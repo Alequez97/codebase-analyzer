@@ -9,14 +9,14 @@ import config from '../config.js';
  */
 export async function readTask(taskId) {
   try {
-    const pendingPath = path.join(config.paths.analysisOutput, 'tasks', 'pending', `${taskId}.json`);
+    const pendingPath = path.join(config.paths.targetAnalysis, 'tasks', 'pending', `${taskId}.json`);
     const content = await fs.readFile(pendingPath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
     if (error.code === 'ENOENT') {
       // Try completed
       try {
-        const completedPath = path.join(config.paths.analysisOutput, 'tasks', 'completed', `${taskId}.json`);
+        const completedPath = path.join(config.paths.targetAnalysis, 'tasks', 'completed', `${taskId}.json`);
         const content = await fs.readFile(completedPath, 'utf-8');
         return JSON.parse(content);
       } catch (err) {
@@ -35,7 +35,7 @@ export async function readTask(taskId) {
  * @param {Object} task - The task object
  */
 export async function writeTask(task) {
-  const filePath = path.join(config.paths.analysisOutput, 'tasks', 'pending', `${task.id}.json`);
+  const filePath = path.join(config.paths.targetAnalysis, 'tasks', 'pending', `${task.id}.json`);
   await fs.writeFile(filePath, JSON.stringify(task, null, 2), 'utf-8');
 }
 
@@ -45,7 +45,7 @@ export async function writeTask(task) {
  */
 export async function listPending() {
   try {
-    const tasksDir = path.join(config.paths.analysisOutput, 'tasks', 'pending');
+    const tasksDir = path.join(config.paths.targetAnalysis, 'tasks', 'pending');
     const files = await fs.readdir(tasksDir);
     
     const tasks = await Promise.all(
@@ -72,8 +72,8 @@ export async function listPending() {
  * @returns {Promise<Object>} The completed task
  */
 export async function moveToCompleted(taskId) {
-  const pendingPath = path.join(config.paths.analysisOutput, 'tasks', 'pending', `${taskId}.json`);
-  const completedPath = path.join(config.paths.analysisOutput, 'tasks', 'completed', `${taskId}.json`);
+  const pendingPath = path.join(config.paths.targetAnalysis, 'tasks', 'pending', `${taskId}.json`);
+  const completedPath = path.join(config.paths.targetAnalysis, 'tasks', 'completed', `${taskId}.json`);
 
   const content = await fs.readFile(pendingPath, 'utf-8');
   const task = JSON.parse(content);
@@ -91,8 +91,8 @@ export async function moveToCompleted(taskId) {
  * @param {string} taskId - The task ID
  */
 export async function deleteTask(taskId) {
-  const pendingPath = path.join(config.paths.analysisOutput, 'tasks', 'pending', `${taskId}.json`);
-  const completedPath = path.join(config.paths.analysisOutput, 'tasks', 'completed', `${taskId}.json`);
+  const pendingPath = path.join(config.paths.targetAnalysis, 'tasks', 'pending', `${taskId}.json`);
+  const completedPath = path.join(config.paths.targetAnalysis, 'tasks', 'completed', `${taskId}.json`);
 
   try {
     await fs.unlink(pendingPath);

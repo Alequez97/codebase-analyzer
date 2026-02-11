@@ -8,7 +8,7 @@ import config from '../config.js';
  */
 export async function readScanResults() {
   try {
-    const filePath = path.join(config.paths.analysisOutput, 'scan-results.json');
+    const filePath = path.join(config.paths.targetAnalysis, 'scan-results.json');
     const content = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
@@ -24,6 +24,6 @@ export async function readScanResults() {
  * @param {Object} data - Scan results data
  */
 export async function writeScanResults(data) {
-  const filePath = path.join(config.paths.analysisOutput, 'scan-results.json');
+  const filePath = path.join(config.paths.targetAnalysis, 'scan-results.json');
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
 }

@@ -12,15 +12,15 @@ import { Alert } from "../ui/alert";
 import { useAppStore } from "../../store/useAppStore";
 
 export function ModulesSection() {
-  const { selectedCodebase, modules, scanning, startScan } = useAppStore();
-
-  if (!selectedCodebase) return null;
+  const { status, modules, scanning, startScan } = useAppStore();
 
   return (
     <Card.Root>
       <Card.Header>
         <HStack justify="space-between">
-          <Heading size="lg">Modules - {selectedCodebase.name}</Heading>
+          <Heading size="lg">
+            Modules{status?.target ? ` - ${status.target.name}` : ""}
+          </Heading>
           <Button
             colorPalette="blue"
             onClick={startScan}

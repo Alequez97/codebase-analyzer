@@ -1,7 +1,7 @@
-import { randomBytes } from 'crypto';
-import config from '../config.js';
-import * as tasksPersistence from '../persistence/tasks.js';
-import { executeTask } from '../agents/index.js';
+import { randomBytes } from "crypto";
+import config from "../config.js";
+import * as tasksPersistence from "../persistence/tasks.js";
+import { executeTask } from "../agents/index.js";
 
 /**
  * Generate a unique task ID
@@ -9,8 +9,8 @@ import { executeTask } from '../agents/index.js';
  * @returns {string} Unique task ID
  */
 function generateTaskId(prefix) {
-  const timestamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
-  const random = randomBytes(3).toString('hex');
+  const timestamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15);
+  const random = randomBytes(3).toString("hex");
   return `${prefix}-${timestamp}-${random}`;
 }
 
@@ -21,26 +21,26 @@ function generateTaskId(prefix) {
  */
 export async function createScanTask(executeNow = false) {
   const task = {
-    id: generateTaskId('scan'),
-    type: 'scan',
-    status: 'pending',
+    id: generateTaskId("scan"),
+    type: "scan",
+    status: "pending",
     createdAt: new Date().toISOString(),
     params: {
-      codebasePath: config.codebasePath,
+      targetDirectory: config.target.directory,
     },
-    instructionFile: 'backend/instructions/scan-codebase.md',
-    outputFile: 'analysis-output/scan-results.json',
+    instructionFile: "backend/instructions/scan-codebase.md",
+    outputFile: ".code-analysis/scan-results.json",
   };
 
   await tasksPersistence.writeTask(task);
-  
+
   if (executeNow) {
     // Trigger agent execution asynchronously
-    executeTask(task.id).catch(err => {
+    executeTask(task.id).catch((err) => {
       console.error(`Failed to execute task ${task.id}:`, err);
     });
   }
-  
+
   return task;
 }
 
@@ -52,31 +52,36 @@ export async function createScanTask(executeNow = false) {
  * @param {boolean} executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeTask(moduleId, moduleName, files, executeNow = false) {
+export async function createAnalyzeTask(
+  moduleId,
+  moduleName,
+  files,
+  executeNow = false,
+) {
   const task = {
-    id: generateTaskId('analyze'),
-    type: 'analyze',
-    status: 'pending',
+    id: generateTaskId("analyze"),
+    type: "analyze",
+    status: "pending",
     createdAt: new Date().toISOString(),
     params: {
       moduleId,
       moduleName,
       files,
-      codebasePath: config.codebasePath,
+      targetDirectory: config.target.directory,
     },
-    instructionFile: 'backend/instructions/analyze-module.md',
-    outputFile: `analysis-output/modules/${moduleId}.json`,
+    instructionFile: "backend/instructions/analyze-module.md",
+    outputFile: `.code-analysis/modules/${moduleId}.json`,
   };
 
   await tasksPersistence.writeTask(task);
-  
+
   if (executeNow) {
     // Trigger agent execution asynchronously
-    executeTask(task.id).catch(err => {
+    executeTask(task.id).catch((err) => {
       console.error(`Failed to execute task ${task.id}:`, err);
     });
   }
-  
+
   return task;
 }
 

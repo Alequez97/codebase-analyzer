@@ -10,6 +10,7 @@ export const SOCKET_EVENTS = {
 
   // Task events
   TASK_COMPLETED: "task:completed",
+  TASK_LOG: "task:log",
 };
 
 // Task types

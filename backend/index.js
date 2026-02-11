@@ -13,7 +13,14 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: (origin, callback) => {
+      // Allow any localhost origin for multiple instances
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
   },
 });
@@ -42,8 +49,11 @@ app.get("/api/status", async (req, res) => {
   res.json({
     status: "ok",
     timestamp: new Date().toISOString(),
+    target: {
+      directory: config.target.directory,
+      name: config.target.name,
+    },
     config: {
-      codebases: config.codebases,
       analysisTool: config.analysisTool,
       port: config.port,
     },
@@ -217,14 +227,15 @@ httpServer.listen(config.port, () => {
   console.log("========================================");
   console.log(`  Port: ${config.port}`);
   console.log(`  Tool: ${config.analysisTool}`);
-  console.log(`  Codebases: ${config.codebases.length}`);
-  config.codebases.forEach((cb) => {
-    console.log(`    - ${cb.name}: ${cb.path}`);
-  });
+  console.log(`  Target: ${config.target.name}`);
+  console.log(`  Project: ${config.target.directory}`);
+  console.log(`  Output: ${config.paths.targetAnalysis}`);
   console.log("========================================");
   console.log("");
   console.log(`API running at http://localhost:${config.port}`);
-  console.log(`Dashboard at http://localhost:3000`);
+  console.log(
+    `Open dashboard at http://localhost:5173 (if frontend is running)`,
+  );
   console.log("WebSocket ready for real-time updates");
   console.log("");
 });

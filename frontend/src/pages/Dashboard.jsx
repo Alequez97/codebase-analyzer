@@ -4,9 +4,9 @@ import { useAppStore } from "../store/useAppStore";
 import { LoadingState, ErrorState } from "../components/dashboard/States";
 import { StatusBar } from "../components/dashboard/StatusBar";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
-import { CodebaseSelector } from "../components/dashboard/CodebaseSelector";
 import { ConfigurationPanel } from "../components/dashboard/ConfigurationPanel";
 import { ModulesSection } from "../components/dashboard/ModulesSection";
+import { TaskLogs } from "../components/dashboard/TaskLogs";
 
 export default function Dashboard() {
   const {
@@ -15,7 +15,6 @@ export default function Dashboard() {
     status,
     fetchStatus,
     fetchModules,
-    selectedCodebase,
     initSocket,
     socketConnected,
   } = useAppStore();
@@ -28,13 +27,8 @@ export default function Dashboard() {
   // Fetch initial data
   useEffect(() => {
     fetchStatus();
-  }, [fetchStatus]);
-
-  useEffect(() => {
-    if (selectedCodebase) {
-      fetchModules();
-    }
-  }, [selectedCodebase, fetchModules]);
+    fetchModules();
+  }, [fetchStatus, fetchModules]);
 
   if (loading) {
     return <LoadingState />;
@@ -54,9 +48,9 @@ export default function Dashboard() {
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">
           <DashboardHeader />
-          <CodebaseSelector />
           <ConfigurationPanel />
           <ModulesSection />
+          <TaskLogs />
         </VStack>
       </Container>
     </Box>

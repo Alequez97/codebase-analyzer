@@ -9,7 +9,7 @@ import config from '../config.js';
  */
 export async function readModule(moduleId) {
   try {
-    const filePath = path.join(config.paths.analysisOutput, 'modules', `${moduleId}.json`);
+    const filePath = path.join(config.paths.targetAnalysis, 'modules', `${moduleId}.json`);
     const content = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
@@ -26,7 +26,7 @@ export async function readModule(moduleId) {
  * @param {Object} data - Module analysis data
  */
 export async function writeModule(moduleId, data) {
-  const filePath = path.join(config.paths.analysisOutput, 'modules', `${moduleId}.json`);
+  const filePath = path.join(config.paths.targetAnalysis, 'modules', `${moduleId}.json`);
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
@@ -36,7 +36,7 @@ export async function writeModule(moduleId, data) {
  */
 export async function listModules() {
   try {
-    const modulesDir = path.join(config.paths.analysisOutput, 'modules');
+    const modulesDir = path.join(config.paths.targetAnalysis, 'modules');
     const files = await fs.readdir(modulesDir);
     return files
       .filter(f => f.endsWith('.json'))

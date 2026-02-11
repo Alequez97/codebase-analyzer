@@ -10,63 +10,30 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 /**
- * Parse all CODEBASE_PATH_* environment variables
- * @returns {Array} Array of codebase objects
+ * Get the target directory being analyzed
+ * Defaults to process.cwd() if run directly, or ANALYSIS_TARGET_DIR from CLI
  */
-function parseCodebases() {
-  const codebases = [];
+function getTargetDirectory() {
+  const targetDir = process.env.ANALYSIS_TARGET_DIR || process.cwd();
 
-  Object.keys(process.env).forEach((key) => {
-    if (key.startsWith("CODEBASE_PATH_")) {
-      const name = key
-        .replace("CODEBASE_PATH_", "")
-        .toLowerCase()
-        .replace(/_/g, "-");
-      const codebasePath = process.env[key];
+  if (!fs.existsSync(targetDir)) {
+    console.error(`Target directory does not exist: ${targetDir}`);
+    process.exit(1);
+  }
 
-      if (!codebasePath) {
-        console.warn(`${key} is empty, skipping`);
-        return;
-      }
+  const stats = fs.statSync(targetDir);
+  if (!stats.isDirectory()) {
+    console.error(`Target is not a directory: ${targetDir}`);
+    process.exit(1);
+  }
 
-      if (!fs.existsSync(codebasePath)) {
-        console.warn(`${key} path does not exist: ${codebasePath}`);
-        return;
-      }
-
-      const stats = fs.statSync(codebasePath);
-      if (!stats.isDirectory()) {
-        console.warn(`${key} is not a directory: ${codebasePath}`);
-        return;
-      }
-
-      codebases.push({
-        id: name,
-        name: name
-          .split("-")
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" "),
-        path: codebasePath,
-      });
-    }
-  });
-
-  return codebases;
+  return targetDir;
 }
 
-const codebases = parseCodebases();
+const targetDirectory = getTargetDirectory();
 
-if (codebases.length === 0) {
-  console.error("");
-  console.error("ERROR: No valid codebases configured!");
-  console.error("");
-  console.error("Please add codebase paths to backend/.env file:");
-  console.error(
-    "  CODEBASE_PATH_AVIA_MANAGER=C:\\_projects\\jfs\\avia-manager",
-  );
-  console.error("");
-  process.exit(1);
-}
+// Extract project name from target directory
+const projectName = path.basename(targetDirectory);
 
 /**
  * Application configuration
@@ -75,8 +42,11 @@ const config = {
   // Server
   port: parseInt(process.env.PORT || "3001", 10),
 
-  // Codebases to analyze
-  codebases,
+  // Target project being analyzed
+  target: {
+    directory: targetDirectory,
+    name: projectName,
+  },
 
   // Analysis tool to use
   analysisTool: process.env.ANALYSIS_TOOL || "aider",
@@ -93,10 +63,16 @@ const config = {
     extraArgs: process.env.AIDER_EXTRA_ARGS || "",
   },
 
-  // Paths relative to project root
+  // Paths
   paths: {
-    root: path.join(__dirname, ".."),
-    analysisOutput: path.join(__dirname, "..", "analysis-output"),
+    // Analyzer tool root (where this code lives)
+    analyzerRoot: path.join(__dirname, ".."),
+
+    // Target project paths
+    targetRoot: targetDirectory,
+    targetAnalysis: path.join(targetDirectory, ".code-analysis"),
+
+    // Analyzer internal paths
     instructions: path.join(__dirname, "instructions"),
     schemas: path.join(__dirname, "schemas"),
   },
@@ -108,14 +84,14 @@ const config = {
   },
 };
 
-// Ensure analysis output directories exist
+// Ensure analysis output directories exist in target project
 const dirs = [
-  config.paths.analysisOutput,
-  path.join(config.paths.analysisOutput, "modules"),
-  path.join(config.paths.analysisOutput, "tasks"),
-  path.join(config.paths.analysisOutput, "tasks", "pending"),
-  path.join(config.paths.analysisOutput, "tasks", "completed"),
-  config.paths.instructions,
+  config.paths.targetAnalysis,
+  path.join(config.paths.targetAnalysis, "modules"),
+  path.join(config.paths.targetAnalysis, "tasks"),
+  path.join(config.paths.targetAnalysis, "tasks", "pending"),
+  path.join(config.paths.targetAnalysis, "tasks", "completed"),
+  path.join(config.paths.targetAnalysis, "logs"),
 ];
 
 dirs.forEach((dir) => {

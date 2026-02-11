@@ -7,7 +7,6 @@ export const useAppStore = create((set, get) => ({
   // State
   status: null,
   modules: [],
-  selectedCodebase: null,
   scanning: false,
   loading: true,
   error: null,
@@ -19,8 +18,6 @@ export const useAppStore = create((set, get) => ({
 
   setModules: (modules) => set({ modules }),
 
-  setSelectedCodebase: (codebase) => set({ selectedCodebase: codebase }),
-
   setScanning: (scanning) => set({ scanning }),
 
   setLoading: (loading) => set({ loading }),
@@ -28,14 +25,6 @@ export const useAppStore = create((set, get) => ({
   setError: (error) => set({ error }),
 
   clearError: () => set({ error: null }),
-
-  // Auto-select first codebase
-  autoSelectCodebase: () => {
-    const { status, selectedCodebase } = get();
-    if (status?.config?.codebases?.length > 0 && !selectedCodebase) {
-      set({ selectedCodebase: status.config.codebases[0] });
-    }
-  },
 
   // Initialize socket connection and listeners
   initSocket: () => {
@@ -77,16 +66,12 @@ export const useAppStore = create((set, get) => ({
     try {
       const response = await api.getStatus();
       set({ status: response.data, error: null, loading: false });
-      get().autoSelectCodebase();
     } catch (err) {
       set({ error: "Failed to connect to backend server", loading: false });
     }
   },
 
   fetchModules: async () => {
-    const { selectedCodebase } = get();
-    if (!selectedCodebase) return;
-
     try {
       const response = await api.getModules();
       set({ modules: response.data.modules || [] });
@@ -97,9 +82,6 @@ export const useAppStore = create((set, get) => ({
   },
 
   startScan: async () => {
-    const { selectedCodebase } = get();
-    if (!selectedCodebase) return;
-
     set({ scanning: true });
     try {
       await api.requestScan(true);
@@ -113,7 +95,6 @@ export const useAppStore = create((set, get) => ({
     set({
       status: null,
       modules: [],
-      selectedCodebase: null,
       scanning: false,
       loading: true,
       error: null,

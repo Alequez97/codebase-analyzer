@@ -2,17 +2,31 @@
   "name": "codebase-analyzer",
   "version": "0.1.0",
   "description": "AI-powered codebase analysis tool with structured workflows",
-  "private": true,
+  "type": "module",
+  "bin": {
+    "code-analyzer": "./bin/code-analyzer.js"
+  },
   "scripts": {
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "backend": "cd backend && npm run dev",
     "frontend": "cd frontend && npm run dev",
-    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "link": "npm link"
   },
-  "keywords": ["codebase", "analysis", "ai", "code-review"],
+  "keywords": [
+    "codebase",
+    "analysis",
+    "ai",
+    "code-review",
+    "code-quality",
+    "static-analysis"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "get-port": "^7.1.0"
   }
 }

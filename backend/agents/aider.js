@@ -1,8 +1,9 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { SOCKET_EVENTS } from "../constants/socket-events.js";
 
 const execAsync = promisify(exec);
 
@@ -71,14 +72,14 @@ export async function execute(task) {
   }
 
   // Read instruction file
-  const instructionPath = path.join(config.paths.root, task.instructionFile);
-  const instruction = await fs.readFile(instructionPath, "utf-8");
+  const instructionPath = path.join(
+    config.paths.analyzerRoot,
+    task.instructionFile,
+  );
 
   // Build file list for Aider to work with
   const files = task.params.files || [];
-  const filesArg = files
-    .map((f) => `"${path.join(task.params.codebasePath, f)}"`)
-    .join(" ");
+  const filesArg = files.length > 0 ? files.map((f) => `"${f}"`).join(" ") : "";
 
   // Determine API key based on model
   const modelApiKey = getApiKeyForModel(
@@ -101,27 +102,110 @@ export async function execute(task) {
   const command = commandParts.join(" ");
   console.log(`Executing Aider: ${command}`);
 
-  try {
-    const { stdout, stderr } = await execAsync(command, {
-      cwd: task.params.codebasePath,
-      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-    });
+  // Create log directory
+  const logDir = path.join(config.paths.targetAnalysis, "logs");
+  await fs.mkdir(logDir, { recursive: true });
+  const logFile = path.join(logDir, `${task.id}.log`);
+  const logStream = await fs.open(logFile, "w");
 
-    return {
-      success: true,
-      stdout,
-      stderr,
-      taskId: task.id,
-    };
-  } catch (error) {
-    console.error(`Aider execution failed for task ${task.id}:`, error);
+  return new Promise((resolve) => {
+    let stdout = "";
+    let stderr = "";
 
-    return {
-      success: false,
-      error: error.message,
-      stdout: error.stdout,
-      stderr: error.stderr,
-      taskId: task.id,
-    };
-  }
+    // Import io dynamically to emit events
+    import("../index.js")
+      .then(({ io }) => {
+        const aiderProcess = spawn(command, {
+          cwd: config.target.directory,
+          shell: true,
+        });
+
+        aiderProcess.stdout.on("data", (data) => {
+          const text = data.toString();
+          stdout += text;
+
+          // Log to file
+          logStream.write(text);
+
+          // Emit to socket
+          io.emit(SOCKET_EVENTS.TASK_LOG, {
+            taskId: task.id,
+            type: task.type,
+            stream: "stdout",
+            data: text,
+          });
+
+          console.log(`[Aider] ${text.trim()}`);
+        });
+
+        aiderProcess.stderr.on("data", (data) => {
+          const text = data.toString();
+          stderr += text;
+
+          // Log to file
+          logStream.write(`[STDERR] ${text}`);
+
+          // Emit to socket
+          io.emit(SOCKET_EVENTS.TASK_LOG, {
+            taskId: task.id,
+            type: task.type,
+            stream: "stderr",
+            data: text,
+          });
+
+          console.error(`[Aider Error] ${text.trim()}`);
+        });
+
+        aiderProcess.on("close", async (code) => {
+          await logStream.close();
+
+          const success = code === 0;
+
+          if (success) {
+            resolve({
+              success: true,
+              stdout,
+              stderr,
+              taskId: task.id,
+              logFile,
+            });
+          } else {
+            resolve({
+              success: false,
+              error: `Aider exited with code ${code}`,
+              stdout,
+              stderr,
+              taskId: task.id,
+              logFile,
+            });
+          }
+        });
+
+        aiderProcess.on("error", async (error) => {
+          await logStream.close();
+
+          console.error(`Aider execution error for task ${task.id}:`, error);
+
+          resolve({
+            success: false,
+            error: error.message,
+            stdout,
+            stderr,
+            taskId: task.id,
+            logFile,
+          });
+        });
+      })
+      .catch(async (err) => {
+        await logStream.close();
+        console.error("Failed to import io:", err);
+
+        resolve({
+          success: false,
+          error: "Failed to setup socket streaming",
+          taskId: task.id,
+          logFile,
+        });
+      });
+  });
 }

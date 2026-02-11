@@ -2,5 +2,5 @@ node_modules/
 analysis-output/
 *.log
 *.playwright-mcp
+*.aider*
 .DS_Store
-.aider*
