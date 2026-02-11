@@ -1,0 +1,125 @@
+# Codebase Analyzer
+
+AI-powered codebase analysis tool with structured workflows and one-click fix actions.
+
+## Quick Start
+
+### 1. Setup
+
+```bash
+# Install dependencies
+npm run install:all
+
+# Create backend .env file
+cd backend
+cp .env.example .env
+
+# Edit backend/.env and set your codebase paths
+# CODEBASE_PATH_AVIA_MANAGER=C:\_projects\jfs\avia-manager
+
+# Create frontend .env file (optional, defaults are fine)
+cd ../frontend
+cp .env.example .env
+```
+
+### 2. Install Aider (Required)
+
+```bash
+# Install Aider via pip
+pip install aider-chat
+
+# Verify installation
+aider --version
+```
+
+### 3. Run
+
+```bash
+npm run dev
+```
+
+- **Dashboard:** http://localhost:3000
+- **API:** http://localhost:3001
+
+## How It Works
+
+### Architecture
+
+```
+Dashboard (React) → Express API → JSON Files ← Claude Code
+                                      ↓
+                              Target Codebase
+```
+
+### Workflow: Scan Codebase
+
+1. Click "Scan Codebase" button in dashboard
+2. Creates `analysis-output/tasks/pending/scan-{id}.json`
+3. Dashboard shows: "Open `prompts/scan-codebase.md` in Claude Code"
+4. Run prompt in Claude Code → creates `analysis-output/scan-results.json`
+5. Dashboard auto-refreshes → shows discovered modules
+
+### Workflow: Analyze Module
+
+1. Click "Analyze" on a module card
+2. Creates pending task
+3. Run corresponding prompt in Claude Code
+4. Creates `analysis-output/modules/{module-id}.json` with:
+   - Requirements (REQ-001, REQ-002...)
+   - Bugs (BUG-001, BUG-002...)
+   - Security Issues (SEC-001, SEC-002...)
+   - Proposed Fixes (FIX-001, FIX-002...)
+   - Test recommendations
+   - Documentation
+
+### Workflow: Fix an Issue
+
+1. View module analysis → see "SEC-001: Missing rate limiting"
+2. Click "Fix" button
+3. Backend applies the fix from JSON to your codebase
+4. Shows diff of changes
+5. Fix is marked `applied: true` in JSON
+
+## JSON Contracts
+
+All data exchange is via JSON files. See `/schemas/*.example.json` for structure.
+
+### Key Files
+
+- `scan-results.json` - List of discovered modules
+- `modules/{id}.json` - Detailed analysis per module
+- `tasks/pending/{id}.json` - Tasks waiting to be processed
+- `tasks/completed/{id}.json` - Completed tasks log
+
+## Development Status
+
+See [PROGRESS.md](./PROGRESS.md) for detailed roadmap.
+
+**Current Phase:** MVP with Claude Code integration
+
+## Configuration
+
+### .env Variables
+
+```env
+# Required
+CODEBASE_PATH=C:\_projects\jfs\avia-manager
+
+# Optional
+PORT=3001
+ANALYSIS_MODE=claude-code
+```
+
+Each developer sets their own `CODEBASE_PATH` - not stored in JSON files.
+
+## Future Phases
+
+- **Phase 1 (Current):** Manual workflow with Claude Code
+- **Phase 2:** Direct LLM API integration (automated)
+- **Phase 3:** Open source package release
+
+## Tech Stack
+
+- **Frontend:** React, Chakra UI v3, Vite
+- **Backend:** Node.js, Express
+- **Analysis:** Claude Code (manual) → Anthropic API (future)

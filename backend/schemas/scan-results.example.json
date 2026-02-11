@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-02-11T14:30:00Z",
+  "modules": [
+    {
+      "id": "user-authentication",
+      "name": "User Authentication",
+      "businessPurpose": "Handles user signup, login, password reset, and session management",
+      "files": [
+        "backend/controllers/auth.js",
+        "backend/models/user.js",
+        "backend/routes/auth.js",
+        "backend/middleware/authProtect.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": true
+    },
+    {
+      "id": "aircraft-management",
+      "name": "Aircraft Management",
+      "businessPurpose": "Aircraft registration, tracking, status updates, and certification management",
+      "files": [
+        "backend/controllers/aircrafts/aircrafts.js",
+        "backend/models/aircrafts/aircraft.js",
+        "backend/routers/aircrafts.js"
+      ],
+      "priority": "P1",
+      "testCoverage": "partial",
+      "hasAnalysis": false
+    },
+    {
+      "id": "payment-processing",
+      "name": "Payment Processing",
+      "businessPurpose": "Handles transactions, refunds, payment methods via multiple gateways",
+      "files": [
+        "backend/controllers/payment.js",
+        "backend/controllers/paymentGateway.js",
+        "backend/models/payment.js",
+        "backend/models/payment_method.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    }
+  ]
+}

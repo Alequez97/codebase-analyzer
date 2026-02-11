@@ -1,0 +1,168 @@
+{
+  "moduleId": "user-authentication",
+  "moduleName": "User Authentication",
+  "timestamp": "2026-02-11T15:00:00Z",
+  
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "Users must provide valid email and password to login",
+      "source": "auth.js controller line 45, Joi validation schema",
+      "confidence": "HIGH",
+      "priority": "P0"
+    },
+    {
+      "id": "REQ-002",
+      "description": "Password must be hashed before storing in database",
+      "source": "user.js model, bcrypt usage",
+      "confidence": "HIGH",
+      "priority": "P0"
+    },
+    {
+      "id": "REQ-003",
+      "description": "Failed login attempts should be rate limited",
+      "source": "Implied from security best practices",
+      "confidence": "MEDIUM",
+      "priority": "P1"
+    }
+  ],
+  
+  "bugs": [
+    {
+      "id": "BUG-001",
+      "severity": "high",
+      "type": "race-condition",
+      "location": {
+        "file": "backend/controllers/auth.js",
+        "line": 45
+      },
+      "description": "Token generation has race condition when user logs in from multiple devices simultaneously",
+      "recommendation": "Use atomic database operation or implement distributed lock",
+      "fixable": true,
+      "fixId": "FIX-001"
+    },
+    {
+      "id": "BUG-002",
+      "severity": "medium",
+      "type": "error-handling",
+      "location": {
+        "file": "backend/controllers/auth.js",
+        "line": 89
+      },
+      "description": "Password reset endpoint doesn't handle email service failures gracefully",
+      "recommendation": "Add try-catch and queue email for retry",
+      "fixable": true,
+      "fixId": "FIX-002"
+    }
+  ],
+  
+  "securityIssues": [
+    {
+      "id": "SEC-001",
+      "severity": "critical",
+      "category": "authentication",
+      "location": {
+        "file": "backend/routes/auth.js",
+        "line": 12
+      },
+      "vulnerability": "Missing rate limiting on login endpoint",
+      "exploit": "Attacker can perform unlimited brute force password attempts",
+      "fixable": true,
+      "fixId": "FIX-003"
+    },
+    {
+      "id": "SEC-002",
+      "severity": "high",
+      "category": "session-management",
+      "location": {
+        "file": "backend/middleware/authProtect.js",
+        "line": 28
+      },
+      "vulnerability": "JWT tokens don't have expiration time",
+      "exploit": "Stolen tokens remain valid forever",
+      "fixable": true,
+      "fixId": "FIX-004"
+    }
+  ],
+  
+  "fixes": [
+    {
+      "id": "FIX-001",
+      "targetIssue": "BUG-001",
+      "file": "backend/controllers/auth.js",
+      "description": "Use atomic findOneAndUpdate for token generation",
+      "oldCode": "const user = await User.findById(userId);\nuser.token = generateToken();\nawait user.save();",
+      "newCode": "const user = await User.findByIdAndUpdate(\n  userId,\n  { $set: { token: generateToken() } },\n  { new: true, runValidators: true }\n);",
+      "applied": false
+    },
+    {
+      "id": "FIX-002",
+      "targetIssue": "BUG-002",
+      "file": "backend/controllers/auth.js",
+      "description": "Add error handling for email service",
+      "oldCode": "await sendPasswordResetEmail(user.email, resetToken);",
+      "newCode": "try {\n  await sendPasswordResetEmail(user.email, resetToken);\n} catch (emailError) {\n  console.error('Failed to send reset email:', emailError);\n  await queueEmailForRetry({ email: user.email, resetToken });\n}",
+      "applied": false
+    },
+    {
+      "id": "FIX-003",
+      "targetIssue": "SEC-001",
+      "file": "backend/routes/auth.js",
+      "description": "Add express-rate-limit middleware to login route",
+      "oldCode": "router.post('/login', validateLogin, authController.login);",
+      "newCode": "import rateLimit from 'express-rate-limit';\n\nconst loginLimiter = rateLimit({\n  windowMs: 15 * 60 * 1000, // 15 minutes\n  max: 5, // 5 attempts\n  message: 'Too many login attempts, please try again later'\n});\n\nrouter.post('/login', loginLimiter, validateLogin, authController.login);",
+      "applied": false
+    },
+    {
+      "id": "FIX-004",
+      "targetIssue": "SEC-002",
+      "file": "backend/middleware/authProtect.js",
+      "description": "Add expiration to JWT tokens",
+      "oldCode": "const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);",
+      "newCode": "const token = jwt.sign(\n  { userId: user._id },\n  process.env.JWT_SECRET,\n  { expiresIn: '24h' }\n);",
+      "applied": false
+    }
+  ],
+  
+  "tests": [
+    {
+      "id": "TEST-001",
+      "scenario": "Login with valid credentials returns JWT token",
+      "type": "integration",
+      "priority": "P0",
+      "testFile": "backend/controllers/auth.test.js"
+    },
+    {
+      "id": "TEST-002",
+      "scenario": "Login with invalid password returns 401",
+      "type": "integration",
+      "priority": "P0",
+      "testFile": "backend/controllers/auth.test.js"
+    },
+    {
+      "id": "TEST-003",
+      "scenario": "Rate limiting blocks excessive login attempts",
+      "type": "integration",
+      "priority": "P1",
+      "testFile": "backend/routes/auth.test.js"
+    }
+  ],
+  
+  "documentation": {
+    "businessPurpose": "Manages all user authentication workflows including signup, login, password reset, and session management. Critical for system security and user access control.",
+    "workflows": [
+      "User signup with email verification",
+      "User login with JWT token generation",
+      "Password reset via email",
+      "Token refresh",
+      "Session validation"
+    ],
+    "integrationPoints": [
+      "Email service for verification and password reset",
+      "JWT token generation and validation",
+      "MongoDB for user storage",
+      "Frontend authentication state management"
+    ],
+    "dataFlow": "User submits credentials → Validation → Password check → JWT generation → Return token → Frontend stores token → Subsequent requests include token → Middleware validates"
+  }
+}

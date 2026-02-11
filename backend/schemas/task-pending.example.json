@@ -1,0 +1,10 @@
+{
+  "id": "scan-20260211-143000",
+  "type": "scan",
+  "status": "pending",
+  "createdAt": "2026-02-11T14:30:00Z",
+  "params": {},
+  "promptFile": "prompts/scan-codebase.md",
+  "outputFile": "analysis-output/scan-results.json",
+  "instructions": "1. Open prompts/scan-codebase.md\n2. Run it in Claude Code with @codebase context\n3. When complete, scan-results.json will be created\n4. Dashboard will auto-refresh"
+}
