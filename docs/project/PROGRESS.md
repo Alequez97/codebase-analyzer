@@ -34,30 +34,34 @@ AI-powered codebase analysis tool with structured workflows and one-click action
                    │ Claude Code reads/writes
 ┌──────────────────▼──────────────────────────────┐
 │         Target Codebase                         │
-│  (Path from .env: CODEBASE_PATH)                │
+│  (CLI runs in project root)                     │
 └─────────────────────────────────────────────────┘
 ```
 
 ## Phase 1: MVP with Claude Code (Current)
 
 ### ✅ Completed
+
 - [x] Project structure (separate tool, multi-codebase support)
 - [x] Package.json files (root, client)
 - [x] .env for developer-specific paths
 
 ### 🚧 In Progress
+
 - [ ] JSON schemas/contracts definition
 - [ ] PROGRESS.md planning document
 
 ### 📋 Planned - Backend
 
 #### Core Structure
+
 - [ ] `/server/index.js` - Express server setup
-- [ ] `/server/config.js` - Load .env, validate CODEBASE_PATH
+- [ ] `/server/config.js` - Load .env and configuration
 - [ ] `/server/utils/file-watcher.js` - Watch analysis-output for changes
 
 #### API Endpoints
-- [ ] `GET /api/status` - Health check, codebase path validation
+
+- [ ] `GET /api/status` - Health check and configuration status
 - [ ] `GET /api/scan` - Get current scan results
 - [ ] `POST /api/scan/request` - Create pending scan task
 - [ ] `GET /api/modules` - List all modules
@@ -68,6 +72,7 @@ AI-powered codebase analysis tool with structured workflows and one-click action
 - [ ] `DELETE /api/tasks/:id` - Clear completed/cancelled task
 
 #### Services
+
 - [ ] `/server/services/AnalysisReader.js` - Read JSON files
 - [ ] `/server/services/TaskManager.js` - Create/manage task files
 - [ ] `/server/services/FixApplier.js` - Apply code fixes to codebase
@@ -75,6 +80,7 @@ AI-powered codebase analysis tool with structured workflows and one-click action
 ### 📋 Planned - Frontend
 
 #### Pages/Components
+
 - [ ] `Dashboard.jsx` - Main view with module grid
 - [ ] `ModuleCard.jsx` - Module overview card
 - [ ] `ModuleAnalysis.jsx` - Detailed analysis view
@@ -82,6 +88,7 @@ AI-powered codebase analysis tool with structured workflows and one-click action
 - [ ] `TaskStatus.jsx` - Shows pending tasks, instructions
 
 #### Features
+
 - [ ] Auto-refresh when files change (polling or websocket)
 - [ ] Click "Scan Codebase" → creates task → shows instructions
 - [ ] Click "Analyze Module" → creates task → shows instructions
@@ -107,6 +114,7 @@ For development without running Claude Code:
 ## JSON Contracts
 
 ### `scan-results.json`
+
 ```javascript
 {
   "timestamp": "ISO-8601",
@@ -125,6 +133,7 @@ For development without running Claude Code:
 ```
 
 ### `modules/{module-id}.json`
+
 ```javascript
 {
   "moduleId": "...",
@@ -180,6 +189,7 @@ For development without running Claude Code:
 ```
 
 ### `tasks/pending/{task-id}.json`
+
 ```javascript
 {
   "id": "unique-task-id",
@@ -233,7 +243,9 @@ For development without running Claude Code:
 
 ## Notes
 
-- Each developer sets `CODEBASE_PATH` in their `.env`
-- No codebase paths stored in JSON (env-specific)
+- CLI tool runs in project root directory (no CODEBASE_PATH env needed)
+- Analysis output stored in `.code-analysis/` folder in target project
 - Pending tasks checked on startup (crash recovery)
 - All fixes are reversible (stored in JSON)
+- Agents handle their own complexity (chunking, retries, token management)
+- Production-ready code: no leftovers, no backward compatibility unless explicitly needed

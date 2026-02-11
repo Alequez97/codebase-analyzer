@@ -1,12 +1,15 @@
 # Scan Codebase - Instruction for AI Agent
 
 ## Objective
+
 Analyze the target codebase and identify all major functional modules. Output a structured JSON file with discovered modules.
 
 ## Target Codebase
+
 Path: `{{CODEBASE_PATH}}`
 
 ## Task
+
 1. Scan the codebase structure
 2. Identify major functional areas/modules based on:
    - Directory structure
@@ -23,9 +26,11 @@ Path: `{{CODEBASE_PATH}}`
    - Test Coverage (none, partial, full)
 
 ## Output Format
+
 Create file: `analysis-output/scan-results.json`
 
 JSON structure:
+
 ```json
 {
   "timestamp": "ISO 8601 timestamp",
@@ -34,10 +39,7 @@ JSON structure:
       "id": "module-id",
       "name": "Module Name",
       "businessPurpose": "What this module does",
-      "files": [
-        "path/to/file1.js",
-        "path/to/file2.js"
-      ],
+      "files": ["path/to/file1.js", "path/to/file2.js"],
       "priority": "P0|P1|P2|P3",
       "testCoverage": "none|partial|full",
       "hasAnalysis": false
@@ -47,14 +49,18 @@ JSON structure:
 ```
 
 ## Guidelines
+
 - Focus on main business modules (not utilities or libraries)
 - Group related files together
 - Be concise in businessPurpose (1-2 sentences max)
 - Use relative paths from codebase root
 - Priority should reflect business criticality
 - Set hasAnalysis to false (it will be updated later)
+- If the codebase is very large, use your repository map to understand structure
+- You can scan incrementally if needed - identify core modules first, then expand
 
 ## Example Modules
+
 - user-authentication
 - payment-processing
 - inventory-management

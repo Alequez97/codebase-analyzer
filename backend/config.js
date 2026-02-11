@@ -82,11 +82,7 @@ const config = {
     enabled: process.env.FILE_WATCH !== "false",
     debounceMs: parseInt(process.env.FILE_WATCH_DEBOUNCE || "500", 10),
   },
-};
 
-// Ensure analysis output directories exist in target project
-const dirs = [
-  config.paths.targetAnalysis,
   path.join(config.paths.targetAnalysis, "modules"),
   path.join(config.paths.targetAnalysis, "tasks"),
   path.join(config.paths.targetAnalysis, "tasks", "pending"),

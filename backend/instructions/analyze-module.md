@@ -1,40 +1,56 @@
 # Analyze Module - Instruction for AI Agent
 
 ## Objective
+
 Perform deep analysis of a specific module to identify requirements, bugs, security issues, and generate fixes.
 
 ## Target Information
+
 - **Codebase Path**: `{{CODEBASE_PATH}}`
 - **Module ID**: `{{MODULE_ID}}`
 - **Module Name**: `{{MODULE_NAME}}`
 - **Files to Analyze**:
-{{#each FILES}}
+  {{#each FILES}}
   - {{this}}
-{{/each}}
+    {{/each}}
 
 ## Task
+
 1. **Extract Requirements**: Identify what the module is supposed to do
 2. **Find Bugs**: Detect logical errors, race conditions, edge cases
 3. **Security Analysis**: Find vulnerabilities, injection points, auth issues
 4. **Generate Fixes**: Propose code changes to fix identified issues
 
 ## Analysis Depth
+
 - Read all specified files thoroughly
 - Check for common patterns (error handling, validation, etc.)
 - Consider security best practices
 - Identify missing tests
 - Look for code smells
 
+## Handling Large Modules
+
+If you encounter token limits:
+
+1. Focus on the most critical files first
+2. Use your repository map knowledge to understand context
+3. Analyze high-risk areas (auth, data handling, external inputs)
+4. You can work incrementally - analyze critical files, output results, then continue with remaining files
+5. Prioritize security issues > bugs > code quality
+
 ## Output Format
+
 Create file: `analysis-output/modules/{{MODULE_ID}}.json`
 
 JSON structure:
+
 ```json
 {
   "moduleId": "{{MODULE_ID}}",
   "moduleName": "{{MODULE_NAME}}",
   "timestamp": "ISO 8601 timestamp",
-  
+
   "requirements": [
     {
       "id": "REQ-001",
@@ -44,7 +60,7 @@ JSON structure:
       "priority": "P0|P1|P2|P3"
     }
   ],
-  
+
   "bugs": [
     {
       "id": "BUG-001",
@@ -60,7 +76,7 @@ JSON structure:
       "fixId": "FIX-001"
     }
   ],
-  
+
   "securityIssues": [
     {
       "id": "SEC-001",
@@ -76,7 +92,7 @@ JSON structure:
       "fixId": "FIX-002"
     }
   ],
-  
+
   "fixes": [
     {
       "id": "FIX-001",
@@ -88,7 +104,7 @@ JSON structure:
       "applied": false
     }
   ],
-  
+
   "recommendations": [
     "Add input validation for X",
     "Implement rate limiting",
@@ -98,6 +114,7 @@ JSON structure:
 ```
 
 ## Guidelines for Fixes
+
 - Include 3-5 lines of context in oldCode/newCode
 - Make fixes atomic (one issue at a time)
 - Ensure newCode is syntactically correct
@@ -105,6 +122,7 @@ JSON structure:
 - Link fixes to specific issues via fixId
 
 ## Severity Levels
+
 - **Critical**: Immediate action required, system at risk
 - **High**: Serious issue, should fix soon
 - **Medium**: Moderate impact, fix when possible

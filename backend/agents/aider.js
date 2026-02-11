@@ -87,10 +87,12 @@ export async function execute(task) {
     config.aider.apiKeys,
   );
 
-  // Build Aider command
+  // Build Aider command with smart context management
   const commandParts = [
     "aider",
     "--yes-always",
+    "--map-refresh auto", // Auto-refresh repo map
+    "--map-tokens 1024", // Use repo map to manage large codebases
     config.aider.model ? `--model ${config.aider.model}` : null,
     modelApiKey ? modelApiKey : null,
     config.aider.extraArgs || null,
