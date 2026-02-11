@@ -1,6 +1,6 @@
-import { HStack, Badge, Text } from '@chakra-ui/react';
+import { HStack, Badge, Text } from "@chakra-ui/react";
 
-export function StatusBar({ connected }) {
+export function StatusBar({ connected, socketConnected }) {
   return (
     <HStack
       justify="flex-end"
@@ -9,13 +9,25 @@ export function StatusBar({ connected }) {
       borderBottom="1px"
       borderColor="gray.200"
       bg="gray.50"
+      gap={6}
     >
-      <Text fontSize="sm" color="gray.600">
-        API Status:
-      </Text>
-      <Badge colorPalette={connected ? 'green' : 'red'} size="sm">
-        {connected ? 'Connected' : 'Disconnected'}
-      </Badge>
+      <HStack gap={2}>
+        <Text fontSize="sm" color="gray.600">
+          API:
+        </Text>
+        <Badge colorPalette={connected ? "green" : "red"} size="sm">
+          {connected ? "Connected" : "Disconnected"}
+        </Badge>
+      </HStack>
+
+      <HStack gap={2}>
+        <Text fontSize="sm" color="gray.600">
+          Socket:
+        </Text>
+        <Badge colorPalette={socketConnected ? "green" : "yellow"} size="sm">
+          {socketConnected ? "Connected" : "Connecting..."}
+        </Badge>
+      </HStack>
     </HStack>
   );
 }

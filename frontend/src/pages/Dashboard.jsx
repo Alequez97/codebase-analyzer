@@ -16,7 +16,14 @@ export default function Dashboard() {
     fetchStatus,
     fetchModules,
     selectedCodebase,
+    initSocket,
+    socketConnected,
   } = useAppStore();
+
+  // Initialize socket connection
+  useEffect(() => {
+    initSocket();
+  }, [initSocket]);
 
   // Fetch initial data
   useEffect(() => {
@@ -39,7 +46,10 @@ export default function Dashboard() {
 
   return (
     <Box>
-      <StatusBar connected={!error && !!status} />
+      <StatusBar
+        connected={!error && !!status}
+        socketConnected={socketConnected}
+      />
 
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">

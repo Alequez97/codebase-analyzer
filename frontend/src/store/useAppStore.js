@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import api from "../services/api";
+import { getSocket, initSocket } from "../services/socket";
+import { SOCKET_EVENTS, TASK_TYPES } from "../constants/socket-events";
 
 export const useAppStore = create((set, get) => ({
   // State
@@ -9,6 +11,8 @@ export const useAppStore = create((set, get) => ({
   scanning: false,
   loading: true,
   error: null,
+  socket: null,
+  socketConnected: false,
 
   // Actions
   setStatus: (status) => set({ status }),
@@ -31,6 +35,41 @@ export const useAppStore = create((set, get) => ({
     if (status?.config?.codebases?.length > 0 && !selectedCodebase) {
       set({ selectedCodebase: status.config.codebases[0] });
     }
+  },
+
+  // Initialize socket connection and listeners
+  initSocket: () => {
+    const socket = initSocket();
+    set({ socket });
+
+    // Connection status
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      set({ socketConnected: true });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+      set({ socketConnected: false });
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      set({ socketConnected: false });
+    });
+
+    // Listen for task completion
+    socket.on(SOCKET_EVENTS.TASK_COMPLETED, ({ type, taskId, moduleId }) => {
+      console.log(`Task completed: ${type} (${taskId})`);
+
+      if (type === TASK_TYPES.SCAN) {
+        set({ scanning: false });
+        get().fetchModules();
+      } else if (type === TASK_TYPES.ANALYZE) {
+        console.log(`Analysis completed for module: ${moduleId}`);
+        get().fetchModules();
+      }
+    });
   },
 
   // Async Actions
@@ -64,25 +103,7 @@ export const useAppStore = create((set, get) => ({
     set({ scanning: true });
     try {
       await api.requestScan(true);
-
-      // Poll for results
-      const pollInterval = setInterval(async () => {
-        try {
-          const response = await api.getModules();
-          if (response.data.modules && response.data.modules.length > 0) {
-            set({ modules: response.data.modules, scanning: false });
-            clearInterval(pollInterval);
-          }
-        } catch (err) {
-          // Still waiting
-        }
-      }, 3000);
-
-      // Stop after 2 minutes
-      setTimeout(() => {
-        clearInterval(pollInterval);
-        set({ scanning: false });
-      }, 120000);
+      // Socket will handle the completion event - no more polling!
     } catch (err) {
       set({ error: "Failed to start scan", scanning: false });
     }
@@ -96,5 +117,6 @@ export const useAppStore = create((set, get) => ({
       scanning: false,
       loading: true,
       error: null,
+      socketConnected: false,
     }),
 }));
