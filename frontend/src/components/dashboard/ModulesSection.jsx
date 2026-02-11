@@ -1,12 +1,18 @@
-import { VStack, HStack, Box, Heading, Text, Badge, Button } from '@chakra-ui/react';
-import { Card } from '../ui/card';
-import { Alert } from '../ui/alert';
-import { useAppStore } from '../../store/useAppStore';
-import { useScanCodebase } from '../../hooks/useApi';
+import {
+  VStack,
+  HStack,
+  Box,
+  Heading,
+  Text,
+  Badge,
+  Button,
+} from "@chakra-ui/react";
+import { Card } from "../ui/card";
+import { Alert } from "../ui/alert";
+import { useAppStore } from "../../store/useAppStore";
 
 export function ModulesSection() {
-  const { selectedCodebase, modules, scanning } = useAppStore();
-  const { startScan } = useScanCodebase();
+  const { selectedCodebase, modules, scanning, startScan } = useAppStore();
 
   if (!selectedCodebase) return null;
 
@@ -21,7 +27,7 @@ export function ModulesSection() {
             loading={scanning}
             loadingText="Scanning..."
           >
-            {modules.length > 0 ? 'Re-scan Codebase' : 'Scan Codebase'}
+            {modules.length > 0 ? "Re-scan Codebase" : "Scan Codebase"}
           </Button>
         </HStack>
       </Card.Header>
@@ -47,7 +53,7 @@ export function ModulesSection() {
         {!scanning && modules.length > 0 && (
           <VStack align="stretch" gap={4}>
             <Text color="gray.600">
-              Found {modules.length} module{modules.length !== 1 ? 's' : ''}
+              Found {modules.length} module{modules.length !== 1 ? "s" : ""}
             </Text>
             {modules.map((module) => (
               <Card.Root key={module.id} variant="outline">
@@ -58,13 +64,13 @@ export function ModulesSection() {
                         <Heading size="md">{module.name}</Heading>
                         <Badge
                           colorPalette={
-                            module.priority === 'P0'
-                              ? 'red'
-                              : module.priority === 'P1'
-                              ? 'orange'
-                              : module.priority === 'P2'
-                              ? 'yellow'
-                              : 'gray'
+                            module.priority === "P0"
+                              ? "red"
+                              : module.priority === "P1"
+                                ? "orange"
+                                : module.priority === "P2"
+                                  ? "yellow"
+                                  : "gray"
                           }
                         >
                           {module.priority}
@@ -78,14 +84,14 @@ export function ModulesSection() {
                       </Text>
                       <Text fontSize="sm" color="gray.500">
                         {module.files?.length || 0} file
-                        {module.files?.length !== 1 ? 's' : ''}
+                        {module.files?.length !== 1 ? "s" : ""}
                       </Text>
                     </Box>
                     <Button
-                      colorPalette={module.hasAnalysis ? 'green' : 'blue'}
-                      variant={module.hasAnalysis ? 'outline' : 'solid'}
+                      colorPalette={module.hasAnalysis ? "green" : "blue"}
+                      variant={module.hasAnalysis ? "outline" : "solid"}
                     >
-                      {module.hasAnalysis ? 'View Analysis' : 'Analyze'}
+                      {module.hasAnalysis ? "View Analysis" : "Analyze"}
                     </Button>
                   </HStack>
                 </Card.Body>

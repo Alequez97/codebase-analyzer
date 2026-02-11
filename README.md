@@ -8,7 +8,7 @@ AI-powered codebase analysis tool with structured workflows and one-click fix ac
 
 ```bash
 # Install dependencies
-npm run install:all
+npm run install
 
 # Create backend .env file
 cd backend
@@ -31,6 +31,8 @@ pip install aider-chat
 # Verify installation
 aider --version
 ```
+
+For detailed Aider configuration (models, API keys, etc.), see **[docs/AIDER.md](docs/AIDER.md)**.
 
 ### 3. Run
 
@@ -99,18 +101,32 @@ See [PROGRESS.md](./PROGRESS.md) for detailed roadmap.
 
 ## Configuration
 
-### .env Variables
+### Environment Variables
+
+See `backend/.env.example` for all available options.
+
+**Required:**
 
 ```env
-# Required
-CODEBASE_PATH=C:\_projects\jfs\avia-manager
-
-# Optional
-PORT=3001
-ANALYSIS_MODE=claude-code
+CODEBASE_PATH_AVIA_MANAGER=C:\_projects\jfs\avia-manager
 ```
 
-Each developer sets their own `CODEBASE_PATH` - not stored in JSON files.
+**Aider Configuration:**
+
+```env
+AIDER_MODEL=deepseek
+DEEPSEEK_API_KEY=your-key-here
+```
+
+For detailed Aider setup (switching models, API keys, etc.), see **[docs/AIDER.md](docs/AIDER.md)**.
+
+Each developer sets their own paths and API keys - not stored in version control.
+
+## Documentation
+
+- **[docs/AIDER.md](docs/AIDER.md)** - Aider configuration guide (models, API keys)
+- **[docs/backend/architecture.md](docs/backend/architecture.md)** - Backend architecture
+- **[docs/frontend/architecture.md](docs/frontend/architecture.md)** - Frontend architecture
 
 ## Future Phases
 
