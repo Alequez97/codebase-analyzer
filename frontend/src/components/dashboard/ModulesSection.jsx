@@ -12,7 +12,8 @@ import { Alert } from "../ui/alert";
 import { useAppStore } from "../../store/useAppStore";
 
 export function ModulesSection() {
-  const { status, modules, scanning, startScan } = useAppStore();
+  const { status, modules, analyzingCodebase, startCodebaseAnalysis } =
+    useAppStore();
 
   return (
     <Card.Root>
@@ -23,34 +24,34 @@ export function ModulesSection() {
           </Heading>
           <Button
             colorPalette="blue"
-            onClick={startScan}
-            loading={scanning}
-            loadingText="Scanning..."
+            onClick={startCodebaseAnalysis}
+            loading={analyzingCodebase}
+            loadingText="Analyzing..."
           >
-            {modules.length > 0 ? "Re-scan Codebase" : "Scan Codebase"}
+            {modules.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
           </Button>
         </HStack>
       </Card.Header>
       <Card.Body>
-        {scanning && (
+        {analyzingCodebase && (
           <Alert.Root status="info">
             <Alert.Indicator />
-            <Alert.Title>Scanning in progress...</Alert.Title>
+            <Alert.Title>Analysis in progress...</Alert.Title>
             <Alert.Description>
               Analyzing your codebase. This may take a few minutes.
             </Alert.Description>
           </Alert.Root>
         )}
 
-        {!scanning && modules.length === 0 && (
+        {!analyzingCodebase && modules.length === 0 && (
           <Box textAlign="center" py={8}>
             <Text color="gray.500" fontSize="lg">
-              No modules found. Click "Scan Codebase" to start analysis.
+              No modules found. Click "Analyze Codebase" to start analysis.
             </Text>
           </Box>
         )}
 
-        {!scanning && modules.length > 0 && (
+        {!analyzingCodebase && modules.length > 0 && (
           <VStack align="stretch" gap={4}>
             <Text color="gray.600">
               Found {modules.length} module{modules.length !== 1 ? "s" : ""}

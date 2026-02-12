@@ -64,7 +64,7 @@ When you run the analyzer, it creates this structure in your project:
 ```
 your-project/
 ├── .code-analysis/           # Created by the analyzer
-│   ├── scan-results.json     # Discovered modules
+│   ├── codebase-analysis.json     # Discovered modules
 │   ├── modules/              # Detailed analysis per module
 │   │   ├── auth-module.json
 │   │   └── api-module.json
@@ -87,7 +87,7 @@ code-analyzer help
 
 ## Features
 
-- **Automatic Module Discovery**: Scans your codebase and identifies functional modules
+- **Automatic Module Discovery**: Analyzes your codebase and identifies functional modules
 - **Deep Analysis**: Per-module analysis for bugs, security issues, and requirements
 - **Real-time Updates**: WebSocket-based progress tracking
 - **AI-powered**: Leverages Aider or other AI coding assistants
@@ -97,7 +97,7 @@ code-analyzer help
 Once started, open `http://localhost:3001` to:
 
 - View discovered modules
-- Trigger scans
+- Trigger analysis
 - Monitor analysis progress
 - Review findings
 

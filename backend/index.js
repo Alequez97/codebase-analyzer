@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import config from "./config.js";
-import * as scanOrchestrator from "./orchestrators/scan.js";
+import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
 import * as modulesPersistence from "./persistence/modules.js";
 import { detectAvailableAgents } from "./agents/index.js";
@@ -62,55 +62,56 @@ app.get("/api/status", async (req, res) => {
 });
 
 /**
- * Get scan results
+ * Get full codebase analysis
  */
-app.get("/api/analysis/scan", async (req, res) => {
+app.get("/api/analysis/codebase", async (req, res) => {
   try {
-    const results = await scanOrchestrator.getScanResults();
+    const results = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
 
     if (!results) {
       return res.status(404).json({
-        error: "No scan results found",
-        message: 'Click "Scan Codebase" to start a scan',
+        error: "No codebase analysis found",
+        message: 'Click "Analyze Codebase" to start analysis',
       });
     }
 
     res.json(results);
   } catch (error) {
-    console.error("Error reading scan results:", error);
-    res.status(500).json({ error: "Failed to read scan results" });
+    console.error("Error reading codebase analysis:", error);
+    res.status(500).json({ error: "Failed to read codebase analysis" });
   }
 });
 
 /**
- * Create a new scan task
+ * Create a new full codebase analysis task
  */
-app.post("/api/analysis/scan/request", async (req, res) => {
+app.post("/api/analysis/codebase/request", async (req, res) => {
   try {
     const executeNow = req.body.executeNow !== false; // Default to true
-    const task = await taskOrchestrator.createScanTask(executeNow);
+    const task =
+      await taskOrchestrator.createFullCodebaseAnalysisTask(executeNow);
     res.status(201).json(task);
   } catch (error) {
-    console.error("Error creating scan task:", error);
-    res.status(500).json({ error: "Failed to create scan task" });
+    console.error("Error creating codebase analysis task:", error);
+    res.status(500).json({ error: "Failed to create codebase analysis task" });
   }
 });
 
 /**
- * Get full scan results with all modules
+ * Get full codebase analysis with all modules
  */
-app.get("/api/analysis/scan/full", async (req, res) => {
+app.get("/api/analysis/codebase/full", async (req, res) => {
   try {
-    const scanResults = await scanOrchestrator.getScanResults();
+    const analysis = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
 
-    if (!scanResults || scanResults.modules.length === 0) {
+    if (!analysis || analysis.modules.length === 0) {
       return res.status(404).json({
         error: "No modules found",
-        message: "Run a codebase scan first",
+        message: "Run a codebase analysis first",
       });
     }
 
-    res.json(scanResults);
+    res.json(analysis);
   } catch (error) {
     console.error("Error reading modules:", error);
     res.status(500).json({ error: "Failed to read modules" });

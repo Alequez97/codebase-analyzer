@@ -18,7 +18,7 @@ Manual code review is time-consuming and error-prone:
 
 A **beautiful web interface** where you can:
 
-1. **Scan your codebase** - AI analyzes your project structure
+1. **Analyze your codebase** - AI analyzes your project structure
 2. **View modules** - See organized breakdown of your code
 3. **Review findings** - Browse bugs, security issues, missing tests
 4. **Apply fixes** - One-click to apply AI-generated fixes
@@ -38,7 +38,7 @@ A **beautiful web interface** where you can:
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│  3. Click "Scan Codebase"                       │
+│  3. Click "Analyze Codebase"                       │
 │     AI analyzes your entire project             │
 └──────────────────┬──────────────────────────────┘
                    │
@@ -143,7 +143,7 @@ A **beautiful web interface** where you can:
 ┌────────────────▼───────────────────────────────┐
 │           Your Codebase + Analysis             │
 │  .code-analysis/                               │
-│    ├── scan-results.json                       │
+│    ├── codebase-analysis.json                       │
 │    ├── modules/{module-id}.json                │
 │    └── tasks/pending/*.json                    │
 └────────────────────────────────────────────────┘
@@ -220,7 +220,7 @@ All analysis results are stored in `.code-analysis/` in your project:
 ```
 your-project/
   .code-analysis/
-    scan-results.json           # Module discovery
+    codebase-analysis.json           # Module discovery
     modules/
       user-auth.json            # Detailed analysis per module
       payment.json
@@ -233,18 +233,18 @@ your-project/
 
 ## User Workflow Example
 
-### Step 1: Initial Scan
+### Step 1: Initial Analysis
 
 ```bash
 cd /path/to/my-app
 code-analyze
 ```
 
-Dashboard shows: "Click Scan Codebase to begin"
+Dashboard shows: "Click Analyze Codebase to begin"
 
 ### Step 2: Discover Modules
 
-**User clicks**: "Scan Codebase"  
+**User clicks**: "Analyze Codebase"  
 **AI does**: Analyzes project structure, identifies modules  
 **User sees**: Grid of discovered modules (e.g., "User Authentication", "Payment Processing")
 
@@ -305,12 +305,12 @@ Dashboard shows: "Click Scan Codebase to begin"
 - Review all findings before fixing
 - Preview changes before applying
 - Undo any fix if needed
-- Configure what to scan and how
+- Configure what to analyze and how
 
 ### Fast Iteration
 
 1. Make changes to your code
-2. Re-scan affected modules
+2. Re-analyze affected modules
 3. See new issues (if any)
 4. Apply fixes
 5. Repeat
@@ -361,7 +361,7 @@ Dashboard shows: "Click Scan Codebase to begin"
 
 ### Phase 1: MVP (Current)
 
-- ✅ Basic scanning
+- ✅ Basic codebase analysis
 - ✅ Module analysis
 - ✅ Bug detection
 - ✅ Fix application
@@ -408,7 +408,7 @@ code-analyze
 
 Code auditing should be:
 
-- **Automated** - AI scans, you review
+- **Automated** - AI analyzes, you review
 - **Fast** - Minutes, not days
 - **Accurate** - Catches what humans miss
 - **Actionable** - One-click fixes

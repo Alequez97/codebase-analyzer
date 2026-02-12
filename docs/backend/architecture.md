@@ -20,16 +20,16 @@ backend/
 │   └── index.js        # Agent selector and task executor
 │
 ├── orchestrators/       # Business logic coordination
-│   ├── scan.js         # Scan workflow (enriches data, coordinates)
+│   ├── codebase-analysis.js         # Codebase analysis workflow (enriches data, coordinates)
 │   └── task.js         # Task lifecycle management
 │
 ├── persistence/         # Data access layer (read/write JSON)
-│   ├── scan.js         # Scan results persistence
+│   ├── codebase-analysis.js         # Codebase analysis results persistence
 │   ├── modules.js      # Module analyses persistence
 │   └── tasks.js        # Task files persistence
 │
 ├── instructions/        # Markdown prompt templates for AI tools
-│   ├── scan-codebase.md
+│   ├── analyze-full-codebase.md
 │   └── analyze-module.md
 │
 ├── schemas/            # JSON schema definitions and examples
@@ -40,24 +40,26 @@ backend/
 
 ## Data Flow
 
-### Scan Workflow
+### Codebase Analysis Workflow
+
 ```
-User clicks "Scan" → Frontend → POST /api/scan/request
+User clicks "Analyze" → Frontend → POST /api/analysis/codebase/request
                                       ↓
                           Task Orchestrator creates task
                                       ↓
                           Agent executes Aider with instructions
                                       ↓
-                          Aider writes scan-results.json
+                          Aider writes codebase-analysis.json
                                       ↓
-                          Frontend polls GET /api/scan
+                          Frontend polls GET /api/analysis/codebase
                                       ↓
-                          Scan Orchestrator enriches data
+                          Codebase Analysis Orchestrator enriches data
                                       ↓
                           Frontend displays modules
 ```
 
 ### Analysis Workflow
+
 ```
 User clicks "Analyze Module" → POST /api/modules/:id/analyze
                                       ↓
@@ -73,17 +75,20 @@ User clicks "Analyze Module" → POST /api/modules/:id/analyze
 ## Layer Responsibilities
 
 ### Persistence Layer
+
 - **Pure I/O operations**: Read and write JSON files
 - **No business logic**: Just data access
 - **Error handling**: Returns null for missing files, throws on actual errors
 
 ### Orchestrators Layer
+
 - **Business logic**: Coordinates multiple operations
 - **Data enrichment**: Adds computed fields (e.g., hasAnalysis flag)
 - **Calls persistence**: Uses persistence layer for data access
 - **Calls agents**: Triggers AI tool execution
 
 ### Agents Layer
+
 - **Tool detection**: Check if AI tool is installed
 - **Execution**: Run AI tool with instructions
 - **Abstraction**: Uniform interface for different tools
@@ -91,11 +96,13 @@ User clicks "Analyze Module" → POST /api/modules/:id/analyze
 ## Configuration
 
 ### Environment Variables
+
 - `CODEBASE_PATH`: Path to codebase being analyzed (required)
 - `ANALYSIS_TOOL`: AI tool to use (aider, claude-code, gemini, etc.)
 - `PORT`: Server port (default: 3001)
 
 ### Agent Selection
+
 1. If `ANALYSIS_TOOL` is set, use that specific tool
 2. Otherwise, auto-detect available tools
 3. Fail if no tools are available
@@ -103,8 +110,9 @@ User clicks "Analyze Module" → POST /api/modules/:id/analyze
 ## API Design
 
 All endpoints follow REST conventions:
+
 - `GET /api/status`: Health check + available agents
-- `GET /api/scan`: Get scan results
+- `GET /api/analysis/codebase`: Get codebase analysis results
 - `POST /api/scan/request`: Create scan task
 - `GET /api/modules`: List modules
 - `GET /api/modules/:id`: Get module analysis
@@ -113,31 +121,36 @@ All endpoints follow REST conventions:
 - `DELETE /api/tasks/:id`: Delete task
 
 ### Request Body Options
+
 - `executeNow`: (boolean, default: true) Execute task immediately vs just create
 
 ## Future Considerations
 
 ### File Watching
+
 - Add file watcher on analysis-output folder
 - Notify frontend via WebSocket when files change
 - Alternative: Frontend polling (simpler, current approach)
 
 ### Fix Application
+
 - Most complex feature (not yet implemented)
 - Apply code diffs from analysis to target codebase
-- **Safety concerns**: 
+- **Safety concerns**:
   - Require git repository?
   - Create backups before applying?
   - Dry-run mode?
   - Show diffs before applying?
 
 ### Agent Enhancements
+
 - Add more agents (Claude Code, Gemini, Codex)
 - Support streaming responses
 - Handle long-running tasks better
 - Task progress reporting
 
 ### Error Handling
+
 - More specific error codes
 - Better error messages for frontend
 - Error logging/monitoring
@@ -146,6 +159,7 @@ All endpoints follow REST conventions:
 ## Technical Decisions
 
 ### Why File-Based Storage?
+
 - **Simple**: No database setup/maintenance
 - **Debuggable**: Inspect files directly
 - **Portable**: Works across systems
@@ -153,12 +167,14 @@ All endpoints follow REST conventions:
 - **Cons**: Not suitable for high concurrency or large scale
 
 ### Why Separate Instructions Files?
+
 - **Reusable**: Same instructions for different tasks
 - **Editable**: Modify prompts without code changes
 - **Versionable**: Track prompt changes in git
 - **Tool-agnostic**: Works with any AI tool that accepts file input
 
 ### Why Plain Functions vs Classes?
+
 - **Simpler**: No need for instance management
 - **Stateless**: Each function is independent
 - **Easier to test**: Pure functions are easier to test

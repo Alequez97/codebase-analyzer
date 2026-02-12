@@ -8,13 +8,13 @@ export default {
   // Status
   getStatus: () => api.get("/status"),
 
-  // Scan
-  getScan: () => api.get("/analysis/scan"),
-  requestScan: (executeNow = true) =>
-    api.post("/analysis/scan/request", { executeNow }),
+  // Full Codebase Analysis
+  getCodebaseAnalysis: () => api.get("/analysis/codebase"),
+  requestCodebaseAnalysis: (executeNow = true) =>
+    api.post("/analysis/codebase/request", { executeNow }),
 
-  // Scan - Full results and modules
-  getModules: () => api.get("/analysis/scan/full"),
+  // Full Codebase Analysis - Full results and modules
+  getModules: () => api.get("/analysis/codebase/full"),
   getModule: (id) => api.get(`/analysis/module/${id}`),
   analyzeModule: (id, moduleName, files, executeNow = true) =>
     api.post(`/analysis/module/${id}/analyze`, {

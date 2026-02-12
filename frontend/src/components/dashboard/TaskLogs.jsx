@@ -23,7 +23,7 @@ export function TaskLogs() {
   const logEndRef = useRef(null);
   const socket = useAppStore((state) => state.socket);
   const modules = useAppStore((state) => state.modules);
-  const scanResults = useAppStore((state) => state.scanResults);
+  const codebaseAnalysis = useAppStore((state) => state.codebaseAnalysis);
 
   useEffect(() => {
     if (!socket) return;
@@ -45,8 +45,8 @@ export function TaskLogs() {
     const handleTaskCompleted = ({ taskId, type, moduleId }) => {
       setLastCompletedTask({ taskId, type, moduleId });
 
-      // Auto-switch to results view for scan tasks
-      if (type === TASK_TYPES.SCAN) {
+      // Auto-switch to results view for codebase analysis tasks
+      if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
         setViewMode("results");
       }
     };
@@ -99,10 +99,13 @@ export function TaskLogs() {
   );
 
   const renderResults = () => {
-    if (!lastCompletedTask || lastCompletedTask.type !== TASK_TYPES.SCAN) {
+    if (
+      !lastCompletedTask ||
+      lastCompletedTask.type !== TASK_TYPES.CODEBASE_ANALYSIS
+    ) {
       return (
         <Box p={4} textAlign="center" color="gray.500">
-          <Text>No scan results available</Text>
+          <Text>No codebase analysis results available</Text>
         </Box>
       );
     }
@@ -110,13 +113,13 @@ export function TaskLogs() {
     return (
       <Box p={4}>
         <VStack align="stretch" gap={4}>
-          {scanResults?.summary && (
+          {codebaseAnalysis?.summary && (
             <Card.Root variant="outline" colorPalette="green">
               <Card.Body>
                 <Heading size="sm" mb={2}>
                   📋 Summary
                 </Heading>
-                <Text fontSize="sm">{scanResults.summary}</Text>
+                <Text fontSize="sm">{codebaseAnalysis.summary}</Text>
               </Card.Body>
             </Card.Root>
           )}
@@ -186,9 +189,9 @@ export function TaskLogs() {
       <Card.Header>
         <HStack justify="space-between">
           <Heading size="md">
-            {viewMode === "logs" ? "🤖 Agent Logs" : "✅ Scan Results"}
+            {viewMode === "logs" ? "🤖 Agent Logs" : "✅ Analysis Results"}
           </Heading>
-          {lastCompletedTask?.type === TASK_TYPES.SCAN && (
+          {lastCompletedTask?.type === TASK_TYPES.CODEBASE_ANALYSIS && (
             <Button
               size="sm"
               variant="outline"

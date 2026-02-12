@@ -1,6 +1,6 @@
-import { useEffect, useCallback } from 'react';
-import { useAppStore } from '../store/useAppStore';
-import api from '../services/api';
+import { useEffect, useCallback } from "react";
+import { useAppStore } from "../store/useAppStore";
+import api from "../services/api";
 
 export function useFetchStatus() {
   const { setStatus, setLoading, setError, autoSelectCodebase } = useAppStore();
@@ -13,7 +13,7 @@ export function useFetchStatus() {
       setError(null);
       setLoading(false);
     } catch (err) {
-      setError('Failed to connect to backend server');
+      setError("Failed to connect to backend server");
       setLoading(false);
     }
   }, [setStatus, setLoading, setError, autoSelectCodebase]);
@@ -35,7 +35,7 @@ export function useFetchModules() {
       const response = await api.getModules(selectedCodebase.id);
       setModules(response.data.modules || []);
     } catch (err) {
-      console.log('No modules found yet');
+      console.log("No modules found yet");
       setModules([]);
     }
   }, [selectedCodebase, setModules]);
@@ -49,15 +49,16 @@ export function useFetchModules() {
   return { refetch: fetchModules };
 }
 
-export function useScanCodebase() {
-  const { selectedCodebase, setScanning, setModules, setError } = useAppStore();
+export function useAnalyzeCodebase() {
+  const { selectedCodebase, setAnalyzingCodebase, setModules, setError } =
+    useAppStore();
 
-  const startScan = useCallback(async () => {
+  const startCodebaseAnalysis = useCallback(async () => {
     if (!selectedCodebase) return;
 
-    setScanning(true);
+    setAnalyzingCodebase(true);
     try {
-      await api.requestScan(selectedCodebase.id, true);
+      await api.requestCodebaseAnalysis(selectedCodebase.id, true);
 
       // Poll for results
       const pollInterval = setInterval(async () => {
@@ -65,7 +66,7 @@ export function useScanCodebase() {
           const response = await api.getModules(selectedCodebase.id);
           if (response.data.modules && response.data.modules.length > 0) {
             setModules(response.data.modules);
-            setScanning(false);
+            setAnalyzingCodebase(false);
             clearInterval(pollInterval);
           }
         } catch (err) {
@@ -76,13 +77,13 @@ export function useScanCodebase() {
       // Stop after 2 minutes
       setTimeout(() => {
         clearInterval(pollInterval);
-        setScanning(false);
+        setAnalyzingCodebase(false);
       }, 120000);
     } catch (err) {
-      setError('Failed to start scan');
-      setScanning(false);
+      setError("Failed to start codebase analysis");
+      setAnalyzingCodebase(false);
     }
-  }, [selectedCodebase, setScanning, setModules, setError]);
+  }, [selectedCodebase, setAnalyzingCodebase, setModules, setError]);
 
-  return { startScan };
+  return { startCodebaseAnalysis };
 }

@@ -1,4 +1,4 @@
-# Scan Codebase - Instruction for AI Agent
+# Full Codebase Analysis - Instruction for AI Agent
 
 ## Objective
 
@@ -11,7 +11,7 @@ Path: `{{CODEBASE_PATH}}`
 
 ## Task
 
-**IMPORTANT**: You MUST create the file `.code-analysis/scan-results.json` with the structure below. This is not optional.
+**IMPORTANT**: You MUST create the file `.code-analysis/codebase-analysis.json` with the structure below. This is not optional.
 
 1. **Quick Codebase Recap**: Briefly understand what this project does (1-2 sentences)
 2. **Identify Modules**: Find major functional areas based on:
@@ -32,7 +32,7 @@ For each module, determine:
 
 ## Output Format
 
-**YOU MUST CREATE THIS FILE**: `.code-analysis/scan-results.json`
+**YOU MUST CREATE THIS FILE**: `.code-analysis/codebase-analysis.json`
 
 JSON structure (write this exact structure to the file):
 
@@ -56,7 +56,7 @@ JSON structure (write this exact structure to the file):
 
 ## Guidelines
 
-- **ACTION REQUIRED**: Create/edit the `.code-analysis/scan-results.json` file with valid JSON
+- **ACTION REQUIRED**: Create/edit the `.code-analysis/codebase-analysis.json` file with valid JSON
 - Focus on main business modules (not utilities or libraries)
 - Group related files together
 - Be concise in businessPurpose (1-2 sentences max)
@@ -65,7 +65,7 @@ JSON structure (write this exact structure to the file):
 - Set hasAnalysis to false (it will be updated later)
 - Add a helpful summary suggesting what to analyze first
 - If the codebase is very large, use your repository map to understand structure
-- Identify 5-10 core modules maximum for initial scan
+- Identify 5-10 core modules maximum for initial analysis
 
 ## Example Modules
 
@@ -77,4 +77,10 @@ JSON structure (write this exact structure to the file):
 
 ## ACTION REQUIRED
 
-Create the `.code-analysis/scan-results.json` file NOW with the structure above. Do not just describe what you would put in it - actually create the file.
+Write the complete JSON content to `.code-analysis/codebase-analysis.json` file NOW. Use the whole file edit format to create it with valid JSON containing:
+
+- Current ISO 8601 timestamp
+- Summary with project description and next steps
+- Array of 5-10 discovered modules
+
+Do not ask for confirmation. Do not wait for more input. Create the file immediately and complete this task.

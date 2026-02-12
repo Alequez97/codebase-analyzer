@@ -7,8 +7,8 @@ export const useAppStore = create((set, get) => ({
   // State
   status: null,
   modules: [],
-  scanResults: null,
-  scanning: false,
+  codebaseAnalysis: null,
+  analyzingCodebase: false,
   loading: true,
   error: null,
   socket: null,
@@ -19,7 +19,7 @@ export const useAppStore = create((set, get) => ({
 
   setModules: (modules) => set({ modules }),
 
-  setScanning: (scanning) => set({ scanning }),
+  setAnalyzingCodebase: (analyzingCodebase) => set({ analyzingCodebase }),
 
   setLoading: (loading) => set({ loading }),
 
@@ -52,8 +52,8 @@ export const useAppStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_COMPLETED, ({ type, taskId, moduleId }) => {
       console.log(`Task completed: ${type} (${taskId})`);
 
-      if (type === TASK_TYPES.SCAN) {
-        set({ scanning: false });
+      if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
+        set({ analyzingCodebase: false });
         get().fetchModules();
       } else if (type === TASK_TYPES.ANALYZE) {
         console.log(`Analysis completed for module: ${moduleId}`);
@@ -77,21 +77,24 @@ export const useAppStore = create((set, get) => ({
       const response = await api.getModules();
       set({
         modules: response.data.modules || [],
-        scanResults: response.data,
+        codebaseAnalysis: response.data,
       });
     } catch (err) {
       console.log("No modules found yet");
-      set({ modules: [], scanResults: null });
+      set({ modules: [], codebaseAnalysis: null });
     }
   },
 
-  startScan: async () => {
-    set({ scanning: true });
+  startCodebaseAnalysis: async () => {
+    set({ analyzingCodebase: true });
     try {
-      await api.requestScan(true);
+      await api.requestCodebaseAnalysis(true);
       // Socket will handle the completion event - no more polling!
     } catch (err) {
-      set({ error: "Failed to start scan", scanning: false });
+      set({
+        error: "Failed to start codebase analysis",
+        analyzingCodebase: false,
+      });
     }
   },
 
@@ -99,8 +102,8 @@ export const useAppStore = create((set, get) => ({
     set({
       status: null,
       modules: [],
-      scanResults: null,
-      scanning: false,
+      codebaseAnalysis: null,
+      analyzingCodebase: false,
       loading: true,
       error: null,
       socketConnected: false,

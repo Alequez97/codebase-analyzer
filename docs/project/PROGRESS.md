@@ -26,7 +26,7 @@ AI-powered codebase analysis tool with structured workflows and one-click action
                    │ File System
 ┌──────────────────▼──────────────────────────────┐
 │      Analysis Output (JSON Files)              │
-│  - scan-results.json                            │
+│  - codebase-analysis.json                            │
 │  - modules/{module-id}.json                     │
 │  - tasks/pending/*.json                         │
 │  - tasks/completed/*.json                       │
@@ -62,8 +62,8 @@ AI-powered codebase analysis tool with structured workflows and one-click action
 #### API Endpoints
 
 - [ ] `GET /api/status` - Health check and configuration status
-- [ ] `GET /api/scan` - Get current scan results
-- [ ] `POST /api/scan/request` - Create pending scan task
+- [ ] `GET /api/analysis/codebase` - Get current codebase analysis results
+- [ ] `POST /api/analysis/codebase/request` - Create pending codebase analysis task
 - [ ] `GET /api/modules` - List all modules
 - [ ] `GET /api/modules/:id` - Get module analysis
 - [ ] `POST /api/modules/:id/analyze` - Create pending analysis task

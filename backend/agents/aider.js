@@ -96,7 +96,8 @@ export async function execute(task) {
   // Build Aider command with smart context management
   const commandParts = [
     "aider",
-    "--yes-always",
+    "--yes-always", // Auto-approve all changes
+    "--no-git", // Don't make git commits (analysis only)
     "--map-refresh auto", // Auto-refresh repo map
     "--map-tokens 1024", // Use repo map to manage large codebases
     config.aider.model ? `--model ${config.aider.model}` : null,
@@ -127,6 +128,11 @@ export async function execute(task) {
           cwd: config.target.directory,
           shell: true,
         });
+
+        // Close stdin immediately - we're using --message-file, no interaction needed
+        if (aiderProcess.stdin) {
+          aiderProcess.stdin.end();
+        }
 
         aiderProcess.stdout.on("data", (data) => {
           const text = data.toString();

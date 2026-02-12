@@ -6,9 +6,9 @@ React-based dashboard that provides a visual interface for codebase analysis. Bu
 
 ## Key Features (Planned)
 
-1. **Module Grid View**: Display discovered modules from scan
+1. **Module Grid View**: Display discovered modules from codebase analysis
 2. **Analysis Detail View**: Show detailed analysis for each module
-3. **One-Click Actions**: Buttons to scan, analyze, and fix
+3. **One-Click Actions**: Buttons to analyze codebase, analyze modules, and fix
 4. **Real-Time Updates**: Auto-refresh when analysis completes
 5. **Task Status**: Show pending tasks and execution status
 
@@ -54,6 +54,7 @@ frontend/
 ## Data Flow
 
 ### Dashboard View
+
 ```
 Dashboard Component
     ↓
@@ -67,6 +68,7 @@ Display module cards
 ```
 
 ### Scan Flow
+
 ```
 User clicks "Scan Codebase"
     ↓
@@ -82,6 +84,7 @@ Refresh module list
 ```
 
 ### Analysis Flow
+
 ```
 User clicks "Analyze" on module card
     ↓
@@ -99,22 +102,26 @@ Navigate to analysis view
 ## Component Design
 
 ### ModuleCard
+
 - Props: `module` (id, name, businessPurpose, priority, hasAnalysis)
 - Shows: Module name, business purpose, priority badge
 - Actions: "Analyze" button (if no analysis), "View Analysis" button (if has analysis)
 
 ### ModuleAnalysis
+
 - Props: `moduleId`
 - Fetches: Module analysis data
 - Shows: Requirements, bugs, security issues, proposed fixes
 - Actions: "Fix" buttons for each issue
 
 ### IssueCard
+
 - Props: `issue` (id, severity, description, fixable)
 - Shows: Issue details, severity badge
 - Actions: "Fix" button if fixable
 
 ### TaskStatus
+
 - Polls: GET /api/tasks/pending
 - Shows: Count of pending tasks, expandable list
 - Updates: Every 2 seconds while tasks exist
@@ -122,16 +129,18 @@ Navigate to analysis view
 ## State Management
 
 ### Approach: React Hooks + Context (if needed)
+
 - **Local state**: Component-specific UI state
 - **Custom hooks**: Shared data fetching logic
 - **Context**: Global state (if needed, e.g., auth, theme)
 
 ### Polling Strategy
+
 ```js
 usePolling(fetchFn, interval, condition) {
   // Poll fetchFn every interval while condition is true
   // Stop polling when condition is false
-  // Example: Poll scan results while no data exists
+  // Example: Poll codebase analysis results while no data exists
 }
 ```
 
@@ -139,30 +148,31 @@ usePolling(fetchFn, interval, condition) {
 
 ```js
 // services/api.js
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: "http://localhost:3001/api",
 });
 
 export default {
   // Status
-  getStatus: () => api.get('/status'),
-  
-  // Scan
-  getScan: () => api.get('/scan'),
-  requestScan: (executeNow = true) => api.post('/scan/request', { executeNow }),
-  
+  getStatus: () => api.get("/status"),
+
+  // Codebase Analysis
+  getCodebaseAnalysis: () => api.get("/analysis/codebase"),
+  requestCodebaseAnalysis: (executeNow = true) =>
+    api.post("/analysis/codebase/request", { executeNow }),
+
   // Modules
-  getModules: () => api.get('/modules'),
+  getModules: () => api.get("/modules"),
   getModule: (id) => api.get(`/modules/${id}`),
-  analyzeModule: (id, moduleName, files, executeNow = true) => 
+  analyzeModule: (id, moduleName, files, executeNow = true) =>
     api.post(`/modules/${id}/analyze`, { moduleName, files, executeNow }),
-  
+
   // Tasks
-  getPendingTasks: () => api.get('/tasks/pending'),
+  getPendingTasks: () => api.get("/tasks/pending"),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
-  
+
   // Fixes (future)
   applyFix: (moduleId, issueId) => api.post(`/fix/${moduleId}/${issueId}`),
 };
@@ -171,21 +181,25 @@ export default {
 ## UI/UX Considerations
 
 ### Auto-Refresh
+
 - Poll for updates every 3-5 seconds while tasks pending
 - Stop polling when no pending tasks
 - Show visual indicator when polling
 
 ### Error Handling
+
 - Toast notifications for errors
 - Retry buttons for failed requests
 - Clear error messages
 
 ### Loading States
+
 - Skeleton loaders for initial load
 - Spinners for actions
 - Disable buttons during processing
 
 ### Visual Priority
+
 - Color-coded priority badges (P0=red, P1=orange, P2=yellow)
 - Severity indicators for issues (critical, high, medium, low)
 - Test coverage indicators
@@ -197,7 +211,7 @@ export default {
 const theme = extendTheme({
   colors: {
     brand: {
-      50: '#e3f2fd',
+      50: "#e3f2fd",
       // ... brand colors
     },
   },
@@ -212,21 +226,25 @@ const theme = extendTheme({
 ## Future Enhancements
 
 ### WebSocket for Real-Time Updates
+
 - Replace polling with WebSocket connection
 - Server pushes updates when files change
 - More efficient than polling
 
 ### Diff Viewer
+
 - Show code diffs before applying fixes
 - Syntax highlighting
 - Side-by-side comparison
 
 ### Filtering and Search
+
 - Filter modules by priority, test coverage
 - Search modules by name or files
 - Filter issues by severity, type
 
 ### Export Functionality
+
 - Export analysis reports to PDF/HTML
 - Generate summary dashboards
 - Share analysis results

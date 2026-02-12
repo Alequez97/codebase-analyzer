@@ -8,10 +8,10 @@ Examples will be added as features are implemented.
 
 ## API Endpoints
 
-### Scan Codebase
+### Analyze Full Codebase
 
 ```bash
-curl -X POST http://localhost:3001/api/scan/request \
+curl -X POST http://localhost:3001/api/analysis/codebase/request \
   -H "Content-Type: application/json" \
   -d '{"executeNow": true}'
 ```

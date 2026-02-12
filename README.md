@@ -53,12 +53,12 @@ Dashboard (React) → Express API → JSON Files ← Claude Code
                               Target Codebase
 ```
 
-### Workflow: Scan Codebase
+### Workflow: Analyze Full Codebase
 
-1. Click "Scan Codebase" button in dashboard
-2. Creates `analysis-output/tasks/pending/scan-{id}.json`
-3. Dashboard shows: "Open `prompts/scan-codebase.md` in Claude Code"
-4. Run prompt in Claude Code → creates `analysis-output/scan-results.json`
+1. Click "Analyze Codebase" button in dashboard
+2. Creates `analysis-output/tasks/pending/analyze-codebase-{id}.json`
+3. Dashboard shows: "Open `prompts/analyze-full-codebase.md` in Claude Code"
+4. Run prompt in Claude Code → creates `analysis-output/codebase-analysis.json`
 5. Dashboard auto-refreshes → shows discovered modules
 
 ### Workflow: Analyze Module
@@ -88,7 +88,7 @@ All data exchange is via JSON files. See `/schemas/*.example.json` for structure
 
 ### Key Files
 
-- `scan-results.json` - List of discovered modules
+- `codebase-analysis.json` - List of discovered modules
 - `modules/{id}.json` - Detailed analysis per module
 - `tasks/pending/{id}.json` - Tasks waiting to be processed
 - `tasks/completed/{id}.json` - Completed tasks log

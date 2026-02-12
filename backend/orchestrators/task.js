@@ -15,21 +15,21 @@ function generateTaskId(prefix) {
 }
 
 /**
- * Create a scan task
+ * Create a full codebase analysis task
  * @param {boolean} executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createScanTask(executeNow = false) {
+export async function createFullCodebaseAnalysisTask(executeNow = false) {
   const task = {
-    id: generateTaskId("scan"),
-    type: "scan",
+    id: generateTaskId("analyze-codebase"),
+    type: "codebase-analysis",
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
       targetDirectory: config.target.directory,
     },
-    instructionFile: "backend/instructions/scan-codebase.md",
-    outputFile: ".code-analysis/scan-results.json",
+    instructionFile: "backend/instructions/analyze-full-codebase.md",
+    outputFile: ".code-analysis/codebase-analysis.json",
   };
 
   await tasksPersistence.writeTask(task);

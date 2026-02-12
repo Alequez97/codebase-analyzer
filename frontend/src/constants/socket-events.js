@@ -15,6 +15,6 @@ export const SOCKET_EVENTS = {
 
 // Task types
 export const TASK_TYPES = {
-  SCAN: "scan",
+  CODEBASE_ANALYSIS: "codebase-analysis",
   ANALYZE: "analyze",
 };
