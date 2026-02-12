@@ -64,7 +64,7 @@ app.get("/api/status", async (req, res) => {
 /**
  * Get scan results
  */
-app.get("/api/scan", async (req, res) => {
+app.get("/api/analysis/scan", async (req, res) => {
   try {
     const results = await scanOrchestrator.getScanResults();
 
@@ -85,7 +85,7 @@ app.get("/api/scan", async (req, res) => {
 /**
  * Create a new scan task
  */
-app.post("/api/scan/request", async (req, res) => {
+app.post("/api/analysis/scan/request", async (req, res) => {
   try {
     const executeNow = req.body.executeNow !== false; // Default to true
     const task = await taskOrchestrator.createScanTask(executeNow);
@@ -97,20 +97,20 @@ app.post("/api/scan/request", async (req, res) => {
 });
 
 /**
- * List all modules from scan results
+ * Get full scan results with all modules
  */
-app.get("/api/modules", async (req, res) => {
+app.get("/api/analysis/scan/full", async (req, res) => {
   try {
-    const modules = await scanOrchestrator.getModules();
+    const scanResults = await scanOrchestrator.getScanResults();
 
-    if (modules.length === 0) {
+    if (!scanResults || scanResults.modules.length === 0) {
       return res.status(404).json({
         error: "No modules found",
         message: "Run a codebase scan first",
       });
     }
 
-    res.json({ modules });
+    res.json(scanResults);
   } catch (error) {
     console.error("Error reading modules:", error);
     res.status(500).json({ error: "Failed to read modules" });
@@ -120,7 +120,7 @@ app.get("/api/modules", async (req, res) => {
 /**
  * Get a specific module's analysis
  */
-app.get("/api/modules/:id", async (req, res) => {
+app.get("/api/analysis/module/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const analysis = await modulesPersistence.readModule(id);
@@ -142,7 +142,7 @@ app.get("/api/modules/:id", async (req, res) => {
 /**
  * Create a task to analyze a specific module
  */
-app.post("/api/modules/:id/analyze", async (req, res) => {
+app.post("/api/analysis/module/:id/analyze", async (req, res) => {
   try {
     const { id } = req.params;
     const { moduleName, files } = req.body;

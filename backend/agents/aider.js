@@ -79,6 +79,12 @@ export async function execute(task) {
 
   // Build file list for Aider to work with
   const files = task.params.files || [];
+
+  // Always include the output file so Aider knows to create/edit it
+  if (task.outputFile) {
+    files.push(task.outputFile);
+  }
+
   const filesArg = files.length > 0 ? files.map((f) => `"${f}"`).join(" ") : "";
 
   // Determine API key based on model

@@ -2,7 +2,9 @@
 
 ## Objective
 
-Perform deep analysis of a specific module to identify requirements, bugs, security issues, and generate fixes.
+**IMPORTANT**: Perform deep analysis and CREATE a structured JSON file with findings.
+
+Analyze a specific module to identify requirements, bugs, security issues, and generate actionable fixes.
 
 ## Target Information
 
@@ -15,6 +17,8 @@ Perform deep analysis of a specific module to identify requirements, bugs, secur
     {{/each}}
 
 ## Task
+
+**IMPORTANT**: You MUST create the file `.code-analysis/modules/{{MODULE_ID}}.json` with the structure below. This is not optional.
 
 1. **Extract Requirements**: Identify what the module is supposed to do
 2. **Find Bugs**: Detect logical errors, race conditions, edge cases
@@ -41,9 +45,9 @@ If you encounter token limits:
 
 ## Output Format
 
-Create file: `analysis-output/modules/{{MODULE_ID}}.json`
+**YOU MUST CREATE THIS FILE**: `.code-analysis/modules/{{MODULE_ID}}.json`
 
-JSON structure:
+JSON structure (write this exact structure to the file):
 
 ```json
 {
@@ -128,4 +132,6 @@ JSON structure:
 - **Medium**: Moderate impact, fix when possible
 - **Low**: Minor issue, nice to have
 
-Create the module analysis file now.
+## ACTION REQUIRED
+
+Create the `.code-analysis/modules/{{MODULE_ID}}.json` file NOW with the structure above. Do not just describe what you would put in it - actually create the file with valid JSON containing your analysis findings.

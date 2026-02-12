@@ -1,5 +1,7 @@
 node_modules/
 analysis-output/
+.code-analysis/
+.qodo/
 *.log
 *.playwright-mcp
 *.aider*

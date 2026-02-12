@@ -82,7 +82,10 @@ const config = {
     enabled: process.env.FILE_WATCH !== "false",
     debounceMs: parseInt(process.env.FILE_WATCH_DEBOUNCE || "500", 10),
   },
+};
 
+// Ensure required directories exist
+const dirs = [
   path.join(config.paths.targetAnalysis, "modules"),
   path.join(config.paths.targetAnalysis, "tasks"),
   path.join(config.paths.targetAnalysis, "tasks", "pending"),

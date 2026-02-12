@@ -2,7 +2,8 @@
 
 ## Objective
 
-Analyze the target codebase and identify all major functional modules. Output a structured JSON file with discovered modules.
+**Phase 1: Quick Analysis**
+Provide a short codebase recap and identify all major functional modules. Output a structured JSON file.
 
 ## Target Codebase
 
@@ -10,30 +11,35 @@ Path: `{{CODEBASE_PATH}}`
 
 ## Task
 
-1. Scan the codebase structure
-2. Identify major functional areas/modules based on:
+**IMPORTANT**: You MUST create the file `.code-analysis/scan-results.json` with the structure below. This is not optional.
+
+1. **Quick Codebase Recap**: Briefly understand what this project does (1-2 sentences)
+2. **Identify Modules**: Find major functional areas based on:
    - Directory structure
    - File groupings
    - Controller/route patterns
    - Business logic boundaries
+3. **Suggest Next Steps**: In the summary field, suggest what should be analyzed next
 
-3. For each module, determine:
-   - Module ID (kebab-case slug)
-   - Module Name (human-readable)
-   - Business Purpose (what it does)
-   - Related Files (main files that implement this module)
-   - Priority (P0=critical, P1=high, P2=medium, P3=low)
-   - Test Coverage (none, partial, full)
+For each module, determine:
+
+- Module ID (kebab-case slug)
+- Module Name (human-readable)
+- Business Purpose (what it does)
+- Related Files (main files that implement this module)
+- Priority (P0=critical, P1=high, P2=medium, P3=low)
+- Test Coverage (none, partial, full)
 
 ## Output Format
 
-Create file: `analysis-output/scan-results.json`
+**YOU MUST CREATE THIS FILE**: `.code-analysis/scan-results.json`
 
-JSON structure:
+JSON structure (write this exact structure to the file):
 
 ```json
 {
   "timestamp": "ISO 8601 timestamp",
+  "summary": "Brief 1-2 sentence project description and suggested next steps",
   "modules": [
     {
       "id": "module-id",
@@ -50,14 +56,16 @@ JSON structure:
 
 ## Guidelines
 
+- **ACTION REQUIRED**: Create/edit the `.code-analysis/scan-results.json` file with valid JSON
 - Focus on main business modules (not utilities or libraries)
 - Group related files together
 - Be concise in businessPurpose (1-2 sentences max)
 - Use relative paths from codebase root
 - Priority should reflect business criticality
 - Set hasAnalysis to false (it will be updated later)
+- Add a helpful summary suggesting what to analyze first
 - If the codebase is very large, use your repository map to understand structure
-- You can scan incrementally if needed - identify core modules first, then expand
+- Identify 5-10 core modules maximum for initial scan
 
 ## Example Modules
 
@@ -67,4 +75,6 @@ JSON structure:
 - notification-service
 - reporting-engine
 
-Create the scan-results.json file now.
+## ACTION REQUIRED
+
+Create the `.code-analysis/scan-results.json` file NOW with the structure above. Do not just describe what you would put in it - actually create the file.

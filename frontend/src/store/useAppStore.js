@@ -7,6 +7,7 @@ export const useAppStore = create((set, get) => ({
   // State
   status: null,
   modules: [],
+  scanResults: null,
   scanning: false,
   loading: true,
   error: null,
@@ -74,10 +75,13 @@ export const useAppStore = create((set, get) => ({
   fetchModules: async () => {
     try {
       const response = await api.getModules();
-      set({ modules: response.data.modules || [] });
+      set({
+        modules: response.data.modules || [],
+        scanResults: response.data,
+      });
     } catch (err) {
       console.log("No modules found yet");
-      set({ modules: [] });
+      set({ modules: [], scanResults: null });
     }
   },
 
@@ -95,6 +99,7 @@ export const useAppStore = create((set, get) => ({
     set({
       status: null,
       modules: [],
+      scanResults: null,
       scanning: false,
       loading: true,
       error: null,
