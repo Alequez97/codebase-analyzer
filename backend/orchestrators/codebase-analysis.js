@@ -1,8 +1,8 @@
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import * as modulesPersistence from "../persistence/modules.js";
+import * as domainsPersistence from "../persistence/domains.js";
 
 /**
- * Get full codebase analysis results with enriched module data
+ * Get full codebase analysis results with enriched domain data
  * @returns {Promise<Object|null>} Codebase analysis results with hasAnalysis flags
  */
 export async function getCodebaseAnalysis() {
@@ -12,24 +12,24 @@ export async function getCodebaseAnalysis() {
     return null;
   }
 
-  // Enrich modules with analysis status
-  const moduleIds = await modulesPersistence.listModules();
-  const enrichedModules = analysis.modules.map((module) => ({
-    ...module,
-    hasAnalysis: moduleIds.includes(module.id),
+  // Enrich domains with analysis status
+  const domainIds = await domainsPersistence.listDomains();
+  const enrichedDomains = analysis.domains.map((domain) => ({
+    ...domain,
+    hasAnalysis: domainIds.includes(domain.id),
   }));
 
   return {
     ...analysis,
-    modules: enrichedModules,
+    domains: enrichedDomains,
   };
 }
 
 /**
- * Get list of modules with analysis status
- * @returns {Promise<Array>} Array of modules
+ * Get list of domains with analysis status
+ * @returns {Promise<Array>} Array of domains
  */
-export async function getModules() {
+export async function getDomains() {
   const analysis = await getCodebaseAnalysis();
-  return analysis ? analysis.modules : [];
+  return analysis ? analysis.domains : [];
 }

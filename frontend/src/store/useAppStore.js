@@ -6,8 +6,7 @@ import { SOCKET_EVENTS, TASK_TYPES } from "../constants/socket-events";
 export const useAppStore = create((set, get) => ({
   // State
   status: null,
-  modules: [],
-  codebaseAnalysis: null,
+  analysis: null,
   analyzingCodebase: false,
   loading: true,
   error: null,
@@ -17,7 +16,7 @@ export const useAppStore = create((set, get) => ({
   // Actions
   setStatus: (status) => set({ status }),
 
-  setModules: (modules) => set({ modules }),
+  setAnalysis: (analysis) => set({ analysis }),
 
   setAnalyzingCodebase: (analyzingCodebase) => set({ analyzingCodebase }),
 
@@ -75,13 +74,10 @@ export const useAppStore = create((set, get) => ({
   fetchCodebaseAnalysis: async () => {
     try {
       const response = await api.getFullCodebaseAnalysis();
-      set({
-        modules: response.data.modules || [],
-        codebaseAnalysis: response.data,
-      });
+      set({ analysis: response.data });
     } catch (err) {
       console.log("No codebase analysis found yet");
-      set({ modules: [], codebaseAnalysis: null });
+      set({ analysis: null });
     }
   },
 
@@ -101,8 +97,7 @@ export const useAppStore = create((set, get) => ({
   reset: () =>
     set({
       status: null,
-      modules: [],
-      codebaseAnalysis: null,
+      analysis: null,
       analyzingCodebase: false,
       loading: true,
       error: null,

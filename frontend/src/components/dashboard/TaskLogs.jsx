@@ -22,8 +22,9 @@ export function TaskLogs() {
   const [lastCompletedTask, setLastCompletedTask] = useState(null);
   const logEndRef = useRef(null);
   const socket = useAppStore((state) => state.socket);
-  const modules = useAppStore((state) => state.modules);
-  const codebaseAnalysis = useAppStore((state) => state.codebaseAnalysis);
+  const analysis = useAppStore((state) => state.analysis);
+
+  const domains = analysis?.domains || [];
 
   useEffect(() => {
     if (!socket) return;
@@ -113,67 +114,67 @@ export function TaskLogs() {
     return (
       <Box p={4}>
         <VStack align="stretch" gap={4}>
-          {codebaseAnalysis?.summary && (
+          {analysis?.summary && (
             <Card.Root variant="outline" colorPalette="green">
               <Card.Body>
                 <Heading size="sm" mb={2}>
                   📋 Summary
                 </Heading>
-                <Text fontSize="sm">{codebaseAnalysis.summary}</Text>
+                <Text fontSize="sm">{analysis.summary}</Text>
               </Card.Body>
             </Card.Root>
           )}
 
           <Box>
             <HStack justify="space-between" mb={3}>
-              <Heading size="sm">Discovered Modules</Heading>
+              <Heading size="sm">Discovered Domains</Heading>
               <Badge colorPalette="green" size="lg">
-                {modules.length} module{modules.length !== 1 ? "s" : ""}
+                {domains.length} domain{domains.length !== 1 ? "s" : ""}
               </Badge>
             </HStack>
 
-            {modules.length === 0 ? (
+            {domains.length === 0 ? (
               <Text color="gray.500" fontSize="sm">
-                No modules discovered
+                No domains discovered
               </Text>
             ) : (
               <VStack align="stretch" gap={2}>
-                {modules.slice(0, 5).map((module) => (
-                  <Card.Root key={module.id} variant="subtle" size="sm">
+                {domains.slice(0, 5).map((domain) => (
+                  <Card.Root key={domain.id} variant="subtle" size="sm">
                     <Card.Body>
                       <HStack justify="space-between">
                         <Box>
                           <HStack gap={2} mb={1}>
                             <Text fontWeight="semibold" fontSize="sm">
-                              {module.name}
+                              {domain.name}
                             </Text>
                             <Badge
                               size="sm"
                               colorPalette={
-                                module.priority === "P0"
+                                domain.priority === "P0"
                                   ? "red"
-                                  : module.priority === "P1"
+                                  : domain.priority === "P1"
                                     ? "orange"
-                                    : module.priority === "P2"
+                                    : domain.priority === "P2"
                                       ? "yellow"
                                       : "gray"
                               }
                             >
-                              {module.priority}
+                              {domain.priority}
                             </Badge>
                           </HStack>
                           <Text fontSize="xs" color="gray.600">
-                            {module.businessPurpose}
+                            {domain.businessPurpose}
                           </Text>
                         </Box>
                       </HStack>
                     </Card.Body>
                   </Card.Root>
                 ))}
-                {modules.length > 5 && (
+                {domains.length > 5 && (
                   <Text fontSize="xs" color="gray.500" textAlign="center">
-                    + {modules.length - 5} more module
-                    {modules.length - 5 !== 1 ? "s" : ""} (scroll up to see all)
+                    + {domains.length - 5} more domain
+                    {domains.length - 5 !== 1 ? "s" : ""} (scroll up to see all)
                   </Text>
                 )}
               </VStack>

@@ -13,11 +13,25 @@ export async function readCodebaseAnalysis() {
       "codebase-analysis.json",
     );
     const content = await fs.readFile(filePath, "utf-8");
+
+    // Handle empty files
+    if (!content || content.trim() === "") {
+      console.log("Codebase analysis file is empty");
+      return null;
+    }
+
     return JSON.parse(content);
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;
     }
+
+    // Handle JSON parse errors (malformed files)
+    if (error instanceof SyntaxError) {
+      console.error("Invalid JSON in codebase-analysis.json:", error.message);
+      return null;
+    }
+
     throw error;
   }
 }

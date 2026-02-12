@@ -97,7 +97,7 @@ export async function execute(task) {
   const commandParts = [
     "aider",
     "--yes-always", // Auto-approve all changes
-    "--no-git", // Don't make git commits (analysis only)
+    "--no-auto-commits", // Don't auto-commit changes (analysis only)
     "--map-refresh auto", // Auto-refresh repo map
     "--map-tokens 1024", // Use repo map to manage large codebases
     config.aider.model ? `--model ${config.aider.model}` : null,

@@ -5,7 +5,7 @@ import cors from "cors";
 import config from "./config.js";
 import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
-import * as modulesPersistence from "./persistence/modules.js";
+import * as domainsPersistence from "./persistence/domains.js";
 import { detectAvailableAgents } from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 
@@ -98,67 +98,67 @@ app.post("/api/analysis/codebase/request", async (req, res) => {
 });
 
 /**
- * Get full codebase analysis with all modules
+ * Get full codebase analysis with all domains
  */
 app.get("/api/analysis/codebase/full", async (req, res) => {
   try {
     const analysis = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
 
-    if (!analysis || analysis.modules.length === 0) {
+    if (!analysis || !analysis.domains || analysis.domains.length === 0) {
       return res.status(404).json({
-        error: "No modules found",
+        error: "No domains found",
         message: "Run a codebase analysis first",
       });
     }
 
     res.json(analysis);
   } catch (error) {
-    console.error("Error reading modules:", error);
-    res.status(500).json({ error: "Failed to read modules" });
+    console.error("Error reading domains:", error);
+    res.status(500).json({ error: "Failed to read domains" });
   }
 });
 
 /**
- * Get a specific module's analysis
+ * Get a specific domain's analysis
  */
-app.get("/api/analysis/module/:id", async (req, res) => {
+app.get("/api/analysis/domain/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const analysis = await modulesPersistence.readModule(id);
+    const analysis = await domainsPersistence.readDomain(id);
 
     if (!analysis) {
       return res.status(404).json({
-        error: "Module analysis not found",
-        message: `No analysis found for module: ${id}`,
+        error: "Domain analysis not found",
+        message: `No analysis found for domain: ${id}`,
       });
     }
 
     res.json(analysis);
   } catch (error) {
-    console.error(`Error reading module ${req.params.id}:`, error);
-    res.status(500).json({ error: "Failed to read module analysis" });
+    console.error(`Error reading domain ${req.params.id}:`, error);
+    res.status(500).json({ error: "Failed to read domain analysis" });
   }
 });
 
 /**
- * Create a task to analyze a specific module
+ * Create a task to analyze a specific domain
  */
-app.post("/api/analysis/module/:id/analyze", async (req, res) => {
+app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
   try {
     const { id } = req.params;
-    const { moduleName, files } = req.body;
+    const { domainName, files } = req.body;
 
-    if (!moduleName || !files || !Array.isArray(files)) {
+    if (!domainName || !files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
-        message: "moduleName and files[] are required",
+        message: "domainName and files[] are required",
       });
     }
 
     const executeNow = req.body.executeNow !== false; // Default to true
     const task = await taskOrchestrator.createAnalyzeTask(
       id,
-      moduleName,
+      domainName,
       files,
       executeNow,
     );

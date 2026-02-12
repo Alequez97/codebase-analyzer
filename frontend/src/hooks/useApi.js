@@ -3,20 +3,19 @@ import { useAppStore } from "../store/useAppStore";
 import api from "../services/api";
 
 export function useFetchStatus() {
-  const { setStatus, setLoading, setError, autoSelectCodebase } = useAppStore();
+  const { setStatus, setLoading, setError } = useAppStore();
 
   const fetchStatus = useCallback(async () => {
     try {
       const response = await api.getStatus();
       setStatus(response.data);
-      autoSelectCodebase();
       setError(null);
       setLoading(false);
     } catch (err) {
       setError("Failed to connect to backend server");
       setLoading(false);
     }
-  }, [setStatus, setLoading, setError, autoSelectCodebase]);
+  }, [setStatus, setLoading, setError]);
 
   useEffect(() => {
     fetchStatus();
@@ -25,49 +24,40 @@ export function useFetchStatus() {
   return { refetch: fetchStatus };
 }
 
-export function useFetchModules() {
-  const { selectedCodebase, setModules } = useAppStore();
+export function useFetchAnalysis() {
+  const { setAnalysis } = useAppStore();
 
-  const fetchModules = useCallback(async () => {
-    if (!selectedCodebase) return;
-
+  const fetchAnalysis = useCallback(async () => {
     try {
-      const response = await api.getFullCodebaseAnalysis(selectedCodebase.id);
-      setModules(response.data.modules || []);
+      const response = await api.getFullCodebaseAnalysis();
+      setAnalysis(response.data);
     } catch (err) {
-      console.log("No modules found yet");
-      setModules([]);
+      console.log("No analysis found yet");
+      setAnalysis(null);
     }
-  }, [selectedCodebase, setModules]);
+  }, [setAnalysis]);
 
   useEffect(() => {
-    if (selectedCodebase) {
-      fetchModules();
-    }
-  }, [selectedCodebase, fetchModules]);
+    fetchAnalysis();
+  }, [fetchAnalysis]);
 
-  return { refetch: fetchModules };
+  return { refetch: fetchAnalysis };
 }
 
 export function useAnalyzeCodebase() {
-  const { selectedCodebase, setAnalyzingCodebase, setModules, setError } =
-    useAppStore();
+  const { setAnalyzingCodebase, setAnalysis, setError } = useAppStore();
 
   const startCodebaseAnalysis = useCallback(async () => {
-    if (!selectedCodebase) return;
-
     setAnalyzingCodebase(true);
     try {
-      await api.requestCodebaseAnalysis(selectedCodebase.id, true);
+      await api.requestCodebaseAnalysis(true);
 
       // Poll for results
       const pollInterval = setInterval(async () => {
         try {
-          const response = await api.getFullCodebaseAnalysis(
-            selectedCodebase.id,
-          );
-          if (response.data.modules && response.data.modules.length > 0) {
-            setModules(response.data.modules);
+          const response = await api.getFullCodebaseAnalysis();
+          if (response.data.domains && response.data.domains.length > 0) {
+            setAnalysis(response.data);
             setAnalyzingCodebase(false);
             clearInterval(pollInterval);
           }
@@ -85,7 +75,7 @@ export function useAnalyzeCodebase() {
       setError("Failed to start codebase analysis");
       setAnalyzingCodebase(false);
     }
-  }, [selectedCodebase, setAnalyzingCodebase, setModules, setError]);
+  }, [setAnalyzingCodebase, setAnalysis, setError]);
 
   return { startCodebaseAnalysis };
 }

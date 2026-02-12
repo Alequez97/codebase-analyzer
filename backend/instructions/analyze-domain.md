@@ -1,16 +1,16 @@
-# Analyze Module - Instruction for AI Agent
+# Analyze Domain - Instruction for AI Agent
 
 ## Objective
 
 **IMPORTANT**: Perform deep analysis and CREATE a structured JSON file with findings.
 
-Analyze a specific module to identify requirements, bugs, security issues, and generate actionable fixes.
+Analyze a specific domain to identify requirements, bugs, security issues, and generate actionable fixes.
 
 ## Target Information
 
 - **Codebase Path**: `{{CODEBASE_PATH}}`
-- **Module ID**: `{{MODULE_ID}}`
-- **Module Name**: `{{MODULE_NAME}}`
+- **Domain ID**: `{{DOMAIN_ID}}`
+- **Domain Name**: `{{DOMAIN_NAME}}`
 - **Files to Analyze**:
   {{#each FILES}}
   - {{this}}
@@ -18,9 +18,9 @@ Analyze a specific module to identify requirements, bugs, security issues, and g
 
 ## Task
 
-**IMPORTANT**: You MUST create the file `.code-analysis/modules/{{MODULE_ID}}.json` with the structure below. This is not optional.
+**IMPORTANT**: You MUST create the file `.code-analysis/domains/{{DOMAIN_ID}}.json` with the structure below. This is not optional.
 
-1. **Extract Requirements**: Identify what the module is supposed to do
+1. **Extract Requirements**: Identify what the domain is supposed to do
 2. **Find Bugs**: Detect logical errors, race conditions, edge cases
 3. **Security Analysis**: Find vulnerabilities, injection points, auth issues
 4. **Generate Fixes**: Propose code changes to fix identified issues
@@ -33,7 +33,7 @@ Analyze a specific module to identify requirements, bugs, security issues, and g
 - Identify missing tests
 - Look for code smells
 
-## Handling Large Modules
+## Handling Large Domains
 
 If you encounter token limits:
 
@@ -45,14 +45,14 @@ If you encounter token limits:
 
 ## Output Format
 
-**YOU MUST CREATE THIS FILE**: `.code-analysis/modules/{{MODULE_ID}}.json`
+**YOU MUST CREATE THIS FILE**: `.code-analysis/domains/{{DOMAIN_ID}}.json`
 
 JSON structure (write this exact structure to the file):
 
 ```json
 {
-  "moduleId": "{{MODULE_ID}}",
-  "moduleName": "{{MODULE_NAME}}",
+  "domainId": "{{DOMAIN_ID}}",
+  "domainName": "{{DOMAIN_NAME}}",
   "timestamp": "ISO 8601 timestamp",
 
   "requirements": [
@@ -134,4 +134,4 @@ JSON structure (write this exact structure to the file):
 
 ## ACTION REQUIRED
 
-Create the `.code-analysis/modules/{{MODULE_ID}}.json` file NOW with the structure above. Do not just describe what you would put in it - actually create the file with valid JSON containing your analysis findings.
+Create the `.code-analysis/domains/{{DOMAIN_ID}}.json` file NOW with the structure above. Do not just describe what you would put in it - actually create the file with valid JSON containing your analysis findings.

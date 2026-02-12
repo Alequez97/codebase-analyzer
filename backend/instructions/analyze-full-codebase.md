@@ -3,7 +3,7 @@
 ## Objective
 
 **Phase 1: Quick Analysis**
-Provide a short codebase recap and identify all major functional modules. Output a structured JSON file.
+Provide a short codebase recap and identify all major functional domains. Output a structured JSON file.
 
 ## Target Codebase
 
@@ -14,19 +14,19 @@ Path: `{{CODEBASE_PATH}}`
 **IMPORTANT**: You MUST create the file `.code-analysis/codebase-analysis.json` with the structure below. This is not optional.
 
 1. **Quick Codebase Recap**: Briefly understand what this project does (1-2 sentences)
-2. **Identify Modules**: Find major functional areas based on:
+2. **Identify Domains**: Find major functional areas based on:
    - Directory structure
    - File groupings
    - Controller/route patterns
    - Business logic boundaries
 3. **Suggest Next Steps**: In the summary field, suggest what should be analyzed next
 
-For each module, determine:
+For each domain, determine:
 
-- Module ID (kebab-case slug)
-- Module Name (human-readable)
+- Domain ID (kebab-case slug)
+- Domain Name (human-readable)
 - Business Purpose (what it does)
-- Related Files (main files that implement this module)
+- Related Files (main files that implement this domain)
 - Priority (P0=critical, P1=high, P2=medium, P3=low)
 - Test Coverage (none, partial, full)
 
@@ -40,11 +40,11 @@ JSON structure (write this exact structure to the file):
 {
   "timestamp": "ISO 8601 timestamp",
   "summary": "Brief 1-2 sentence project description and suggested next steps",
-  "modules": [
+  "domains": [
     {
-      "id": "module-id",
-      "name": "Module Name",
-      "businessPurpose": "What this module does",
+      "id": "domain-id",
+      "name": "Domain Name",
+      "businessPurpose": "What this domain does",
       "files": ["path/to/file1.js", "path/to/file2.js"],
       "priority": "P0|P1|P2|P3",
       "testCoverage": "none|partial|full",
@@ -57,7 +57,7 @@ JSON structure (write this exact structure to the file):
 ## Guidelines
 
 - **ACTION REQUIRED**: Create/edit the `.code-analysis/codebase-analysis.json` file with valid JSON
-- Focus on main business modules (not utilities or libraries)
+- Focus on main business domains (not utilities or libraries)
 - Group related files together
 - Be concise in businessPurpose (1-2 sentences max)
 - Use relative paths from codebase root
@@ -65,9 +65,9 @@ JSON structure (write this exact structure to the file):
 - Set hasAnalysis to false (it will be updated later)
 - Add a helpful summary suggesting what to analyze first
 - If the codebase is very large, use your repository map to understand structure
-- Identify 5-10 core modules maximum for initial analysis
+- Identify 5-10 core domains maximum for initial analysis
 
-## Example Modules
+## Example Domains
 
 - user-authentication
 - payment-processing
@@ -81,6 +81,6 @@ Write the complete JSON content to `.code-analysis/codebase-analysis.json` file 
 
 - Current ISO 8601 timestamp
 - Summary with project description and next steps
-- Array of 5-10 discovered modules
+- Array of 5-10 discovered domains
 
 Do not ask for confirmation. Do not wait for more input. Create the file immediately and complete this task.

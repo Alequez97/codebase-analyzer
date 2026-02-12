@@ -12,15 +12,17 @@ import { Alert } from "../ui/alert";
 import { useAppStore } from "../../store/useAppStore";
 
 export function ModulesSection() {
-  const { status, modules, analyzingCodebase, startCodebaseAnalysis } =
+  const { status, analysis, analyzingCodebase, startCodebaseAnalysis } =
     useAppStore();
+
+  const domains = analysis?.domains || [];
 
   return (
     <Card.Root>
       <Card.Header>
         <HStack justify="space-between">
           <Heading size="lg">
-            Modules{status?.target ? ` - ${status.target.name}` : ""}
+            Code Domains{status?.target ? ` - ${status.target.name}` : ""}
           </Heading>
           <Button
             colorPalette="blue"
@@ -28,7 +30,7 @@ export function ModulesSection() {
             loading={analyzingCodebase}
             loadingText="Analyzing..."
           >
-            {modules.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
+            {domains.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
           </Button>
         </HStack>
       </Card.Header>
@@ -43,56 +45,63 @@ export function ModulesSection() {
           </Alert.Root>
         )}
 
-        {!analyzingCodebase && modules.length === 0 && (
+        {!analyzingCodebase && domains.length === 0 && (
           <Box textAlign="center" py={8}>
             <Text color="gray.500" fontSize="lg">
-              No modules found. Click "Analyze Codebase" to start analysis.
+              No domains found. Click "Analyze Codebase" to start analysis.
             </Text>
           </Box>
         )}
 
-        {!analyzingCodebase && modules.length > 0 && (
+        {!analyzingCodebase && domains.length > 0 && (
           <VStack align="stretch" gap={4}>
+            {analysis?.summary && (
+              <Box p={3} bg="blue.50" borderRadius="md">
+                <Text fontSize="sm" color="gray.700">
+                  {analysis.summary}
+                </Text>
+              </Box>
+            )}
             <Text color="gray.600">
-              Found {modules.length} module{modules.length !== 1 ? "s" : ""}
+              Found {domains.length} domain{domains.length !== 1 ? "s" : ""}
             </Text>
-            {modules.map((module) => (
-              <Card.Root key={module.id} variant="outline">
+            {domains.map((domain) => (
+              <Card.Root key={domain.id} variant="outline">
                 <Card.Body>
                   <HStack justify="space-between">
                     <Box flex={1}>
                       <HStack mb={2}>
-                        <Heading size="md">{module.name}</Heading>
+                        <Heading size="md">{domain.name}</Heading>
                         <Badge
                           colorPalette={
-                            module.priority === "P0"
+                            domain.priority === "P0"
                               ? "red"
-                              : module.priority === "P1"
+                              : domain.priority === "P1"
                                 ? "orange"
-                                : module.priority === "P2"
+                                : domain.priority === "P2"
                                   ? "yellow"
                                   : "gray"
                           }
                         >
-                          {module.priority}
+                          {domain.priority}
                         </Badge>
-                        {module.hasAnalysis && (
+                        {domain.hasAnalysis && (
                           <Badge colorPalette="green">Analyzed</Badge>
                         )}
                       </HStack>
                       <Text color="gray.600" mb={2}>
-                        {module.businessPurpose}
+                        {domain.businessPurpose}
                       </Text>
                       <Text fontSize="sm" color="gray.500">
-                        {module.files?.length || 0} file
-                        {module.files?.length !== 1 ? "s" : ""}
+                        {domain.files?.length || 0} file
+                        {domain.files?.length !== 1 ? "s" : ""}
                       </Text>
                     </Box>
                     <Button
-                      colorPalette={module.hasAnalysis ? "green" : "blue"}
-                      variant={module.hasAnalysis ? "outline" : "solid"}
+                      colorPalette={domain.hasAnalysis ? "green" : "blue"}
+                      variant={domain.hasAnalysis ? "outline" : "solid"}
                     >
-                      {module.hasAnalysis ? "View Analysis" : "Analyze"}
+                      {domain.hasAnalysis ? "View Analysis" : "Analyze"}
                     </Button>
                   </HStack>
                 </Card.Body>

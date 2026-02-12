@@ -45,16 +45,16 @@ export async function createFullCodebaseAnalysisTask(executeNow = false) {
 }
 
 /**
- * Create a module analysis task
- * @param {string} moduleId - The module ID
- * @param {string} moduleName - The module name
- * @param {string[]} files - Files in the module
+ * Create a domain analysis task
+ * @param {string} domainId - The domain ID
+ * @param {string} domainName - The domain name
+ * @param {string[]} files - Files in the domain
  * @param {boolean} executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
 export async function createAnalyzeTask(
-  moduleId,
-  moduleName,
+  domainId,
+  domainName,
   files,
   executeNow = false,
 ) {
@@ -64,13 +64,13 @@ export async function createAnalyzeTask(
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
-      moduleId,
-      moduleName,
+      domainId,
+      domainName,
       files,
       targetDirectory: config.target.directory,
     },
-    instructionFile: "backend/instructions/analyze-module.md",
-    outputFile: `.code-analysis/modules/${moduleId}.json`,
+    instructionFile: "backend/instructions/analyze-domain.md",
+    outputFile: `.code-analysis/domains/${domainId}.json`,
   };
 
   await tasksPersistence.writeTask(task);
