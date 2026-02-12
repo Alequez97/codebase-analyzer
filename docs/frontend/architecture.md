@@ -67,18 +67,18 @@ GET /api/modules
 Display module cards
 ```
 
-### Scan Flow
+### Codebase Analysis Flow
 
 ```
-User clicks "Scan Codebase"
+User clicks "Analyze Codebase"
     ↓
-api.requestScan()
+api.requestCodebaseAnalysis()
     ↓
-POST /api/scan/request
+POST /api/analysis/codebase/request
     ↓
-Show "Scanning..." indicator
+Show "Analyzing..." indicator
     ↓
-Poll GET /api/scan until data appears
+Poll GET /api/analysis/codebase until data appears
     ↓
 Refresh module list
 ```

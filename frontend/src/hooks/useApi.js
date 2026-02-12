@@ -32,7 +32,7 @@ export function useFetchModules() {
     if (!selectedCodebase) return;
 
     try {
-      const response = await api.getModules(selectedCodebase.id);
+      const response = await api.getFullCodebaseAnalysis(selectedCodebase.id);
       setModules(response.data.modules || []);
     } catch (err) {
       console.log("No modules found yet");
@@ -63,7 +63,9 @@ export function useAnalyzeCodebase() {
       // Poll for results
       const pollInterval = setInterval(async () => {
         try {
-          const response = await api.getModules(selectedCodebase.id);
+          const response = await api.getFullCodebaseAnalysis(
+            selectedCodebase.id,
+          );
           if (response.data.modules && response.data.modules.length > 0) {
             setModules(response.data.modules);
             setAnalyzingCodebase(false);

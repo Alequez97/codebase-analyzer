@@ -54,10 +54,10 @@ export const useAppStore = create((set, get) => ({
 
       if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
         set({ analyzingCodebase: false });
-        get().fetchModules();
+        get().fetchCodebaseAnalysis();
       } else if (type === TASK_TYPES.ANALYZE) {
         console.log(`Analysis completed for module: ${moduleId}`);
-        get().fetchModules();
+        get().fetchCodebaseAnalysis();
       }
     });
   },
@@ -72,15 +72,15 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
-  fetchModules: async () => {
+  fetchCodebaseAnalysis: async () => {
     try {
-      const response = await api.getModules();
+      const response = await api.getFullCodebaseAnalysis();
       set({
         modules: response.data.modules || [],
         codebaseAnalysis: response.data,
       });
     } catch (err) {
-      console.log("No modules found yet");
+      console.log("No codebase analysis found yet");
       set({ modules: [], codebaseAnalysis: null });
     }
   },

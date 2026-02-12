@@ -90,7 +90,7 @@ AI-powered codebase analysis tool with structured workflows and one-click action
 #### Features
 
 - [ ] Auto-refresh when files change (polling or websocket)
-- [ ] Click "Scan Codebase" → creates task → shows instructions
+- [ ] Click "Analyze Codebase" → creates task → shows instructions
 - [ ] Click "Analyze Module" → creates task → shows instructions
 - [ ] Click "Fix" on issue → calls API → applies fix → shows diff
 - [ ] File watcher notifications
@@ -99,7 +99,7 @@ AI-powered codebase analysis tool with structured workflows and one-click action
 
 Templates that generate the JSON files:
 
-- [ ] `/prompts/scan-codebase.md` - Generate scan-results.json
+- [ ] `/prompts/analyze-full-codebase.md` - Generate codebase-analysis.json
 - [ ] `/prompts/analyze-module.md` - Generate modules/{id}.json
 - [ ] `/prompts/generate-fix.md` - Generate fix for specific issue
 
@@ -107,13 +107,13 @@ Templates that generate the JSON files:
 
 For development without running Claude Code:
 
-- [ ] `/examples/scan-results.example.json`
+- [ ] `/examples/codebase-analysis.example.json`
 - [ ] `/examples/module-analysis.example.json`
 - [ ] Instructions to copy examples for testing
 
 ## JSON Contracts
 
-### `scan-results.json`
+### `codebase-analysis.json`
 
 ```javascript
 {
@@ -193,25 +193,25 @@ For development without running Claude Code:
 ```javascript
 {
   "id": "unique-task-id",
-  "type": "scan|analyze-module|generate-fix",
+  "type": "codebase-analysis|analyze-module|generate-fix",
   "status": "pending",
   "createdAt": "...",
   "params": {
     // Type-specific params
     "moduleId": "..." // for analyze-module
   },
-  "promptFile": "prompts/scan-codebase.md", // Which prompt to use
-  "outputFile": "analysis-output/scan-results.json" // Where to write
+  "promptFile": "prompts/analyze-full-codebase.md", // Which prompt to use
+  "outputFile": "analysis-output/codebase-analysis.json" // Where to write
 }
 ```
 
-## Workflow: Scan Codebase
+## Workflow: Analyze Full Codebase
 
-1. User clicks "Scan Codebase" in dashboard
-2. Frontend → `POST /api/scan/request`
-3. Backend creates `tasks/pending/scan-{timestamp}.json`
-4. Backend returns instructions: "Open prompts/scan-codebase.md in Claude Code"
-5. File watcher detects `scan-results.json` created
+1. User clicks "Analyze Codebase" in dashboard
+2. Frontend → `POST /api/analysis/codebase/request`
+3. Backend creates `tasks/pending/analyze-codebase-{timestamp}.json`
+4. Backend returns instructions: "Open prompts/analyze-full-codebase.md in Claude Code"
+5. File watcher detects `codebase-analysis.json` created
 6. Backend moves task to `tasks/completed/`
 7. Frontend auto-refreshes → shows modules
 

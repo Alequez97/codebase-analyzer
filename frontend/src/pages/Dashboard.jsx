@@ -14,7 +14,7 @@ export default function Dashboard() {
     error,
     status,
     fetchStatus,
-    fetchModules,
+    fetchCodebaseAnalysis,
     initSocket,
     socketConnected,
   } = useAppStore();
@@ -27,8 +27,8 @@ export default function Dashboard() {
   // Fetch initial data
   useEffect(() => {
     fetchStatus();
-    fetchModules();
-  }, [fetchStatus, fetchModules]);
+    fetchCodebaseAnalysis();
+  }, [fetchStatus, fetchCodebaseAnalysis]);
 
   if (loading) {
     return <LoadingState />;

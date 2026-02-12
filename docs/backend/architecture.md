@@ -113,7 +113,7 @@ All endpoints follow REST conventions:
 
 - `GET /api/status`: Health check + available agents
 - `GET /api/analysis/codebase`: Get codebase analysis results
-- `POST /api/scan/request`: Create scan task
+- `POST /api/analysis/codebase/request`: Create codebase analysis task
 - `GET /api/modules`: List modules
 - `GET /api/modules/:id`: Get module analysis
 - `POST /api/modules/:id/analyze`: Create analysis task

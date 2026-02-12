@@ -14,7 +14,7 @@ export default {
     api.post("/analysis/codebase/request", { executeNow }),
 
   // Full Codebase Analysis - Full results and modules
-  getModules: () => api.get("/analysis/codebase/full"),
+  getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
   getModule: (id) => api.get(`/analysis/module/${id}`),
   analyzeModule: (id, moduleName, files, executeNow = true) =>
     api.post(`/analysis/module/${id}/analyze`, {
