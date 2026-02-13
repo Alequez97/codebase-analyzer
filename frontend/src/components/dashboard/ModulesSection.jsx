@@ -12,8 +12,14 @@ import { Alert } from "../ui/alert";
 import { useAppStore } from "../../store/useAppStore";
 
 export function ModulesSection() {
-  const { status, analysis, analyzingCodebase, startCodebaseAnalysis } =
-    useAppStore();
+  const {
+    status,
+    analysis,
+    analyzingCodebase,
+    startCodebaseAnalysis,
+    showLogs,
+    toggleLogs,
+  } = useAppStore();
 
   const domains = analysis?.domains || [];
 
@@ -24,14 +30,24 @@ export function ModulesSection() {
           <Heading size="lg">
             Code Domains{status?.target ? ` - ${status.target.name}` : ""}
           </Heading>
-          <Button
-            colorPalette="blue"
-            onClick={startCodebaseAnalysis}
-            loading={analyzingCodebase}
-            loadingText="Analyzing..."
-          >
-            {domains.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
-          </Button>
+          <HStack gap={2}>
+            <Button
+              variant="outline"
+              colorPalette="gray"
+              onClick={toggleLogs}
+              size="sm"
+            >
+              {showLogs ? "Hide Logs" : "Show Logs"}
+            </Button>
+            <Button
+              colorPalette="blue"
+              onClick={startCodebaseAnalysis}
+              loading={analyzingCodebase}
+              loadingText="Analyzing..."
+            >
+              {domains.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
+            </Button>
+          </HStack>
         </HStack>
       </Card.Header>
       <Card.Body>

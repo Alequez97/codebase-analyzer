@@ -18,6 +18,7 @@ export default function Dashboard() {
     fetchCodebaseAnalysis,
     initSocket,
     socketConnected,
+    showLogs,
   } = useAppStore();
 
   // Initialize socket connection
@@ -52,7 +53,7 @@ export default function Dashboard() {
           <DashboardHeader />
           <ConfigurationPanel />
           <ModulesSection />
-          <TaskLogs />
+          {showLogs && <TaskLogs />}
         </VStack>
       </Container>
     </Box>

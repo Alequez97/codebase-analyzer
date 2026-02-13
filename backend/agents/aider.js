@@ -98,6 +98,8 @@ export async function execute(task) {
     "aider",
     "--yes-always", // Auto-approve all changes
     "--no-auto-commits", // Don't auto-commit changes (analysis only)
+    "--exit", // Exit after processing message file
+    "--no-suggest-shell-commands", // Don't suggest additional shell commands
     "--map-refresh auto", // Auto-refresh repo map
     "--map-tokens 1024", // Use repo map to manage large codebases
     config.aider.model ? `--model ${config.aider.model}` : null,

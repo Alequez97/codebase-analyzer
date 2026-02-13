@@ -16,6 +16,7 @@ export const useAppStore = create((set, get) => ({
   error: null,
   socket: null,
   socketConnected: false,
+  showLogs: false,
 
   // Actions
   setStatus: (status) => set({ status }),
@@ -31,6 +32,8 @@ export const useAppStore = create((set, get) => ({
   setError: (error) => set({ error }),
 
   clearError: () => set({ error: null }),
+
+  toggleLogs: () => set((state) => ({ showLogs: !state.showLogs })),
 
   // Initialize socket connection and listeners
   initSocket: () => {
@@ -143,5 +146,6 @@ export const useAppStore = create((set, get) => ({
       loading: true,
       error: null,
       socketConnected: false,
+      showLogs: false,
     }),
 }));
