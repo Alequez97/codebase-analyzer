@@ -11,6 +11,7 @@ export async function readCodebaseAnalysis() {
   try {
     const filePath = path.join(
       config.paths.targetAnalysis,
+      "analysis",
       "codebase-analysis.json",
     );
     return await tryReadJsonFile(filePath, "codebase-analysis.json");
@@ -29,6 +30,7 @@ export async function readCodebaseAnalysis() {
 export async function writeCodebaseAnalysis(data) {
   const filePath = path.join(
     config.paths.targetAnalysis,
+    "analysis",
     "codebase-analysis.json",
   );
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");

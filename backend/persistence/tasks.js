@@ -9,34 +9,35 @@ import { tryReadJsonFile } from "./utils.js";
  * @returns {Promise<Object|null>} Task object or null if not found
  */
 export async function readTask(taskId) {
-  try {
-    const pendingPath = path.join(
+  const locations = [
+    path.join(
       config.paths.targetAnalysis,
       "tasks",
       "pending",
       `${taskId}.json`,
-    );
-    return await tryReadJsonFile(pendingPath, `task ${taskId}`);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      // Try completed
-      try {
-        const completedPath = path.join(
-          config.paths.targetAnalysis,
-          "tasks",
-          "completed",
-          `${taskId}.json`,
-        );
-        return await tryReadJsonFile(completedPath, `task ${taskId}`);
-      } catch (err) {
-        if (err.code === "ENOENT") {
-          return null;
-        }
-        throw err;
+    ),
+    path.join(
+      config.paths.targetAnalysis,
+      "tasks",
+      "completed",
+      `${taskId}.json`,
+    ),
+  ];
+
+  for (const filePath of locations) {
+    try {
+      const task = await tryReadJsonFile(filePath, `task ${taskId}`);
+      if (task) {
+        return task;
+      }
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
       }
     }
-    throw error;
   }
+
+  return null;
 }
 
 /**
@@ -112,6 +113,7 @@ export async function moveToCompleted(taskId) {
 
 /**
  * Delete a task from pending or completed
+ * Also deletes associated log file if it exists
  * @param {string} taskId - The task ID
  */
 export async function deleteTask(taskId) {
@@ -128,6 +130,36 @@ export async function deleteTask(taskId) {
     `${taskId}.json`,
   );
 
+  // First read the task to get log file path
+  let task = null;
+  try {
+    const content = await fs.readFile(pendingPath, "utf-8");
+    task = JSON.parse(content);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      try {
+        const content = await fs.readFile(completedPath, "utf-8");
+        task = JSON.parse(content);
+      } catch (err) {
+        // Task doesn't exist anywhere
+      }
+    }
+  }
+
+  // Delete log file if it exists
+  if (task && task.logFile) {
+    const logPath = path.join(config.paths.targetAnalysis, task.logFile);
+    try {
+      await fs.unlink(logPath);
+      console.log(`Deleted log file: ${task.logFile}`);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        console.error(`Failed to delete log file ${task.logFile}:`, error);
+      }
+    }
+  }
+
+  // Delete task file
   try {
     await fs.unlink(pendingPath);
   } catch (error) {

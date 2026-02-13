@@ -86,6 +86,7 @@ const config = {
 
 // Ensure required directories exist
 const dirs = [
+  path.join(config.paths.targetAnalysis, "analysis"),
   path.join(config.paths.targetAnalysis, "domains"),
   path.join(config.paths.targetAnalysis, "tasks"),
   path.join(config.paths.targetAnalysis, "tasks", "pending"),

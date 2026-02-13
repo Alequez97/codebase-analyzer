@@ -1,5 +1,11 @@
 # Analyze Domain - Instruction for AI Agent
 
+## CRITICAL INSTRUCTIONS
+
+**DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. COMPLETE THE TASK AND EXIT.**
+
+Your ONLY job is to write `.code-analysis/domains/{{DOMAIN_ID}}.json` and exit.
+
 ## Objective
 
 **IMPORTANT**: Perform deep analysis and CREATE a structured JSON file with findings.
@@ -134,4 +140,21 @@ JSON structure (write this exact structure to the file):
 
 ## ACTION REQUIRED
 
-Create the `.code-analysis/domains/{{DOMAIN_ID}}.json` file NOW with the structure above. Do not just describe what you would put in it - actually create the file with valid JSON containing your analysis findings.
+**YOUR TASK**: Create the file `.code-analysis/domains/{{DOMAIN_ID}}.json` with the complete analysis.
+
+**CRITICAL REQUIREMENTS**:
+
+1. You MUST create/write the file `.code-analysis/domains/{{DOMAIN_ID}}.json`
+2. The file MUST contain valid JSON with the complete structure shown above
+3. Do NOT just describe what should be done - ACTUALLY CREATE THE FILE
+4. Do NOT ask questions or wait for confirmation - WRITE THE FILE NOW
+5. Perform thorough analysis and fill in all sections (requirements, bugs, securityIssues, fixes, recommendations)
+
+**Example file path**: `.code-analysis/domains/{{DOMAIN_ID}}.json`
+
+**What to include**:
+
+- domainId: "{{DOMAIN_ID}}"
+- domainName: "{{DOMAIN_NAME}}"
+- timestamp: current ISO 8601 timestamp
+- Complete analysis with requirements, bugs, security issues, fixes, and recommendations

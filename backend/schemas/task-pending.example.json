@@ -3,6 +3,7 @@
   "type": "scan",
   "status": "pending",
   "createdAt": "2026-02-11T14:30:00Z",
+  "logFile": null,
   "params": {},
   "promptFile": "prompts/scan-codebase.md",
   "outputFile": "analysis-output/scan-results.json",

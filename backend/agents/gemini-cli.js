@@ -75,6 +75,13 @@ export async function execute(task) {
   const logFile = path.join(logDir, `${task.id}.log`);
   const logStream = await fs.open(logFile, "w");
 
+  // Update task with log file path (relative to .code-analysis/)
+  task.logFile = `logs/${task.id}.log`;
+
+  // Import task persistence to save logFile reference
+  const { writeTask } = await import("../persistence/tasks.js");
+  await writeTask(task);
+
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";

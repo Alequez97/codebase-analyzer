@@ -1,4 +1,6 @@
 {
+  "taskId": "scan-20260211-143000",
+  "logFile": "logs/scan-20260211-143000.log",
   "timestamp": "2026-02-11T14:30:00Z",
   "summary": "Full-stack application managing aviation operations including user authentication, aircraft tracking, and payment processing. Recommend analyzing user-authentication domain first due to P0 priority and lack of test coverage.",
   "domains": [

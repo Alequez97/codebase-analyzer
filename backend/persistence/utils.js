@@ -14,7 +14,7 @@ export async function tryReadJsonFile(filePath, identifier = "file") {
 
     // Handle empty files
     if (!content || content.trim() === "") {
-      console.log(`File ${identifier} is empty`);
+      console.log(`File ${identifier} is empty (path: ${filePath})`);
       return null;
     }
 
@@ -22,7 +22,10 @@ export async function tryReadJsonFile(filePath, identifier = "file") {
   } catch (error) {
     // Handle JSON parse errors (malformed files)
     if (error instanceof SyntaxError) {
-      console.error(`Invalid JSON in ${identifier}:`, error.message);
+      console.error(
+        `Invalid JSON in ${identifier} (path: ${filePath}):`,
+        error.message,
+      );
       return null;
     }
 

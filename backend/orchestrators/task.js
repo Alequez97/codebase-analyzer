@@ -30,7 +30,7 @@ export async function createFullCodebaseAnalysisTask(executeNow, agent) {
       targetDirectory: config.target.directory,
     },
     instructionFile: "backend/instructions/analyze-full-codebase.md",
-    outputFile: ".code-analysis/codebase-analysis.json",
+    outputFile: ".code-analysis/analysis/codebase-analysis.json",
   };
 
   await tasksPersistence.writeTask(task);
@@ -94,6 +94,15 @@ export async function createAnalyzeTask(
  */
 export async function getPendingTasks() {
   return tasksPersistence.listPending();
+}
+
+/**
+ * Get a specific task by ID
+ * @param {string} taskId - The task ID
+ * @returns {Promise<Object|null>} Task object or null if not found
+ */
+export async function getTask(taskId) {
+  return tasksPersistence.readTask(taskId);
 }
 
 /**

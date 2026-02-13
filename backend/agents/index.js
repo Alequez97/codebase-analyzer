@@ -1,7 +1,11 @@
 import * as aider from "./aider.js";
 import * as geminiCli from "./gemini-cli.js";
 import * as tasksPersistence from "../persistence/tasks.js";
+import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
+import * as domainsPersistence from "../persistence/domains.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import path from "path";
+import fs from "fs/promises";
 
 const AGENTS = {
   aider: {
@@ -17,6 +21,88 @@ const AGENTS = {
     module: geminiCli,
   },
 };
+
+/**
+ * Post-process analysis output files to add task metadata
+ * @param {Object} task - The task object
+ */
+async function enhanceOutputWithTaskMetadata(task) {
+  if (!task.outputFile) {
+    return;
+  }
+
+  try {
+    // Read the output file that was just created by the agent
+    const outputPath = task.outputFile;
+    let content;
+    let analysis;
+
+    try {
+      content = await fs.readFile(outputPath, "utf-8");
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        console.log(
+          `Output file ${outputPath} does not exist, creating minimal metadata file`,
+        );
+        content = "";
+      } else {
+        throw error;
+      }
+    }
+
+    // Handle empty or invalid files - create minimal structure with taskId
+    if (!content || content.trim() === "") {
+      console.log(
+        `Output file ${outputPath} is empty, creating minimal metadata structure`,
+      );
+      analysis = {
+        taskId: task.id,
+        logFile: task.logFile || null,
+        status: "incomplete",
+        message: "Agent did not write analysis output. Check logs for details.",
+        analyzedAt: new Date().toISOString(),
+      };
+    } else {
+      try {
+        analysis = JSON.parse(content);
+      } catch (parseError) {
+        console.log(
+          `Output file ${outputPath} contains invalid JSON, creating minimal metadata structure`,
+        );
+        analysis = {
+          taskId: task.id,
+          logFile: task.logFile || null,
+          status: "invalid",
+          message: "Agent wrote invalid JSON output. Check logs for details.",
+          rawContent: content.substring(0, 500), // Include first 500 chars for debugging
+          analyzedAt: new Date().toISOString(),
+        };
+      }
+    }
+
+    // Add task metadata to the analysis
+    analysis.taskId = task.id;
+    analysis.logFile = task.logFile || null;
+
+    // Add analyzedAt if not present
+    if (!analysis.analyzedAt && !analysis.timestamp) {
+      analysis.analyzedAt = new Date().toISOString();
+    }
+
+    // Write back the enhanced analysis
+    await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
+
+    console.log(
+      `Enhanced ${outputPath} with task metadata (taskId: ${task.id})`,
+    );
+  } catch (error) {
+    // Log error but don't fail the task
+    console.error(
+      `Failed to enhance output with task metadata:`,
+      error.message,
+    );
+  }
+}
 
 /**
  * Get available agent based on config and detection
@@ -58,6 +144,9 @@ export async function executeTask(taskId) {
   const result = await agent.execute(task);
 
   if (result.success) {
+    // Enhance output file with task metadata (taskId, logFile, timestamp)
+    await enhanceOutputWithTaskMetadata(task);
+
     // Move task to completed
     await tasksPersistence.moveToCompleted(taskId);
 

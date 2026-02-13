@@ -97,11 +97,11 @@ export async function execute(task) {
   const commandParts = [
     "aider",
     "--yes-always", // Auto-approve all changes
-    "--no-auto-commits", // Don't auto-commit changes (analysis only)
     "--exit", // Exit after processing message file
     "--no-suggest-shell-commands", // Don't suggest additional shell commands
+    "--edit-format whole", // Use whole-file format (better for creating new files)
     "--map-refresh auto", // Auto-refresh repo map
-    "--map-tokens 1024", // Use repo map to manage large codebases
+    "--map-tokens 4096", // Use repo map to manage large codebases
     config.aider.model ? `--model ${config.aider.model}` : null,
     modelApiKey ? modelApiKey : null,
     config.aider.extraArgs || null,
@@ -117,7 +117,17 @@ export async function execute(task) {
   const logDir = path.join(config.paths.targetAnalysis, "logs");
   await fs.mkdir(logDir, { recursive: true });
   const logFile = path.join(logDir, `${task.id}.log`);
-  const logStream = await fs.open(logFile, "w");
+
+  // Use createWriteStream for proper streaming writes
+  const fsSync = await import("fs");
+  const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
+
+  // Update task with log file path (relative to .code-analysis/)
+  task.logFile = `logs/${task.id}.log`;
+
+  // Import task persistence to save logFile reference
+  const { writeTask } = await import("../persistence/tasks.js");
+  await writeTask(task);
 
   return new Promise((resolve) => {
     let stdout = "";
@@ -173,7 +183,11 @@ export async function execute(task) {
         });
 
         aiderProcess.on("close", async (code) => {
-          await logStream.close();
+          // End the write stream and wait for it to finish
+          logStream.end();
+          await new Promise((resolveStream) =>
+            logStream.on("finish", resolveStream),
+          );
 
           const success = code === 0;
 
@@ -198,7 +212,11 @@ export async function execute(task) {
         });
 
         aiderProcess.on("error", async (error) => {
-          await logStream.close();
+          // Close the log stream
+          logStream.end();
+          await new Promise((resolveStream) =>
+            logStream.on("finish", resolveStream),
+          );
 
           console.error(`Aider execution error for task ${task.id}:`, error);
 
@@ -213,7 +231,12 @@ export async function execute(task) {
         });
       })
       .catch(async (err) => {
-        await logStream.close();
+        // Close the log stream even on import failure
+        logStream.end();
+        await new Promise((resolveStream) =>
+          logStream.on("finish", resolveStream),
+        );
+
         console.error("Failed to import io:", err);
 
         resolve({

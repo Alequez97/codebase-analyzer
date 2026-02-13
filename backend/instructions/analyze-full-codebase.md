@@ -1,14 +1,20 @@
 # Codebase Analysis Task
 
+## CRITICAL INSTRUCTIONS
+
+**DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. WRITE THE FILE AND EXIT.**
+
+You MUST use the /add command to add the output file, then write the content, then exit.
+
 ## DIRECTIVE
 
-Create the file `.code-analysis/codebase-analysis.json` with domain discovery results.
+Write the complete JSON content to `.code-analysis/analysis/codebase-analysis.json`.
 
 Use your repository map to identify major functional domains in the codebase.
 
 ## File to Create
 
-`.code-analysis/codebase-analysis.json`
+`.code-analysis/analysis/codebase-analysis.json`
 
 ## JSON Structure Required
 
@@ -43,4 +49,17 @@ Use your repository map to identify major functional domains in the codebase.
 
 ## Execute
 
-Write valid JSON to `.code-analysis/codebase-analysis.json` with the structure above. Create the file if it doesn't exist.
+**YOUR TASK**: Create the file `.code-analysis/analysis/codebase-analysis.json` with the complete JSON structure.
+
+**CRITICAL REQUIREMENTS**:
+
+1. You MUST create/write the file `.code-analysis/analysis/codebase-analysis.json`
+2. The file MUST contain valid JSON with the structure shown above
+3. Do NOT just describe what should be done - ACTUALLY CREATE THE FILE
+4. Do NOT ask questions or wait for confirmation - WRITE THE FILE NOW
+5. Fill in the structure with your actual analysis of the codebase
+
+**Example command you should execute**:
+
+- Create the file with the exact path: `.code-analysis/analysis/codebase-analysis.json`
+- Write the complete JSON structure with your analysis

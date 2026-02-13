@@ -358,6 +358,8 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Code should be ready to ship at any moment
 - Avoid hardcoded fallback defaults in user-facing behavior/messages when runtime config should be authoritative
 - Avoid default function parameters for runtime request values; normalize and validate inside orchestrator/service function bodies
+- Never use nested try-catch blocks for control flow; use loops with early returns instead
+- Don't migrate or maintain backward compatibility - just implement the new structure cleanly
 
 ## Roadmap
 

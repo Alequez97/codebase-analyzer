@@ -2,6 +2,8 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import fs from "fs/promises";
+import path from "path";
 import config from "./config.js";
 import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
@@ -215,6 +217,55 @@ app.get("/api/tasks/pending", async (req, res) => {
   } catch (error) {
     console.error("Error reading pending tasks:", error);
     res.status(500).json({ error: "Failed to read pending tasks" });
+  }
+});
+
+/**
+ * Get task logs by task ID
+ */
+app.get("/api/tasks/:id/logs", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const task = await taskOrchestrator.getTask(id);
+
+    if (!task) {
+      return res.status(404).json({
+        error: "Task not found",
+        message: `No task found with ID: ${id}`,
+      });
+    }
+
+    if (!task.logFile) {
+      return res.status(404).json({
+        error: "No log file available",
+        message: "This task has not been executed yet or does not have logs",
+      });
+    }
+
+    // Read log file
+    const logPath = path.join(config.paths.targetAnalysis, task.logFile);
+
+    try {
+      const logContent = await fs.readFile(logPath, "utf-8");
+      res.json({
+        taskId: id,
+        logFile: task.logFile,
+        content: logContent,
+        taskType: task.type,
+        taskStatus: task.status,
+      });
+    } catch (fileError) {
+      if (fileError.code === "ENOENT") {
+        return res.status(404).json({
+          error: "Log file not found",
+          message: `Log file exists in task metadata but file not found: ${task.logFile}`,
+        });
+      }
+      throw fileError;
+    }
+  } catch (error) {
+    console.error(`Error reading task logs for ${req.params.id}:`, error);
+    res.status(500).json({ error: "Failed to read task logs" });
   }
 });
 
