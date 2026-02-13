@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import * as logger from "../utils/logger.js";
 
 /**
  * Read a specific module analysis
@@ -18,7 +19,9 @@ export async function readModule(moduleId) {
 
     // Handle empty files
     if (!content || content.trim() === "") {
-      console.log(`Module ${moduleId} analysis file is empty`);
+      logger.debug(`Module ${moduleId} analysis file is empty`, {
+        component: "Persistence",
+      });
       return null;
     }
 
@@ -30,7 +33,10 @@ export async function readModule(moduleId) {
 
     // Handle JSON parse errors (malformed files)
     if (error instanceof SyntaxError) {
-      console.error(`Invalid JSON in module ${moduleId}:`, error.message);
+      logger.error(`Invalid JSON in module ${moduleId}`, {
+        error: error.message,
+        component: "Persistence",
+      });
       return null;
     }
 

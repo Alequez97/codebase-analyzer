@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import * as logger from "../utils/logger.js";
 
 const execAsync = promisify(exec);
 const GEMINI_COMMAND = process.platform === "win32" ? "gemini.cmd" : "gemini";
@@ -49,7 +50,7 @@ export async function detect() {
   const available = await detectCommand(GEMINI_COMMAND);
 
   if (!available) {
-    console.log("Gemini CLI not detected");
+    logger.debug("Gemini CLI not detected", { component: "GeminiCLI" });
   }
 
   return available;

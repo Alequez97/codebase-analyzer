@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
 import { executeTask } from "../agents/index.js";
+import * as logger from "../utils/logger.js";
 
 /**
  * Generate a unique task ID
@@ -38,7 +39,10 @@ export async function createFullCodebaseAnalysisTask(executeNow, agent) {
   if (executeNow) {
     // Trigger agent execution asynchronously
     executeTask(task.id).catch((err) => {
-      console.error(`Failed to execute task ${task.id}:`, err);
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
     });
   }
 
@@ -81,7 +85,10 @@ export async function createAnalyzeTask(
   if (executeNow) {
     // Trigger agent execution asynchronously
     executeTask(task.id).catch((err) => {
-      console.error(`Failed to execute task ${task.id}:`, err);
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
     });
   }
 

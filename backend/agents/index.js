@@ -6,6 +6,7 @@ import * as domainsPersistence from "../persistence/domains.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import path from "path";
 import fs from "fs/promises";
+import * as logger from "../utils/logger.js";
 
 const AGENTS = {
   aider: {
@@ -41,8 +42,9 @@ async function enhanceOutputWithTaskMetadata(task) {
       content = await fs.readFile(outputPath, "utf-8");
     } catch (error) {
       if (error.code === "ENOENT") {
-        console.log(
+        logger.debug(
           `Output file ${outputPath} does not exist, creating minimal metadata file`,
+          { component: "AgentOrchestrator", taskId: task.id },
         );
         content = "";
       } else {
@@ -52,8 +54,9 @@ async function enhanceOutputWithTaskMetadata(task) {
 
     // Handle empty or invalid files - create minimal structure with taskId
     if (!content || content.trim() === "") {
-      console.log(
+      logger.debug(
         `Output file ${outputPath} is empty, creating minimal metadata structure`,
+        { component: "AgentOrchestrator", taskId: task.id },
       );
       analysis = {
         taskId: task.id,
@@ -66,8 +69,9 @@ async function enhanceOutputWithTaskMetadata(task) {
       try {
         analysis = JSON.parse(content);
       } catch (parseError) {
-        console.log(
+        logger.debug(
           `Output file ${outputPath} contains invalid JSON, creating minimal metadata structure`,
+          { component: "AgentOrchestrator", taskId: task.id },
         );
         analysis = {
           taskId: task.id,
@@ -92,15 +96,17 @@ async function enhanceOutputWithTaskMetadata(task) {
     // Write back the enhanced analysis
     await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
 
-    console.log(
+    logger.debug(
       `Enhanced ${outputPath} with task metadata (taskId: ${task.id})`,
+      { component: "AgentOrchestrator", taskId: task.id },
     );
   } catch (error) {
     // Log error but don't fail the task
-    console.error(
-      `Failed to enhance output with task metadata:`,
-      error.message,
-    );
+    logger.error(`Failed to enhance output with task metadata`, {
+      error,
+      component: "AgentOrchestrator",
+      taskId: task.id,
+    });
   }
 }
 
@@ -160,7 +166,11 @@ export async function executeTask(taskId) {
         timestamp: new Date().toISOString(),
       });
     } catch (err) {
-      console.error("Failed to emit socket event:", err);
+      logger.error("Failed to emit socket event", {
+        error: err,
+        component: "AgentOrchestrator",
+        taskId,
+      });
       // Don't fail the task if socket emit fails
     }
   }

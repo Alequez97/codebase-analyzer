@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { tryReadJsonFile } from "./utils.js";
+import * as logger from "../utils/logger.js";
 
 /**
  * Read a task from pending or completed
@@ -151,10 +152,13 @@ export async function deleteTask(taskId) {
     const logPath = path.join(config.paths.targetAnalysis, task.logFile);
     try {
       await fs.unlink(logPath);
-      console.log(`Deleted log file: ${task.logFile}`);
+      logger.debug(`Deleted log file: ${task.logFile}`, { component: "Tasks" });
     } catch (error) {
       if (error.code !== "ENOENT") {
-        console.error(`Failed to delete log file ${task.logFile}:`, error);
+        logger.error(`Failed to delete log file ${task.logFile}`, {
+          error,
+          component: "Tasks",
+        });
       }
     }
   }

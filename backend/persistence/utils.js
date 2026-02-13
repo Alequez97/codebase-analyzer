@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import * as logger from "../utils/logger.js";
 
 /**
  * Safely read and parse a JSON file
@@ -14,7 +15,9 @@ export async function tryReadJsonFile(filePath, identifier = "file") {
 
     // Handle empty files
     if (!content || content.trim() === "") {
-      console.log(`File ${identifier} is empty (path: ${filePath})`);
+      logger.debug(`File ${identifier} is empty (path: ${filePath})`, {
+        component: "Persistence",
+      });
       return null;
     }
 
@@ -22,10 +25,10 @@ export async function tryReadJsonFile(filePath, identifier = "file") {
   } catch (error) {
     // Handle JSON parse errors (malformed files)
     if (error instanceof SyntaxError) {
-      console.error(
-        `Invalid JSON in ${identifier} (path: ${filePath}):`,
-        error.message,
-      );
+      logger.error(`Invalid JSON in ${identifier} (path: ${filePath})`, {
+        error: error.message,
+        component: "Persistence",
+      });
       return null;
     }
 

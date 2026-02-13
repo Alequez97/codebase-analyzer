@@ -10,6 +10,7 @@ import * as taskOrchestrator from "./orchestrators/task.js";
 import * as domainsPersistence from "./persistence/domains.js";
 import { detectAvailableAgents, getSupportedAgents } from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
+import * as logger from "./utils/logger.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -36,7 +37,7 @@ app.use(express.json());
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  logger.http(req.method, req.path);
   next();
 });
 
@@ -93,7 +94,10 @@ app.get("/api/analysis/codebase", async (req, res) => {
 
     res.json(results);
   } catch (error) {
-    console.error("Error reading codebase analysis:", error);
+    logger.error("Error reading codebase analysis", {
+      error,
+      component: "API",
+    });
     res.status(500).json({ error: "Failed to read codebase analysis" });
   }
 });
@@ -120,7 +124,10 @@ app.post("/api/analysis/codebase/request", async (req, res) => {
     );
     res.status(201).json(task);
   } catch (error) {
-    console.error("Error creating codebase analysis task:", error);
+    logger.error("Error creating codebase analysis task", {
+      error,
+      component: "API",
+    });
     res.status(500).json({ error: "Failed to create codebase analysis task" });
   }
 });
@@ -141,7 +148,7 @@ app.get("/api/analysis/codebase/full", async (req, res) => {
 
     res.json(analysis);
   } catch (error) {
-    console.error("Error reading domains:", error);
+    logger.error("Error reading domains", { error, component: "API" });
     res.status(500).json({ error: "Failed to read domains" });
   }
 });
@@ -163,7 +170,10 @@ app.get("/api/analysis/domain/:id", async (req, res) => {
 
     res.json(analysis);
   } catch (error) {
-    console.error(`Error reading domain ${req.params.id}:`, error);
+    logger.error(`Error reading domain ${req.params.id}`, {
+      error,
+      component: "API",
+    });
     res.status(500).json({ error: "Failed to read domain analysis" });
   }
 });
@@ -202,7 +212,7 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
     );
     res.status(201).json(task);
   } catch (error) {
-    console.error("Error creating analyze task:", error);
+    logger.error("Error creating analyze task", { error, component: "API" });
     res.status(500).json({ error: "Failed to create analyze task" });
   }
 });
@@ -215,7 +225,7 @@ app.get("/api/tasks/pending", async (req, res) => {
     const tasks = await taskOrchestrator.getPendingTasks();
     res.json({ tasks });
   } catch (error) {
-    console.error("Error reading pending tasks:", error);
+    logger.error("Error reading pending tasks", { error, component: "API" });
     res.status(500).json({ error: "Failed to read pending tasks" });
   }
 });
@@ -264,7 +274,10 @@ app.get("/api/tasks/:id/logs", async (req, res) => {
       throw fileError;
     }
   } catch (error) {
-    console.error(`Error reading task logs for ${req.params.id}:`, error);
+    logger.error(`Error reading task logs for ${req.params.id}`, {
+      error,
+      component: "API",
+    });
     res.status(500).json({ error: "Failed to read task logs" });
   }
 });
@@ -278,7 +291,10 @@ app.delete("/api/tasks/:id", async (req, res) => {
     await taskOrchestrator.deleteTask(id);
     res.json({ success: true, message: "Task deleted" });
   } catch (error) {
-    console.error(`Error deleting task ${req.params.id}:`, error);
+    logger.error(`Error deleting task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
     res.status(500).json({ error: "Failed to delete task" });
   }
 });
@@ -289,7 +305,7 @@ app.delete("/api/tasks/:id", async (req, res) => {
 // ==================== Error Handler ====================
 
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
+  logger.error("Unhandled error", { error: err, component: "API" });
   res.status(500).json({
     error: "Internal server error",
     message: err.message,
@@ -299,30 +315,32 @@ app.use((err, req, res, next) => {
 // ==================== Socket.IO ====================
 
 io.on(SOCKET_EVENTS.CONNECTION, (socket) => {
-  console.log(`Client connected: ${socket.id}`);
+  logger.debug(`Client connected: ${socket.id}`, { component: "WebSocket" });
 
   socket.on(SOCKET_EVENTS.DISCONNECT, () => {
-    console.log(`Client disconnected: ${socket.id}`);
+    logger.debug(`Client disconnected: ${socket.id}`, {
+      component: "WebSocket",
+    });
   });
 });
 
 // ==================== Start Server ====================
 
 httpServer.listen(config.port, () => {
-  console.log("");
-  console.log("========================================");
-  console.log("  Codebase Analyzer API");
-  console.log("========================================");
-  console.log(`  Port: ${config.port}`);
-  console.log(`  Target: ${config.target.name}`);
-  console.log(`  Project: ${config.target.directory}`);
-  console.log(`  Output: ${config.paths.targetAnalysis}`);
-  console.log("========================================");
-  console.log("");
-  console.log(`API running at http://localhost:${config.port}`);
-  console.log(
+  logger.info("");
+  logger.info("========================================");
+  logger.info("  Codebase Analyzer API");
+  logger.info("========================================");
+  logger.info(`  Port: ${config.port}`);
+  logger.info(`  Target: ${config.target.name}`);
+  logger.info(`  Project: ${config.target.directory}`);
+  logger.info(`  Output: ${config.paths.targetAnalysis}`);
+  logger.info("========================================");
+  logger.info("");
+  logger.info(`API running at http://localhost:${config.port}`);
+  logger.info(
     `Open dashboard at http://localhost:5173 (if frontend is running)`,
   );
-  console.log("WebSocket ready for real-time updates");
-  console.log("");
+  logger.info("WebSocket ready for real-time updates");
+  logger.info("");
 });

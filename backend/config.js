@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import * as logger from "./utils/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,13 +18,13 @@ function getTargetDirectory() {
   const targetDir = process.env.ANALYSIS_TARGET_DIR || process.cwd();
 
   if (!fs.existsSync(targetDir)) {
-    console.error(`Target directory does not exist: ${targetDir}`);
+    logger.error(`Target directory does not exist: ${targetDir}`);
     process.exit(1);
   }
 
   const stats = fs.statSync(targetDir);
   if (!stats.isDirectory()) {
-    console.error(`Target is not a directory: ${targetDir}`);
+    logger.error(`Target is not a directory: ${targetDir}`);
     process.exit(1);
   }
 

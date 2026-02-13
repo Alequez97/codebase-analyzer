@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import * as logger from "../utils/logger.js";
 
 const execAsync = promisify(exec);
 
@@ -51,10 +52,10 @@ function getApiKeyForModel(model, apiKeys) {
 export async function detect() {
   try {
     const { stdout } = await execAsync("aider --version");
-    console.log(`Aider detected: ${stdout.trim()}`);
+    logger.debug(`Aider detected: ${stdout.trim()}`, { component: "Aider" });
     return true;
   } catch (error) {
-    console.log("Aider not detected");
+    logger.debug("Aider not detected", { component: "Aider" });
     return false;
   }
 }
@@ -111,7 +112,10 @@ export async function execute(task) {
   ].filter(Boolean);
 
   const command = commandParts.join(" ");
-  console.log(`Executing Aider: ${command}`);
+  logger.info(`Executing Aider: ${command}`, {
+    component: "Aider",
+    taskId: task.id,
+  });
 
   // Create log directory
   const logDir = path.join(config.paths.targetAnalysis, "logs");
@@ -161,7 +165,10 @@ export async function execute(task) {
             data: text,
           });
 
-          console.log(`[Aider] ${text.trim()}`);
+          logger.debug(`${text.trim()}`, {
+            component: "Aider",
+            taskId: task.id,
+          });
         });
 
         aiderProcess.stderr.on("data", (data) => {
@@ -179,7 +186,11 @@ export async function execute(task) {
             data: text,
           });
 
-          console.error(`[Aider Error] ${text.trim()}`);
+          logger.error(`${text.trim()}`, {
+            component: "Aider",
+            taskId: task.id,
+            stream: "stderr",
+          });
         });
 
         aiderProcess.on("close", async (code) => {
@@ -218,7 +229,11 @@ export async function execute(task) {
             logStream.on("finish", resolveStream),
           );
 
-          console.error(`Aider execution error for task ${task.id}:`, error);
+          logger.error(`Aider execution error for task ${task.id}`, {
+            error,
+            component: "Aider",
+            taskId: task.id,
+          });
 
           resolve({
             success: false,
@@ -237,7 +252,11 @@ export async function execute(task) {
           logStream.on("finish", resolveStream),
         );
 
-        console.error("Failed to import io:", err);
+        logger.error("Failed to import io", {
+          error: err,
+          component: "Aider",
+          taskId: task.id,
+        });
 
         resolve({
           success: false,
