@@ -65,8 +65,8 @@ The AI agent (Aider) handles ALL complexity:
 ```env
 # Aider handles token limits automatically
 # These defaults work for most codebases:
-AIDER_MODEL=deepseek
-AIDER_EXTRA_ARGS=
+LLM_MODEL=deepseek
+AGENT_EXTRA_ARGS=
 
 # Aider uses repository map with 1024 tokens by default
 # No need to configure token limits manually

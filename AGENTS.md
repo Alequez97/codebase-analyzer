@@ -209,7 +209,7 @@ The tool analyzes the current directory.
 # backend/.env
 PORT=3001
 ANALYSIS_TOOL=aider
-AIDER_MODEL=deepseek
+LLM_MODEL=deepseek
 DEEPSEEK_API_KEY=your_key_here
 ```
 

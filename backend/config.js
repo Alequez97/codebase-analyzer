@@ -53,14 +53,14 @@ const config = {
 
   // Aider configuration
   aider: {
-    model: process.env.AIDER_MODEL || "deepseek",
+    model: process.env.LLM_MODEL || "deepseek",
     apiKeys: {
       deepseek: process.env.DEEPSEEK_API_KEY,
       anthropic: process.env.ANTHROPIC_API_KEY,
       openai: process.env.OPENAI_API_KEY,
       openrouter: process.env.OPENROUTER_API_KEY,
     },
-    extraArgs: process.env.AIDER_EXTRA_ARGS || "",
+    extraArgs: process.env.AGENT_EXTRA_ARGS || "",
   },
 
   // Paths

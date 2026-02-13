@@ -50,7 +50,7 @@ OPENAI_API_KEY=sk-...
 DEEPSEEK_API_KEY=sk-...
 
 # Optional: Choose your AI model
-AIDER_MODEL=sonnet
+LLM_MODEL=sonnet
 # Options: sonnet, gpt-4, deepseek, etc.
 
 # Optional: Server port

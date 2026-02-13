@@ -114,7 +114,7 @@ CODEBASE_PATH_AVIA_MANAGER=C:\_projects\jfs\avia-manager
 **Aider Configuration:**
 
 ```env
-AIDER_MODEL=deepseek
+LLM_MODEL=deepseek
 DEEPSEEK_API_KEY=your-key-here
 ```
 
