@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { tryReadJsonFile } from "./utils.js";
 
 /**
  * Read full codebase analysis from file
@@ -12,26 +13,11 @@ export async function readCodebaseAnalysis() {
       config.paths.targetAnalysis,
       "codebase-analysis.json",
     );
-    const content = await fs.readFile(filePath, "utf-8");
-
-    // Handle empty files
-    if (!content || content.trim() === "") {
-      console.log("Codebase analysis file is empty");
-      return null;
-    }
-
-    return JSON.parse(content);
+    return await tryReadJsonFile(filePath, "codebase-analysis.json");
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;
     }
-
-    // Handle JSON parse errors (malformed files)
-    if (error instanceof SyntaxError) {
-      console.error("Invalid JSON in codebase-analysis.json:", error.message);
-      return null;
-    }
-
     throw error;
   }
 }

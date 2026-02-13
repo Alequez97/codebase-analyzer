@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { tryReadJsonFile } from "./utils.js";
 
 /**
  * Read a specific domain analysis
@@ -14,26 +15,11 @@ export async function readDomain(domainId) {
       "domains",
       `${domainId}.json`,
     );
-    const content = await fs.readFile(filePath, "utf-8");
-
-    // Handle empty files
-    if (!content || content.trim() === "") {
-      console.log(`Domain ${domainId} analysis file is empty`);
-      return null;
-    }
-
-    return JSON.parse(content);
+    return await tryReadJsonFile(filePath, `domain ${domainId}`);
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;
     }
-
-    // Handle JSON parse errors (malformed files)
-    if (error instanceof SyntaxError) {
-      console.error(`Invalid JSON in domain ${domainId}:`, error.message);
-      return null;
-    }
-
     throw error;
   }
 }

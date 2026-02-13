@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { tryReadJsonFile } from "./utils.js";
 
 /**
  * Read a task from pending or completed
@@ -8,26 +9,6 @@ import config from "../config.js";
  * @returns {Promise<Object|null>} Task object or null if not found
  */
 export async function readTask(taskId) {
-  const tryReadFile = async (filePath) => {
-    try {
-      const content = await fs.readFile(filePath, "utf-8");
-
-      // Handle empty files
-      if (!content || content.trim() === "") {
-        return null;
-      }
-
-      return JSON.parse(content);
-    } catch (error) {
-      // Handle JSON parse errors
-      if (error instanceof SyntaxError) {
-        console.error(`Invalid JSON in task ${taskId}:`, error.message);
-        return null;
-      }
-      throw error;
-    }
-  };
-
   try {
     const pendingPath = path.join(
       config.paths.targetAnalysis,
@@ -35,7 +16,7 @@ export async function readTask(taskId) {
       "pending",
       `${taskId}.json`,
     );
-    return await tryReadFile(pendingPath);
+    return await tryReadJsonFile(pendingPath, `task ${taskId}`);
   } catch (error) {
     if (error.code === "ENOENT") {
       // Try completed
@@ -46,7 +27,7 @@ export async function readTask(taskId) {
           "completed",
           `${taskId}.json`,
         );
-        return await tryReadFile(completedPath);
+        return await tryReadJsonFile(completedPath, `task ${taskId}`);
       } catch (err) {
         if (err.code === "ENOENT") {
           return null;

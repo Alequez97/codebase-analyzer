@@ -14,7 +14,13 @@ export async function getCodebaseAnalysis() {
 
   // Enrich domains with analysis status
   const domainIds = await domainsPersistence.listDomains();
-  const enrichedDomains = analysis.domains.map((domain) => ({
+  const domains = Array.isArray(analysis.domains)
+    ? analysis.domains
+    : Array.isArray(analysis.modules)
+      ? analysis.modules
+      : [];
+
+  const enrichedDomains = domains.map((domain) => ({
     ...domain,
     hasAnalysis: domainIds.includes(domain.id),
   }));
