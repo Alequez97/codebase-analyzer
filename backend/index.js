@@ -6,7 +6,7 @@ import config from "./config.js";
 import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
 import * as domainsPersistence from "./persistence/domains.js";
-import { detectAvailableAgents } from "./agents/index.js";
+import { detectAvailableAgents, getSupportedAgents } from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 
 const app = express();
@@ -41,6 +41,21 @@ app.use((req, res, next) => {
 // ==================== API Routes ====================
 
 /**
+ * Get tool discovery information for frontend
+ */
+app.get("/api/tools", async (req, res) => {
+  const availableAgents = await detectAvailableAgents();
+  const supportedAgents = getSupportedAgents();
+
+  const tools = supportedAgents.map((agent) => ({
+    ...agent,
+    available: !!availableAgents[agent.id],
+  }));
+
+  res.json({ tools });
+});
+
+/**
  * Health check with configuration status
  */
 app.get("/api/status", async (req, res) => {
@@ -54,7 +69,6 @@ app.get("/api/status", async (req, res) => {
       name: config.target.name,
     },
     config: {
-      analysisTool: config.analysisTool,
       port: config.port,
     },
     agents,
@@ -88,8 +102,20 @@ app.get("/api/analysis/codebase", async (req, res) => {
 app.post("/api/analysis/codebase/request", async (req, res) => {
   try {
     const executeNow = req.body.executeNow !== false; // Default to true
-    const task =
-      await taskOrchestrator.createFullCodebaseAnalysisTask(executeNow);
+    const agent = req.body.agent || "aider";
+    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+
+    if (!supportedAgentIds.includes(agent)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: `Unsupported agent: ${agent}`,
+      });
+    }
+
+    const task = await taskOrchestrator.createFullCodebaseAnalysisTask(
+      executeNow,
+      agent,
+    );
     res.status(201).json(task);
   } catch (error) {
     console.error("Error creating codebase analysis task:", error);
@@ -147,11 +173,20 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
   try {
     const { id } = req.params;
     const { domainName, files } = req.body;
+    const agent = req.body.agent || "aider";
+    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
 
     if (!domainName || !files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
         message: "domainName and files[] are required",
+      });
+    }
+
+    if (!supportedAgentIds.includes(agent)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: `Unsupported agent: ${agent}`,
       });
     }
 
@@ -161,6 +196,7 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
       domainName,
       files,
       executeNow,
+      agent,
     );
     res.status(201).json(task);
   } catch (error) {
@@ -227,7 +263,6 @@ httpServer.listen(config.port, () => {
   console.log("  Codebase Analyzer API");
   console.log("========================================");
   console.log(`  Port: ${config.port}`);
-  console.log(`  Tool: ${config.analysisTool}`);
   console.log(`  Target: ${config.target.name}`);
   console.log(`  Project: ${config.target.directory}`);
   console.log(`  Output: ${config.paths.targetAnalysis}`);

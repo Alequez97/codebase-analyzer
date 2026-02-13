@@ -19,13 +19,14 @@ function generateTaskId(prefix) {
  * @param {boolean} executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createFullCodebaseAnalysisTask(executeNow = false) {
+export async function createFullCodebaseAnalysisTask(executeNow, agent) {
   const task = {
     id: generateTaskId("analyze-codebase"),
     type: "codebase-analysis",
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
+      agent,
       targetDirectory: config.target.directory,
     },
     instructionFile: "backend/instructions/analyze-full-codebase.md",
@@ -56,7 +57,8 @@ export async function createAnalyzeTask(
   domainId,
   domainName,
   files,
-  executeNow = false,
+  executeNow,
+  agent,
 ) {
   const task = {
     id: generateTaskId("analyze"),
@@ -64,6 +66,7 @@ export async function createAnalyzeTask(
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
+      agent,
       domainId,
       domainName,
       files,

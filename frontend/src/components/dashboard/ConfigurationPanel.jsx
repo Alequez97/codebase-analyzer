@@ -1,9 +1,25 @@
-import { VStack, HStack, Box, Heading, Text, Badge } from "@chakra-ui/react";
+import {
+  VStack,
+  HStack,
+  Box,
+  Heading,
+  Text,
+  Badge,
+  Button,
+} from "@chakra-ui/react";
 import { Card } from "../ui/card";
 import { useAppStore } from "../../store/useAppStore";
 
 export function ConfigurationPanel() {
-  const { status } = useAppStore();
+  const {
+    status,
+    tools,
+    selectedAgent,
+    setSelectedAgent,
+    toolsLoading,
+    toolsError,
+  } = useAppStore();
+  const selectedTool = tools.find((tool) => tool.id === selectedAgent);
 
   return (
     <Card.Root>
@@ -25,56 +41,65 @@ export function ConfigurationPanel() {
             <Text fontWeight="bold" mb={2}>
               Analysis Tool
             </Text>
-            <HStack gap={2} align="center">
-              <Badge colorPalette="blue" size="lg">
-                {status?.config?.analysisTool || "auto-detect"}
-              </Badge>
-              {status?.config?.analysisTool === "aider" && (
-                <Text fontSize="sm" color="gray.600">
-                  →{" "}
-                  <a
-                    href="https://aider.chat/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#3182ce", textDecoration: "underline" }}
-                  >
-                    Installation Guide
-                  </a>
+            <HStack gap={2} align="center" flexWrap="wrap">
+              {tools.map((tool) => (
+                <Button
+                  key={tool.id}
+                  size="sm"
+                  variant={selectedAgent === tool.id ? "solid" : "outline"}
+                  colorPalette={selectedAgent === tool.id ? "blue" : "gray"}
+                  onClick={() => setSelectedAgent(tool.id)}
+                >
+                  {tool.id}
+                </Button>
+              ))}
+              {tools.length === 0 && (
+                <Text fontSize="sm" color="gray.500">
+                  {toolsLoading
+                    ? "Loading tools..."
+                    : toolsError || "No tools available"}
                 </Text>
               )}
             </HStack>
           </Box>
 
-          {/* Available Agents */}
-          {status?.agents && (
+          {selectedTool && (
             <Box>
               <Text fontWeight="bold" mb={2}>
-                Available AI Agents
+                Tool Details
               </Text>
               <VStack align="stretch" gap={2}>
-                {Object.entries(status.agents).map(([name, available]) => (
-                  <HStack key={name} justify="space-between">
-                    <Text fontSize="sm">{name}</Text>
-                    <Badge colorPalette={available ? "green" : "red"} size="sm">
-                      {available ? "✓ Available" : "✗ Not Found"}
-                    </Badge>
-                  </HStack>
-                ))}
-              </VStack>
-              {!status.agents.aider && (
-                <Text fontSize="xs" color="gray.500" mt={2}>
-                  To use Aider,{" "}
-                  <a
-                    href="https://aider.chat/docs/install.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#3182ce", textDecoration: "underline" }}
+                <HStack justify="space-between">
+                  <Text fontSize="sm" fontWeight="medium">
+                    {selectedTool.name || selectedTool.id}
+                  </Text>
+                  <Badge colorPalette="blue" size="sm">
+                    {selectedTool.id}
+                  </Badge>
+                </HStack>
+                <HStack justify="space-between">
+                  <Text fontSize="sm">Status</Text>
+                  <Badge
+                    colorPalette={selectedTool.available ? "green" : "red"}
+                    size="sm"
                   >
-                    install it
-                  </a>{" "}
-                  and ensure it's in your PATH
-                </Text>
-              )}
+                    {selectedTool.available ? "Available" : "Not Installed"}
+                  </Badge>
+                </HStack>
+                {selectedTool.installUrl && (
+                  <Text fontSize="sm" color="gray.600">
+                    Installation Guide:{" "}
+                    <a
+                      href={selectedTool.installUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#3182ce", textDecoration: "underline" }}
+                    >
+                      {selectedTool.installUrl}
+                    </a>
+                  </Text>
+                )}
+              </VStack>
             </Box>
           )}
         </VStack>

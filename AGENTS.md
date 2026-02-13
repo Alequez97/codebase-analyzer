@@ -357,6 +357,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Remove unused features immediately
 - Code should be ready to ship at any moment
 - Avoid hardcoded fallback defaults in user-facing behavior/messages when runtime config should be authoritative
+- Avoid default function parameters for runtime request values; normalize and validate inside orchestrator/service function bodies
 
 ## Roadmap
 

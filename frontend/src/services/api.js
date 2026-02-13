@@ -7,20 +7,22 @@ const api = axios.create({
 export default {
   // Status
   getStatus: () => api.get("/status"),
+  getTools: () => api.get("/tools"),
 
   // Full Codebase Analysis
   getCodebaseAnalysis: () => api.get("/analysis/codebase"),
-  requestCodebaseAnalysis: (executeNow = true) =>
-    api.post("/analysis/codebase/request", { executeNow }),
+  requestCodebaseAnalysis: (executeNow = true, agent = "aider") =>
+    api.post("/analysis/codebase/request", { executeNow, agent }),
 
   // Full Codebase Analysis - Full results and modules
   getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
   getModule: (id) => api.get(`/analysis/module/${id}`),
-  analyzeModule: (id, moduleName, files, executeNow = true) =>
+  analyzeModule: (id, moduleName, files, executeNow = true, agent = "aider") =>
     api.post(`/analysis/module/${id}/analyze`, {
       moduleName,
       files,
       executeNow,
+      agent,
     }),
 
   // Tasks

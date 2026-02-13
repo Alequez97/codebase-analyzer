@@ -8,6 +8,10 @@ export const useAppStore = create((set, get) => ({
   status: null,
   analysis: null,
   analyzingCodebase: false,
+  tools: [],
+  selectedAgent: "aider",
+  toolsLoading: false,
+  toolsError: null,
   loading: true,
   error: null,
   socket: null,
@@ -19,6 +23,8 @@ export const useAppStore = create((set, get) => ({
   setAnalysis: (analysis) => set({ analysis }),
 
   setAnalyzingCodebase: (analyzingCodebase) => set({ analyzingCodebase }),
+
+  setSelectedAgent: (selectedAgent) => set({ selectedAgent }),
 
   setLoading: (loading) => set({ loading }),
 
@@ -81,10 +87,41 @@ export const useAppStore = create((set, get) => ({
     }
   },
 
+  fetchTools: async () => {
+    set({ toolsLoading: true, toolsError: null });
+
+    try {
+      const response = await api.getTools();
+      const tools = response.data?.tools || [];
+      const current = get().selectedAgent;
+      const hasCurrent = tools.some((tool) => tool.id === current);
+      const fallback = tools[0]?.id || "aider";
+
+      set({
+        tools,
+        selectedAgent: hasCurrent ? current : fallback,
+        toolsLoading: false,
+        toolsError: null,
+      });
+    } catch (err) {
+      const message =
+        err?.response?.status === 404
+          ? "Tools endpoint not available (Cannot GET /api/tools). Restart backend after latest changes."
+          : "Failed to load tools.";
+
+      console.error("Failed to load tools:", err);
+      set({
+        tools: [],
+        toolsLoading: false,
+        toolsError: message,
+      });
+    }
+  },
+
   startCodebaseAnalysis: async () => {
     set({ analyzingCodebase: true });
     try {
-      await api.requestCodebaseAnalysis(true);
+      await api.requestCodebaseAnalysis(true, get().selectedAgent);
       // Socket will handle the completion event - no more polling!
     } catch (err) {
       set({
@@ -99,6 +136,10 @@ export const useAppStore = create((set, get) => ({
       status: null,
       analysis: null,
       analyzingCodebase: false,
+      tools: [],
+      selectedAgent: "aider",
+      toolsLoading: false,
+      toolsError: null,
       loading: true,
       error: null,
       socketConnected: false,

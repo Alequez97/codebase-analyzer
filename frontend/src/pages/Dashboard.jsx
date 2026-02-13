@@ -14,6 +14,7 @@ export default function Dashboard() {
     error,
     status,
     fetchStatus,
+    fetchTools,
     fetchCodebaseAnalysis,
     initSocket,
     socketConnected,
@@ -27,8 +28,9 @@ export default function Dashboard() {
   // Fetch initial data
   useEffect(() => {
     fetchStatus();
+    fetchTools();
     fetchCodebaseAnalysis();
-  }, [fetchStatus, fetchCodebaseAnalysis]);
+  }, [fetchStatus, fetchTools, fetchCodebaseAnalysis]);
 
   if (loading) {
     return <LoadingState />;
