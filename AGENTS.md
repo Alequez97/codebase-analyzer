@@ -356,6 +356,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Always update existing code rather than keeping old versions
 - Remove unused features immediately
 - Code should be ready to ship at any moment
+- Avoid hardcoded fallback defaults in user-facing behavior/messages when runtime config should be authoritative
 
 ## Roadmap
 

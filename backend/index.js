@@ -106,8 +106,8 @@ app.get("/api/analysis/codebase/full", async (req, res) => {
 
     if (!analysis || !analysis.domains || analysis.domains.length === 0) {
       return res.status(404).json({
-        error: "No domains found",
-        message: "Run a codebase analysis first",
+        error: "No completed codebase analysis found",
+        message: "Run codebase analysis to generate and load domains",
       });
     }
 

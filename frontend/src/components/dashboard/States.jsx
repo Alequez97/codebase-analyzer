@@ -1,5 +1,5 @@
-import { Container, VStack, Text, Spinner } from '@chakra-ui/react';
-import { Alert } from '../ui/alert';
+import { Container, VStack, Text, Spinner } from "@chakra-ui/react";
+import { Alert } from "../ui/alert";
 
 export function LoadingState() {
   return (
@@ -19,7 +19,9 @@ export function ErrorState({ error, port }) {
         <Alert.Indicator />
         <Alert.Title>{error}</Alert.Title>
         <Alert.Description>
-          Make sure the backend server is running on port {port || 3001}
+          {port
+            ? `Make sure the backend server is running on port ${port}`
+            : "Make sure the backend server is running"}
         </Alert.Description>
       </Alert.Root>
     </Container>

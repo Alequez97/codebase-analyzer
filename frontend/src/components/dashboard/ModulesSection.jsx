@@ -48,7 +48,8 @@ export function ModulesSection() {
         {!analyzingCodebase && domains.length === 0 && (
           <Box textAlign="center" py={8}>
             <Text color="gray.500" fontSize="lg">
-              No domains found. Click "Analyze Codebase" to start analysis.
+              No completed codebase analysis found. Click "Analyze Codebase" to
+              generate and load domains.
             </Text>
           </Box>
         )}
