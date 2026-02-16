@@ -11,6 +11,14 @@ import * as domainsPersistence from "./persistence/domains.js";
 import { detectAvailableAgents, getSupportedAgents } from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 import * as logger from "./utils/logger.js";
+import {
+  getMockCodebaseAnalysis,
+  getMockDomainAnalysis,
+  getMockDomainDocumentation,
+  getMockDomainRequirements,
+  getMockDomainTesting,
+  simulateAnalysisDelay,
+} from "./services/mock-data.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -73,6 +81,7 @@ app.get("/api/status", async (req, res) => {
     },
     config: {
       port: config.port,
+      useMockData: config.useMockData,
     },
     agents,
   });
@@ -83,6 +92,13 @@ app.get("/api/status", async (req, res) => {
  */
 app.get("/api/analysis/codebase", async (req, res) => {
   try {
+    // Mock mode: return mock data immediately
+    if (config.useMockData) {
+      logger.info("[MOCK MODE] Returning mock codebase analysis");
+      return res.json(getMockCodebaseAnalysis());
+    }
+
+    // Production mode: read from file system
     const results = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
 
     if (!results) {
@@ -118,6 +134,37 @@ app.post("/api/analysis/codebase/request", async (req, res) => {
       });
     }
 
+    // Mock mode: simulate task creation and emit completion event after delay
+    if (config.useMockData) {
+      logger.info("[MOCK MODE] Simulating codebase analysis task");
+      const mockTask = {
+        id: `mock-task-${Date.now()}`,
+        type: "codebase-analysis",
+        status: "pending",
+        agent,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Return task immediately
+      res.status(201).json(mockTask);
+
+      // Simulate async completion after delay
+      if (executeNow) {
+        simulateAnalysisDelay(2000).then(() => {
+          const analysisData = getMockCodebaseAnalysis();
+          logger.info("[MOCK MODE] Emitting TASK_COMPLETED with analysis data");
+          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
+            taskId: mockTask.id,
+            type: "codebase-analysis",
+            timestamp: new Date().toISOString(),
+            data: analysisData,
+          });
+        });
+      }
+      return;
+    }
+
+    // Production mode: create real task
     const task = await taskOrchestrator.createFullCodebaseAnalysisTask(
       executeNow,
       agent,
@@ -159,6 +206,23 @@ app.get("/api/analysis/codebase/full", async (req, res) => {
 app.get("/api/analysis/domain/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Mock mode: return mock domain data
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Returning mock domain analysis for: ${id}`);
+      const mockAnalysis = getMockDomainAnalysis(id);
+
+      if (!mockAnalysis) {
+        return res.status(404).json({
+          error: "Domain analysis not found",
+          message: `No mock analysis available for domain: ${id}`,
+        });
+      }
+
+      return res.json(mockAnalysis);
+    }
+
+    // Production mode: read from file system
     const analysis = await domainsPersistence.readDomain(id);
 
     if (!analysis) {
@@ -202,6 +266,43 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
       });
     }
 
+    // Mock mode: simulate domain analysis task
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Simulating domain analysis task for: ${id}`);
+      const mockTask = {
+        id: `mock-task-${Date.now()}`,
+        type: "analyze-domain",
+        domainId: id,
+        domainName,
+        status: "pending",
+        agent,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Return task immediately
+      res.status(201).json(mockTask);
+
+      // Simulate async completion after delay
+      const executeNow = req.body.executeNow !== false;
+      if (executeNow) {
+        simulateAnalysisDelay(1500).then(() => {
+          const domainData = getMockDomainAnalysis(id);
+          logger.info(
+            `[MOCK MODE] Emitting TASK_COMPLETED with domain data for: ${id}`,
+          );
+          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
+            taskId: mockTask.id,
+            type: "analyze",
+            domainId: id,
+            timestamp: new Date().toISOString(),
+            data: domainData,
+          });
+        });
+      }
+      return;
+    }
+
+    // Production mode: create real task
     const executeNow = req.body.executeNow !== false; // Default to true
     const task = await taskOrchestrator.createAnalyzeTask(
       id,
@@ -214,6 +315,417 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
   } catch (error) {
     logger.error("Error creating analyze task", { error, component: "API" });
     res.status(500).json({ error: "Failed to create analyze task" });
+  }
+});
+
+/**
+ * Get domain documentation section
+ */
+app.get("/api/analysis/domain/:id/documentation", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Returning mock domain documentation for: ${id}`);
+      const mockData = getMockDomainDocumentation(id);
+
+      if (!mockData) {
+        return res.status(404).json({
+          error: "Domain documentation not found",
+          message: `No mock documentation available for domain: ${id}`,
+        });
+      }
+
+      return res.json(mockData);
+    }
+
+    const data = await domainsPersistence.readDomainDocumentation(id);
+
+    if (!data) {
+      return res.status(404).json({
+        error: "Domain documentation not found",
+        message: `No documentation found for domain: ${id}`,
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    logger.error(`Error reading domain documentation ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to read domain documentation" });
+  }
+});
+
+/**
+ * Get domain requirements section
+ */
+app.get("/api/analysis/domain/:id/requirements", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Returning mock domain requirements for: ${id}`);
+      const mockData = getMockDomainRequirements(id);
+
+      if (!mockData) {
+        return res.status(404).json({
+          error: "Domain requirements not found",
+          message: `No mock requirements available for domain: ${id}`,
+        });
+      }
+
+      return res.json(mockData);
+    }
+
+    const data = await domainsPersistence.readDomainRequirements(id);
+
+    if (!data) {
+      return res.status(404).json({
+        error: "Domain requirements not found",
+        message: `No requirements found for domain: ${id}`,
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    logger.error(`Error reading domain requirements ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to read domain requirements" });
+  }
+});
+
+/**
+ * Get domain testing section
+ */
+app.get("/api/analysis/domain/:id/testing", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Returning mock domain testing for: ${id}`);
+      const mockData = getMockDomainTesting(id);
+
+      if (!mockData) {
+        return res.status(404).json({
+          error: "Domain testing not found",
+          message: `No mock testing data available for domain: ${id}`,
+        });
+      }
+
+      return res.json(mockData);
+    }
+
+    const data = await domainsPersistence.readDomainTesting(id);
+
+    if (!data) {
+      return res.status(404).json({
+        error: "Domain testing not found",
+        message: `No testing data found for domain: ${id}`,
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    logger.error(`Error reading domain testing ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to read domain testing" });
+  }
+});
+
+/**
+ * Analyze domain documentation section
+ */
+app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { domainName, files } = req.body;
+    const agent = req.body.agent || "aider";
+    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+
+    if (!domainName || !files || !Array.isArray(files)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "domainName and files[] are required",
+      });
+    }
+
+    if (!supportedAgentIds.includes(agent)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: `Unsupported agent: ${agent}`,
+      });
+    }
+
+    if (config.useMockData) {
+      logger.info(
+        `[MOCK MODE] Simulating domain documentation analysis for: ${id}`,
+      );
+      const mockTask = {
+        id: `mock-task-${Date.now()}`,
+        type: "analyze-domain-documentation",
+        domainId: id,
+        domainName,
+        status: "pending",
+        agent,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(201).json(mockTask);
+
+      const executeNow = req.body.executeNow !== false;
+      if (executeNow) {
+        simulateAnalysisDelay(1500).then(() => {
+          const data = getMockDomainDocumentation(id);
+          logger.info(
+            `[MOCK MODE] Emitting TASK_COMPLETED with documentation data for: ${id}`,
+          );
+          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
+            taskId: mockTask.id,
+            type: "analyze-documentation",
+            domainId: id,
+            timestamp: new Date().toISOString(),
+            data,
+          });
+        });
+      }
+      return;
+    }
+
+    // TODO: Production mode - create real task
+    res.status(501).json({ error: "Not implemented in production mode yet" });
+  } catch (error) {
+    logger.error("Error creating documentation analysis task", {
+      error,
+      component: "API",
+    });
+    res
+      .status(500)
+      .json({ error: "Failed to create documentation analysis task" });
+  }
+});
+
+/**
+ * Analyze domain requirements section
+ */
+app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { domainName, files } = req.body;
+    const agent = req.body.agent || "aider";
+    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+
+    if (!domainName || !files || !Array.isArray(files)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "domainName and files[] are required",
+      });
+    }
+
+    if (!supportedAgentIds.includes(agent)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: `Unsupported agent: ${agent}`,
+      });
+    }
+
+    if (config.useMockData) {
+      logger.info(
+        `[MOCK MODE] Simulating domain requirements analysis for: ${id}`,
+      );
+      const mockTask = {
+        id: `mock-task-${Date.now()}`,
+        type: "analyze-domain-requirements",
+        domainId: id,
+        domainName,
+        status: "pending",
+        agent,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(201).json(mockTask);
+
+      const executeNow = req.body.executeNow !== false;
+      if (executeNow) {
+        simulateAnalysisDelay(1500).then(() => {
+          const data = getMockDomainRequirements(id);
+          logger.info(
+            `[MOCK MODE] Emitting TASK_COMPLETED with requirements data for: ${id}`,
+          );
+          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
+            taskId: mockTask.id,
+            type: "analyze-requirements",
+            domainId: id,
+            timestamp: new Date().toISOString(),
+            data,
+          });
+        });
+      }
+      return;
+    }
+
+    // TODO: Production mode - create real task
+    res.status(501).json({ error: "Not implemented in production mode yet" });
+  } catch (error) {
+    logger.error("Error creating requirements analysis task", {
+      error,
+      component: "API",
+    });
+    res
+      .status(500)
+      .json({ error: "Failed to create requirements analysis task" });
+  }
+});
+
+/**
+ * Analyze domain testing section
+ */
+app.post("/api/analysis/domain/:id/analyze/testing", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { domainName, files } = req.body;
+    const agent = req.body.agent || "aider";
+    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+
+    if (!domainName || !files || !Array.isArray(files)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "domainName and files[] are required",
+      });
+    }
+
+    if (!supportedAgentIds.includes(agent)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: `Unsupported agent: ${agent}`,
+      });
+    }
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Simulating domain testing analysis for: ${id}`);
+      const mockTask = {
+        id: `mock-task-${Date.now()}`,
+        type: "analyze-domain-testing",
+        domainId: id,
+        domainName,
+        status: "pending",
+        agent,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(201).json(mockTask);
+
+      const executeNow = req.body.executeNow !== false;
+      if (executeNow) {
+        simulateAnalysisDelay(1500).then(() => {
+          const data = getMockDomainTesting(id);
+          logger.info(
+            `[MOCK MODE] Emitting TASK_COMPLETED with testing data for: ${id}`,
+          );
+          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
+            taskId: mockTask.id,
+            type: "analyze-testing",
+            domainId: id,
+            timestamp: new Date().toISOString(),
+            data,
+          });
+        });
+      }
+      return;
+    }
+
+    // TODO: Production mode - create real task
+    res.status(501).json({ error: "Not implemented in production mode yet" });
+  } catch (error) {
+    logger.error("Error creating testing analysis task", {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to create testing analysis task" });
+  }
+});
+
+/**
+ * Save edited requirements
+ */
+app.post("/api/analysis/domain/:id/requirements/save", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { requirements, domainName } = req.body;
+
+    if (!requirements || !Array.isArray(requirements)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "requirements[] array is required",
+      });
+    }
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Simulating requirements save for: ${id}`);
+      // In mock mode, just return success
+      return res.json({
+        success: true,
+        message: "Requirements saved successfully (mock mode)",
+      });
+    }
+
+    // Production mode: save to file
+    await domainsPersistence.writeDomainRequirements(id, {
+      domainId: id,
+      domainName: domainName || id,
+      timestamp: new Date().toISOString(),
+      requirements,
+    });
+
+    res.json({
+      success: true,
+      message: "Requirements saved successfully",
+    });
+  } catch (error) {
+    logger.error(`Error saving requirements for ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to save requirements" });
+  }
+});
+
+/**
+ * Apply a single test
+ */
+app.post("/api/analysis/domain/:id/tests/:testId/apply", async (req, res) => {
+  try {
+    const { id, testId } = req.params;
+
+    if (config.useMockData) {
+      logger.info(
+        `[MOCK MODE] Simulating test application for ${testId} in domain: ${id}`,
+      );
+
+      // Simulate async operation
+      await simulateAnalysisDelay(800);
+
+      return res.json({
+        success: true,
+        message: `Test ${testId} applied successfully (mock mode)`,
+        testId,
+        domainId: id,
+      });
+    }
+
+    // TODO: Production mode - implement test application logic
+    res.status(501).json({ error: "Not implemented in production mode yet" });
+  } catch (error) {
+    logger.error(
+      `Error applying test ${req.params.testId} for domain ${req.params.id}`,
+      { error, component: "API" },
+    );
+    res.status(500).json({ error: "Failed to apply test" });
   }
 });
 
@@ -332,6 +844,7 @@ httpServer.listen(config.port, () => {
   logger.info("  Codebase Analyzer API");
   logger.info("========================================");
   logger.info(`  Port: ${config.port}`);
+  logger.info(`  Mode: ${config.useMockData ? "MOCK DATA" : "PRODUCTION"}`);
   logger.info(`  Target: ${config.target.name}`);
   logger.info(`  Project: ${config.target.directory}`);
   logger.info(`  Output: ${config.paths.targetAnalysis}`);
@@ -342,5 +855,10 @@ httpServer.listen(config.port, () => {
     `Open dashboard at http://localhost:5173 (if frontend is running)`,
   );
   logger.info("WebSocket ready for real-time updates");
+  if (config.useMockData) {
+    logger.warn(
+      "⚠️  MOCK MODE ENABLED - Using sample data instead of real analysis",
+    );
+  }
   logger.info("");
 });

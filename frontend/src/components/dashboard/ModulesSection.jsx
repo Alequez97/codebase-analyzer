@@ -6,19 +6,22 @@ import {
   Text,
   Badge,
   Button,
+  Table,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
 import { useAppStore } from "../../store/useAppStore";
 
 export function ModulesSection() {
+  const navigate = useNavigate();
   const {
     status,
     analysis,
     analyzingCodebase,
     startCodebaseAnalysis,
-    showLogs,
-    toggleLogs,
+    analyzeDomain,
+    domainAnalyzeLoadingById,
   } = useAppStore();
 
   const domains = analysis?.domains || [];
@@ -30,24 +33,14 @@ export function ModulesSection() {
           <Heading size="lg">
             Code Domains{status?.target ? ` - ${status.target.name}` : ""}
           </Heading>
-          <HStack gap={2}>
-            <Button
-              variant="outline"
-              colorPalette="gray"
-              onClick={toggleLogs}
-              size="sm"
-            >
-              {showLogs ? "Hide Logs" : "Show Logs"}
-            </Button>
-            <Button
-              colorPalette="blue"
-              onClick={startCodebaseAnalysis}
-              loading={analyzingCodebase}
-              loadingText="Analyzing..."
-            >
-              {domains.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
-            </Button>
-          </HStack>
+          <Button
+            colorPalette="blue"
+            onClick={startCodebaseAnalysis}
+            loading={analyzingCodebase}
+            loadingText="Analyzing..."
+          >
+            {domains.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
+          </Button>
         </HStack>
       </Card.Header>
       <Card.Body>
@@ -72,58 +65,97 @@ export function ModulesSection() {
 
         {!analyzingCodebase && domains.length > 0 && (
           <VStack align="stretch" gap={4}>
-            {analysis?.summary && (
-              <Box p={3} bg="blue.50" borderRadius="md">
-                <Text fontSize="sm" color="gray.700">
-                  {analysis.summary}
-                </Text>
-              </Box>
-            )}
-            <Text color="gray.600">
-              Found {domains.length} domain{domains.length !== 1 ? "s" : ""}
-            </Text>
-            {domains.map((domain) => (
-              <Card.Root key={domain.id} variant="outline">
-                <Card.Body>
-                  <HStack justify="space-between">
-                    <Box flex={1}>
-                      <HStack mb={2}>
-                        <Heading size="md">{domain.name}</Heading>
+            <Box p={4} bg="blue.50" borderRadius="md">
+              <Heading size="sm" mb={2} color="blue.800">
+                Platform Description
+              </Heading>
+              <Text fontSize="sm" color="gray.700">
+                {analysis?.summary ||
+                  "No platform summary available yet. Run codebase analysis to generate it."}
+              </Text>
+            </Box>
+
+            <HStack justify="space-between">
+              <Text color="gray.600">
+                Found {domains.length} domain{domains.length !== 1 ? "s" : ""}
+              </Text>
+            </HStack>
+
+            <Table.Root size="sm" variant="outline">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Domain</Table.ColumnHeader>
+                  <Table.ColumnHeader>Description</Table.ColumnHeader>
+                  <Table.ColumnHeader>Status</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Actions
+                  </Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {domains.map((domain) => {
+                  const isAnalyzing = !!domainAnalyzeLoadingById[domain.id];
+                  return (
+                    <Table.Row key={domain.id}>
+                      <Table.Cell>
+                        <VStack align="start" gap={1}>
+                          <HStack>
+                            <Text fontWeight="semibold">{domain.name}</Text>
+                            <Badge
+                              colorPalette={
+                                domain.priority === "P0"
+                                  ? "red"
+                                  : domain.priority === "P1"
+                                    ? "orange"
+                                    : domain.priority === "P2"
+                                      ? "yellow"
+                                      : "gray"
+                              }
+                            >
+                              {domain.priority}
+                            </Badge>
+                          </HStack>
+                          <Text fontSize="xs" color="gray.500">
+                            {domain.id}
+                          </Text>
+                        </VStack>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Text color="gray.700">{domain.businessPurpose}</Text>
+                      </Table.Cell>
+                      <Table.Cell>
                         <Badge
-                          colorPalette={
-                            domain.priority === "P0"
-                              ? "red"
-                              : domain.priority === "P1"
-                                ? "orange"
-                                : domain.priority === "P2"
-                                  ? "yellow"
-                                  : "gray"
-                          }
+                          colorPalette={domain.hasAnalysis ? "green" : "gray"}
                         >
-                          {domain.priority}
+                          {domain.hasAnalysis ? "Analyzed" : "Not analyzed"}
                         </Badge>
-                        {domain.hasAnalysis && (
-                          <Badge colorPalette="green">Analyzed</Badge>
-                        )}
-                      </HStack>
-                      <Text color="gray.600" mb={2}>
-                        {domain.businessPurpose}
-                      </Text>
-                      <Text fontSize="sm" color="gray.500">
-                        {domain.files?.length || 0} file
-                        {domain.files?.length !== 1 ? "s" : ""}
-                      </Text>
-                    </Box>
-                    <Button
-                      colorPalette={domain.hasAnalysis ? "green" : "blue"}
-                      variant={domain.hasAnalysis ? "outline" : "solid"}
-                    >
-                      {domain.hasAnalysis ? "View Analysis" : "Analyze"}
-                    </Button>
-                  </HStack>
-                </Card.Body>
-              </Card.Root>
-            ))}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <HStack justify="flex-end">
+                          <Button
+                            size="sm"
+                            colorPalette="blue"
+                            variant="outline"
+                            onClick={() => navigate(`/domains/${domain.id}`)}
+                          >
+                            Detailed analysis
+                          </Button>
+                          <Button
+                            size="sm"
+                            colorPalette="blue"
+                            onClick={() => analyzeDomain(domain)}
+                            loading={isAnalyzing}
+                            loadingText="Analyzing"
+                          >
+                            Analyze
+                          </Button>
+                        </HStack>
+                      </Table.Cell>
+                    </Table.Row>
+                  );
+                })}
+              </Table.Body>
+            </Table.Root>
           </VStack>
         )}
       </Card.Body>

@@ -162,7 +162,7 @@ export async function executeTask(taskId) {
       io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
         taskId,
         type: task.type,
-        moduleId: task.params?.moduleId,
+        domainId: task.params?.domainId,
         timestamp: new Date().toISOString(),
       });
     } catch (err) {

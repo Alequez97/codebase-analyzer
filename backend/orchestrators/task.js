@@ -76,7 +76,7 @@ export async function createAnalyzeTask(
       files,
       targetDirectory: config.target.directory,
     },
-    instructionFile: "backend/instructions/analyze-domain.md",
+    instructionFile: "backend/instructions/analyze-domain-detailed.md",
     outputFile: `.code-analysis/domains/${domainId}.json`,
   };
 

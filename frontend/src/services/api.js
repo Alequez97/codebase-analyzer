@@ -16,14 +16,71 @@ export default {
 
   // Full Codebase Analysis - Full results and modules
   getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
-  getModule: (id) => api.get(`/analysis/module/${id}`),
-  analyzeModule: (id, moduleName, files, executeNow = true, agent = "aider") =>
-    api.post(`/analysis/module/${id}/analyze`, {
-      moduleName,
+  getDomain: (id) => api.get(`/analysis/domain/${id}`),
+  analyzeDomain: (id, domainName, files, executeNow = true, agent = "aider") =>
+    api.post(`/analysis/domain/${id}/analyze`, {
+      domainName,
       files,
       executeNow,
       agent,
     }),
+
+  // Domain section-specific endpoints
+  getDomainDocumentation: (id) =>
+    api.get(`/analysis/domain/${id}/documentation`),
+  getDomainRequirements: (id) => api.get(`/analysis/domain/${id}/requirements`),
+  getDomainTesting: (id) => api.get(`/analysis/domain/${id}/testing`),
+
+  analyzeDomainDocumentation: (
+    id,
+    domainName,
+    files,
+    executeNow = true,
+    agent = "aider",
+  ) =>
+    api.post(`/analysis/domain/${id}/analyze/documentation`, {
+      domainName,
+      files,
+      executeNow,
+      agent,
+    }),
+
+  analyzeDomainRequirements: (
+    id,
+    domainName,
+    files,
+    executeNow = true,
+    agent = "aider",
+  ) =>
+    api.post(`/analysis/domain/${id}/analyze/requirements`, {
+      domainName,
+      files,
+      executeNow,
+      agent,
+    }),
+
+  analyzeDomainTesting: (
+    id,
+    domainName,
+    files,
+    executeNow = true,
+    agent = "aider",
+  ) =>
+    api.post(`/analysis/domain/${id}/analyze/testing`, {
+      domainName,
+      files,
+      executeNow,
+      agent,
+    }),
+
+  saveRequirements: (id, domainName, requirements) =>
+    api.post(`/analysis/domain/${id}/requirements/save`, {
+      domainName,
+      requirements,
+    }),
+
+  applyTest: (domainId, testId) =>
+    api.post(`/analysis/domain/${domainId}/tests/${testId}/apply`),
 
   // Tasks
   getPendingTasks: () => api.get("/tasks/pending"),

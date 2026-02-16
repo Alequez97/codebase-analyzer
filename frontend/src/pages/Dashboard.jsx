@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, Container, VStack } from "@chakra-ui/react";
+import { Box, Button, Container, HStack, VStack } from "@chakra-ui/react";
 import { useAppStore } from "../store/useAppStore";
 import { LoadingState, ErrorState } from "../components/dashboard/States";
 import { StatusBar } from "../components/dashboard/StatusBar";
@@ -19,6 +19,7 @@ export default function Dashboard() {
     initSocket,
     socketConnected,
     showLogs,
+    toggleLogs,
   } = useAppStore();
 
   // Initialize socket connection
@@ -46,14 +47,24 @@ export default function Dashboard() {
       <StatusBar
         connected={!error && !!status}
         socketConnected={socketConnected}
+        status={status}
       />
 
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">
           <DashboardHeader />
           <ConfigurationPanel />
-          <ModulesSection />
-          {showLogs && <TaskLogs />}
+          <HStack justify="flex-end">
+            <Button
+              variant="outline"
+              colorPalette="gray"
+              onClick={toggleLogs}
+              size="sm"
+            >
+              {showLogs ? "Show codebase anaysis" : "Show Logs"}
+            </Button>
+          </HStack>
+          {showLogs ? <TaskLogs /> : <ModulesSection />}
         </VStack>
       </Container>
     </Box>

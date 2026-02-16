@@ -21,7 +21,7 @@ Use your repository map to identify major functional domains in the codebase.
 ```json
 {
   "timestamp": "2026-02-13T12:00:00.000Z",
-  "summary": "Brief project description. Next steps: analyze [domain-name] first.",
+  "summary": "Brief 2-3 sentence overview of what this platform/application does.",
   "domains": [
     {
       "id": "example-domain",
@@ -39,6 +39,7 @@ Use your repository map to identify major functional domains in the codebase.
 ## Rules
 
 - Use current ISO 8601 timestamp
+- **summary**: Brief 2-3 sentence overview describing what the platform does and its main purpose
 - Identify ALL major functional domains (no limit on count)
 - For large apps, identify as many domains as needed to cover the application
 - Use kebab-case for domain IDs
