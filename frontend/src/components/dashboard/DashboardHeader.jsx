@@ -1,8 +1,8 @@
 import { Box, Heading, Text } from "@chakra-ui/react";
-import { useAppStore } from "../../store/useAppStore";
+import { useAnalysisStore } from "../../store/useAnalysisStore";
 
 export function DashboardHeader() {
-  const { status } = useAppStore();
+  const { status } = useAnalysisStore();
 
   return (
     <Box textAlign="center">

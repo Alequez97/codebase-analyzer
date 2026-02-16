@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Box, Button, Container, HStack, VStack } from "@chakra-ui/react";
-import { useAppStore } from "../store/useAppStore";
+import { useAnalysisStore } from "../store/useAnalysisStore";
+import { useConfigStore } from "../store/useConfigStore";
+import { useSocketStore } from "../store/useSocketStore";
 import { LoadingState, ErrorState } from "../components/dashboard/States";
 import { StatusBar } from "../components/dashboard/StatusBar";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
@@ -9,18 +11,14 @@ import { ModulesSection } from "../components/dashboard/ModulesSection";
 import { TaskLogs } from "../components/dashboard/TaskLogs";
 
 export default function Dashboard() {
-  const {
-    loading,
-    error,
-    status,
-    fetchStatus,
-    fetchTools,
-    fetchCodebaseAnalysis,
-    initSocket,
-    socketConnected,
-    showLogs,
-    toggleLogs,
-  } = useAppStore();
+  // Analysis store
+  const { loading, error, status, fetchAnalysis } = useAnalysisStore();
+
+  // Config store
+  const { showLogs, toggleLogs, fetchTools } = useConfigStore();
+
+  // Socket store
+  const { socketConnected, initSocket } = useSocketStore();
 
   // Initialize socket connection
   useEffect(() => {
@@ -29,10 +27,9 @@ export default function Dashboard() {
 
   // Fetch initial data
   useEffect(() => {
-    fetchStatus();
     fetchTools();
-    fetchCodebaseAnalysis();
-  }, [fetchStatus, fetchTools, fetchCodebaseAnalysis]);
+    fetchAnalysis();
+  }, [fetchTools, fetchAnalysis]);
 
   if (loading) {
     return <LoadingState />;

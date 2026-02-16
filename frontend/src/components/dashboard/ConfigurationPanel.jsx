@@ -8,18 +8,17 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { Card } from "../ui/card";
-import { useAppStore } from "../../store/useAppStore";
+import { useAnalysisStore } from "../../store/useAnalysisStore";
+import { useConfigStore } from "../../store/useConfigStore";
 
 export function ConfigurationPanel() {
-  const {
-    status,
-    tools,
-    selectedAgent,
-    setSelectedAgent,
-    toolsLoading,
-    toolsError,
-  } = useAppStore();
-  const selectedTool = tools.find((tool) => tool.id === selectedAgent);
+  const { status } = useAnalysisStore();
+  const { tools, selectedAgent, setSelectedAgent, toolsLoading, toolsError } =
+    useConfigStore();
+
+  // Safety check: ensure tools is always an array
+  const toolsArray = Array.isArray(tools) ? tools : [];
+  const selectedTool = toolsArray.find((tool) => tool.id === selectedAgent);
 
   return (
     <Card.Root>
@@ -42,7 +41,7 @@ export function ConfigurationPanel() {
               Analysis Tool
             </Text>
             <HStack gap={2} align="center" flexWrap="wrap">
-              {tools.map((tool) => (
+              {toolsArray.map((tool) => (
                 <Button
                   key={tool.id}
                   size="sm"
@@ -53,7 +52,7 @@ export function ConfigurationPanel() {
                   {tool.id}
                 </Button>
               ))}
-              {tools.length === 0 && (
+              {toolsArray.length === 0 && (
                 <Text fontSize="sm" color="gray.500">
                   {toolsLoading
                     ? "Loading tools..."

@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
-import { useAppStore } from "../../store/useAppStore";
+import { useAnalysisStore } from "../../store/useAnalysisStore";
 
 export function ModulesSection() {
   const navigate = useNavigate();
@@ -19,10 +19,10 @@ export function ModulesSection() {
     status,
     analysis,
     analyzingCodebase,
-    startCodebaseAnalysis,
+    analyzeCodebase,
     analyzeDomain,
     domainAnalyzeLoadingById,
-  } = useAppStore();
+  } = useAnalysisStore();
 
   const domains = analysis?.domains || [];
 
@@ -35,7 +35,7 @@ export function ModulesSection() {
           </Heading>
           <Button
             colorPalette="blue"
-            onClick={startCodebaseAnalysis}
+            onClick={analyzeCodebase}
             loading={analyzingCodebase}
             loadingText="Analyzing..."
           >

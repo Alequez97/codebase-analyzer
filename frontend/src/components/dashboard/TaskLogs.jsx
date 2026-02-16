@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, HStack, Heading, Text, VStack } from "@chakra-ui/react";
-import { useAppStore } from "../../store/useAppStore";
+import { useSocketStore } from "../../store/useSocketStore";
 import { SOCKET_EVENTS } from "../../constants/socket-events";
 import { Card } from "../ui/card";
 
@@ -11,7 +11,7 @@ import { Card } from "../ui/card";
 export function TaskLogs() {
   const [logs, setLogs] = useState([]);
   const logEndRef = useRef(null);
-  const socket = useAppStore((state) => state.socket);
+  const socket = useSocketStore((state) => state.socket);
 
   useEffect(() => {
     if (!socket) return;

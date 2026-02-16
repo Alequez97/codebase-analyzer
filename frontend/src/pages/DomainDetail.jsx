@@ -18,7 +18,9 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import { useAppStore } from "../store/useAppStore";
+import { useAnalysisStore } from "../store/useAnalysisStore";
+import { useDomainEditorStore } from "../store/useDomainEditorStore";
+import { useTestingStore } from "../store/useTestingStore";
 import { Card } from "../components/ui/card";
 import { Alert } from "../components/ui/alert";
 import { CheckCircle, XCircle, AlertCircle, Save } from "lucide-react";
@@ -34,6 +36,7 @@ export default function DomainDetail() {
   const navigate = useNavigate();
   const { domainId } = useParams();
 
+  // Analysis store
   const {
     analysis,
     fetchDomainAnalysis,
@@ -41,8 +44,6 @@ export default function DomainDetail() {
     analyzeDomainDocumentation,
     analyzeDomainRequirements,
     analyzeDomainTesting,
-    saveRequirements,
-    applyTest,
     domainAnalysisById,
     domainLoadingById,
     domainErrorById,
@@ -50,11 +51,22 @@ export default function DomainDetail() {
     domainDocumentationLoadingById,
     domainRequirementsLoadingById,
     domainTestingLoadingById,
-    applyingTestsByDomainId,
+  } = useAnalysisStore();
+
+  // Domain editor store
+  const {
     editedRequirementsByDomainId,
     updateEditedRequirements,
     resetEditedRequirements,
-  } = useAppStore();
+    editedFilesByDomainId,
+    updateEditedFiles,
+    resetEditedFiles,
+    saveRequirements,
+    initializeEditorsForDomain,
+  } = useDomainEditorStore();
+
+  // Testing store
+  const { applyingTestsByDomainId, applyTest } = useTestingStore();
 
   const domain = (analysis?.domains || []).find((item) => item.id === domainId);
   const detail = domainAnalysisById[domainId];
@@ -72,11 +84,15 @@ export default function DomainDetail() {
 
   useEffect(() => {
     if (domainId) {
-      fetchDomainAnalysis(domainId);
+      fetchDomainAnalysis(domainId).then(() => {
+        initializeEditorsForDomain(domainId);
+      });
     }
-  }, [domainId, fetchDomainAnalysis]);
+  }, [domainId, fetchDomainAnalysis, initializeEditorsForDomain]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
+  const filesText =
+    editedFilesByDomainId[domainId] || (domain?.files || []).join("\n");
 
   const existingTestFiles = useMemo(() => {
     const testing = detail?.testing;
@@ -153,8 +169,49 @@ export default function DomainDetail() {
 
         <Card.Root>
           <Card.Header>
+            <Heading size="md">Files</Heading>
+          </Card.Header>
+          <Card.Body>
+            <Text mb={3} color="gray.600" fontSize="sm">
+              These files define this domain. Edit to refine scope before
+              running analysis.
+            </Text>
+            <HStack align="start" gap={2}>
+              <Textarea
+                minH="180px"
+                flex="1"
+                fontFamily="mono"
+                fontSize="sm"
+                value={filesText}
+                onChange={(event) =>
+                  updateEditedFiles(domainId, event.target.value)
+                }
+                placeholder="backend/services/domain/file.js\nfrontend/src/pages/DomainPage.jsx"
+              />
+              <VStack gap={2}>
+                <IconButton
+                  size="sm"
+                  colorPalette="green"
+                  title="Save files (updates domain scope)"
+                >
+                  <Save size={16} />
+                </IconButton>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => resetEditedFiles(domainId)}
+                >
+                  Reset
+                </Button>
+              </VStack>
+            </HStack>
+          </Card.Body>
+        </Card.Root>
+
+        <Card.Root>
+          <Card.Header>
             <HStack justify="space-between">
-              <Heading size="md">1. Documentation</Heading>
+              <Heading size="md">Documentation</Heading>
               <Button
                 size="sm"
                 colorPalette="blue"
@@ -205,7 +262,7 @@ export default function DomainDetail() {
             >
               <ReactMarkdown>
                 {detail?.documentation?.businessPurpose ||
-                  "No documentation generated yet. Click **Analyze domain** to run detailed analysis."}
+                  "Click **Analyze documentation** to generate deep analysis. All files listed above will be analyzed to understand business purpose, responsibilities, and architecture."}
               </ReactMarkdown>
             </Box>
           </Card.Body>
@@ -214,7 +271,7 @@ export default function DomainDetail() {
         <Card.Root>
           <Card.Header>
             <HStack justify="space-between">
-              <Heading size="md">2. Requirements</Heading>
+              <Heading size="md">Requirements</Heading>
               <HStack>
                 <Button
                   size="sm"
@@ -269,7 +326,7 @@ export default function DomainDetail() {
         <Card.Root>
           <Card.Header>
             <HStack justify="space-between">
-              <Heading size="md">3. Testing</Heading>
+              <Heading size="md">Testing</Heading>
               <Button
                 size="sm"
                 colorPalette="blue"
