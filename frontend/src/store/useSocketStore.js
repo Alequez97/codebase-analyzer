@@ -49,12 +49,11 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.DOMAIN_ANALYSIS_STARTED, (data) => {
       const { domainId, taskType } = data;
       if (taskType === TASK_TYPES.ANALYZE_DOMAIN_DETAILED) {
-        useAnalysisStore.setState((state) => ({
-          domainAnalyzeLoadingById: {
-            ...state.domainAnalyzeLoadingById,
-            [domainId]: true,
-          },
-        }));
+        useAnalysisStore.setState((state) => {
+          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
+          newLoadingMap.set(domainId, true);
+          return { domainAnalyzeLoadingById: newLoadingMap };
+        });
       }
     });
 
@@ -62,16 +61,20 @@ export const useSocketStore = create((set, get) => ({
       const { domainId, taskType } = data;
 
       if (taskType === TASK_TYPES.ANALYZE_DOMAIN_DETAILED) {
-        useAnalysisStore.setState((state) => ({
-          domainAnalyzeLoadingById: {
-            ...state.domainAnalyzeLoadingById,
-            [domainId]: false,
-          },
-        }));
+        useAnalysisStore.setState((state) => {
+          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
+          newLoadingMap.set(domainId, false);
+          return { domainAnalyzeLoadingById: newLoadingMap };
+        });
       }
 
-      // Refresh domain data
-      await useAnalysisStore.getState().fetchDomainAnalysis(domainId);
+      // Refresh all domain sections in parallel
+      const analysisStore = useAnalysisStore.getState();
+      await Promise.all([
+        analysisStore.fetchDomainDocumentation(domainId),
+        analysisStore.fetchDomainRequirements(domainId),
+        analysisStore.fetchDomainTesting(domainId),
+      ]);
 
       // Initialize editors with new data
       useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
@@ -79,54 +82,48 @@ export const useSocketStore = create((set, get) => ({
 
     socket.on(SOCKET_EVENTS.DOMAIN_ANALYSIS_ERROR, (data) => {
       const { domainId, error, taskType } = data;
+      const errorMessage = error || "Domain analysis failed";
 
       if (taskType === TASK_TYPES.ANALYZE_DOMAIN_DETAILED) {
-        useAnalysisStore.setState((state) => ({
-          domainAnalyzeLoadingById: {
-            ...state.domainAnalyzeLoadingById,
-            [domainId]: false,
-          },
-          domainErrorById: {
-            ...state.domainErrorById,
-            [domainId]: error || "Domain analysis failed",
-          },
-        }));
+        useAnalysisStore.setState((state) => {
+          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
+          const newDocErrorMap = new Map(state.domainDocumentationErrorById);
+          const newReqErrorMap = new Map(state.domainRequirementsErrorById);
+          const newTestErrorMap = new Map(state.domainTestingErrorById);
+
+          newLoadingMap.set(domainId, false);
+          newDocErrorMap.set(domainId, errorMessage);
+          newReqErrorMap.set(domainId, errorMessage);
+          newTestErrorMap.set(domainId, errorMessage);
+
+          return {
+            domainAnalyzeLoadingById: newLoadingMap,
+            domainDocumentationErrorById: newDocErrorMap,
+            domainRequirementsErrorById: newReqErrorMap,
+            domainTestingErrorById: newTestErrorMap,
+          };
+        });
       }
     });
 
     // Section-specific events
     socket.on(SOCKET_EVENTS.DOMAIN_DOCUMENTATION_COMPLETED, async (data) => {
       const { domainId } = data;
-      useAnalysisStore.setState((state) => ({
-        domainDocumentationLoadingById: {
-          ...state.domainDocumentationLoadingById,
-          [domainId]: false,
-        },
-      }));
-      await useAnalysisStore.getState().fetchDomainAnalysis(domainId);
+      // Fetch only the documentation section
+      await useAnalysisStore.getState().fetchDomainDocumentation(domainId);
     });
 
     socket.on(SOCKET_EVENTS.DOMAIN_REQUIREMENTS_COMPLETED, async (data) => {
       const { domainId } = data;
-      useAnalysisStore.setState((state) => ({
-        domainRequirementsLoadingById: {
-          ...state.domainRequirementsLoadingById,
-          [domainId]: false,
-        },
-      }));
-      await useAnalysisStore.getState().fetchDomainAnalysis(domainId);
+      // Fetch only the requirements section
+      await useAnalysisStore.getState().fetchDomainRequirements(domainId);
       useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
     });
 
     socket.on(SOCKET_EVENTS.DOMAIN_TESTING_COMPLETED, async (data) => {
       const { domainId } = data;
-      useAnalysisStore.setState((state) => ({
-        domainTestingLoadingById: {
-          ...state.domainTestingLoadingById,
-          [domainId]: false,
-        },
-      }));
-      await useAnalysisStore.getState().fetchDomainAnalysis(domainId);
+      // Fetch only the testing section
+      await useAnalysisStore.getState().fetchDomainTesting(domainId);
     });
 
     // Task completion events

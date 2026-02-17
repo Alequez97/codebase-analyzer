@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Container, VStack } from "@chakra-ui/react";
+import { Container, VStack, List } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAnalysisStore } from "../store/useAnalysisStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
@@ -18,17 +18,23 @@ export default function DomainDetailsPage() {
   // Analysis store
   const {
     analysis,
-    fetchDomainAnalysis,
+    fetchDomainDocumentation,
+    fetchDomainRequirements,
+    fetchDomainTesting,
     analyzeDomain,
     analyzeDomainDocumentation,
     analyzeDomainRequirements,
     analyzeDomainTesting,
-    domainAnalysisById,
-    domainLoadingById,
+    domainDocumentationById,
+    domainRequirementsById,
+    domainTestingById,
     domainAnalyzeLoadingById,
     domainDocumentationLoadingById,
     domainRequirementsLoadingById,
     domainTestingLoadingById,
+    domainDocumentationErrorById,
+    domainRequirementsErrorById,
+    domainTestingErrorById,
   } = useAnalysisStore();
 
   // Domain editor store
@@ -48,25 +54,51 @@ export default function DomainDetailsPage() {
   const { applyingTestsByDomainId, applyTest } = useTestingStore();
 
   const domain = (analysis?.domains || []).find((item) => item.id === domainId);
-  const detail = domainAnalysisById.get(domainId);
-  const loading = !!domainLoadingById.get(domainId);
   const analyzing = !!domainAnalyzeLoadingById.get(domainId);
+
+  // Section-specific data
+  const documentation = domainDocumentationById.get(domainId);
+  const requirements = domainRequirementsById.get(domainId);
+  const testing = domainTestingById.get(domainId);
 
   // Loading states for individual sections
   const documentationLoading = !!domainDocumentationLoadingById.get(domainId);
   const requirementsLoading = !!domainRequirementsLoadingById.get(domainId);
   const testingLoading = !!domainTestingLoadingById.get(domainId);
 
+  // Error states for individual sections
+  const documentationError = domainDocumentationErrorById.get(domainId);
+  const requirementsError = domainRequirementsErrorById.get(domainId);
+  const testingError = domainTestingErrorById.get(domainId);
+
+  // Collect all errors into a single array
+  const errors = [
+    documentationError && { section: "Documentation", message: documentationError },
+    requirementsError && { section: "Requirements", message: requirementsError },
+    testingError && { section: "Testing", message: testingError },
+  ].filter(Boolean);
+
   // Test application states
   const applyingTests = applyingTestsByDomainId[domainId] || {};
 
   useEffect(() => {
     if (domainId) {
-      fetchDomainAnalysis(domainId).then(() => {
+      // Fetch all sections in parallel for better performance
+      Promise.all([
+        fetchDomainDocumentation(domainId),
+        fetchDomainRequirements(domainId),
+        fetchDomainTesting(domainId),
+      ]).then(() => {
         initializeEditorsForDomain(domainId);
       });
     }
-  }, [domainId, fetchDomainAnalysis, initializeEditorsForDomain]);
+  }, [
+    domainId,
+    fetchDomainDocumentation,
+    fetchDomainRequirements,
+    fetchDomainTesting,
+    initializeEditorsForDomain,
+  ]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
 
@@ -115,10 +147,24 @@ export default function DomainDetailsPage() {
           onAnalyze={() => domain && analyzeDomain(domain)}
         />
 
-        {loading && (
-          <Alert.Root status="info">
+        {/* Section-specific errors in a single alert */}
+        {errors.length > 0 && (
+          <Alert.Root status="error">
             <Alert.Indicator />
-            <Alert.Title>Loading domain analysis...</Alert.Title>
+            <Alert.Title>
+              {errors.length === 1
+                ? "Analysis Error"
+                : `${errors.length} Analysis Errors`}
+            </Alert.Title>
+            <Alert.Description>
+              <List.Root>
+                {errors.map((error, index) => (
+                  <List.Item key={index}>
+                    <strong>{error.section}:</strong> {error.message}
+                  </List.Item>
+                ))}
+              </List.Root>
+            </Alert.Description>
           </Alert.Root>
         )}
 
@@ -130,7 +176,7 @@ export default function DomainDetailsPage() {
         />
 
         <DomainDocumentationSection
-          documentation={detail?.documentation}
+          documentation={documentation}
           loading={documentationLoading}
           onAnalyze={() => domain && analyzeDomainDocumentation(domain)}
         />
@@ -147,7 +193,7 @@ export default function DomainDetailsPage() {
         />
 
         <DomainTestingSection
-          testing={detail?.testing}
+          testing={testing}
           loading={testingLoading}
           applyingTests={applyingTests}
           onAnalyze={() => domain && analyzeDomainTesting(domain)}
