@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import api from "../services/api";
+import { sortDomainsByPriority } from "../utils/domain-utils";
 
 export const useAnalysisStore = create(
   persist(
@@ -45,16 +46,25 @@ export const useAnalysisStore = create(
           // Try to fetch analysis (may not exist yet)
           try {
             const analysisResponse = await api.getFullCodebaseAnalysis();
+            const analysisData = analysisResponse.data;
+
+            // Sort domains by priority
+            if (analysisData?.domains) {
+              analysisData.domains = sortDomainsByPriority(
+                analysisData.domains,
+              );
+            }
+
             set({
               status: statusResponse.data,
-              analysis: analysisResponse.data,
+              analysis: analysisData,
               loading: false,
             });
 
             // Check for pending tasks after loading analysis
             await get().fetchPendingTasks();
 
-            return analysisResponse.data;
+            return analysisData;
           } catch (analysisErr) {
             // 404 is expected when no analysis exists yet - not an error
             if (analysisErr?.response?.status === 404) {
