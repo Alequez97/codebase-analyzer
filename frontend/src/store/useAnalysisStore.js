@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import api from "../services/api";
 import { sortDomainsByPriority } from "../utils/domain-utils";
+import { TASK_TYPES } from "../constants/task-types";
 
 export const useAnalysisStore = create(
   persist(
@@ -24,6 +25,8 @@ export const useAnalysisStore = create(
       domainDocumentationErrorById: new Map(),
       domainRequirementsErrorById: new Map(),
       domainTestingErrorById: new Map(),
+      // Task progress tracking (Map) - stores latest progress message by domain
+      domainTaskProgressById: new Map(),
       analyzingCodebase: false,
       pendingCodebaseTask: null,
       loading: false,
@@ -42,6 +45,17 @@ export const useAnalysisStore = create(
       setError: (error) => set({ error }),
 
       clearError: () => set({ error: null }),
+
+      setDomainTaskProgress: (domainId, progress) =>
+        set((state) => {
+          const newMap = new Map(state.domainTaskProgressById);
+          if (progress) {
+            newMap.set(domainId, progress);
+          } else {
+            newMap.delete(domainId);
+          }
+          return { domainTaskProgressById: newMap };
+        }),
 
       fetchAnalysis: async () => {
         // Check if we already have cached analysis - return it without fetching
@@ -104,7 +118,7 @@ export const useAnalysisStore = create(
 
           // Find pending codebase-analysis task
           const codebaseTask = tasks.find(
-            (task) => task.type === "codebase-analysis",
+            (task) => task.type === TASK_TYPES.CODEBASE_ANALYSIS,
           );
 
           if (codebaseTask) {
@@ -216,27 +230,22 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainDocumentation(
-            domain.id,
-            domain.name,
-            domain.files || [],
-          );
+          await api.analyzeDomainDocumentation(domain.id, domain.files || []);
           return { success: true };
         } catch (err) {
           const message =
             err?.response?.data?.message || "Failed to analyze documentation";
           set((state) => {
+            const newLoadingMap = new Map(state.domainDocumentationLoadingById);
             const newErrorMap = new Map(state.domainDocumentationErrorById);
+            newLoadingMap.set(domain.id, false);
             newErrorMap.set(domain.id, message);
-            return { domainDocumentationErrorById: newErrorMap };
+            return {
+              domainDocumentationLoadingById: newLoadingMap,
+              domainDocumentationErrorById: newErrorMap,
+            };
           });
           return { success: false, error: message };
-        } finally {
-          set((state) => {
-            const newLoadingMap = new Map(state.domainDocumentationLoadingById);
-            newLoadingMap.set(domain.id, false);
-            return { domainDocumentationLoadingById: newLoadingMap };
-          });
         }
       },
 
@@ -256,11 +265,7 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainRequirements(
-            domain.id,
-            domain.name,
-            domain.files || [],
-          );
+          await api.analyzeDomainRequirements(domain.id, domain.files || []);
           return { success: true };
         } catch (err) {
           const message =
@@ -296,11 +301,7 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainTesting(
-            domain.id,
-            domain.name,
-            domain.files || [],
-          );
+          await api.analyzeDomainTesting(domain.id, domain.files || []);
           return { success: true };
         } catch (err) {
           const message =

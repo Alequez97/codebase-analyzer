@@ -1,12 +1,22 @@
 import { useState } from "react";
-import { Box, Button, Heading, HStack, IconButton, Textarea } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  IconButton,
+  Textarea,
+  Text,
+  Badge,
+} from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
-import { Pencil, X, Save } from "lucide-react";
+import { Pencil, X, Save, FileText } from "lucide-react";
 import { Card } from "../ui/card";
 
 export default function DomainDocumentationSection({
   documentation,
   loading,
+  progress,
   onAnalyze,
   editedDocumentation,
   onDocumentationChange,
@@ -32,7 +42,10 @@ export default function DomainDocumentationSection({
   const displayContent =
     editedDocumentation !== undefined && editedDocumentation !== null
       ? editedDocumentation
-      : documentation?.documentation?.businessPurpose || "";
+      : documentation?.content || "";
+
+  const statusText = documentation?.metadata?.status || null;
+  const logFile = documentation?.metadata?.logFile || null;
 
   return (
     <Card.Root>
@@ -60,6 +73,11 @@ export default function DomainDocumentationSection({
               >
                 <X size={16} />
               </IconButton>
+            )}
+            {statusText && (
+              <Badge colorPalette="green" size="sm">
+                {statusText}
+              </Badge>
             )}
           </HStack>
           <HStack>
@@ -91,6 +109,24 @@ export default function DomainDocumentationSection({
         </HStack>
       </Card.Header>
       <Card.Body>
+        {(loading || progress) && (
+          <Box
+            mb={4}
+            p={3}
+            bg="blue.50"
+            borderRadius="md"
+            borderLeft="4px solid"
+            borderColor="blue.500"
+          >
+            <HStack gap={2}>
+              <FileText size={16} />
+              <Text fontSize="sm" fontWeight="medium" color="blue.800">
+                {progress?.message ||
+                  "AI is analyzing domain files and generating documentation..."}
+              </Text>
+            </HStack>
+          </Box>
+        )}
         {isEditMode ? (
           <Textarea
             value={displayContent}

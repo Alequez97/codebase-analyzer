@@ -311,13 +311,13 @@ app.get("/api/analysis/domain/:id/testing", async (req, res) => {
 app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
   try {
     const { id } = req.params;
-    const { domainName, files } = req.body;
+    const { files } = req.body;
     const agent = DEFAULT_AGENTS.DOMAIN_DOCUMENTATION;
 
-    if (!domainName || !files || !Array.isArray(files)) {
+    if (!files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
-        message: "domainName and files[] are required",
+        message: "files[] are required",
       });
     }
 
@@ -325,7 +325,6 @@ app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
     const executeNow = req.body.executeNow !== false;
     const task = await taskOrchestrator.createAnalyzeDocumentationTask(
       id,
-      domainName,
       files,
       executeNow,
       agent,
@@ -348,13 +347,13 @@ app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
 app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
   try {
     const { id } = req.params;
-    const { domainName, files } = req.body;
+    const { files } = req.body;
     const agent = DEFAULT_AGENTS.DOMAIN_REQUIREMENTS;
 
-    if (!domainName || !files || !Array.isArray(files)) {
+    if (!files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
-        message: "domainName and files[] are required",
+        message: "files[] are required",
       });
     }
 
@@ -379,13 +378,13 @@ app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
 app.post("/api/analysis/domain/:id/analyze/testing", async (req, res) => {
   try {
     const { id } = req.params;
-    const { domainName, files } = req.body;
+    const { files } = req.body;
     const agent = DEFAULT_AGENTS.DOMAIN_TESTING;
 
-    if (!domainName || !files || !Array.isArray(files)) {
+    if (!files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
-        message: "domainName and files[] are required",
+        message: "files[] are required",
       });
     }
 

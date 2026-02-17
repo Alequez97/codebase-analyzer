@@ -4,6 +4,7 @@ import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
 import { getAgent } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { TASK_TYPES } from "../constants/task-types.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 
@@ -26,7 +27,7 @@ function generateTaskId(prefix) {
 export async function createFullCodebaseAnalysisTask(executeNow, agent) {
   const task = {
     id: generateTaskId("analyze-codebase"),
-    type: "codebase-analysis",
+    type: TASK_TYPES.CODEBASE_ANALYSIS,
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
@@ -72,7 +73,6 @@ export async function getTask(taskId) {
 /**
  * Create a domain documentation analysis task
  * @param {string} domainId - The domain ID
- * @param {string} domainName - The domain name
  * @param {string[]} files - Files in the domain
  * @param {boolean} executeNow - Whether to execute immediately
  * @param {string} agent - Agent to use for analysis
@@ -80,25 +80,23 @@ export async function getTask(taskId) {
  */
 export async function createAnalyzeDocumentationTask(
   domainId,
-  domainName,
   files,
   executeNow,
   agent,
 ) {
   const task = {
     id: generateTaskId("analyze-documentation"),
-    type: "analyze-documentation",
+    type: TASK_TYPES.DOCUMENTATION,
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
       agent,
       domainId,
-      domainName,
       files,
       targetDirectory: config.target.directory,
     },
     instructionFile: "backend/instructions/analyze-domain-documentation.md",
-    outputFile: `.code-analysis/domains/${domainId}/documentation.md`,
+    outputFile: `.code-analysis/domains/${domainId}/documentation.json`,
   };
 
   await tasksPersistence.writeTask(task);
@@ -234,6 +232,15 @@ export async function executeTask(taskId) {
       taskId,
       type: task.type,
       domainId: task.params?.domainId,
+      timestamp: new Date().toISOString(),
+    });
+  } else {
+    // Task failed - emit failure event
+    emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
+      taskId,
+      type: task.type,
+      domainId: task.params?.domainId,
+      error: result.error || "Task execution failed",
       timestamp: new Date().toISOString(),
     });
   }

@@ -87,7 +87,6 @@ const config = {
 
     // Analyzer internal paths
     instructions: path.join(__dirname, "instructions"),
-    schemas: path.join(__dirname, "schemas"),
   },
 
   // File watching

@@ -70,10 +70,21 @@ export class ClaudeClient extends BaseLLMClient {
   formatMessages(messages) {
     return messages
       .filter((m) => m.role !== "system")
-      .map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      .map((msg) => {
+        // Normalize content to array format for consistency
+        // Claude requires array format when using tools
+        let content = msg.content;
+
+        // If content is a string, convert to array format with type field
+        if (typeof content === "string") {
+          content = [{ type: "text", text: content }];
+        }
+
+        return {
+          role: msg.role,
+          content,
+        };
+      });
   }
 
   /**

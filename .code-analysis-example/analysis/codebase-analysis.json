@@ -1,28 +1,4 @@
 {
-  "_comment": "This file shows the expected structure of .code-analysis/ folder",
-  "_structure": {
-    "description": "Expected folder structure after analysis",
-    "folders": {
-      "analysis/": "Contains codebase-analysis.json (this file format)",
-      "domains/": {
-        "description": "Each domain has its own subfolder",
-        "example": "domains/user-authentication/",
-        "files": {
-          "documentation.md": "Generated markdown documentation",
-          "documentation.meta.json": "Metadata about doc generation (taskId, timestamps, tokens, etc)",
-          "requirements.json": "Requirements analysis",
-          "requirements.meta.json": "Metadata about requirements generation",
-          "testing.json": "Testing analysis",
-          "testing.meta.json": "Metadata about testing generation"
-        }
-      },
-      "logs/": "Task execution logs (task-id.log)",
-      "tasks/": {
-        "pending/": "Queued tasks",
-        "completed/": "Finished tasks"
-      }
-    }
-  },
   "taskId": "analyze-codebase-20260217-143000-a1b2c3",
   "timestamp": "2026-02-17T14:30:00.000Z",
   "completedAt": "2026-02-17T14:35:42.567Z",

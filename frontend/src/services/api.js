@@ -27,23 +27,20 @@ export default {
   getDomainRequirements: (id) => api.get(`/analysis/domain/${id}/requirements`),
   getDomainTesting: (id) => api.get(`/analysis/domain/${id}/testing`),
 
-  analyzeDomainDocumentation: (id, domainName, files, executeNow = true) =>
+  analyzeDomainDocumentation: (id, files, executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/documentation`, {
-      domainName,
       files,
       executeNow,
     }),
 
-  analyzeDomainRequirements: (id, domainName, files, executeNow = true) =>
+  analyzeDomainRequirements: (id, files, executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/requirements`, {
-      domainName,
       files,
       executeNow,
     }),
 
-  analyzeDomainTesting: (id, domainName, files, executeNow = true) =>
+  analyzeDomainTesting: (id, files, executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/testing`, {
-      domainName,
       files,
       executeNow,
     }),

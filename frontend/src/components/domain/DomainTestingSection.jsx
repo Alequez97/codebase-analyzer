@@ -12,7 +12,7 @@ import {
   Table,
   Icon,
 } from "@chakra-ui/react";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, FileText } from "lucide-react";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
 
@@ -440,6 +440,7 @@ function TestRecommendations({ recommendations }) {
 export default function DomainTestingSection({
   testing,
   loading,
+  progress,
   applyingTests,
   onAnalyze,
   onApplyTest,
@@ -464,6 +465,24 @@ export default function DomainTestingSection({
         </HStack>
       </Card.Header>
       <Card.Body>
+        {(loading || progress) && (
+          <Box
+            mb={4}
+            p={3}
+            bg="blue.50"
+            borderRadius="md"
+            borderLeft="4px solid"
+            borderColor="blue.500"
+          >
+            <HStack gap={2}>
+              <FileText size={16} />
+              <Text fontSize="sm" fontWeight="medium" color="blue.800">
+                {progress?.message ||
+                  "AI is analyzing domain files and generating test recommendations..."}
+              </Text>
+            </HStack>
+          </Box>
+        )}
         {!testing && (
           <Alert.Root status="info">
             <Alert.Indicator />

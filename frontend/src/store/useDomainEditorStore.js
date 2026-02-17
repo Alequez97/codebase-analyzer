@@ -50,7 +50,8 @@ export const useDomainEditorStore = create(
       initializeEditorsForDomain: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
         const detail = analysisStore.domainAnalysisById.get(domainId);
-        const documentation = analysisStore.domainDocumentationById.get(domainId);
+        const documentation =
+          analysisStore.domainDocumentationById.get(domainId);
 
         set((state) => {
           const updates = {};
@@ -67,7 +68,7 @@ export const useDomainEditorStore = create(
           if (!state.editedDocumentationByDomainId[domainId]) {
             updates.editedDocumentationByDomainId = {
               ...state.editedDocumentationByDomainId,
-              [domainId]: documentation?.documentation?.businessPurpose || "",
+              [domainId]: documentation?.content || "",
             };
           }
 
@@ -134,12 +135,13 @@ export const useDomainEditorStore = create(
 
       resetEditedDocumentation: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
-        const documentation = analysisStore.domainDocumentationById.get(domainId);
+        const documentation =
+          analysisStore.domainDocumentationById.get(domainId);
 
         set((state) => ({
           editedDocumentationByDomainId: {
             ...state.editedDocumentationByDomainId,
-            [domainId]: documentation?.documentation?.businessPurpose || "",
+            [domainId]: documentation?.content || "",
           },
         }));
       },
@@ -181,7 +183,9 @@ export const useDomainEditorStore = create(
           const currentAnalysis = analysisStore.analysis;
           if (currentAnalysis?.domains) {
             const updatedDomains = currentAnalysis.domains.map((domain) =>
-              domain.id === domainId ? { ...domain, files: filesArray } : domain
+              domain.id === domainId
+                ? { ...domain, files: filesArray }
+                : domain,
             );
             analysisStore.setAnalysis({
               ...currentAnalysis,
@@ -205,24 +209,21 @@ export const useDomainEditorStore = create(
         try {
           await api.saveDocumentation(domainId, documentation);
 
-          // Update the cache in analysis store
+          // Update the cache in analysis store with correct structure
           const analysisStore = useAnalysisStore.getState();
-          const currentDoc = analysisStore.domainDocumentationById.get(domainId);
-          if (currentDoc) {
-            const updatedDoc = {
-              ...currentDoc,
-              documentation: {
-                businessPurpose: documentation,
-              },
-              timestamp: new Date().toISOString(),
-            };
-            const newMap = new Map(analysisStore.domainDocumentationById);
-            newMap.set(domainId, updatedDoc);
-            analysisStore.setAnalysis({
-              ...analysisStore.analysis,
-              domainDocumentationById: newMap,
-            });
-          }
+          const currentDoc =
+            analysisStore.domainDocumentationById.get(domainId);
+          const updatedDoc = {
+            content: documentation,
+            metadata: {
+              ...currentDoc?.metadata,
+              status: "manually-edited",
+              updatedAt: new Date().toISOString(),
+            },
+          };
+          const newMap = new Map(analysisStore.domainDocumentationById);
+          newMap.set(domainId, updatedDoc);
+          useAnalysisStore.setState({ domainDocumentationById: newMap });
 
           return { success: true };
         } catch (err) {

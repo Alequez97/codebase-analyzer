@@ -10,34 +10,12 @@ import { tryReadJsonFile } from "./utils.js";
  */
 export async function readDomainDocumentation(domainId) {
   try {
-    // Try new markdown format first
-    const markdownPath = path.join(
-      config.paths.targetAnalysis,
-      "domains",
-      domainId,
-      "documentation.md",
-    );
-
-    try {
-      const markdownContent = await fs.readFile(markdownPath, "utf-8");
-      return {
-        domainId,
-        timestamp: new Date().toISOString(),
-        documentation: {
-          businessPurpose: markdownContent,
-        },
-      };
-    } catch (mdError) {
-      if (mdError.code !== "ENOENT") {
-        throw mdError;
-      }
-    }
-
-    // Fall back to legacy JSON format
+    // Read documentation.json which contains {content, metadata}
     const jsonPath = path.join(
       config.paths.targetAnalysis,
       "domains",
-      `${domainId}-documentation.json`,
+      domainId,
+      "documentation.json",
     );
     return await tryReadJsonFile(jsonPath, `domain ${domainId} documentation`);
   } catch (error) {
@@ -51,29 +29,14 @@ export async function readDomainDocumentation(domainId) {
 /**
  * Write domain documentation section
  * @param {string} domainId - The domain ID
- * @param {string|Object} data - Documentation data (string for markdown, object for JSON)
+ * @param {Object} data - Documentation data {content: string, metadata: object}
  */
 export async function writeDomainDocumentation(domainId, data) {
-  // If data is a string, write as markdown
-  if (typeof data === "string") {
-    const dirPath = path.join(
-      config.paths.targetAnalysis,
-      "domains",
-      domainId,
-    );
-    await fs.mkdir(dirPath, { recursive: true });
+  const dirPath = path.join(config.paths.targetAnalysis, "domains", domainId);
+  await fs.mkdir(dirPath, { recursive: true });
 
-    const filePath = path.join(dirPath, "documentation.md");
-    await fs.writeFile(filePath, data, "utf-8");
-  } else {
-    // Legacy: write as JSON
-    const filePath = path.join(
-      config.paths.targetAnalysis,
-      "domains",
-      `${domainId}-documentation.json`,
-    );
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
-  }
+  const filePath = path.join(dirPath, "documentation.json");
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 /**
@@ -238,27 +201,113 @@ export async function writeDomain(domainId, data) {
 }
 
 /**
+ * Read domain documentation metadata
+ * @param {string} domainId - The domain ID
+ * @returns {Promise<Object|null>} Metadata or null if not found
+ */
+export async function readDomainDocumentationMetadata(domainId) {
+  try {
+    const metadataPath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+      "documentation.meta.json",
+    );
+    return await tryReadJsonFile(
+      metadataPath,
+      `domain ${domainId} documentation metadata`,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Read domain requirements metadata
+ * @param {string} domainId - The domain ID
+ * @returns {Promise<Object|null>} Metadata or null if not found
+ */
+export async function readDomainRequirementsMetadata(domainId) {
+  try {
+    const metadataPath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+      "requirements.meta.json",
+    );
+    return await tryReadJsonFile(
+      metadataPath,
+      `domain ${domainId} requirements metadata`,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Read domain testing metadata
+ * @param {string} domainId - The domain ID
+ * @returns {Promise<Object|null>} Metadata or null if not found
+ */
+export async function readDomainTestingMetadata(domainId) {
+  try {
+    const metadataPath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+      "testing.meta.json",
+    );
+    return await tryReadJsonFile(
+      metadataPath,
+      `domain ${domainId} testing metadata`,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
  * List all domain IDs that have analyses
  * @returns {Promise<string[]>} Array of domain IDs
  */
 export async function listDomains() {
   try {
     const domainsDir = path.join(config.paths.targetAnalysis, "domains");
-    const files = await fs.readdir(domainsDir);
 
-    // Extract unique domain IDs from filenames
+    // Check if directory exists
+    try {
+      await fs.access(domainsDir);
+    } catch {
+      return [];
+    }
+
+    const entries = await fs.readdir(domainsDir, { withFileTypes: true });
+
+    // Get all subdirectories (each represents a domain)
     const domainIds = new Set();
-    files
-      .filter((f) => f.endsWith(".json"))
-      .forEach((f) => {
-        // Remove file extension and section suffix
-        const domainId = f
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        domainIds.add(entry.name);
+      } else if (entry.name.endsWith(".json")) {
+        // Legacy support: extract domain ID from JSON filenames
+        const domainId = entry.name
           .replace(".json", "")
           .replace(/-documentation$/, "")
           .replace(/-requirements$/, "")
           .replace(/-testing$/, "");
         domainIds.add(domainId);
-      });
+      }
+    }
 
     return Array.from(domainIds);
   } catch (error) {

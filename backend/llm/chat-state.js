@@ -50,10 +50,17 @@ export class ChatState {
    */
   addToolUse(toolCalls) {
     // Store tool calls in assistant message content
-    // This follows Anthropic's format where tool_use is part of assistant message
+    // Convert normalized tool calls back to Claude's format with type field
+    const formattedContent = toolCalls.map((call) => ({
+      type: "tool_use",
+      id: call.id,
+      name: call.name,
+      input: call.arguments,
+    }));
+
     this.messages.push({
       role: "assistant",
-      content: toolCalls,
+      content: formattedContent,
     });
   }
 

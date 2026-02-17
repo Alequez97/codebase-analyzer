@@ -244,15 +244,13 @@ Dashboard shows: "Click Analyze Codebase to begin"
 
 ### Step 2: Discover Modules
 
-**User clicks**: "Analyze Codebase"  
-**AI does**: Analyzes project structure, identifies modules  
+**User clicks**: "Analyze Codebase"
+**AI does**: Analyzes project structure, identifies modules
 **User sees**: Grid of discovered modules (e.g., "User Authentication", "Payment Processing")
 
 ### Step 3: Analyze a Module
 
-**User clicks**: "Analyze" on "User Authentication"  
-**AI does**: Deep analysis of all auth-related files  
-**User sees**:
+**User clicks**: "Analyze" on "User Authentication"**AI does**: Deep analysis of all auth-related files**User sees**:
 
 - 3 critical security issues
 - 7 bugs
@@ -260,8 +258,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 
 ### Step 4: Review Findings
 
-**User clicks**: On a security issue  
-**User sees**:
+**User clicks**: On a security issue**User sees**:
 
 - **Issue**: SQL Injection vulnerability
 - **Location**: `auth/login.js:42`
@@ -270,9 +267,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 
 ### Step 5: Apply Fix
 
-**User clicks**: "Apply Fix" button  
-**Backend does**: Applies the fix to `auth/login.js`  
-**User sees**:
+**User clicks**: "Apply Fix" button**Backend does**: Applies the fix to `auth/login.js`**User sees**:
 
 - Success message
 - Code diff showing changes
@@ -280,8 +275,8 @@ Dashboard shows: "Click Analyze Codebase to begin"
 
 ### Step 6: Batch Fixes (Optional)
 
-**User clicks**: "Fix All" for a category  
-**Backend does**: Applies all auto-fixable issues  
+**User clicks**: "Fix All" for a category
+**Backend does**: Applies all auto-fixable issues
 **User sees**: Progress bar, summary of applied fixes
 
 ## Why This Approach?
@@ -369,17 +364,17 @@ Dashboard shows: "Click Analyze Codebase to begin"
   storage: createJSONStorage(() => sessionStorage, {
     replacer: (_key, value) => {
       if (value instanceof Map) {
-        return { __type: 'Map', value: Array.from(value.entries()) };
+        return { __type: "Map", value: Array.from(value.entries()) };
       }
       return value;
     },
     reviver: (_key, value) => {
-      if (value && value.__type === 'Map') {
+      if (value && value.__type === "Map") {
         return new Map(value.value);
       }
       return value;
     },
-  })
+  });
   ```
 
 #### 6.2 **Split Large Endpoints into Modular Endpoints**
@@ -422,6 +417,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Never use nested try-catch blocks for control flow; use loops with early returns instead
 - Don't migrate or maintain backward compatibility - just implement the new structure cleanly
 - **Always use the centralized logger utility** (`backend/utils/logger.js`) instead of `console.log` for proper log level management and consistent output formatting
+- **Always use constants** - Never hardcode task type strings (e.g., `"analyze-documentation"`). Use `TASK_TYPES.DOCUMENTATION` from `constants/task-types.js` instead. This applies to both frontend and backend code for consistency and maintainability.
 
 ### 8. **User Feedback with Toasts**
 
@@ -437,6 +433,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
   - `description`: Additional details (optional, useful for error messages)
   - `type`: "success" or "error" for appropriate styling
   - Example:
+
     ```javascript
     toaster.create({
       title: "Files saved successfully",

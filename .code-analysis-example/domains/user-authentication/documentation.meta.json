@@ -1,0 +1,58 @@
+{
+  "domainId": "user-authentication",
+  "domainName": "User Authentication",
+  "taskId": "analyze-documentation-20260217-143000-a1b2c3",
+  "generatedAt": "2026-02-17T14:30:00.000Z",
+  "completedAt": "2026-02-17T14:32:15.234Z",
+  "durationMs": 135234,
+  "agent": "llm-api",
+  "model": "claude-sonnet-4-20250514",
+  "files": [
+    {
+      "path": "/full/path/to/backend/controllers/auth.js",
+      "relativePath": "backend/controllers/auth.js"
+    },
+    {
+      "path": "/full/path/to/backend/models/user.js",
+      "relativePath": "backend/models/user.js"
+    },
+    {
+      "path": "/full/path/to/backend/routes/auth.js",
+      "relativePath": "backend/routes/auth.js"
+    },
+    {
+      "path": "/full/path/to/backend/middleware/authProtect.js",
+      "relativePath": "backend/middleware/authProtect.js"
+    }
+  ],
+  "iterations": 8,
+  "tokenUsage": {
+    "inputTokens": 45230,
+    "outputTokens": 3420,
+    "totalTokens": 48650
+  },
+  "conversationLog": [
+    {
+      "iteration": 1,
+      "timestamp": "2026-02-17T14:30:01.123Z",
+      "inputTokens": 2340,
+      "outputTokens": 156,
+      "stopReason": "tool_use"
+    },
+    {
+      "iteration": 2,
+      "timestamp": "2026-02-17T14:30:15.456Z",
+      "inputTokens": 5670,
+      "outputTokens": 203,
+      "stopReason": "tool_use"
+    },
+    {
+      "iteration": 8,
+      "timestamp": "2026-02-17T14:32:15.234Z",
+      "inputTokens": 21610,
+      "outputTokens": 1607,
+      "stopReason": "end_turn"
+    }
+  ],
+  "status": "completed"
+}

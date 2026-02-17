@@ -35,6 +35,7 @@ export default function DomainDetailsPage() {
     domainDocumentationErrorById,
     domainRequirementsErrorById,
     domainTestingErrorById,
+    domainTaskProgressById,
   } = useAnalysisStore();
 
   // Domain editor store
@@ -74,6 +75,15 @@ export default function DomainDetailsPage() {
   const documentationError = domainDocumentationErrorById.get(domainId);
   const requirementsError = domainRequirementsErrorById.get(domainId);
   const testingError = domainTestingErrorById.get(domainId);
+
+  // Task progress - filter by section type
+  const taskProgress = domainTaskProgressById.get(domainId);
+  const documentationProgress =
+    taskProgress?.type === "analyze-documentation" ? taskProgress : null;
+  const requirementsProgress =
+    taskProgress?.type === "analyze-requirements" ? taskProgress : null;
+  const testingProgress =
+    taskProgress?.type === "analyze-testing" ? taskProgress : null;
 
   // Collect all errors into a single array
   const errors = [
@@ -210,22 +220,24 @@ export default function DomainDetailsPage() {
 
         {/* Section-specific errors in a single alert */}
         {errors.length > 0 && (
-          <Alert.Root status="error">
-            <Alert.Indicator />
-            <Alert.Title>
-              {errors.length === 1
-                ? "Analysis Error"
-                : `${errors.length} Analysis Errors`}
-            </Alert.Title>
-            <Alert.Description>
-              <List.Root>
-                {errors.map((error, index) => (
-                  <List.Item key={index}>
-                    <strong>{error.section}:</strong> {error.message}
-                  </List.Item>
-                ))}
-              </List.Root>
-            </Alert.Description>
+          <Alert.Root status="error" alignItems="flex-start">
+            <Alert.Indicator mt={1} />
+            <VStack align="stretch" gap={1}>
+              <Alert.Title>
+                {errors.length === 1
+                  ? "Analysis Error"
+                  : `${errors.length} Analysis Errors`}
+              </Alert.Title>
+              <Alert.Description>
+                <List.Root>
+                  {errors.map((error, index) => (
+                    <List.Item key={index}>
+                      <strong>{error.section}:</strong> {error.message}
+                    </List.Item>
+                  ))}
+                </List.Root>
+              </Alert.Description>
+            </VStack>
           </Alert.Root>
         )}
 
@@ -239,6 +251,7 @@ export default function DomainDetailsPage() {
         <DomainDocumentationSection
           documentation={documentation}
           loading={documentationLoading}
+          progress={documentationProgress}
           onAnalyze={() => domain && analyzeDomainDocumentation(domain)}
           editedDocumentation={documentationText}
           onDocumentationChange={(value) =>
@@ -251,6 +264,7 @@ export default function DomainDetailsPage() {
         <DomainRequirementsSection
           requirementsText={requirementsText}
           loading={requirementsLoading}
+          progress={requirementsProgress}
           onRequirementsChange={(value) =>
             updateEditedRequirements(domainId, value)
           }
@@ -262,6 +276,7 @@ export default function DomainDetailsPage() {
         <DomainTestingSection
           testing={testing}
           loading={testingLoading}
+          progress={testingProgress}
           applyingTests={applyingTests}
           onAnalyze={() => domain && analyzeDomainTesting(domain)}
           onApplyTest={handleApplyTest}

@@ -27,12 +27,10 @@ const AGENTS = {
  */
 export const DEFAULT_AGENTS = {
   CODEBASE_ANALYSIS: "llm-api",
-  DOMAIN_ANALYSIS: "aider",
-  DOMAIN_DOCUMENTATION: "aider",
+  DOMAIN_DOCUMENTATION: "llm-api",
   DOMAIN_REQUIREMENTS: "aider",
   DOMAIN_TESTING: "aider",
 };
-
 
 /**
  * Get available agent based on config and detection
