@@ -16,6 +16,7 @@ export const useAnalysisStore = create(
       domainRequirementsLoadingById: {},
       domainTestingLoadingById: {},
       analyzingCodebase: false,
+      pendingCodebaseTask: null,
       loading: true,
       error: null,
 
@@ -25,6 +26,9 @@ export const useAnalysisStore = create(
       setAnalysis: (analysis) => set({ analysis }),
 
       setAnalyzingCodebase: (analyzingCodebase) => set({ analyzingCodebase }),
+
+      setPendingCodebaseTask: (task) =>
+        set({ pendingCodebaseTask: task, analyzingCodebase: !!task }),
 
       setLoading: (loading) => set({ loading }),
 
@@ -46,6 +50,10 @@ export const useAnalysisStore = create(
               analysis: analysisResponse.data,
               loading: false,
             });
+
+            // Check for pending tasks after loading analysis
+            await get().fetchPendingTasks();
+
             return analysisResponse.data;
           } catch (analysisErr) {
             // 404 is expected when no analysis exists yet - not an error
@@ -55,6 +63,10 @@ export const useAnalysisStore = create(
                 analysis: null,
                 loading: false,
               });
+
+              // Check for pending tasks even when no analysis exists
+              await get().fetchPendingTasks();
+
               return null;
             }
             throw analysisErr; // Re-throw other errors
@@ -67,19 +79,56 @@ export const useAnalysisStore = create(
         }
       },
 
+      fetchPendingTasks: async () => {
+        try {
+          const response = await api.getPendingTasks();
+          const tasks = response.data || [];
+
+          // Find pending codebase-analysis task
+          const codebaseTask = tasks.find(
+            (task) => task.type === "codebase-analysis",
+          );
+
+          if (codebaseTask) {
+            set({
+              pendingCodebaseTask: codebaseTask,
+              analyzingCodebase: true,
+            });
+          }
+
+          return tasks;
+        } catch (err) {
+          console.error("Failed to fetch pending tasks:", err);
+          return [];
+        }
+      },
+
       analyzeCodebase: async () => {
         set({ analyzingCodebase: true, error: null });
         try {
           const response = await api.requestCodebaseAnalysis();
-          return { success: true, data: response.data };
+          const task = response.data;
+
+          // Store the pending task
+          set({
+            pendingCodebaseTask: task,
+            analyzingCodebase: true,
+          });
+
+          return { success: true, data: task };
         } catch (err) {
           const message =
             err?.response?.data?.message || "Failed to start analysis";
-          set({ error: message });
+          set({ error: message, analyzingCodebase: false });
           return { success: false, error: message };
-        } finally {
-          set({ analyzingCodebase: false });
         }
+      },
+
+      clearPendingCodebaseTask: () => {
+        set({
+          pendingCodebaseTask: null,
+          analyzingCodebase: false,
+        });
       },
 
       fetchDomainAnalysis: async (domainId) => {

@@ -19,6 +19,7 @@ export function ModulesSection() {
     status,
     analysis,
     analyzingCodebase,
+    pendingCodebaseTask,
     analyzeCodebase,
     analyzeDomain,
     domainAnalyzeLoadingById,
@@ -49,7 +50,9 @@ export function ModulesSection() {
             <Alert.Indicator />
             <Alert.Title>Analysis in progress...</Alert.Title>
             <Alert.Description>
-              Analyzing your codebase. This may take a few minutes.
+              {pendingCodebaseTask
+                ? `Task ID: ${pendingCodebaseTask.id} - Analyzing your codebase. This may take a few minutes.`
+                : "Analyzing your codebase. This may take a few minutes."}
             </Alert.Description>
           </Alert.Root>
         )}

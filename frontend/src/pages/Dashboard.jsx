@@ -25,7 +25,7 @@ export default function Dashboard() {
     initSocket();
   }, [initSocket]);
 
-  // Fetch initial data
+  // Fetch initial data (which also checks for pending tasks)
   useEffect(() => {
     fetchAnalysis();
   }, [fetchAnalysis]);

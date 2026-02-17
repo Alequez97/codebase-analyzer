@@ -128,6 +128,19 @@ export const useSocketStore = create((set, get) => ({
       }));
       await useAnalysisStore.getState().fetchDomainAnalysis(domainId);
     });
+
+    // Task completion events
+    socket.on(SOCKET_EVENTS.TASK_COMPLETED, async (data) => {
+      const { type, taskId } = data;
+
+      if (type === "codebase-analysis") {
+        // Clear pending task state
+        useAnalysisStore.getState().clearPendingCodebaseTask();
+
+        // Refresh analysis data
+        await useAnalysisStore.getState().fetchAnalysis();
+      }
+    });
   },
 
   disconnectSocket: () => {
