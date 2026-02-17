@@ -35,17 +35,17 @@ export default function MarkdownRenderer({ content, ...props }) {
       </Text>
     ),
     ul: ({ children }) => (
-      <Box as="ul" pl={6} mb={3}>
+      <Box as="ul" pl={6} mb={3} listStyleType="disc" listStylePos="outside">
         {children}
       </Box>
     ),
     ol: ({ children }) => (
-      <Box as="ol" pl={6} mb={3}>
+      <Box as="ol" pl={6} mb={3} listStyleType="decimal" listStylePos="outside">
         {children}
       </Box>
     ),
     li: ({ children }) => (
-      <Box as="li" mb={1}>
+      <Box as="li" mb={1} display="list-item">
         {children}
       </Box>
     ),
