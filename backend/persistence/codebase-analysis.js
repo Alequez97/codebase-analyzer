@@ -63,3 +63,22 @@ export async function updateDomainFiles(domainId, files) {
 
   return analysis;
 }
+
+/**
+ * Update platform summary in codebase analysis
+ * @param {string} summary - Platform summary text
+ * @returns {Promise<Object|null>} Updated analysis or null if file not found
+ */
+export async function updateCodebaseSummary(summary) {
+  const analysis = await readCodebaseAnalysis();
+
+  if (!analysis) {
+    return null;
+  }
+
+  analysis.summary = summary;
+
+  await writeCodebaseAnalysis(analysis);
+
+  return analysis;
+}

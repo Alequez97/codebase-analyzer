@@ -167,6 +167,44 @@ app.get("/api/analysis/codebase/full", async (req, res) => {
 });
 
 /**
+ * Save edited platform summary
+ */
+app.post("/api/analysis/codebase/summary/save", async (req, res) => {
+  try {
+    const { summary } = req.body;
+
+    if (typeof summary !== "string") {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "summary string is required",
+      });
+    }
+
+    const updatedAnalysis =
+      await codebaseAnalysisPersistence.updateCodebaseSummary(summary);
+
+    if (!updatedAnalysis) {
+      return res.status(404).json({
+        error: "Codebase analysis not found",
+        message: 'Click "Analyze Codebase" to start analysis',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Platform description saved successfully",
+      summary: updatedAnalysis.summary,
+    });
+  } catch (error) {
+    logger.error("Error saving platform summary", {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to save platform summary" });
+  }
+});
+
+/**
  * Get a specific domain's analysis
  */
 app.get("/api/analysis/domain/:id", async (req, res) => {

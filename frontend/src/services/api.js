@@ -18,6 +18,10 @@ export default {
 
   // Full Codebase Analysis - Full results and modules
   getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
+  saveCodebaseSummary: (summary) =>
+    api.post("/analysis/codebase/summary/save", {
+      summary,
+    }),
   getDomain: (id) => api.get(`/analysis/domain/${id}`),
   getDomainFiles: (id) => api.get(`/analysis/domain/${id}/files`),
 

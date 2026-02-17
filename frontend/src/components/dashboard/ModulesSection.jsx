@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   VStack,
   HStack,
@@ -7,15 +8,22 @@ import {
   Badge,
   Button,
   Table,
+  Textarea,
+  IconButton,
 } from "@chakra-ui/react";
+import { Pencil, X, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
+import { toaster } from "../ui/toaster";
 import { useConfigStore } from "../../store/useConfigStore";
 import { useAnalysisStore } from "../../store/useAnalysisStore";
 
 export function ModulesSection() {
   const navigate = useNavigate();
+  const [isEditingSummary, setIsEditingSummary] = useState(false);
+  const [editedSummary, setEditedSummary] = useState("");
+  const [savingSummary, setSavingSummary] = useState(false);
   const { config } = useConfigStore();
   const {
     analysis,
@@ -23,9 +31,47 @@ export function ModulesSection() {
     pendingCodebaseTask,
     analyzeCodebase,
     domainAnalyzeLoadingById,
+    saveCodebaseSummary,
   } = useAnalysisStore();
 
   const domains = analysis?.domains || [];
+
+  useEffect(() => {
+    if (!isEditingSummary) {
+      setEditedSummary(analysis?.summary || "");
+    }
+  }, [analysis?.summary, isEditingSummary]);
+
+  const handleEnterSummaryEdit = () => {
+    setEditedSummary(analysis?.summary || "");
+    setIsEditingSummary(true);
+  };
+
+  const handleCancelSummaryEdit = () => {
+    setEditedSummary(analysis?.summary || "");
+    setIsEditingSummary(false);
+  };
+
+  const handleSaveSummary = async () => {
+    setSavingSummary(true);
+    const result = await saveCodebaseSummary(editedSummary);
+    setSavingSummary(false);
+
+    if (result.success) {
+      toaster.create({
+        title: "Platform description saved successfully",
+        type: "success",
+      });
+      setIsEditingSummary(false);
+      return;
+    }
+
+    toaster.create({
+      title: "Failed to save platform description",
+      description: result.error,
+      type: "error",
+    });
+  };
 
   return (
     <Card.Root>
@@ -69,13 +115,58 @@ export function ModulesSection() {
         {!analyzingCodebase && domains.length > 0 && (
           <VStack align="stretch" gap={4}>
             <Box p={4} bg="blue.50" borderRadius="md">
-              <Heading size="sm" mb={2} color="blue.800">
-                Platform Description
-              </Heading>
-              <Text fontSize="sm" color="gray.700">
-                {analysis?.summary ||
-                  "No platform summary available yet. Run codebase analysis to generate it."}
-              </Text>
+              <HStack justify="space-between" mb={2}>
+                <HStack>
+                  <Heading size="sm" color="blue.800">
+                    Platform Description
+                  </Heading>
+                  {!isEditingSummary && (
+                    <IconButton
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleEnterSummaryEdit}
+                      title="Edit platform description"
+                    >
+                      <Pencil size={16} />
+                    </IconButton>
+                  )}
+                  {isEditingSummary && (
+                    <IconButton
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleCancelSummaryEdit}
+                      title="Cancel editing"
+                    >
+                      <X size={16} />
+                    </IconButton>
+                  )}
+                </HStack>
+                {isEditingSummary && (
+                  <Button
+                    size="sm"
+                    colorPalette="green"
+                    onClick={handleSaveSummary}
+                    loading={savingSummary}
+                  >
+                    <Save size={14} />
+                    Save
+                  </Button>
+                )}
+              </HStack>
+              {isEditingSummary ? (
+                <Textarea
+                  value={editedSummary}
+                  onChange={(e) => setEditedSummary(e.target.value)}
+                  rows={5}
+                  fontSize="sm"
+                  placeholder="Describe what this platform does..."
+                />
+              ) : (
+                <Text fontSize="sm" color="gray.700">
+                  {analysis?.summary ||
+                    "No platform summary available yet. Run codebase analysis to generate it."}
+                </Text>
+              )}
             </Box>
 
             <HStack justify="space-between">
@@ -118,9 +209,6 @@ export function ModulesSection() {
                               {domain.priority}
                             </Badge>
                           </HStack>
-                          <Text fontSize="xs" color="gray.500">
-                            {domain.id}
-                          </Text>
                         </VStack>
                       </Table.Cell>
                       <Table.Cell>

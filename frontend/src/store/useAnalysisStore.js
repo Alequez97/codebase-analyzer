@@ -156,6 +156,34 @@ export const useAnalysisStore = create(
         }
       },
 
+      saveCodebaseSummary: async (summary) => {
+        if (typeof summary !== "string") {
+          return { success: false, error: "Summary must be a string" };
+        }
+
+        try {
+          await api.saveCodebaseSummary(summary);
+
+          set((state) => {
+            if (!state.analysis) {
+              return state;
+            }
+            return {
+              analysis: {
+                ...state.analysis,
+                summary,
+              },
+            };
+          });
+
+          return { success: true };
+        } catch (err) {
+          const message =
+            err?.response?.data?.message || "Failed to save platform summary";
+          return { success: false, error: message };
+        }
+      },
+
       clearPendingCodebaseTask: () => {
         set({
           pendingCodebaseTask: null,
