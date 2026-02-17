@@ -5,6 +5,7 @@ import path from "path";
 import config from "../config.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
+import { getLogEventForTaskType } from "../utils/task-logger.js";
 import * as logger from "../utils/logger.js";
 
 const execAsync = promisify(exec);
@@ -155,8 +156,8 @@ export async function execute(task) {
       // Log to file
       logStream.write(text);
 
-      // Emit to socket
-      emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+      // Emit to socket with task-specific event
+      emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
         type: task.type,
         stream: "stdout",
@@ -176,8 +177,8 @@ export async function execute(task) {
       // Log to file
       logStream.write(`[STDERR] ${text}`);
 
-      // Emit to socket
-      emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+      // Emit to socket with task-specific event
+      emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
         type: task.type,
         stream: "stderr",

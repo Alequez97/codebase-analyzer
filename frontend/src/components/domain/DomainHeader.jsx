@@ -7,13 +7,7 @@ function getPriorityColor(priority) {
   return "gray";
 }
 
-export default function DomainHeader({
-  domain,
-  domainId,
-  analyzing,
-  onBack,
-  onAnalyze,
-}) {
+export default function DomainHeader({ domain, domainId, analyzing, onBack }) {
   return (
     <HStack justify="space-between" align="start">
       <VStack align="start" gap={1}>
@@ -29,19 +23,9 @@ export default function DomainHeader({
           {domain?.businessPurpose || "No domain summary available."}
         </Text>
       </VStack>
-      <HStack>
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button
-          colorPalette="blue"
-          onClick={onAnalyze}
-          loading={analyzing}
-          loadingText="Analyzing"
-        >
-          Analyze domain
-        </Button>
-      </HStack>
+      <Button variant="outline" onClick={onBack}>
+        Back
+      </Button>
     </HStack>
   );
 }

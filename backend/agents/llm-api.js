@@ -6,6 +6,7 @@ import { ChatState } from "../llm/chat-state.js";
 import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
+import { getLogEventForTaskType } from "../utils/task-logger.js";
 import * as logger from "../utils/logger.js";
 
 /**
@@ -164,7 +165,7 @@ export async function execute(task) {
       );
       taskLogger.raw("-".repeat(80));
 
-      emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+      emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
         type: task.type,
         stream: "stdout",
@@ -212,7 +213,7 @@ export async function execute(task) {
       );
 
       const responseLog = `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`;
-      emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+      emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
         type: task.type,
         stream: "stdout",
@@ -235,7 +236,7 @@ export async function execute(task) {
           },
         );
 
-        emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+        emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
           type: task.type,
           stream: "stdout",
@@ -264,7 +265,7 @@ export async function execute(task) {
             0,
             150,
           );
-          emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+          emitSocketEvent(getLogEventForTaskType(task.type), {
             taskId: task.id,
             type: task.type,
             stream: "stdout",
@@ -319,7 +320,7 @@ export async function execute(task) {
           iterations: iterationCount,
         });
 
-        emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+        emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
           type: task.type,
           stream: "stdout",
@@ -406,7 +407,7 @@ export async function execute(task) {
                   component: "LLM-API",
                 },
               );
-              emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+              emitSocketEvent(getLogEventForTaskType(task.type), {
                 taskId: task.id,
                 type: task.type,
                 stream: "stdout",
@@ -431,7 +432,7 @@ export async function execute(task) {
           component: "LLM-API",
           file: task.outputFile,
         });
-        emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+        emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
           type: task.type,
           stream: "stdout",

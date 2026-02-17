@@ -53,52 +53,6 @@ export async function createFullCodebaseAnalysisTask(executeNow, agent) {
 }
 
 /**
- * Create a domain analysis task
- * @param {string} domainId - The domain ID
- * @param {string} domainName - The domain name
- * @param {string[]} files - Files in the domain
- * @param {boolean} executeNow - Whether to execute immediately
- * @returns {Promise<Object>} The created task
- */
-export async function createAnalyzeTask(
-  domainId,
-  domainName,
-  files,
-  executeNow,
-  agent,
-) {
-  const task = {
-    id: generateTaskId("analyze"),
-    type: "analyze",
-    status: "pending",
-    createdAt: new Date().toISOString(),
-    params: {
-      agent,
-      domainId,
-      domainName,
-      files,
-      targetDirectory: config.target.directory,
-    },
-    instructionFile: "backend/instructions/analyze-domain-detailed.md",
-    outputFile: `.code-analysis/domains/${domainId}.json`,
-  };
-
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    // Trigger agent execution asynchronously
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskOrchestrator",
-      });
-    });
-  }
-
-  return task;
-}
-
-/**
  * Get all pending tasks
  * @returns {Promise<Array>} Array of pending tasks
  */

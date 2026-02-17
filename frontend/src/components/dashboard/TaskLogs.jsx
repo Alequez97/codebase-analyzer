@@ -30,10 +30,22 @@ export function TaskLogs() {
       ]);
     };
 
-    socket.on(SOCKET_EVENTS.TASK_LOG, handleTaskLog);
+    // Subscribe to all task-specific log events
+    const logEvents = [
+      SOCKET_EVENTS.LOG_CODEBASE_ANALYSIS,
+      SOCKET_EVENTS.LOG_DOCUMENTATION,
+      SOCKET_EVENTS.LOG_REQUIREMENTS,
+      SOCKET_EVENTS.LOG_TESTING,
+    ];
+
+    logEvents.forEach((event) => {
+      socket.on(event, handleTaskLog);
+    });
 
     return () => {
-      socket.off(SOCKET_EVENTS.TASK_LOG, handleTaskLog);
+      logEvents.forEach((event) => {
+        socket.off(event, handleTaskLog);
+      });
     };
   }, [socket]);
 

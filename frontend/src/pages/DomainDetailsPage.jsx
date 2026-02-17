@@ -22,7 +22,6 @@ export default function DomainDetailsPage() {
     fetchDomainDocumentation,
     fetchDomainRequirements,
     fetchDomainTesting,
-    analyzeDomain,
     analyzeDomainDocumentation,
     analyzeDomainRequirements,
     analyzeDomainTesting,
@@ -78,8 +77,14 @@ export default function DomainDetailsPage() {
 
   // Collect all errors into a single array
   const errors = [
-    documentationError && { section: "Documentation", message: documentationError },
-    requirementsError && { section: "Requirements", message: requirementsError },
+    documentationError && {
+      section: "Documentation",
+      message: documentationError,
+    },
+    requirementsError && {
+      section: "Requirements",
+      message: requirementsError,
+    },
     testingError && { section: "Testing", message: testingError },
   ].filter(Boolean);
 
@@ -201,7 +206,6 @@ export default function DomainDetailsPage() {
           domainId={domainId}
           analyzing={analyzing}
           onBack={() => navigate("/")}
-          onAnalyze={() => domain && analyzeDomain(domain)}
         />
 
         {/* Section-specific errors in a single alert */}

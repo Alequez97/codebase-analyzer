@@ -22,7 +22,6 @@ export function ModulesSection() {
     analyzingCodebase,
     pendingCodebaseTask,
     analyzeCodebase,
-    analyzeDomain,
     domainAnalyzeLoadingById,
   } = useAnalysisStore();
 
@@ -142,16 +141,7 @@ export function ModulesSection() {
                             variant="outline"
                             onClick={() => navigate(`/domains/${domain.id}`)}
                           >
-                            Detailed analysis
-                          </Button>
-                          <Button
-                            size="sm"
-                            colorPalette="blue"
-                            onClick={() => analyzeDomain(domain)}
-                            loading={isAnalyzing}
-                            loadingText="Analyzing"
-                          >
-                            Analyze
+                            View Details
                           </Button>
                         </HStack>
                       </Table.Cell>

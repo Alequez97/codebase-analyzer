@@ -20,13 +20,6 @@ export default {
   getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
   getDomain: (id) => api.get(`/analysis/domain/${id}`),
   getDomainFiles: (id) => api.get(`/analysis/domain/${id}/files`),
-  analyzeDomain: (id, domainName, files, executeNow = true, agent = "aider") =>
-    api.post(`/analysis/domain/${id}/analyze`, {
-      domainName,
-      files,
-      executeNow,
-      agent,
-    }),
 
   // Domain section-specific endpoints
   getDomainDocumentation: (id) =>

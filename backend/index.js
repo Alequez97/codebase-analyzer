@@ -228,46 +228,6 @@ app.get("/api/analysis/domain/:id/files", async (req, res) => {
 });
 
 /**
- * Create a task to analyze a specific domain
- */
-app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { domainName, files } = req.body;
-    const agent = req.body.agent || "aider";
-    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
-
-    if (!domainName || !files || !Array.isArray(files)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: "domainName and files[] are required",
-      });
-    }
-
-    if (!supportedAgentIds.includes(agent)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: `Unsupported agent: ${agent}`,
-      });
-    }
-
-    // Create real task
-    const executeNow = req.body.executeNow !== false; // Default to true
-    const task = await taskOrchestrator.createAnalyzeTask(
-      id,
-      domainName,
-      files,
-      executeNow,
-      agent,
-    );
-    res.status(201).json(task);
-  } catch (error) {
-    logger.error("Error creating analyze task", { error, component: "API" });
-    res.status(500).json({ error: "Failed to create analyze task" });
-  }
-});
-
-/**
  * Get domain documentation section
  */
 app.get("/api/analysis/domain/:id/documentation", async (req, res) => {
@@ -399,7 +359,9 @@ app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
     }
 
     // TODO: Implement requirements analysis task orchestrator
-    res.status(501).json({ error: "Requirements analysis not implemented yet" });
+    res
+      .status(501)
+      .json({ error: "Requirements analysis not implemented yet" });
   } catch (error) {
     logger.error("Error creating requirements analysis task", {
       error,

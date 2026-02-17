@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { initSocket } from "../services/socket";
-import { SOCKET_EVENTS, TASK_TYPES } from "../constants/socket-events";
+import { SOCKET_EVENTS } from "../constants/socket-events";
+import { TASK_TYPES } from "../constants/task-types";
 import { useAnalysisStore } from "./useAnalysisStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 
@@ -43,67 +44,6 @@ export const useSocketStore = create((set, get) => ({
       useAnalysisStore.getState().setStatus("error");
       useAnalysisStore.getState().setError(data.error || "Analysis failed");
       useAnalysisStore.getState().setAnalyzingCodebase(false);
-    });
-
-    // Domain analysis events
-    socket.on(SOCKET_EVENTS.DOMAIN_ANALYSIS_STARTED, (data) => {
-      const { domainId, taskType } = data;
-      if (taskType === TASK_TYPES.ANALYZE_DOMAIN_DETAILED) {
-        useAnalysisStore.setState((state) => {
-          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
-          newLoadingMap.set(domainId, true);
-          return { domainAnalyzeLoadingById: newLoadingMap };
-        });
-      }
-    });
-
-    socket.on(SOCKET_EVENTS.DOMAIN_ANALYSIS_COMPLETED, async (data) => {
-      const { domainId, taskType } = data;
-
-      if (taskType === TASK_TYPES.ANALYZE_DOMAIN_DETAILED) {
-        useAnalysisStore.setState((state) => {
-          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
-          newLoadingMap.set(domainId, false);
-          return { domainAnalyzeLoadingById: newLoadingMap };
-        });
-      }
-
-      // Refresh all domain sections in parallel
-      const analysisStore = useAnalysisStore.getState();
-      await Promise.all([
-        analysisStore.fetchDomainDocumentation(domainId),
-        analysisStore.fetchDomainRequirements(domainId),
-        analysisStore.fetchDomainTesting(domainId),
-      ]);
-
-      // Initialize editors with new data
-      useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
-    });
-
-    socket.on(SOCKET_EVENTS.DOMAIN_ANALYSIS_ERROR, (data) => {
-      const { domainId, error, taskType } = data;
-      const errorMessage = error || "Domain analysis failed";
-
-      if (taskType === TASK_TYPES.ANALYZE_DOMAIN_DETAILED) {
-        useAnalysisStore.setState((state) => {
-          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
-          const newDocErrorMap = new Map(state.domainDocumentationErrorById);
-          const newReqErrorMap = new Map(state.domainRequirementsErrorById);
-          const newTestErrorMap = new Map(state.domainTestingErrorById);
-
-          newLoadingMap.set(domainId, false);
-          newDocErrorMap.set(domainId, errorMessage);
-          newReqErrorMap.set(domainId, errorMessage);
-          newTestErrorMap.set(domainId, errorMessage);
-
-          return {
-            domainAnalyzeLoadingById: newLoadingMap,
-            domainDocumentationErrorById: newDocErrorMap,
-            domainRequirementsErrorById: newReqErrorMap,
-            domainTestingErrorById: newTestErrorMap,
-          };
-        });
-      }
     });
 
     // Section-specific events

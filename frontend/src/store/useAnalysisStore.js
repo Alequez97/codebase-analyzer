@@ -200,31 +200,6 @@ export const useAnalysisStore = create(
         }
       },
 
-      analyzeDomain: async (domain) => {
-        if (!domain?.id) return { success: false, error: "Invalid domain" };
-
-        set((state) => {
-          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
-          newLoadingMap.set(domain.id, true);
-          return { domainAnalyzeLoadingById: newLoadingMap };
-        });
-
-        try {
-          await api.analyzeDomain(domain.id);
-          return { success: true };
-        } catch (err) {
-          const message =
-            err?.response?.data?.message || "Failed to analyze domain";
-          return { success: false, error: message };
-        } finally {
-          set((state) => {
-            const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
-            newLoadingMap.set(domain.id, false);
-            return { domainAnalyzeLoadingById: newLoadingMap };
-          });
-        }
-      },
-
       analyzeDomainDocumentation: async (domain) => {
         if (!domain?.id) return { success: false, error: "Invalid domain" };
 
@@ -425,7 +400,8 @@ export const useAnalysisStore = create(
           return data;
         } catch (err) {
           const message =
-            err?.response?.data?.message || "Failed to load domain requirements";
+            err?.response?.data?.message ||
+            "Failed to load domain requirements";
 
           set((state) => {
             const newLoadingMap = new Map(state.domainRequirementsLoadingById);

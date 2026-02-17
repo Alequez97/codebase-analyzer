@@ -10,5 +10,10 @@ export const SOCKET_EVENTS = {
 
   // Task events
   TASK_COMPLETED: "task:completed",
-  TASK_LOG: "task:log",
+
+  // Task-specific logs
+  LOG_CODEBASE_ANALYSIS: "log:codebase-analysis",
+  LOG_DOCUMENTATION: "log:documentation",
+  LOG_REQUIREMENTS: "log:requirements",
+  LOG_TESTING: "log:testing",
 };
