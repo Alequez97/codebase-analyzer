@@ -38,6 +38,10 @@ const projectName = path.basename(targetDirectory);
 
 /**
  * Application configuration
+ *
+ * Tool Usage:
+ * - LLM API: Used for generating analysis JSON files (codebase & domain analysis)
+ * - Aider: Used for editing files and writing code (applying fixes, writing tests)
  */
 const config = {
   // Server
@@ -53,10 +57,18 @@ const config = {
   // When true, API endpoints return mock data instead of executing real LLM analysis
   useMockData: process.env.USE_MOCK_DATA === "true",
 
-  // Analysis tool to use
-  analysisTool: process.env.ANALYSIS_TOOL || "aider",
+  // LLM API configuration (used for analysis JSON generation)
+  llm: {
+    model: process.env.LLM_MODEL || "deepseek",
+    apiKeys: {
+      deepseek: process.env.DEEPSEEK_API_KEY,
+      anthropic: process.env.ANTHROPIC_API_KEY,
+      openai: process.env.OPENAI_API_KEY,
+      openrouter: process.env.OPENROUTER_API_KEY,
+    },
+  },
 
-  // Aider configuration
+  // Aider configuration (used for code editing and fixes)
   aider: {
     model: process.env.LLM_MODEL || "deepseek",
     apiKeys: {

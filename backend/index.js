@@ -52,21 +52,6 @@ app.use((req, res, next) => {
 // ==================== API Routes ====================
 
 /**
- * Get tool discovery information for frontend
- */
-app.get("/api/tools", async (req, res) => {
-  const availableAgents = await detectAvailableAgents();
-  const supportedAgents = getSupportedAgents();
-
-  const tools = supportedAgents.map((agent) => ({
-    ...agent,
-    available: !!availableAgents[agent.id],
-  }));
-
-  res.json({ tools });
-});
-
-/**
  * Health check with configuration status
  */
 app.get("/api/status", async (req, res) => {

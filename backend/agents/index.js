@@ -1,5 +1,5 @@
+import * as llmApi from "./llm-api.js";
 import * as aider from "./aider.js";
-import * as geminiCli from "./gemini-cli.js";
 import * as tasksPersistence from "../persistence/tasks.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as domainsPersistence from "../persistence/domains.js";
@@ -8,18 +8,24 @@ import path from "path";
 import fs from "fs/promises";
 import * as logger from "../utils/logger.js";
 
+/**
+ * Available AI agents
+ * - llm-api: Direct LLM API calls for generating analysis JSON
+ * - aider: AI coding assistant for editing files and writing code
+ */
 const AGENTS = {
+  "llm-api": {
+    id: "llm-api",
+    name: "LLM API",
+    purpose: "Generates analysis JSON files",
+    module: llmApi,
+  },
   aider: {
     id: "aider",
     name: "Aider",
+    purpose: "Edits files and writes code",
     installUrl: "https://aider.chat/docs/install.html",
     module: aider,
-  },
-  gemini: {
-    id: "gemini",
-    name: "Gemini CLI",
-    installUrl: "https://geminicli.com/docs/get-started/installation",
-    module: geminiCli,
   },
 };
 

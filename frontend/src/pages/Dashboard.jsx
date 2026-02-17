@@ -15,7 +15,7 @@ export default function Dashboard() {
   const { loading, error, status, fetchAnalysis } = useAnalysisStore();
 
   // Config store
-  const { showLogs, toggleLogs, fetchTools } = useConfigStore();
+  const { showLogs, toggleLogs } = useConfigStore();
 
   // Socket store
   const { socketConnected, initSocket } = useSocketStore();
@@ -27,9 +27,8 @@ export default function Dashboard() {
 
   // Fetch initial data
   useEffect(() => {
-    fetchTools();
     fetchAnalysis();
-  }, [fetchTools, fetchAnalysis]);
+  }, [fetchAnalysis]);
 
   if (loading) {
     return <LoadingState />;

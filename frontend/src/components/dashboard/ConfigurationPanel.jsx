@@ -1,24 +1,27 @@
-import {
-  VStack,
-  HStack,
-  Box,
-  Heading,
-  Text,
-  Badge,
-  Button,
-} from "@chakra-ui/react";
+import { VStack, Box, Heading, Text, Badge, HStack } from "@chakra-ui/react";
 import { Card } from "../ui/card";
 import { useAnalysisStore } from "../../store/useAnalysisStore";
-import { useConfigStore } from "../../store/useConfigStore";
 
 export function ConfigurationPanel() {
   const { status } = useAnalysisStore();
-  const { tools, selectedAgent, setSelectedAgent, toolsLoading, toolsError } =
-    useConfigStore();
 
-  // Safety check: ensure tools is always an array
-  const toolsArray = Array.isArray(tools) ? tools : [];
-  const selectedTool = toolsArray.find((tool) => tool.id === selectedAgent);
+  const tools = [
+    {
+      id: "llm-api",
+      name: "LLM API",
+      purpose: "Generates analysis JSON files",
+      usedFor: "Codebase & domain analysis",
+      color: "blue",
+    },
+    {
+      id: "aider",
+      name: "Aider",
+      purpose: "Edits files and writes code",
+      usedFor: "Applying fixes, writing tests",
+      color: "green",
+      installUrl: "https://aider.chat/docs/install.html",
+    },
+  ];
 
   return (
     <Card.Root>
@@ -38,69 +41,70 @@ export function ConfigurationPanel() {
 
           <Box>
             <Text fontWeight="bold" mb={2}>
-              Analysis Tool
+              Analysis Tools
             </Text>
-            <HStack gap={2} align="center" flexWrap="wrap">
-              {toolsArray.map((tool) => (
-                <Button
+            <Text fontSize="sm" color="gray.600" mb={3}>
+              Different tools are used automatically based on the task
+            </Text>
+            <VStack align="stretch" gap={3}>
+              {tools.map((tool) => (
+                <Box
                   key={tool.id}
-                  size="sm"
-                  variant={selectedAgent === tool.id ? "solid" : "outline"}
-                  colorPalette={selectedAgent === tool.id ? "blue" : "gray"}
-                  onClick={() => setSelectedAgent(tool.id)}
+                  p={3}
+                  borderWidth="1px"
+                  borderRadius="md"
+                  borderColor="gray.200"
+                  bg="gray.50"
                 >
-                  {tool.id}
-                </Button>
+                  <HStack justify="space-between" mb={2}>
+                    <HStack gap={2}>
+                      <Text fontWeight="semibold" fontSize="sm">
+                        {tool.name}
+                      </Text>
+                      <Badge colorPalette={tool.color} size="sm">
+                        {tool.id}
+                      </Badge>
+                    </HStack>
+                  </HStack>
+                  <VStack align="stretch" gap={1}>
+                    <HStack>
+                      <Text fontSize="xs" color="gray.500" minW="80px">
+                        Purpose:
+                      </Text>
+                      <Text fontSize="xs" fontWeight="medium">
+                        {tool.purpose}
+                      </Text>
+                    </HStack>
+                    <HStack>
+                      <Text fontSize="xs" color="gray.500" minW="80px">
+                        Used for:
+                      </Text>
+                      <Text fontSize="xs">{tool.usedFor}</Text>
+                    </HStack>
+                    {tool.installUrl && (
+                      <HStack>
+                        <Text fontSize="xs" color="gray.500" minW="80px">
+                          Install:
+                        </Text>
+                        <a
+                          href={tool.installUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: "#3182ce",
+                            textDecoration: "underline",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Installation Guide
+                        </a>
+                      </HStack>
+                    )}
+                  </VStack>
+                </Box>
               ))}
-              {toolsArray.length === 0 && (
-                <Text fontSize="sm" color="gray.500">
-                  {toolsLoading
-                    ? "Loading tools..."
-                    : toolsError || "No tools available"}
-                </Text>
-              )}
-            </HStack>
+            </VStack>
           </Box>
-
-          {selectedTool && (
-            <Box>
-              <Text fontWeight="bold" mb={2}>
-                Tool Details
-              </Text>
-              <VStack align="stretch" gap={2}>
-                <HStack justify="space-between">
-                  <Text fontSize="sm" fontWeight="medium">
-                    {selectedTool.name || selectedTool.id}
-                  </Text>
-                  <Badge colorPalette="blue" size="sm">
-                    {selectedTool.id}
-                  </Badge>
-                </HStack>
-                <HStack justify="space-between">
-                  <Text fontSize="sm">Status</Text>
-                  <Badge
-                    colorPalette={selectedTool.available ? "green" : "red"}
-                    size="sm"
-                  >
-                    {selectedTool.available ? "Available" : "Not Installed"}
-                  </Badge>
-                </HStack>
-                {selectedTool.installUrl && (
-                  <Text fontSize="sm" color="gray.600">
-                    Installation Guide:{" "}
-                    <a
-                      href={selectedTool.installUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "#3182ce", textDecoration: "underline" }}
-                    >
-                      {selectedTool.installUrl}
-                    </a>
-                  </Text>
-                )}
-              </VStack>
-            </Box>
-          )}
         </VStack>
       </Card.Body>
     </Card.Root>

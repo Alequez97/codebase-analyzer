@@ -188,7 +188,7 @@ export async function execute(task) {
 #### 7. **Integration with Task System**
 
 - Register LLM agent in `backend/agents/index.js`
-- Add to `AGENTS` object alongside Aider and Gemini
+- Add to `AGENTS` object alongside Aider
 - Update agent detection and selection logic
 - Configure via `backend/config.js`:
   ```javascript

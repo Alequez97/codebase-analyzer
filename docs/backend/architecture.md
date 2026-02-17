@@ -8,7 +8,7 @@ The backend is a Node.js Express server that orchestrates AI-powered codebase an
 
 1. **Separation of Concerns**: Clear separation between data persistence, business logic, and external integrations
 2. **Contract-First**: JSON schemas define all data structures
-3. **Agent Flexibility**: Support for multiple AI tools (Aider, Claude Code, Gemini, etc.)
+3. **Tool-Specific Usage**: LLM API for analysis JSON generation, Aider for code editing
 4. **Simple & Debuggable**: File-based storage, no database required
 
 ## Directory Structure
@@ -98,14 +98,14 @@ User clicks "Analyze Module" → POST /api/modules/:id/analyze
 ### Environment Variables
 
 - `CODEBASE_PATH`: Path to codebase being analyzed (required)
-- `ANALYSIS_TOOL`: AI tool to use (aider, claude-code, gemini, etc.)
 - `PORT`: Server port (default: 3001)
+- `LLM_MODEL`: LLM model to use (default: deepseek)
+- `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`: API keys for LLM providers
 
-### Agent Selection
+### Tool Usage
 
-1. If `ANALYSIS_TOOL` is set, use that specific tool
-2. Otherwise, auto-detect available tools
-3. Fail if no tools are available
+- **LLM API**: Used for generating analysis JSON files (codebase & domain analysis)
+- **Aider**: Used for editing files and writing code (applying fixes, writing tests)
 
 ## API Design
 
@@ -144,10 +144,10 @@ All endpoints follow REST conventions:
 
 ### Agent Enhancements
 
-- Add more agents (Claude Code, Gemini, Codex)
 - Support streaming responses
 - Handle long-running tasks better
 - Task progress reporting
+- Better error recovery for LLM API calls
 
 ### Error Handling
 

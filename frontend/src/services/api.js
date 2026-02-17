@@ -7,7 +7,6 @@ const api = axios.create({
 export default {
   // Status
   getStatus: () => api.get("/status"),
-  getTools: () => api.get("/tools"),
 
   // Full Codebase Analysis
   getCodebaseAnalysis: () => api.get("/analysis/codebase"),
