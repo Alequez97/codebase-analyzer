@@ -10,7 +10,7 @@ export default {
 
   // Full Codebase Analysis
   getCodebaseAnalysis: () => api.get("/analysis/codebase"),
-  requestCodebaseAnalysis: (executeNow = true, agent = "aider") =>
+  requestCodebaseAnalysis: (executeNow = true, agent = "llm-api") =>
     api.post("/analysis/codebase/request", { executeNow, agent }),
 
   // Full Codebase Analysis - Full results and modules

@@ -4,6 +4,7 @@ import * as tasksPersistence from "../persistence/tasks.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as domainsPersistence from "../persistence/domains.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { emitSocketEvent } from "../utils/socket-emitter.js";
 import path from "path";
 import fs from "fs/promises";
 import * as logger from "../utils/logger.js";
@@ -163,22 +164,12 @@ export async function executeTask(taskId) {
     await tasksPersistence.moveToCompleted(taskId);
 
     // Emit event via socket
-    try {
-      const { io } = await import("../index.js");
-      io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
-        taskId,
-        type: task.type,
-        domainId: task.params?.domainId,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (err) {
-      logger.error("Failed to emit socket event", {
-        error: err,
-        component: "AgentOrchestrator",
-        taskId,
-      });
-      // Don't fail the task if socket emit fails
-    }
+    emitSocketEvent(SOCKET_EVENTS.TASK_COMPLETED, {
+      taskId,
+      type: task.type,
+      domainId: task.params?.domainId,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return result;

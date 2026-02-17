@@ -12,6 +12,7 @@ export function ConfigurationPanel() {
       purpose: "Generates analysis JSON files",
       usedFor: "Codebase & domain analysis",
       color: "blue",
+      available: status?.agents?.["llm-api"] ?? false,
     },
     {
       id: "aider",
@@ -20,6 +21,7 @@ export function ConfigurationPanel() {
       usedFor: "Applying fixes, writing tests",
       color: "green",
       installUrl: "https://aider.chat/docs/install.html",
+      available: status?.agents?.["aider"] ?? false,
     },
   ];
 
@@ -53,8 +55,8 @@ export function ConfigurationPanel() {
                   p={3}
                   borderWidth="1px"
                   borderRadius="md"
-                  borderColor="gray.200"
-                  bg="gray.50"
+                  borderColor={tool.available ? "green.300" : "gray.200"}
+                  bg={tool.available ? "green.50" : "gray.50"}
                 >
                   <HStack justify="space-between" mb={2}>
                     <HStack gap={2}>
@@ -64,6 +66,15 @@ export function ConfigurationPanel() {
                       <Badge colorPalette={tool.color} size="sm">
                         {tool.id}
                       </Badge>
+                      {tool.available ? (
+                        <Badge colorPalette="green" size="sm">
+                          Available
+                        </Badge>
+                      ) : (
+                        <Badge colorPalette="red" size="sm">
+                          Not Available
+                        </Badge>
+                      )}
                     </HStack>
                   </HStack>
                   <VStack align="stretch" gap={1}>

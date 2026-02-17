@@ -11,14 +11,7 @@ import * as domainsPersistence from "./persistence/domains.js";
 import { detectAvailableAgents, getSupportedAgents } from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 import * as logger from "./utils/logger.js";
-import {
-  getMockCodebaseAnalysis,
-  getMockDomainAnalysis,
-  getMockDomainDocumentation,
-  getMockDomainRequirements,
-  getMockDomainTesting,
-  simulateAnalysisDelay,
-} from "./services/mock-data.js";
+import { initSocketEmitter } from "./utils/socket-emitter.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -36,8 +29,8 @@ const io = new Server(httpServer, {
   },
 });
 
-// Export io for use in other modules
-export { io };
+// Initialize socket emitter for use in agents (avoids circular dependencies)
+initSocketEmitter(io);
 
 // Middleware
 app.use(cors());
@@ -77,13 +70,6 @@ app.get("/api/status", async (req, res) => {
  */
 app.get("/api/analysis/codebase", async (req, res) => {
   try {
-    // Mock mode: return mock data immediately
-    if (config.useMockData) {
-      logger.info("[MOCK MODE] Returning mock codebase analysis");
-      return res.json(getMockCodebaseAnalysis());
-    }
-
-    // Production mode: read from file system
     const results = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
 
     if (!results) {
@@ -109,7 +95,7 @@ app.get("/api/analysis/codebase", async (req, res) => {
 app.post("/api/analysis/codebase/request", async (req, res) => {
   try {
     const executeNow = req.body.executeNow !== false; // Default to true
-    const agent = req.body.agent || "aider";
+    const agent = req.body.agent || "llm-api"; // Use llm-api by default for codebase analysis
     const supportedAgentIds = getSupportedAgents().map((item) => item.id);
 
     if (!supportedAgentIds.includes(agent)) {
@@ -119,37 +105,6 @@ app.post("/api/analysis/codebase/request", async (req, res) => {
       });
     }
 
-    // Mock mode: simulate task creation and emit completion event after delay
-    if (config.useMockData) {
-      logger.info("[MOCK MODE] Simulating codebase analysis task");
-      const mockTask = {
-        id: `mock-task-${Date.now()}`,
-        type: "codebase-analysis",
-        status: "pending",
-        agent,
-        timestamp: new Date().toISOString(),
-      };
-
-      // Return task immediately
-      res.status(201).json(mockTask);
-
-      // Simulate async completion after delay
-      if (executeNow) {
-        simulateAnalysisDelay(2000).then(() => {
-          const analysisData = getMockCodebaseAnalysis();
-          logger.info("[MOCK MODE] Emitting TASK_COMPLETED with analysis data");
-          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
-            taskId: mockTask.id,
-            type: "codebase-analysis",
-            timestamp: new Date().toISOString(),
-            data: analysisData,
-          });
-        });
-      }
-      return;
-    }
-
-    // Production mode: create real task
     const task = await taskOrchestrator.createFullCodebaseAnalysisTask(
       executeNow,
       agent,
@@ -192,22 +147,6 @@ app.get("/api/analysis/domain/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Mock mode: return mock domain data
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Returning mock domain analysis for: ${id}`);
-      const mockAnalysis = getMockDomainAnalysis(id);
-
-      if (!mockAnalysis) {
-        return res.status(404).json({
-          error: "Domain analysis not found",
-          message: `No mock analysis available for domain: ${id}`,
-        });
-      }
-
-      return res.json(mockAnalysis);
-    }
-
-    // Production mode: read from file system
     const analysis = await domainsPersistence.readDomain(id);
 
     if (!analysis) {

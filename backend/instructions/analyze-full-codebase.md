@@ -1,26 +1,30 @@
 # Codebase Analysis Task
 
-## CRITICAL INSTRUCTIONS
+## OBJECTIVE
 
-**DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. WRITE THE FILE AND EXIT.**
+Analyze the codebase and identify all major functional domains (business capabilities, features, modules).
 
-You MUST use the /add command to add the output file, then write the content, then exit.
+## AVAILABLE TOOLS
 
-## DIRECTIVE
+You have access to these tools to explore the codebase:
 
-Write the complete JSON content to `.code-analysis/analysis/codebase-analysis.json`.
+- `list_directory`: List files and subdirectories
+- `read_file`: Read specific file contents
+- `search_files`: Find files matching patterns
 
-Use your repository map to identify major functional domains in the codebase.
+## YOUR TASK
 
-## File to Create
+1. Use the available tools to explore the project structure
+2. Identify all major functional domains in the codebase
+3. Output a complete JSON analysis following the structure below
 
-`.code-analysis/analysis/codebase-analysis.json`
+## OUTPUT FORMAT
 
-## JSON Structure Required
+You MUST output your analysis as a valid JSON object with this exact structure:
 
 ```json
 {
-  "timestamp": "2026-02-13T12:00:00.000Z",
+  "timestamp": "2026-02-17T12:00:00.000Z",
   "summary": "Brief 2-3 sentence overview of what this platform/application does.",
   "domains": [
     {
@@ -36,31 +40,35 @@ Use your repository map to identify major functional domains in the codebase.
 }
 ```
 
-## Rules
+## REQUIREMENTS
 
-- Use current ISO 8601 timestamp
-- **summary**: Brief 2-3 sentence overview describing what the platform does and its main purpose
+- Use current ISO 8601 timestamp (YYYY-MM-DDTHH:mm:ss.sssZ format)
+- **summary**: Brief 2-3 sentence overview describing what the platform does
 - Identify ALL major functional domains (no limit on count)
-- For large apps, identify as many domains as needed to cover the application
-- Use kebab-case for domain IDs
-- Priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
-- List 1-5 main files per domain
-- All domains have `"hasAnalysis": false`
-- Keep businessPurpose to 1 sentence
+- Use kebab-case for domain IDs (e.g., "user-authentication", "payment-processing")
+- **priority**: P0 (critical), P1 (high), P2 (medium), P3 (low)
+- **files**: List 3-8 main files per domain (paths relative to project root)
+- **testCoverage**: Set to "none" for initial analysis
+- **hasAnalysis**: Always set to false
+- **businessPurpose**: Keep to 1 sentence per domain
 
-## Execute
+## CRITICAL INSTRUCTIONS
 
-**YOUR TASK**: Create the file `.code-analysis/analysis/codebase-analysis.json` with the complete JSON structure.
+1. Start by exploring the project structure using `list_directory` on "."
+2. Identify major directories and file patterns
+3. Read key files to understand functionality
+4. Group related files into logical domains
+5. Output ONLY the JSON structure - no additional text before or after
+6. The JSON must be valid and parseable
+7. Include all domains you discover - there's no limit
 
-**CRITICAL REQUIREMENTS**:
+## EXAMPLE WORKFLOW
 
-1. You MUST create/write the file `.code-analysis/analysis/codebase-analysis.json`
-2. The file MUST contain valid JSON with the structure shown above
-3. Do NOT just describe what should be done - ACTUALLY CREATE THE FILE
-4. Do NOT ask questions or wait for confirmation - WRITE THE FILE NOW
-5. Fill in the structure with your actual analysis of the codebase
+1. List root directory to see structure
+2. Explore major subdirectories (src/, backend/, frontend/, etc.)
+3. Search for key files (_.js, _.jsx, _.ts, _.tsx, etc.)
+4. Read package.json and README if available
+5. Identify functional groupings
+6. Generate the JSON output
 
-**Example command you should execute**:
-
-- Create the file with the exact path: `.code-analysis/analysis/codebase-analysis.json`
-- Write the complete JSON structure with your analysis
+**Output your JSON analysis now.**

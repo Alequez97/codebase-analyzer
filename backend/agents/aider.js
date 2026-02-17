@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { emitSocketEvent } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 
 const execAsync = promisify(exec);
@@ -137,133 +138,109 @@ export async function execute(task) {
     let stdout = "";
     let stderr = "";
 
-    // Import io dynamically to emit events
-    import("../index.js")
-      .then(({ io }) => {
-        const aiderProcess = spawn(command, {
-          cwd: config.target.directory,
-          shell: true,
-        });
+    const aiderProcess = spawn(command, {
+      cwd: config.target.directory,
+      shell: true,
+    });
 
-        // Close stdin immediately - we're using --message-file, no interaction needed
-        if (aiderProcess.stdin) {
-          aiderProcess.stdin.end();
-        }
+    // Close stdin immediately - we're using --message-file, no interaction needed
+    if (aiderProcess.stdin) {
+      aiderProcess.stdin.end();
+    }
 
-        aiderProcess.stdout.on("data", (data) => {
-          const text = data.toString();
-          stdout += text;
+    aiderProcess.stdout.on("data", (data) => {
+      const text = data.toString();
+      stdout += text;
 
-          // Log to file
-          logStream.write(text);
+      // Log to file
+      logStream.write(text);
 
-          // Emit to socket
-          io.emit(SOCKET_EVENTS.TASK_LOG, {
-            taskId: task.id,
-            type: task.type,
-            stream: "stdout",
-            data: text,
-          });
+      // Emit to socket
+      emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+        taskId: task.id,
+        type: task.type,
+        stream: "stdout",
+        data: text,
+      });
 
-          logger.debug(`${text.trim()}`, {
-            component: "Aider",
-            taskId: task.id,
-          });
-        });
+      logger.debug(`${text.trim()}`, {
+        component: "Aider",
+        taskId: task.id,
+      });
+    });
 
-        aiderProcess.stderr.on("data", (data) => {
-          const text = data.toString();
-          stderr += text;
+    aiderProcess.stderr.on("data", (data) => {
+      const text = data.toString();
+      stderr += text;
 
-          // Log to file
-          logStream.write(`[STDERR] ${text}`);
+      // Log to file
+      logStream.write(`[STDERR] ${text}`);
 
-          // Emit to socket
-          io.emit(SOCKET_EVENTS.TASK_LOG, {
-            taskId: task.id,
-            type: task.type,
-            stream: "stderr",
-            data: text,
-          });
+      // Emit to socket
+      emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
+        taskId: task.id,
+        type: task.type,
+        stream: "stderr",
+        data: text,
+      });
 
-          logger.error(`${text.trim()}`, {
-            component: "Aider",
-            taskId: task.id,
-            stream: "stderr",
-          });
-        });
+      logger.error(`${text.trim()}`, {
+        component: "Aider",
+        taskId: task.id,
+        stream: "stderr",
+      });
+    });
 
-        aiderProcess.on("close", async (code) => {
-          // End the write stream and wait for it to finish
-          logStream.end();
-          await new Promise((resolveStream) =>
-            logStream.on("finish", resolveStream),
-          );
+    aiderProcess.on("close", async (code) => {
+      // End the write stream and wait for it to finish
+      logStream.end();
+      await new Promise((resolveStream) =>
+        logStream.on("finish", resolveStream),
+      );
 
-          const success = code === 0;
+      const success = code === 0;
 
-          if (success) {
-            resolve({
-              success: true,
-              stdout,
-              stderr,
-              taskId: task.id,
-              logFile,
-            });
-          } else {
-            resolve({
-              success: false,
-              error: `Aider exited with code ${code}`,
-              stdout,
-              stderr,
-              taskId: task.id,
-              logFile,
-            });
-          }
-        });
-
-        aiderProcess.on("error", async (error) => {
-          // Close the log stream
-          logStream.end();
-          await new Promise((resolveStream) =>
-            logStream.on("finish", resolveStream),
-          );
-
-          logger.error(`Aider execution error for task ${task.id}`, {
-            error,
-            component: "Aider",
-            taskId: task.id,
-          });
-
-          resolve({
-            success: false,
-            error: error.message,
-            stdout,
-            stderr,
-            taskId: task.id,
-            logFile,
-          });
-        });
-      })
-      .catch(async (err) => {
-        // Close the log stream even on import failure
-        logStream.end();
-        await new Promise((resolveStream) =>
-          logStream.on("finish", resolveStream),
-        );
-
-        logger.error("Failed to import io", {
-          error: err,
-          component: "Aider",
-          taskId: task.id,
-        });
-
+      if (success) {
         resolve({
-          success: false,
-          error: "Failed to setup socket streaming",
+          success: true,
+          stdout,
+          stderr,
           taskId: task.id,
           logFile,
         });
+      } else {
+        resolve({
+          success: false,
+          error: `Aider exited with code ${code}`,
+          stdout,
+          stderr,
+          taskId: task.id,
+          logFile,
+        });
+      }
+    });
+
+    aiderProcess.on("error", async (error) => {
+      // Close the log stream
+      logStream.end();
+      await new Promise((resolveStream) =>
+        logStream.on("finish", resolveStream),
+      );
+
+      logger.error(`Aider execution error for task ${task.id}`, {
+        error,
+        component: "Aider",
+        taskId: task.id,
       });
+
+      resolve({
+        success: false,
+        error: error.message,
+        stdout,
+        stderr,
+        taskId: task.id,
+        logFile,
+      });
+    });
   });
 }
