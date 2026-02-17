@@ -65,7 +65,6 @@ app.get("/api/status", async (req, res) => {
     },
     config: {
       port: config.port,
-      useMockData: config.useMockData,
     },
     agents,
   });
@@ -252,43 +251,7 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
       });
     }
 
-    // Mock mode: simulate domain analysis task
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Simulating domain analysis task for: ${id}`);
-      const mockTask = {
-        id: `mock-task-${Date.now()}`,
-        type: "analyze-domain",
-        domainId: id,
-        domainName,
-        status: "pending",
-        agent,
-        timestamp: new Date().toISOString(),
-      };
-
-      // Return task immediately
-      res.status(201).json(mockTask);
-
-      // Simulate async completion after delay
-      const executeNow = req.body.executeNow !== false;
-      if (executeNow) {
-        simulateAnalysisDelay(1500).then(() => {
-          const domainData = getMockDomainAnalysis(id);
-          logger.info(
-            `[MOCK MODE] Emitting TASK_COMPLETED with domain data for: ${id}`,
-          );
-          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
-            taskId: mockTask.id,
-            type: "analyze",
-            domainId: id,
-            timestamp: new Date().toISOString(),
-            data: domainData,
-          });
-        });
-      }
-      return;
-    }
-
-    // Production mode: create real task
+    // Create real task
     const executeNow = req.body.executeNow !== false; // Default to true
     const task = await taskOrchestrator.createAnalyzeTask(
       id,
@@ -310,20 +273,6 @@ app.post("/api/analysis/domain/:id/analyze", async (req, res) => {
 app.get("/api/analysis/domain/:id/documentation", async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Returning mock domain documentation for: ${id}`);
-      const mockData = getMockDomainDocumentation(id);
-
-      if (!mockData) {
-        return res.status(404).json({
-          error: "Domain documentation not found",
-          message: `No mock documentation available for domain: ${id}`,
-        });
-      }
-
-      return res.json(mockData);
-    }
 
     const data = await domainsPersistence.readDomainDocumentation(id);
 
@@ -351,20 +300,6 @@ app.get("/api/analysis/domain/:id/requirements", async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Returning mock domain requirements for: ${id}`);
-      const mockData = getMockDomainRequirements(id);
-
-      if (!mockData) {
-        return res.status(404).json({
-          error: "Domain requirements not found",
-          message: `No mock requirements available for domain: ${id}`,
-        });
-      }
-
-      return res.json(mockData);
-    }
-
     const data = await domainsPersistence.readDomainRequirements(id);
 
     if (!data) {
@@ -390,20 +325,6 @@ app.get("/api/analysis/domain/:id/requirements", async (req, res) => {
 app.get("/api/analysis/domain/:id/testing", async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Returning mock domain testing for: ${id}`);
-      const mockData = getMockDomainTesting(id);
-
-      if (!mockData) {
-        return res.status(404).json({
-          error: "Domain testing not found",
-          message: `No mock testing data available for domain: ${id}`,
-        });
-      }
-
-      return res.json(mockData);
-    }
 
     const data = await domainsPersistence.readDomainTesting(id);
 
@@ -440,42 +361,7 @@ app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
       });
     }
 
-    if (config.useMockData) {
-      logger.info(
-        `[MOCK MODE] Simulating domain documentation analysis for: ${id}`,
-      );
-      const mockTask = {
-        id: `mock-task-${Date.now()}`,
-        type: "analyze-domain-documentation",
-        domainId: id,
-        domainName,
-        status: "pending",
-        agent,
-        timestamp: new Date().toISOString(),
-      };
-
-      res.status(201).json(mockTask);
-
-      const executeNow = req.body.executeNow !== false;
-      if (executeNow) {
-        simulateAnalysisDelay(1500).then(() => {
-          const data = getMockDomainDocumentation(id);
-          logger.info(
-            `[MOCK MODE] Emitting TASK_COMPLETED with documentation data for: ${id}`,
-          );
-          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
-            taskId: mockTask.id,
-            type: "analyze-documentation",
-            domainId: id,
-            timestamp: new Date().toISOString(),
-            data,
-          });
-        });
-      }
-      return;
-    }
-
-    // Production mode: create real task
+    // Create real task
     const executeNow = req.body.executeNow !== false;
     const task = await taskOrchestrator.createAnalyzeDocumentationTask(
       id,
@@ -512,43 +398,8 @@ app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
       });
     }
 
-    if (config.useMockData) {
-      logger.info(
-        `[MOCK MODE] Simulating domain requirements analysis for: ${id}`,
-      );
-      const mockTask = {
-        id: `mock-task-${Date.now()}`,
-        type: "analyze-domain-requirements",
-        domainId: id,
-        domainName,
-        status: "pending",
-        agent,
-        timestamp: new Date().toISOString(),
-      };
-
-      res.status(201).json(mockTask);
-
-      const executeNow = req.body.executeNow !== false;
-      if (executeNow) {
-        simulateAnalysisDelay(1500).then(() => {
-          const data = getMockDomainRequirements(id);
-          logger.info(
-            `[MOCK MODE] Emitting TASK_COMPLETED with requirements data for: ${id}`,
-          );
-          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
-            taskId: mockTask.id,
-            type: "analyze-requirements",
-            domainId: id,
-            timestamp: new Date().toISOString(),
-            data,
-          });
-        });
-      }
-      return;
-    }
-
-    // TODO: Production mode - create real task
-    res.status(501).json({ error: "Not implemented in production mode yet" });
+    // TODO: Implement requirements analysis task orchestrator
+    res.status(501).json({ error: "Requirements analysis not implemented yet" });
   } catch (error) {
     logger.error("Error creating requirements analysis task", {
       error,
@@ -576,41 +427,8 @@ app.post("/api/analysis/domain/:id/analyze/testing", async (req, res) => {
       });
     }
 
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Simulating domain testing analysis for: ${id}`);
-      const mockTask = {
-        id: `mock-task-${Date.now()}`,
-        type: "analyze-domain-testing",
-        domainId: id,
-        domainName,
-        status: "pending",
-        agent,
-        timestamp: new Date().toISOString(),
-      };
-
-      res.status(201).json(mockTask);
-
-      const executeNow = req.body.executeNow !== false;
-      if (executeNow) {
-        simulateAnalysisDelay(1500).then(() => {
-          const data = getMockDomainTesting(id);
-          logger.info(
-            `[MOCK MODE] Emitting TASK_COMPLETED with testing data for: ${id}`,
-          );
-          io.emit(SOCKET_EVENTS.TASK_COMPLETED, {
-            taskId: mockTask.id,
-            type: "analyze-testing",
-            domainId: id,
-            timestamp: new Date().toISOString(),
-            data,
-          });
-        });
-      }
-      return;
-    }
-
-    // TODO: Production mode - create real task
-    res.status(501).json({ error: "Not implemented in production mode yet" });
+    // TODO: Implement testing analysis task orchestrator
+    res.status(501).json({ error: "Testing analysis not implemented yet" });
   } catch (error) {
     logger.error("Error creating testing analysis task", {
       error,
@@ -635,15 +453,7 @@ app.post("/api/analysis/domain/:id/documentation/save", async (req, res) => {
       });
     }
 
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Simulating documentation save for: ${id}`);
-      return res.json({
-        success: true,
-        message: "Documentation saved successfully (mock mode)",
-      });
-    }
-
-    // Production mode: save to markdown file
+    // Save to markdown file
     await domainsPersistence.writeDomainDocumentation(id, documentation);
 
     res.json({
@@ -674,16 +484,7 @@ app.post("/api/analysis/domain/:id/requirements/save", async (req, res) => {
       });
     }
 
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Simulating requirements save for: ${id}`);
-      // In mock mode, just return success
-      return res.json({
-        success: true,
-        message: "Requirements saved successfully (mock mode)",
-      });
-    }
-
-    // Production mode: save to file
+    // Save to file
     await domainsPersistence.writeDomainRequirements(id, {
       domainId: id,
       domainName: domainName || id,
@@ -719,15 +520,7 @@ app.post("/api/analysis/domain/:id/files/save", async (req, res) => {
       });
     }
 
-    if (config.useMockData) {
-      logger.info(`[MOCK MODE] Simulating files save for: ${id}`);
-      return res.json({
-        success: true,
-        message: "Files saved successfully (mock mode)",
-      });
-    }
-
-    // Production mode: update domain files in codebase analysis
+    // Update domain files in codebase analysis
     const updatedAnalysis = await codebaseAnalysisPersistence.updateDomainFiles(
       id,
       files,
@@ -761,24 +554,8 @@ app.post("/api/analysis/domain/:id/tests/:testId/apply", async (req, res) => {
   try {
     const { id, testId } = req.params;
 
-    if (config.useMockData) {
-      logger.info(
-        `[MOCK MODE] Simulating test application for ${testId} in domain: ${id}`,
-      );
-
-      // Simulate async operation
-      await simulateAnalysisDelay(800);
-
-      return res.json({
-        success: true,
-        message: `Test ${testId} applied successfully (mock mode)`,
-        testId,
-        domainId: id,
-      });
-    }
-
-    // TODO: Production mode - implement test application logic
-    res.status(501).json({ error: "Not implemented in production mode yet" });
+    // TODO: Implement test application logic
+    res.status(501).json({ error: "Test application not implemented yet" });
   } catch (error) {
     logger.error(
       `Error applying test ${req.params.testId} for domain ${req.params.id}`,
@@ -903,7 +680,6 @@ httpServer.listen(config.port, () => {
   logger.info("  Codebase Analyzer API");
   logger.info("========================================");
   logger.info(`  Port: ${config.port}`);
-  logger.info(`  Mode: ${config.useMockData ? "MOCK DATA" : "PRODUCTION"}`);
   logger.info(`  Target: ${config.target.name}`);
   logger.info(`  Project: ${config.target.directory}`);
   logger.info(`  Output: ${config.paths.targetAnalysis}`);
@@ -914,10 +690,5 @@ httpServer.listen(config.port, () => {
     `Open dashboard at http://localhost:5173 (if frontend is running)`,
   );
   logger.info("WebSocket ready for real-time updates");
-  if (config.useMockData) {
-    logger.warn(
-      "⚠️  MOCK MODE ENABLED - Using sample data instead of real analysis",
-    );
-  }
   logger.info("");
 });

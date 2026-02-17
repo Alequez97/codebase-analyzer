@@ -53,10 +53,6 @@ const config = {
     name: projectName,
   },
 
-  // Mock data mode (for development/testing)
-  // When true, API endpoints return mock data instead of executing real LLM analysis
-  useMockData: process.env.USE_MOCK_DATA === "true",
-
   // LLM API configuration (used for analysis JSON generation)
   llm: {
     model: process.env.LLM_MODEL || "deepseek",

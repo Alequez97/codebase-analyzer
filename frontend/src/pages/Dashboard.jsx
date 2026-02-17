@@ -43,7 +43,6 @@ export default function Dashboard() {
       <StatusBar
         connected={!error && !!status}
         socketConnected={socketConnected}
-        status={status}
       />
 
       <Container maxW="container.xl" py={8}>

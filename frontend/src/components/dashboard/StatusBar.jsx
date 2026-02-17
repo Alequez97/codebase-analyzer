@@ -1,8 +1,6 @@
 import { HStack, Badge, Text } from "@chakra-ui/react";
 
-export function StatusBar({ connected, socketConnected, status }) {
-  const useMockData = status?.config?.useMockData;
-
+export function StatusBar({ connected, socketConnected }) {
   return (
     <HStack
       justify="flex-end"
@@ -30,17 +28,6 @@ export function StatusBar({ connected, socketConnected, status }) {
           {socketConnected ? "Connected" : "Connecting..."}
         </Badge>
       </HStack>
-
-      {useMockData && (
-        <HStack gap={2}>
-          <Text fontSize="sm" color="gray.600">
-            Mode:
-          </Text>
-          <Badge colorPalette="orange" size="sm">
-            MOCK DATA
-          </Badge>
-        </HStack>
-      )}
     </HStack>
   );
 }
