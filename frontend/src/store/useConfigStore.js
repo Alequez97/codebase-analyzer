@@ -17,6 +17,7 @@ export const useConfigStore = create(
     }),
     {
       name: "config-store",
+      storage: () => sessionStorage,
       partialize: (state) => ({
         showLogs: state.showLogs,
       }),

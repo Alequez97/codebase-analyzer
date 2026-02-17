@@ -41,6 +41,7 @@ export default function DomainDetailsPage() {
     updateEditedFiles,
     resetEditedFiles,
     saveRequirements,
+    saveFiles,
     initializeEditorsForDomain,
   } = useDomainEditorStore();
 
@@ -70,8 +71,13 @@ export default function DomainDetailsPage() {
   }, [domainId, fetchDomainAnalysis, initializeEditorsForDomain]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
-  const filesText =
-    editedFilesByDomainId[domainId] || (domain?.files || []).join("\n");
+
+  // Use domain.files from codebase analysis as source of truth
+  // Only use edited files if they exist and were actually modified by user
+  const filesArray =
+    editedFilesByDomainId[domainId] !== undefined
+      ? editedFilesByDomainId[domainId]
+      : domain?.files || [];
 
   const handleSaveRequirements = async () => {
     const result = await saveRequirements(domainId);
@@ -79,6 +85,15 @@ export default function DomainDetailsPage() {
       alert("Requirements saved successfully!");
     } else {
       alert(`Failed to save requirements: ${result.error}`);
+    }
+  };
+
+  const handleSaveFiles = async () => {
+    const result = await saveFiles(domainId);
+    if (result.success) {
+      alert("Files saved successfully!");
+    } else {
+      alert(`Failed to save files: ${result.error}`);
     }
   };
 
@@ -118,8 +133,9 @@ export default function DomainDetailsPage() {
         )}
 
         <DomainFilesSection
-          filesText={filesText}
-          onFilesChange={(value) => updateEditedFiles(domainId, value)}
+          files={filesArray}
+          onFilesChange={(files) => updateEditedFiles(domainId, files)}
+          onSave={handleSaveFiles}
           onReset={() => resetEditedFiles(domainId)}
         />
 

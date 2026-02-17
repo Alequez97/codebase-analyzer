@@ -349,7 +349,18 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Custom analysis rules
 - API-first design
 
-### 6. **Production-Ready Code**
+### 6. **State Management Best Practices**
+
+- **Use Zustand stores** for all complex business logic, shared state, and data that needs to be accessed across multiple components
+- **Use React useState** only for simple, internal component-specific UI state (toggles, form inputs, local visibility)
+- **Examples of Zustand usage**: API data caching, analysis results, domain editing, project files, configuration
+- **Examples of useState usage**: dropdown open/closed, input field values, local search terms, modal visibility
+- Store state should be organized by domain (e.g., `useAnalysisStore`, `useProjectFilesStore`, `useDomainEditorStore`)
+- Implement smart caching in stores to avoid redundant API calls
+- Keep stores focused and avoid creating a single monolithic store
+- **CRITICAL: Always use sessionStorage, never localStorage** - All persisted state must use `sessionStorage` via Zustand's `storage: () => sessionStorage` option to ensure data is cleared when the browser tab/session ends (not persisted across browser restarts)
+
+### 7. **Production-Ready Code**
 
 - No legacy code or backward compatibility unless explicitly needed
 - Clean implementation without leftovers

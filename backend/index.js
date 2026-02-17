@@ -6,12 +6,14 @@ import fs from "fs/promises";
 import path from "path";
 import config from "./config.js";
 import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis.js";
+import * as codebaseAnalysisPersistence from "./persistence/codebase-analysis.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
 import * as domainsPersistence from "./persistence/domains.js";
 import { detectAvailableAgents, getSupportedAgents } from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 import * as logger from "./utils/logger.js";
 import { initSocketEmitter } from "./utils/socket-emitter.js";
+import { getProjectFiles } from "./utils/file-scanner.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -63,6 +65,27 @@ app.get("/api/status", async (req, res) => {
     },
     agents,
   });
+});
+
+/**
+ * Get all project files for autocomplete
+ */
+app.get("/api/project/files", async (req, res) => {
+  try {
+    const files = await getProjectFiles(config.target.directory);
+
+    res.json({
+      files,
+      count: files.length,
+      projectPath: config.target.directory,
+    });
+  } catch (error) {
+    logger.error("Error scanning project files", {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to scan project files" });
+  }
 });
 
 /**
@@ -163,6 +186,41 @@ app.get("/api/analysis/domain/:id", async (req, res) => {
       component: "API",
     });
     res.status(500).json({ error: "Failed to read domain analysis" });
+  }
+});
+
+/**
+ * Get files list for a domain from codebase analysis
+ */
+app.get("/api/analysis/domain/:id/files", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const codebaseAnalysis = await codebaseAnalysisPersistence.read();
+
+    if (!codebaseAnalysis) {
+      return res.status(404).json({
+        error: "Codebase analysis not found",
+        message: "No codebase analysis available",
+      });
+    }
+
+    const domain = (codebaseAnalysis.domains || []).find((d) => d.id === id);
+
+    if (!domain) {
+      return res.status(404).json({
+        error: "Domain not found",
+        message: `No domain found with id: ${id}`,
+      });
+    }
+
+    res.json({ files: domain.files || [] });
+  } catch (error) {
+    logger.error(`Error reading domain files ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to read domain files" });
   }
 });
 
@@ -616,6 +674,56 @@ app.post("/api/analysis/domain/:id/requirements/save", async (req, res) => {
       component: "API",
     });
     res.status(500).json({ error: "Failed to save requirements" });
+  }
+});
+
+/**
+ * Save domain files
+ */
+app.post("/api/analysis/domain/:id/files/save", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { files } = req.body;
+
+    if (!files || !Array.isArray(files)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "files[] array is required",
+      });
+    }
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Simulating files save for: ${id}`);
+      return res.json({
+        success: true,
+        message: "Files saved successfully (mock mode)",
+      });
+    }
+
+    // Production mode: update domain files in codebase analysis
+    const updatedAnalysis = await codebaseAnalysisPersistence.updateDomainFiles(
+      id,
+      files,
+    );
+
+    if (!updatedAnalysis) {
+      return res.status(404).json({
+        error: "Domain not found",
+        message: `Domain ${id} not found in codebase analysis`,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Files saved successfully",
+      domain: updatedAnalysis.domains.find((d) => d.id === id),
+    });
+  } catch (error) {
+    logger.error(`Error saving files for ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to save files" });
   }
 });
 

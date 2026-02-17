@@ -8,6 +8,9 @@ export default {
   // Status
   getStatus: () => api.get("/status"),
 
+  // Project Files
+  getProjectFiles: () => api.get("/project/files"),
+
   // Full Codebase Analysis
   getCodebaseAnalysis: () => api.get("/analysis/codebase"),
   requestCodebaseAnalysis: (executeNow = true, agent = "llm-api") =>
@@ -16,6 +19,7 @@ export default {
   // Full Codebase Analysis - Full results and modules
   getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
   getDomain: (id) => api.get(`/analysis/domain/${id}`),
+  getDomainFiles: (id) => api.get(`/analysis/domain/${id}/files`),
   analyzeDomain: (id, domainName, files, executeNow = true, agent = "aider") =>
     api.post(`/analysis/domain/${id}/analyze`, {
       domainName,
@@ -76,6 +80,11 @@ export default {
     api.post(`/analysis/domain/${id}/requirements/save`, {
       domainName,
       requirements,
+    }),
+
+  saveDomainFiles: (id, files) =>
+    api.post(`/analysis/domain/${id}/files/save`, {
+      files,
     }),
 
   applyTest: (domainId, testId) =>

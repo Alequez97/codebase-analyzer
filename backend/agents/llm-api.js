@@ -211,6 +211,7 @@ export async function execute(task) {
         },
       );
 
+      const responseLog = `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`;
       emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
         taskId: task.id,
         type: task.type,

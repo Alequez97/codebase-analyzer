@@ -92,7 +92,13 @@ export const useAnalysisStore = create(
       fetchPendingTasks: async () => {
         try {
           const response = await api.getPendingTasks();
-          const tasks = response.data || [];
+          const tasks = response.data?.tasks || [];
+
+          // Ensure tasks is an array
+          if (!Array.isArray(tasks)) {
+            console.error("Invalid tasks response:", tasks);
+            return [];
+          }
 
           // Find pending codebase-analysis task
           const codebaseTask = tasks.find(
@@ -314,6 +320,7 @@ export const useAnalysisStore = create(
     }),
     {
       name: "analysis-store",
+      storage: () => sessionStorage,
       partialize: (state) => ({
         analysis: state.analysis,
         domainAnalysisById: state.domainAnalysisById,

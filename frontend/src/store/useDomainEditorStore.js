@@ -49,9 +49,6 @@ export const useDomainEditorStore = create(
       initializeEditorsForDomain: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
         const detail = analysisStore.domainAnalysisById[domainId];
-        const domain = (analysisStore.analysis?.domains || []).find(
-          (d) => d.id === domainId,
-        );
 
         set((state) => {
           const updates = {};
@@ -64,14 +61,8 @@ export const useDomainEditorStore = create(
             };
           }
 
-          // Initialize files if not already set
-          if (!state.editedFilesByDomainId[domainId]) {
-            const filesText = (domain?.files || []).join("\n");
-            updates.editedFilesByDomainId = {
-              ...state.editedFilesByDomainId,
-              [domainId]: filesText,
-            };
-          }
+          // Don't initialize files - they should come from codebase analysis (domain.files)
+          // Only track edited files when user actually modifies them
 
           return Object.keys(updates).length > 0 ? updates : state;
         });
@@ -98,11 +89,11 @@ export const useDomainEditorStore = create(
         }));
       },
 
-      updateEditedFiles: (domainId, filesText) => {
+      updateEditedFiles: (domainId, filesArray) => {
         set((state) => ({
           editedFilesByDomainId: {
             ...state.editedFilesByDomainId,
-            [domainId]: filesText,
+            [domainId]: filesArray,
           },
         }));
       },
@@ -112,12 +103,12 @@ export const useDomainEditorStore = create(
         const domain = (analysisStore.analysis?.domains || []).find(
           (d) => d.id === domainId,
         );
-        const filesText = (domain?.files || []).join("\n");
+        const filesArray = domain?.files || [];
 
         set((state) => ({
           editedFilesByDomainId: {
             ...state.editedFilesByDomainId,
-            [domainId]: filesText,
+            [domainId]: filesArray,
           },
         }));
       },
@@ -139,6 +130,26 @@ export const useDomainEditorStore = create(
         }
       },
 
+      saveFiles: async (domainId) => {
+        const filesArray = get().editedFilesByDomainId[domainId];
+        if (!filesArray || filesArray.length === 0) {
+          return { success: false, error: "No files to save" };
+        }
+
+        try {
+          await api.saveDomainFiles(domainId, filesArray);
+
+          // Refresh the analysis to get updated domain data
+          const analysisStore = useAnalysisStore.getState();
+          await analysisStore.fetchAnalysis();
+
+          return { success: true };
+        } catch (err) {
+          const message = err?.response?.data?.error || "Failed to save files";
+          return { success: false, error: message };
+        }
+      },
+
       reset: () =>
         set({
           editedRequirementsByDomainId: {},
@@ -147,6 +158,7 @@ export const useDomainEditorStore = create(
     }),
     {
       name: "domain-editor-store",
+      storage: () => sessionStorage,
     },
   ),
 );
