@@ -77,19 +77,23 @@ async function readLogContent(logFile) {
 export async function readCodebaseAnalysisLogs() {
   const analysis = await codebaseAnalysisPersistence.readCodebaseAnalysis();
   if (!analysis) {
-    throw createHttpError(
-      404,
-      "No codebase analysis found",
-      'Click "Analyze Codebase" to start analysis',
-    );
+    // Return empty result instead of 404 - no analysis yet is a valid state
+    return {
+      taskId: null,
+      logFile: null,
+      content: "",
+      source: "codebase-analysis",
+    };
   }
 
   if (!analysis.logFile) {
-    throw createHttpError(
-      404,
-      "No log file available",
-      "Codebase analysis exists but does not include a log file path",
-    );
+    // Return empty result - analysis exists but logs not available yet
+    return {
+      taskId: analysis.taskId || null,
+      logFile: null,
+      content: "",
+      source: "codebase-analysis",
+    };
   }
 
   const logResult = await readLogContent(analysis.logFile);
@@ -108,11 +112,14 @@ export async function readTaskLogs(taskId) {
   }
 
   if (!task.logFile) {
-    throw createHttpError(
-      404,
-      "No log file available",
-      "This task has not been executed yet or does not have logs",
-    );
+    // Return empty content instead of 404 - task exists but not executed yet
+    return {
+      taskId,
+      logFile: null,
+      content: "",
+      taskType: task.type,
+      taskStatus: task.status,
+    };
   }
 
   const logResult = await readLogContent(task.logFile);

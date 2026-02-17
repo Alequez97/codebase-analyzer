@@ -277,7 +277,7 @@ export const useAnalysisStore = create(
         }
       },
 
-      analyzeDomainRequirements: async (domain) => {
+      analyzeDomainRequirements: async (domain, userContext = "") => {
         if (!domain?.id) return { success: false, error: "Invalid domain" };
 
         set((state) => {
@@ -293,7 +293,11 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainRequirements(domain.id, domain.files || []);
+          await api.analyzeDomainRequirements(
+            domain.id,
+            domain.files || [],
+            userContext,
+          );
           return { success: true };
         } catch (err) {
           const message =

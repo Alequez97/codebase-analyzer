@@ -407,7 +407,7 @@ app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
 app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
   try {
     const { id } = req.params;
-    const { files } = req.body;
+    const { files, userContext } = req.body;
     const agent = DEFAULT_AGENTS.DOMAIN_REQUIREMENTS;
 
     if (!files || !Array.isArray(files)) {
@@ -417,10 +417,16 @@ app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
       });
     }
 
-    // TODO: Implement requirements analysis task orchestrator
-    res
-      .status(501)
-      .json({ error: "Requirements analysis not implemented yet" });
+    // Create real task with optional user context
+    const executeNow = req.body.executeNow !== false;
+    const task = await taskOrchestrator.createAnalyzeRequirementsTask(
+      id,
+      files,
+      userContext || "",
+      executeNow,
+      agent,
+    );
+    res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating requirements analysis task", {
       error,

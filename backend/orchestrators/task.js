@@ -115,6 +115,53 @@ export async function createAnalyzeDocumentationTask(
 }
 
 /**
+ * Create a domain requirements analysis task
+ * @param {string} domainId - The domain ID
+ * @param {string[]} files - Files in the domain
+ * @param {string} userContext - Optional user-provided context
+ * @param {boolean} executeNow - Whether to execute immediately
+ * @param {string} agent - Agent to use for analysis
+ * @returns {Promise<Object>} The created task
+ */
+export async function createAnalyzeRequirementsTask(
+  domainId,
+  files,
+  userContext,
+  executeNow,
+  agent,
+) {
+  const task = {
+    id: generateTaskId("analyze-requirements"),
+    type: TASK_TYPES.REQUIREMENTS,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    params: {
+      agent,
+      domainId,
+      files,
+      userContext: userContext || "",
+      targetDirectory: config.target.directory,
+    },
+    instructionFile: "backend/instructions/analyze-domain-requirements.md",
+    outputFile: `.code-analysis/domains/${domainId}/requirements.json`,
+  };
+
+  await tasksPersistence.writeTask(task);
+
+  if (executeNow) {
+    // Trigger agent execution asynchronously
+    executeTask(task.id).catch((err) => {
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
+    });
+  }
+
+  return task;
+}
+
+/**
  * Post-process analysis output files to add task metadata
  * @param {Object} task - The task object
  */

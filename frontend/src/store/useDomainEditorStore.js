@@ -52,15 +52,20 @@ export const useDomainEditorStore = create(
         const detail = analysisStore.domainAnalysisById.get(domainId);
         const documentation =
           analysisStore.domainDocumentationById.get(domainId);
+        const requirements = analysisStore.domainRequirementsById.get(domainId);
 
         set((state) => {
           const updates = {};
 
           // Initialize requirements if not already set
           if (!state.editedRequirementsByDomainId[domainId]) {
+            // Use requirements from new API endpoint if available
+            // Otherwise fall back to legacy domainAnalysisById
+            const requirementsArray =
+              requirements?.requirements || detail?.requirements || [];
             updates.editedRequirementsByDomainId = {
               ...state.editedRequirementsByDomainId,
-              [domainId]: requirementsToEditableText(detail?.requirements),
+              [domainId]: requirementsToEditableText(requirementsArray),
             };
           }
 
@@ -90,12 +95,18 @@ export const useDomainEditorStore = create(
 
       resetEditedRequirements: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
-        const existing = analysisStore.domainAnalysisById.get(domainId);
+        const detail = analysisStore.domainAnalysisById.get(domainId);
+        const requirements = analysisStore.domainRequirementsById.get(domainId);
+
+        // Use requirements from new API endpoint if available
+        // Otherwise fall back to legacy domainAnalysisById
+        const requirementsArray =
+          requirements?.requirements || detail?.requirements || [];
 
         set((state) => ({
           editedRequirementsByDomainId: {
             ...state.editedRequirementsByDomainId,
-            [domainId]: requirementsToEditableText(existing?.requirements),
+            [domainId]: requirementsToEditableText(requirementsArray),
           },
         }));
       },

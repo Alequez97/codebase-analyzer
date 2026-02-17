@@ -312,7 +312,9 @@ export default function DomainDetailsPage() {
           onRequirementsChange={(value) =>
             updateEditedRequirements(domainId, value)
           }
-          onAnalyze={() => domain && analyzeDomainRequirements(domain)}
+          onAnalyze={(userContext) =>
+            domain && analyzeDomainRequirements(domain, userContext)
+          }
           onSave={handleSaveRequirements}
           onReset={() => resetEditedRequirements(domainId)}
           showLogs={showDomainLogs}

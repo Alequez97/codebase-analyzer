@@ -16,7 +16,7 @@ export default function Dashboard() {
   const { config, configLoading, fetchConfig } = useConfigStore();
 
   // Analysis store (codebase analysis data)
-  const { loading, error, analysis, fetchAnalysis } = useAnalysisStore();
+  const { loading, error, analysis, analyzingCodebase, fetchAnalysis } = useAnalysisStore();
 
   // Logs store (UI state for showing/hiding logs)
   const { showDashboardLogs, toggleDashboardLogs, fetchCodebaseAnalysisLogs } =
@@ -46,15 +46,15 @@ export default function Dashboard() {
       return;
     }
 
-    fetchCodebaseAnalysisLogs(analysis);
-  }, [showDashboardLogs, analysis?.taskId]);
+    fetchCodebaseAnalysisLogs(analysis, false, analyzingCodebase);
+  }, [showDashboardLogs, analysis?.taskId, analyzingCodebase]);
 
   const handleToggleDashboardLogs = () => {
     const shouldShowLogs = !showDashboardLogs;
     toggleDashboardLogs();
 
     if (shouldShowLogs) {
-      fetchCodebaseAnalysisLogs(analysis);
+      fetchCodebaseAnalysisLogs(analysis, false, analyzingCodebase);
     }
   };
 

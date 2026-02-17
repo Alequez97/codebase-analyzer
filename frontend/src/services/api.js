@@ -37,9 +37,10 @@ export default {
       executeNow,
     }),
 
-  analyzeDomainRequirements: (id, files, executeNow = true) =>
+  analyzeDomainRequirements: (id, files, userContext = "", executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/requirements`, {
       files,
+      userContext,
       executeNow,
     }),
 

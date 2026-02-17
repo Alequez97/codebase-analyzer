@@ -45,7 +45,7 @@ export function TaskLogs() {
             <VStack gap={3} color="gray.500">
               <Text fontSize="lg">No logs yet</Text>
               <Text fontSize="sm" textAlign="center">
-                Run codebase analysis to generate logs
+                Click "Analyze Codebase" to start analysis
               </Text>
             </VStack>
           </Box>

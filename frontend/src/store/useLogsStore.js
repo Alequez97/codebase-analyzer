@@ -136,8 +136,14 @@ export const useLogsStore = create(
        * Fetch persisted codebase analysis logs
        * @param {Object|null} analysis - Codebase analysis from analysis store
        * @param {boolean} force - Force reloading even if task is already loaded
+       * @param {boolean} isAnalyzing - Whether codebase analysis is currently running
        */
-      fetchCodebaseAnalysisLogs: async (analysis, force = false) => {
+      fetchCodebaseAnalysisLogs: async (analysis, force = false, isAnalyzing = false) => {
+        // Don't fetch from API if analysis is in progress - rely on socket streaming instead
+        if (isAnalyzing) {
+          return;
+        }
+
         const analysisTaskId = analysis?.taskId || null;
         if (
           !force &&

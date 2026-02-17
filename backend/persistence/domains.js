@@ -49,7 +49,8 @@ export async function readDomainRequirements(domainId) {
     const filePath = path.join(
       config.paths.targetAnalysis,
       "domains",
-      `${domainId}-requirements.json`,
+      domainId,
+      "requirements.json",
     );
     return await tryReadJsonFile(filePath, `domain ${domainId} requirements`);
   } catch (error) {
@@ -66,11 +67,10 @@ export async function readDomainRequirements(domainId) {
  * @param {Object} data - Requirements data
  */
 export async function writeDomainRequirements(domainId, data) {
-  const filePath = path.join(
-    config.paths.targetAnalysis,
-    "domains",
-    `${domainId}-requirements.json`,
-  );
+  const dirPath = path.join(config.paths.targetAnalysis, "domains", domainId);
+  await fs.mkdir(dirPath, { recursive: true });
+
+  const filePath = path.join(dirPath, "requirements.json");
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 

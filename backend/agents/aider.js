@@ -11,6 +11,63 @@ import * as logger from "../utils/logger.js";
 const execAsync = promisify(exec);
 
 /**
+ * Replace template variables in instruction content
+ * @param {string} content - The instruction content with template variables
+ * @param {Object} task - The task object containing parameters
+ * @returns {string} Content with replaced variables
+ */
+function replaceTemplateVariables(content, task) {
+  const { params } = task;
+
+  // Get domain name from codebase analysis if available
+  let domainName = params.domainId || "Unknown Domain";
+
+  // Create a map of variables to replace
+  const variables = {
+    CODEBASE_PATH: params.targetDirectory || config.target.directory,
+    DOMAIN_ID: params.domainId || "",
+    DOMAIN_NAME: domainName,
+    FILES: params.files || [],
+    USER_CONTEXT: params.userContext || "",
+  };
+
+  // Replace simple {{VARIABLE}} patterns
+  let result = content.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+    return variables[varName] !== undefined ? variables[varName] : match;
+  });
+
+  // Replace {{#if VARIABLE}} blocks
+  result = result.replace(
+    /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
+    (match, varName, blockContent) => {
+      const value = variables[varName];
+      // Only include block if variable exists and is not empty
+      if (value && (typeof value !== "string" || value.trim() !== "")) {
+        return blockContent.replace(/\{\{(\w+)\}\}/g, (m, v) => {
+          return variables[v] !== undefined ? variables[v] : m;
+        });
+      }
+      return "";
+    },
+  );
+
+  // Replace {{#each FILES}} blocks
+  result = result.replace(
+    /\{\{#each FILES\}\}([\s\S]*?)\{\{\/each\}\}/g,
+    (match, itemTemplate) => {
+      const files = variables.FILES || [];
+      return files
+        .map((file) => {
+          return itemTemplate.replace(/\{\{this\}\}/g, file);
+        })
+        .join("\n");
+    },
+  );
+
+  return result;
+}
+
+/**
  * Helper function to determine the API key flag for a given model
  * @param {string} model - The model name
  * @param {Object} apiKeys - Object containing API keys
@@ -80,6 +137,20 @@ export async function execute(task) {
     task.instructionFile,
   );
 
+  let instructionContent = await fs.readFile(instructionPath, "utf-8");
+
+  // Replace template variables in the instruction
+  instructionContent = replaceTemplateVariables(instructionContent, task);
+
+  // Create a temporary instruction file with replaced variables
+  const tempInstructionPath = path.join(
+    config.paths.targetAnalysis,
+    "temp",
+    `instruction-${task.id}.md`,
+  );
+  await fs.mkdir(path.dirname(tempInstructionPath), { recursive: true });
+  await fs.writeFile(tempInstructionPath, instructionContent, "utf-8");
+
   // Build file list for Aider to work with
   const files = task.params.files || [];
 
@@ -109,7 +180,7 @@ export async function execute(task) {
     modelApiKey ? modelApiKey : null,
     config.aider.extraArgs || null,
     "--message-file",
-    `"${instructionPath}"`,
+    `"${tempInstructionPath}"`,
     filesArg,
   ].filter(Boolean);
 
@@ -201,6 +272,19 @@ export async function execute(task) {
         logStream.on("finish", resolveStream),
       );
 
+      // Clean up temporary instruction file
+      try {
+        await fs.unlink(tempInstructionPath);
+      } catch (err) {
+        // Ignore cleanup errors
+        logger.debug(
+          `Failed to cleanup temp instruction file: ${err.message}`,
+          {
+            component: "Aider",
+          },
+        );
+      }
+
       const success = code === 0;
 
       if (success) {
@@ -229,6 +313,19 @@ export async function execute(task) {
       await new Promise((resolveStream) =>
         logStream.on("finish", resolveStream),
       );
+
+      // Clean up temporary instruction file
+      try {
+        await fs.unlink(tempInstructionPath);
+      } catch (err) {
+        // Ignore cleanup errors
+        logger.debug(
+          `Failed to cleanup temp instruction file: ${err.message}`,
+          {
+            component: "Aider",
+          },
+        );
+      }
 
       logger.error(`Aider execution error for task ${task.id}`, {
         error,
