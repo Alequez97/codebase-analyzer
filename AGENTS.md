@@ -360,6 +360,56 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Keep stores focused and avoid creating a single monolithic store
 - **CRITICAL: Always use sessionStorage, never localStorage** - All persisted state must use `sessionStorage` via Zustand's `storage: () => sessionStorage` option to ensure data is cleared when the browser tab/session ends (not persisted across browser restarts)
 
+#### 6.1 **Use Map Instead of Objects for Key-Value State**
+
+- **Use JavaScript `Map` instead of plain objects** for state that requires frequent mutations by keys (e.g., `*ById` patterns)
+- Maps provide better performance for key-based operations (set, get, delete) compared to object spread operations
+- When persisting Maps in Zustand, use custom serialization/deserialization:
+  ```javascript
+  storage: createJSONStorage(() => sessionStorage, {
+    replacer: (_key, value) => {
+      if (value instanceof Map) {
+        return { __type: 'Map', value: Array.from(value.entries()) };
+      }
+      return value;
+    },
+    reviver: (_key, value) => {
+      if (value && value.__type === 'Map') {
+        return new Map(value.value);
+      }
+      return value;
+    },
+  })
+  ```
+
+#### 6.2 **Split Large Endpoints into Modular Endpoints**
+
+- **Avoid monolithic endpoints** that return all data at once
+- **Split by logical modules** - each section of data should have its own endpoint
+- **Example**: Instead of `/api/analysis/domain/:id` returning everything, use:
+  - `/api/analysis/domain/:id/documentation` - for documentation analysis
+  - `/api/analysis/domain/:id/requirements` - for requirements analysis
+  - `/api/analysis/domain/:id/testing` - for testing analysis
+- **Benefits**:
+  - Reduced payload size and faster initial loads
+  - Independent loading states per section
+  - Granular error handling (errors don't block unrelated sections)
+  - Better caching strategies (cache sections independently)
+  - Improved user experience with progressive loading
+
+#### 6.3 **Separate Error Handling for Each Module**
+
+- **Map errors by section** - create separate error Maps for each domain part
+- **Example**: Instead of one `domainErrorById`, use:
+  - `domainDocumentationErrorById` - errors specific to documentation
+  - `domainRequirementsErrorById` - errors specific to requirements
+  - `domainTestingErrorById` - errors specific to testing
+- **Benefits**:
+  - One section failing doesn't block other sections
+  - Users can see which specific section failed
+  - Retry logic can be applied per section
+  - Better debugging and error reporting
+
 ### 7. **Production-Ready Code**
 
 - No legacy code or backward compatibility unless explicitly needed

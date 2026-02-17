@@ -48,7 +48,7 @@ export const useDomainEditorStore = create(
       // Actions
       initializeEditorsForDomain: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
-        const detail = analysisStore.domainAnalysisById[domainId];
+        const detail = analysisStore.domainAnalysisById.get(domainId);
 
         set((state) => {
           const updates = {};
@@ -79,7 +79,7 @@ export const useDomainEditorStore = create(
 
       resetEditedRequirements: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
-        const existing = analysisStore.domainAnalysisById[domainId];
+        const existing = analysisStore.domainAnalysisById.get(domainId);
 
         set((state) => ({
           editedRequirementsByDomainId: {

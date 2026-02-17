@@ -25,7 +25,6 @@ export default function DomainDetailsPage() {
     analyzeDomainTesting,
     domainAnalysisById,
     domainLoadingById,
-    domainErrorById,
     domainAnalyzeLoadingById,
     domainDocumentationLoadingById,
     domainRequirementsLoadingById,
@@ -49,15 +48,14 @@ export default function DomainDetailsPage() {
   const { applyingTestsByDomainId, applyTest } = useTestingStore();
 
   const domain = (analysis?.domains || []).find((item) => item.id === domainId);
-  const detail = domainAnalysisById[domainId];
-  const loading = !!domainLoadingById[domainId];
-  const analyzing = !!domainAnalyzeLoadingById[domainId];
-  const error = domainErrorById[domainId];
+  const detail = domainAnalysisById.get(domainId);
+  const loading = !!domainLoadingById.get(domainId);
+  const analyzing = !!domainAnalyzeLoadingById.get(domainId);
 
   // Loading states for individual sections
-  const documentationLoading = !!domainDocumentationLoadingById[domainId];
-  const requirementsLoading = !!domainRequirementsLoadingById[domainId];
-  const testingLoading = !!domainTestingLoadingById[domainId];
+  const documentationLoading = !!domainDocumentationLoadingById.get(domainId);
+  const requirementsLoading = !!domainRequirementsLoadingById.get(domainId);
+  const testingLoading = !!domainTestingLoadingById.get(domainId);
 
   // Test application states
   const applyingTests = applyingTestsByDomainId[domainId] || {};
@@ -116,14 +114,6 @@ export default function DomainDetailsPage() {
           onBack={() => navigate("/")}
           onAnalyze={() => domain && analyzeDomain(domain)}
         />
-
-        {error && (
-          <Alert.Root status="error">
-            <Alert.Indicator />
-            <Alert.Title>Domain analysis unavailable</Alert.Title>
-            <Alert.Description>{error}</Alert.Description>
-          </Alert.Root>
-        )}
 
         {loading && (
           <Alert.Root status="info">

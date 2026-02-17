@@ -9,13 +9,22 @@ export const useAnalysisStore = create(
       // State
       status: null,
       analysis: null,
-      domainAnalysisById: {},
-      domainLoadingById: {},
-      domainErrorById: {},
-      domainAnalyzeLoadingById: {},
-      domainDocumentationLoadingById: {},
-      domainRequirementsLoadingById: {},
-      domainTestingLoadingById: {},
+      // Domain section data storage (Map) - split by section for granular loading
+      domainDocumentationById: new Map(),
+      domainRequirementsById: new Map(),
+      domainTestingById: new Map(),
+      // Legacy: full domain analysis (deprecated, use section-specific instead)
+      domainAnalysisById: new Map(),
+      domainLoadingById: new Map(),
+      domainAnalyzeLoadingById: new Map(),
+      // Section-specific loading states (Map)
+      domainDocumentationLoadingById: new Map(),
+      domainRequirementsLoadingById: new Map(),
+      domainTestingLoadingById: new Map(),
+      // Section-specific error states (Map)
+      domainDocumentationErrorById: new Map(),
+      domainRequirementsErrorById: new Map(),
+      domainTestingErrorById: new Map(),
       analyzingCodebase: false,
       pendingCodebaseTask: null,
       loading: true,
@@ -150,46 +159,50 @@ export const useAnalysisStore = create(
       fetchDomainAnalysis: async (domainId) => {
         if (!domainId) return null;
 
-        set((state) => ({
-          domainLoadingById: {
-            ...state.domainLoadingById,
-            [domainId]: true,
-          },
-          domainErrorById: {
-            ...state.domainErrorById,
-            [domainId]: null,
-          },
-        }));
+        set((state) => {
+          const newLoadingMap = new Map(state.domainLoadingById);
+          newLoadingMap.set(domainId, true);
+          return { domainLoadingById: newLoadingMap };
+        });
 
         try {
           const response = await api.getDomain(domainId);
           const detail = response.data;
 
-          set((state) => ({
-            domainAnalysisById: {
-              ...state.domainAnalysisById,
-              [domainId]: detail,
-            },
-            domainLoadingById: {
-              ...state.domainLoadingById,
-              [domainId]: false,
-            },
-          }));
+          set((state) => {
+            const newAnalysisMap = new Map(state.domainAnalysisById);
+            const newLoadingMap = new Map(state.domainLoadingById);
+            newAnalysisMap.set(domainId, detail);
+            newLoadingMap.set(domainId, false);
+            return {
+              domainAnalysisById: newAnalysisMap,
+              domainLoadingById: newLoadingMap,
+            };
+          });
 
           return detail;
         } catch (err) {
           const message =
             err?.response?.data?.message || "Failed to load domain analysis";
-          set((state) => ({
-            domainLoadingById: {
-              ...state.domainLoadingById,
-              [domainId]: false,
-            },
-            domainErrorById: {
-              ...state.domainErrorById,
-              [domainId]: message,
-            },
-          }));
+
+          set((state) => {
+            const newLoadingMap = new Map(state.domainLoadingById);
+            const newDocErrorMap = new Map(state.domainDocumentationErrorById);
+            const newReqErrorMap = new Map(state.domainRequirementsErrorById);
+            const newTestErrorMap = new Map(state.domainTestingErrorById);
+
+            newLoadingMap.set(domainId, false);
+            newDocErrorMap.set(domainId, message);
+            newReqErrorMap.set(domainId, message);
+            newTestErrorMap.set(domainId, message);
+
+            return {
+              domainLoadingById: newLoadingMap,
+              domainDocumentationErrorById: newDocErrorMap,
+              domainRequirementsErrorById: newReqErrorMap,
+              domainTestingErrorById: newTestErrorMap,
+            };
+          });
           return null;
         }
       },
@@ -197,12 +210,11 @@ export const useAnalysisStore = create(
       analyzeDomain: async (domain) => {
         if (!domain?.id) return { success: false, error: "Invalid domain" };
 
-        set((state) => ({
-          domainAnalyzeLoadingById: {
-            ...state.domainAnalyzeLoadingById,
-            [domain.id]: true,
-          },
-        }));
+        set((state) => {
+          const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
+          newLoadingMap.set(domain.id, true);
+          return { domainAnalyzeLoadingById: newLoadingMap };
+        });
 
         try {
           await api.analyzeDomain(domain.id);
@@ -212,24 +224,28 @@ export const useAnalysisStore = create(
             err?.response?.data?.message || "Failed to analyze domain";
           return { success: false, error: message };
         } finally {
-          set((state) => ({
-            domainAnalyzeLoadingById: {
-              ...state.domainAnalyzeLoadingById,
-              [domain.id]: false,
-            },
-          }));
+          set((state) => {
+            const newLoadingMap = new Map(state.domainAnalyzeLoadingById);
+            newLoadingMap.set(domain.id, false);
+            return { domainAnalyzeLoadingById: newLoadingMap };
+          });
         }
       },
 
       analyzeDomainDocumentation: async (domain) => {
         if (!domain?.id) return { success: false, error: "Invalid domain" };
 
-        set((state) => ({
-          domainDocumentationLoadingById: {
-            ...state.domainDocumentationLoadingById,
-            [domain.id]: true,
-          },
-        }));
+        set((state) => {
+          const newLoadingMap = new Map(state.domainDocumentationLoadingById);
+          newLoadingMap.set(domain.id, true);
+          // Clear previous error when starting new analysis
+          const newErrorMap = new Map(state.domainDocumentationErrorById);
+          newErrorMap.delete(domain.id);
+          return {
+            domainDocumentationLoadingById: newLoadingMap,
+            domainDocumentationErrorById: newErrorMap,
+          };
+        });
 
         try {
           await api.analyzeDomainDocumentation(domain.id);
@@ -237,26 +253,35 @@ export const useAnalysisStore = create(
         } catch (err) {
           const message =
             err?.response?.data?.message || "Failed to analyze documentation";
+          set((state) => {
+            const newErrorMap = new Map(state.domainDocumentationErrorById);
+            newErrorMap.set(domain.id, message);
+            return { domainDocumentationErrorById: newErrorMap };
+          });
           return { success: false, error: message };
         } finally {
-          set((state) => ({
-            domainDocumentationLoadingById: {
-              ...state.domainDocumentationLoadingById,
-              [domain.id]: false,
-            },
-          }));
+          set((state) => {
+            const newLoadingMap = new Map(state.domainDocumentationLoadingById);
+            newLoadingMap.set(domain.id, false);
+            return { domainDocumentationLoadingById: newLoadingMap };
+          });
         }
       },
 
       analyzeDomainRequirements: async (domain) => {
         if (!domain?.id) return { success: false, error: "Invalid domain" };
 
-        set((state) => ({
-          domainRequirementsLoadingById: {
-            ...state.domainRequirementsLoadingById,
-            [domain.id]: true,
-          },
-        }));
+        set((state) => {
+          const newLoadingMap = new Map(state.domainRequirementsLoadingById);
+          newLoadingMap.set(domain.id, true);
+          // Clear previous error when starting new analysis
+          const newErrorMap = new Map(state.domainRequirementsErrorById);
+          newErrorMap.delete(domain.id);
+          return {
+            domainRequirementsLoadingById: newLoadingMap,
+            domainRequirementsErrorById: newErrorMap,
+          };
+        });
 
         try {
           await api.analyzeDomainRequirements(domain.id);
@@ -264,26 +289,35 @@ export const useAnalysisStore = create(
         } catch (err) {
           const message =
             err?.response?.data?.message || "Failed to analyze requirements";
+          set((state) => {
+            const newErrorMap = new Map(state.domainRequirementsErrorById);
+            newErrorMap.set(domain.id, message);
+            return { domainRequirementsErrorById: newErrorMap };
+          });
           return { success: false, error: message };
         } finally {
-          set((state) => ({
-            domainRequirementsLoadingById: {
-              ...state.domainRequirementsLoadingById,
-              [domain.id]: false,
-            },
-          }));
+          set((state) => {
+            const newLoadingMap = new Map(state.domainRequirementsLoadingById);
+            newLoadingMap.set(domain.id, false);
+            return { domainRequirementsLoadingById: newLoadingMap };
+          });
         }
       },
 
       analyzeDomainTesting: async (domain) => {
         if (!domain?.id) return { success: false, error: "Invalid domain" };
 
-        set((state) => ({
-          domainTestingLoadingById: {
-            ...state.domainTestingLoadingById,
-            [domain.id]: true,
-          },
-        }));
+        set((state) => {
+          const newLoadingMap = new Map(state.domainTestingLoadingById);
+          newLoadingMap.set(domain.id, true);
+          // Clear previous error when starting new analysis
+          const newErrorMap = new Map(state.domainTestingErrorById);
+          newErrorMap.delete(domain.id);
+          return {
+            domainTestingLoadingById: newLoadingMap,
+            domainTestingErrorById: newErrorMap,
+          };
+        });
 
         try {
           await api.analyzeDomainTesting(domain.id);
@@ -291,14 +325,161 @@ export const useAnalysisStore = create(
         } catch (err) {
           const message =
             err?.response?.data?.message || "Failed to analyze testing";
+          set((state) => {
+            const newErrorMap = new Map(state.domainTestingErrorById);
+            newErrorMap.set(domain.id, message);
+            return { domainTestingErrorById: newErrorMap };
+          });
           return { success: false, error: message };
         } finally {
-          set((state) => ({
-            domainTestingLoadingById: {
-              ...state.domainTestingLoadingById,
-              [domain.id]: false,
-            },
-          }));
+          set((state) => {
+            const newLoadingMap = new Map(state.domainTestingLoadingById);
+            newLoadingMap.set(domain.id, false);
+            return { domainTestingLoadingById: newLoadingMap };
+          });
+        }
+      },
+
+      // Section-specific fetch methods (replaces fetchDomainAnalysis)
+      fetchDomainDocumentation: async (domainId) => {
+        if (!domainId) return null;
+
+        // Check cache first
+        const cached = get().domainDocumentationById.get(domainId);
+        if (cached) return cached;
+
+        set((state) => {
+          const newLoadingMap = new Map(state.domainDocumentationLoadingById);
+          newLoadingMap.set(domainId, true);
+          return { domainDocumentationLoadingById: newLoadingMap };
+        });
+
+        try {
+          const response = await api.getDomainDocumentation(domainId);
+          const data = response.data;
+
+          set((state) => {
+            const newDataMap = new Map(state.domainDocumentationById);
+            const newLoadingMap = new Map(state.domainDocumentationLoadingById);
+            newDataMap.set(domainId, data);
+            newLoadingMap.set(domainId, false);
+            return {
+              domainDocumentationById: newDataMap,
+              domainDocumentationLoadingById: newLoadingMap,
+            };
+          });
+
+          return data;
+        } catch (err) {
+          const message =
+            err?.response?.data?.message ||
+            "Failed to load domain documentation";
+
+          set((state) => {
+            const newLoadingMap = new Map(state.domainDocumentationLoadingById);
+            const newErrorMap = new Map(state.domainDocumentationErrorById);
+            newLoadingMap.set(domainId, false);
+            newErrorMap.set(domainId, message);
+            return {
+              domainDocumentationLoadingById: newLoadingMap,
+              domainDocumentationErrorById: newErrorMap,
+            };
+          });
+          return null;
+        }
+      },
+
+      fetchDomainRequirements: async (domainId) => {
+        if (!domainId) return null;
+
+        // Check cache first
+        const cached = get().domainRequirementsById.get(domainId);
+        if (cached) return cached;
+
+        set((state) => {
+          const newLoadingMap = new Map(state.domainRequirementsLoadingById);
+          newLoadingMap.set(domainId, true);
+          return { domainRequirementsLoadingById: newLoadingMap };
+        });
+
+        try {
+          const response = await api.getDomainRequirements(domainId);
+          const data = response.data;
+
+          set((state) => {
+            const newDataMap = new Map(state.domainRequirementsById);
+            const newLoadingMap = new Map(state.domainRequirementsLoadingById);
+            newDataMap.set(domainId, data);
+            newLoadingMap.set(domainId, false);
+            return {
+              domainRequirementsById: newDataMap,
+              domainRequirementsLoadingById: newLoadingMap,
+            };
+          });
+
+          return data;
+        } catch (err) {
+          const message =
+            err?.response?.data?.message || "Failed to load domain requirements";
+
+          set((state) => {
+            const newLoadingMap = new Map(state.domainRequirementsLoadingById);
+            const newErrorMap = new Map(state.domainRequirementsErrorById);
+            newLoadingMap.set(domainId, false);
+            newErrorMap.set(domainId, message);
+            return {
+              domainRequirementsLoadingById: newLoadingMap,
+              domainRequirementsErrorById: newErrorMap,
+            };
+          });
+          return null;
+        }
+      },
+
+      fetchDomainTesting: async (domainId) => {
+        if (!domainId) return null;
+
+        // Check cache first
+        const cached = get().domainTestingById.get(domainId);
+        if (cached) return cached;
+
+        set((state) => {
+          const newLoadingMap = new Map(state.domainTestingLoadingById);
+          newLoadingMap.set(domainId, true);
+          return { domainTestingLoadingById: newLoadingMap };
+        });
+
+        try {
+          const response = await api.getDomainTesting(domainId);
+          const data = response.data;
+
+          set((state) => {
+            const newDataMap = new Map(state.domainTestingById);
+            const newLoadingMap = new Map(state.domainTestingLoadingById);
+            newDataMap.set(domainId, data);
+            newLoadingMap.set(domainId, false);
+            return {
+              domainTestingById: newDataMap,
+              domainTestingLoadingById: newLoadingMap,
+            };
+          });
+
+          return data;
+        } catch (err) {
+          const message =
+            err?.response?.data?.message || "Failed to load domain testing";
+
+          set((state) => {
+            const newLoadingMap = new Map(state.domainTestingLoadingById);
+            const newErrorMap = new Map(state.domainTestingErrorById);
+            newLoadingMap.set(domainId, false);
+            newErrorMap.set(domainId, message);
+            return {
+              domainTestingLoadingById: newLoadingMap,
+              domainTestingErrorById: newErrorMap,
+            };
+          });
+          return null;
         }
       },
 
@@ -306,13 +487,18 @@ export const useAnalysisStore = create(
         set({
           status: null,
           analysis: null,
-          domainAnalysisById: {},
-          domainLoadingById: {},
-          domainErrorById: {},
-          domainAnalyzeLoadingById: {},
-          domainDocumentationLoadingById: {},
-          domainRequirementsLoadingById: {},
-          domainTestingLoadingById: {},
+          domainDocumentationById: new Map(),
+          domainRequirementsById: new Map(),
+          domainTestingById: new Map(),
+          domainAnalysisById: new Map(),
+          domainLoadingById: new Map(),
+          domainAnalyzeLoadingById: new Map(),
+          domainDocumentationLoadingById: new Map(),
+          domainRequirementsLoadingById: new Map(),
+          domainTestingLoadingById: new Map(),
+          domainDocumentationErrorById: new Map(),
+          domainRequirementsErrorById: new Map(),
+          domainTestingErrorById: new Map(),
           analyzingCodebase: false,
           loading: true,
           error: null,
@@ -320,10 +506,31 @@ export const useAnalysisStore = create(
     }),
     {
       name: "analysis-store",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => sessionStorage, {
+        // Custom serialization for Map objects
+        replacer: (_key, value) => {
+          if (value instanceof Map) {
+            return {
+              __type: "Map",
+              value: Array.from(value.entries()),
+            };
+          }
+          return value;
+        },
+        // Custom deserialization for Map objects
+        reviver: (_key, value) => {
+          if (value && value.__type === "Map") {
+            return new Map(value.value);
+          }
+          return value;
+        },
+      }),
       partialize: (state) => ({
         analysis: state.analysis,
         domainAnalysisById: state.domainAnalysisById,
+        domainDocumentationById: state.domainDocumentationById,
+        domainRequirementsById: state.domainRequirementsById,
+        domainTestingById: state.domainTestingById,
       }),
     },
   ),

@@ -97,7 +97,7 @@ export function ModulesSection() {
               </Table.Header>
               <Table.Body>
                 {domains.map((domain) => {
-                  const isAnalyzing = !!domainAnalyzeLoadingById[domain.id];
+                  const isAnalyzing = !!domainAnalyzeLoadingById.get(domain.id);
                   return (
                     <Table.Row key={domain.id}>
                       <Table.Cell>
