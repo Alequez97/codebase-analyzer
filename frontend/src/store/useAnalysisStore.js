@@ -248,7 +248,11 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainDocumentation(domain.id);
+          await api.analyzeDomainDocumentation(
+            domain.id,
+            domain.name,
+            domain.files || [],
+          );
           return { success: true };
         } catch (err) {
           const message =
@@ -284,7 +288,11 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainRequirements(domain.id);
+          await api.analyzeDomainRequirements(
+            domain.id,
+            domain.name,
+            domain.files || [],
+          );
           return { success: true };
         } catch (err) {
           const message =
@@ -320,7 +328,11 @@ export const useAnalysisStore = create(
         });
 
         try {
-          await api.analyzeDomainTesting(domain.id);
+          await api.analyzeDomainTesting(
+            domain.id,
+            domain.name,
+            domain.files || [],
+          );
           return { success: true };
         } catch (err) {
           const message =

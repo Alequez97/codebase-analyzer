@@ -1,13 +1,5 @@
 import * as llmApi from "./llm-api.js";
 import * as aider from "./aider.js";
-import * as tasksPersistence from "../persistence/tasks.js";
-import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import * as domainsPersistence from "../persistence/domains.js";
-import { SOCKET_EVENTS } from "../constants/socket-events.js";
-import { emitSocketEvent } from "../utils/socket-emitter.js";
-import path from "path";
-import fs from "fs/promises";
-import * as logger from "../utils/logger.js";
 
 /**
  * Available AI agents
@@ -31,97 +23,23 @@ const AGENTS = {
 };
 
 /**
- * Post-process analysis output files to add task metadata
- * @param {Object} task - The task object
+ * Default agents for different task types
  */
-async function enhanceOutputWithTaskMetadata(task) {
-  if (!task.outputFile) {
-    return;
-  }
+export const DEFAULT_AGENTS = {
+  CODEBASE_ANALYSIS: "llm-api",
+  DOMAIN_ANALYSIS: "aider",
+  DOMAIN_DOCUMENTATION: "aider",
+  DOMAIN_REQUIREMENTS: "aider",
+  DOMAIN_TESTING: "aider",
+};
 
-  try {
-    // Read the output file that was just created by the agent
-    const outputPath = task.outputFile;
-    let content;
-    let analysis;
-
-    try {
-      content = await fs.readFile(outputPath, "utf-8");
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        logger.debug(
-          `Output file ${outputPath} does not exist, creating minimal metadata file`,
-          { component: "AgentOrchestrator", taskId: task.id },
-        );
-        content = "";
-      } else {
-        throw error;
-      }
-    }
-
-    // Handle empty or invalid files - create minimal structure with taskId
-    if (!content || content.trim() === "") {
-      logger.debug(
-        `Output file ${outputPath} is empty, creating minimal metadata structure`,
-        { component: "AgentOrchestrator", taskId: task.id },
-      );
-      analysis = {
-        taskId: task.id,
-        logFile: task.logFile || null,
-        status: "incomplete",
-        message: "Agent did not write analysis output. Check logs for details.",
-        analyzedAt: new Date().toISOString(),
-      };
-    } else {
-      try {
-        analysis = JSON.parse(content);
-      } catch (parseError) {
-        logger.debug(
-          `Output file ${outputPath} contains invalid JSON, creating minimal metadata structure`,
-          { component: "AgentOrchestrator", taskId: task.id },
-        );
-        analysis = {
-          taskId: task.id,
-          logFile: task.logFile || null,
-          status: "invalid",
-          message: "Agent wrote invalid JSON output. Check logs for details.",
-          rawContent: content.substring(0, 500), // Include first 500 chars for debugging
-          analyzedAt: new Date().toISOString(),
-        };
-      }
-    }
-
-    // Add task metadata to the analysis
-    analysis.taskId = task.id;
-    analysis.logFile = task.logFile || null;
-
-    // Add analyzedAt if not present
-    if (!analysis.analyzedAt && !analysis.timestamp) {
-      analysis.analyzedAt = new Date().toISOString();
-    }
-
-    // Write back the enhanced analysis
-    await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
-
-    logger.debug(
-      `Enhanced ${outputPath} with task metadata (taskId: ${task.id})`,
-      { component: "AgentOrchestrator", taskId: task.id },
-    );
-  } catch (error) {
-    // Log error but don't fail the task
-    logger.error(`Failed to enhance output with task metadata`, {
-      error,
-      component: "AgentOrchestrator",
-      taskId: task.id,
-    });
-  }
-}
 
 /**
  * Get available agent based on config and detection
+ * @param {string} agentId - The agent ID to retrieve
  * @returns {Promise<Object>} Agent module with detect() and execute() functions
  */
-async function getAgent(agentId) {
+export async function getAgent(agentId) {
   const selectedId = agentId || "aider";
   const agent = AGENTS[selectedId];
 
@@ -135,44 +53,6 @@ async function getAgent(agentId) {
   }
 
   return agent.module;
-}
-
-/**
- * Execute a task using the configured agent
- * @param {string} taskId - The task ID
- * @returns {Promise<Object>} Execution result
- */
-export async function executeTask(taskId) {
-  const task = await tasksPersistence.readTask(taskId);
-
-  if (!task) {
-    throw new Error(`Task ${taskId} not found`);
-  }
-
-  if (task.status !== "pending") {
-    throw new Error(`Task ${taskId} is not pending (status: ${task.status})`);
-  }
-
-  const agent = await getAgent(task.params?.agent);
-  const result = await agent.execute(task);
-
-  if (result.success) {
-    // Enhance output file with task metadata (taskId, logFile, timestamp)
-    await enhanceOutputWithTaskMetadata(task);
-
-    // Move task to completed
-    await tasksPersistence.moveToCompleted(taskId);
-
-    // Emit event via socket
-    emitSocketEvent(SOCKET_EVENTS.TASK_COMPLETED, {
-      taskId,
-      type: task.type,
-      domainId: task.params?.domainId,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  return result;
 }
 
 /**

@@ -423,6 +423,33 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Don't migrate or maintain backward compatibility - just implement the new structure cleanly
 - **Always use the centralized logger utility** (`backend/utils/logger.js`) instead of `console.log` for proper log level management and consistent output formatting
 
+### 8. **User Feedback with Toasts**
+
+- **Use Chakra UI toasts** (not browser alerts) for all user notifications about completed actions
+- Toast notifications provide better UX: non-blocking, auto-dismiss, professional appearance
+- **When to use toasts**:
+  - Success notifications (e.g., "Files saved successfully", "Documentation saved successfully")
+  - Error notifications (e.g., "Failed to save files", "Failed to apply test")
+  - Action confirmations (e.g., "Test applied successfully")
+- **Never use browser `alert()`** - always use `toaster.create()` from `components/ui/toaster`
+- **Toast configuration**:
+  - `title`: Main message (required)
+  - `description`: Additional details (optional, useful for error messages)
+  - `type`: "success" or "error" for appropriate styling
+  - Example:
+    ```javascript
+    toaster.create({
+      title: "Files saved successfully",
+      type: "success",
+    });
+
+    toaster.create({
+      title: "Failed to save files",
+      description: result.error,
+      type: "error",
+    });
+    ```
+
 ## Roadmap
 
 ### Phase 1: MVP (Current)

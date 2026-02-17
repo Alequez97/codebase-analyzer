@@ -34,46 +34,30 @@ export default {
   getDomainRequirements: (id) => api.get(`/analysis/domain/${id}/requirements`),
   getDomainTesting: (id) => api.get(`/analysis/domain/${id}/testing`),
 
-  analyzeDomainDocumentation: (
-    id,
-    domainName,
-    files,
-    executeNow = true,
-    agent = "aider",
-  ) =>
+  analyzeDomainDocumentation: (id, domainName, files, executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/documentation`, {
       domainName,
       files,
       executeNow,
-      agent,
     }),
 
-  analyzeDomainRequirements: (
-    id,
-    domainName,
-    files,
-    executeNow = true,
-    agent = "aider",
-  ) =>
+  analyzeDomainRequirements: (id, domainName, files, executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/requirements`, {
       domainName,
       files,
       executeNow,
-      agent,
     }),
 
-  analyzeDomainTesting: (
-    id,
-    domainName,
-    files,
-    executeNow = true,
-    agent = "aider",
-  ) =>
+  analyzeDomainTesting: (id, domainName, files, executeNow = true) =>
     api.post(`/analysis/domain/${id}/analyze/testing`, {
       domainName,
       files,
       executeNow,
-      agent,
+    }),
+
+  saveDocumentation: (id, documentation) =>
+    api.post(`/analysis/domain/${id}/documentation/save`, {
+      documentation,
     }),
 
   saveRequirements: (id, domainName, requirements) =>

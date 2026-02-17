@@ -44,11 +44,13 @@ export const useDomainEditorStore = create(
       // State
       editedRequirementsByDomainId: {},
       editedFilesByDomainId: {},
+      editedDocumentationByDomainId: {},
 
       // Actions
       initializeEditorsForDomain: (domainId) => {
         const analysisStore = useAnalysisStore.getState();
         const detail = analysisStore.domainAnalysisById.get(domainId);
+        const documentation = analysisStore.domainDocumentationById.get(domainId);
 
         set((state) => {
           const updates = {};
@@ -58,6 +60,14 @@ export const useDomainEditorStore = create(
             updates.editedRequirementsByDomainId = {
               ...state.editedRequirementsByDomainId,
               [domainId]: requirementsToEditableText(detail?.requirements),
+            };
+          }
+
+          // Initialize documentation if not already set
+          if (!state.editedDocumentationByDomainId[domainId]) {
+            updates.editedDocumentationByDomainId = {
+              ...state.editedDocumentationByDomainId,
+              [domainId]: documentation?.documentation?.businessPurpose || "",
             };
           }
 
@@ -113,6 +123,27 @@ export const useDomainEditorStore = create(
         }));
       },
 
+      updateEditedDocumentation: (domainId, text) => {
+        set((state) => ({
+          editedDocumentationByDomainId: {
+            ...state.editedDocumentationByDomainId,
+            [domainId]: text,
+          },
+        }));
+      },
+
+      resetEditedDocumentation: (domainId) => {
+        const analysisStore = useAnalysisStore.getState();
+        const documentation = analysisStore.domainDocumentationById.get(domainId);
+
+        set((state) => ({
+          editedDocumentationByDomainId: {
+            ...state.editedDocumentationByDomainId,
+            [domainId]: documentation?.documentation?.businessPurpose || "",
+          },
+        }));
+      },
+
       saveRequirements: async (domainId) => {
         const requirementsText = get().editedRequirementsByDomainId[domainId];
         if (!requirementsText) {
@@ -120,8 +151,14 @@ export const useDomainEditorStore = create(
         }
 
         try {
+          const analysisStore = useAnalysisStore.getState();
+          const domain = (analysisStore.analysis?.domains || []).find(
+            (d) => d.id === domainId,
+          );
+          const domainName = domain?.name || domainId;
+
           const requirements = editableTextToRequirements(requirementsText);
-          await api.saveRequirements(domainId, requirements);
+          await api.saveRequirements(domainId, domainName, requirements);
           return { success: true };
         } catch (err) {
           const message =
@@ -150,10 +187,47 @@ export const useDomainEditorStore = create(
         }
       },
 
+      saveDocumentation: async (domainId) => {
+        const documentation = get().editedDocumentationByDomainId[domainId];
+        if (!documentation) {
+          return { success: false, error: "No documentation to save" };
+        }
+
+        try {
+          await api.saveDocumentation(domainId, documentation);
+
+          // Update the cache in analysis store
+          const analysisStore = useAnalysisStore.getState();
+          const currentDoc = analysisStore.domainDocumentationById.get(domainId);
+          if (currentDoc) {
+            const updatedDoc = {
+              ...currentDoc,
+              documentation: {
+                businessPurpose: documentation,
+              },
+              timestamp: new Date().toISOString(),
+            };
+            const newMap = new Map(analysisStore.domainDocumentationById);
+            newMap.set(domainId, updatedDoc);
+            analysisStore.setAnalysis({
+              ...analysisStore.analysis,
+              domainDocumentationById: newMap,
+            });
+          }
+
+          return { success: true };
+        } catch (err) {
+          const message =
+            err?.response?.data?.error || "Failed to save documentation";
+          return { success: false, error: message };
+        }
+      },
+
       reset: () =>
         set({
           editedRequirementsByDomainId: {},
           editedFilesByDomainId: {},
+          editedDocumentationByDomainId: {},
         }),
     }),
     {

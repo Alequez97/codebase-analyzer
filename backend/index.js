@@ -9,7 +9,11 @@ import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis
 import * as codebaseAnalysisPersistence from "./persistence/codebase-analysis.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
 import * as domainsPersistence from "./persistence/domains.js";
-import { detectAvailableAgents, getSupportedAgents } from "./agents/index.js";
+import {
+  detectAvailableAgents,
+  getSupportedAgents,
+  DEFAULT_AGENTS,
+} from "./agents/index.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 import * as logger from "./utils/logger.js";
 import { initSocketEmitter } from "./utils/socket-emitter.js";
@@ -427,20 +431,12 @@ app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
   try {
     const { id } = req.params;
     const { domainName, files } = req.body;
-    const agent = req.body.agent || "aider";
-    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+    const agent = DEFAULT_AGENTS.DOMAIN_DOCUMENTATION;
 
     if (!domainName || !files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
         message: "domainName and files[] are required",
-      });
-    }
-
-    if (!supportedAgentIds.includes(agent)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: `Unsupported agent: ${agent}`,
       });
     }
 
@@ -479,8 +475,16 @@ app.post("/api/analysis/domain/:id/analyze/documentation", async (req, res) => {
       return;
     }
 
-    // TODO: Production mode - create real task
-    res.status(501).json({ error: "Not implemented in production mode yet" });
+    // Production mode: create real task
+    const executeNow = req.body.executeNow !== false;
+    const task = await taskOrchestrator.createAnalyzeDocumentationTask(
+      id,
+      domainName,
+      files,
+      executeNow,
+      agent,
+    );
+    res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating documentation analysis task", {
       error,
@@ -499,20 +503,12 @@ app.post("/api/analysis/domain/:id/analyze/requirements", async (req, res) => {
   try {
     const { id } = req.params;
     const { domainName, files } = req.body;
-    const agent = req.body.agent || "aider";
-    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+    const agent = DEFAULT_AGENTS.DOMAIN_REQUIREMENTS;
 
     if (!domainName || !files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
         message: "domainName and files[] are required",
-      });
-    }
-
-    if (!supportedAgentIds.includes(agent)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: `Unsupported agent: ${agent}`,
       });
     }
 
@@ -571,20 +567,12 @@ app.post("/api/analysis/domain/:id/analyze/testing", async (req, res) => {
   try {
     const { id } = req.params;
     const { domainName, files } = req.body;
-    const agent = req.body.agent || "aider";
-    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
+    const agent = DEFAULT_AGENTS.DOMAIN_TESTING;
 
     if (!domainName || !files || !Array.isArray(files)) {
       return res.status(400).json({
         error: "Invalid request",
         message: "domainName and files[] are required",
-      });
-    }
-
-    if (!supportedAgentIds.includes(agent)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: `Unsupported agent: ${agent}`,
       });
     }
 
@@ -629,6 +617,45 @@ app.post("/api/analysis/domain/:id/analyze/testing", async (req, res) => {
       component: "API",
     });
     res.status(500).json({ error: "Failed to create testing analysis task" });
+  }
+});
+
+/**
+ * Save edited documentation
+ */
+app.post("/api/analysis/domain/:id/documentation/save", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { documentation } = req.body;
+
+    if (!documentation || typeof documentation !== "string") {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "documentation string is required",
+      });
+    }
+
+    if (config.useMockData) {
+      logger.info(`[MOCK MODE] Simulating documentation save for: ${id}`);
+      return res.json({
+        success: true,
+        message: "Documentation saved successfully (mock mode)",
+      });
+    }
+
+    // Production mode: save to markdown file
+    await domainsPersistence.writeDomainDocumentation(id, documentation);
+
+    res.json({
+      success: true,
+      message: "Documentation saved successfully",
+    });
+  } catch (error) {
+    logger.error(`Error saving documentation for ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to save documentation" });
   }
 });
 

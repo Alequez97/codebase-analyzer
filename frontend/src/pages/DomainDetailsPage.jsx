@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Container, VStack, List } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toaster } from "../components/ui/toaster";
 import { useAnalysisStore } from "../store/useAnalysisStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useTestingStore } from "../store/useTestingStore";
@@ -45,8 +46,12 @@ export default function DomainDetailsPage() {
     editedFilesByDomainId,
     updateEditedFiles,
     resetEditedFiles,
+    editedDocumentationByDomainId,
+    updateEditedDocumentation,
+    resetEditedDocumentation,
     saveRequirements,
     saveFiles,
+    saveDocumentation,
     initializeEditorsForDomain,
   } = useDomainEditorStore();
 
@@ -101,6 +106,7 @@ export default function DomainDetailsPage() {
   ]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
+  const documentationText = editedDocumentationByDomainId[domainId];
 
   // Use domain.files from codebase analysis as source of truth
   // Only use edited files if they exist and were actually modified by user
@@ -112,27 +118,64 @@ export default function DomainDetailsPage() {
   const handleSaveRequirements = async () => {
     const result = await saveRequirements(domainId);
     if (result.success) {
-      alert("Requirements saved successfully!");
+      toaster.create({
+        title: "Requirements saved successfully",
+        type: "success",
+      });
     } else {
-      alert(`Failed to save requirements: ${result.error}`);
+      toaster.create({
+        title: "Failed to save requirements",
+        description: result.error,
+        type: "error",
+      });
     }
   };
 
   const handleSaveFiles = async () => {
     const result = await saveFiles(domainId);
     if (result.success) {
-      alert("Files saved successfully!");
+      toaster.create({
+        title: "Files saved successfully",
+        type: "success",
+      });
     } else {
-      alert(`Failed to save files: ${result.error}`);
+      toaster.create({
+        title: "Failed to save files",
+        description: result.error,
+        type: "error",
+      });
+    }
+  };
+
+  const handleSaveDocumentation = async () => {
+    const result = await saveDocumentation(domainId);
+    if (result.success) {
+      toaster.create({
+        title: "Documentation saved successfully",
+        type: "success",
+      });
+    } else {
+      toaster.create({
+        title: "Failed to save documentation",
+        description: result.error,
+        type: "error",
+      });
     }
   };
 
   const handleApplyTest = async (testId) => {
     const result = await applyTest(domainId, testId);
     if (result.success) {
-      alert(result.message || "Test applied successfully!");
+      toaster.create({
+        title: result.message || "Test applied successfully",
+        type: "success",
+      });
     } else {
-      alert(`Failed to apply test: ${result.error}`);
+      toaster.create({
+        title: "Failed to apply test",
+        description: result.error,
+        type: "error",
+      });
     }
   };
 
@@ -179,6 +222,12 @@ export default function DomainDetailsPage() {
           documentation={documentation}
           loading={documentationLoading}
           onAnalyze={() => domain && analyzeDomainDocumentation(domain)}
+          editedDocumentation={documentationText}
+          onDocumentationChange={(value) =>
+            updateEditedDocumentation(domainId, value)
+          }
+          onSave={handleSaveDocumentation}
+          onReset={() => resetEditedDocumentation(domainId)}
         />
 
         <DomainRequirementsSection

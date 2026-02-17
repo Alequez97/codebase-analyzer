@@ -10,12 +10,36 @@ import { tryReadJsonFile } from "./utils.js";
  */
 export async function readDomainDocumentation(domainId) {
   try {
-    const filePath = path.join(
+    // Try new markdown format first
+    const markdownPath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+      "documentation.md",
+    );
+
+    try {
+      const markdownContent = await fs.readFile(markdownPath, "utf-8");
+      return {
+        domainId,
+        timestamp: new Date().toISOString(),
+        documentation: {
+          businessPurpose: markdownContent,
+        },
+      };
+    } catch (mdError) {
+      if (mdError.code !== "ENOENT") {
+        throw mdError;
+      }
+    }
+
+    // Fall back to legacy JSON format
+    const jsonPath = path.join(
       config.paths.targetAnalysis,
       "domains",
       `${domainId}-documentation.json`,
     );
-    return await tryReadJsonFile(filePath, `domain ${domainId} documentation`);
+    return await tryReadJsonFile(jsonPath, `domain ${domainId} documentation`);
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;
@@ -27,15 +51,29 @@ export async function readDomainDocumentation(domainId) {
 /**
  * Write domain documentation section
  * @param {string} domainId - The domain ID
- * @param {Object} data - Documentation data
+ * @param {string|Object} data - Documentation data (string for markdown, object for JSON)
  */
 export async function writeDomainDocumentation(domainId, data) {
-  const filePath = path.join(
-    config.paths.targetAnalysis,
-    "domains",
-    `${domainId}-documentation.json`,
-  );
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+  // If data is a string, write as markdown
+  if (typeof data === "string") {
+    const dirPath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+    );
+    await fs.mkdir(dirPath, { recursive: true });
+
+    const filePath = path.join(dirPath, "documentation.md");
+    await fs.writeFile(filePath, data, "utf-8");
+  } else {
+    // Legacy: write as JSON
+    const filePath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      `${domainId}-documentation.json`,
+    );
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+  }
 }
 
 /**
