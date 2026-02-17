@@ -78,7 +78,7 @@ frontend/
 ### Adding a New Zustand Store
 ```javascript
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export const useMyStore = create(
   persist(
@@ -91,7 +91,7 @@ export const useMyStore = create(
     }),
     {
       name: "my-store",
-      storage: () => sessionStorage, // CRITICAL: Use sessionStorage!
+      storage: createJSONStorage(() => sessionStorage), // CRITICAL: Use sessionStorage!
       partialize: (state) => ({
         data: state.data, // Only persist what's needed
       }),

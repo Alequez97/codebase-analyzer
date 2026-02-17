@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import api from "../services/api";
 import { useAnalysisStore } from "./useAnalysisStore";
 
@@ -158,7 +158,7 @@ export const useDomainEditorStore = create(
     }),
     {
       name: "domain-editor-store",
-      storage: () => sessionStorage,
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );

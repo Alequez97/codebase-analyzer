@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import api from "../services/api";
 import { sortDomainsByPriority } from "../utils/domain-utils";
 
@@ -320,7 +320,7 @@ export const useAnalysisStore = create(
     }),
     {
       name: "analysis-store",
-      storage: () => sessionStorage,
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         analysis: state.analysis,
         domainAnalysisById: state.domainAnalysisById,

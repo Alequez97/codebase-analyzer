@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export const useConfigStore = create(
   persist(
@@ -17,7 +17,7 @@ export const useConfigStore = create(
     }),
     {
       name: "config-store",
-      storage: () => sessionStorage,
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         showLogs: state.showLogs,
       }),
