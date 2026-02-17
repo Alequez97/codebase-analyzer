@@ -452,8 +452,14 @@ app.post("/api/analysis/domain/:id/documentation/save", async (req, res) => {
       });
     }
 
-    // Save to markdown file
-    await domainsPersistence.writeDomainDocumentation(id, documentation);
+    // Save with proper structure {content, metadata}
+    await domainsPersistence.writeDomainDocumentation(id, {
+      content: documentation,
+      metadata: {
+        status: "completed",
+        lastModified: new Date().toISOString(),
+      },
+    });
 
     res.json({
       success: true,
