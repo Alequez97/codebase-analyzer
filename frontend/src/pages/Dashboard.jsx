@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Box, Button, Container, HStack, VStack } from "@chakra-ui/react";
 import { useAnalysisStore } from "../store/useAnalysisStore";
 import { useConfigStore } from "../store/useConfigStore";
+import { useLogsStore } from "../store/useLogsStore";
 import { useSocketStore } from "../store/useSocketStore";
 import { LoadingState, ErrorState } from "../components/dashboard/States";
 import { StatusBar } from "../components/dashboard/StatusBar";
@@ -11,11 +12,14 @@ import { ModulesSection } from "../components/dashboard/ModulesSection";
 import { TaskLogs } from "../components/dashboard/TaskLogs";
 
 export default function Dashboard() {
-  // Analysis store
-  const { loading, error, status, analysis, fetchAnalysis } = useAnalysisStore();
+  // Config store (server configuration, agents, target project)
+  const { config, configLoading, fetchConfig } = useConfigStore();
 
-  // Config store
-  const { showLogs, toggleLogs } = useConfigStore();
+  // Analysis store (codebase analysis data)
+  const { loading, error, analysis, fetchAnalysis } = useAnalysisStore();
+
+  // Logs store (UI state for showing/hiding logs)
+  const { showLogs, toggleLogs } = useLogsStore();
 
   // Socket store
   const { socketConnected, initSocket } = useSocketStore();
@@ -25,10 +29,12 @@ export default function Dashboard() {
     initSocket();
   }, [initSocket]);
 
-  // Fetch initial data only if not already loaded (which also checks for pending tasks)
+  // Fetch initial data on mount
   useEffect(() => {
-    // Only fetch if we don't have analysis data yet
-    // fetchAnalysis handles its own loading states and caching internally
+    // Always fetch config (lightweight, not persisted)
+    fetchConfig();
+
+    // Only fetch analysis if not cached
     if (!analysis) {
       fetchAnalysis();
     }
@@ -39,13 +45,14 @@ export default function Dashboard() {
   }
 
   if (error) {
-    return <ErrorState error={error} port={status?.config?.port} />;
+    return <ErrorState error={error} port={config?.config?.port} />;
   }
 
   return (
     <Box>
       <StatusBar
-        connected={!error && !!status}
+        connected={!error && !!config}
+        statusLoading={configLoading}
         socketConnected={socketConnected}
       />
 

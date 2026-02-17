@@ -1,6 +1,19 @@
 import { HStack, Badge, Text } from "@chakra-ui/react";
 
-export function StatusBar({ connected, socketConnected }) {
+export function StatusBar({ connected, statusLoading, socketConnected }) {
+  // Determine API status display
+  const getApiStatus = () => {
+    if (statusLoading) {
+      return { color: "yellow", text: "Connecting..." };
+    }
+    if (connected) {
+      return { color: "green", text: "Connected" };
+    }
+    return { color: "red", text: "Disconnected" };
+  };
+
+  const apiStatus = getApiStatus();
+
   return (
     <HStack
       justify="flex-end"
@@ -15,8 +28,8 @@ export function StatusBar({ connected, socketConnected }) {
         <Text fontSize="sm" color="gray.600">
           API:
         </Text>
-        <Badge colorPalette={connected ? "green" : "red"} size="sm">
-          {connected ? "Connected" : "Disconnected"}
+        <Badge colorPalette={apiStatus.color} size="sm">
+          {apiStatus.text}
         </Badge>
       </HStack>
 

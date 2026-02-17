@@ -1,8 +1,8 @@
 import { Box, Heading, Text } from "@chakra-ui/react";
-import { useAnalysisStore } from "../../store/useAnalysisStore";
+import { useConfigStore } from "../../store/useConfigStore";
 
 export function DashboardHeader() {
-  const { status } = useAnalysisStore();
+  const { config } = useConfigStore();
 
   return (
     <Box textAlign="center">
@@ -12,9 +12,9 @@ export function DashboardHeader() {
       <Text color="gray.600" fontSize="lg">
         AI-powered code analysis and insights
       </Text>
-      {status?.target && (
+      {config?.target && (
         <Text color="blue.600" fontSize="md" mt={2} fontWeight="medium">
-          📁 {status.target.name}
+          📁 {config.target.name}
         </Text>
       )}
     </Box>

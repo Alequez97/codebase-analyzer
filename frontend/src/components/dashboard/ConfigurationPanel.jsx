@@ -1,9 +1,14 @@
 import { VStack, Box, Heading, Text, Badge, HStack } from "@chakra-ui/react";
 import { Card } from "../ui/card";
-import { useAnalysisStore } from "../../store/useAnalysisStore";
+import { useConfigStore } from "../../store/useConfigStore";
 
 export function ConfigurationPanel() {
-  const { status } = useAnalysisStore();
+  const { config, configLoading } = useConfigStore();
+
+  const getToolAvailability = (toolId) => {
+    if (configLoading) return "loading";
+    return config?.agents?.[toolId] ? "available" : "unavailable";
+  };
 
   const tools = [
     {
@@ -12,7 +17,7 @@ export function ConfigurationPanel() {
       purpose: "Generates analysis JSON files",
       usedFor: "Codebase & domain analysis",
       color: "blue",
-      available: status?.agents?.["llm-api"] ?? false,
+      availability: getToolAvailability("llm-api"),
     },
     {
       id: "aider",
@@ -21,7 +26,7 @@ export function ConfigurationPanel() {
       usedFor: "Applying fixes, writing tests",
       color: "green",
       installUrl: "https://aider.chat/docs/install.html",
-      available: status?.agents?.["aider"] ?? false,
+      availability: getToolAvailability("aider"),
     },
   ];
 
@@ -37,7 +42,7 @@ export function ConfigurationPanel() {
               Project Directory
             </Text>
             <Text fontSize="sm" color="gray.600" fontFamily="mono">
-              {status?.target?.directory || "Loading..."}
+              {config?.target?.directory || "Loading..."}
             </Text>
           </Box>
 
@@ -55,8 +60,20 @@ export function ConfigurationPanel() {
                   p={3}
                   borderWidth="1px"
                   borderRadius="md"
-                  borderColor={tool.available ? "green.300" : "gray.200"}
-                  bg={tool.available ? "green.50" : "gray.50"}
+                  borderColor={
+                    tool.availability === "available"
+                      ? "green.300"
+                      : tool.availability === "loading"
+                        ? "gray.300"
+                        : "gray.200"
+                  }
+                  bg={
+                    tool.availability === "available"
+                      ? "green.50"
+                      : tool.availability === "loading"
+                        ? "gray.100"
+                        : "gray.50"
+                  }
                 >
                   <HStack justify="space-between" mb={2}>
                     <HStack gap={2}>
@@ -66,7 +83,11 @@ export function ConfigurationPanel() {
                       <Badge colorPalette={tool.color} size="sm">
                         {tool.id}
                       </Badge>
-                      {tool.available ? (
+                      {tool.availability === "loading" ? (
+                        <Badge colorPalette="gray" size="sm">
+                          Loading...
+                        </Badge>
+                      ) : tool.availability === "available" ? (
                         <Badge colorPalette="green" size="sm">
                           Available
                         </Badge>

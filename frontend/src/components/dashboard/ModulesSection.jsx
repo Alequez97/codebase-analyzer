@@ -11,12 +11,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
+import { useConfigStore } from "../../store/useConfigStore";
 import { useAnalysisStore } from "../../store/useAnalysisStore";
 
 export function ModulesSection() {
   const navigate = useNavigate();
+  const { config } = useConfigStore();
   const {
-    status,
     analysis,
     analyzingCodebase,
     pendingCodebaseTask,
@@ -32,7 +33,7 @@ export function ModulesSection() {
       <Card.Header>
         <HStack justify="space-between">
           <Heading size="lg">
-            Code Domains{status?.target ? ` - ${status.target.name}` : ""}
+            Code Domains{config?.target ? ` - ${config.target.name}` : ""}
           </Heading>
           <Button
             colorPalette="blue"

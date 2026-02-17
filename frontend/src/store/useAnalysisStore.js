@@ -7,7 +7,6 @@ export const useAnalysisStore = create(
   persist(
     (set, get) => ({
       // State
-      status: null,
       analysis: null,
       // Domain section data storage (Map) - split by section for granular loading
       domainDocumentationById: new Map(),
@@ -31,8 +30,6 @@ export const useAnalysisStore = create(
       error: null,
 
       // Actions
-      setStatus: (status) => set({ status }),
-
       setAnalysis: (analysis) => set({ analysis }),
 
       setAnalyzingCodebase: (analyzingCodebase) => set({ analyzingCodebase }),
@@ -47,50 +44,46 @@ export const useAnalysisStore = create(
       clearError: () => set({ error: null }),
 
       fetchAnalysis: async () => {
+        // Check if we already have cached analysis - return it without fetching
+        const currentAnalysis = get().analysis;
+        if (currentAnalysis) {
+          return currentAnalysis;
+        }
+
+        // No cached analysis - fetch it
         set({ loading: true, error: null });
         try {
-          // Fetch status first (always available)
-          const statusResponse = await api.getStatus();
+          const analysisResponse = await api.getFullCodebaseAnalysis();
+          const analysisData = analysisResponse.data;
 
-          // Try to fetch analysis (may not exist yet)
-          try {
-            const analysisResponse = await api.getFullCodebaseAnalysis();
-            const analysisData = analysisResponse.data;
+          // Sort domains by priority
+          if (analysisData?.domains) {
+            analysisData.domains = sortDomainsByPriority(analysisData.domains);
+          }
 
-            // Sort domains by priority
-            if (analysisData?.domains) {
-              analysisData.domains = sortDomainsByPriority(
-                analysisData.domains,
-              );
-            }
+          set({
+            analysis: analysisData,
+            loading: false,
+          });
 
+          // Check for pending tasks after loading analysis
+          await get().fetchPendingTasks();
+
+          return analysisData;
+        } catch (err) {
+          // 404 is expected when no analysis exists yet - not an error
+          if (err?.response?.status === 404) {
             set({
-              status: statusResponse.data,
-              analysis: analysisData,
+              analysis: null,
               loading: false,
             });
 
-            // Check for pending tasks after loading analysis
+            // Check for pending tasks even when no analysis exists
             await get().fetchPendingTasks();
 
-            return analysisData;
-          } catch (analysisErr) {
-            // 404 is expected when no analysis exists yet - not an error
-            if (analysisErr?.response?.status === 404) {
-              set({
-                status: statusResponse.data,
-                analysis: null,
-                loading: false,
-              });
-
-              // Check for pending tasks even when no analysis exists
-              await get().fetchPendingTasks();
-
-              return null;
-            }
-            throw analysisErr; // Re-throw other errors
+            return null;
           }
-        } catch (err) {
+
           const message =
             err?.response?.data?.message || "Failed to load analysis";
           set({ error: message, loading: false });
@@ -497,7 +490,6 @@ export const useAnalysisStore = create(
 
       reset: () =>
         set({
-          status: null,
           analysis: null,
           domainDocumentationById: new Map(),
           domainRequirementsById: new Map(),
