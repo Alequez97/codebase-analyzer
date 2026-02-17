@@ -1,10 +1,6 @@
 # Code Examples
 
-This folder contains examples demonstrating how to use the Codebase Analyzer API.
-
-## Coming Soon
-
-Examples will be added as features are implemented.
+This folder contains examples for the current domain-based API.
 
 ## API Endpoints
 
@@ -16,26 +12,24 @@ curl -X POST http://localhost:3001/api/analysis/codebase/request \
   -d '{"executeNow": true}'
 ```
 
-### Analyze Module
+### Analyze Domain Documentation
 
 ```bash
-curl -X POST http://localhost:3001/api/modules/user-auth/analyze \
+curl -X POST http://localhost:3001/api/analysis/domain/user-auth/analyze/documentation \
   -H "Content-Type: application/json" \
   -d '{
-    "moduleName": "User Authentication",
     "files": ["src/auth/login.js", "src/auth/register.js"],
     "executeNow": true
   }'
 ```
 
-### Get Module Analysis
+### Get Domain Documentation
 
 ```bash
-curl http://localhost:3001/api/modules/user-auth
+curl http://localhost:3001/api/analysis/domain/user-auth/documentation
 ```
 
 ## See Also
 
-- [Project Overview](../project/AGENTS.md)
 - [Backend Architecture](../backend/architecture.md)
 - [CLI Usage](../cli/CLI-USAGE.md)

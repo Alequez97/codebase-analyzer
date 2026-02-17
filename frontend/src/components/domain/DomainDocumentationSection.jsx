@@ -12,6 +12,7 @@ import {
 import { Pencil, X, Save, FileText } from "lucide-react";
 import { Card } from "../ui/card";
 import MarkdownRenderer from "../MarkdownRenderer";
+import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
 
 export default function DomainDocumentationSection({
   documentation,
@@ -166,7 +167,7 @@ export default function DomainDocumentationSection({
               <Text color="gray.500">Loading logs...</Text>
             ) : logs ? (
               <Text as="pre" color="green.300" fontFamily="mono" fontSize="xs">
-                {logs}
+                {formatIsoUtcTimestampsInText(logs)}
               </Text>
             ) : (
               <Text color="gray.500">

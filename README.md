@@ -48,8 +48,8 @@ npm run dev
 ### Architecture
 
 ```
-Dashboard (React) → Express API → JSON Files ← Claude Code
-                                      ↓
+Dashboard (React) -> Express API -> JSON Files <- Claude Code
+                                      |
                               Target Codebase
 ```
 
@@ -58,15 +58,15 @@ Dashboard (React) → Express API → JSON Files ← Claude Code
 1. Click "Analyze Codebase" button in dashboard
 2. Creates `analysis-output/tasks/pending/analyze-codebase-{id}.json`
 3. Dashboard shows: "Open `prompts/analyze-full-codebase.md` in Claude Code"
-4. Run prompt in Claude Code → creates `analysis-output/codebase-analysis.json`
-5. Dashboard auto-refreshes → shows discovered modules
+4. Run prompt in Claude Code -> creates `analysis-output/codebase-analysis.json`
+5. Dashboard auto-refreshes -> shows discovered domains
 
-### Workflow: Analyze Module
+### Workflow: Analyze Domain
 
-1. Click "Analyze" on a module card
+1. Click "Analyze" on a domain card
 2. Creates pending task
 3. Run corresponding prompt in Claude Code
-4. Creates `analysis-output/modules/{module-id}.json` with:
+4. Creates `analysis-output/domains/{domain-id}.json` with:
    - Requirements (REQ-001, REQ-002...)
    - Bugs (BUG-001, BUG-002...)
    - Security Issues (SEC-001, SEC-002...)
@@ -76,7 +76,7 @@ Dashboard (React) → Express API → JSON Files ← Claude Code
 
 ### Workflow: Fix an Issue
 
-1. View module analysis → see "SEC-001: Missing rate limiting"
+1. View domain analysis -> see "SEC-001: Missing rate limiting"
 2. Click "Fix" button
 3. Backend applies the fix from JSON to your codebase
 4. Shows diff of changes
@@ -88,8 +88,8 @@ All data exchange is via JSON files. See `/schemas/*.example.json` for structure
 
 ### Key Files
 
-- `codebase-analysis.json` - List of discovered modules
-- `modules/{id}.json` - Detailed analysis per module
+- `codebase-analysis.json` - List of discovered domains
+- `domains/{id}.json` - Detailed analysis per domain
 - `tasks/pending/{id}.json` - Tasks waiting to be processed
 - `tasks/completed/{id}.json` - Completed tasks log
 
@@ -138,4 +138,4 @@ Each developer sets their own paths and API keys - not stored in version control
 
 - **Frontend:** React, Chakra UI v3, Vite
 - **Backend:** Node.js, Express
-- **Analysis:** Claude Code (manual) → Anthropic API (future)
+- **Analysis:** Claude Code (manual) -> Anthropic API (future)

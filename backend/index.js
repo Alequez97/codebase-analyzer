@@ -2,11 +2,10 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import fs from "fs/promises";
-import path from "path";
 import config from "./config.js";
 import * as codebaseAnalysisOrchestrator from "./orchestrators/codebase-analysis.js";
 import * as codebaseAnalysisPersistence from "./persistence/codebase-analysis.js";
+import * as logsPersistence from "./persistence/logs.js";
 import * as taskOrchestrator from "./orchestrators/task.js";
 import * as domainsPersistence from "./persistence/domains.js";
 import {
@@ -163,6 +162,29 @@ app.get("/api/analysis/codebase/full", async (req, res) => {
   } catch (error) {
     logger.error("Error reading domains", { error, component: "API" });
     res.status(500).json({ error: "Failed to read domains" });
+  }
+});
+
+/**
+ * Get persisted logs for the latest codebase analysis from codebase-analysis.json
+ */
+app.get("/api/logs/codebase-analysis", async (req, res) => {
+  try {
+    const result = await logsPersistence.readCodebaseAnalysisLogs();
+    res.json(result);
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({
+        error: error.error,
+        message: error.message,
+      });
+    }
+
+    logger.error("Error reading codebase analysis logs", {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to read codebase analysis logs" });
   }
 });
 
@@ -589,44 +611,16 @@ app.get("/api/tasks/pending", async (req, res) => {
 app.get("/api/tasks/:id/logs", async (req, res) => {
   try {
     const { id } = req.params;
-    const task = await taskOrchestrator.getTask(id);
-
-    if (!task) {
-      return res.status(404).json({
-        error: "Task not found",
-        message: `No task found with ID: ${id}`,
-      });
-    }
-
-    if (!task.logFile) {
-      return res.status(404).json({
-        error: "No log file available",
-        message: "This task has not been executed yet or does not have logs",
-      });
-    }
-
-    // Read log file
-    const logPath = path.join(config.paths.targetAnalysis, task.logFile);
-
-    try {
-      const logContent = await fs.readFile(logPath, "utf-8");
-      res.json({
-        taskId: id,
-        logFile: task.logFile,
-        content: logContent,
-        taskType: task.type,
-        taskStatus: task.status,
-      });
-    } catch (fileError) {
-      if (fileError.code === "ENOENT") {
-        return res.status(404).json({
-          error: "Log file not found",
-          message: `Log file exists in task metadata but file not found: ${task.logFile}`,
-        });
-      }
-      throw fileError;
-    }
+    const result = await logsPersistence.readTaskLogs(id);
+    res.json(result);
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({
+        error: error.error,
+        message: error.message,
+      });
+    }
+
     logger.error(`Error reading task logs for ${req.params.id}`, {
       error,
       component: "API",
@@ -653,7 +647,7 @@ app.delete("/api/tasks/:id", async (req, res) => {
 });
 
 // TODO: Fix application endpoint
-// app.post('/api/fix/:moduleId/:issueId', async (req, res) => { ... });
+// app.post('/api/fix/:domainId/:issueId', async (req, res) => { ... });
 
 // ==================== Error Handler ====================
 

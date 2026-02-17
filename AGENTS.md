@@ -19,7 +19,7 @@ Manual code review is time-consuming and error-prone:
 A **beautiful web interface** where you can:
 
 1. **Analyze your codebase** - AI analyzes your project structure
-2. **View modules** - See organized breakdown of your code
+2. **View domains** - See organized breakdown of your code
 3. **Review findings** - Browse bugs, security issues, missing tests
 4. **Apply fixes** - One-click to apply AI-generated fixes
 5. **Track progress** - See what's been fixed and what's pending
@@ -43,12 +43,12 @@ A **beautiful web interface** where you can:
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│  4. View discovered modules                     │
+│  4. View discovered domains                     │
 │     See all functional areas of your codebase   │
 └──────────────────┬──────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────┐
-│  5. Click "Analyze" on a module                 │
+│  5. Click "Analyze" on a domain                 │
 │     AI deep-dives into bugs & security issues   │
 └──────────────────┬──────────────────────────────┘
                    │
@@ -71,7 +71,7 @@ A **beautiful web interface** where you can:
 
 ### 🎯 Automated Discovery
 
-- **Module Detection**: AI automatically identifies functional modules in your codebase
+- **Domain Detection**: AI automatically identifies functional domains in your codebase
 - **Dependency Mapping**: Understands how your code is interconnected
 - **Priority Assignment**: Highlights critical vs. low-priority areas
 
@@ -105,7 +105,7 @@ A **beautiful web interface** where you can:
 
 ### 📊 Beautiful Dashboard
 
-- **Module Overview**: Card-based view of all modules
+- **Domain Overview**: Card-based view of all domains
 - **Issue Breakdown**: See bugs, security issues, test gaps at a glance
 - **Real-Time Updates**: Live updates as AI completes analysis
 - **Detailed Views**: Drill down into specific findings
@@ -119,7 +119,7 @@ A **beautiful web interface** where you can:
 ┌────────────────────────────────────────────────┐
 │            Web Dashboard (React)               │
 │  Beautiful UI with real-time updates          │
-│  - Module cards                                │
+│  - Domain cards                                │
 │  - Issue lists                                 │
 │  - Fix buttons                                 │
 └────────────────┬───────────────────────────────┘
@@ -144,7 +144,7 @@ A **beautiful web interface** where you can:
 │           Your Codebase + Analysis             │
 │  .code-analysis/                               │
 │    ├── codebase-analysis.json                       │
-│    ├── modules/{module-id}.json                │
+│    ├── domains/{domain-id}.json                │
 │    └── tasks/pending/*.json                    │
 └────────────────────────────────────────────────┘
 ```
@@ -220,9 +220,9 @@ All analysis results are stored in `.code-analysis/` in your project:
 ```
 your-project/
   .code-analysis/
-    codebase-analysis.json           # Module discovery
-    modules/
-      user-auth.json            # Detailed analysis per module
+    codebase-analysis.json           # Domain discovery
+    domains/
+      user-auth.json            # Detailed analysis per domain
       payment.json
       ...
     tasks/
@@ -242,13 +242,13 @@ code-analyze
 
 Dashboard shows: "Click Analyze Codebase to begin"
 
-### Step 2: Discover Modules
+### Step 2: Discover Domains
 
 **User clicks**: "Analyze Codebase"
-**AI does**: Analyzes project structure, identifies modules
-**User sees**: Grid of discovered modules (e.g., "User Authentication", "Payment Processing")
+**AI does**: Analyzes project structure, identifies domains
+**User sees**: Grid of discovered domains (e.g., "User Authentication", "Payment Processing")
 
-### Step 3: Analyze a Module
+### Step 3: Analyze a Domain
 
 **User clicks**: "Analyze" on "User Authentication"**AI does**: Deep analysis of all auth-related files**User sees**:
 
@@ -305,7 +305,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 ### Fast Iteration
 
 1. Make changes to your code
-2. Re-analyze affected modules
+2. Re-analyze affected domains
 3. See new issues (if any)
 4. Apply fixes
 5. Repeat
@@ -380,7 +380,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 #### 6.2 **Split Large Endpoints into Modular Endpoints**
 
 - **Avoid monolithic endpoints** that return all data at once
-- **Split by logical modules** - each section of data should have its own endpoint
+- **Split by logical domains/sections** - each section of data should have its own endpoint
 - **Example**: Instead of `/api/analysis/domain/:id` returning everything, use:
   - `/api/analysis/domain/:id/documentation` - for documentation analysis
   - `/api/analysis/domain/:id/requirements` - for requirements analysis
@@ -392,7 +392,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
   - Better caching strategies (cache sections independently)
   - Improved user experience with progressive loading
 
-#### 6.3 **Separate Error Handling for Each Module**
+#### 6.3 **Separate Error Handling for Each Domain Section**
 
 - **Map errors by section** - create separate error Maps for each domain part
 - **Example**: Instead of one `domainErrorById`, use:

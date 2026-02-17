@@ -1,17 +1,18 @@
 import { useEffect, useRef } from "react";
-import { Box, HStack, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 import { useLogsStore } from "../../store/useLogsStore";
 import { Card } from "../ui/card";
+import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
 
 /**
- * Real-time task execution log viewer
- * Displays streaming output from agent tasks
+ * Task execution log viewer for dashboard codebase analysis
  */
 export function TaskLogs() {
   const logs = useLogsStore((state) => state.codebaseAnalysisLogs);
+  const loading = useLogsStore((state) => state.codebaseLogsLoading);
+  const error = useLogsStore((state) => state.codebaseLogsError);
   const logEndRef = useRef(null);
 
-  // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
@@ -19,15 +20,32 @@ export function TaskLogs() {
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="md">🤖 Agent Logs</Heading>
+        <Heading size="md">Agent Logs</Heading>
       </Card.Header>
       <Card.Body p={0}>
-        {logs.length === 0 ? (
+        {loading ? (
           <Box p={8}>
             <VStack gap={3} color="gray.500">
-              <Text fontSize="lg">💤 No logs yet</Text>
+              <Text fontSize="sm">Loading logs...</Text>
+            </VStack>
+          </Box>
+        ) : error ? (
+          <Box p={8}>
+            <VStack gap={2} align="stretch">
+              <Text fontSize="sm" color="red.500">
+                Failed to load logs
+              </Text>
+              <Text fontSize="xs" color="gray.500">
+                {error}
+              </Text>
+            </VStack>
+          </Box>
+        ) : logs.length === 0 ? (
+          <Box p={8}>
+            <VStack gap={3} color="gray.500">
+              <Text fontSize="lg">No logs yet</Text>
               <Text fontSize="sm" textAlign="center">
-                Agent logs will appear here when analysis tasks are running
+                Run codebase analysis to generate logs
               </Text>
             </VStack>
           </Box>
@@ -50,7 +68,7 @@ export function TaskLogs() {
                 color={log.stream === "stderr" ? "red.400" : "green.300"}
                 opacity={log.stream === "stderr" ? 1 : 0.9}
               >
-                {log.data}
+                {formatIsoUtcTimestampsInText(log.data)}
               </Box>
             ))}
             <div ref={logEndRef} />

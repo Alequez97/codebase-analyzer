@@ -19,7 +19,8 @@ export default function Dashboard() {
   const { loading, error, analysis, fetchAnalysis } = useAnalysisStore();
 
   // Logs store (UI state for showing/hiding logs)
-  const { showDashboardLogs, toggleDashboardLogs } = useLogsStore();
+  const { showDashboardLogs, toggleDashboardLogs, fetchCodebaseAnalysisLogs } =
+    useLogsStore();
 
   // Socket store
   const { socketConnected, initSocket } = useSocketStore();
@@ -39,6 +40,23 @@ export default function Dashboard() {
       fetchAnalysis();
     }
   }, []); // Empty dependency array - only run once on mount
+
+  useEffect(() => {
+    if (!showDashboardLogs) {
+      return;
+    }
+
+    fetchCodebaseAnalysisLogs(analysis);
+  }, [showDashboardLogs, analysis?.taskId]);
+
+  const handleToggleDashboardLogs = () => {
+    const shouldShowLogs = !showDashboardLogs;
+    toggleDashboardLogs();
+
+    if (shouldShowLogs) {
+      fetchCodebaseAnalysisLogs(analysis);
+    }
+  };
 
   if (loading) {
     return <LoadingState />;
@@ -64,10 +82,10 @@ export default function Dashboard() {
             <Button
               variant="outline"
               colorPalette="gray"
-              onClick={toggleDashboardLogs}
+              onClick={handleToggleDashboardLogs}
               size="sm"
             >
-              {showDashboardLogs ? "Show codebase anaysis" : "Show Logs"}
+              {showDashboardLogs ? "Show codebase analysis" : "Show Logs"}
             </Button>
           </HStack>
           {showDashboardLogs ? <TaskLogs /> : <ModulesSection />}

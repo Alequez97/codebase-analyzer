@@ -2,7 +2,7 @@
 
 ## OBJECTIVE
 
-Analyze the codebase and identify all major functional domains (business capabilities, features, modules).
+Analyze the codebase and identify all major functional domains (business capabilities and features).
 
 ## AVAILABLE TOOLS
 

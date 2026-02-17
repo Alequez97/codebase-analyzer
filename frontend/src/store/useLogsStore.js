@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import api from "../services/api";
+import { TASK_TYPES } from "../constants/task-types";
 
 /**
  * Store for UI state and data related to logs display
@@ -9,7 +10,7 @@ export const useLogsStore = create(
   persist(
     (set, get) => ({
       // State
-      showDashboardLogs: false, // Dashboard: toggles between modules and full codebase logs
+      showDashboardLogs: false, // Dashboard: toggles between domains view and full codebase logs
       showDomainLogs: false, // Domain details: toggles between analysis and domain-specific logs
       // Logs storage by domain and section type (Map<domainId, Map<sectionType, string>>)
       domainLogsBySection: new Map(),
@@ -17,6 +18,9 @@ export const useLogsStore = create(
       logsLoadingBySection: new Map(),
       // Codebase analysis logs (real-time from socket)
       codebaseAnalysisLogs: [],
+      codebaseLogsLoading: false,
+      codebaseLogsError: null,
+      loadedCodebaseTaskId: null,
 
       // Actions
       toggleDashboardLogs: () =>
@@ -84,7 +88,7 @@ export const useLogsStore = create(
           const response = await api.getTaskLogs(taskId);
 
           // Set logs
-          get().setLogs(domainId, sectionType, response.content || "");
+          get().setLogs(domainId, sectionType, response?.data?.content || "");
         } catch (error) {
           console.error(`Failed to fetch logs for task ${taskId}:`, error);
           get().setLogs(
@@ -104,6 +108,70 @@ export const useLogsStore = create(
 
             return { logsLoadingBySection: newLogsLoadingBySection };
           });
+        }
+      },
+
+      /**
+       * Replace codebase analysis logs with persisted content
+       * @param {string} content - Full log content
+       * @param {string|null} taskId - Task ID for metadata
+       */
+      setCodebaseAnalysisLogsFromContent: (content, taskId = null) =>
+        set({
+          codebaseAnalysisLogs: content
+            ? [
+                {
+                  id: `historical-${Date.now()}`,
+                  taskId: taskId || "historical",
+                  type: TASK_TYPES.CODEBASE_ANALYSIS,
+                  stream: "stdout",
+                  data: content,
+                  timestamp: new Date().toISOString(),
+                },
+              ]
+            : [],
+        }),
+
+      /**
+       * Fetch persisted codebase analysis logs
+       * @param {Object|null} analysis - Codebase analysis from analysis store
+       * @param {boolean} force - Force reloading even if task is already loaded
+       */
+      fetchCodebaseAnalysisLogs: async (analysis, force = false) => {
+        const analysisTaskId = analysis?.taskId || null;
+        if (
+          !force &&
+          analysisTaskId &&
+          analysisTaskId === get().loadedCodebaseTaskId
+        ) {
+          return;
+        }
+
+        set({
+          codebaseLogsLoading: true,
+          codebaseLogsError: null,
+        });
+
+        try {
+          const response = await api.getCodebaseAnalysisLogs();
+          const payload = response?.data || {};
+
+          get().setCodebaseAnalysisLogsFromContent(
+            payload.content || "",
+            payload.taskId || analysisTaskId,
+          );
+          set({
+            loadedCodebaseTaskId: payload.taskId || analysisTaskId,
+          });
+        } catch (error) {
+          const message =
+            error?.response?.data?.message ||
+            error?.response?.data?.error ||
+            error?.message ||
+            "Failed to load codebase logs";
+          set({ codebaseLogsError: message });
+        } finally {
+          set({ codebaseLogsLoading: false });
         }
       },
 
@@ -154,6 +222,9 @@ export const useLogsStore = create(
           domainLogsBySection: new Map(),
           logsLoadingBySection: new Map(),
           codebaseAnalysisLogs: [],
+          codebaseLogsLoading: false,
+          codebaseLogsError: null,
+          loadedCodebaseTaskId: null,
         }),
     }),
     {
@@ -176,6 +247,7 @@ export const useLogsStore = create(
         showDashboardLogs: state.showDashboardLogs,
         showDomainLogs: state.showDomainLogs,
         domainLogsBySection: state.domainLogsBySection,
+        loadedCodebaseTaskId: state.loadedCodebaseTaskId,
         // Don't persist codebaseAnalysisLogs - they're session-specific
       }),
     },

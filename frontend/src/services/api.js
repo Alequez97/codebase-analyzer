@@ -16,7 +16,7 @@ export default {
   requestCodebaseAnalysis: (executeNow = true, agent = "llm-api") =>
     api.post("/analysis/codebase/request", { executeNow, agent }),
 
-  // Full Codebase Analysis - Full results and modules
+  // Full Codebase Analysis - Full results and domains
   getFullCodebaseAnalysis: () => api.get("/analysis/codebase/full"),
   saveCodebaseSummary: (summary) =>
     api.post("/analysis/codebase/summary/save", {
@@ -72,4 +72,5 @@ export default {
   getPendingTasks: () => api.get("/tasks/pending"),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
   getTaskLogs: (taskId) => api.get(`/tasks/${taskId}/logs`),
+  getCodebaseAnalysisLogs: () => api.get("/logs/codebase-analysis"),
 };

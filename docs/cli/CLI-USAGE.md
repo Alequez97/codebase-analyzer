@@ -63,16 +63,20 @@ When you run the analyzer, it creates this structure in your project:
 
 ```
 your-project/
-├── .code-analysis/           # Created by the analyzer
-│   ├── codebase-analysis.json     # Discovered modules
-│   ├── modules/              # Detailed analysis per module
-│   │   ├── auth-module.json
-│   │   └── api-module.json
-│   └── tasks/
-│       ├── pending/          # Queued analysis tasks
-│       └── completed/        # Finished tasks
-├── src/                      # Your actual project files
-└── package.json
+  .code-analysis/
+    analysis/
+      codebase-analysis.json        # Discovered domains
+    domains/                        # Detailed analysis per domain
+      user-auth/
+        documentation.json
+        requirements.json
+        testing.json
+    tasks/
+      pending/                      # Queued analysis tasks
+      completed/                    # Finished tasks
+    logs/                           # Task logs
+  src/                              # Your actual project files
+  package.json
 ```
 
 ## Commands
@@ -87,8 +91,8 @@ code-analyzer help
 
 ## Features
 
-- **Automatic Module Discovery**: Analyzes your codebase and identifies functional modules
-- **Deep Analysis**: Per-module analysis for bugs, security issues, and requirements
+- **Automatic Domain Discovery**: Analyzes your codebase and identifies functional domains
+- **Deep Analysis**: Per-domain analysis for bugs, security issues, and requirements
 - **Real-time Updates**: WebSocket-based progress tracking
 - **AI-powered**: Leverages Aider or other AI coding assistants
 
@@ -96,7 +100,7 @@ code-analyzer help
 
 Once started, open `http://localhost:3001` to:
 
-- View discovered modules
+- View discovered domains
 - Trigger analysis
 - Monitor analysis progress
 - Review findings

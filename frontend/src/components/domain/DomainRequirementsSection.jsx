@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { Pencil, X, Save, FileText } from "lucide-react";
 import { Card } from "../ui/card";
+import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
 
 export default function DomainRequirementsSection({
   requirementsText,
@@ -138,7 +139,7 @@ export default function DomainRequirementsSection({
               <Text color="gray.500">Loading logs...</Text>
             ) : logs ? (
               <Code.Root variant="plain" colorPalette="green" size="xs">
-                <Code.Content>{logs}</Code.Content>
+                <Code.Content>{formatIsoUtcTimestampsInText(logs)}</Code.Content>
               </Code.Root>
             ) : (
               <Text color="gray.500">
