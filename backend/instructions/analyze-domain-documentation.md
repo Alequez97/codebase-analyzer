@@ -18,7 +18,7 @@ Analyze the domain files and generate comprehensive business documentation in Ma
 - **Files to Analyze**:
   {{#each FILES}}
   - {{this}}
-  {{/each}}
+    {{/each}}
 
 ## Task
 
@@ -53,10 +53,12 @@ The file should be pure Markdown with the following structure:
 
 ## Key Components
 
-### Component Name (`path/to/file.js`)
+### Component Name - `path/to/file.js`
+
 Description of what this component does and its role.
 
-### Another Component (`path/to/another.js`)
+### Another Component - `path/to/another.js`
+
 Description of what this component does and its role.
 
 ## Architecture
@@ -99,16 +101,20 @@ Authentication is the foundation of platform security. Any vulnerability here co
 
 ## Key Components
 
-### Password Service (`auth/password-service.js`)
+### Password Service - `auth/password-service.js`
+
 Handles password hashing, validation, and reset workflows. Uses bcrypt with 10 rounds for hashing.
 
-### Token Manager (`auth/token-manager.js`)
+### Token Manager - `auth/token-manager.js`
+
 Generates and validates JWT tokens. Manages token refresh and expiration logic.
 
-### Auth Middleware (`auth/middleware.js`)
+### Auth Middleware - `auth/middleware.js`
+
 Express middleware that protects routes by verifying JWT tokens and checking user permissions.
 
-### Session Store (`auth/session-store.js`)
+### Session Store - `auth/session-store.js`
+
 Redis-based session storage for quick token validation and user state management.
 
 ## Architecture

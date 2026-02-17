@@ -8,7 +8,6 @@ import {
   Textarea,
   Text,
   Badge,
-  Code,
 } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import { Pencil, X, Save, FileText } from "lucide-react";
@@ -93,16 +92,19 @@ export default function DomainDocumentationSection({
     code: ({ inline, children }) => {
       if (inline) {
         return (
-          <Code
+          <Box
+            as="code"
+            display="inline"
             bg="gray.100"
             px={1.5}
             py={0.5}
             borderRadius="sm"
             fontSize="sm"
-            colorPalette="gray"
+            fontFamily="mono"
+            whiteSpace="nowrap"
           >
             {children}
-          </Code>
+          </Box>
         );
       }
       // Block code
@@ -118,16 +120,9 @@ export default function DomainDocumentationSection({
           fontSize="sm"
           fontFamily="mono"
         >
-          <Code
-            as="code"
-            bg="transparent"
-            color="inherit"
-            p={0}
-            fontSize="inherit"
-            fontFamily="inherit"
-          >
+          <Box as="code" display="block" fontFamily="inherit">
             {children}
-          </Code>
+          </Box>
         </Box>
       );
     },
