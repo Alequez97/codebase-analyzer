@@ -87,23 +87,37 @@ export default function DomainDetailsPage() {
   const applyingTests = applyingTestsByDomainId[domainId] || {};
 
   useEffect(() => {
-    if (domainId) {
-      // Fetch all sections in parallel for better performance
-      Promise.all([
-        fetchDomainDocumentation(domainId),
-        fetchDomainRequirements(domainId),
-        fetchDomainTesting(domainId),
-      ]).then(() => {
+    if (!domainId) return;
+
+    // Only fetch if data doesn't exist in cache (fetch functions handle caching internally)
+    // Call fetch functions - they will return cached data immediately if available
+    const fetchPromises = [];
+
+    // Only fetch documentation if not already loaded or loading
+    if (!documentation && !documentationLoading) {
+      fetchPromises.push(fetchDomainDocumentation(domainId));
+    }
+
+    // Only fetch requirements if not already loaded or loading
+    if (!requirements && !requirementsLoading) {
+      fetchPromises.push(fetchDomainRequirements(domainId));
+    }
+
+    // Only fetch testing if not already loaded or loading
+    if (!testing && !testingLoading) {
+      fetchPromises.push(fetchDomainTesting(domainId));
+    }
+
+    // If there are any fetch operations, initialize editors after they complete
+    if (fetchPromises.length > 0) {
+      Promise.all(fetchPromises).then(() => {
         initializeEditorsForDomain(domainId);
       });
+    } else {
+      // Data already exists, just initialize editors
+      initializeEditorsForDomain(domainId);
     }
-  }, [
-    domainId,
-    fetchDomainDocumentation,
-    fetchDomainRequirements,
-    fetchDomainTesting,
-    initializeEditorsForDomain,
-  ]);
+  }, [domainId]); // Only depend on domainId to avoid unnecessary re-fetches
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
   const documentationText = editedDocumentationByDomainId[domainId];

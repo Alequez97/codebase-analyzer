@@ -12,7 +12,7 @@ import { TaskLogs } from "../components/dashboard/TaskLogs";
 
 export default function Dashboard() {
   // Analysis store
-  const { loading, error, status, fetchAnalysis } = useAnalysisStore();
+  const { loading, error, status, analysis, fetchAnalysis } = useAnalysisStore();
 
   // Config store
   const { showLogs, toggleLogs } = useConfigStore();
@@ -25,10 +25,14 @@ export default function Dashboard() {
     initSocket();
   }, [initSocket]);
 
-  // Fetch initial data (which also checks for pending tasks)
+  // Fetch initial data only if not already loaded (which also checks for pending tasks)
   useEffect(() => {
-    fetchAnalysis();
-  }, [fetchAnalysis]);
+    // Only fetch if we don't have analysis data yet
+    // fetchAnalysis handles its own loading states and caching internally
+    if (!analysis) {
+      fetchAnalysis();
+    }
+  }, []); // Empty dependency array - only run once on mount
 
   if (loading) {
     return <LoadingState />;

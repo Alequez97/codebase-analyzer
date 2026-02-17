@@ -27,7 +27,7 @@ export const useAnalysisStore = create(
       domainTestingErrorById: new Map(),
       analyzingCodebase: false,
       pendingCodebaseTask: null,
-      loading: true,
+      loading: false,
       error: null,
 
       // Actions
