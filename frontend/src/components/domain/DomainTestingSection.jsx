@@ -444,6 +444,9 @@ export default function DomainTestingSection({
   applyingTests,
   onAnalyze,
   onApplyTest,
+  showLogs = false,
+  logs = "",
+  logsLoading = false,
 }) {
   const existingTestFiles = testing?.existingTests || [];
 
@@ -451,21 +454,30 @@ export default function DomainTestingSection({
     <Card.Root>
       <Card.Header>
         <HStack justify="space-between">
-          <Heading size="md">Testing</Heading>
-          <Button
-            size="sm"
-            colorPalette="blue"
-            variant="outline"
-            onClick={onAnalyze}
-            loading={loading}
-            loadingText="Analyzing"
-          >
-            {testing ? "Re-analyze tests" : "Analyze tests"}
-          </Button>
+          <HStack gap={2}>
+            <Heading size="md">Testing</Heading>
+            {showLogs && (
+              <Badge colorPalette="purple" size="sm">
+                Logs View
+              </Badge>
+            )}
+          </HStack>
+          {!showLogs && (
+            <Button
+              size="sm"
+              colorPalette="blue"
+              variant="outline"
+              onClick={onAnalyze}
+              loading={loading}
+              loadingText="Analyzing"
+            >
+              {testing ? "Re-analyze tests" : "Analyze tests"}
+            </Button>
+          )}
         </HStack>
       </Card.Header>
       <Card.Body>
-        {(loading || progress) && (
+        {(loading || progress) && !showLogs && (
           <Box
             mb={4}
             p={3}
@@ -483,7 +495,30 @@ export default function DomainTestingSection({
             </HStack>
           </Box>
         )}
-        {!testing && (
+        {showLogs ? (
+          <Box
+            bg="gray.900"
+            color="green.300"
+            p={4}
+            borderRadius="md"
+            fontFamily="mono"
+            fontSize="xs"
+            maxH="500px"
+            overflowY="auto"
+            whiteSpace="pre-wrap"
+            wordBreak="break-word"
+          >
+            {logsLoading ? (
+              <Text color="gray.500">Loading logs...</Text>
+            ) : logs ? (
+              <code style={{ display: "block" }}>{logs}</code>
+            ) : (
+              <Text color="gray.500">
+                No logs available. Run analysis to see logs.
+              </Text>
+            )}
+          </Box>
+        ) : !testing ? (
           <Alert.Root status="info">
             <Alert.Indicator />
             <Alert.Title>No test analysis yet</Alert.Title>
@@ -492,9 +527,7 @@ export default function DomainTestingSection({
               suggestions.
             </Alert.Description>
           </Alert.Root>
-        )}
-
-        {testing && (
+        ) : (
           <VStack align="stretch" gap={6}>
             {/* Coverage Metrics */}
             <TestCoverageMetrics coverage={testing.currentCoverage} />

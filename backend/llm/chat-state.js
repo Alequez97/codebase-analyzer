@@ -55,7 +55,7 @@ export class ChatState {
       type: "tool_use",
       id: call.id,
       name: call.name,
-      input: call.arguments,
+      input: call.arguments, // normalized response uses 'arguments' field
     }));
 
     this.messages.push({

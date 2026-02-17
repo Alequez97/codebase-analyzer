@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Box, HStack, Heading, Text, VStack } from "@chakra-ui/react";
-import { useSocketStore } from "../../store/useSocketStore";
-import { SOCKET_EVENTS } from "../../constants/socket-events";
+import { useLogsStore } from "../../store/useLogsStore";
 import { Card } from "../ui/card";
 
 /**
@@ -9,45 +8,8 @@ import { Card } from "../ui/card";
  * Displays streaming output from agent tasks
  */
 export function TaskLogs() {
-  const [logs, setLogs] = useState([]);
+  const logs = useLogsStore((state) => state.codebaseAnalysisLogs);
   const logEndRef = useRef(null);
-  const socket = useSocketStore((state) => state.socket);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleTaskLog = ({ taskId, type, stream, data }) => {
-      setLogs((prev) => [
-        ...prev,
-        {
-          id: Date.now() + Math.random(),
-          taskId,
-          type,
-          stream,
-          data,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    };
-
-    // Subscribe to all task-specific log events
-    const logEvents = [
-      SOCKET_EVENTS.LOG_CODEBASE_ANALYSIS,
-      SOCKET_EVENTS.LOG_DOCUMENTATION,
-      SOCKET_EVENTS.LOG_REQUIREMENTS,
-      SOCKET_EVENTS.LOG_TESTING,
-    ];
-
-    logEvents.forEach((event) => {
-      socket.on(event, handleTaskLog);
-    });
-
-    return () => {
-      logEvents.forEach((event) => {
-        socket.off(event, handleTaskLog);
-      });
-    };
-  }, [socket]);
 
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {

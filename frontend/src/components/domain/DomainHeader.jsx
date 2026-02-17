@@ -1,4 +1,5 @@
 import { Button, Heading, HStack, Text, VStack, Badge } from "@chakra-ui/react";
+import { useLogsStore } from "../../store/useLogsStore";
 
 function getPriorityColor(priority) {
   if (priority === "P0") return "red";
@@ -8,6 +9,8 @@ function getPriorityColor(priority) {
 }
 
 export default function DomainHeader({ domain, domainId, analyzing, onBack }) {
+  const { showDomainLogs, toggleDomainLogs } = useLogsStore();
+
   return (
     <HStack justify="space-between" align="start">
       <VStack align="start" gap={1}>
@@ -23,9 +26,14 @@ export default function DomainHeader({ domain, domainId, analyzing, onBack }) {
           {domain?.businessPurpose || "No domain summary available."}
         </Text>
       </VStack>
-      <Button variant="outline" onClick={onBack}>
-        Back
-      </Button>
+      <HStack>
+        <Button variant="outline" onClick={toggleDomainLogs}>
+          {showDomainLogs ? "Show Domain Analysis" : "Show Logs"}
+        </Button>
+        <Button variant="outline" onClick={onBack}>
+          Back
+        </Button>
+      </HStack>
     </HStack>
   );
 }

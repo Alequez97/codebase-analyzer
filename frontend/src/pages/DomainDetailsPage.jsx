@@ -5,6 +5,7 @@ import { toaster } from "../components/ui/toaster";
 import { useAnalysisStore } from "../store/useAnalysisStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useTestingStore } from "../store/useTestingStore";
+import { useLogsStore } from "../store/useLogsStore";
 import { Alert } from "../components/ui/alert";
 import DomainHeader from "../components/domain/DomainHeader";
 import DomainFilesSection from "../components/domain/DomainFilesSection";
@@ -58,6 +59,14 @@ export default function DomainDetailsPage() {
   // Testing store
   const { applyingTestsByDomainId, applyTest } = useTestingStore();
 
+  // Logs store
+  const {
+    showDomainLogs,
+    fetchTaskLogs,
+    domainLogsBySection,
+    logsLoadingBySection,
+  } = useLogsStore();
+
   const domain = (analysis?.domains || []).find((item) => item.id === domainId);
   const analyzing = !!domainAnalyzeLoadingById.get(domainId);
 
@@ -84,6 +93,18 @@ export default function DomainDetailsPage() {
     taskProgress?.type === "analyze-requirements" ? taskProgress : null;
   const testingProgress =
     taskProgress?.type === "analyze-testing" ? taskProgress : null;
+
+  // Logs data for each section
+  const domainLogs = domainLogsBySection.get(domainId) || new Map();
+  const documentationLogs = domainLogs.get("documentation") || "";
+  const requirementsLogs = domainLogs.get("requirements") || "";
+  const testingLogs = domainLogs.get("testing") || "";
+
+  // Logs loading states
+  const logsLoading = logsLoadingBySection.get(domainId) || new Map();
+  const documentationLogsLoading = !!logsLoading.get("documentation");
+  const requirementsLogsLoading = !!logsLoading.get("requirements");
+  const testingLogsLoading = !!logsLoading.get("testing");
 
   // Collect all errors into a single array
   const errors = [
@@ -133,6 +154,26 @@ export default function DomainDetailsPage() {
       initializeEditorsForDomain(domainId);
     }
   }, [domainId]); // Only depend on domainId to avoid unnecessary re-fetches
+
+  // Fetch historical logs when sections exist and have taskIds
+  useEffect(() => {
+    if (!domainId) return;
+
+    // Fetch documentation logs if task exists
+    if (documentation?.taskId) {
+      fetchTaskLogs(domainId, documentation.taskId, "documentation");
+    }
+
+    // Fetch requirements logs if task exists
+    if (requirements?.taskId) {
+      fetchTaskLogs(domainId, requirements.taskId, "requirements");
+    }
+
+    // Fetch testing logs if task exists
+    if (testing?.taskId) {
+      fetchTaskLogs(domainId, testing.taskId, "testing");
+    }
+  }, [domainId, documentation?.taskId, requirements?.taskId, testing?.taskId]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
   const documentationText = editedDocumentationByDomainId[domainId];
@@ -259,6 +300,9 @@ export default function DomainDetailsPage() {
           }
           onSave={handleSaveDocumentation}
           onReset={() => resetEditedDocumentation(domainId)}
+          showLogs={showDomainLogs}
+          logs={documentationLogs}
+          logsLoading={documentationLogsLoading}
         />
 
         <DomainRequirementsSection
@@ -271,6 +315,9 @@ export default function DomainDetailsPage() {
           onAnalyze={() => domain && analyzeDomainRequirements(domain)}
           onSave={handleSaveRequirements}
           onReset={() => resetEditedRequirements(domainId)}
+          showLogs={showDomainLogs}
+          logs={requirementsLogs}
+          logsLoading={requirementsLogsLoading}
         />
 
         <DomainTestingSection
@@ -280,6 +327,9 @@ export default function DomainDetailsPage() {
           applyingTests={applyingTests}
           onAnalyze={() => domain && analyzeDomainTesting(domain)}
           onApplyTest={handleApplyTest}
+          showLogs={showDomainLogs}
+          logs={testingLogs}
+          logsLoading={testingLogsLoading}
         />
       </VStack>
     </Container>

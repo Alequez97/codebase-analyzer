@@ -7,6 +7,8 @@ import {
   Textarea,
   Box,
   IconButton,
+  Badge,
+  Code,
 } from "@chakra-ui/react";
 import { Pencil, X, Save, FileText } from "lucide-react";
 import { Card } from "../ui/card";
@@ -19,6 +21,9 @@ export default function DomainRequirementsSection({
   onAnalyze,
   onSave,
   onReset,
+  showLogs = false,
+  logs = "",
+  logsLoading = false,
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -42,7 +47,7 @@ export default function DomainRequirementsSection({
         <HStack justify="space-between">
           <HStack gap={2}>
             <Heading size="md">Requirements</Heading>
-            {!isEditMode && (
+            {!isEditMode && !showLogs && (
               <IconButton
                 size="sm"
                 variant="ghost"
@@ -63,9 +68,14 @@ export default function DomainRequirementsSection({
                 <X size={16} />
               </IconButton>
             )}
+            {showLogs && (
+              <Badge colorPalette="purple" size="sm">
+                Logs View
+              </Badge>
+            )}
           </HStack>
           <HStack>
-            {!isEditMode && (
+            {!isEditMode && !showLogs && (
               <Button
                 size="sm"
                 colorPalette="blue"
@@ -93,7 +103,7 @@ export default function DomainRequirementsSection({
         </HStack>
       </Card.Header>
       <Card.Body>
-        {(loading || progress) && (
+        {(loading || progress) && !showLogs && (
           <Box
             mb={4}
             p={3}
@@ -111,7 +121,32 @@ export default function DomainRequirementsSection({
             </HStack>
           </Box>
         )}
-        {isEditMode ? (
+        {showLogs ? (
+          <Box
+            bg="gray.900"
+            color="green.300"
+            p={4}
+            borderRadius="md"
+            fontFamily="mono"
+            fontSize="xs"
+            maxH="500px"
+            overflowY="auto"
+            whiteSpace="pre-wrap"
+            wordBreak="break-word"
+          >
+            {logsLoading ? (
+              <Text color="gray.500">Loading logs...</Text>
+            ) : logs ? (
+              <Code.Root variant="plain" colorPalette="green" size="xs">
+                <Code.Content>{logs}</Code.Content>
+              </Code.Root>
+            ) : (
+              <Text color="gray.500">
+                No logs available. Run analysis to see logs.
+              </Text>
+            )}
+          </Box>
+        ) : isEditMode ? (
           <>
             <Text mb={3} color="gray.600" fontSize="sm">
               Edit business rules here. Use format: [Priority] Description

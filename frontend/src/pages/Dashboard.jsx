@@ -19,7 +19,7 @@ export default function Dashboard() {
   const { loading, error, analysis, fetchAnalysis } = useAnalysisStore();
 
   // Logs store (UI state for showing/hiding logs)
-  const { showLogs, toggleLogs } = useLogsStore();
+  const { showDashboardLogs, toggleDashboardLogs } = useLogsStore();
 
   // Socket store
   const { socketConnected, initSocket } = useSocketStore();
@@ -64,13 +64,13 @@ export default function Dashboard() {
             <Button
               variant="outline"
               colorPalette="gray"
-              onClick={toggleLogs}
+              onClick={toggleDashboardLogs}
               size="sm"
             >
-              {showLogs ? "Show codebase anaysis" : "Show Logs"}
+              {showDashboardLogs ? "Show codebase anaysis" : "Show Logs"}
             </Button>
           </HStack>
-          {showLogs ? <TaskLogs /> : <ModulesSection />}
+          {showDashboardLogs ? <TaskLogs /> : <ModulesSection />}
         </VStack>
       </Container>
     </Box>

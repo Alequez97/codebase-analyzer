@@ -1,9 +1,13 @@
 import { create } from "zustand";
-import { initSocket } from "../services/socket";
+import { io } from "socket.io-client";
 import { SOCKET_EVENTS } from "../constants/socket-events";
 import { TASK_TYPES } from "../constants/task-types";
 import { useAnalysisStore } from "./useAnalysisStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
+import { useLogsStore } from "./useLogsStore";
+
+const SOCKET_URL =
+  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
 
 export const useSocketStore = create((set, get) => ({
   // State
@@ -12,7 +16,18 @@ export const useSocketStore = create((set, get) => ({
 
   // Actions
   initSocket: () => {
-    const socket = initSocket();
+    // Create socket connection if it doesn't exist
+    if (get().socket) {
+      return; // Already initialized
+    }
+
+    const socket = io(SOCKET_URL, {
+      autoConnect: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+    });
+
     set({ socket });
 
     // Connection status
@@ -170,6 +185,40 @@ export const useSocketStore = create((set, get) => ({
         });
       }
     });
+
+    // Log events - stream logs to logs store
+    const handleLogEvent = ({ taskId, type, stream, log, domainId }) => {
+      // Add to codebase analysis logs (visible in dashboard)
+      useLogsStore.getState().addCodebaseAnalysisLog({
+        id: Date.now() + Math.random(),
+        taskId,
+        type,
+        stream,
+        data: log,
+        timestamp: new Date().toISOString(),
+      });
+
+      // If this is a domain-specific log, also append to domain logs
+      if (domainId && type) {
+        let sectionType = null;
+        if (type === TASK_TYPES.DOCUMENTATION) {
+          sectionType = "documentation";
+        } else if (type === TASK_TYPES.REQUIREMENTS) {
+          sectionType = "requirements";
+        } else if (type === TASK_TYPES.TESTING) {
+          sectionType = "testing";
+        }
+
+        if (sectionType) {
+          useLogsStore.getState().appendLogs(domainId, sectionType, log);
+        }
+      }
+    };
+
+    socket.on(SOCKET_EVENTS.LOG_CODEBASE_ANALYSIS, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_DOCUMENTATION, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_REQUIREMENTS, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_TESTING, handleLogEvent);
   },
 
   disconnectSocket: () => {

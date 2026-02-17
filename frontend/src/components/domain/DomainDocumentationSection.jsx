@@ -22,6 +22,9 @@ export default function DomainDocumentationSection({
   onDocumentationChange,
   onSave,
   onReset,
+  showLogs = false,
+  logs = "",
+  logsLoading = false,
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -67,7 +70,7 @@ export default function DomainDocumentationSection({
         <HStack justify="space-between">
           <HStack gap={2}>
             <Heading size="md">Documentation</Heading>
-            {!isEditMode && (
+            {!isEditMode && !showLogs && (
               <IconButton
                 size="sm"
                 variant="ghost"
@@ -93,9 +96,14 @@ export default function DomainDocumentationSection({
                 {statusText}
               </Badge>
             )}
+            {showLogs && (
+              <Badge colorPalette="purple" size="sm">
+                Logs View
+              </Badge>
+            )}
           </HStack>
           <HStack>
-            {!isEditMode && (
+            {!isEditMode && !showLogs && (
               <Button
                 size="sm"
                 colorPalette="blue"
@@ -123,7 +131,7 @@ export default function DomainDocumentationSection({
         </HStack>
       </Card.Header>
       <Card.Body>
-        {(loading || progress) && (
+        {(loading || progress) && !showLogs && (
           <Box
             mb={4}
             p={3}
@@ -141,7 +149,32 @@ export default function DomainDocumentationSection({
             </HStack>
           </Box>
         )}
-        {isEditMode ? (
+        {showLogs ? (
+          <Box
+            bg="gray.900"
+            color="green.300"
+            p={4}
+            borderRadius="md"
+            fontFamily="mono"
+            fontSize="xs"
+            maxH="500px"
+            overflowY="auto"
+            whiteSpace="pre-wrap"
+            wordBreak="break-word"
+          >
+            {logsLoading ? (
+              <Text color="gray.500">Loading logs...</Text>
+            ) : logs ? (
+              <Text as="pre" color="green.300" fontFamily="mono" fontSize="xs">
+                {logs}
+              </Text>
+            ) : (
+              <Text color="gray.500">
+                No logs available. Run analysis to see logs.
+              </Text>
+            )}
+          </Box>
+        ) : isEditMode ? (
           <Textarea
             value={displayContent}
             onChange={(e) => onDocumentationChange?.(e.target.value)}

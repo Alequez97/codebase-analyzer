@@ -71,4 +71,5 @@ export default {
   // Tasks
   getPendingTasks: () => api.get("/tasks/pending"),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
+  getTaskLogs: (taskId) => api.get(`/tasks/${taskId}/logs`),
 };

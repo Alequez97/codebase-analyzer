@@ -447,63 +447,34 @@ Dashboard shows: "Click Analyze Codebase to begin"
     });
     ```
 
-## Roadmap
+### 9. **Socket Event Handling**
 
-### Phase 1: MVP (Current)
+- **Handle socket events in the socket store** (`useSocketStore`), not in individual components
+- **Update business logic stores** from socket event handlers (e.g., `useLogsStore`, `useAnalysisStore`)
+- Components should only **read from stores**, never listen to socket events directly
+- **Architecture**:
+  - `useSocketStore.initSocket()` sets up all socket event listeners
+  - Event handlers call methods on business logic stores to update state
+  - Components subscribe to business logic stores via Zustand selectors
 
-- ✅ Basic codebase analysis
-- ✅ Module analysis
-- ✅ Bug detection
-- ✅ Fix application
-- ✅ Web dashboard
+- **Benefits**:
+  - Single source of truth for socket event handling
+  - No duplicate event listeners across components
+  - Components remain purely presentational
+  - Easier to debug and maintain
+  - Clear separation of concerns
 
-### Phase 2: Enhanced Analysis
+- **Example**:
 
-- [ ] Test suggestion and generation
-- [ ] Performance issue detection
-- [ ] Code smell identification
-- [ ] Refactoring recommendations
+  ```javascript
+  // ✅ CORRECT: Handle in socket store
+  socket.on(SOCKET_EVENTS.LOG_DOCUMENTATION, ({ taskId, domainId, log }) => {
+    useLogsStore.getState().appendLogs(domainId, "documentation", log);
+  });
 
-### Phase 3: Team Features
-
-- [ ] Multi-user support
-- [ ] Analysis history
-- [ ] Team dashboards
-- [ ] CI/CD integration
-
-### Phase 4: Advanced Intelligence
-
-- [ ] Learning from applied fixes
-- [ ] Custom rule definitions
-- [ ] Cross-project patterns
-- [ ] Automated PR generation
-
-## Get Started
-
-```bash
-# Install
-npm install -g codebase-analyzer
-
-# Run in your project
-cd /path/to/your/project
-code-analyze
-
-# Open dashboard
-# Browser opens automatically at http://localhost:5173
-```
-
-## Philosophy
-
-> **"Let AI do the tedious work, you do the creative work."**
-
-Code auditing should be:
-
-- **Automated** - AI analyzes, you review
-- **Fast** - Minutes, not days
-- **Accurate** - Catches what humans miss
-- **Actionable** - One-click fixes
-- **Enjoyable** - Beautiful interface, not command-line hell
-
----
-
-**Made for developers who want to ship better code faster.** 🚀
+  // ❌ WRONG: Handle in component
+  useEffect(() => {
+    socket.on(SOCKET_EVENTS.LOG_DOCUMENTATION, handleLog);
+    return () => socket.off(SOCKET_EVENTS.LOG_DOCUMENTATION);
+  }, [socket]);
+  ```

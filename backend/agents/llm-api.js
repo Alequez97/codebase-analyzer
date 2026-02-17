@@ -156,9 +156,10 @@ async function executeDocumentationTask(task) {
 
         emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
+          domainId,
           type: task.type,
           stream: "stdout",
-          data: `[${progress.stage.toUpperCase()}] ${progress.message}\n`,
+          log: `[${progress.stage.toUpperCase()}] ${progress.message}\n`,
         });
       },
     });
@@ -695,11 +696,7 @@ async function executeJsonTask(task) {
     taskLogger.raw("");
 
     // Initialize LLM client and chat state
-    emitJsonTaskProgress(
-      task,
-      "initializing",
-      "Initializing LLM client...",
-    );
+    emitJsonTaskProgress(task, "initializing", "Initializing LLM client...");
     taskLogger.info("🤖 Initializing LLM client...", {
       component: "LLM-API",
       model: config.llm.model,
@@ -750,9 +747,10 @@ async function executeJsonTask(task) {
 
       emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
+        domainId: task.params?.domainId,
         type: task.type,
         stream: "stdout",
-        data: `\n${"-".repeat(80)}\n[Iteration ${iterationCount}/${maxIterations}] 📤 Sending message to LLM...\n${"-".repeat(80)}\n`,
+        log: `\n${"-".repeat(80)}\n[Iteration ${iterationCount}/${maxIterations}] 📤 Sending message to LLM...\n${"-".repeat(80)}\n`,
       });
 
       // Check if we need to compact context
@@ -798,9 +796,10 @@ async function executeJsonTask(task) {
       const responseLog = `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`;
       emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
+        domainId: task.params?.domainId,
         type: task.type,
         stream: "stdout",
-        data: responseLog,
+        log: responseLog,
       });
 
       // Add assistant's response to chat state
@@ -821,9 +820,10 @@ async function executeJsonTask(task) {
 
         emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
+          domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          data: `\n🔧 [Tool Calls] LLM requested ${response.toolCalls.length} tool(s): ${toolNames}\n`,
+          log: `\n🔧 [Tool Calls] LLM requested ${response.toolCalls.length} tool(s): ${toolNames}\n`,
         });
 
         // Store tool calls in chat state
@@ -832,7 +832,7 @@ async function executeJsonTask(task) {
             type: "tool_use",
             id: tc.id,
             name: tc.name,
-            input: tc.arguments,
+            arguments: tc.arguments, // Use 'arguments' to match normalized format
           })),
         );
 
@@ -840,9 +840,7 @@ async function executeJsonTask(task) {
         for (const toolCall of response.toolCalls) {
           // Extract file path for progress message
           const filePath =
-            toolCall.arguments?.path ||
-            toolCall.arguments?.file_path ||
-            "file";
+            toolCall.arguments?.path || toolCall.arguments?.file_path || "file";
           let progressMessage = `Reading ${filePath}`;
           if (toolCall.name === "list_directory") {
             progressMessage = `Listing directory ${filePath}`;
@@ -861,9 +859,10 @@ async function executeJsonTask(task) {
           );
           emitSocketEvent(getLogEventForTaskType(task.type), {
             taskId: task.id,
+            domainId: task.params?.domainId,
             type: task.type,
             stream: "stdout",
-            data: `  ├─ 🔨 Executing: ${toolCall.name}\n  │  Args: ${argsPreview}${JSON.stringify(toolCall.arguments).length > 150 ? "..." : ""}\n`,
+            log: `  ├─ 🔨 Executing: ${toolCall.name}\n  │  Args: ${argsPreview}${JSON.stringify(toolCall.arguments).length > 150 ? "..." : ""}\n`,
           });
 
           try {
@@ -916,9 +915,10 @@ async function executeJsonTask(task) {
 
         emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
+          domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          data: `\n✅ [COMPLETE] LLM has finished the analysis\n`,
+          log: `\n✅ [COMPLETE] LLM has finished the analysis\n`,
         });
 
         break;
@@ -1004,9 +1004,10 @@ async function executeJsonTask(task) {
               );
               emitSocketEvent(getLogEventForTaskType(task.type), {
                 taskId: task.id,
+                domainId: task.params?.domainId,
                 type: task.type,
                 stream: "stdout",
-                data: `[JSON Found] ✅ Successfully extracted and parsed JSON from response\n`,
+                log: `[JSON Found] ✅ Successfully extracted and parsed JSON from response\n`,
               });
               break;
             } catch (parseError) {
@@ -1030,9 +1031,10 @@ async function executeJsonTask(task) {
         });
         emitSocketEvent(getLogEventForTaskType(task.type), {
           taskId: task.id,
+          domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          data: `[File Written] ✅ Created ${task.outputFile}\n`,
+          log: `[File Written] ✅ Created ${task.outputFile}\n`,
         });
       } else {
         const errorMessage = "LLM did not output valid JSON in its responses";

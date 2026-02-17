@@ -159,9 +159,10 @@ export async function execute(task) {
       // Emit to socket with task-specific event
       emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
+        domainId: task.params?.domainId,
         type: task.type,
         stream: "stdout",
-        data: text,
+        log: text,
       });
 
       logger.debug(`${text.trim()}`, {
@@ -180,9 +181,10 @@ export async function execute(task) {
       // Emit to socket with task-specific event
       emitSocketEvent(getLogEventForTaskType(task.type), {
         taskId: task.id,
+        domainId: task.params?.domainId,
         type: task.type,
         stream: "stderr",
-        data: text,
+        log: text,
       });
 
       logger.error(`${text.trim()}`, {
