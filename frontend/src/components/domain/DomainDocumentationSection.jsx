@@ -8,6 +8,7 @@ import {
   Textarea,
   Text,
   Badge,
+  Code,
 } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import { Pencil, X, Save, FileText } from "lucide-react";
@@ -46,6 +47,117 @@ export default function DomainDocumentationSection({
 
   const statusText = documentation?.metadata?.status || null;
   const logFile = documentation?.metadata?.logFile || null;
+
+  // Custom components for ReactMarkdown
+  const markdownComponents = {
+    h1: ({ children }) => (
+      <Heading as="h1" size="xl" mt={6} mb={3}>
+        {children}
+      </Heading>
+    ),
+    h2: ({ children }) => (
+      <Heading as="h2" size="lg" mt={5} mb={2}>
+        {children}
+      </Heading>
+    ),
+    h3: ({ children }) => (
+      <Heading as="h3" size="md" mt={4} mb={2}>
+        {children}
+      </Heading>
+    ),
+    h4: ({ children }) => (
+      <Heading as="h4" size="sm" mt={3} mb={1}>
+        {children}
+      </Heading>
+    ),
+    p: ({ children }) => (
+      <Text mb={3} lineHeight="tall">
+        {children}
+      </Text>
+    ),
+    ul: ({ children }) => (
+      <Box as="ul" pl={6} mb={3}>
+        {children}
+      </Box>
+    ),
+    ol: ({ children }) => (
+      <Box as="ol" pl={6} mb={3}>
+        {children}
+      </Box>
+    ),
+    li: ({ children }) => (
+      <Box as="li" mb={1}>
+        {children}
+      </Box>
+    ),
+    code: ({ inline, children }) => {
+      if (inline) {
+        return (
+          <Code
+            bg="gray.100"
+            px={1.5}
+            py={0.5}
+            borderRadius="sm"
+            fontSize="sm"
+            colorPalette="gray"
+          >
+            {children}
+          </Code>
+        );
+      }
+      // Block code
+      return (
+        <Box
+          as="pre"
+          bg="gray.900"
+          color="gray.100"
+          p={4}
+          borderRadius="md"
+          overflowX="auto"
+          mb={3}
+          fontSize="sm"
+          fontFamily="mono"
+        >
+          <Code
+            as="code"
+            bg="transparent"
+            color="inherit"
+            p={0}
+            fontSize="inherit"
+            fontFamily="inherit"
+          >
+            {children}
+          </Code>
+        </Box>
+      );
+    },
+    pre: ({ children }) => <>{children}</>, // Pre is handled by code component
+    strong: ({ children }) => (
+      <Box as="strong" fontWeight="bold">
+        {children}
+      </Box>
+    ),
+    em: ({ children }) => (
+      <Box as="em" fontStyle="italic">
+        {children}
+      </Box>
+    ),
+    blockquote: ({ children }) => (
+      <Box
+        as="blockquote"
+        borderLeft="4px solid"
+        borderColor="blue.500"
+        pl={4}
+        py={2}
+        my={3}
+        bg="blue.50"
+        fontStyle="italic"
+      >
+        {children}
+      </Box>
+    ),
+    hr: () => <Box as="hr" my={4} borderColor="gray.300" />,
+  };
 
   return (
     <Card.Root>
@@ -137,40 +249,8 @@ export default function DomainDocumentationSection({
             placeholder="Write documentation in Markdown format..."
           />
         ) : (
-          <Box
-            color="gray.800"
-            fontSize="sm"
-            lineHeight="1.8"
-            sx={{
-              "& h1": { fontSize: "xl", fontWeight: "bold", mt: 4, mb: 2 },
-              "& h2": { fontSize: "lg", fontWeight: "bold", mt: 3, mb: 2 },
-              "& h3": {
-                fontSize: "md",
-                fontWeight: "semibold",
-                mt: 2,
-                mb: 1,
-              },
-              "& p": { mb: 2 },
-              "& ul": { pl: 4, mb: 2 },
-              "& li": { mb: 1 },
-              "& code": {
-                bg: "gray.100",
-                px: 1,
-                py: 0.5,
-                borderRadius: "sm",
-                fontSize: "xs",
-                fontFamily: "mono",
-              },
-              "& pre": {
-                bg: "gray.50",
-                p: 3,
-                borderRadius: "md",
-                overflowX: "auto",
-                mb: 2,
-              },
-            }}
-          >
-            <ReactMarkdown>
+          <Box color="gray.800" fontSize="sm" lineHeight="1.8">
+            <ReactMarkdown components={markdownComponents}>
               {displayContent ||
                 "Click **Analyze documentation** to generate deep analysis. All files listed above will be analyzed to understand business purpose, responsibilities, and architecture."}
             </ReactMarkdown>
