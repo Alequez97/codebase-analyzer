@@ -176,9 +176,18 @@ export const useDomainEditorStore = create(
         try {
           await api.saveDomainFiles(domainId, filesArray);
 
-          // Refresh the analysis to get updated domain data
+          // Update the domain files in the analysis store directly
           const analysisStore = useAnalysisStore.getState();
-          await analysisStore.fetchAnalysis();
+          const currentAnalysis = analysisStore.analysis;
+          if (currentAnalysis?.domains) {
+            const updatedDomains = currentAnalysis.domains.map((domain) =>
+              domain.id === domainId ? { ...domain, files: filesArray } : domain
+            );
+            analysisStore.setAnalysis({
+              ...currentAnalysis,
+              domains: updatedDomains,
+            });
+          }
 
           return { success: true };
         } catch (err) {
