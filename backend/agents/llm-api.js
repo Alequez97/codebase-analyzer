@@ -90,20 +90,53 @@ export async function execute(task) {
   const { writeTask } = await import("../persistence/tasks.js");
   await writeTask(task);
 
-  // Create log stream
+  // Create task-specific logger that writes to both console and file
   const fsSync = await import("fs");
   const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
+  const taskLogger = logger.createLogger([logStream]);
 
   try {
+    // Log process start
+    taskLogger.raw("=".repeat(80));
+    taskLogger.info(`🚀 STARTING LLM ANALYSIS PROCESS`, {
+      component: "LLM-API",
+      taskId: task.id,
+      taskType: task.type,
+    });
+    taskLogger.info(`📋 Task: ${task.type}`, { component: "LLM-API" });
+    taskLogger.info(`📄 Instruction file: ${task.instructionFile}`, {
+      component: "LLM-API",
+    });
+    taskLogger.info(`📁 Output file: ${task.outputFile}`, {
+      component: "LLM-API",
+    });
+    taskLogger.info(`🎯 Target directory: ${config.target.directory}`, {
+      component: "LLM-API",
+    });
+    taskLogger.raw("=".repeat(80));
+    taskLogger.raw("");
+
     // Initialize LLM client and chat state
+    taskLogger.info("🤖 Initializing LLM client...", {
+      component: "LLM-API",
+      model: config.llm.model,
+    });
     const client = createLLMClient();
     const chatState = new ChatState(client);
     const fileToolExecutor = new FileToolExecutor(config.target.directory);
+    taskLogger.info("✅ LLM client initialized", { component: "LLM-API" });
 
     // Add system message with instructions
+    taskLogger.debug("📜 Loading system instructions...", {
+      component: "LLM-API",
+      instructionLength: instructions.length,
+    });
     chatState.addSystemMessage(instructions);
 
     // Add initial user message to start the conversation
+    taskLogger.info("💬 Sending initial prompt to LLM...", {
+      component: "LLM-API",
+    });
     chatState.addUserMessage(
       "Begin the codebase analysis as specified in the instructions.",
     );
@@ -111,38 +144,72 @@ export async function execute(task) {
     let iterationCount = 0;
     const maxIterations = 50; // Prevent infinite loops
 
+    taskLogger.info(
+      `🔄 Starting analysis loop (max ${maxIterations} iterations)`,
+      {
+        component: "LLM-API",
+      },
+    );
+
     while (iterationCount < maxIterations) {
       iterationCount++;
 
-      const logMessage = `[Iteration ${iterationCount}] Sending message to LLM...\n`;
-      logStream.write(logMessage);
-      logger.debug(logMessage.trim(), {
-        component: "LLM-API",
-        taskId: task.id,
-      });
+      taskLogger.raw("-".repeat(80));
+      taskLogger.info(
+        `📤 Iteration ${iterationCount}/${maxIterations}: Sending message to LLM`,
+        {
+          component: "LLM-API",
+          taskId: task.id,
+        },
+      );
+      taskLogger.raw("-".repeat(80));
 
       emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
         taskId: task.id,
         type: task.type,
         stream: "stdout",
-        data: logMessage,
+        data: `\n${"-".repeat(80)}\n[Iteration ${iterationCount}/${maxIterations}] 📤 Sending message to LLM...\n${"-".repeat(80)}\n`,
       });
 
       // Check if we need to compact context
       if (chatState.needsCompaction()) {
+        taskLogger.info("🗜️  Context too large, compacting chat history...", {
+          component: "LLM-API",
+          taskId: task.id,
+        });
         await chatState.compact();
+        taskLogger.info("✅ Context compaction complete", {
+          component: "LLM-API",
+        });
       }
 
       // Send message to LLM
+      taskLogger.debug("⏳ Waiting for LLM response...", {
+        component: "LLM-API",
+      });
       const response = await client.sendMessage(chatState.getMessages(), {
         tools: FILE_TOOLS,
       });
 
-      const responseLog = `[LLM Response] ${response.content}\n`;
-      const usageLog = `[Token Usage] Input: ${response.usage.inputTokens}, Output: ${response.usage.outputTokens}\n`;
+      taskLogger.info("📥 Received LLM response", {
+        component: "LLM-API",
+        stopReason: response.stopReason,
+        hasToolCalls: Boolean(response.toolCalls?.length),
+        toolCount: response.toolCalls?.length || 0,
+        inputTokens: response.usage.inputTokens,
+        outputTokens: response.usage.outputTokens,
+      });
 
-      logStream.write(responseLog);
-      logStream.write(usageLog);
+      // Summarize response content for logging
+      const contentPreview = response.content
+        ? response.content.substring(0, 200).replace(/\n/g, " ")
+        : "(no text content)";
+      taskLogger.debug(
+        `Response preview: ${contentPreview}${response.content?.length > 200 ? "..." : ""}`,
+        {
+          component: "LLM-API",
+        },
+      );
 
       emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
         taskId: task.id,
@@ -158,14 +225,20 @@ export async function execute(task) {
 
       // Handle tool calls
       if (response.toolCalls && response.toolCalls.length > 0) {
-        const toolLog = `[Tool Calls] ${response.toolCalls.length} tool(s) requested\n`;
-        logStream.write(toolLog);
+        const toolNames = response.toolCalls.map((tc) => tc.name).join(", ");
+        taskLogger.raw("");
+        taskLogger.info(
+          `🔧 LLM requested ${response.toolCalls.length} tool(s): ${toolNames}`,
+          {
+            component: "LLM-API",
+          },
+        );
 
         emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
           taskId: task.id,
           type: task.type,
           stream: "stdout",
-          data: toolLog,
+          data: `\n🔧 [Tool Calls] LLM requested ${response.toolCalls.length} tool(s): ${toolNames}\n`,
         });
 
         // Store tool calls in chat state
@@ -180,14 +253,21 @@ export async function execute(task) {
 
         // Execute each tool call
         for (const toolCall of response.toolCalls) {
-          const toolStartLog = `[Tool: ${toolCall.name}] ${JSON.stringify(toolCall.arguments)}\n`;
-          logStream.write(toolStartLog);
+          taskLogger.info(`  🔨 Executing: ${toolCall.name}`, {
+            component: "LLM-API",
+            toolName: toolCall.name,
+            args: toolCall.arguments,
+          });
 
+          const argsPreview = JSON.stringify(toolCall.arguments).substring(
+            0,
+            150,
+          );
           emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
             taskId: task.id,
             type: task.type,
             stream: "stdout",
-            data: toolStartLog,
+            data: `  ├─ 🔨 Executing: ${toolCall.name}\n  │  Args: ${argsPreview}${JSON.stringify(toolCall.arguments).length > 150 ? "..." : ""}\n`,
           });
 
           try {
@@ -196,18 +276,31 @@ export async function execute(task) {
               toolCall.arguments,
             );
 
-            const toolResultLog = `[Tool Result] ${result.substring(0, 500)}${result.length > 500 ? "..." : ""}\n`;
-            logStream.write(toolResultLog);
+            taskLogger.debug(
+              `  ✅ Tool ${toolCall.name} completed (${result.length} chars)`,
+              {
+                component: "LLM-API",
+                resultLength: result.length,
+              },
+            );
 
             chatState.addToolResult(toolCall.id, toolCall.name, result);
           } catch (error) {
             const errorResult = `Error: ${error.message}`;
-            const toolErrorLog = `[Tool Error] ${errorResult}\n`;
-            logStream.write(toolErrorLog);
+            taskLogger.error(
+              `  ❌ Tool ${toolCall.name} failed: ${errorResult}`,
+              {
+                component: "LLM-API",
+              },
+            );
 
             chatState.addToolResult(toolCall.id, toolCall.name, errorResult);
           }
         }
+
+        taskLogger.info("✅ All tool executions complete, continuing...", {
+          component: "LLM-API",
+        });
 
         // Continue conversation after tool execution
         continue;
@@ -218,14 +311,18 @@ export async function execute(task) {
         response.stopReason === "end_turn" ||
         response.stopReason === "stop_sequence"
       ) {
-        const completeLog = `[Complete] LLM finished analysis\n`;
-        logStream.write(completeLog);
+        taskLogger.raw("");
+        taskLogger.info("✅ LLM indicated completion (no more tool calls)", {
+          component: "LLM-API",
+          stopReason: response.stopReason,
+          iterations: iterationCount,
+        });
 
         emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
           taskId: task.id,
           type: task.type,
           stream: "stdout",
-          data: completeLog,
+          data: `\n✅ [COMPLETE] LLM has finished the analysis\n`,
         });
 
         break;
@@ -233,29 +330,51 @@ export async function execute(task) {
 
       // If stop_reason is max_tokens, we might need to continue
       if (response.stopReason === "max_tokens") {
-        const continueLog = `[Continue] Max tokens reached, continuing...\n`;
-        logStream.write(continueLog);
+        taskLogger.warn("⚠️  Max tokens reached, asking LLM to continue", {
+          component: "LLM-API",
+        });
         chatState.addUserMessage("Please continue your analysis.");
         continue;
       }
 
       // No tool calls and unexpected stop reason - break
+      taskLogger.warn(
+        `Unexpected stop reason: ${response.stopReason}, ending loop`,
+        {
+          component: "LLM-API",
+          stopReason: response.stopReason,
+        },
+      );
       break;
     }
+
+    taskLogger.info("🔍 Checking for output file...", {
+      component: "LLM-API",
+      expectedPath: outputPath,
+    });
 
     // Check if output file was created
     let outputExists = false;
     try {
       await fs.access(outputPath);
       outputExists = true;
+      taskLogger.info("✅ Output file found", { component: "LLM-API" });
     } catch {
       outputExists = false;
+      taskLogger.warn(
+        "⚠️  Output file not found, will attempt extraction from conversation",
+        {
+          component: "LLM-API",
+        },
+      );
     }
 
     // If file doesn't exist, try to extract JSON from the conversation
     if (!outputExists) {
-      const finalLog = `[Extracting JSON] Looking for JSON in LLM responses...\n`;
-      logStream.write(finalLog);
+      taskLogger.raw("");
+      taskLogger.info("🔎 Attempting to extract JSON from LLM responses...", {
+        component: "LLM-API",
+      });
 
       // Get all assistant messages
       const messages = chatState.getMessages();
@@ -280,13 +399,17 @@ export async function execute(task) {
             try {
               const extractedJson = jsonMatch[1].trim();
               jsonContent = JSON.parse(extractedJson);
-              const extractLog = `[JSON Found] Successfully extracted and parsed JSON from response\n`;
-              logStream.write(extractLog);
+              taskLogger.info(
+                "✅ JSON successfully extracted from LLM response",
+                {
+                  component: "LLM-API",
+                },
+              );
               emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
                 taskId: task.id,
                 type: task.type,
                 stream: "stdout",
-                data: extractLog,
+                data: `[JSON Found] ✅ Successfully extracted and parsed JSON from response\n`,
               });
               break;
             } catch (parseError) {
@@ -303,17 +426,26 @@ export async function execute(task) {
           JSON.stringify(jsonContent, null, 2),
           "utf-8",
         );
-        const writeLog = `[File Written] Created ${task.outputFile}\n`;
-        logStream.write(writeLog);
+        taskLogger.info("✅ Output file written successfully", {
+          component: "LLM-API",
+          file: task.outputFile,
+        });
         emitSocketEvent(SOCKET_EVENTS.TASK_LOG, {
           taskId: task.id,
           type: task.type,
           stream: "stdout",
-          data: writeLog,
+          data: `[File Written] ✅ Created ${task.outputFile}\n`,
         });
       } else {
         const errorMessage = "LLM did not output valid JSON in its responses";
-        logStream.write(`[Error] ${errorMessage}\n`);
+        taskLogger.raw("");
+        taskLogger.error(
+          "❌ Failed to extract valid JSON from LLM conversation",
+          {
+            component: "LLM-API",
+            taskId: task.id,
+          },
+        );
         logStream.end();
 
         return {
@@ -326,13 +458,22 @@ export async function execute(task) {
     }
 
     // Close log stream
-    logStream.end();
-    await new Promise((resolve) => logStream.on("finish", resolve));
-
-    logger.info(`LLM API task completed successfully`, {
+    taskLogger.raw("");
+    taskLogger.raw("=".repeat(80));
+    taskLogger.info(`🎉 PROCESS COMPLETED SUCCESSFULLY`, {
       component: "LLM-API",
       taskId: task.id,
+      iterations: iterationCount,
     });
+    taskLogger.info(`📊 Total iterations: ${iterationCount}`, {
+      component: "LLM-API",
+    });
+    taskLogger.info(`📁 Output file: ${task.outputFile}`, {
+      component: "LLM-API",
+    });
+    taskLogger.raw("=".repeat(80));
+    logStream.end();
+    await new Promise((resolve) => logStream.on("finish", resolve));
 
     return {
       success: true,
@@ -341,17 +482,17 @@ export async function execute(task) {
       outputFile: outputPath,
     };
   } catch (error) {
-    const errorLog = `[Fatal Error] ${error.message}\n${error.stack}\n`;
-    logStream.write(errorLog);
-    logStream.end();
-    await new Promise((resolve) => logStream.on("finish", resolve));
-
-    logger.error(`LLM API task failed: ${error.message}`, {
+    taskLogger.raw("");
+    taskLogger.raw("=".repeat(80));
+    taskLogger.error(`❌ LLM ANALYSIS FAILED`, {
       error: error.message,
       stack: error.stack,
       component: "LLM-API",
       taskId: task.id,
     });
+    taskLogger.raw("=".repeat(80));
+    logStream.end();
+    await new Promise((resolve) => logStream.on("finish", resolve));
 
     return {
       success: false,

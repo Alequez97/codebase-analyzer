@@ -130,3 +130,68 @@ export function http(method, path) {
 export function log(message) {
   console.log(message);
 }
+
+/**
+ * Create a scoped logger instance that writes to multiple outputs
+ * Useful for task-specific logging (console + file)
+ * @param {Array} additionalOutputs - Additional output streams (e.g., file streams)
+ * @returns {Object} Logger instance with all logging methods
+ */
+export function createLogger(additionalOutputs = []) {
+  const scopedConfig = {
+    ...config,
+    outputs: [...config.outputs, ...additionalOutputs],
+  };
+
+  function scopedWrite(level, message, context, method = "log") {
+    const formatted = format(level, message, context);
+
+    scopedConfig.outputs.forEach((output) => {
+      if (output[method]) {
+        output[method](formatted);
+      } else if (output.write) {
+        output.write(formatted + "\n");
+      }
+    });
+  }
+
+  return {
+    error: (message, context) => {
+      if (scopedConfig.level >= LOG_LEVELS.ERROR) {
+        if (context instanceof Error) {
+          context = {
+            message: context.message,
+            stack: context.stack,
+            ...context,
+          };
+        }
+        scopedWrite("ERROR", message, context, "error");
+      }
+    },
+    warn: (message, context) => {
+      if (scopedConfig.level >= LOG_LEVELS.WARN) {
+        scopedWrite("WARN", message, context, "warn");
+      }
+    },
+    info: (message, context) => {
+      if (scopedConfig.level >= LOG_LEVELS.INFO) {
+        scopedWrite("INFO", message, context, "log");
+      }
+    },
+    debug: (message, context) => {
+      if (scopedConfig.level >= LOG_LEVELS.DEBUG) {
+        scopedWrite("DEBUG", message, context, "log");
+      }
+    },
+    // Raw log without timestamp/level (useful for structured banners)
+    raw: (message) => {
+      scopedConfig.outputs.forEach((output) => {
+        if (output.log) {
+          output.log(message);
+        } else if (output.write) {
+          output.write(message + "\n");
+        }
+      });
+    },
+  };
+}
