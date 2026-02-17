@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -9,9 +9,9 @@ import {
   Text,
   Badge,
 } from "@chakra-ui/react";
-import ReactMarkdown from "react-markdown";
 import { Pencil, X, Save, FileText } from "lucide-react";
 import { Card } from "../ui/card";
+import MarkdownRenderer from "../MarkdownRenderer";
 
 export default function DomainDocumentationSection({
   documentation,
@@ -39,6 +39,20 @@ export default function DomainDocumentationSection({
     setIsEditMode(false);
   };
 
+  // ESC key to exit edit mode
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        handleCancel();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isEditMode]);
+
   const displayContent =
     editedDocumentation !== undefined && editedDocumentation !== null
       ? editedDocumentation
@@ -46,113 +60,6 @@ export default function DomainDocumentationSection({
 
   const statusText = documentation?.metadata?.status || null;
   const logFile = documentation?.metadata?.logFile || null;
-
-  // Custom components for ReactMarkdown
-  const markdownComponents = {
-    h1: ({ children }) => (
-      <Heading as="h1" size="xl" mt={6} mb={3}>
-        {children}
-      </Heading>
-    ),
-    h2: ({ children }) => (
-      <Heading as="h2" size="lg" mt={5} mb={2}>
-        {children}
-      </Heading>
-    ),
-    h3: ({ children }) => (
-      <Heading as="h3" size="md" mt={4} mb={2}>
-        {children}
-      </Heading>
-    ),
-    h4: ({ children }) => (
-      <Heading as="h4" size="sm" mt={3} mb={1}>
-        {children}
-      </Heading>
-    ),
-    p: ({ children }) => (
-      <Text mb={3} lineHeight="tall">
-        {children}
-      </Text>
-    ),
-    ul: ({ children }) => (
-      <Box as="ul" pl={6} mb={3}>
-        {children}
-      </Box>
-    ),
-    ol: ({ children }) => (
-      <Box as="ol" pl={6} mb={3}>
-        {children}
-      </Box>
-    ),
-    li: ({ children }) => (
-      <Box as="li" mb={1}>
-        {children}
-      </Box>
-    ),
-    code: ({ inline, children }) => {
-      if (inline) {
-        return (
-          <Box
-            as="code"
-            display="inline"
-            bg="gray.100"
-            px={1.5}
-            py={0.5}
-            borderRadius="sm"
-            fontSize="sm"
-            fontFamily="mono"
-            whiteSpace="nowrap"
-          >
-            {children}
-          </Box>
-        );
-      }
-      // Block code
-      return (
-        <Box
-          as="pre"
-          bg="gray.900"
-          color="gray.100"
-          p={4}
-          borderRadius="md"
-          overflowX="auto"
-          mb={3}
-          fontSize="sm"
-          fontFamily="mono"
-        >
-          <Box as="code" display="block" fontFamily="inherit">
-            {children}
-          </Box>
-        </Box>
-      );
-    },
-    pre: ({ children }) => <>{children}</>, // Pre is handled by code component
-    strong: ({ children }) => (
-      <Box as="strong" fontWeight="bold">
-        {children}
-      </Box>
-    ),
-    em: ({ children }) => (
-      <Box as="em" fontStyle="italic">
-        {children}
-      </Box>
-    ),
-    blockquote: ({ children }) => (
-      <Box
-        as="blockquote"
-        borderLeft="4px solid"
-        borderColor="blue.500"
-        pl={4}
-        py={2}
-        my={3}
-        bg="blue.50"
-        fontStyle="italic"
-      >
-        {children}
-      </Box>
-    ),
-    hr: () => <Box as="hr" my={4} borderColor="gray.300" />,
-  };
 
   return (
     <Card.Root>
@@ -244,11 +151,20 @@ export default function DomainDocumentationSection({
             placeholder="Write documentation in Markdown format..."
           />
         ) : (
-          <Box color="gray.800" fontSize="sm" lineHeight="1.8">
-            <ReactMarkdown components={markdownComponents}>
-              {displayContent ||
-                "Click **Analyze documentation** to generate deep analysis. All files listed above will be analyzed to understand business purpose, responsibilities, and architecture."}
-            </ReactMarkdown>
+          <Box
+            color="gray.800"
+            fontSize="sm"
+            lineHeight="1.8"
+            onDoubleClick={handleEnterEditMode}
+            cursor={documentation ? "text" : "default"}
+            title={documentation ? "Double-click to edit" : ""}
+          >
+            <MarkdownRenderer
+              content={
+                displayContent ||
+                "Click **Analyze documentation** to generate deep analysis. All files listed above will be analyzed to understand business purpose, responsibilities, and architecture."
+              }
+            />
           </Box>
         )}
       </Card.Body>
