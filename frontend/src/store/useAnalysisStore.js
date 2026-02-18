@@ -303,17 +303,16 @@ export const useAnalysisStore = create(
           const message =
             err?.response?.data?.message || "Failed to analyze requirements";
           set((state) => {
+            const newLoadingMap = new Map(state.domainRequirementsLoadingById);
             const newErrorMap = new Map(state.domainRequirementsErrorById);
+            newLoadingMap.set(domain.id, false);
             newErrorMap.set(domain.id, message);
-            return { domainRequirementsErrorById: newErrorMap };
+            return {
+              domainRequirementsLoadingById: newLoadingMap,
+              domainRequirementsErrorById: newErrorMap,
+            };
           });
           return { success: false, error: message };
-        } finally {
-          set((state) => {
-            const newLoadingMap = new Map(state.domainRequirementsLoadingById);
-            newLoadingMap.set(domain.id, false);
-            return { domainRequirementsLoadingById: newLoadingMap };
-          });
         }
       },
 
@@ -339,17 +338,16 @@ export const useAnalysisStore = create(
           const message =
             err?.response?.data?.message || "Failed to analyze testing";
           set((state) => {
+            const newLoadingMap = new Map(state.domainTestingLoadingById);
             const newErrorMap = new Map(state.domainTestingErrorById);
+            newLoadingMap.set(domain.id, false);
             newErrorMap.set(domain.id, message);
-            return { domainTestingErrorById: newErrorMap };
+            return {
+              domainTestingLoadingById: newLoadingMap,
+              domainTestingErrorById: newErrorMap,
+            };
           });
           return { success: false, error: message };
-        } finally {
-          set((state) => {
-            const newLoadingMap = new Map(state.domainTestingLoadingById);
-            newLoadingMap.set(domain.id, false);
-            return { domainTestingLoadingById: newLoadingMap };
-          });
         }
       },
 

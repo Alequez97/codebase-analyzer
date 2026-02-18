@@ -123,14 +123,30 @@ export const useSocketStore = create((set, get) => ({
           message,
         });
 
-        // Ensure loading state remains true during progress for documentation
-        if (type === "analyze-documentation") {
-          const state = useAnalysisStore.getState();
+        // Ensure loading state remains true during progress
+        const state = useAnalysisStore.getState();
+        if (type === TASK_TYPES.DOCUMENTATION) {
           const loadingMap = new Map(state.domainDocumentationLoadingById);
           if (!loadingMap.get(domainId)) {
             loadingMap.set(domainId, true);
             useAnalysisStore.setState({
               domainDocumentationLoadingById: loadingMap,
+            });
+          }
+        } else if (type === TASK_TYPES.REQUIREMENTS) {
+          const loadingMap = new Map(state.domainRequirementsLoadingById);
+          if (!loadingMap.get(domainId)) {
+            loadingMap.set(domainId, true);
+            useAnalysisStore.setState({
+              domainRequirementsLoadingById: loadingMap,
+            });
+          }
+        } else if (type === TASK_TYPES.TESTING) {
+          const loadingMap = new Map(state.domainTestingLoadingById);
+          if (!loadingMap.get(domainId)) {
+            loadingMap.set(domainId, true);
+            useAnalysisStore.setState({
+              domainTestingLoadingById: loadingMap,
             });
           }
         }
