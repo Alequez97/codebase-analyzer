@@ -4,7 +4,7 @@
 
 **DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. COMPLETE THE TASK AND EXIT.**
 
-Your ONLY job is to analyze the domain files and output comprehensive Markdown documentation.
+Your ONLY job is to analyze the domain files and output comprehensive documentation as JSON.
 
 ## AVAILABLE TOOLS
 
@@ -17,7 +17,7 @@ You have access to these tools to explore the codebase:
 
 ## Objective
 
-Analyze the domain files and generate comprehensive business documentation in Markdown format.
+Analyze the domain files and generate comprehensive business documentation in Markdown, then wrap it in JSON.
 
 ## Target Information
 
@@ -41,7 +41,15 @@ Read all domain files listed above and generate a comprehensive Markdown documen
 
 ## Output Format
 
-You MUST output your documentation as pure Markdown with the following structure:
+You MUST output your documentation as JSON with the following structure:
+
+```json
+{
+  "content": "# {{DOMAIN_NAME}}\n\n[Brief description of what this domain does]\n\n## Core Responsibilities\n\n- Responsibility 1\n- Responsibility 2\n- Responsibility 3\n\n## Why it matters\n\n[Explain the business value and importance of this domain]\n\n## Key Components\n\n### Component Name\n\n**File**: `path/to/file.js`\n\nDescription of what this component does and its role.\n\n### Another Component\n\n**File**: `path/to/another.js`\n\nDescription of what this component does and its role.\n\n## Architecture\n\n[Explain how the components work together, data flow, dependencies, etc.]\n\n## Risk Areas\n\n[Identify critical paths, security concerns, performance bottlenecks, etc.]\n"
+}
+```
+
+The `content` field MUST be pure Markdown with the following structure:
 
 ```markdown
 # {{DOMAIN_NAME}}
@@ -93,8 +101,11 @@ Description of what this component does and its role.
 
 ## Example Output
 
-```markdown
-# User Authentication
+```json
+{
+  "content": "# User Authentication\n\nHandles user login, session management, and access control for the platform.\n\n## Core Responsibilities\n\n- Validate user credentials against database\n- Generate and manage JWT tokens\n- Enforce role-based access control (RBAC)\n- Handle password reset workflows\n- Manage user sessions and timeouts\n\n## Why it matters\n\nAuthentication is the foundation of platform security. Any vulnerability here could compromise the entire system. This domain ensures that only authorized users can access protected resources and that user identities are verified correctly.\n\n## Key Components\n\n### Password Service\n\n**File**: `auth/password-service.js`\n\nHandles password hashing, validation, and reset workflows. Uses bcrypt with 10 rounds for hashing.\n\n### Token Manager\n\n**File**: `auth/token-manager.js`\n\nGenerates and validates JWT tokens. Manages token refresh and expiration logic.\n\n### Auth Middleware\n\n**File**: `auth/middleware.js`\n\nExpress middleware that protects routes by verifying JWT tokens and checking user permissions.\n\n### Session Store\n\n**File**: `auth/session-store.js`\n\nRedis-based session storage for quick token validation and user state management.\n\n## Architecture\n\nThe authentication flow follows these steps:\n\n1. User submits credentials via `/api/auth/login`\n2. Password Service validates credentials against database\n3. Token Manager generates JWT with user roles\n4. Session Store caches the token in Redis\n5. Auth Middleware validates tokens on subsequent requests\n\nSessions are stored in Redis for performance, with automatic expiration after 24 hours of inactivity.\n\n## Risk Areas\n\n- **Password Security**: All passwords must be hashed with bcrypt before storage\n- **Token Expiration**: Expired tokens must be rejected to prevent unauthorized access\n- **Session Hijacking**: Tokens should be transmitted only over HTTPS\n- **Brute Force**: Login attempts should be rate-limited to prevent attacks\n"
+}
+```
 
 Handles user login, session management, and access control for the platform.
 
@@ -154,6 +165,7 @@ Sessions are stored in Redis for performance, with automatic expiration after 24
 - **Token Expiration**: Expired tokens must be rejected to prevent unauthorized access
 - **Session Hijacking**: Tokens should be transmitted only over HTTPS
 - **Brute Force**: Login attempts should be rate-limited to prevent attacks
+
 ```
 
 ## Task Execution
@@ -166,7 +178,7 @@ Sessions are stored in Redis for performance, with automatic expiration after 24
 **CRITICAL REQUIREMENTS**:
 
 1. ✅ **MUST** use `write_file` tool to save the output to: `{{OUTPUT_FILE}}`
-2. ✅ **MUST** output pure Markdown (no JSON, no unnecessary code blocks)
+2. ✅ **MUST** output JSON with `content` (Markdown) only
 3. ✅ **MUST** analyze ALL files listed in the "Files to Analyze" section
 4. ✅ **MUST** explain business purpose and value
 5. ✅ **MUST** describe key components and their roles
@@ -175,3 +187,4 @@ Sessions are stored in Redis for performance, with automatic expiration after 24
 8. ❌ **DO NOT** ask questions or wait for input
 9. ❌ **DO NOT** just describe what should be done
 10. ✅ **WRITE THE FILE NOW** using `write_file` tool and exit
+```
