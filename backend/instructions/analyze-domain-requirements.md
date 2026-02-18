@@ -13,6 +13,7 @@ You have access to these tools to explore the codebase:
 - `list_directory`: List files and subdirectories
 - `read_file`: Read specific file contents
 - `search_files`: Find files matching patterns
+- `write_file`: **REQUIRED** - Write your analysis output to the specified file
 
 ## Objective
 
@@ -189,7 +190,7 @@ Good requirements are:
 1. ✅ **STEP 1**: Use `read_file` tool to read EVERY file in the "Files to Analyze" list
 2. ✅ **STEP 2**: For each file, analyze the code and extract testable requirements
 3. ✅ **STEP 3**: Combine all requirements into a single JSON output
-4. ✅ **STEP 4**: Output the complete JSON (not wrapped in markdown code blocks if possible)
+4. ✅ **STEP 4**: Use the `write_file` tool to save the JSON to: **`{{OUTPUT_FILE}}`**
 
 **Example workflow**:
 
@@ -203,19 +204,20 @@ Good requirements are:
 3. read_file("path/to/file3.js")
    -> Analyze code -> Extract REQ-006, REQ-007, REQ-008
 
-4. Output JSON with all requirements (REQ-001 through REQ-008)
+4. write_file("{{OUTPUT_FILE}}", "<JSON content with all requirements>")
 ```
 
 **CRITICAL REQUIREMENTS**:
 
 1. ✅ **MUST** use `read_file` tool for EVERY file in the list above
-2. ✅ **MUST** output valid JSON (not Markdown, not wrapped in code blocks if possible)
-3. ✅ **MUST** analyze code logic, not just file names
-4. ✅ **MUST** extract business rules, validation logic, and expected behaviors
-5. ✅ **MUST** include both happy path and error scenarios
-6. ✅ **MUST** make requirements specific and testable
-7. ✅ **MUST** prioritize requirements correctly (P0 for critical, P3 for low priority)
-8. ✅ **MUST** include source file references with line numbers when possible
-9. ❌ **DO NOT** ask questions or wait for input
-10. ❌ **DO NOT** just describe what should be done
-11. ✅ **OUTPUT THE JSON NOW** and exit
+2. ✅ **MUST** use `write_file` tool to save the output to: `{{OUTPUT_FILE}}`
+3. ✅ **MUST** output valid JSON (not wrapped in markdown code blocks)
+4. ✅ **MUST** analyze code logic, not just file names
+5. ✅ **MUST** extract business rules, validation logic, and expected behaviors
+6. ✅ **MUST** include both happy path and error scenarios
+7. ✅ **MUST** make requirements specific and testable
+8. ✅ **MUST** prioritize requirements correctly (P0 for critical, P3 for low priority)
+9. ✅ **MUST** include source file references with line numbers when possible
+10. ❌ **DO NOT** ask questions or wait for input
+11. ❌ **DO NOT** just describe what should be done
+12. ✅ **WRITE THE FILE NOW** using `write_file` tool and exit

@@ -77,6 +77,7 @@ export async function buildRequirementsTemplateVariables(task) {
     DOMAIN_NAME: domainName,
     FILES: files || [],
     USER_CONTEXT: userContext || "",
+    OUTPUT_FILE: task.outputFile || "",
   };
 }
 
@@ -108,6 +109,7 @@ export async function buildDocumentationTemplateVariables(task) {
     DOMAIN_ID: domainId,
     DOMAIN_NAME: domainName,
     FILES: files || [],
+    OUTPUT_FILE: task.outputFile || "",
   };
 }
 
@@ -121,6 +123,7 @@ export function buildCodebaseTemplateVariables(task) {
 
   return {
     CODEBASE_PATH: targetDirectory,
+    OUTPUT_FILE: task.outputFile || "",
   };
 }
 

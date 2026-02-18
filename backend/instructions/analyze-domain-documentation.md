@@ -13,6 +13,7 @@ You have access to these tools to explore the codebase:
 - `list_directory`: List files and subdirectories
 - `read_file`: Read specific file contents
 - `search_files`: Find files matching patterns
+- `write_file`: **REQUIRED** - Write your documentation output to the specified file
 
 ## Objective
 
@@ -160,18 +161,17 @@ Sessions are stored in Redis for performance, with automatic expiration after 24
 1. Use the available tools to read and analyze ALL files listed in the "Files to Analyze" section
 2. Extract business purpose, architecture, and key components from the code
 3. Identify risk areas and critical paths
-4. Output comprehensive Markdown documentation following the structure above
+4. Use the `write_file` tool to save the Markdown documentation to: **`{{OUTPUT_FILE}}`**
 
 **CRITICAL REQUIREMENTS**:
 
-1. ✅ **MUST** output pure Markdown (no JSON, no unnecessary code blocks)
-2. ✅ **MUST** analyze ALL files listed in the "Files to Analyze" section
-3. ✅ **MUST** explain business purpose and value
-4. ✅ **MUST** describe key components and their roles
-5. ✅ **MUST** explain architecture and how components interact
-6. ✅ **MUST** identify risk areas and critical paths
-7. ❌ **DO NOT** ask questions or wait for input
-8. ❌ **DO NOT** just describe what should be done
-9. ✅ **OUTPUT THE MARKDOWN NOW** and exit
-
-**Note**: The system will automatically save your Markdown output to the appropriate file. You do not need to use any file writing tools.
+1. ✅ **MUST** use `write_file` tool to save the output to: `{{OUTPUT_FILE}}`
+2. ✅ **MUST** output pure Markdown (no JSON, no unnecessary code blocks)
+3. ✅ **MUST** analyze ALL files listed in the "Files to Analyze" section
+4. ✅ **MUST** explain business purpose and value
+5. ✅ **MUST** describe key components and their roles
+6. ✅ **MUST** explain architecture and how components interact
+7. ✅ **MUST** identify risk areas and critical paths
+8. ❌ **DO NOT** ask questions or wait for input
+9. ❌ **DO NOT** just describe what should be done
+10. ✅ **WRITE THE FILE NOW** using `write_file` tool and exit

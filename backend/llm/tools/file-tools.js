@@ -64,6 +64,24 @@ export const FILE_TOOLS = [
     },
     required: ["pattern"],
   },
+  {
+    name: "write_file",
+    description:
+      "Write content to a file in the .code-analysis directory. REQUIRED to save your analysis output. The path must be relative to the project root and MUST start with '.code-analysis/'.",
+    parameters: {
+      path: {
+        type: "string",
+        description:
+          "Relative path to the output file (MUST start with '.code-analysis/', e.g., '.code-analysis/domains/my-domain/requirements.json')",
+      },
+      content: {
+        type: "string",
+        description:
+          "Content to write to the file. For JSON output, provide valid JSON string (not wrapped in markdown code blocks).",
+      },
+    },
+    required: ["path", "content"],
+  },
 ];
 
 /**
@@ -89,8 +107,45 @@ export class FileToolExecutor {
         return await this.listDirectory(args.path, args.recursive);
       case "search_files":
         return await this.searchFiles(args.pattern, args.directory);
+      case "write_file":
+        return await this.writeFile(args.path, args.content);
       default:
         throw new Error(`Unknown tool: ${toolName}`);
+    }
+  }
+
+  /**
+   * Write file content (only allowed in .code-analysis directory)
+   * @private
+   */
+  async writeFile(relativePath, content) {
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+
+    // Security: ONLY allow writing to .code-analysis directory
+    if (!normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`)) {
+      return `Error: Can only write files to ${ANALYSIS_OUTPUT_DIR}/ directory for security reasons. Your path: ${relativePath}`;
+    }
+
+    const fullPath = path.join(this.projectRoot, relativePath);
+
+    // Security: ensure path is within project root
+    const resolvedPath = path.resolve(fullPath);
+    const resolvedRoot = path.resolve(this.projectRoot);
+    if (!resolvedPath.startsWith(resolvedRoot)) {
+      throw new Error("Access denied: path outside project root");
+    }
+
+    try {
+      // Create directory if it doesn't exist
+      const dirPath = path.dirname(fullPath);
+      await fs.mkdir(dirPath, { recursive: true });
+
+      // Write file
+      await fs.writeFile(fullPath, content, "utf-8");
+
+      return `Success: File written to ${relativePath} (${content.length} bytes)`;
+    } catch (error) {
+      return `Error writing file: ${error.message}`;
     }
   }
 

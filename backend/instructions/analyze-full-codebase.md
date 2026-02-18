@@ -11,6 +11,7 @@ You have access to these tools to explore the codebase:
 - `list_directory`: List files and subdirectories
 - `read_file`: Read specific file contents
 - `search_files`: Find files matching patterns
+- `write_file`: **REQUIRED** - Write your analysis output to the specified file
 
 ## YOUR TASK
 
@@ -69,6 +70,6 @@ You MUST output your analysis as a valid JSON object with this exact structure:
 3. Search for key files (_.js, _.jsx, _.ts, _.tsx, etc.)
 4. Read package.json and README if available
 5. Identify functional groupings
-6. Generate the JSON output
+6. Use `write_file` tool to save the JSON to: **`{{OUTPUT_FILE}}`**
 
-**Output your JSON analysis now.**
+**Generate and write your JSON analysis now using the `write_file` tool.**
