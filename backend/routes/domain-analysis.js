@@ -4,7 +4,7 @@ import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.j
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { DEFAULT_AGENTS } from "../agents/index.js";
 import * as logger from "../utils/logger.js";
-import { readMockJson } from "../utils/mock-data.js";
+import { readMockJson, sleep } from "../utils/mock-data.js";
 
 const router = express.Router();
 
