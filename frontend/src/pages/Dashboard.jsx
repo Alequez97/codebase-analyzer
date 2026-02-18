@@ -24,12 +24,7 @@ export default function Dashboard() {
     useLogsStore();
 
   // Socket store
-  const { socketConnected, initSocket } = useSocketStore();
-
-  // Initialize socket connection
-  useEffect(() => {
-    initSocket();
-  }, [initSocket]);
+  const { socketConnected } = useSocketStore();
 
   // Fetch initial data on mount
   useEffect(() => {
