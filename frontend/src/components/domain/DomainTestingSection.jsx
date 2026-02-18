@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -11,6 +12,9 @@ import {
   Grid,
   Table,
   Icon,
+  Collapsible,
+  IconButton,
+  Skeleton,
 } from "@chakra-ui/react";
 import {
   CheckCircle,
@@ -18,6 +22,8 @@ import {
   FileText,
   Sparkles,
   Check,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
@@ -459,12 +465,33 @@ export default function DomainTestingSection({
   logsLoading = false,
 }) {
   const existingTestFiles = testing?.existingTests || [];
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <Card.Root>
-      <Card.Header>
-        <HStack justify="space-between">
-          <HStack gap={2}>
+      <Card.Header py="4">
+        <HStack justify="space-between" alignItems="center">
+          <HStack
+            gap={2}
+            flex={1}
+            cursor="pointer"
+            onClick={() => setIsExpanded(!isExpanded)}
+            alignItems="center"
+          >
+            <IconButton
+              size="xs"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+            >
+              {isExpanded ? (
+                <ChevronDown size={16} />
+              ) : (
+                <ChevronRight size={16} />
+              )}
+            </IconButton>
             <Heading size="md">Testing</Heading>
             {showLogs && (
               <Badge colorPalette="purple" size="sm">
@@ -472,92 +499,125 @@ export default function DomainTestingSection({
               </Badge>
             )}
           </HStack>
-          {!showLogs && (
-            <Button
-              size="sm"
-              colorPalette="blue"
-              variant="outline"
-              onClick={onAnalyze}
-              loading={loading}
-              loadingText="Analyzing"
-            >
-              <Sparkles size={14} />
-              {testing ? "Re-analyze tests" : "Analyze tests"}
-            </Button>
-          )}
+          <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
+            {!showLogs && (
+              <Button
+                size="sm"
+                colorPalette="blue"
+                variant="outline"
+                onClick={onAnalyze}
+                loading={loading}
+                loadingText="Analyzing"
+              >
+                <Sparkles size={14} />
+                {testing ? "Re-analyze tests" : "Analyze tests"}
+              </Button>
+            )}
+          </HStack>
         </HStack>
       </Card.Header>
-      <Card.Body>
-        {(loading || progress) && !showLogs && (
-          <Box
-            mb={4}
-            p={3}
-            bg="blue.50"
-            borderRadius="md"
-            borderLeft="4px solid"
-            borderColor="blue.500"
-          >
-            <HStack gap={2}>
-              <FileText size={16} />
-              <Text fontSize="sm" fontWeight="medium" color="blue.800">
-                {progress?.message ||
-                  "AI is analyzing domain files and generating test recommendations..."}
-              </Text>
-            </HStack>
-          </Box>
-        )}
-        {showLogs ? (
-          <LogsViewer logs={logs} loading={logsLoading} />
-        ) : !testing ? (
-          <Alert.Root status="info">
-            <Alert.Indicator />
-            <Alert.Title>No test analysis yet</Alert.Title>
-            <Alert.Description>
-              Click "Analyze tests" to get detailed coverage analysis and test
-              suggestions.
-            </Alert.Description>
-          </Alert.Root>
-        ) : (
-          <VStack align="stretch" gap={6}>
-            {/* Coverage Metrics */}
-            <TestCoverageMetrics coverage={testing.currentCoverage} />
+      <Collapsible.Root open={isExpanded}>
+        <Collapsible.Content>
+          <Card.Body>
+            {(loading || progress) && !showLogs && (
+              <Box
+                mb={4}
+                p={3}
+                bg="blue.50"
+                borderRadius="md"
+                borderLeft="4px solid"
+                borderColor="blue.500"
+              >
+                <HStack gap={2}>
+                  <FileText size={16} />
+                  <Text fontSize="sm" fontWeight="medium" color="blue.800">
+                    {progress?.message ||
+                      "AI is analyzing domain files and generating test recommendations..."}
+                  </Text>
+                </HStack>
+              </Box>
+            )}
+            {showLogs ? (
+              <LogsViewer logs={logs} loading={logsLoading} />
+            ) : loading && !testing ? (
+              <VStack align="stretch" gap={6}>
+                <Box>
+                  <Skeleton height="20px" width="150px" mb={3} />
+                  <Grid
+                    templateColumns="repeat(auto-fit, minmax(120px, 1fr))"
+                    gap={3}
+                  >
+                    <Skeleton height="80px" />
+                    <Skeleton height="80px" />
+                    <Skeleton height="80px" />
+                    <Skeleton height="80px" />
+                  </Grid>
+                </Box>
+                <Separator />
+                <Box>
+                  <Skeleton height="20px" width="180px" mb={3} />
+                  <Skeleton height="120px" />
+                </Box>
+                <Separator />
+                <Box>
+                  <Skeleton height="20px" width="200px" mb={3} />
+                  <Skeleton height="200px" />
+                </Box>
+              </VStack>
+            ) : !testing ? (
+              <Alert.Root status="info">
+                <Alert.Indicator />
+                <Alert.Title>No test analysis yet</Alert.Title>
+                <Alert.Description>
+                  Click "Analyze tests" to get detailed coverage analysis and
+                  test suggestions.
+                </Alert.Description>
+              </Alert.Root>
+            ) : (
+              <VStack align="stretch" gap={6}>
+                {/* Coverage Metrics */}
+                <TestCoverageMetrics coverage={testing.currentCoverage} />
 
-            <Separator />
+                <Separator />
 
-            {/* Existing Tests */}
-            <Box>
-              <Text fontWeight="semibold" mb={3} fontSize="md">
-                Existing Test Files
-              </Text>
-              <ExistingTestsTable testFiles={existingTestFiles} />
-            </Box>
+                {/* Existing Tests */}
+                <Box>
+                  <Text fontWeight="semibold" mb={3} fontSize="md">
+                    Existing Test Files
+                  </Text>
+                  <ExistingTestsTable testFiles={existingTestFiles} />
+                </Box>
 
-            <Separator />
+                <Separator />
 
-            {/* Missing Tests */}
-            <Box>
-              <Text fontWeight="semibold" mb={4} fontSize="md">
-                Missing Tests (Suggestions)
-              </Text>
-              <MissingTestsSection
-                missingTests={testing.missingTests}
-                applyingTests={applyingTests}
-                onApplyTest={onApplyTest}
-              />
-            </Box>
+                {/* Missing Tests */}
+                <Box>
+                  <Text fontWeight="semibold" mb={4} fontSize="md">
+                    Missing Tests (Suggestions)
+                  </Text>
+                  <MissingTestsSection
+                    missingTests={testing.missingTests}
+                    applyingTests={applyingTests}
+                    onApplyTest={onApplyTest}
+                  />
+                </Box>
 
-            <Separator />
+                <Separator />
 
-            {/* Recommendations */}
-            <Box>
-              <Text fontWeight="semibold" mb={3} fontSize="md">
-                General Recommendations
-              </Text>
-              <TestRecommendations recommendations={testing.recommendations} />
-            </Box>
-          </VStack>
-        )}
-      </Card.Body>
+                {/* Recommendations */}
+                <Box>
+                  <Text fontWeight="semibold" mb={3} fontSize="md">
+                    General Recommendations
+                  </Text>
+                  <TestRecommendations
+                    recommendations={testing.recommendations}
+                  />
+                </Box>
+              </VStack>
+            )}
+          </Card.Body>
+        </Collapsible.Content>
+      </Collapsible.Root>
     </Card.Root>
   );
 }

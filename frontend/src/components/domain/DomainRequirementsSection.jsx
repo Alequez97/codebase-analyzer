@@ -12,6 +12,8 @@ import {
   Grid,
   Code,
   Separator,
+  Collapsible,
+  Skeleton,
 } from "@chakra-ui/react";
 import {
   Pencil,
@@ -140,6 +142,7 @@ export default function DomainRequirementsSection({
   const [userContext, setUserContext] = useState("");
   const [expandedRequirements, setExpandedRequirements] = useState(new Set());
   const [draftRequirements, setDraftRequirements] = useState([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Sort requirements by priority
   const sortedRequirements = useMemo(() => {
@@ -247,10 +250,37 @@ export default function DomainRequirementsSection({
   return (
     <>
       <Card.Root>
-        <Card.Header>
-          <HStack justify="space-between">
-            <HStack gap={2}>
+        <Card.Header py="4">
+          <HStack justify="space-between" alignItems="center">
+            <HStack
+              gap={2}
+              flex={1}
+              cursor="pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+              alignItems="center"
+            >
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+              >
+                {isExpanded ? (
+                  <ChevronDown size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+              </IconButton>
               <Heading size="md">Requirements</Heading>
+              {showLogs && (
+                <Badge colorPalette="purple" size="sm">
+                  Logs View
+                </Badge>
+              )}
+            </HStack>
+            <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
               {!isEditMode && !showLogs && sortedRequirements.length > 0 && (
                 <IconButton
                   size="sm"
@@ -271,13 +301,6 @@ export default function DomainRequirementsSection({
                   <X size={16} />
                 </IconButton>
               )}
-              {showLogs && (
-                <Badge colorPalette="purple" size="sm">
-                  Logs View
-                </Badge>
-              )}
-            </HStack>
-            <HStack>
               {!isEditMode && !showLogs && (
                 <Button
                   size="sm"
@@ -306,517 +329,561 @@ export default function DomainRequirementsSection({
             </HStack>
           </HStack>
         </Card.Header>
-        <Card.Body>
-          {(loading || progress) && !showLogs && (
-            <Box
-              mb={4}
-              p={3}
-              bg="blue.50"
-              borderRadius="md"
-              borderLeft="4px solid"
-              borderColor="blue.500"
-            >
-              <HStack gap={2}>
-                <FileText size={16} />
-                <Text fontSize="sm" fontWeight="medium" color="blue.800">
-                  {progress?.message ||
-                    "AI is analyzing domain files and extracting requirements..."}
-                </Text>
-              </HStack>
-            </Box>
-          )}
-          {showLogs ? (
-            <LogsViewer logs={logs} loading={logsLoading} />
-          ) : isEditMode ? (
-            <VStack align="stretch" gap={5}>
-              <Box
-                p={3}
-                bg="gray.50"
-                borderRadius="md"
-                borderWidth="1px"
-                borderColor="gray.200"
-              >
-                <Text fontSize="sm" color="gray.700" fontWeight="medium">
-                  Edit requirements in-place. Change priority or text directly.
-                </Text>
-                <Text fontSize="xs" color="gray.500">
-                  Drag-and-drop priority grouping can be added later if needed.
-                </Text>
-              </Box>
+        <Collapsible.Root open={isExpanded}>
+          <Collapsible.Content>
+            <Card.Body>
+              {(loading || progress) && !showLogs && (
+                <Box
+                  mb={4}
+                  p={3}
+                  bg="blue.50"
+                  borderRadius="md"
+                  borderLeft="4px solid"
+                  borderColor="blue.500"
+                >
+                  <HStack gap={2}>
+                    <FileText size={16} />
+                    <Text fontSize="sm" fontWeight="medium" color="blue.800">
+                      {progress?.message ||
+                        "AI is analyzing domain files and extracting requirements..."}
+                    </Text>
+                  </HStack>
+                </Box>
+              )}
+              {showLogs ? (
+                <LogsViewer logs={logs} loading={logsLoading} />
+              ) : isEditMode ? (
+                <VStack align="stretch" gap={5}>
+                  <Box
+                    p={3}
+                    bg="gray.50"
+                    borderRadius="md"
+                    borderWidth="1px"
+                    borderColor="gray.200"
+                  >
+                    <Text fontSize="sm" color="gray.700" fontWeight="medium">
+                      Edit requirements in-place. Change priority or text
+                      directly.
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Drag-and-drop priority grouping can be added later if
+                      needed.
+                    </Text>
+                  </Box>
 
-              {sortedDraftRequirements.length > 0 ? (
-                <VStack align="stretch" gap={3}>
-                  {Object.entries(groupedDraftRequirements).map(
-                    ([priority, reqs]) =>
-                      reqs.length > 0 && (
-                        <Box key={priority}>
-                          <Heading size="sm" mb={3} color="gray.700">
-                            {priority === "P0" && "🔴 Critical (P0)"}
-                            {priority === "P1" && "🟠 High Priority (P1)"}
-                            {priority === "P2" && "🔵 Medium Priority (P2)"}
-                            {priority === "P3" && "⚪ Low Priority (P3)"}
-                          </Heading>
+                  {sortedDraftRequirements.length > 0 ? (
+                    <VStack align="stretch" gap={3}>
+                      {Object.entries(groupedDraftRequirements).map(
+                        ([priority, reqs]) =>
+                          reqs.length > 0 && (
+                            <Box key={priority}>
+                              <Heading size="sm" mb={3} color="gray.700">
+                                {priority === "P0" && "🔴 Critical (P0)"}
+                                {priority === "P1" && "🟠 High Priority (P1)"}
+                                {priority === "P2" && "🔵 Medium Priority (P2)"}
+                                {priority === "P3" && "⚪ Low Priority (P3)"}
+                              </Heading>
 
-                          <VStack align="stretch" gap={2}>
-                            {reqs.map((req) => {
-                              const CategoryIcon =
-                                CATEGORY_ICONS[req.category] ||
-                                CATEGORY_ICONS.other;
-                              const isExpanded = expandedRequirements.has(
-                                req.id,
-                              );
+                              <VStack align="stretch" gap={2}>
+                                {reqs.map((req) => {
+                                  const CategoryIcon =
+                                    CATEGORY_ICONS[req.category] ||
+                                    CATEGORY_ICONS.other;
+                                  const isExpanded = expandedRequirements.has(
+                                    req.id,
+                                  );
 
-                              return (
-                                <Card.Root
-                                  key={req.id}
-                                  size="sm"
-                                  variant="outline"
-                                  borderLeftWidth="4px"
-                                  borderLeftColor={`${PRIORITY_COLORS[normalizePriority(req.priority)]}.500`}
-                                >
-                                  <Card.Body p={4}>
-                                    <VStack align="stretch" gap={3}>
-                                      <HStack
-                                        justify="space-between"
-                                        align="start"
-                                      >
-                                        <HStack flex={1} align="start" gap={3}>
-                                          <CategoryIcon
-                                            size={18}
-                                            style={{
-                                              marginTop: "2px",
-                                              flexShrink: 0,
-                                            }}
-                                          />
-                                          <VStack
+                                  return (
+                                    <Card.Root
+                                      key={req.id}
+                                      size="sm"
+                                      variant="outline"
+                                      borderLeftWidth="4px"
+                                      borderLeftColor={`${PRIORITY_COLORS[normalizePriority(req.priority)]}.500`}
+                                    >
+                                      <Card.Body p={4}>
+                                        <VStack align="stretch" gap={3}>
+                                          <HStack
+                                            justify="space-between"
                                             align="start"
-                                            gap={2}
-                                            flex={1}
                                           >
-                                            <HStack gap={2} flexWrap="wrap">
-                                              <Code
-                                                fontSize="xs"
-                                                colorPalette="gray"
-                                                fontWeight="semibold"
-                                              >
-                                                {req.id}
-                                              </Code>
-                                              <Badge
-                                                colorPalette={
-                                                  PRIORITY_COLORS[
-                                                    normalizePriority(
-                                                      req.priority,
-                                                    )
-                                                  ]
-                                                }
-                                                size="sm"
-                                                variant="solid"
-                                              >
-                                                {normalizePriority(
-                                                  req.priority,
-                                                )}
-                                              </Badge>
-                                              <Badge
-                                                colorPalette="purple"
-                                                size="sm"
-                                                variant="subtle"
-                                              >
-                                                {req.category}
-                                              </Badge>
-                                              <Badge
-                                                colorPalette={
-                                                  CONFIDENCE_COLORS[
-                                                    req.confidence
-                                                  ]
-                                                }
-                                                size="sm"
-                                                variant="outline"
-                                              >
-                                                {req.confidence} confidence
-                                              </Badge>
-                                            </HStack>
-
-                                            <HStack gap={3} w="full">
-                                              <Box
-                                                as="select"
-                                                value={normalizePriority(
-                                                  req.priority,
-                                                )}
-                                                onChange={(event) =>
-                                                  handleDraftChange(req.id, {
-                                                    priority:
-                                                      event.target.value,
-                                                  })
-                                                }
-                                                borderWidth="1px"
-                                                borderColor="gray.300"
-                                                borderRadius="md"
-                                                px={2}
-                                                py={1}
-                                                fontSize="sm"
-                                                bg="white"
-                                              >
-                                                {PRIORITY_LIST.map((value) => (
-                                                  <option
-                                                    key={value}
-                                                    value={value}
-                                                  >
-                                                    {value}
-                                                  </option>
-                                                ))}
-                                              </Box>
-                                              <Textarea
-                                                value={req.description}
-                                                onChange={(event) =>
-                                                  handleDraftChange(req.id, {
-                                                    description:
-                                                      event.target.value,
-                                                  })
-                                                }
-                                                placeholder="Describe the requirement"
-                                                size="sm"
-                                                minH="80px"
+                                            <HStack
+                                              flex={1}
+                                              align="start"
+                                              gap={3}
+                                            >
+                                              <CategoryIcon
+                                                size={18}
+                                                style={{
+                                                  marginTop: "2px",
+                                                  flexShrink: 0,
+                                                }}
                                               />
+                                              <VStack
+                                                align="start"
+                                                gap={2}
+                                                flex={1}
+                                              >
+                                                <HStack gap={2} flexWrap="wrap">
+                                                  <Code
+                                                    fontSize="xs"
+                                                    colorPalette="gray"
+                                                    fontWeight="semibold"
+                                                  >
+                                                    {req.id}
+                                                  </Code>
+                                                  <Badge
+                                                    colorPalette={
+                                                      PRIORITY_COLORS[
+                                                        normalizePriority(
+                                                          req.priority,
+                                                        )
+                                                      ]
+                                                    }
+                                                    size="sm"
+                                                    variant="solid"
+                                                  >
+                                                    {normalizePriority(
+                                                      req.priority,
+                                                    )}
+                                                  </Badge>
+                                                  <Badge
+                                                    colorPalette="purple"
+                                                    size="sm"
+                                                    variant="subtle"
+                                                  >
+                                                    {req.category}
+                                                  </Badge>
+                                                  <Badge
+                                                    colorPalette={
+                                                      CONFIDENCE_COLORS[
+                                                        req.confidence
+                                                      ]
+                                                    }
+                                                    size="sm"
+                                                    variant="outline"
+                                                  >
+                                                    {req.confidence} confidence
+                                                  </Badge>
+                                                </HStack>
+
+                                                <HStack gap={3} w="full">
+                                                  <Box
+                                                    as="select"
+                                                    value={normalizePriority(
+                                                      req.priority,
+                                                    )}
+                                                    onChange={(event) =>
+                                                      handleDraftChange(
+                                                        req.id,
+                                                        {
+                                                          priority:
+                                                            event.target.value,
+                                                        },
+                                                      )
+                                                    }
+                                                    borderWidth="1px"
+                                                    borderColor="gray.300"
+                                                    borderRadius="md"
+                                                    px={2}
+                                                    py={1}
+                                                    fontSize="sm"
+                                                    bg="white"
+                                                  >
+                                                    {PRIORITY_LIST.map(
+                                                      (value) => (
+                                                        <option
+                                                          key={value}
+                                                          value={value}
+                                                        >
+                                                          {value}
+                                                        </option>
+                                                      ),
+                                                    )}
+                                                  </Box>
+                                                  <Textarea
+                                                    value={req.description}
+                                                    onChange={(event) =>
+                                                      handleDraftChange(
+                                                        req.id,
+                                                        {
+                                                          description:
+                                                            event.target.value,
+                                                        },
+                                                      )
+                                                    }
+                                                    placeholder="Describe the requirement"
+                                                    size="sm"
+                                                    minH="80px"
+                                                  />
+                                                </HStack>
+                                              </VStack>
                                             </HStack>
-                                          </VStack>
-                                        </HStack>
 
-                                        {(req.source || req.relatedCode) && (
-                                          <IconButton
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() =>
-                                              toggleRequirement(req.id)
-                                            }
-                                          >
-                                            {isExpanded ? (
-                                              <ChevronDown size={16} />
-                                            ) : (
-                                              <ChevronRight size={16} />
+                                            {(req.source ||
+                                              req.relatedCode) && (
+                                              <IconButton
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() =>
+                                                  toggleRequirement(req.id)
+                                                }
+                                              >
+                                                {isExpanded ? (
+                                                  <ChevronDown size={16} />
+                                                ) : (
+                                                  <ChevronRight size={16} />
+                                                )}
+                                              </IconButton>
                                             )}
-                                          </IconButton>
-                                        )}
-                                      </HStack>
+                                          </HStack>
 
-                                      {isExpanded && (
-                                        <VStack align="stretch" gap={3} mt={2}>
-                                          <Separator />
+                                          {isExpanded && (
+                                            <VStack
+                                              align="stretch"
+                                              gap={3}
+                                              mt={2}
+                                            >
+                                              <Separator />
 
-                                          {req.source && (
-                                            <Box>
-                                              <HStack gap={2} mb={2}>
-                                                <FileCode size={14} />
-                                                <Text
-                                                  fontSize="xs"
-                                                  fontWeight="semibold"
-                                                  color="gray.600"
-                                                >
-                                                  Source Location
-                                                </Text>
-                                              </HStack>
-                                              <Code
-                                                fontSize="xs"
-                                                colorPalette="blue"
-                                                display="block"
-                                                p={2}
-                                                borderRadius="md"
-                                              >
-                                                {req.source}
-                                              </Code>
-                                            </Box>
-                                          )}
+                                              {req.source && (
+                                                <Box>
+                                                  <HStack gap={2} mb={2}>
+                                                    <FileCode size={14} />
+                                                    <Text
+                                                      fontSize="xs"
+                                                      fontWeight="semibold"
+                                                      color="gray.600"
+                                                    >
+                                                      Source Location
+                                                    </Text>
+                                                  </HStack>
+                                                  <Code
+                                                    fontSize="xs"
+                                                    colorPalette="blue"
+                                                    display="block"
+                                                    p={2}
+                                                    borderRadius="md"
+                                                  >
+                                                    {req.source}
+                                                  </Code>
+                                                </Box>
+                                              )}
 
-                                          {req.relatedCode && (
-                                            <Box>
-                                              <HStack gap={2} mb={2}>
-                                                <Code2 size={14} />
-                                                <Text
-                                                  fontSize="xs"
-                                                  fontWeight="semibold"
-                                                  color="gray.600"
-                                                >
-                                                  Related Code
-                                                </Text>
-                                              </HStack>
-                                              <Box
-                                                bg="gray.50"
-                                                p={3}
-                                                borderRadius="md"
-                                                borderWidth="1px"
-                                                borderColor="gray.200"
-                                                fontSize="xs"
-                                                fontFamily="mono"
-                                                overflowX="auto"
-                                                whiteSpace="pre"
-                                              >
-                                                {req.relatedCode}
-                                              </Box>
-                                            </Box>
+                                              {req.relatedCode && (
+                                                <Box>
+                                                  <HStack gap={2} mb={2}>
+                                                    <Code2 size={14} />
+                                                    <Text
+                                                      fontSize="xs"
+                                                      fontWeight="semibold"
+                                                      color="gray.600"
+                                                    >
+                                                      Related Code
+                                                    </Text>
+                                                  </HStack>
+                                                  <Box
+                                                    bg="gray.50"
+                                                    p={3}
+                                                    borderRadius="md"
+                                                    borderWidth="1px"
+                                                    borderColor="gray.200"
+                                                    fontSize="xs"
+                                                    fontFamily="mono"
+                                                    overflowX="auto"
+                                                    whiteSpace="pre"
+                                                  >
+                                                    {req.relatedCode}
+                                                  </Box>
+                                                </Box>
+                                              )}
+                                            </VStack>
                                           )}
                                         </VStack>
-                                      )}
-                                    </VStack>
-                                  </Card.Body>
-                                </Card.Root>
-                              );
-                            })}
-                          </VStack>
-                        </Box>
-                      ),
+                                      </Card.Body>
+                                    </Card.Root>
+                                  );
+                                })}
+                              </VStack>
+                            </Box>
+                          ),
+                      )}
+                    </VStack>
+                  ) : (
+                    <Text fontSize="sm" color="gray.500">
+                      No requirements available to edit.
+                    </Text>
                   )}
                 </VStack>
-              ) : (
-                <Text fontSize="sm" color="gray.500">
-                  No requirements available to edit.
-                </Text>
-              )}
-            </VStack>
-          ) : sortedRequirements.length > 0 ? (
-            <VStack align="stretch" gap={6}>
-              {/* Summary Stats */}
-              <Grid
-                templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
-                gap={4}
-              >
-                <Card.Root size="sm" variant="outline">
-                  <Card.Body>
-                    <VStack align="start" gap={1}>
-                      <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                        Total Requirements
-                      </Text>
-                      <Text fontSize="2xl" fontWeight="bold">
-                        {sortedRequirements.length}
-                      </Text>
-                    </VStack>
-                  </Card.Body>
-                </Card.Root>
+              ) : sortedRequirements.length > 0 ? (
+                <VStack align="stretch" gap={6}>
+                  {/* Summary Stats */}
+                  <Grid
+                    templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
+                    gap={4}
+                  >
+                    <Card.Root size="sm" variant="outline">
+                      <Card.Body>
+                        <VStack align="start" gap={1}>
+                          <Text
+                            fontSize="xs"
+                            color="gray.500"
+                            fontWeight="medium"
+                          >
+                            Total Requirements
+                          </Text>
+                          <Text fontSize="2xl" fontWeight="bold">
+                            {sortedRequirements.length}
+                          </Text>
+                        </VStack>
+                      </Card.Body>
+                    </Card.Root>
 
-                {Object.entries(groupedRequirements).map(
-                  ([priority, reqs]) =>
-                    reqs.length > 0 && (
-                      <Card.Root key={priority} size="sm" variant="outline">
-                        <Card.Body>
-                          <HStack justify="space-between">
-                            <VStack align="start" gap={1}>
-                              <Text
-                                fontSize="xs"
-                                color="gray.500"
-                                fontWeight="medium"
-                              >
-                                Priority {priority}
-                              </Text>
-                              <Text fontSize="2xl" fontWeight="bold">
-                                {reqs.length}
-                              </Text>
-                            </VStack>
-                            <Badge
-                              colorPalette={PRIORITY_COLORS[priority]}
-                              size="lg"
-                              variant="solid"
-                            >
-                              {priority}
-                            </Badge>
-                          </HStack>
-                        </Card.Body>
-                      </Card.Root>
-                    ),
-                )}
-              </Grid>
+                    {Object.entries(groupedRequirements).map(
+                      ([priority, reqs]) =>
+                        reqs.length > 0 && (
+                          <Card.Root key={priority} size="sm" variant="outline">
+                            <Card.Body>
+                              <HStack justify="space-between">
+                                <VStack align="start" gap={1}>
+                                  <Text
+                                    fontSize="xs"
+                                    color="gray.500"
+                                    fontWeight="medium"
+                                  >
+                                    Priority {priority}
+                                  </Text>
+                                  <Text fontSize="2xl" fontWeight="bold">
+                                    {reqs.length}
+                                  </Text>
+                                </VStack>
+                                <Badge
+                                  colorPalette={PRIORITY_COLORS[priority]}
+                                  size="lg"
+                                  variant="solid"
+                                >
+                                  {priority}
+                                </Badge>
+                              </HStack>
+                            </Card.Body>
+                          </Card.Root>
+                        ),
+                    )}
+                  </Grid>
 
-              {/* Requirements List */}
-              <VStack align="stretch" gap={3}>
-                {Object.entries(groupedRequirements).map(
-                  ([priority, reqs]) =>
-                    reqs.length > 0 && (
-                      <Box key={priority}>
-                        <Heading size="sm" mb={3} color="gray.700">
-                          {priority === "P0" && "🔴 Critical (P0)"}
-                          {priority === "P1" && "🟠 High Priority (P1)"}
-                          {priority === "P2" && "🔵 Medium Priority (P2)"}
-                          {priority === "P3" && "⚪ Low Priority (P3)"}
-                        </Heading>
+                  {/* Requirements List */}
+                  <VStack align="stretch" gap={3}>
+                    {Object.entries(groupedRequirements).map(
+                      ([priority, reqs]) =>
+                        reqs.length > 0 && (
+                          <Box key={priority}>
+                            <Heading size="sm" mb={3} color="gray.700">
+                              {priority === "P0" && "🔴 Critical (P0)"}
+                              {priority === "P1" && "🟠 High Priority (P1)"}
+                              {priority === "P2" && "🔵 Medium Priority (P2)"}
+                              {priority === "P3" && "⚪ Low Priority (P3)"}
+                            </Heading>
 
-                        <VStack align="stretch" gap={2}>
-                          {reqs.map((req) => {
-                            const CategoryIcon =
-                              CATEGORY_ICONS[req.category] ||
-                              CATEGORY_ICONS.other;
-                            const isExpanded = expandedRequirements.has(req.id);
+                            <VStack align="stretch" gap={2}>
+                              {reqs.map((req) => {
+                                const CategoryIcon =
+                                  CATEGORY_ICONS[req.category] ||
+                                  CATEGORY_ICONS.other;
+                                const isExpanded = expandedRequirements.has(
+                                  req.id,
+                                );
 
-                            return (
-                              <Card.Root
-                                key={req.id}
-                                size="sm"
-                                variant="outline"
-                                borderLeftWidth="4px"
-                                borderLeftColor={`${PRIORITY_COLORS[priority]}.500`}
-                              >
-                                <Card.Body p={4}>
-                                  <VStack align="stretch" gap={3}>
-                                    {/* Header Row */}
-                                    <HStack
-                                      justify="space-between"
-                                      align="start"
-                                    >
-                                      <HStack flex={1} align="start" gap={3}>
-                                        <CategoryIcon
-                                          size={18}
-                                          style={{
-                                            marginTop: "2px",
-                                            flexShrink: 0,
-                                          }}
-                                        />
-                                        <VStack align="start" gap={2} flex={1}>
-                                          <HStack gap={2} flexWrap="wrap">
-                                            <Code
-                                              fontSize="xs"
-                                              colorPalette="gray"
-                                              fontWeight="semibold"
-                                            >
-                                              {req.id}
-                                            </Code>
-                                            <Badge
-                                              colorPalette={
-                                                PRIORITY_COLORS[priority]
-                                              }
-                                              size="sm"
-                                              variant="solid"
-                                            >
-                                              {priority}
-                                            </Badge>
-                                            <Badge
-                                              colorPalette="purple"
-                                              size="sm"
-                                              variant="subtle"
-                                            >
-                                              {req.category}
-                                            </Badge>
-                                            <Badge
-                                              colorPalette={
-                                                CONFIDENCE_COLORS[
-                                                  req.confidence
-                                                ]
-                                              }
-                                              size="sm"
-                                              variant="outline"
-                                            >
-                                              {req.confidence} confidence
-                                            </Badge>
-                                          </HStack>
-                                          <Text fontSize="sm" lineHeight="tall">
-                                            {req.description}
-                                          </Text>
-                                        </VStack>
-                                      </HStack>
-
-                                      {(req.source || req.relatedCode) && (
-                                        <IconButton
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() =>
-                                            toggleRequirement(req.id)
-                                          }
+                                return (
+                                  <Card.Root
+                                    key={req.id}
+                                    size="sm"
+                                    variant="outline"
+                                    borderLeftWidth="4px"
+                                    borderLeftColor={`${PRIORITY_COLORS[priority]}.500`}
+                                  >
+                                    <Card.Body p={4}>
+                                      <VStack align="stretch" gap={3}>
+                                        {/* Header Row */}
+                                        <HStack
+                                          justify="space-between"
+                                          align="start"
                                         >
-                                          {isExpanded ? (
-                                            <ChevronDown size={16} />
-                                          ) : (
-                                            <ChevronRight size={16} />
+                                          <HStack
+                                            flex={1}
+                                            align="start"
+                                            gap={3}
+                                          >
+                                            <CategoryIcon
+                                              size={18}
+                                              style={{
+                                                marginTop: "2px",
+                                                flexShrink: 0,
+                                              }}
+                                            />
+                                            <VStack
+                                              align="start"
+                                              gap={2}
+                                              flex={1}
+                                            >
+                                              <HStack gap={2} flexWrap="wrap">
+                                                <Code
+                                                  fontSize="xs"
+                                                  colorPalette="gray"
+                                                  fontWeight="semibold"
+                                                >
+                                                  {req.id}
+                                                </Code>
+                                                <Badge
+                                                  colorPalette={
+                                                    PRIORITY_COLORS[priority]
+                                                  }
+                                                  size="sm"
+                                                  variant="solid"
+                                                >
+                                                  {priority}
+                                                </Badge>
+                                                <Badge
+                                                  colorPalette="purple"
+                                                  size="sm"
+                                                  variant="subtle"
+                                                >
+                                                  {req.category}
+                                                </Badge>
+                                                <Badge
+                                                  colorPalette={
+                                                    CONFIDENCE_COLORS[
+                                                      req.confidence
+                                                    ]
+                                                  }
+                                                  size="sm"
+                                                  variant="outline"
+                                                >
+                                                  {req.confidence} confidence
+                                                </Badge>
+                                              </HStack>
+                                              <Text
+                                                fontSize="sm"
+                                                lineHeight="tall"
+                                              >
+                                                {req.description}
+                                              </Text>
+                                            </VStack>
+                                          </HStack>
+
+                                          {(req.source || req.relatedCode) && (
+                                            <IconButton
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() =>
+                                                toggleRequirement(req.id)
+                                              }
+                                            >
+                                              {isExpanded ? (
+                                                <ChevronDown size={16} />
+                                              ) : (
+                                                <ChevronRight size={16} />
+                                              )}
+                                            </IconButton>
                                           )}
-                                        </IconButton>
-                                      )}
-                                    </HStack>
+                                        </HStack>
 
-                                    {/* Expanded Details */}
-                                    {isExpanded && (
-                                      <VStack align="stretch" gap={3} mt={2}>
-                                        <Separator />
+                                        {/* Expanded Details */}
+                                        {isExpanded && (
+                                          <VStack
+                                            align="stretch"
+                                            gap={3}
+                                            mt={2}
+                                          >
+                                            <Separator />
 
-                                        {req.source && (
-                                          <Box>
-                                            <HStack gap={2} mb={2}>
-                                              <FileCode size={14} />
-                                              <Text
-                                                fontSize="xs"
-                                                fontWeight="semibold"
-                                                color="gray.600"
-                                              >
-                                                Source Location
-                                              </Text>
-                                            </HStack>
-                                            <Code
-                                              fontSize="xs"
-                                              colorPalette="blue"
-                                              display="block"
-                                              p={2}
-                                              borderRadius="md"
-                                            >
-                                              {req.source}
-                                            </Code>
-                                          </Box>
-                                        )}
+                                            {req.source && (
+                                              <Box>
+                                                <HStack gap={2} mb={2}>
+                                                  <FileCode size={14} />
+                                                  <Text
+                                                    fontSize="xs"
+                                                    fontWeight="semibold"
+                                                    color="gray.600"
+                                                  >
+                                                    Source Location
+                                                  </Text>
+                                                </HStack>
+                                                <Code
+                                                  fontSize="xs"
+                                                  colorPalette="blue"
+                                                  display="block"
+                                                  p={2}
+                                                  borderRadius="md"
+                                                >
+                                                  {req.source}
+                                                </Code>
+                                              </Box>
+                                            )}
 
-                                        {req.relatedCode && (
-                                          <Box>
-                                            <HStack gap={2} mb={2}>
-                                              <Code2 size={14} />
-                                              <Text
-                                                fontSize="xs"
-                                                fontWeight="semibold"
-                                                color="gray.600"
-                                              >
-                                                Related Code
-                                              </Text>
-                                            </HStack>
-                                            <Box
-                                              bg="gray.50"
-                                              p={3}
-                                              borderRadius="md"
-                                              borderWidth="1px"
-                                              borderColor="gray.200"
-                                              fontSize="xs"
-                                              fontFamily="mono"
-                                              overflowX="auto"
-                                              whiteSpace="pre"
-                                            >
-                                              {req.relatedCode}
-                                            </Box>
-                                          </Box>
+                                            {req.relatedCode && (
+                                              <Box>
+                                                <HStack gap={2} mb={2}>
+                                                  <Code2 size={14} />
+                                                  <Text
+                                                    fontSize="xs"
+                                                    fontWeight="semibold"
+                                                    color="gray.600"
+                                                  >
+                                                    Related Code
+                                                  </Text>
+                                                </HStack>
+                                                <Box
+                                                  bg="gray.50"
+                                                  p={3}
+                                                  borderRadius="md"
+                                                  borderWidth="1px"
+                                                  borderColor="gray.200"
+                                                  fontSize="xs"
+                                                  fontFamily="mono"
+                                                  overflowX="auto"
+                                                  whiteSpace="pre"
+                                                >
+                                                  {req.relatedCode}
+                                                </Box>
+                                              </Box>
+                                            )}
+                                          </VStack>
                                         )}
                                       </VStack>
-                                    )}
-                                  </VStack>
-                                </Card.Body>
-                              </Card.Root>
-                            );
-                          })}
-                        </VStack>
-                      </Box>
-                    ),
-                )}
-              </VStack>
-            </VStack>
-          ) : (
-            <Box
-              textAlign="center"
-              py={8}
-              px={4}
-              borderWidth="2px"
-              borderStyle="dashed"
-              borderColor="gray.300"
-              borderRadius="md"
-              color="gray.500"
-            >
-              <FileText size={32} style={{ margin: "0 auto 12px" }} />
-              <Text fontSize="sm" fontWeight="medium" mb={2}>
-                No requirements analyzed yet
-              </Text>
-              <Text fontSize="xs">
-                Click <strong>Analyze requirements</strong> to extract business
-                rules from code
-              </Text>
-            </Box>
-          )}
-        </Card.Body>
+                                    </Card.Body>
+                                  </Card.Root>
+                                );
+                              })}
+                            </VStack>
+                          </Box>
+                        ),
+                    )}
+                  </VStack>
+                </VStack>
+              ) : (
+                <Box
+                  textAlign="center"
+                  py={8}
+                  px={4}
+                  borderWidth="2px"
+                  borderStyle="dashed"
+                  borderColor="gray.300"
+                  borderRadius="md"
+                  color="gray.500"
+                >
+                  <FileText size={32} style={{ margin: "0 auto 12px" }} />
+                  <Text fontSize="sm" fontWeight="medium" mb={2}>
+                    No requirements analyzed yet
+                  </Text>
+                  <Text fontSize="xs">
+                    Click <strong>Analyze requirements</strong> to extract
+                    business rules from code
+                  </Text>
+                </Box>
+              )}
+            </Card.Body>
+          </Collapsible.Content>
+        </Collapsible.Root>
       </Card.Root>
 
       {/* Context Input Dialog */}

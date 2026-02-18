@@ -9,6 +9,7 @@ import {
   Box,
   Table,
   Button,
+  Skeleton,
 } from "@chakra-ui/react";
 import { X, Plus, Pencil } from "lucide-react";
 import { Card } from "../ui/card";
@@ -16,6 +17,7 @@ import { useProjectFilesStore } from "../../store/useProjectFilesStore";
 
 export default function DomainFilesSection({
   files = [],
+  loading: domainLoading = false,
   onFilesChange,
   onSave,
   onReset,
@@ -35,7 +37,7 @@ export default function DomainFilesSection({
   // Fetch project files on mount
   useEffect(() => {
     fetchProjectFiles();
-  }, [fetchProjectFiles]);
+  }, []);
 
   // Filter suggestions based on search term
   const filteredSuggestions = useMemo(() => {
@@ -104,8 +106,12 @@ export default function DomainFilesSection({
       <Card.Header>
         <HStack justify="space-between">
           <HStack gap={2}>
-            <Heading size="md">Files</Heading>
-            {!isEditMode && (
+            {domainLoading ? (
+              <Skeleton height="24px" width="80px" />
+            ) : (
+              <Heading size="md">Files</Heading>
+            )}
+            {!isEditMode && filesArray.length > 0 && (
               <IconButton
                 size="sm"
                 variant="ghost"
@@ -152,7 +158,11 @@ export default function DomainFilesSection({
                       {filesArray.map((file) => (
                         <Table.Row key={file} _hover={{ bg: "gray.50" }}>
                           <Table.Cell>
-                            <Text fontSize="sm" fontFamily="mono" color="gray.700">
+                            <Text
+                              fontSize="sm"
+                              fontFamily="mono"
+                              color="gray.700"
+                            >
                               {file}
                             </Text>
                           </Table.Cell>
@@ -231,7 +241,11 @@ export default function DomainFilesSection({
                             _hover={{ bg: "blue.50" }}
                             onClick={() => handleAddFile(file)}
                           >
-                            <Text fontSize="sm" fontFamily="mono" color="gray.700">
+                            <Text
+                              fontSize="sm"
+                              fontFamily="mono"
+                              color="gray.700"
+                            >
                               {file}
                             </Text>
                           </Box>
@@ -266,44 +280,46 @@ export default function DomainFilesSection({
               </Box>
             </VStack>
           </>
+        ) : domainLoading ? (
+          <VStack align="stretch" gap={2}>
+            <Skeleton height="40px" />
+            <Skeleton height="40px" />
+            <Skeleton height="40px" />
+          </VStack>
+        ) : filesArray.length > 0 ? (
+          <Box
+            borderWidth="1px"
+            borderRadius="md"
+            overflow="hidden"
+            maxH="300px"
+            overflowY="auto"
+          >
+            <Table.Root size="sm" variant="outline">
+              <Table.Body>
+                {filesArray.map((file) => (
+                  <Table.Row key={file} _hover={{ bg: "gray.50" }}>
+                    <Table.Cell>
+                      <Text fontSize="sm" fontFamily="mono" color="gray.700">
+                        {file}
+                      </Text>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Box>
         ) : (
-          <>
-            {filesArray.length > 0 ? (
-              <Box
-                borderWidth="1px"
-                borderRadius="md"
-                overflow="hidden"
-                maxH="300px"
-                overflowY="auto"
-              >
-                <Table.Root size="sm" variant="outline">
-                  <Table.Body>
-                    {filesArray.map((file) => (
-                      <Table.Row key={file} _hover={{ bg: "gray.50" }}>
-                        <Table.Cell>
-                          <Text fontSize="sm" fontFamily="mono" color="gray.700">
-                            {file}
-                          </Text>
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
-              </Box>
-            ) : (
-              <Box
-                borderWidth="1px"
-                borderRadius="md"
-                p={8}
-                textAlign="center"
-                bg="gray.50"
-              >
-                <Text color="gray.500" fontSize="sm">
-                  No files in this domain yet.
-                </Text>
-              </Box>
-            )}
-          </>
+          <Box
+            borderWidth="1px"
+            borderRadius="md"
+            p={8}
+            textAlign="center"
+            bg="gray.50"
+          >
+            <Text color="gray.500" fontSize="sm">
+              No files in this domain yet.
+            </Text>
+          </Box>
         )}
       </Card.Body>
     </Card.Root>

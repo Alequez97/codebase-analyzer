@@ -1,4 +1,12 @@
-import { Button, Heading, HStack, Text, VStack, Badge } from "@chakra-ui/react";
+import {
+  Button,
+  Heading,
+  HStack,
+  Text,
+  VStack,
+  Badge,
+  Skeleton,
+} from "@chakra-ui/react";
 import { Eye, FileText, ArrowLeft } from "lucide-react";
 import { useLogsStore } from "../../store/useLogsStore";
 
@@ -11,6 +19,24 @@ function getPriorityColor(priority) {
 
 export default function DomainHeader({ domain, domainId, analyzing, onBack }) {
   const { showDomainLogs, toggleDomainLogs } = useLogsStore();
+
+  if (!domain) {
+    return (
+      <HStack justify="space-between" align="start">
+        <VStack align="start" gap={2}>
+          <HStack gap={2}>
+            <Skeleton height="32px" width="250px" />
+            <Skeleton height="24px" width="40px" />
+          </HStack>
+          <Skeleton height="20px" width="500px" />
+        </VStack>
+        <HStack>
+          <Skeleton height="40px" width="150px" />
+          <Skeleton height="40px" width="100px" />
+        </HStack>
+      </HStack>
+    );
+  }
 
   return (
     <HStack justify="space-between" align="start">

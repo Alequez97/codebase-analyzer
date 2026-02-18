@@ -20,6 +20,7 @@ export default function DomainDetailsPage() {
   // Analysis store
   const {
     analysis,
+    fetchAnalysis,
     fetchDomainDocumentation,
     fetchDomainRequirements,
     fetchDomainTesting,
@@ -122,6 +123,11 @@ export default function DomainDetailsPage() {
 
   // Test application states
   const applyingTests = applyingTestsByDomainId[domainId] || {};
+
+  // Fetch codebase analysis first (to ensure we have domain list when opening in new tab)
+  useEffect(() => {
+    fetchAnalysis();
+  }, []);
 
   useEffect(() => {
     if (!domainId) return;
@@ -261,7 +267,7 @@ export default function DomainDetailsPage() {
         />
 
         {/* Section-specific errors in a single alert */}
-        {errors.length > 0 && (
+        {domain && errors.length > 0 && (
           <Alert.Root status="error" alignItems="flex-start">
             <Alert.Indicator mt={1} />
             <VStack align="stretch" gap={1}>
@@ -285,6 +291,7 @@ export default function DomainDetailsPage() {
 
         <DomainFilesSection
           files={filesArray}
+          loading={!domain}
           onFilesChange={(files) => updateEditedFiles(domainId, files)}
           onSave={handleSaveFiles}
           onReset={() => resetEditedFiles(domainId)}
