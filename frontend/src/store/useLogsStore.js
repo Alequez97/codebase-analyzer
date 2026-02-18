@@ -63,10 +63,9 @@ export const useLogsStore = create((set, get) => ({
   /**
    * Fetch domain section logs from API
    * @param {string} domainId - Domain identifier
-   * @param {string} taskId - Task identifier
-   * @param {string} sectionType - Section type (documentation, requirements, testing)
+   * @param {string} sectionType - Section type (documentation, requirements, testing, bugs-security)
    */
-  fetchDomainSectionLogs: async (domainId, taskId, sectionType) => {
+  fetchDomainSectionLogs: async (domainId, sectionType) => {
     // Set loading state
     set((state) => {
       const loadingMap = state.logsLoadingBySection.get(domainId) || new Map();
@@ -79,12 +78,15 @@ export const useLogsStore = create((set, get) => ({
     });
 
     try {
-      const response = await api.getTaskLogs(taskId);
+      const response = await api.getDomainSectionLogs(domainId, sectionType);
 
       // Set logs
       get().setLogs(domainId, sectionType, response?.data?.content || "");
     } catch (error) {
-      console.error(`Failed to fetch logs for task ${taskId}:`, error);
+      console.error(
+        `Failed to fetch logs for domain ${domainId} section ${sectionType}:`,
+        error,
+      );
       get().setLogs(
         domainId,
         sectionType,

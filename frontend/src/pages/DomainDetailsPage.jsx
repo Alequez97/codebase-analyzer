@@ -184,35 +184,36 @@ export default function DomainDetailsPage() {
     }
   }, [domainId]); // Only depend on domainId to avoid unnecessary re-fetches
 
-  // Fetch historical logs when sections exist and have taskIds
+  // Fetch logs lazily when user opens logs view
   useEffect(() => {
-    if (!domainId) return;
+    if (!domainId || !showDomainLogs) return;
 
-    // Fetch documentation logs if task exists
-    if (documentation?.taskId) {
-      fetchDomainSectionLogs(domainId, documentation.taskId, "documentation");
+    // Fetch documentation logs if section exists
+    if (documentation) {
+      fetchDomainSectionLogs(domainId, "documentation");
     }
 
-    // Fetch requirements logs if task exists
-    if (requirements?.taskId) {
-      fetchDomainSectionLogs(domainId, requirements.taskId, "requirements");
+    // Fetch requirements logs if section exists
+    if (requirements) {
+      fetchDomainSectionLogs(domainId, "requirements");
     }
 
-    // Fetch bugs & security logs if task exists
-    if (bugsSecurity?.taskId) {
-      fetchDomainSectionLogs(domainId, bugsSecurity.taskId, "bugs-security");
+    // Fetch bugs & security logs if section exists
+    if (bugsSecurity) {
+      fetchDomainSectionLogs(domainId, "bugs-security");
     }
 
-    // Fetch testing logs if task exists
-    if (testing?.taskId) {
-      fetchDomainSectionLogs(domainId, testing.taskId, "testing");
+    // Fetch testing logs if section exists
+    if (testing) {
+      fetchDomainSectionLogs(domainId, "testing");
     }
   }, [
     domainId,
-    documentation?.taskId,
-    requirements?.taskId,
-    bugsSecurity?.taskId,
-    testing?.taskId,
+    showDomainLogs,
+    documentation,
+    requirements,
+    bugsSecurity,
+    testing,
   ]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";

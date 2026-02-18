@@ -4,6 +4,41 @@ import config from "../config.js";
 import { tryReadJsonFile } from "./utils.js";
 
 /**
+ * Read domain bugs & security section
+ * @param {string} domainId - The domain ID
+ * @returns {Promise<Object|null>} Bugs & security section or null if not found
+ */
+export async function readDomainBugsSecurity(domainId) {
+  try {
+    const filePath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+      "bugs-security.json",
+    );
+    return await tryReadJsonFile(filePath, `domain ${domainId} bugs-security`);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Write domain bugs & security section
+ * @param {string} domainId - The domain ID
+ * @param {Object} data - Bugs & security data
+ */
+export async function writeDomainBugsSecurity(domainId, data) {
+  const dirPath = path.join(config.paths.targetAnalysis, "domains", domainId);
+  await fs.mkdir(dirPath, { recursive: true });
+
+  const filePath = path.join(dirPath, "bugs-security.json");
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+}
+
+/**
  * Read domain documentation section
  * @param {string} domainId - The domain ID
  * @returns {Promise<Object|null>} Documentation section or null if not found
@@ -84,7 +119,8 @@ export async function readDomainTesting(domainId) {
     const filePath = path.join(
       config.paths.targetAnalysis,
       "domains",
-      `${domainId}-testing.json`,
+      domainId,
+      "testing.json",
     );
     return await tryReadJsonFile(filePath, `domain ${domainId} testing`);
   } catch (error) {
@@ -101,30 +137,31 @@ export async function readDomainTesting(domainId) {
  * @param {Object} data - Testing data
  */
 export async function writeDomainTesting(domainId, data) {
-  const filePath = path.join(
-    config.paths.targetAnalysis,
-    "domains",
-    `${domainId}-testing.json`,
-  );
+  const dirPath = path.join(config.paths.targetAnalysis, "domains", domainId);
+  await fs.mkdir(dirPath, { recursive: true });
+
+  const filePath = path.join(dirPath, "testing.json");
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 /**
- * Read a specific domain analysis (merged from three separate files)
+ * Read a specific domain analysis (merged from four separate sections)
  * @param {string} domainId - The domain ID
  * @returns {Promise<Object|null>} Domain analysis or null if not found
  */
 export async function readDomain(domainId) {
   try {
-    // Read all three sections
-    const [documentation, requirements, testing] = await Promise.all([
-      readDomainDocumentation(domainId),
-      readDomainRequirements(domainId),
-      readDomainTesting(domainId),
-    ]);
+    // Read all sections
+    const [documentation, requirements, testing, bugsSecurity] =
+      await Promise.all([
+        readDomainDocumentation(domainId),
+        readDomainRequirements(domainId),
+        readDomainTesting(domainId),
+        readDomainBugsSecurity(domainId),
+      ]);
 
     // If all sections are null, domain doesn't exist
-    if (!documentation && !requirements && !testing) {
+    if (!documentation && !requirements && !testing && !bugsSecurity) {
       return null;
     }
 
@@ -153,6 +190,13 @@ export async function readDomain(domainId) {
       }
     }
 
+    if (bugsSecurity) {
+      merged.bugsSecurity = bugsSecurity.bugsSecurity;
+      if (!merged.domainName) {
+        merged.domainName = bugsSecurity.domainName || domainId;
+      }
+    }
+
     return merged;
   } catch (error) {
     if (error.code === "ENOENT") {
@@ -163,14 +207,21 @@ export async function readDomain(domainId) {
 }
 
 /**
- * Write domain analysis to file (legacy - writes all sections to single file)
- * @deprecated Use writeDomainDocumentation, writeDomainRequirements, writeDomainTesting instead
+ * Write domain analysis to file (legacy - writes all sections to separate files)
+ * @deprecated Use writeDomainDocumentation, writeDomainRequirements, writeDomainTesting, writeDomainBugsSecurity instead
  * @param {string} domainId - The domain ID
  * @param {Object} data - Domain analysis data
  */
 export async function writeDomain(domainId, data) {
-  // Split data into three separate files
-  const { documentation, requirements, testing, domainName, timestamp } = data;
+  // Split data into separate files
+  const {
+    documentation,
+    requirements,
+    testing,
+    bugsSecurity,
+    domainName,
+    timestamp,
+  } = data;
 
   const baseData = {
     domainId,
@@ -196,6 +247,13 @@ export async function writeDomain(domainId, data) {
     await writeDomainTesting(domainId, {
       ...baseData,
       testing,
+    });
+  }
+
+  if (bugsSecurity) {
+    await writeDomainBugsSecurity(domainId, {
+      ...baseData,
+      bugsSecurity,
     });
   }
 }
@@ -267,6 +325,88 @@ export async function readDomainTestingMetadata(domainId) {
       metadataPath,
       `domain ${domainId} testing metadata`,
     );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Read domain bugs & security metadata
+ * @param {string} domainId - The domain ID
+ * @returns {Promise<Object|null>} Metadata or null if not found
+ */
+export async function readDomainBugsSecurityMetadata(domainId) {
+  try {
+    const metadataPath = path.join(
+      config.paths.targetAnalysis,
+      "domains",
+      domainId,
+      "bugs-security.meta.json",
+    );
+    return await tryReadJsonFile(
+      metadataPath,
+      `domain ${domainId} bugs-security metadata`,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Read logs from a domain section JSON file
+ * @param {string} domainId - The domain ID
+ * @param {string} section - Section type (documentation, requirements, testing, bugs-security)
+ * @returns {Promise<string|null>} Logs content or null if not found
+ */
+export async function readDomainSectionLogs(domainId, section) {
+  try {
+    let sectionData = null;
+
+    // Get the appropriate section data
+    switch (section) {
+      case "documentation":
+        sectionData = await readDomainDocumentation(domainId);
+        break;
+      case "requirements":
+        sectionData = await readDomainRequirements(domainId);
+        break;
+      case "testing":
+        sectionData = await readDomainTesting(domainId);
+        break;
+      case "bugs-security":
+        sectionData = await readDomainBugsSecurity(domainId);
+        break;
+      default:
+        return null;
+    }
+
+    // Extract log file path from metadata or root level
+    const logFilePath = sectionData?.metadata?.logFile || sectionData?.logFile;
+
+    if (!logFilePath) {
+      return null;
+    }
+
+    // Read the actual log file
+    try {
+      const absoluteLogPath = path.join(
+        config.paths.targetAnalysis,
+        logFilePath,
+      );
+      const logContent = await fs.readFile(absoluteLogPath, "utf-8");
+      return logContent;
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return null;
+      }
+      throw error;
+    }
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;

@@ -128,18 +128,14 @@ router.get("/:id/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const mockResponse = await readMockJson([
-      "domains",
-      "bugs-security-analysis.json",
-    ]);
+    const data = await domainsPersistence.readDomainBugsSecurity(id);
 
-    const data = {
-      ...mockResponse,
-      taskId: `mock-bugs-security-${Date.now()}`,
-      domainId: id,
-      timestamp: new Date().toISOString(),
-      analyzedFiles: [],
-    };
+    if (!data) {
+      return res.status(404).json({
+        error: "Domain bugs & security not found",
+        message: `No bugs & security data found for domain: ${id}`,
+      });
+    }
 
     res.json(data);
   } catch (error) {
@@ -464,6 +460,48 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
       { error, component: "API" },
     );
     res.status(500).json({ error: "Failed to apply test" });
+  }
+});
+
+/**
+ * Get logs for a specific domain section
+ */
+router.get("/:id/logs/:section", async (req, res) => {
+  try {
+    const { id, section } = req.params;
+
+    // Validate section parameter
+    const validSections = [
+      "documentation",
+      "requirements",
+      "testing",
+      "bugs-security",
+    ];
+    if (!validSections.includes(section)) {
+      return res.status(400).json({
+        error: "Invalid section",
+        message: `Section must be one of: ${validSections.join(", ")}`,
+      });
+    }
+
+    const logs = await domainsPersistence.readDomainSectionLogs(id, section);
+
+    if (!logs) {
+      return res.status(404).json({
+        error: "Logs not found",
+        message: `No logs found for domain ${id} section ${section}`,
+      });
+    }
+
+    res.json({ content: logs, section, domainId: id });
+  } catch (error) {
+    logger.error(
+      `Error reading logs for domain ${req.params.id} section ${req.params.section}`,
+      { error, component: "API" },
+    );
+    res.status(500).json({
+      error: "Failed to read domain section logs",
+    });
   }
 });
 

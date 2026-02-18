@@ -90,6 +90,10 @@ export default {
   applyTest: (domainId, testId) =>
     api.post(`/analysis/domain/${domainId}/tests/${testId}/apply`),
 
+  // Domain logs
+  getDomainSectionLogs: (domainId, section) =>
+    api.get(`/analysis/domain/${domainId}/logs/${section}`),
+
   // Tasks
   getPendingTasks: () => api.get("/tasks/pending"),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
