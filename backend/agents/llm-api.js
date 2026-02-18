@@ -721,6 +721,7 @@ async function executeAnalysisTask(task) {
 
     let iterationCount = 0;
     const maxIterations = 50; // Prevent infinite loops
+    let llmWrittenFilePath = null; // Track where LLM actually wrote the file
 
     emitTaskProgress(task, "analyzing", "Analyzing domain files...");
     taskLogger.info(
@@ -891,6 +892,11 @@ async function executeAnalysisTask(task) {
               toolCall.arguments,
             );
 
+            // Track write_file calls to detect misplaced files
+            if (toolCall.name === "write_file" && toolCall.arguments?.path) {
+              llmWrittenFilePath = toolCall.arguments.path;
+            }
+
             taskLogger.debug(
               `  ✅ Tool ${toolCall.name} completed (${result.length} chars)`,
               {
@@ -974,6 +980,40 @@ async function executeAnalysisTask(task) {
       expectedPath: outputPath,
     });
 
+    // Check if LLM wrote to a different path than expected
+    if (llmWrittenFilePath && llmWrittenFilePath !== task.outputFile) {
+      const actualPath = path.join(config.target.directory, llmWrittenFilePath);
+      taskLogger.warn(
+        "⚠️  LLM HALLUCINATED FILE PATH - wrote to wrong location!",
+        {
+          component: "LLM-API",
+          expected: task.outputFile,
+          actual: llmWrittenFilePath,
+        },
+      );
+      taskLogger.info(
+        "📋 Moving file from hallucinated path to expected location...",
+        { component: "LLM-API" },
+      );
+
+      try {
+        // Read content from the wrong location
+        const content = await fs.readFile(actualPath, "utf-8");
+        // Write to correct location
+        await fs.writeFile(outputPath, content, "utf-8");
+        // Delete the misplaced file
+        await fs.unlink(actualPath);
+        taskLogger.info("✅ File moved successfully to correct location", {
+          component: "LLM-API",
+        });
+      } catch (moveError) {
+        taskLogger.error("❌ Failed to move misplaced file", {
+          component: "LLM-API",
+          error: moveError.message,
+        });
+      }
+    }
+
     // Check if output file was created
     let outputExists = false;
     try {
@@ -1002,14 +1042,17 @@ async function executeAnalysisTask(task) {
       const messages = chatState.getMessages();
       let jsonContent = null;
 
-      // Find the last message with JSON content
+      // Find the last message with JSON content (skip tool calls)
       for (let i = messages.length - 1; i >= 0; i--) {
         const msg = messages[i];
-        if (msg.role === "assistant" && msg.content) {
-          const content =
-            typeof msg.content === "string"
-              ? msg.content
-              : JSON.stringify(msg.content);
+
+        // Only process text content from assistant, skip tool calls
+        if (
+          msg.role === "assistant" &&
+          msg.content &&
+          typeof msg.content === "string"
+        ) {
+          const content = msg.content;
 
           // Try to extract JSON from markdown code blocks or plain text
           const jsonMatch =
@@ -1020,7 +1063,18 @@ async function executeAnalysisTask(task) {
           if (jsonMatch) {
             try {
               const extractedJson = jsonMatch[1].trim();
-              jsonContent = JSON.parse(extractedJson);
+              const parsed = JSON.parse(extractedJson);
+
+              // Validate it's not tool call metadata (has "type": "tool_use")
+              if (parsed.type === "tool_use" || parsed.name === "write_file") {
+                taskLogger.debug(
+                  "⏭️  Skipping tool call metadata, looking for actual output",
+                  { component: "LLM-API" },
+                );
+                continue;
+              }
+
+              jsonContent = parsed;
               taskLogger.info(
                 "✅ JSON successfully extracted from LLM response",
                 {
