@@ -5,7 +5,7 @@ import { ClaudeClient } from "../llm/clients/claude-client.js";
 import { ChatState } from "../llm/chat-state.js";
 import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
-import { emitSocketEvent } from "../utils/socket-emitter.js";
+import { emitSocketEvent, emitTaskProgress } from "../utils/socket-emitter.js";
 import { getLogEventForTaskType } from "../utils/task-logger.js";
 import * as logger from "../utils/logger.js";
 import {
@@ -79,8 +79,8 @@ export async function execute(task) {
     return await executeDocumentationTask(task);
   }
 
-  // For other tasks (codebase analysis, requirements, testing), use JSON output
-  return await executeJsonTask(task);
+  // For other analysis tasks (codebase analysis, requirements, testing)
+  return await executeAnalysisTask(task);
 }
 
 /**
@@ -629,28 +629,16 @@ function extractMarkdownFromResponse(content) {
 }
 
 /**
- * Helper to emit progress for JSON tasks
+ * Execute analysis task (codebase analysis, requirements, testing)
+ * These tasks analyze code and output structured JSON results
  */
-function emitJsonTaskProgress(task, stage, message) {
-  emitSocketEvent(SOCKET_EVENTS.TASK_PROGRESS, {
-    taskId: task.id,
-    domainId: task.params?.domainId,
-    type: task.type,
-    stage,
-    message,
-  });
-}
-
-/**
- * Execute JSON output task (codebase analysis, requirements, testing)
- */
-async function executeJsonTask(task) {
+async function executeAnalysisTask(task) {
   logger.info(`Executing LLM API task: ${task.type}`, {
     component: "LLM-API",
     taskId: task.id,
   });
 
-  emitJsonTaskProgress(task, "initializing", "Initializing analysis...");
+  emitTaskProgress(task, "initializing", "Initializing analysis...");
 
   // Read instruction file
   const instructionPath = path.join(
@@ -660,11 +648,7 @@ async function executeJsonTask(task) {
   const instructionTemplate = await fs.readFile(instructionPath, "utf-8");
 
   // Process template with task variables
-  emitJsonTaskProgress(
-    task,
-    "initializing",
-    "Processing instruction template...",
-  );
+  emitTaskProgress(task, "initializing", "Processing instruction template...");
   const templateVariables = await buildTemplateVariables(task);
   const instructions = processTemplate(instructionTemplate, templateVariables);
 
@@ -709,7 +693,7 @@ async function executeJsonTask(task) {
     taskLogger.raw("");
 
     // Initialize LLM client and chat state
-    emitJsonTaskProgress(task, "initializing", "Initializing LLM client...");
+    emitTaskProgress(task, "initializing", "Initializing LLM client...");
     taskLogger.info("🤖 Initializing LLM client...", {
       component: "LLM-API",
       model: config.llm.model,
@@ -737,7 +721,7 @@ async function executeJsonTask(task) {
     let iterationCount = 0;
     const maxIterations = 50; // Prevent infinite loops
 
-    emitJsonTaskProgress(task, "analyzing", "Analyzing domain files...");
+    emitTaskProgress(task, "analyzing", "Analyzing domain files...");
     taskLogger.info(
       `🔄 Starting analysis loop (max ${maxIterations} iterations)`,
       {
@@ -772,9 +756,31 @@ async function executeJsonTask(task) {
           component: "LLM-API",
           taskId: task.id,
         });
+
+        emitTaskProgress(
+          task,
+          "compacting",
+          "Context too large, compacting chat history...",
+        );
+        emitSocketEvent(getLogEventForTaskType(task.type), {
+          taskId: task.id,
+          domainId: task.params?.domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `\n🗜️  [Compacting] Context too large, compacting chat history...\n`,
+        });
+
         await chatState.compact();
+
         taskLogger.info("✅ Context compaction complete", {
           component: "LLM-API",
+        });
+        emitSocketEvent(getLogEventForTaskType(task.type), {
+          taskId: task.id,
+          domainId: task.params?.domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `✅ [Compaction Complete] Chat history compacted\n`,
         });
       }
 
@@ -858,7 +864,7 @@ async function executeJsonTask(task) {
           if (toolCall.name === "list_directory") {
             progressMessage = `Listing directory ${filePath}`;
           }
-          emitJsonTaskProgress(task, "analyzing", progressMessage);
+          emitTaskProgress(task, "analyzing", progressMessage);
 
           taskLogger.info(`  🔨 Executing: ${toolCall.name}`, {
             component: "LLM-API",
@@ -931,7 +937,7 @@ async function executeJsonTask(task) {
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `\n✅ [COMPLETE] LLM has finished the analysis\n`,
+          log: `\n✅ [Analysis Complete] LLM has finished analyzing, now extracting results...\n`,
         });
 
         break;
@@ -985,7 +991,7 @@ async function executeJsonTask(task) {
 
     // If file doesn't exist, try to extract JSON from the conversation
     if (!outputExists) {
-      emitJsonTaskProgress(task, "processing", "Extracting results...");
+      emitTaskProgress(task, "processing", "Extracting results...");
       taskLogger.raw("");
       taskLogger.info("🔎 Attempting to extract JSON from LLM responses...", {
         component: "LLM-API",
@@ -1037,7 +1043,7 @@ async function executeJsonTask(task) {
 
       if (jsonContent) {
         // Write the extracted JSON to file
-        emitJsonTaskProgress(task, "saving", "Saving results...");
+        emitTaskProgress(task, "saving", "Saving results...");
         await fs.writeFile(
           outputPath,
           JSON.stringify(jsonContent, null, 2),
@@ -1052,7 +1058,7 @@ async function executeJsonTask(task) {
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `[File Written] ✅ Created ${task.outputFile}\n`,
+          log: `✅ [File Written] Created ${task.outputFile}\n`,
         });
       } else {
         const errorMessage = "LLM did not output valid JSON in its responses";
@@ -1090,6 +1096,16 @@ async function executeJsonTask(task) {
       component: "LLM-API",
     });
     taskLogger.raw("=".repeat(80));
+
+    // Emit final completion event if not already sent
+    emitSocketEvent(getLogEventForTaskType(task.type), {
+      taskId: task.id,
+      domainId: task.params?.domainId,
+      type: task.type,
+      stream: "stdout",
+      log: `\n${"=".repeat(80)}\n✅ [COMPLETE] Process finished successfully\n📊 Iterations: ${iterationCount}\n📁 Output: ${task.outputFile}\n${"=".repeat(80)}\n`,
+    });
+
     logStream.end();
     await new Promise((resolve) => logStream.on("finish", resolve));
 

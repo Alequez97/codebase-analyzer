@@ -3,6 +3,8 @@
  * Avoids circular dependencies when agents need to emit socket events
  */
 
+import { SOCKET_EVENTS } from "../constants/socket-events.js";
+
 let socketInstance = null;
 
 /**
@@ -40,4 +42,21 @@ export function emitSocketEvent(eventName, data) {
  */
 export function isSocketReady() {
   return socketInstance !== null;
+}
+
+/**
+ * Emit task progress event
+ * Convenience helper for emitting task progress updates
+ * @param {Object} task - Task object with id, type, and params
+ * @param {string} stage - Progress stage (initializing, analyzing, compacting, saving, etc.)
+ * @param {string} message - Progress message to display
+ */
+export function emitTaskProgress(task, stage, message) {
+  emitSocketEvent(SOCKET_EVENTS.TASK_PROGRESS, {
+    taskId: task.id,
+    domainId: task.params?.domainId,
+    type: task.type,
+    stage,
+    message,
+  });
 }
