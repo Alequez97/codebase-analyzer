@@ -222,6 +222,23 @@ async function enhanceOutputWithTaskMetadata(task) {
       }
     }
 
+    if (analysis && typeof analysis === "object" && !Array.isArray(analysis)) {
+      const metadata =
+        analysis.metadata && typeof analysis.metadata === "object"
+          ? { ...analysis.metadata }
+          : {};
+
+      if (!metadata.logFile) {
+        metadata.logFile = task.logFile || null;
+      }
+
+      if (!metadata.taskId) {
+        metadata.taskId = task.id;
+      }
+
+      analysis.metadata = metadata;
+    }
+
     // Add task metadata to the analysis
     analysis.taskId = task.id;
     analysis.logFile = task.logFile || null;
