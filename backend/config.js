@@ -56,6 +56,7 @@ const config = {
   // LLM API configuration (used for analysis JSON generation)
   llm: {
     model: process.env.LLM_MODEL || "deepseek",
+    maxTokens: 32768, // Claude Sonnet 4.5 supports up to 64K output tokens
     apiKeys: {
       deepseek: process.env.DEEPSEEK_API_KEY,
       anthropic: process.env.ANTHROPIC_API_KEY,

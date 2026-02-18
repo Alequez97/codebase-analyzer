@@ -30,7 +30,7 @@ export class ClaudeClient extends BaseLLMClient {
   async sendMessage(messages, options = {}) {
     const requestParams = {
       model: this.model,
-      max_tokens: options.maxTokens || this.config.maxTokens || 4096,
+      max_tokens: this.config.maxTokens,
       messages: this.formatMessages(messages),
     };
 

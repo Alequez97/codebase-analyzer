@@ -47,7 +47,7 @@ export async function detect() {
  * @returns {BaseLLMClient}
  */
 function createLLMClient() {
-  const { model, apiKeys } = config.llm;
+  const { model, apiKeys, maxTokens } = config.llm;
 
   // For now, we only support Claude/Anthropic
   // Future: add OpenAI, DeepSeek, OpenRouter clients
@@ -55,6 +55,7 @@ function createLLMClient() {
     return new ClaudeClient({
       apiKey: apiKeys.anthropic,
       model: model.startsWith("claude") ? model : "claude-sonnet-4-20250514",
+      maxTokens,
     });
   }
 
