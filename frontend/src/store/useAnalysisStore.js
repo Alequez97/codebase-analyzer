@@ -2,6 +2,7 @@ import { create } from "zustand";
 import api from "../services/api";
 import { sortDomainsByPriority } from "../utils/domain-utils";
 import { TASK_TYPES } from "../constants/task-types";
+import { useLogsStore } from "./useLogsStore";
 
 export const useAnalysisStore = create((set, get) => ({
   // State
@@ -241,6 +242,9 @@ export const useAnalysisStore = create((set, get) => ({
   analyzeDomainDocumentation: async (domain) => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
 
+    // Clear logs for this domain section when starting new analysis
+    useLogsStore.getState().clearLogs(domain.id, "documentation");
+
     set((state) => {
       const newLoadingMap = new Map(state.domainDocumentationLoadingById);
       newLoadingMap.set(domain.id, true);
@@ -275,6 +279,9 @@ export const useAnalysisStore = create((set, get) => ({
 
   analyzeDomainRequirements: async (domain, userContext = "") => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
+
+    // Clear logs for this domain section when starting new analysis
+    useLogsStore.getState().clearLogs(domain.id, "requirements");
 
     set((state) => {
       const newLoadingMap = new Map(state.domainRequirementsLoadingById);
@@ -314,6 +321,9 @@ export const useAnalysisStore = create((set, get) => ({
 
   analyzeDomainTesting: async (domain) => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
+
+    // Clear logs for this domain section when starting new analysis
+    useLogsStore.getState().clearLogs(domain.id, "testing");
 
     set((state) => {
       const newLoadingMap = new Map(state.domainTestingLoadingById);
