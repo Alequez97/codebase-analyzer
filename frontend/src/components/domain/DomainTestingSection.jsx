@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
-import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
+import LogsViewer from "./LogsViewer";
 
 function getPriorityColor(priority) {
   if (priority === "P0") return "red";
@@ -507,30 +507,7 @@ export default function DomainTestingSection({
           </Box>
         )}
         {showLogs ? (
-          <Box
-            bg="gray.900"
-            color="green.300"
-            p={4}
-            borderRadius="md"
-            fontFamily="mono"
-            fontSize="xs"
-            maxH="500px"
-            overflowY="auto"
-            whiteSpace="pre-wrap"
-            wordBreak="break-word"
-          >
-            {logsLoading ? (
-              <Text color="gray.500">Loading logs...</Text>
-            ) : logs ? (
-              <code style={{ display: "block" }}>
-                {formatIsoUtcTimestampsInText(logs)}
-              </code>
-            ) : (
-              <Text color="gray.500">
-                No logs available. Run analysis to see logs.
-              </Text>
-            )}
-          </Box>
+          <LogsViewer logs={logs} loading={logsLoading} />
         ) : !testing ? (
           <Alert.Root status="info">
             <Alert.Indicator />

@@ -16,8 +16,8 @@ export const useLogsStore = create(
       domainLogsBySection: new Map(),
       // Loading state for logs fetch (Map<domainId, Map<sectionType, boolean>>)
       logsLoadingBySection: new Map(),
-      // Codebase analysis logs (real-time from socket)
-      codebaseAnalysisLogs: [],
+      // Codebase analysis logs (real-time from socket) - stored as string
+      codebaseAnalysisLogs: "",
       codebaseLogsLoading: false,
       codebaseLogsError: null,
       loadedCodebaseTaskId: null,
@@ -66,12 +66,12 @@ export const useLogsStore = create(
         }),
 
       /**
-       * Fetch task logs from API
+       * Fetch domain section logs from API
        * @param {string} domainId - Domain identifier
        * @param {string} taskId - Task identifier
-       * @param {string} sectionType - Section type
+       * @param {string} sectionType - Section type (documentation, requirements, testing)
        */
-      fetchTaskLogs: async (domainId, taskId, sectionType) => {
+      fetchDomainSectionLogs: async (domainId, taskId, sectionType) => {
         // Set loading state
         set((state) => {
           const loadingMap =
@@ -118,18 +118,7 @@ export const useLogsStore = create(
        */
       setCodebaseAnalysisLogsFromContent: (content, taskId = null) =>
         set({
-          codebaseAnalysisLogs: content
-            ? [
-                {
-                  id: `historical-${Date.now()}`,
-                  taskId: taskId || "historical",
-                  type: TASK_TYPES.CODEBASE_ANALYSIS,
-                  stream: "stdout",
-                  data: content,
-                  timestamp: new Date().toISOString(),
-                },
-              ]
-            : [],
+          codebaseAnalysisLogs: content || "",
         }),
 
       /**
@@ -138,7 +127,11 @@ export const useLogsStore = create(
        * @param {boolean} force - Force reloading even if task is already loaded
        * @param {boolean} isAnalyzing - Whether codebase analysis is currently running
        */
-      fetchCodebaseAnalysisLogs: async (analysis, force = false, isAnalyzing = false) => {
+      fetchCodebaseAnalysisLogs: async (
+        analysis,
+        force = false,
+        isAnalyzing = false,
+      ) => {
         // Don't fetch from API if analysis is in progress - rely on socket streaming instead
         if (isAnalyzing) {
           return;
@@ -208,18 +201,18 @@ export const useLogsStore = create(
         }),
 
       /**
-       * Add a log entry to codebase analysis logs (from socket events)
-       * @param {Object} logEntry - Log entry object
+       * Append log text to codebase analysis logs (from socket events)
+       * @param {string} logText - Log text to append
        */
-      addCodebaseAnalysisLog: (logEntry) =>
+      appendCodebaseAnalysisLog: (logText) =>
         set((state) => ({
-          codebaseAnalysisLogs: [...state.codebaseAnalysisLogs, logEntry],
+          codebaseAnalysisLogs: state.codebaseAnalysisLogs + logText,
         })),
 
       /**
        * Clear all codebase analysis logs
        */
-      clearCodebaseAnalysisLogs: () => set({ codebaseAnalysisLogs: [] }),
+      clearCodebaseAnalysisLogs: () => set({ codebaseAnalysisLogs: "" }),
 
       reset: () =>
         set({
@@ -227,7 +220,7 @@ export const useLogsStore = create(
           showDomainLogs: false,
           domainLogsBySection: new Map(),
           logsLoadingBySection: new Map(),
-          codebaseAnalysisLogs: [],
+          codebaseAnalysisLogs: "",
           codebaseLogsLoading: false,
           codebaseLogsError: null,
           loadedCodebaseTaskId: null,

@@ -8,13 +8,12 @@ import {
   Box,
   IconButton,
   Badge,
-  Code,
   VStack,
   Input,
 } from "@chakra-ui/react";
 import { Pencil, X, Save, FileText, Sparkles } from "lucide-react";
 import { Card } from "../ui/card";
-import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
+import LogsViewer from "./LogsViewer";
 import {
   DialogRoot,
   DialogContent,
@@ -154,32 +153,7 @@ export default function DomainRequirementsSection({
             </Box>
           )}
           {showLogs ? (
-            <Box
-              bg="gray.900"
-              color="green.300"
-              p={4}
-              borderRadius="md"
-              fontFamily="mono"
-              fontSize="xs"
-              maxH="500px"
-              overflowY="auto"
-              whiteSpace="pre-wrap"
-              wordBreak="break-word"
-            >
-              {logsLoading ? (
-                <Text color="gray.500">Loading logs...</Text>
-              ) : logs ? (
-                <Code.Root variant="plain" colorPalette="green" size="xs">
-                  <Code.Content>
-                    {formatIsoUtcTimestampsInText(logs)}
-                  </Code.Content>
-                </Code.Root>
-              ) : (
-                <Text color="gray.500">
-                  No logs available. Run analysis to see logs.
-                </Text>
-              )}
-            </Box>
+            <LogsViewer logs={logs} loading={logsLoading} />
           ) : isEditMode ? (
             <>
               <Text mb={3} color="gray.600" fontSize="sm">

@@ -28,8 +28,8 @@ const AGENTS = {
 export const DEFAULT_AGENTS = {
   CODEBASE_ANALYSIS: "llm-api",
   DOMAIN_DOCUMENTATION: "llm-api",
-  DOMAIN_REQUIREMENTS: "aider",
-  DOMAIN_TESTING: "aider",
+  DOMAIN_REQUIREMENTS: "llm-api",
+  DOMAIN_TESTING: "llm-api",
 };
 
 /**
@@ -38,7 +38,7 @@ export const DEFAULT_AGENTS = {
  * @returns {Promise<Object>} Agent module with detect() and execute() functions
  */
 export async function getAgent(agentId) {
-  const selectedId = agentId || "aider";
+  const selectedId = agentId || "llm-api";
   const agent = AGENTS[selectedId];
 
   if (!agent) {

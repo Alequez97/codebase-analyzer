@@ -189,14 +189,7 @@ export const useSocketStore = create((set, get) => ({
     // Log events - stream logs to logs store
     const handleLogEvent = ({ taskId, type, stream, log, domainId }) => {
       // Add to codebase analysis logs (visible in dashboard)
-      useLogsStore.getState().addCodebaseAnalysisLog({
-        id: Date.now() + Math.random(),
-        taskId,
-        type,
-        stream,
-        data: log,
-        timestamp: new Date().toISOString(),
-      });
+      useLogsStore.getState().appendCodebaseAnalysisLog(log);
 
       // If this is a domain-specific log, also append to domain logs
       if (domainId && type) {

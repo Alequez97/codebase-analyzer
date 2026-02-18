@@ -9,14 +9,15 @@ import { StatusBar } from "../components/dashboard/StatusBar";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
 import { ConfigurationPanel } from "../components/dashboard/ConfigurationPanel";
 import { ModulesSection } from "../components/dashboard/ModulesSection";
-import { TaskLogs } from "../components/dashboard/TaskLogs";
+import { CodebaseAnalysisLogs } from "../components/dashboard/CodebaseAnalysisLogs";
 
 export default function Dashboard() {
   // Config store (server configuration, agents, target project)
   const { config, configLoading, fetchConfig } = useConfigStore();
 
   // Analysis store (codebase analysis data)
-  const { loading, error, analysis, analyzingCodebase, fetchAnalysis } = useAnalysisStore();
+  const { loading, error, analysis, analyzingCodebase, fetchAnalysis } =
+    useAnalysisStore();
 
   // Logs store (UI state for showing/hiding logs)
   const { showDashboardLogs, toggleDashboardLogs, fetchCodebaseAnalysisLogs } =
@@ -88,7 +89,7 @@ export default function Dashboard() {
               {showDashboardLogs ? "Show codebase analysis" : "Show Logs"}
             </Button>
           </HStack>
-          {showDashboardLogs ? <TaskLogs /> : <ModulesSection />}
+          {showDashboardLogs ? <CodebaseAnalysisLogs /> : <ModulesSection />}
         </VStack>
       </Container>
     </Box>

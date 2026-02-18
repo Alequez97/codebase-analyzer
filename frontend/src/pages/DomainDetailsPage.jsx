@@ -62,7 +62,7 @@ export default function DomainDetailsPage() {
   // Logs store
   const {
     showDomainLogs,
-    fetchTaskLogs,
+    fetchDomainSectionLogs,
     domainLogsBySection,
     logsLoadingBySection,
   } = useLogsStore();
@@ -161,17 +161,17 @@ export default function DomainDetailsPage() {
 
     // Fetch documentation logs if task exists
     if (documentation?.taskId) {
-      fetchTaskLogs(domainId, documentation.taskId, "documentation");
+      fetchDomainSectionLogs(domainId, documentation.taskId, "documentation");
     }
 
     // Fetch requirements logs if task exists
     if (requirements?.taskId) {
-      fetchTaskLogs(domainId, requirements.taskId, "requirements");
+      fetchDomainSectionLogs(domainId, requirements.taskId, "requirements");
     }
 
     // Fetch testing logs if task exists
     if (testing?.taskId) {
-      fetchTaskLogs(domainId, testing.taskId, "testing");
+      fetchDomainSectionLogs(domainId, testing.taskId, "testing");
     }
   }, [domainId, documentation?.taskId, requirements?.taskId, testing?.taskId]);
 
