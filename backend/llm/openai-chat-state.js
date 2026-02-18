@@ -1,10 +1,11 @@
 import * as logger from "../utils/logger.js";
 
 /**
- * Chat State Manager
- * Manages conversation history, token counting, and context compaction
+ * OpenAI Chat State Manager
+ * Manages conversation history with OpenAI's message format
+ * (tool_calls as separate array, not embedded in content)
  */
-export class ChatState {
+export class OpenAIChatState {
   constructor(llmClient, options = {}) {
     this.client = llmClient;
     this.messages = [];
@@ -36,7 +37,7 @@ export class ChatState {
   }
 
   /**
-   * Add an assistant message
+   * Add an assistant message with text content
    */
   addAssistantMessage(content) {
     this.messages.push({
@@ -47,36 +48,35 @@ export class ChatState {
 
   /**
    * Add tool use by assistant (when LLM calls a tool)
+   * OpenAI format: tool_calls are stored separately, not in content
    */
   addToolUse(toolCalls) {
-    // Store tool calls in assistant message content
-    // Convert normalized tool calls back to Claude's format with type field
-    const formattedContent = toolCalls.map((call) => ({
-      type: "tool_use",
+    // Convert normalized tool calls to OpenAI's tool_call format
+    const formattedToolCalls = toolCalls.map((call) => ({
       id: call.id,
-      name: call.name,
-      input: call.arguments, // normalized response uses 'arguments' field
+      type: "function",
+      function: {
+        name: call.name,
+        arguments: JSON.stringify(call.arguments), // OpenAI wants stringified arguments
+      },
     }));
 
     this.messages.push({
       role: "assistant",
-      content: formattedContent,
+      content: "", // OpenAI uses empty content when there are tool calls
+      tool_calls: formattedToolCalls,
     });
   }
 
   /**
    * Add tool result (response from executing a tool)
+   * OpenAI format: each tool result is a separate message with role: "tool"
    */
   addToolResult(toolCallId, toolName, result) {
     this.messages.push({
-      role: "user",
-      content: [
-        {
-          type: "tool_result",
-          tool_use_id: toolCallId,
-          content: result,
-        },
-      ],
+      role: "tool",
+      tool_call_id: toolCallId,
+      content: result,
     });
   }
 
@@ -118,11 +118,12 @@ export class ChatState {
     const conversationText = oldMessages
       .map((msg, idx) => {
         if (msg.role === "user") {
-          const content = this._extractTextContent(msg.content);
-          return `[User ${idx}]: ${content}`;
+          return `[User ${idx}]: ${msg.content}`;
         } else if (msg.role === "assistant") {
-          const content = this._extractTextContent(msg.content);
+          const content = msg.content || this._formatToolCalls(msg.tool_calls);
           return `[Assistant ${idx}]: ${content}`;
+        } else if (msg.role === "tool") {
+          return `[Tool Result ${idx}]: ${msg.content}`;
         }
         return "";
       })
@@ -141,8 +142,8 @@ Provide a clear, structured summary that captures the essential context for cont
 
   /**
    * Compact the conversation to reduce token usage
-   * Strategy: Keep tool-use/result pairs intact, summarize old turns, keep recent clean turns
-   * This prevents breaking Claude's requirement that tool_result pairs with tool_use
+   * Strategy: Keep tool_calls/tool_result pairs intact, summarize old turns, keep recent clean turns
+   * This prevents breaking OpenAI's API requirement for matching tool calls and results
    */
   async compact(llmClient) {
     if (this.messages.length <= 3) {
@@ -151,7 +152,7 @@ Provide a clear, structured summary that captures the essential context for cont
 
     const tokenCount = this.getTokenCount();
     logger.debug(`Compacting context. Current tokens: ${tokenCount}`, {
-      component: "ChatState",
+      component: "OpenAIChatState",
     });
 
     const systemMessages = this.messages.filter((m) => m.role === "system");
@@ -160,29 +161,21 @@ Provide a clear, structured summary that captures the essential context for cont
     );
 
     // Find the last "clean" point - where we can safely split without orphaning tool calls
-    // Look backwards to find an assistant message that doesn't have tool_use, or a user message
+    // OpenAI format: tool_calls are on assistant messages, tool results are separate "tool" messages
+    // We need to find a point where we're not in the middle of a tool execution cycle
     let lastCleanSplitIndex = 0;
     for (let i = conversationMessages.length - 1; i >= 0; i--) {
       const msg = conversationMessages[i];
 
-      // User messages are always "clean" split points
-      if (msg.role === "user") {
-        // Check if it's a tool_result message
-        const isToolResult =
-          Array.isArray(msg.content) &&
-          msg.content.some((block) => block.type === "tool_result");
-        if (!isToolResult) {
-          lastCleanSplitIndex = i + 1; // Keep from here on
-          break;
-        }
+      // A clean split point is:
+      // 1. A "user" message that is NOT a tool result, OR
+      // 2. An "assistant" message that does NOT have tool_calls
+      if (msg.role === "user" && msg.role !== "tool") {
+        lastCleanSplitIndex = i + 1; // Keep from here on
+        break;
       }
 
-      // Assistant messages without tool_use are clean
-      if (
-        msg.role === "assistant" &&
-        (!Array.isArray(msg.content) ||
-          !msg.content.some((block) => block.type === "tool_use"))
-      ) {
+      if (msg.role === "assistant" && !msg.tool_calls) {
         lastCleanSplitIndex = i + 1;
         break;
       }
@@ -215,20 +208,20 @@ Provide a clear, structured summary that captures the essential context for cont
         ];
 
         logger.debug("Requesting LLM to summarize conversation...", {
-          component: "ChatState",
+          component: "OpenAIChatState",
         });
 
         const summaryResponse = await llmClient.sendMessage(tempMessages);
         summary = summaryResponse.content || summary;
 
         logger.debug("LLM-generated summary received", {
-          component: "ChatState",
+          component: "OpenAIChatState",
           summaryLength: summary.length,
         });
       } catch (error) {
         logger.warn(
           `Failed to get LLM summary, using basic summary: ${error.message}`,
-          { component: "ChatState" },
+          { component: "OpenAIChatState" },
         );
         summary = this._summarizeMessages(oldMessages);
       }
@@ -250,7 +243,7 @@ Provide a clear, structured summary that captures the essential context for cont
     const newTokenCount = this.getTokenCount();
     logger.debug(
       `Compaction complete. New tokens: ${newTokenCount} (saved ${tokenCount - newTokenCount})`,
-      { component: "ChatState" },
+      { component: "OpenAIChatState" },
     );
   }
 
@@ -269,14 +262,28 @@ Provide a clear, structured summary that captures the essential context for cont
           content.length > 200 ? content.slice(0, 200) + "..." : content;
         summaryParts.push(`User: ${truncated}`);
       } else if (msg.role === "assistant") {
-        const content = this._extractTextContent(msg.content);
+        const content = msg.content || this._formatToolCalls(msg.tool_calls);
         const truncated =
           content.length > 300 ? content.slice(0, 300) + "..." : content;
         summaryParts.push(`Assistant: ${truncated}`);
+      } else if (msg.role === "tool") {
+        const content = msg.content || "";
+        const truncated =
+          content.length > 200 ? content.slice(0, 200) + "..." : content;
+        summaryParts.push(`Tool Result: ${truncated}`);
       }
     }
 
     return summaryParts.join("\n\n");
+  }
+
+  /**
+   * Format tool calls for display
+   * @private
+   */
+  _formatToolCalls(toolCalls) {
+    if (!toolCalls || toolCalls.length === 0) return "";
+    return `[Tool calls: ${toolCalls.map((tc) => tc.function.name).join(", ")}]`;
   }
 
   /**
@@ -294,7 +301,6 @@ Provide a clear, structured summary that captures the essential context for cont
           if (typeof block === "string") return block;
           if (block.type === "text") return block.text;
           if (block.type === "tool_result") return "[Tool result]";
-          if (block.type === "tool_use") return `[Tool call: ${block.name}]`;
           return "";
         })
         .join(" ");

@@ -4,9 +4,14 @@ import path from "path";
 import { ClaudeClient } from "../llm/clients/claude-client.js";
 import { OpenAIClient } from "../llm/clients/openai-client.js";
 import { ChatState } from "../llm/chat-state.js";
+import { OpenAIChatState } from "../llm/openai-chat-state.js";
 import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
-import { emitSocketEvent, emitTaskLog, emitTaskProgress } from "../utils/socket-emitter.js";
+import {
+  emitSocketEvent,
+  emitTaskLog,
+  emitTaskProgress,
+} from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 import {
   processTemplate,
@@ -281,7 +286,10 @@ async function generateDomainDocumentation({
 
   // Create LLM client
   const client = createLLMClient();
-  const chatState = new ChatState(client);
+  const chatState =
+    client instanceof OpenAIClient
+      ? new OpenAIChatState(client)
+      : new ChatState(client);
   const fileToolExecutor = new FileToolExecutor(config.target.directory);
 
   taskLogger.info(`📂 Domain files to analyze:`, { component: "LLM-API" });
@@ -814,7 +822,10 @@ async function executeAnalysisTask(task) {
       model: config.llm.model,
     });
     const client = createLLMClient();
-    const chatState = new ChatState(client);
+    const chatState =
+      client instanceof OpenAIClient
+        ? new OpenAIChatState(client)
+        : new ChatState(client);
     const fileToolExecutor = new FileToolExecutor(config.target.directory);
     taskLogger.info("✅ LLM client initialized", { component: "LLM-API" });
 
@@ -883,10 +894,10 @@ async function executeAnalysisTask(task) {
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `\n🗜️  [Compacting] Context too large, compacting chat history...\n`,
+          log: `\n🗜️  [Compacting] Using LLM to intelligently summarize conversation...\n`,
         });
 
-        await chatState.compact();
+        await chatState.compact(client);
 
         taskLogger.info("✅ Context compaction complete", {
           component: "LLM-API",
@@ -896,7 +907,7 @@ async function executeAnalysisTask(task) {
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `✅ [Compaction Complete] Chat history compacted\n`,
+          log: `✅ [Compaction Complete] Conversation summarized by LLM\n`,
         });
       }
 
@@ -1044,7 +1055,8 @@ async function executeAnalysisTask(task) {
       // Check if LLM indicated it's done (no more tool calls and stop_reason is end_turn)
       if (
         response.stopReason === "end_turn" ||
-        response.stopReason === "stop_sequence"
+        response.stopReason === "stop_sequence" ||
+        response.stopReason === "completed"
       ) {
         taskLogger.raw("");
         taskLogger.info("✅ LLM indicated completion (no more tool calls)", {
@@ -1305,4 +1317,3 @@ async function executeAnalysisTask(task) {
     };
   }
 }
-

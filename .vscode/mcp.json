@@ -11,6 +11,10 @@
     "chakra-ui": {
       "command": "npx",
       "args": ["-y", "@chakra-ui/react-mcp"]
+    },
+    "open-ai-developer-docs": {
+      "type": "http",
+      "url": "https://developers.openai.com/mcp"
     }
   }
 }

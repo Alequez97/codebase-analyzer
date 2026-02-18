@@ -3,7 +3,9 @@ import { BaseLLMClient } from "./base-client.js";
 
 /**
  * OpenAI LLM Client Implementation
- * Supports GPT-4, GPT-4 Turbo, and future models like GPT-5.2
+ * Uses the new Responses API (beta) for enhanced reasoning capabilities
+ * Supports GPT-4, GPT-4 Turbo, GPT-5-preview, and future reasoning models
+ * Includes support for function tools (custom tool calling)
  */
 export class OpenAIClient extends BaseLLMClient {
   constructor(config) {
@@ -24,7 +26,7 @@ export class OpenAIClient extends BaseLLMClient {
   }
 
   /**
-   * Send a message to OpenAI
+   * Send a message to OpenAI using Responses API
    * @param {Array<Object>} messages - Conversation history
    * @param {Object} [options] - Request options
    * @returns {Promise<Object>} Normalized response
@@ -32,15 +34,22 @@ export class OpenAIClient extends BaseLLMClient {
   async sendMessage(messages, options = {}) {
     const requestParams = {
       model: this.model,
-      max_completion_tokens: this.config.maxTokens || 4096,
-      messages: this.formatMessages(messages),
+      input: this.formatMessages(messages),
+      max_output_tokens: this.config.maxTokens || 4096,
     };
 
-    // Add temperature if specified
-    if (options.temperature !== undefined) {
-      requestParams.temperature = options.temperature;
-    } else if (this.config.temperature !== undefined) {
-      requestParams.temperature = this.config.temperature;
+    // Add reasoning level if specified (for reasoning models)
+    if (options.reasoning !== undefined) {
+      requestParams.reasoning = options.reasoning;
+    } else if (this.config.reasoning !== undefined) {
+      requestParams.reasoning = this.config.reasoning;
+    }
+
+    // Add text verbosity if specified
+    if (options.textVerbosity !== undefined) {
+      requestParams.text = { verbosity: options.textVerbosity };
+    } else if (this.config.textVerbosity !== undefined) {
+      requestParams.text = { verbosity: this.config.textVerbosity };
     }
 
     // Add tools if provided
@@ -50,7 +59,7 @@ export class OpenAIClient extends BaseLLMClient {
     }
 
     try {
-      const response = await this.client.chat.completions.create(requestParams);
+      const response = await this.client.responses.create(requestParams);
       return this.normalizeResponse(response);
     } catch (error) {
       throw new Error(`OpenAI API error: ${error.message}`);
@@ -58,23 +67,57 @@ export class OpenAIClient extends BaseLLMClient {
   }
 
   /**
-   * Format messages for OpenAI API
-   * OpenAI uses a simpler message format than Claude
+   * Format messages for Responses API
+   * Responses API expects input as array of items with specific types
+   * Converts Chat Completions format to Responses API format
    * @private
    */
   formatMessages(messages) {
-    return messages.map((msg) => {
-      // OpenAI requires separate system role
-      if (msg.role === "system") {
-        return {
-          role: "system",
-          content: msg.content,
-        };
+    const formattedItems = [];
+
+    for (const msg of messages) {
+      // Convert tool result messages to function_call_output items
+      if (msg.role === "tool") {
+        formattedItems.push({
+          type: "function_call_output",
+          call_id: msg.tool_call_id,
+          output: msg.content,
+        });
+        continue;
       }
 
+      // Convert tool_calls to function_call items (but also include assistant message if there's content)
+      if (msg.tool_calls && msg.tool_calls.length > 0) {
+        // If there's assistant content before tool calls, add it as a message
+        if (msg.content && msg.content.trim()) {
+          formattedItems.push({
+            type: "message",
+            role: "assistant",
+            content: [
+              {
+                type: "output_text",
+                text: msg.content,
+              },
+            ],
+          });
+        }
+
+        // Add each tool call as a function_call item
+        for (const toolCall of msg.tool_calls) {
+          formattedItems.push({
+            type: "function_call",
+            call_id: toolCall.id,
+            name: toolCall.function.name,
+            arguments: toolCall.function.arguments,
+          });
+        }
+        continue;
+      }
+
+      // Handle regular messages
       let content = msg.content;
 
-      // Convert array format to simple string if it's just text
+      // Convert array format to simple string
       if (Array.isArray(content)) {
         const textBlocks = content
           .filter((c) => c.type === "text")
@@ -87,63 +130,115 @@ export class OpenAIClient extends BaseLLMClient {
         }
       }
 
+      const contentStr =
+        typeof content === "string" ? content : JSON.stringify(content);
+
+      // Skip empty messages
+      if (!contentStr || !contentStr.trim()) {
+        continue;
+      }
+
+      // Convert role names (Responses API supports: assistant, system, developer, user)
+      // Note: Chat Completions uses "system" but Responses API prefers "developer"
+      let role = msg.role;
+      if (role === "system") {
+        role = "developer";
+      }
+
+      // Determine content type based on role
+      const contentType = role === "assistant" ? "output_text" : "input_text";
+
+      formattedItems.push({
+        type: "message",
+        role: role,
+        content: [
+          {
+            type: contentType,
+            text: contentStr,
+          },
+        ],
+      });
+    }
+
+    return formattedItems;
+  }
+
+  /**
+   * Format tools for Responses API
+   * Converts tool definitions to OpenAI function tool format
+   * Responses API uses internally-tagged structure (name/description at top level)
+   * @private
+   */
+  formatTools(tools) {
+    return tools.map((tool) => {
+      const requiredFields = tool.required || [];
+      const allFields = Object.keys(tool.parameters);
+
+      // Enable strict mode only if all fields are required
+      // (strict mode requires all properties to be in required array, or use null type for optional)
+      const useStrict = requiredFields.length === allFields.length;
+
       return {
-        role: msg.role,
-        content:
-          typeof content === "string" ? content : JSON.stringify(content),
+        type: "function",
+        name: tool.name,
+        description: tool.description,
+        strict: useStrict,
+        parameters: {
+          type: "object",
+          properties: tool.parameters,
+          required: requiredFields,
+          additionalProperties: false,
+        },
       };
     });
   }
 
   /**
-   * Format tools for OpenAI API
-   * OpenAI uses a different tool format than Claude
-   * @private
-   */
-  formatTools(tools) {
-    return tools.map((tool) => ({
-      type: "function",
-      function: {
-        name: tool.name,
-        description: tool.description,
-        parameters: {
-          type: "object",
-          properties: tool.parameters,
-          required: tool.required || Object.keys(tool.parameters),
-        },
-      },
-    }));
-  }
-
-  /**
-   * Normalize OpenAI response to standard format
+   * Normalize Responses API response to standard format
    * @private
    */
   normalizeResponse(response) {
     const result = {
       content: "",
       toolCalls: [],
-      stopReason: response.choices[0].finish_reason,
+      stopReason: response.status || "completed",
       usage: {
-        inputTokens: response.usage?.prompt_tokens || 0,
-        outputTokens: response.usage?.completion_tokens || 0,
+        inputTokens: response.usage?.input_tokens || 0,
+        outputTokens: response.usage?.output_tokens || 0,
       },
     };
 
-    const choice = response.choices[0];
-
-    // Handle text content
-    if (choice.message.content) {
-      result.content = choice.message.content;
+    // Handle text output from Responses API
+    // Use output_text helper (recommended) or extract from output array
+    if (response.output_text) {
+      result.content = response.output_text;
+    } else if (Array.isArray(response.output)) {
+      // Extract text from message items in output array
+      const messageItems = response.output.filter(
+        (item) => item.type === "message",
+      );
+      const textContents = messageItems.flatMap((msg) =>
+        (msg.content || [])
+          .filter((c) => c.type === "output_text")
+          .map((c) => c.text),
+      );
+      result.content = textContents.join("\n");
     }
 
-    // Handle tool calls
-    if (choice.message.tool_calls) {
-      result.toolCalls = choice.message.tool_calls.map((call) => ({
-        id: call.id,
-        name: call.function.name,
-        arguments: JSON.parse(call.function.arguments),
-      }));
+    // Handle tool calls from Responses API
+    // Tool calls are items in the output array with type "function_call"
+    if (Array.isArray(response.output)) {
+      result.toolCalls = response.output
+        .filter((item) => item.type === "function_call")
+        .map((call) => ({
+          id: call.call_id,
+          name: call.name,
+          // Parse arguments from JSON string to object (Responses API returns stringified args)
+          arguments:
+            typeof call.arguments === "string"
+              ? JSON.parse(call.arguments)
+              : call.arguments,
+        }));
     }
 
     return result;
