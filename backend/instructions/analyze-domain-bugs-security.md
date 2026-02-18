@@ -89,8 +89,7 @@ You MUST output your analysis as a valid JSON object with the following structur
 {
   "domainId": "{{DOMAIN_ID}}",
   "domainName": "{{DOMAIN_NAME}}",
-  "analyzedAt": "2024-01-15T10:30:00Z",
-  "issues": [
+  "findings": [
     {
       "id": "BUG-001",
       "title": "Clear, concise title of the issue",
@@ -109,6 +108,16 @@ You MUST output your analysis as a valid JSON object with the following structur
 ```
 
 ### Field Descriptions
+
+**Top-level fields**:
+
+- **domainId**: The domain identifier (use `{{DOMAIN_ID}}`)
+- **domainName**: Human-readable domain name (use `{{DOMAIN_NAME}}`)
+- **findings**: Array of all identified bugs, security vulnerabilities, and quality issues
+
+**Note**: The backend will automatically add `analyzedAt`, `taskId`, `logFile`, and `metadata` fields. You don't need to include these.
+
+**Finding object fields**:
 
 - **id**: Unique identifier (BUG-001, BUG-002, etc., or SEC-001 for security issues)
 - **title**: Short, clear title summarizing the issue
@@ -135,8 +144,7 @@ You MUST output your analysis as a valid JSON object with the following structur
 {
   "domainId": "user-auth",
   "domainName": "User Authentication",
-  "analyzedAt": "2024-01-15T10:30:00Z",
-  "issues": [
+  "findings": [
     {
       "id": "SEC-001",
       "title": "SQL Injection Vulnerability in Login Query",

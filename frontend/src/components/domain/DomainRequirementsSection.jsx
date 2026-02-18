@@ -9,11 +9,9 @@ import {
   IconButton,
   Badge,
   VStack,
-  Grid,
   Code,
   Separator,
   Collapsible,
-  Skeleton,
 } from "@chakra-ui/react";
 import {
   Pencil,
@@ -285,6 +283,33 @@ export default function DomainRequirementsSection({
                 <Badge colorPalette="purple" size="sm">
                   Logs View
                 </Badge>
+              )}
+              {sortedRequirements.length > 0 && (
+                <HStack gap={2}>
+                  <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                    {sortedRequirements.length} total
+                  </Text>
+                  {groupedRequirements.P0.length > 0 && (
+                    <Badge colorPalette={PRIORITY_COLORS.P0} size="sm">
+                      {groupedRequirements.P0.length} P0
+                    </Badge>
+                  )}
+                  {groupedRequirements.P1.length > 0 && (
+                    <Badge colorPalette={PRIORITY_COLORS.P1} size="sm">
+                      {groupedRequirements.P1.length} P1
+                    </Badge>
+                  )}
+                  {groupedRequirements.P2.length > 0 && (
+                    <Badge colorPalette={PRIORITY_COLORS.P2} size="sm">
+                      {groupedRequirements.P2.length} P2
+                    </Badge>
+                  )}
+                  {groupedRequirements.P3.length > 0 && (
+                    <Badge colorPalette={PRIORITY_COLORS.P3} size="sm">
+                      {groupedRequirements.P3.length} P3
+                    </Badge>
+                  )}
+                </HStack>
               )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
@@ -623,63 +648,7 @@ export default function DomainRequirementsSection({
                   )}
                 </VStack>
               ) : sortedRequirements.length > 0 ? (
-                <VStack align="stretch" gap={6}>
-                  {/* Summary Stats */}
-                  <Grid
-                    templateColumns="repeat(auto-fit, minmax(200px, 1fr))"
-                    gap={4}
-                  >
-                    <Card.Root size="sm" variant="outline">
-                      <Card.Body>
-                        <VStack align="start" gap={1}>
-                          <Text
-                            fontSize="xs"
-                            color="gray.500"
-                            fontWeight="medium"
-                          >
-                            Total Requirements
-                          </Text>
-                          <Text fontSize="2xl" fontWeight="bold">
-                            {sortedRequirements.length}
-                          </Text>
-                        </VStack>
-                      </Card.Body>
-                    </Card.Root>
-
-                    {Object.entries(groupedRequirements).map(
-                      ([priority, reqs]) =>
-                        reqs.length > 0 && (
-                          <Card.Root key={priority} size="sm" variant="outline">
-                            <Card.Body>
-                              <HStack justify="space-between">
-                                <VStack align="start" gap={1}>
-                                  <Text
-                                    fontSize="xs"
-                                    color="gray.500"
-                                    fontWeight="medium"
-                                  >
-                                    Priority {priority}
-                                  </Text>
-                                  <Text fontSize="2xl" fontWeight="bold">
-                                    {reqs.length}
-                                  </Text>
-                                </VStack>
-                                <Badge
-                                  colorPalette={PRIORITY_COLORS[priority]}
-                                  size="lg"
-                                  variant="solid"
-                                >
-                                  {priority}
-                                </Badge>
-                              </HStack>
-                            </Card.Body>
-                          </Card.Root>
-                        ),
-                    )}
-                  </Grid>
-
-                  {/* Requirements List */}
-                  <VStack align="stretch" gap={3}>
+                <VStack align="stretch" gap={3}>
                     {Object.entries(groupedRequirements).map(
                       ([priority, reqs]) =>
                         reqs.length > 0 && (
@@ -865,7 +834,6 @@ export default function DomainRequirementsSection({
                           </Box>
                         ),
                     )}
-                  </VStack>
                 </VStack>
               ) : (
                 <EmptyState
@@ -893,12 +861,7 @@ export default function DomainRequirementsSection({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              <HStack gap={2}>
-                <Sparkles size={20} />
-                <Text>Provide Additional Context (Optional)</Text>
-              </HStack>
-            </DialogTitle>
+            <DialogTitle>Provide Additional Context (Optional)</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <VStack align="stretch" gap={4}>

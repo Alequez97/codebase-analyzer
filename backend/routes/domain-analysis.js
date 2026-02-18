@@ -4,7 +4,6 @@ import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.j
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { DEFAULT_AGENTS } from "../agents/index.js";
 import * as logger from "../utils/logger.js";
-import { readMockJson, sleep } from "../utils/mock-data.js";
 
 const router = express.Router();
 
@@ -127,12 +126,17 @@ router.get("/:id/requirements", async (req, res) => {
 router.get("/:id/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await readMockJson(["domains", "bugs-security-analysis.json"]);
-    res.json({
-      ...data,
-      domainId: id,
-      timestamp: new Date().toISOString(),
-    });
+
+    const data = await domainsPersistence.readDomainBugsSecurity(id);
+
+    if (!data) {
+      return res.status(404).json({
+        error: "Domain bugs & security not found",
+        message: `No bugs & security analysis found for domain: ${id}`,
+      });
+    }
+
+    res.json(data);
   } catch (error) {
     logger.error(`Error reading domain bugs & security ${req.params.id}`, {
       error,
@@ -246,18 +250,25 @@ router.post("/:id/analyze/requirements", async (req, res) => {
 router.post("/:id/analyze/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
-    const includeRequirements = req.body?.includeRequirements === true;
+    const { files, includeRequirements = false } = req.body;
+    const agent = DEFAULT_AGENTS.DOMAIN_BUGS_SECURITY;
 
-    await sleep(1500);
+    if (!files || !Array.isArray(files)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "files[] are required",
+      });
+    }
 
-    const data = await readMockJson(["domains", "bugs-security-analysis.json"]);
-
-    res.json({
-      ...data,
-      domainId: id,
-      includesRequirements: includeRequirements,
-      timestamp: new Date().toISOString(),
-    });
+    const executeNow = req.body.executeNow !== false;
+    const task = await taskOrchestrator.createAnalyzeBugsSecurityTask(
+      id,
+      files,
+      includeRequirements,
+      executeNow,
+      agent,
+    );
+    res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating bugs & security analysis task", {
       error,

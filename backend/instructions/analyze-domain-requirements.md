@@ -85,7 +85,6 @@ You MUST output your analysis as a valid JSON object with the following structur
 {
   "domainId": "{{DOMAIN_ID}}",
   "domainName": "{{DOMAIN_NAME}}",
-  "analyzedAt": "2024-01-15T10:30:00Z",
   "requirements": [
     {
       "id": "REQ-001",
@@ -140,7 +139,6 @@ You MUST output your analysis as a valid JSON object with the following structur
 {
   "domainId": "user-auth",
   "domainName": "User Authentication",
-  "analyzedAt": "2024-01-15T10:30:00Z",
   "requirements": [
     {
       "id": "REQ-001",

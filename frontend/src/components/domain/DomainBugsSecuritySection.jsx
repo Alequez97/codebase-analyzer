@@ -63,10 +63,20 @@ const FINDING_STATUS = {
   WONT_FIX: "wont-fix",
 };
 
+const TYPE_COLORS = {
+  security: "red",
+  bug: "orange",
+  quality: "blue",
+};
+
+function normalizeSeverity(value) {
+  return String(value || "").toLowerCase();
+}
+
 function sortFindingsBySeverity(findings = []) {
   return [...findings].sort((a, b) => {
-    const severityA = SEVERITY_ORDER[a.severity] ?? 999;
-    const severityB = SEVERITY_ORDER[b.severity] ?? 999;
+    const severityA = SEVERITY_ORDER[normalizeSeverity(a.severity)] ?? 999;
+    const severityB = SEVERITY_ORDER[normalizeSeverity(b.severity)] ?? 999;
     return severityA - severityB;
   });
 }
@@ -100,6 +110,16 @@ export default function DomainBugsSecuritySection({
     low: 0,
     total: 0,
   };
+  const typeSummary = sortedFindings.reduce(
+    (acc, finding) => {
+      const key = String(finding.type || "").toLowerCase();
+      if (key === "security" || key === "bug" || key === "quality") {
+        acc[key] += 1;
+      }
+      return acc;
+    },
+    { security: 0, bug: 0, quality: 0 },
+  );
 
   const handleAnalyzeClick = () => {
     setShowAnalyzeDialog(true);
@@ -213,6 +233,11 @@ export default function DomainBugsSecuritySection({
                 )}
               </IconButton>
               <Heading size="md">Bugs & Security</Heading>
+              {hasData && (
+                <Badge colorPalette="purple" size="sm" variant="subtle">
+                  {sortedFindings.length} findings
+                </Badge>
+              )}
               {showLogs && (
                 <Badge colorPalette="purple" size="sm">
                   Logs View
@@ -220,6 +245,9 @@ export default function DomainBugsSecuritySection({
               )}
               {hasData && summary.total > 0 && (
                 <HStack gap={2}>
+                  <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                    {summary.total} total
+                  </Text>
                   {summary.critical > 0 && (
                     <Badge colorPalette="red" size="sm">
                       {summary.critical} Critical
@@ -238,6 +266,21 @@ export default function DomainBugsSecuritySection({
                   {summary.low > 0 && (
                     <Badge colorPalette="gray" size="sm">
                       {summary.low} Low
+                    </Badge>
+                  )}
+                  {typeSummary.security > 0 && (
+                    <Badge colorPalette="red" size="sm" variant="subtle">
+                      {typeSummary.security} Security
+                    </Badge>
+                  )}
+                  {typeSummary.bug > 0 && (
+                    <Badge colorPalette="orange" size="sm" variant="subtle">
+                      {typeSummary.bug} Bugs
+                    </Badge>
+                  )}
+                  {typeSummary.quality > 0 && (
+                    <Badge colorPalette="blue" size="sm" variant="subtle">
+                      {typeSummary.quality} Quality
                     </Badge>
                   )}
                 </HStack>
@@ -302,9 +345,23 @@ export default function DomainBugsSecuritySection({
                           const CategoryIcon =
                             CATEGORY_ICONS[finding.category] || Bug;
                           const findingStatus = getFindingStatus(finding.id);
+                          const normalizedSeverity = normalizeSeverity(
+                            finding.severity,
+                          );
+                          const typeColor =
+                            TYPE_COLORS[String(finding.type || "").toLowerCase()] ||
+                            "gray";
+                          const source = finding.location
+                            ? `${finding.location.file}:${finding.location.line}`
+                            : finding.source;
 
                           return (
-                            <Card.Root key={finding.id} size="sm">
+                            <Card.Root
+                              key={finding.id}
+                              size="sm"
+                              borderLeftWidth="4px"
+                              borderLeftColor={`${SEVERITY_COLORS[normalizedSeverity] || "gray"}.500`}
+                            >
                               <Card.Body>
                                 <VStack align="stretch" gap={2}>
                                   {/* Header */}
@@ -336,14 +393,20 @@ export default function DomainBugsSecuritySection({
                                       </Text>
                                       <Badge
                                         colorPalette={
-                                          SEVERITY_COLORS[finding.severity]
+                                          SEVERITY_COLORS[normalizedSeverity] ||
+                                          "gray"
                                         }
                                         size="sm"
+                                        variant="solid"
                                       >
-                                        {getSeverityIcon(finding.severity)}
-                                        {finding.severity.toUpperCase()}
+                                        {getSeverityIcon(normalizedSeverity)}
+                                        {normalizedSeverity.toUpperCase()}
                                       </Badge>
-                                      <Badge size="sm" variant="subtle">
+                                      <Badge
+                                        size="sm"
+                                        variant="subtle"
+                                        colorPalette={typeColor}
+                                      >
                                         {finding.type}
                                       </Badge>
                                     </HStack>
@@ -414,7 +477,7 @@ export default function DomainBugsSecuritySection({
                                       </Box>
 
                                       {/* Location */}
-                                      {finding.location && (
+                                      {source && (
                                         <Box>
                                           <HStack gap={1} mb={1}>
                                             <FileCode size={14} />
@@ -430,22 +493,13 @@ export default function DomainBugsSecuritySection({
                                             p={2}
                                             display="block"
                                           >
-                                            {finding.location.file}:
-                                            {finding.location.line}
+                                            {source}
                                           </Code>
-                                          {finding.location.snippet && (
-                                            <Box
-                                              mt={1}
-                                              p={2}
-                                              bg="gray.800"
-                                              color="white"
-                                              borderRadius="md"
-                                              fontSize="xs"
-                                              fontFamily="mono"
-                                            >
-                                              <pre>
-                                                {finding.location.snippet}
-                                              </pre>
+                                          {finding.location?.snippet && (
+                                            <Box mt={2}>
+                                              <MarkdownRenderer
+                                                content={`\`\`\`javascript\n${finding.location.snippet}\n\`\`\``}
+                                              />
                                             </Box>
                                           )}
                                         </Box>
@@ -488,25 +542,34 @@ export default function DomainBugsSecuritySection({
                                       )}
 
                                       {/* Suggested Fix */}
-                                      {finding.suggestedFix && (
+                                      {finding.relatedCode && (
                                         <Box>
                                           <Text
                                             fontSize="sm"
                                             fontWeight="semibold"
                                             mb={1}
                                           >
-                                            Suggested Fix:
+                                            Related Code:
                                           </Text>
-                                          <Box
-                                            p={2}
-                                            bg="gray.800"
-                                            color="white"
-                                            borderRadius="md"
-                                            fontSize="xs"
-                                            fontFamily="mono"
+                                          <MarkdownRenderer
+                                            content={`\`\`\`javascript\n${finding.relatedCode}\n\`\`\``}
+                                          />
+                                        </Box>
+                                      )}
+
+                                      {(finding.fixExample ||
+                                        finding.suggestedFix) && (
+                                        <Box>
+                                          <Text
+                                            fontSize="sm"
+                                            fontWeight="semibold"
+                                            mb={1}
                                           >
-                                            <pre>{finding.suggestedFix}</pre>
-                                          </Box>
+                                            Fix Example:
+                                          </Text>
+                                          <MarkdownRenderer
+                                            content={`\`\`\`javascript\n${finding.fixExample || finding.suggestedFix}\n\`\`\``}
+                                          />
                                         </Box>
                                       )}
 

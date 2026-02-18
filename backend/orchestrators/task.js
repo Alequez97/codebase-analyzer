@@ -297,6 +297,31 @@ async function enhanceOutputWithTaskMetadata(task) {
       analysis.analyzedAt = new Date().toISOString();
     }
 
+    // Auto-calculate summary for bugs-security analysis if findings exist
+    if (
+      task.type === TASK_TYPES.BUGS_SECURITY &&
+      analysis.findings &&
+      Array.isArray(analysis.findings)
+    ) {
+      const summary = {
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        total: analysis.findings.length,
+      };
+
+      analysis.findings.forEach((finding) => {
+        const severity = finding.severity?.toLowerCase();
+        if (severity === "critical") summary.critical++;
+        else if (severity === "high") summary.high++;
+        else if (severity === "medium") summary.medium++;
+        else if (severity === "low") summary.low++;
+      });
+
+      analysis.summary = summary;
+    }
+
     // Write back the enhanced analysis
     await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
 
