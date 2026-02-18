@@ -302,3 +302,64 @@ export async function executeTask(taskId) {
 export async function deleteTask(taskId) {
   return tasksPersistence.deleteTask(taskId);
 }
+
+/**
+ * Restart all pending tasks (called on server startup)
+ * @returns {Promise<Object>} Result with count of restarted tasks
+ */
+export async function restartPendingTasks() {
+  try {
+    const pendingTasks = await getPendingTasks();
+
+    if (pendingTasks.length === 0) {
+      logger.info("No pending tasks to restart", {
+        component: "TaskOrchestrator",
+      });
+      return { restarted: 0, tasks: [] };
+    }
+
+    logger.info(`Restarting ${pendingTasks.length} pending task(s)`, {
+      component: "TaskOrchestrator",
+    });
+
+    const restartedTasks = [];
+
+    for (const task of pendingTasks) {
+      try {
+        logger.info(`Restarting task: ${task.id} (type: ${task.type})`, {
+          component: "TaskOrchestrator",
+        });
+
+        // Execute task asynchronously
+        executeTask(task.id).catch((err) => {
+          logger.error(`Failed to restart task ${task.id}`, {
+            error: err,
+            component: "TaskOrchestrator",
+          });
+        });
+
+        restartedTasks.push(task.id);
+      } catch (error) {
+        logger.error(`Error restarting task ${task.id}`, {
+          error,
+          component: "TaskOrchestrator",
+        });
+      }
+    }
+
+    logger.info(`Successfully restarted ${restartedTasks.length} task(s)`, {
+      component: "TaskOrchestrator",
+    });
+
+    return {
+      restarted: restartedTasks.length,
+      tasks: restartedTasks,
+    };
+  } catch (error) {
+    logger.error("Failed to restart pending tasks", {
+      error,
+      component: "TaskOrchestrator",
+    });
+    return { restarted: 0, tasks: [], error: error.message };
+  }
+}

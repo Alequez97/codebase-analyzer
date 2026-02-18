@@ -679,7 +679,7 @@ io.on(SOCKET_EVENTS.CONNECTION, (socket) => {
 
 // ==================== Start Server ====================
 
-httpServer.listen(config.port, () => {
+httpServer.listen(config.port, async () => {
   logger.info("");
   logger.info("========================================");
   logger.info("  Codebase Analyzer API");
@@ -696,4 +696,7 @@ httpServer.listen(config.port, () => {
   );
   logger.info("WebSocket ready for real-time updates");
   logger.info("");
+
+  // Restart any pending tasks from previous session
+  await taskOrchestrator.restartPendingTasks();
 });
