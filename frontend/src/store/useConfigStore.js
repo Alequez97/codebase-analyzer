@@ -5,8 +5,8 @@ import api from "../services/api";
  * Store for server configuration and connection status
  * Contains: target project info, available agents, server metadata
  *
- * Note: This is NOT persisted to sessionStorage - it's lightweight and
- * fetched fresh on each session to ensure we have up-to-date server info
+ * Note: This is NOT persisted - it's lightweight and fetched fresh on each
+ * session to ensure we have up-to-date server info
  */
 export const useConfigStore = create((set, get) => ({
   // State

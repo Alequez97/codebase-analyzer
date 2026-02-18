@@ -42,6 +42,7 @@ export default function DomainDetailsPage() {
   // Domain editor store
   const {
     editedRequirementsByDomainId,
+    updateEditedRequirementsStructured,
     updateEditedRequirements,
     resetEditedRequirements,
     editedFilesByDomainId,
@@ -306,11 +307,15 @@ export default function DomainDetailsPage() {
         />
 
         <DomainRequirementsSection
+          requirements={requirements}
           requirementsText={requirementsText}
           loading={requirementsLoading}
           progress={requirementsProgress}
           onRequirementsChange={(value) =>
             updateEditedRequirements(domainId, value)
+          }
+          onRequirementsStructuredChange={(value) =>
+            updateEditedRequirementsStructured(domainId, value)
           }
           onAnalyze={(userContext) =>
             domain && analyzeDomainRequirements(domain, userContext)
