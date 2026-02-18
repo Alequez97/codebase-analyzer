@@ -11,6 +11,7 @@ import DomainHeader from "../components/domain/DomainHeader";
 import DomainFilesSection from "../components/domain/DomainFilesSection";
 import DomainDocumentationSection from "../components/domain/DomainDocumentationSection";
 import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
+import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
 import DomainTestingSection from "../components/domain/DomainTestingSection";
 
 export default function DomainDetailsPage() {
@@ -23,19 +24,24 @@ export default function DomainDetailsPage() {
     fetchAnalysis,
     fetchDomainDocumentation,
     fetchDomainRequirements,
+    fetchDomainBugsSecurity,
     fetchDomainTesting,
     analyzeDomainDocumentation,
     analyzeDomainRequirements,
+    analyzeDomainBugsSecurity,
     analyzeDomainTesting,
     domainDocumentationById,
     domainRequirementsById,
+    domainBugsSecurityById,
     domainTestingById,
     domainAnalyzeLoadingById,
     domainDocumentationLoadingById,
     domainRequirementsLoadingById,
+    domainBugsSecurityLoadingById,
     domainTestingLoadingById,
     domainDocumentationErrorById,
     domainRequirementsErrorById,
+    domainBugsSecurityErrorById,
     domainTestingErrorById,
     domainTaskProgressById,
   } = useAnalysisStore();
@@ -75,16 +81,19 @@ export default function DomainDetailsPage() {
   // Section-specific data
   const documentation = domainDocumentationById.get(domainId);
   const requirements = domainRequirementsById.get(domainId);
+  const bugsSecurity = domainBugsSecurityById.get(domainId);
   const testing = domainTestingById.get(domainId);
 
   // Loading states for individual sections
   const documentationLoading = !!domainDocumentationLoadingById.get(domainId);
   const requirementsLoading = !!domainRequirementsLoadingById.get(domainId);
+  const bugsSecurityLoading = !!domainBugsSecurityLoadingById.get(domainId);
   const testingLoading = !!domainTestingLoadingById.get(domainId);
 
   // Error states for individual sections
   const documentationError = domainDocumentationErrorById.get(domainId);
   const requirementsError = domainRequirementsErrorById.get(domainId);
+  const bugsSecurityError = domainBugsSecurityErrorById.get(domainId);
   const testingError = domainTestingErrorById.get(domainId);
 
   // Task progress - filter by section type
@@ -93,6 +102,8 @@ export default function DomainDetailsPage() {
     taskProgress?.type === "analyze-documentation" ? taskProgress : null;
   const requirementsProgress =
     taskProgress?.type === "analyze-requirements" ? taskProgress : null;
+  const bugsSecurityProgress =
+    taskProgress?.type === "analyze-bugs-security" ? taskProgress : null;
   const testingProgress =
     taskProgress?.type === "analyze-testing" ? taskProgress : null;
 
@@ -100,12 +111,14 @@ export default function DomainDetailsPage() {
   const domainLogs = domainLogsBySection.get(domainId) || new Map();
   const documentationLogs = domainLogs.get("documentation") || "";
   const requirementsLogs = domainLogs.get("requirements") || "";
+  const bugsSecurityLogs = domainLogs.get("bugs-security") || "";
   const testingLogs = domainLogs.get("testing") || "";
 
   // Logs loading states
   const logsLoading = logsLoadingBySection.get(domainId) || new Map();
   const documentationLogsLoading = !!logsLoading.get("documentation");
   const requirementsLogsLoading = !!logsLoading.get("requirements");
+  const bugsSecurityLogsLoading = !!logsLoading.get("bugs-security");
   const testingLogsLoading = !!logsLoading.get("testing");
 
   // Collect all errors into a single array
@@ -117,6 +130,10 @@ export default function DomainDetailsPage() {
     requirementsError && {
       section: "Requirements",
       message: requirementsError,
+    },
+    bugsSecurityError && {
+      section: "Bugs & Security",
+      message: bugsSecurityError,
     },
     testingError && { section: "Testing", message: testingError },
   ].filter(Boolean);
@@ -144,6 +161,11 @@ export default function DomainDetailsPage() {
     // Only fetch requirements if not already loaded or loading
     if (!requirements && !requirementsLoading) {
       fetchPromises.push(fetchDomainRequirements(domainId));
+    }
+
+    // Only fetch bugs & security if not already loaded or loading
+    if (!bugsSecurity && !bugsSecurityLoading) {
+      fetchPromises.push(fetchDomainBugsSecurity(domainId));
     }
 
     // Only fetch testing if not already loaded or loading
@@ -176,11 +198,22 @@ export default function DomainDetailsPage() {
       fetchDomainSectionLogs(domainId, requirements.taskId, "requirements");
     }
 
+    // Fetch bugs & security logs if task exists
+    if (bugsSecurity?.taskId) {
+      fetchDomainSectionLogs(domainId, bugsSecurity.taskId, "bugs-security");
+    }
+
     // Fetch testing logs if task exists
     if (testing?.taskId) {
       fetchDomainSectionLogs(domainId, testing.taskId, "testing");
     }
-  }, [domainId, documentation?.taskId, requirements?.taskId, testing?.taskId]);
+  }, [
+    domainId,
+    documentation?.taskId,
+    requirements?.taskId,
+    bugsSecurity?.taskId,
+    testing?.taskId,
+  ]);
 
   const requirementsText = editedRequirementsByDomainId[domainId] || "";
   const documentationText = editedDocumentationByDomainId[domainId];
@@ -318,20 +351,35 @@ export default function DomainDetailsPage() {
           requirementsText={requirementsText}
           loading={requirementsLoading}
           progress={requirementsProgress}
+          hasDocumentation={!!documentation}
           onRequirementsChange={(value) =>
             updateEditedRequirements(domainId, value)
           }
           onRequirementsStructuredChange={(value) =>
             updateEditedRequirementsStructured(domainId, value)
           }
-          onAnalyze={(userContext) =>
-            domain && analyzeDomainRequirements(domain, userContext)
+          onAnalyze={(userContext, includeDocumentation) =>
+            domain &&
+            analyzeDomainRequirements(domain, userContext, includeDocumentation)
           }
           onSave={handleSaveRequirements}
           onReset={() => resetEditedRequirements(domainId)}
           showLogs={showDomainLogs}
           logs={requirementsLogs}
           logsLoading={requirementsLogsLoading}
+        />
+
+        <DomainBugsSecuritySection
+          bugsSecurity={bugsSecurity}
+          loading={bugsSecurityLoading}
+          progress={bugsSecurityProgress}
+          hasRequirements={!!requirements}
+          onAnalyze={(includeRequirements) =>
+            domain && analyzeDomainBugsSecurity(domain, includeRequirements)
+          }
+          showLogs={showDomainLogs}
+          logs={bugsSecurityLogs}
+          logsLoading={bugsSecurityLogsLoading}
         />
 
         <DomainTestingSection

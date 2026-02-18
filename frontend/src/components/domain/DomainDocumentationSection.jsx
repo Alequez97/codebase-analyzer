@@ -22,6 +22,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Card } from "../ui/card";
+import { EmptyState } from "../ui/empty-state";
 import MarkdownRenderer from "../MarkdownRenderer";
 import LogsViewer from "./LogsViewer";
 
@@ -186,22 +187,24 @@ export default function DomainDocumentationSection({
                 <Skeleton height="16px" width="92%" />
                 <Skeleton height="16px" width="80%" />
               </VStack>
-            ) : (
+            ) : documentation ? (
               <Box
                 color="gray.800"
                 fontSize="sm"
                 lineHeight="1.8"
                 onDoubleClick={handleEnterEditMode}
-                cursor={documentation ? "text" : "default"}
-                title={documentation ? "Double-click to edit" : ""}
+                cursor="text"
+                title="Double-click to edit"
               >
-                <MarkdownRenderer
-                  content={
-                    displayContent ||
-                    "Click **Analyze documentation** to generate deep analysis. All files listed above will be analyzed to understand business purpose, responsibilities, and architecture."
-                  }
-                />
+                <MarkdownRenderer content={displayContent} />
               </Box>
+            ) : (
+              <EmptyState
+                icon={FileText}
+                title="No documentation analyzed yet"
+                description="Click 'Analyze documentation' to generate deep analysis of this domain's business purpose, responsibilities, and architecture."
+                variant="simple"
+              />
             )}
           </Card.Body>
         </Collapsible.Content>

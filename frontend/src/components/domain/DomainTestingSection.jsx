@@ -24,9 +24,11 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  TestTube,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
+import { EmptyState } from "../ui/empty-state";
 import LogsViewer from "./LogsViewer";
 
 function getPriorityColor(priority) {
@@ -565,14 +567,12 @@ export default function DomainTestingSection({
                 </Box>
               </VStack>
             ) : !testing ? (
-              <Alert.Root status="info">
-                <Alert.Indicator />
-                <Alert.Title>No test analysis yet</Alert.Title>
-                <Alert.Description>
-                  Click "Analyze tests" to get detailed coverage analysis and
-                  test suggestions.
-                </Alert.Description>
-              </Alert.Root>
+              <EmptyState
+                icon={TestTube}
+                title="No test analysis yet"
+                description="Click 'Analyze tests' to get detailed coverage analysis and test suggestions."
+                variant="simple"
+              />
             ) : (
               <VStack align="stretch" gap={6}>
                 {/* Coverage Metrics */}

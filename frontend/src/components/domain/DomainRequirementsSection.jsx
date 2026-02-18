@@ -28,8 +28,11 @@ import {
   AlertCircle,
   Code2,
   FileCode,
+  BookOpen,
 } from "lucide-react";
 import { Card } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
+import { EmptyState } from "../ui/empty-state";
 import LogsViewer from "./LogsViewer";
 import {
   DialogRoot,
@@ -136,10 +139,12 @@ export default function DomainRequirementsSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
+  hasDocumentation = false,
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showContextDialog, setShowContextDialog] = useState(false);
   const [userContext, setUserContext] = useState("");
+  const [includeDocumentation, setIncludeDocumentation] = useState(false);
   const [expandedRequirements, setExpandedRequirements] = useState(new Set());
   const [draftRequirements, setDraftRequirements] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -232,13 +237,15 @@ export default function DomainRequirementsSection({
 
   const handleStartAnalysis = () => {
     setShowContextDialog(false);
-    onAnalyze?.(userContext);
+    onAnalyze?.(userContext, includeDocumentation);
     setUserContext(""); // Reset for next time
+    setIncludeDocumentation(false);
   };
 
   const handleCancelContext = () => {
     setShowContextDialog(false);
     setUserContext("");
+    setIncludeDocumentation(false);
   };
 
   const handleDraftChange = (reqId, patch) => {
@@ -861,25 +868,17 @@ export default function DomainRequirementsSection({
                   </VStack>
                 </VStack>
               ) : (
-                <Box
-                  textAlign="center"
-                  py={8}
-                  px={4}
-                  borderWidth="2px"
-                  borderStyle="dashed"
-                  borderColor="gray.300"
-                  borderRadius="md"
-                  color="gray.500"
-                >
-                  <FileText size={32} style={{ margin: "0 auto 12px" }} />
-                  <Text fontSize="sm" fontWeight="medium" mb={2}>
-                    No requirements analyzed yet
-                  </Text>
-                  <Text fontSize="xs">
-                    Click <strong>Analyze requirements</strong> to extract
-                    business rules from code
-                  </Text>
-                </Box>
+                <EmptyState
+                  icon={FileText}
+                  title="No requirements analyzed yet"
+                  description={
+                    <>
+                      Click <strong>Analyze requirements</strong> to extract
+                      business rules from code
+                    </>
+                  }
+                  variant="simple"
+                />
               )}
             </Card.Body>
           </Collapsible.Content>
@@ -936,6 +935,24 @@ export default function DomainRequirementsSection({
               <Text fontSize="xs" color="gray.500">
                 Leave empty to generate requirements without additional
                 guidance.
+              </Text>
+              <Separator />
+              <Checkbox
+                checked={includeDocumentation}
+                onCheckedChange={(e) => setIncludeDocumentation(e.checked)}
+                disabled={!hasDocumentation}
+              >
+                <HStack gap={2}>
+                  <BookOpen size={16} />
+                  <Text fontSize="sm" fontWeight="medium">
+                    Include documentation for context
+                  </Text>
+                </HStack>
+              </Checkbox>
+              <Text fontSize="xs" color="gray.500" pl={6}>
+                {hasDocumentation
+                  ? "Enable this to analyze requirements using the domain's documentation as additional context."
+                  : "Documentation must be generated first before it can be included as context."}
               </Text>
             </VStack>
           </DialogBody>

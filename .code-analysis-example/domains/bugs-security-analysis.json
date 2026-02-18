@@ -1,0 +1,126 @@
+{
+  "summary": {
+    "critical": 1,
+    "high": 2,
+    "medium": 2,
+    "low": 1,
+    "total": 6
+  },
+  "findings": [
+    {
+      "id": "FIND-001",
+      "severity": "critical",
+      "category": "security",
+      "type": "SQL Injection",
+      "title": "Unsanitized query in login flow",
+      "description": "User input is interpolated directly into SQL.",
+      "location": {
+        "file": "src/auth/login.js",
+        "line": 42,
+        "snippet": "const query = `SELECT * FROM users WHERE email = '${email}'`;"
+      },
+      "impact": "Authentication bypass and data extraction are possible.",
+      "recommendation": "Use parameterized queries for all user-controlled values.",
+      "suggestedFix": "const query = 'SELECT * FROM users WHERE email = ?';\ndb.query(query, [email]);",
+      "relatedRequirements": [
+        "REQ-001"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "FIND-002",
+      "severity": "high",
+      "category": "security",
+      "type": "XSS",
+      "title": "Raw HTML rendering in profile page",
+      "description": "User content is rendered without sanitization.",
+      "location": {
+        "file": "src/profile/display.jsx",
+        "line": 89,
+        "snippet": "dangerouslySetInnerHTML={{ __html: userBio }}"
+      },
+      "impact": "Session theft or arbitrary actions in victim browser.",
+      "recommendation": "Sanitize HTML with a trusted sanitizer before rendering.",
+      "suggestedFix": "dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userBio) }}",
+      "relatedRequirements": [],
+      "confidence": "high"
+    },
+    {
+      "id": "FIND-003",
+      "severity": "high",
+      "category": "bug",
+      "type": "Race Condition",
+      "title": "Duplicate order processing under concurrency",
+      "description": "Pending order status check is not atomic.",
+      "location": {
+        "file": "src/orders/handler.js",
+        "line": 78,
+        "snippet": "if (order.status === 'pending') { processOrder(order); }"
+      },
+      "impact": "Duplicate charges may occur.",
+      "recommendation": "Use transactional update with status guard.",
+      "suggestedFix": "UPDATE orders SET status = 'processing' WHERE id = ? AND status = 'pending';",
+      "relatedRequirements": [
+        "REQ-012"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "FIND-004",
+      "severity": "medium",
+      "category": "bug",
+      "type": "Edge Case",
+      "title": "Division by zero in analytics metrics",
+      "description": "Computation doesn't guard for zero denominators.",
+      "location": {
+        "file": "src/analytics/metrics.js",
+        "line": 45,
+        "snippet": "const conversionRate = conversions / totalVisits;"
+      },
+      "impact": "Runtime exceptions in dashboard.",
+      "recommendation": "Return zero when denominator is zero.",
+      "suggestedFix": "const conversionRate = totalVisits > 0 ? conversions / totalVisits : 0;",
+      "relatedRequirements": [
+        "REQ-034"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "FIND-005",
+      "severity": "medium",
+      "category": "security",
+      "type": "Data Exposure",
+      "title": "Sensitive values written to logs",
+      "description": "Credentials and keys are included in error logs.",
+      "location": {
+        "file": "src/utils/logger.js",
+        "line": 34,
+        "snippet": "logger.error('Login failed', { email, password, apiKey });"
+      },
+      "impact": "Sensitive data leakage in log pipeline.",
+      "recommendation": "Redact secret fields before logging.",
+      "suggestedFix": "logger.error('Login failed', { email });",
+      "relatedRequirements": [],
+      "confidence": "high"
+    },
+    {
+      "id": "FIND-006",
+      "severity": "low",
+      "category": "quality",
+      "type": "Code Quality",
+      "title": "N+1 queries in user search",
+      "description": "Related entities are loaded per user in a loop.",
+      "location": {
+        "file": "src/users/search.js",
+        "line": 123,
+        "snippet": "users.forEach(async (user) => { user.posts = await getPosts(user.id); });"
+      },
+      "impact": "Slow responses for large result sets.",
+      "recommendation": "Batch load related records.",
+      "suggestedFix": "const postsByUserId = await getPostsByUserIds(users.map((u) => u.id));",
+      "relatedRequirements": [],
+      "confidence": "medium"
+    }
+  ],
+  "includesRequirements": false
+}

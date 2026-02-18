@@ -478,3 +478,17 @@ Dashboard shows: "Click Analyze Codebase to begin"
     return () => socket.off(SOCKET_EVENTS.LOG_DOCUMENTATION);
   }, [socket]);
   ```
+
+### 10. **Mock Data Workflow (When User Requests Mocking)**
+
+- If the user asks for mock responses, prefer reading JSON files from `.code-analysis-example/` instead of hardcoding large inline objects in route handlers.
+- Use the shared utility `backend/utils/mock-data.js` for mock loading and timing:
+  - `readMockJson([...pathSegments])` for reading/parsing mock payloads
+  - `sleep(milliseconds)` for optional artificial delay to simulate async analysis
+- Keep route handlers thin:
+  - Load mock data
+  - Add runtime fields (for example `domainId`, `taskId`, `timestamp`, `analyzedFiles`)
+  - Return response
+- Reuse the same mock JSON for related endpoints when possible (for example GET section data and POST analyze preview), unless the user explicitly asks for different payloads.
+- Keep mock file paths centralized and predictable under `.code-analysis-example` (for example `.code-analysis-example/domains/*.json`).
+- Do not use browser-side mocks for backend API behavior unless the user explicitly requests frontend-only mocking.

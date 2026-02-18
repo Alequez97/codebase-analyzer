@@ -29,6 +29,8 @@ export default {
   getDomainDocumentation: (id) =>
     api.get(`/analysis/domain/${id}/documentation`),
   getDomainRequirements: (id) => api.get(`/analysis/domain/${id}/requirements`),
+  getDomainBugsSecurity: (id) =>
+    api.get(`/analysis/domain/${id}/bugs-security`),
   getDomainTesting: (id) => api.get(`/analysis/domain/${id}/testing`),
 
   analyzeDomainDocumentation: (id, files, executeNow = true) =>
@@ -37,10 +39,29 @@ export default {
       executeNow,
     }),
 
-  analyzeDomainRequirements: (id, files, userContext = "", executeNow = true) =>
+  analyzeDomainRequirements: (
+    id,
+    files,
+    userContext = "",
+    includeDocumentation = false,
+    executeNow = true,
+  ) =>
     api.post(`/analysis/domain/${id}/analyze/requirements`, {
       files,
       userContext,
+      includeDocumentation,
+      executeNow,
+    }),
+
+  analyzeDomainBugsSecurity: (
+    id,
+    files,
+    includeRequirements = false,
+    executeNow = true,
+  ) =>
+    api.post(`/analysis/domain/${id}/analyze/bugs-security`, {
+      files,
+      includeRequirements,
       executeNow,
     }),
 

@@ -10,6 +10,7 @@ export const useAnalysisStore = create((set, get) => ({
   // Domain section data storage (Map) - split by section for granular loading
   domainDocumentationById: new Map(),
   domainRequirementsById: new Map(),
+  domainBugsSecurityById: new Map(),
   domainTestingById: new Map(),
   // Legacy: full domain analysis (deprecated, use section-specific instead)
   domainAnalysisById: new Map(),
@@ -18,10 +19,12 @@ export const useAnalysisStore = create((set, get) => ({
   // Section-specific loading states (Map)
   domainDocumentationLoadingById: new Map(),
   domainRequirementsLoadingById: new Map(),
+  domainBugsSecurityLoadingById: new Map(),
   domainTestingLoadingById: new Map(),
   // Section-specific error states (Map)
   domainDocumentationErrorById: new Map(),
   domainRequirementsErrorById: new Map(),
+  domainBugsSecurityErrorById: new Map(),
   domainTestingErrorById: new Map(),
   // Task progress tracking (Map) - stores latest progress message by domain
   domainTaskProgressById: new Map(),
@@ -277,7 +280,11 @@ export const useAnalysisStore = create((set, get) => ({
     }
   },
 
-  analyzeDomainRequirements: async (domain, userContext = "") => {
+  analyzeDomainRequirements: async (
+    domain,
+    userContext = "",
+    includeDocumentation = false,
+  ) => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
 
     // Clear logs for this domain section when starting new analysis
@@ -300,6 +307,7 @@ export const useAnalysisStore = create((set, get) => ({
         domain.id,
         domain.files || [],
         userContext,
+        includeDocumentation,
       );
       return { success: true };
     } catch (err) {
@@ -351,6 +359,48 @@ export const useAnalysisStore = create((set, get) => ({
         return {
           domainTestingLoadingById: newLoadingMap,
           domainTestingErrorById: newErrorMap,
+        };
+      });
+      return { success: false, error: message };
+    }
+  },
+
+  analyzeDomainBugsSecurity: async (domain, includeRequirements = false) => {
+    if (!domain?.id) return { success: false, error: "Invalid domain" };
+
+    // Clear logs for this domain section when starting new analysis
+    useLogsStore.getState().clearLogs(domain.id, "bugs-security");
+
+    set((state) => {
+      const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+      newLoadingMap.set(domain.id, true);
+      // Clear previous error when starting new analysis
+      const newErrorMap = new Map(state.domainBugsSecurityErrorById);
+      newErrorMap.delete(domain.id);
+      return {
+        domainBugsSecurityLoadingById: newLoadingMap,
+        domainBugsSecurityErrorById: newErrorMap,
+      };
+    });
+
+    try {
+      await api.analyzeDomainBugsSecurity(
+        domain.id,
+        domain.files || [],
+        includeRequirements,
+      );
+      return { success: true };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Failed to analyze bugs & security";
+      set((state) => {
+        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+        const newErrorMap = new Map(state.domainBugsSecurityErrorById);
+        newLoadingMap.set(domain.id, false);
+        newErrorMap.set(domain.id, message);
+        return {
+          domainBugsSecurityLoadingById: newLoadingMap,
+          domainBugsSecurityErrorById: newErrorMap,
         };
       });
       return { success: false, error: message };
@@ -499,20 +549,70 @@ export const useAnalysisStore = create((set, get) => ({
     }
   },
 
+  fetchDomainBugsSecurity: async (domainId) => {
+    if (!domainId) return null;
+
+    // Check cache first
+    const cached = get().domainBugsSecurityById.get(domainId);
+    if (cached) return cached;
+
+    set((state) => {
+      const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+      newLoadingMap.set(domainId, true);
+      return { domainBugsSecurityLoadingById: newLoadingMap };
+    });
+
+    try {
+      const response = await api.getDomainBugsSecurity(domainId);
+      const data = response.data;
+
+      set((state) => {
+        const newDataMap = new Map(state.domainBugsSecurityById);
+        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+        newDataMap.set(domainId, data);
+        newLoadingMap.set(domainId, false);
+        return {
+          domainBugsSecurityById: newDataMap,
+          domainBugsSecurityLoadingById: newLoadingMap,
+        };
+      });
+
+      return data;
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Failed to load bugs & security";
+
+      set((state) => {
+        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+        const newErrorMap = new Map(state.domainBugsSecurityErrorById);
+        newLoadingMap.set(domainId, false);
+        newErrorMap.set(domainId, message);
+        return {
+          domainBugsSecurityLoadingById: newLoadingMap,
+          domainBugsSecurityErrorById: newErrorMap,
+        };
+      });
+      return null;
+    }
+  },
+
   reset: () =>
     set({
       analysis: null,
       domainDocumentationById: new Map(),
       domainRequirementsById: new Map(),
+      domainBugsSecurityById: new Map(),
       domainTestingById: new Map(),
       domainAnalysisById: new Map(),
       domainLoadingById: new Map(),
       domainAnalyzeLoadingById: new Map(),
       domainDocumentationLoadingById: new Map(),
       domainRequirementsLoadingById: new Map(),
+      domainBugsSecurityLoadingById: new Map(),
       domainTestingLoadingById: new Map(),
       domainDocumentationErrorById: new Map(),
       domainRequirementsErrorById: new Map(),
+      domainBugsSecurityErrorById: new Map(),
       domainTestingErrorById: new Map(),
       analyzingCodebase: false,
       loading: true,

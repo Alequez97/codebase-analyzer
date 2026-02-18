@@ -17,5 +17,6 @@ export const SOCKET_EVENTS = {
   LOG_CODEBASE_ANALYSIS: "log:codebase-analysis",
   LOG_DOCUMENTATION: "log:documentation",
   LOG_REQUIREMENTS: "log:requirements",
+  LOG_BUGS_SECURITY: "log:bugs-security",
   LOG_TESTING: "log:testing",
 };

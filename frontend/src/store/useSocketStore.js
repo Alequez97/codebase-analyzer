@@ -101,6 +101,17 @@ export const useSocketStore = create((set, get) => ({
         // Fetch updated requirements section
         await useAnalysisStore.getState().fetchDomainRequirements(domainId);
         useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
+      } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
+        // Clear loading state
+        const state = useAnalysisStore.getState();
+        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+        newLoadingMap.set(domainId, false);
+        useAnalysisStore.setState({
+          domainBugsSecurityLoadingById: newLoadingMap,
+        });
+
+        // Fetch updated bugs & security section
+        await useAnalysisStore.getState().fetchDomainBugsSecurity(domainId);
       } else if (type === TASK_TYPES.TESTING && domainId) {
         // Clear loading state
         const state = useAnalysisStore.getState();
@@ -139,6 +150,14 @@ export const useSocketStore = create((set, get) => ({
             loadingMap.set(domainId, true);
             useAnalysisStore.setState({
               domainRequirementsLoadingById: loadingMap,
+            });
+          }
+        } else if (type === TASK_TYPES.BUGS_SECURITY) {
+          const loadingMap = new Map(state.domainBugsSecurityLoadingById);
+          if (!loadingMap.get(domainId)) {
+            loadingMap.set(domainId, true);
+            useAnalysisStore.setState({
+              domainBugsSecurityLoadingById: loadingMap,
             });
           }
         } else if (type === TASK_TYPES.TESTING) {
@@ -188,6 +207,17 @@ export const useSocketStore = create((set, get) => ({
           domainRequirementsLoadingById: newLoadingMap,
           domainRequirementsErrorById: newErrorMap,
         });
+      } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
+        // Clear loading state and set error
+        const state = useAnalysisStore.getState();
+        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
+        const newErrorMap = new Map(state.domainBugsSecurityErrorById);
+        newLoadingMap.set(domainId, false);
+        newErrorMap.set(domainId, error || "Bugs & security analysis failed");
+        useAnalysisStore.setState({
+          domainBugsSecurityLoadingById: newLoadingMap,
+          domainBugsSecurityErrorById: newErrorMap,
+        });
       } else if (type === TASK_TYPES.TESTING && domainId) {
         // Clear loading state and set error
         const state = useAnalysisStore.getState();
@@ -214,6 +244,8 @@ export const useSocketStore = create((set, get) => ({
           sectionType = "documentation";
         } else if (type === TASK_TYPES.REQUIREMENTS) {
           sectionType = "requirements";
+        } else if (type === TASK_TYPES.BUGS_SECURITY) {
+          sectionType = "bugs-security";
         } else if (type === TASK_TYPES.TESTING) {
           sectionType = "testing";
         }
@@ -227,6 +259,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_CODEBASE_ANALYSIS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_DOCUMENTATION, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REQUIREMENTS, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_TESTING, handleLogEvent);
   },
 
