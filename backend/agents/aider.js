@@ -3,9 +3,7 @@ import { promisify } from "util";
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
-import { SOCKET_EVENTS } from "../constants/socket-events.js";
-import { emitSocketEvent } from "../utils/socket-emitter.js";
-import { getLogEventForTaskType } from "../utils/task-logger.js";
+import { emitTaskLog } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 
 const execAsync = promisify(exec);
@@ -228,7 +226,7 @@ export async function execute(task) {
       logStream.write(text);
 
       // Emit to socket with task-specific event
-      emitSocketEvent(getLogEventForTaskType(task.type), {
+      emitTaskLog(task, {
         taskId: task.id,
         domainId: task.params?.domainId,
         type: task.type,
@@ -250,7 +248,7 @@ export async function execute(task) {
       logStream.write(`[STDERR] ${text}`);
 
       // Emit to socket with task-specific event
-      emitSocketEvent(getLogEventForTaskType(task.type), {
+      emitTaskLog(task, {
         taskId: task.id,
         domainId: task.params?.domainId,
         type: task.type,

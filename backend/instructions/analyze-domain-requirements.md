@@ -36,6 +36,20 @@ Analyze the domain files and extract comprehensive business requirements that wi
 {{USER_CONTEXT}}
 {{/if}}
 
+{{#if INCLUDE_DOCUMENTATION}}
+
+## Domain Documentation Reference
+
+Domain documentation is available at `.code-analysis/domains/{{DOMAIN_ID}}/documentation.json`.
+
+**USE THIS FILE**: Read the documentation to understand the business purpose and architecture of this domain. Then extract requirements that:
+
+1. Implement the documented business functionality
+2. Handle the documented risk areas
+3. Align with the documented responsibilities and architecture
+
+{{/if}}
+
 ## Task
 
 **CRITICAL**: You MUST use the `read_file` tool to read ALL files listed above. You cannot extract requirements without reading the actual code.
@@ -43,9 +57,16 @@ Analyze the domain files and extract comprehensive business requirements that wi
 **Step-by-step process**:
 
 1. **Read each file** using the `read_file` tool (provide the file path from the list above)
-2. **Analyze the code** to identify business rules, validation logic, expected behaviors
-3. **Extract requirements** that describe what the code does and what tests should verify
-4. **Output JSON** with all requirements in the specified format
+   {{#if INCLUDE_DOCUMENTATION}}
+2. **Read documentation** from `.code-analysis/domains/{{DOMAIN_ID}}/documentation.json` to understand business context
+3. **Analyze the code** to identify business rules, validation logic, expected behaviors aligned with the documentation
+4. **Extract requirements** that describe what the code does and what tests should verify
+5. **Output JSON** with all requirements in the specified format
+   {{else}}
+6. **Analyze the code** to identify business rules, validation logic, expected behaviors
+7. **Extract requirements** that describe what the code does and what tests should verify
+8. **Output JSON** with all requirements in the specified format
+   {{/if}}
 
 For each file, look for:
 
@@ -188,9 +209,16 @@ Good requirements are:
 ## Task Execution
 
 1. ✅ **STEP 1**: Use `read_file` tool to read EVERY file in the "Files to Analyze" list
-2. ✅ **STEP 2**: For each file, analyze the code and extract testable requirements
-3. ✅ **STEP 3**: Combine all requirements into a single JSON output
-4. ✅ **STEP 4**: Use the `write_file` tool to save the JSON to: **`{{OUTPUT_FILE}}`**
+   {{#if INCLUDE_DOCUMENTATION}}
+2. ✅ **STEP 2**: Read documentation from `.code-analysis/domains/{{DOMAIN_ID}}/documentation.json`
+3. ✅ **STEP 3**: For each file, analyze the code and extract testable requirements aligned with documentation
+4. ✅ **STEP 4**: Combine all requirements into a single JSON output
+5. ✅ **STEP 5**: Use the `write_file` tool to save the JSON to: **`{{OUTPUT_FILE}}`**
+   {{else}}
+6. ✅ **STEP 2**: For each file, analyze the code and extract testable requirements
+7. ✅ **STEP 3**: Combine all requirements into a single JSON output
+8. ✅ **STEP 4**: Use the `write_file` tool to save the JSON to: **`{{OUTPUT_FILE}}`**
+   {{/if}}
 
 **Example workflow**:
 
@@ -210,14 +238,23 @@ Good requirements are:
 **CRITICAL REQUIREMENTS**:
 
 1. ✅ **MUST** use `read_file` tool for EVERY file in the list above
-2. ✅ **MUST** use `write_file` tool to save the output to: `{{OUTPUT_FILE}}`
-3. ✅ **MUST** output valid JSON (not wrapped in markdown code blocks)
-4. ✅ **MUST** analyze code logic, not just file names
-5. ✅ **MUST** extract business rules, validation logic, and expected behaviors
-6. ✅ **MUST** include both happy path and error scenarios
-7. ✅ **MUST** make requirements specific and testable
-8. ✅ **MUST** prioritize requirements correctly (P0 for critical, P3 for low priority)
-9. ✅ **MUST** include source file references with line numbers when possible
-10. ❌ **DO NOT** ask questions or wait for input
-11. ❌ **DO NOT** just describe what should be done
-12. ✅ **WRITE THE FILE NOW** using `write_file` tool and exit
+   {{#if INCLUDE_DOCUMENTATION}}
+2. ✅ **MUST** read documentation from `.code-analysis/domains/{{DOMAIN_ID}}/documentation.json` before extracting requirements
+3. ✅ **MUST** use `write_file` tool to save the output to: `{{OUTPUT_FILE}}`
+4. ✅ **MUST** output valid JSON (not wrapped in markdown code blocks)
+5. ✅ **MUST** analyze code logic, not just file names
+6. ✅ **MUST** extract business rules, validation logic, and expected behaviors aligned with documentation
+7. ✅ **MUST** include both happy path and error scenarios
+   {{else}}
+8. ✅ **MUST** use `write_file` tool to save the output to: `{{OUTPUT_FILE}}`
+9. ✅ **MUST** output valid JSON (not wrapped in markdown code blocks)
+10. ✅ **MUST** analyze code logic, not just file names
+11. ✅ **MUST** extract business rules, validation logic, and expected behaviors
+12. ✅ **MUST** include both happy path and error scenarios
+    {{/if}}
+13. ✅ **MUST** make requirements specific and testable
+14. ✅ **MUST** prioritize requirements correctly (P0 for critical, P3 for low priority)
+15. ✅ **MUST** include source file references with line numbers when possible
+16. ❌ **DO NOT** ask questions or wait for input
+17. ❌ **DO NOT** just describe what should be done
+18. ✅ **WRITE THE FILE NOW** using `write_file` tool and exit

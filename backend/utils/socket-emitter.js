@@ -4,6 +4,7 @@
  */
 
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { getLogEventForTaskType } from "./task-logger.js";
 
 let socketInstance = null;
 
@@ -45,6 +46,22 @@ export function isSocketReady() {
 }
 
 /**
+ * Emit a task log event using task type -> socket event mapping
+ * @param {Object} task - Task object with id, type, and params
+ * @param {Object} payload - Additional payload fields (e.g. log, stream)
+ */
+export function emitTaskLog(task, payload = {}) {
+  const logEventName = getLogEventForTaskType(task.type);
+  emitSocketEvent(logEventName, {
+    taskId: task.id,
+    domainId: task.params?.domainId,
+    type: task.type,
+    stream: "stdout",
+    ...payload,
+  });
+}
+
+/**
  * Emit task progress event
  * Convenience helper for emitting task progress updates
  * @param {Object} task - Task object with id, type, and params
@@ -58,5 +75,9 @@ export function emitTaskProgress(task, stage, message) {
     type: task.type,
     stage,
     message,
+  });
+
+  emitTaskLog(task, {
+    log: `[${String(stage || "").toUpperCase()}] ${message}\n`,
   });
 }

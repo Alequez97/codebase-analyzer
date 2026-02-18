@@ -4,7 +4,7 @@ import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.j
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { DEFAULT_AGENTS } from "../agents/index.js";
 import * as logger from "../utils/logger.js";
-import { readMockJson, sleep } from "../utils/mock-data.js";
+import { readMockJson } from "../utils/mock-data.js";
 
 const router = express.Router();
 
@@ -127,17 +127,12 @@ router.get("/:id/requirements", async (req, res) => {
 router.get("/:id/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
-
-    const data = await domainsPersistence.readDomainBugsSecurity(id);
-
-    if (!data) {
-      return res.status(404).json({
-        error: "Domain bugs & security not found",
-        message: `No bugs & security data found for domain: ${id}`,
-      });
-    }
-
-    res.json(data);
+    const data = await readMockJson(["domains", "bugs-security-analysis.json"]);
+    res.json({
+      ...data,
+      domainId: id,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     logger.error(`Error reading domain bugs & security ${req.params.id}`, {
       error,
@@ -251,50 +246,18 @@ router.post("/:id/analyze/requirements", async (req, res) => {
 router.post("/:id/analyze/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
-    const { files, includeRequirements = false } = req.body;
-    const agent = "llm-api"; // Default agent for bugs & security analysis
+    const includeRequirements = req.body?.includeRequirements === true;
 
-    if (!files || !Array.isArray(files)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: "files[] are required",
-      });
-    }
+    await sleep(1500);
 
-    // TODO: Implement bugs & security analysis task orchestrator
-    // const executeNow = req.body.executeNow !== false;
-    // const task = await taskOrchestrator.createAnalyzeBugsSecurityTask(
-    //   id,
-    //   files,
-    //   includeRequirements,
-    //   executeNow,
-    //   agent,
-    // );
-    // res.status(201).json(task);
+    const data = await readMockJson(["domains", "bugs-security-analysis.json"]);
 
-    logger.info("Bugs & security analysis requested", {
+    res.json({
+      ...data,
       domainId: id,
-      fileCount: files.length,
-      includeRequirements,
-      agent,
-    });
-
-    const mockResponse = await readMockJson([
-      "domains",
-      "bugs-security-analysis.json",
-    ]);
-
-    const response = {
-      ...mockResponse,
-      taskId: `mock-bugs-security-${Date.now()}`,
-      domainId: id,
+      includesRequirements: includeRequirements,
       timestamp: new Date().toISOString(),
-      includeRequirements,
-      analyzedFiles: files,
-    };
-
-    await sleep(600);
-    res.status(200).json(response);
+    });
   } catch (error) {
     logger.error("Error creating bugs & security analysis task", {
       error,

@@ -54,7 +54,13 @@ export function processTemplate(template, variables = {}) {
  * @returns {Promise<Object>} Variables for template processing
  */
 export async function buildRequirementsTemplateVariables(task) {
-  const { domainId, files, userContext, targetDirectory } = task.params;
+  const {
+    domainId,
+    files,
+    userContext,
+    includeDocumentation,
+    targetDirectory,
+  } = task.params;
 
   // Look up domain name from codebase analysis (if available)
   let domainName = domainId; // Fallback to ID
@@ -77,6 +83,40 @@ export async function buildRequirementsTemplateVariables(task) {
     DOMAIN_NAME: domainName,
     FILES: files || [],
     USER_CONTEXT: userContext || "",
+    INCLUDE_DOCUMENTATION: includeDocumentation ? "true" : "",
+    OUTPUT_FILE: task.outputFile || "",
+  };
+}
+
+/**
+ * Build variables object for bugs & security analysis template
+ * @param {Object} task - Task object
+ * @returns {Promise<Object>} Variables for template processing
+ */
+export async function buildBugsSecurityTemplateVariables(task) {
+  const { domainId, files, includeRequirements, targetDirectory } = task.params;
+
+  // Look up domain name from codebase analysis (if available)
+  let domainName = domainId; // Fallback to ID
+
+  try {
+    const { readCodebaseAnalysis } =
+      await import("../persistence/codebase-analysis.js");
+    const analysis = await readCodebaseAnalysis();
+    const domain = analysis?.domains?.find((d) => d.id === domainId);
+    if (domain?.name) {
+      domainName = domain.name;
+    }
+  } catch (err) {
+    // Fallback to domainId if analysis not found
+  }
+
+  return {
+    CODEBASE_PATH: targetDirectory,
+    DOMAIN_ID: domainId,
+    DOMAIN_NAME: domainName,
+    FILES: files || [],
+    INCLUDE_REQUIREMENTS: includeRequirements ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
   };
 }
@@ -136,6 +176,8 @@ export async function buildTemplateVariables(task) {
   switch (task.type) {
     case "analyze-requirements":
       return await buildRequirementsTemplateVariables(task);
+    case "analyze-bugs-security":
+      return await buildBugsSecurityTemplateVariables(task);
     case "analyze-documentation":
       return await buildDocumentationTemplateVariables(task);
     case "analyze-codebase":

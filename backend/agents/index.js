@@ -29,6 +29,7 @@ export const DEFAULT_AGENTS = {
   CODEBASE_ANALYSIS: "llm-api",
   DOMAIN_DOCUMENTATION: "llm-api",
   DOMAIN_REQUIREMENTS: "llm-api",
+  DOMAIN_BUGS_SECURITY: "llm-api",
   DOMAIN_TESTING: "llm-api",
 };
 

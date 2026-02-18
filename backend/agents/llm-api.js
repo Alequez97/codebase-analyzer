@@ -6,8 +6,7 @@ import { OpenAIClient } from "../llm/clients/openai-client.js";
 import { ChatState } from "../llm/chat-state.js";
 import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
-import { emitSocketEvent, emitTaskProgress } from "../utils/socket-emitter.js";
-import { getLogEventForTaskType } from "../utils/task-logger.js";
+import { emitSocketEvent, emitTaskLog, emitTaskProgress } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 import {
   processTemplate,
@@ -189,7 +188,7 @@ async function executeDocumentationTask(task) {
           message: progress.message,
         });
 
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId,
           type: task.type,
@@ -332,7 +331,7 @@ async function generateDomainDocumentation({
       },
     );
 
-    emitSocketEvent(getLogEventForTaskType(task.type), {
+    emitTaskLog(task, {
       taskId: task.id,
       domainId,
       type: task.type,
@@ -359,7 +358,7 @@ async function generateDomainDocumentation({
       { component: "LLM-API" },
     );
 
-    emitSocketEvent(getLogEventForTaskType(task.type), {
+    emitTaskLog(task, {
       taskId: task.id,
       domainId,
       type: task.type,
@@ -375,7 +374,7 @@ async function generateDomainDocumentation({
         { component: "LLM-API" },
       );
 
-      emitSocketEvent(getLogEventForTaskType(task.type), {
+      emitTaskLog(task, {
         taskId: task.id,
         domainId,
         type: task.type,
@@ -416,7 +415,7 @@ async function generateDomainDocumentation({
           0,
           150,
         );
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId,
           type: task.type,
@@ -440,7 +439,7 @@ async function generateDomainDocumentation({
           component: "LLM-API",
         });
 
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId,
           type: task.type,
@@ -449,7 +448,7 @@ async function generateDomainDocumentation({
         });
       }
 
-      emitSocketEvent(getLogEventForTaskType(task.type), {
+      emitTaskLog(task, {
         taskId: task.id,
         domainId,
         type: task.type,
@@ -483,7 +482,7 @@ async function generateDomainDocumentation({
           markdownSizeKB: Math.round(documentationMarkdown.length / 1000),
         });
 
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId,
           type: task.type,
@@ -505,7 +504,7 @@ async function generateDomainDocumentation({
           },
         );
 
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId,
           type: task.type,
@@ -570,7 +569,7 @@ async function generateDomainDocumentation({
   );
   taskLogger.raw("");
 
-  emitSocketEvent(getLogEventForTaskType(task.type), {
+  emitTaskLog(task, {
     taskId: task.id,
     domainId,
     type: task.type,
@@ -623,7 +622,7 @@ async function generateDomainDocumentation({
     },
   );
 
-  emitSocketEvent(getLogEventForTaskType(task.type), {
+  emitTaskLog(task, {
     taskId: task.id,
     domainId,
     type: task.type,
@@ -859,7 +858,7 @@ async function executeAnalysisTask(task) {
       );
       taskLogger.raw("-".repeat(80));
 
-      emitSocketEvent(getLogEventForTaskType(task.type), {
+      emitTaskLog(task, {
         taskId: task.id,
         domainId: task.params?.domainId,
         type: task.type,
@@ -879,7 +878,7 @@ async function executeAnalysisTask(task) {
           "compacting",
           "Context too large, compacting chat history...",
         );
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
@@ -892,7 +891,7 @@ async function executeAnalysisTask(task) {
         taskLogger.info("✅ Context compaction complete", {
           component: "LLM-API",
         });
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
@@ -930,7 +929,7 @@ async function executeAnalysisTask(task) {
       );
 
       const responseLog = `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`;
-      emitSocketEvent(getLogEventForTaskType(task.type), {
+      emitTaskLog(task, {
         taskId: task.id,
         domainId: task.params?.domainId,
         type: task.type,
@@ -954,7 +953,7 @@ async function executeAnalysisTask(task) {
           },
         );
 
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
@@ -993,7 +992,7 @@ async function executeAnalysisTask(task) {
             0,
             150,
           );
-          emitSocketEvent(getLogEventForTaskType(task.type), {
+          emitTaskLog(task, {
             taskId: task.id,
             domainId: task.params?.domainId,
             type: task.type,
@@ -1054,7 +1053,7 @@ async function executeAnalysisTask(task) {
           iterations: iterationCount,
         });
 
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
@@ -1196,7 +1195,7 @@ async function executeAnalysisTask(task) {
                   component: "LLM-API",
                 },
               );
-              emitSocketEvent(getLogEventForTaskType(task.type), {
+              emitTaskLog(task, {
                 taskId: task.id,
                 domainId: task.params?.domainId,
                 type: task.type,
@@ -1223,7 +1222,7 @@ async function executeAnalysisTask(task) {
           component: "LLM-API",
           file: task.outputFile,
         });
-        emitSocketEvent(getLogEventForTaskType(task.type), {
+        emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
@@ -1268,7 +1267,7 @@ async function executeAnalysisTask(task) {
     taskLogger.raw("=".repeat(80));
 
     // Emit final completion event if not already sent
-    emitSocketEvent(getLogEventForTaskType(task.type), {
+    emitTaskLog(task, {
       taskId: task.id,
       domainId: task.params?.domainId,
       type: task.type,
@@ -1306,3 +1305,4 @@ async function executeAnalysisTask(task) {
     };
   }
 }
+
