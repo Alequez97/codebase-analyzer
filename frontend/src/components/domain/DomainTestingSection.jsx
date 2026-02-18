@@ -12,7 +12,13 @@ import {
   Table,
   Icon,
 } from "@chakra-ui/react";
-import { CheckCircle, AlertCircle, FileText } from "lucide-react";
+import {
+  CheckCircle,
+  AlertCircle,
+  FileText,
+  Sparkles,
+  Check,
+} from "lucide-react";
 import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
 import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
@@ -280,6 +286,7 @@ function MissingTestsSection({ missingTests, applyingTests, onApplyTest }) {
                     loading={!!applyingTests[test.id]}
                     loadingText="Applying"
                   >
+                    <Check size={12} />
                     Apply
                   </Button>
                 </Table.Cell>
@@ -343,6 +350,7 @@ function MissingTestsSection({ missingTests, applyingTests, onApplyTest }) {
                     loading={!!applyingTests[test.id]}
                     loadingText="Applying"
                   >
+                    <Check size={12} />
                     Apply
                   </Button>
                 </Table.Cell>
@@ -406,6 +414,7 @@ function MissingTestsSection({ missingTests, applyingTests, onApplyTest }) {
                     loading={!!applyingTests[test.id]}
                     loadingText="Applying"
                   >
+                    <Check size={12} />
                     Apply
                   </Button>
                 </Table.Cell>
@@ -472,6 +481,7 @@ export default function DomainTestingSection({
               loading={loading}
               loadingText="Analyzing"
             >
+              <Sparkles size={14} />
               {testing ? "Re-analyze tests" : "Analyze tests"}
             </Button>
           )}

@@ -1,4 +1,5 @@
 import { Button, Heading, HStack, Text, VStack, Badge } from "@chakra-ui/react";
+import { Eye, FileText, ArrowLeft } from "lucide-react";
 import { useLogsStore } from "../../store/useLogsStore";
 
 function getPriorityColor(priority) {
@@ -28,9 +29,20 @@ export default function DomainHeader({ domain, domainId, analyzing, onBack }) {
       </VStack>
       <HStack>
         <Button variant="outline" onClick={toggleDomainLogs}>
-          {showDomainLogs ? "Show Domain Analysis" : "Show Logs"}
+          {showDomainLogs ? (
+            <>
+              <Eye size={16} />
+              Show Domain Analysis
+            </>
+          ) : (
+            <>
+              <FileText size={16} />
+              Show Logs
+            </>
+          )}
         </Button>
         <Button variant="outline" onClick={onBack}>
+          <ArrowLeft size={16} />
           Back
         </Button>
       </HStack>

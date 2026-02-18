@@ -9,7 +9,7 @@ import {
   Text,
   Badge,
 } from "@chakra-ui/react";
-import { Pencil, X, Save, FileText } from "lucide-react";
+import { Pencil, X, Save, FileText, Sparkles } from "lucide-react";
 import { Card } from "../ui/card";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { formatIsoUtcTimestampsInText } from "../../utils/date-time";
@@ -113,6 +113,7 @@ export default function DomainDocumentationSection({
                 loading={loading}
                 loadingText="Analyzing"
               >
+                <Sparkles size={14} />
                 {documentation
                   ? "Re-analyze documentation"
                   : "Analyze documentation"}
