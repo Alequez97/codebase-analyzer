@@ -2,6 +2,7 @@ import config from "../config.js";
 import fs from "fs/promises";
 import path from "path";
 import { ClaudeClient } from "../llm/clients/claude-client.js";
+import { OpenAIClient } from "../llm/clients/openai-client.js";
 import { ChatState } from "../llm/chat-state.js";
 import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
@@ -44,23 +45,47 @@ export async function detect() {
 
 /**
  * Create LLM client based on configured model
+ * Prioritizes LLM_MODEL choice over which API key is available
  * @returns {BaseLLMClient}
  */
 function createLLMClient() {
   const { model, apiKeys, maxTokens } = config.llm;
 
-  // For now, we only support Claude/Anthropic
-  // Future: add OpenAI, DeepSeek, OpenRouter clients
-  if (apiKeys.anthropic) {
-    return new ClaudeClient({
-      apiKey: apiKeys.anthropic,
-      model: model.startsWith("claude") ? model : "claude-sonnet-4-20250514",
+  // Determine which client to use based on LLM_MODEL setting
+  const isOpenAIModel = model.toLowerCase().startsWith("gpt");
+  const isClaudeModel = model.toLowerCase().startsWith("claude");
+
+  // User wants OpenAI model
+  if (isOpenAIModel) {
+    if (!apiKeys.openai) {
+      throw new Error(
+        `OpenAI model "${model}" is selected but OPENAI_API_KEY is not configured`,
+      );
+    }
+    return new OpenAIClient({
+      apiKey: apiKeys.openai,
+      model,
       maxTokens,
     });
   }
 
+  // User wants Claude model
+  if (isClaudeModel) {
+    if (!apiKeys.anthropic) {
+      throw new Error(
+        `Claude model "${model}" is selected but ANTHROPIC_API_KEY is not configured`,
+      );
+    }
+    return new ClaudeClient({
+      apiKey: apiKeys.anthropic,
+      model,
+      maxTokens,
+    });
+  }
+
+  // Unknown model prefix - provide helpful error
   throw new Error(
-    "No supported LLM client available. Please configure ANTHROPIC_API_KEY",
+    `Unsupported model "${model}". LLM_MODEL should start with "gpt" (OpenAI) or "claude" (Anthropic)`,
   );
 }
 
@@ -73,6 +98,7 @@ export async function execute(task) {
   logger.info(`Executing LLM API task: ${task.type}`, {
     component: "LLM-API",
     taskId: task.id,
+    model: config.llm.model,
   });
 
   // For documentation tasks, use the specialized documentation generator
@@ -136,14 +162,18 @@ async function executeDocumentationTask(task) {
     });
     taskLogger.info(`📋 Domain: ${domainName}`, { component: "LLM-API" });
     taskLogger.info(`📁 Files: ${files.length}`, { component: "LLM-API" });
+    taskLogger.info(`🤖 Model: ${config.llm.model}`, { component: "LLM-API" });
+    taskLogger.info(`🎯 Target directory: ${config.target.directory}`, {
+      component: "LLM-API",
+    });
     taskLogger.raw("=".repeat(80));
     taskLogger.raw("");
 
     const result = await generateDomainDocumentation({
+      task,
       domainId,
       domainName,
       files,
-      taskId: task.id,
       taskLogger,
       onProgress: (progress) => {
         taskLogger.info(`📊 ${progress.stage}: ${progress.message}`, {
@@ -234,10 +264,10 @@ async function executeDocumentationTask(task) {
  * @param {Object} params - Generation parameters
  */
 async function generateDomainDocumentation({
+  task,
   domainId,
   domainName,
   files,
-  taskId,
   taskLogger,
   onProgress = () => {},
 }) {
@@ -297,10 +327,18 @@ async function generateDomainDocumentation({
       `🔄 Iteration ${iterationCount}/${maxIterations} - Sending request to LLM...`,
       {
         component: "LLM-API",
-        taskId,
+        taskId: task.id,
         tokenCount: chatState.getTokenCount(),
       },
     );
+
+    emitSocketEvent(getLogEventForTaskType(task.type), {
+      taskId: task.id,
+      domainId,
+      type: task.type,
+      stream: "stdout",
+      log: `\n${"-".repeat(80)}\n[Iteration ${iterationCount}/${maxIterations}] 📤 Sending message to LLM...\n${"-".repeat(80)}\n`,
+    });
 
     // Send message to LLM
     const response = await client.sendMessage(chatState.getMessages(), {
@@ -321,12 +359,29 @@ async function generateDomainDocumentation({
       { component: "LLM-API" },
     );
 
+    emitSocketEvent(getLogEventForTaskType(task.type), {
+      taskId: task.id,
+      domainId,
+      type: task.type,
+      stream: "stdout",
+      log: `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`,
+    });
+
     // Handle tool calls
     if (response.toolCalls && response.toolCalls.length > 0) {
+      const toolNames = response.toolCalls.map((tc) => tc.name).join(", ");
       taskLogger.info(
-        `🔧 LLM requested ${response.toolCalls.length} tool call(s)`,
+        `🔧 LLM requested ${response.toolCalls.length} tool call(s): ${toolNames}`,
         { component: "LLM-API" },
       );
+
+      emitSocketEvent(getLogEventForTaskType(task.type), {
+        taskId: task.id,
+        domainId,
+        type: task.type,
+        stream: "stdout",
+        log: `\n🔧 [Tool Calls] LLM requested ${response.toolCalls.length} tool(s): ${toolNames}\n`,
+      });
 
       chatState.addToolUse(response.toolCalls);
 
@@ -357,6 +412,18 @@ async function generateDomainDocumentation({
           iteration: iterationCount,
         });
 
+        const argsPreview = JSON.stringify(toolCall.arguments).substring(
+          0,
+          150,
+        );
+        emitSocketEvent(getLogEventForTaskType(task.type), {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `  ├─ 📖 ${toolDescription}\n  │  Args: ${argsPreview}${JSON.stringify(toolCall.arguments).length > 150 ? "..." : ""}\n`,
+        });
+
         const result = await fileToolExecutor.executeTool(
           toolCall.name,
           toolCall.arguments,
@@ -372,7 +439,23 @@ async function generateDomainDocumentation({
         taskLogger.info(`  ✅ Tool completed - returned ${resultSize}`, {
           component: "LLM-API",
         });
+
+        emitSocketEvent(getLogEventForTaskType(task.type), {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `  └─ ✅ Tool completed - returned ${resultSize}\n`,
+        });
       }
+
+      emitSocketEvent(getLogEventForTaskType(task.type), {
+        taskId: task.id,
+        domainId,
+        type: task.type,
+        stream: "stdout",
+        log: `✅ All tool executions complete, continuing...\n\n`,
+      });
 
       continue;
     }
@@ -394,10 +477,18 @@ async function generateDomainDocumentation({
       if (documentationMarkdown) {
         taskLogger.info("✨ Documentation generation completed!", {
           component: "LLM-API",
-          taskId,
+          taskId: task.id,
           iterations: iterationCount,
           markdownLength: documentationMarkdown.length,
           markdownSizeKB: Math.round(documentationMarkdown.length / 1000),
+        });
+
+        emitSocketEvent(getLogEventForTaskType(task.type), {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `\n✨ [Documentation Complete] Generated ${Math.round(documentationMarkdown.length / 1000)}KB of Markdown after ${iterationCount} iterations\n`,
         });
 
         onProgress({
@@ -413,6 +504,14 @@ async function generateDomainDocumentation({
             component: "LLM-API",
           },
         );
+
+        emitSocketEvent(getLogEventForTaskType(task.type), {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `⚠️  [Response] No valid markdown found, requesting documentation in next iteration...\n`,
+        });
       }
     }
 
@@ -471,6 +570,14 @@ async function generateDomainDocumentation({
   );
   taskLogger.raw("");
 
+  emitSocketEvent(getLogEventForTaskType(task.type), {
+    taskId: task.id,
+    domainId,
+    type: task.type,
+    stream: "stdout",
+    log: `\n${"=".repeat(80)}\n📊 [Statistics]\n⏱️  Duration: ${durationSec}s\n🔄 Iterations: ${iterationCount}\n📝 Markdown: ${Math.round(documentationMarkdown.length / 1000)}KB\n🪙 Tokens: ${(totalTokens.input + totalTokens.output).toLocaleString()} total (${totalTokens.input.toLocaleString()} in / ${totalTokens.output.toLocaleString()} out)\n${"=".repeat(80)}\n`,
+  });
+
   // Create minimal metadata
   const metadata = {
     status: "completed",
@@ -484,8 +591,8 @@ async function generateDomainDocumentation({
       totalTokens: totalTokens.input + totalTokens.output,
     },
     agent: "llm-api",
-    model: client.getModelName(),
-    logFile: `logs/${taskId}.log`,
+    model: client.model,
+    logFile: `logs/${task.id}.log`,
   };
 
   taskLogger.info(`💾 Saving documentation to JSON...`, {
@@ -515,6 +622,14 @@ async function generateDomainDocumentation({
       component: "LLM-API",
     },
   );
+
+  emitSocketEvent(getLogEventForTaskType(task.type), {
+    taskId: task.id,
+    domainId,
+    type: task.type,
+    stream: "stdout",
+    log: `\n✅ [COMPLETE] Documentation generation finished successfully\n📂 Domain: ${domainId}\n📄 Path: .code-analysis/domains/${domainId}/documentation.json\n`,
+  });
 
   return {
     success: true,

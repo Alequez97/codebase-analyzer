@@ -16,9 +16,8 @@ export class ClaudeClient extends BaseLLMClient {
       apiKey: config.apiKey,
     });
 
-    // Default to Claude Sonnet 4.5 (latest version) if no model specified
     // See: https://docs.anthropic.com/en/docs/about-claude/models
-    this.model = config.model || "claude-sonnet-4-5-20250929";
+    this.model = config.model;
   }
 
   /**
