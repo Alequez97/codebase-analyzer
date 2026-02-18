@@ -4,7 +4,15 @@
 
 **DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. COMPLETE THE TASK AND EXIT.**
 
-Your ONLY job is to write `.code-analysis/domains/{{DOMAIN_ID}}/documentation.md` and exit.
+Your ONLY job is to analyze the domain files and output comprehensive Markdown documentation.
+
+## AVAILABLE TOOLS
+
+You have access to these tools to explore the codebase:
+
+- `list_directory`: List files and subdirectories
+- `read_file`: Read specific file contents
+- `search_files`: Find files matching patterns
 
 ## Objective
 
@@ -32,9 +40,7 @@ Read all domain files listed above and generate a comprehensive Markdown documen
 
 ## Output Format
 
-**YOU MUST CREATE THIS FILE**: `.code-analysis/domains/{{DOMAIN_ID}}/documentation.md`
-
-The file should be pure Markdown with the following structure:
+You MUST output your documentation as pure Markdown with the following structure:
 
 ```markdown
 # {{DOMAIN_NAME}}
@@ -149,29 +155,23 @@ Sessions are stored in Redis for performance, with automatic expiration after 24
 - **Brute Force**: Login attempts should be rate-limited to prevent attacks
 ```
 
-## ACTION REQUIRED
+## Task Execution
 
-**YOUR TASK**: Create `.code-analysis/domains/{{DOMAIN_ID}}/documentation.md` with comprehensive business documentation in Markdown format.
+1. Use the available tools to read and analyze ALL files listed in the "Files to Analyze" section
+2. Extract business purpose, architecture, and key components from the code
+3. Identify risk areas and critical paths
+4. Output comprehensive Markdown documentation following the structure above
 
 **CRITICAL REQUIREMENTS**:
 
-1. ✅ **MUST** create/write the file `.code-analysis/domains/{{DOMAIN_ID}}/documentation.md`
-2. ✅ **MUST** write pure Markdown (no JSON, no code blocks around the entire content)
-3. ✅ **MUST** analyze ALL files listed in the "Files to Analyze" section
-4. ✅ **MUST** explain business purpose and value
-5. ✅ **MUST** describe key components and their roles
-6. ✅ **MUST** explain architecture and how components interact
-7. ✅ **MUST** identify risk areas and critical paths
-8. ❌ **DO NOT** ask questions or wait for input
-9. ❌ **DO NOT** just describe what should be done
-10. ✅ **WRITE THE FILE NOW** and exit
+1. ✅ **MUST** output pure Markdown (no JSON, no unnecessary code blocks)
+2. ✅ **MUST** analyze ALL files listed in the "Files to Analyze" section
+3. ✅ **MUST** explain business purpose and value
+4. ✅ **MUST** describe key components and their roles
+5. ✅ **MUST** explain architecture and how components interact
+6. ✅ **MUST** identify risk areas and critical paths
+7. ❌ **DO NOT** ask questions or wait for input
+8. ❌ **DO NOT** just describe what should be done
+9. ✅ **OUTPUT THE MARKDOWN NOW** and exit
 
-## Final Reminder
-
-**THIS IS NOT A DRY RUN. WRITE THE ACTUAL FILE NOW.**
-
-File path: `.code-analysis/domains/{{DOMAIN_ID}}/documentation.md`
-
-Expected format: Pure Markdown with clear structure
-
-**CREATE THIS FILE NOW AND EXIT.**
+**Note**: The system will automatically save your Markdown output to the appropriate file. You do not need to use any file writing tools.

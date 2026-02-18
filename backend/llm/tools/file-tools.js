@@ -3,6 +3,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 /**
+ * Constants
+ */
+const ANALYSIS_OUTPUT_DIR = ".code-analysis";
+
+/**
  * File system tools that LLM can use during codebase analysis
  */
 
@@ -101,6 +106,13 @@ export class FileToolExecutor {
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
       throw new Error("Access denied: path outside project root");
+    }
+
+    // Prevent reading output files in .code-analysis directory
+    // LLM should only read SOURCE CODE, not its own output
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+    if (normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`)) {
+      return `Error: Cannot read files in ${ANALYSIS_OUTPUT_DIR} directory. This directory contains analysis outputs, not source code. Only read source code files from your codebase.`;
     }
 
     try {

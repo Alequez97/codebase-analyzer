@@ -4,7 +4,15 @@
 
 **DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. COMPLETE THE TASK AND EXIT.**
 
-Your ONLY job is to write `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` and exit.
+Your ONLY job is to analyze the domain files and output structured JSON with comprehensive business requirements.
+
+## AVAILABLE TOOLS
+
+You have access to these tools to explore the codebase:
+
+- `list_directory`: List files and subdirectories
+- `read_file`: Read specific file contents
+- `search_files`: Find files matching patterns
 
 ## Objective
 
@@ -29,20 +37,27 @@ Analyze the domain files and extract comprehensive business requirements that wi
 
 ## Task
 
-Read all domain files listed above and extract requirements that describe:
+**CRITICAL**: You MUST use the `read_file` tool to read ALL files listed above. You cannot extract requirements without reading the actual code.
 
-1. **Business Rules** - Core logic and validation rules
+**Step-by-step process**:
+
+1. **Read each file** using the `read_file` tool (provide the file path from the list above)
+2. **Analyze the code** to identify business rules, validation logic, expected behaviors
+3. **Extract requirements** that describe what the code does and what tests should verify
+4. **Output JSON** with all requirements in the specified format
+
+For each file, look for:
+
+1. **Business Rules** - Core logic, algorithms, decision points, workflows
 2. **Expected Behaviors** - What the domain should do under various conditions
-3. **Data Validation** - Input validation, constraints, and data integrity rules
-4. **Edge Cases** - Boundary conditions and special scenarios
-5. **Integration Points** - How this domain interacts with other parts of the system
-6. **Error Handling** - Expected error scenarios and how they should be handled
+3. **Data Validation** - Input validation, constraints, type checks, format requirements
+4. **Edge Cases** - Boundary conditions, null/empty handling, special scenarios
+5. **Integration Points** - API calls, database queries, external services, dependencies
+6. **Error Handling** - Try-catch blocks, error checks, validation failures, error messages
 
 ## Output Format
 
-**YOU MUST CREATE THIS FILE**: `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json`
-
-The file must be valid JSON with the following structure:
+You MUST output your analysis as a valid JSON object with the following structure:
 
 ```json
 {
@@ -169,30 +184,38 @@ Good requirements are:
 4. **Complete**: Cover both happy path and error scenarios
 5. **Traceable**: Link back to source code for verification
 
-## ACTION REQUIRED
+## Task Execution
 
-**YOUR TASK**: Create `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` with comprehensive business requirements extracted from the code.
+1. ✅ **STEP 1**: Use `read_file` tool to read EVERY file in the "Files to Analyze" list
+2. ✅ **STEP 2**: For each file, analyze the code and extract testable requirements
+3. ✅ **STEP 3**: Combine all requirements into a single JSON output
+4. ✅ **STEP 4**: Output the complete JSON (not wrapped in markdown code blocks if possible)
+
+**Example workflow**:
+
+```
+1. read_file("path/to/file1.js")
+   -> Analyze code -> Extract REQ-001, REQ-002, REQ-003
+
+2. read_file("path/to/file2.js")
+   -> Analyze code -> Extract REQ-004, REQ-005
+
+3. read_file("path/to/file3.js")
+   -> Analyze code -> Extract REQ-006, REQ-007, REQ-008
+
+4. Output JSON with all requirements (REQ-001 through REQ-008)
+```
 
 **CRITICAL REQUIREMENTS**:
 
-1. ✅ **MUST** create/write the file `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json`
-2. ✅ **MUST** write valid JSON (not Markdown, not wrapped in code blocks)
-3. ✅ **MUST** analyze ALL files listed in the "Files to Analyze" section
+1. ✅ **MUST** use `read_file` tool for EVERY file in the list above
+2. ✅ **MUST** output valid JSON (not Markdown, not wrapped in code blocks if possible)
+3. ✅ **MUST** analyze code logic, not just file names
 4. ✅ **MUST** extract business rules, validation logic, and expected behaviors
 5. ✅ **MUST** include both happy path and error scenarios
 6. ✅ **MUST** make requirements specific and testable
 7. ✅ **MUST** prioritize requirements correctly (P0 for critical, P3 for low priority)
-8. ✅ **MUST** include source file references
+8. ✅ **MUST** include source file references with line numbers when possible
 9. ❌ **DO NOT** ask questions or wait for input
 10. ❌ **DO NOT** just describe what should be done
-11. ✅ **WRITE THE FILE NOW** and exit
-
-## Final Reminder
-
-**THIS IS NOT A DRY RUN. WRITE THE ACTUAL FILE NOW.**
-
-File path: `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json`
-
-Expected format: Valid JSON following the schema above
-
-**CREATE THIS FILE NOW AND EXIT.**
+11. ✅ **OUTPUT THE JSON NOW** and exit

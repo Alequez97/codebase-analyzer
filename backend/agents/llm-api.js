@@ -8,6 +8,10 @@ import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
 import { getLogEventForTaskType } from "../utils/task-logger.js";
 import * as logger from "../utils/logger.js";
+import {
+  processTemplate,
+  buildTemplateVariables,
+} from "../utils/template-processor.js";
 
 /**
  * Detect if the LLM API agent is available.
@@ -653,7 +657,16 @@ async function executeJsonTask(task) {
     config.paths.analyzerRoot,
     task.instructionFile,
   );
-  const instructions = await fs.readFile(instructionPath, "utf-8");
+  const instructionTemplate = await fs.readFile(instructionPath, "utf-8");
+
+  // Process template with task variables
+  emitJsonTaskProgress(
+    task,
+    "initializing",
+    "Processing instruction template...",
+  );
+  const templateVariables = await buildTemplateVariables(task);
+  const instructions = processTemplate(instructionTemplate, templateVariables);
 
   // Create output directory
   const outputPath = path.join(config.target.directory, task.outputFile);
@@ -924,12 +937,17 @@ async function executeJsonTask(task) {
         break;
       }
 
-      // If stop_reason is max_tokens, we might need to continue
+      // If stop_reason is max_tokens, ask for final JSON output
       if (response.stopReason === "max_tokens") {
-        taskLogger.warn("⚠️  Max tokens reached, asking LLM to continue", {
-          component: "LLM-API",
-        });
-        chatState.addUserMessage("Please continue your analysis.");
+        taskLogger.warn(
+          "⚠️  Max tokens reached, requesting final JSON output",
+          {
+            component: "LLM-API",
+          },
+        );
+        chatState.addUserMessage(
+          "You've hit the token limit. Please output the complete JSON with all the requirements/analysis you've identified so far. Make sure it's valid, complete JSON.",
+        );
         continue;
       }
 

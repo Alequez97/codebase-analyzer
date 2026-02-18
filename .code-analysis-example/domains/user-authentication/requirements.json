@@ -1,0 +1,187 @@
+{
+  "domainId": "user-authentication",
+  "domainName": "User Authentication",
+  "analyzedAt": "2026-02-17T14:35:00.000Z",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "User passwords must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "category": "validation",
+      "priority": "P0",
+      "source": "backend/validators/password.js:15-23",
+      "confidence": "HIGH",
+      "relatedCode": "const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$/"
+    },
+    {
+      "id": "REQ-002",
+      "description": "Failed login attempts must be rate-limited to 5 attempts per 15-minute window per IP address to prevent brute force attacks",
+      "category": "business-rule",
+      "priority": "P0",
+      "source": "backend/middleware/rateLimiter.js:42-58",
+      "confidence": "HIGH",
+      "relatedCode": "maxAttempts: 5, windowMs: 15 * 60 * 1000"
+    },
+    {
+      "id": "REQ-003",
+      "description": "JWT access tokens must expire after 15 minutes of issuance to minimize security risk from token theft",
+      "category": "business-rule",
+      "priority": "P0",
+      "source": "backend/utils/tokenManager.js:89",
+      "confidence": "HIGH",
+      "relatedCode": "expiresIn: '15m'"
+    },
+    {
+      "id": "REQ-004",
+      "description": "JWT refresh tokens must expire after 7 days and be stored securely in httpOnly cookies",
+      "category": "business-rule",
+      "priority": "P0",
+      "source": "backend/utils/tokenManager.js:95",
+      "confidence": "HIGH",
+      "relatedCode": "refreshExpiresIn: '7d', httpOnly: true, secure: true"
+    },
+    {
+      "id": "REQ-005",
+      "description": "When authentication fails, the system must return a generic 'Invalid credentials' message without revealing whether the username or password was incorrect",
+      "category": "error-handling",
+      "priority": "P0",
+      "source": "backend/controllers/auth.js:156-162",
+      "confidence": "HIGH",
+      "relatedCode": "return res.status(401).json({ message: 'Invalid credentials' })"
+    },
+    {
+      "id": "REQ-006",
+      "description": "Password reset tokens must be single-use, cryptographically random, and expire after 1 hour",
+      "category": "business-rule",
+      "priority": "P1",
+      "source": "backend/services/passwordReset.js:78-92",
+      "confidence": "HIGH",
+      "relatedCode": "crypto.randomBytes(32), expiresAt: Date.now() + 3600000"
+    },
+    {
+      "id": "REQ-007",
+      "description": "Users must verify their email address before being allowed to log in for the first time",
+      "category": "business-rule",
+      "priority": "P1",
+      "source": "backend/middleware/authProtect.js:23-29",
+      "confidence": "HIGH",
+      "relatedCode": "if (!user.emailVerified) { return res.status(403).json({ message: 'Email not verified' }) }"
+    },
+    {
+      "id": "REQ-008",
+      "description": "Email addresses must be unique across the system and validated against RFC 5322 standard format",
+      "category": "validation",
+      "priority": "P0",
+      "source": "backend/models/user.js:45-52",
+      "confidence": "HIGH",
+      "relatedCode": "unique: true, validate: emailValidator.validate"
+    },
+    {
+      "id": "REQ-009",
+      "description": "Passwords must be hashed using bcrypt with a salt round factor of at least 12 before being stored in the database",
+      "category": "business-rule",
+      "priority": "P0",
+      "source": "backend/models/user.js:89-93",
+      "confidence": "HIGH",
+      "relatedCode": "bcrypt.hash(password, 12)"
+    },
+    {
+      "id": "REQ-010",
+      "description": "User sessions must be invalidated immediately when the user logs out, rendering all existing tokens for that session unusable",
+      "category": "business-rule",
+      "priority": "P1",
+      "source": "backend/controllers/auth.js:245-251",
+      "confidence": "HIGH",
+      "relatedCode": "await Session.findByIdAndDelete(sessionId)"
+    },
+    {
+      "id": "REQ-011",
+      "description": "When a user successfully logs in, the system must clear any previous failed login attempt counters for that user",
+      "category": "behavior",
+      "priority": "P2",
+      "source": "backend/controllers/auth.js:178-182",
+      "confidence": "MEDIUM",
+      "relatedCode": "await LoginAttempts.deleteMany({ userId: user._id })"
+    },
+    {
+      "id": "REQ-012",
+      "description": "Admin users must bypass rate limiting restrictions to ensure administrative access is always available",
+      "category": "edge-case",
+      "priority": "P2",
+      "source": "backend/middleware/rateLimiter.js:71-75",
+      "confidence": "MEDIUM",
+      "relatedCode": "if (req.user?.role === 'admin') { return next(); }"
+    },
+    {
+      "id": "REQ-013",
+      "description": "When a user changes their password, all existing sessions and tokens must be invalidated to force re-authentication",
+      "category": "business-rule",
+      "priority": "P1",
+      "source": "backend/services/user.js:312-320",
+      "confidence": "HIGH",
+      "relatedCode": "await Session.deleteMany({ userId }); await Token.deleteMany({ userId })"
+    },
+    {
+      "id": "REQ-014",
+      "description": "Account lockout must occur after 10 failed login attempts within 1 hour, preventing further login attempts for 30 minutes",
+      "category": "business-rule",
+      "priority": "P1",
+      "source": "backend/middleware/accountLockout.js:56-68",
+      "confidence": "HIGH",
+      "relatedCode": "maxAttempts: 10, windowMs: 3600000, lockoutDuration: 1800000"
+    },
+    {
+      "id": "REQ-015",
+      "description": "The system must send an email notification to the user whenever a password change or password reset occurs",
+      "category": "integration",
+      "priority": "P2",
+      "source": "backend/services/passwordReset.js:145-152",
+      "confidence": "HIGH",
+      "relatedCode": "await emailService.send('password-changed', user.email)"
+    },
+    {
+      "id": "REQ-016",
+      "description": "OAuth social login (Google, GitHub) must create a new user account if the email doesn't exist, or link to existing account if email matches",
+      "category": "integration",
+      "priority": "P1",
+      "source": "backend/controllers/oauth.js:89-112",
+      "confidence": "HIGH",
+      "relatedCode": "const existingUser = await User.findOne({ email: profile.email })"
+    },
+    {
+      "id": "REQ-017",
+      "description": "Two-factor authentication (2FA) must be optional but recommended, using TOTP (Time-based One-Time Password) algorithm",
+      "category": "business-rule",
+      "priority": "P2",
+      "source": "backend/controllers/twoFactor.js:34-67",
+      "confidence": "MEDIUM",
+      "relatedCode": "speakeasy.totp.verify({ secret, encoding: 'base32', token })"
+    },
+    {
+      "id": "REQ-018",
+      "description": "When 2FA is enabled, login must require both password authentication AND valid TOTP code from authenticator app",
+      "category": "business-rule",
+      "priority": "P1",
+      "source": "backend/middleware/authProtect.js:89-102",
+      "confidence": "HIGH",
+      "relatedCode": "if (user.twoFactorEnabled && !req.body.totpCode) { return res.status(401).json({ requires2FA: true }) }"
+    },
+    {
+      "id": "REQ-019",
+      "description": "The system must not store plain-text passwords, security questions, or any reversible password representations in the database",
+      "category": "business-rule",
+      "priority": "P0",
+      "source": "backend/models/user.js:67-72",
+      "confidence": "HIGH",
+      "relatedCode": "password: { type: String, select: false, required: true }"
+    },
+    {
+      "id": "REQ-020",
+      "description": "Token refresh requests must validate that the refresh token is not expired, not revoked, and belongs to the requesting user",
+      "category": "validation",
+      "priority": "P0",
+      "source": "backend/controllers/auth.js:289-305",
+      "confidence": "HIGH",
+      "relatedCode": "if (!token || token.revoked || token.expiresAt < Date.now()) { throw new Error('Invalid token') }"
+    }
+  ]
+}
