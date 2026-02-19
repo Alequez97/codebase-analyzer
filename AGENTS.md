@@ -479,7 +479,46 @@ Dashboard shows: "Click Analyze Codebase to begin"
   }, [socket]);
   ```
 
-### 10. **Mock Data Workflow (When User Requests Mocking)**
+### 10. **Modular Architecture - Avoid Large "Master" Files**
+
+- **Split large files by responsibility** - Break down monolithic files into focused, single-purpose modules
+- **Don't create "god files"** that export everything - these become maintenance nightmares and violate single responsibility principle
+- **Benefits of modular structure**:
+  - Easier to navigate and understand
+  - Better code organization
+  - Reduced merge conflicts
+  - Faster builds (tree-shaking works better)
+  - Easier to test individual modules
+  - Clear separation of concerns
+- **Examples of proper splitting**:
+  - **API layer**: Split `services/api.js` → `api/` folder with:
+    - `api/status.js` - status endpoints
+    - `api/project.js` - project files
+    - `api/codebase.js` - codebase analysis
+    - `api/domain.js` - domain CRUD
+    - `api/domain-documentation.js` - documentation endpoints
+    - `api/domain-requirements.js` - requirements endpoints
+    - `api/domain-bugs-security.js` - bugs & security endpoints
+    - `api/domain-testing.js` - testing endpoints
+    - `api/tasks.js` - task management
+    - `api/index.js` - re-exports all modules
+
+  - **Persistence layer**: Split `persistence/domains.js` → per-section modules:
+    - `persistence/domain-documentation.js`
+    - `persistence/domain-requirements.js`
+    - `persistence/domain-testing.js`
+    - `persistence/domain-bugs-security.js`
+
+- **When to split a file**:
+  - File exceeds ~200-300 lines
+  - Multiple unrelated responsibilities
+  - Different parts change for different reasons
+  - Hard to find specific functionality
+  - Multiple developers frequently edit the same file
+
+- **Keep index files thin** - Only re-export, don't add logic
+
+### 11. **Mock Data Workflow (When User Requests Mocking)**
 
 - If the user asks for mock responses, prefer reading JSON files from `.code-analysis-example/` instead of hardcoding large inline objects in route handlers.
 - Use the shared utility `backend/utils/mock-data.js` for mock loading and timing:

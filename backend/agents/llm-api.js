@@ -613,7 +613,7 @@ async function generateDomainDocumentation({
 
   // Save documentation with metadata
   const { writeDomainDocumentation } =
-    await import("../persistence/domains.js");
+    await import("../persistence/domain-documentation.js");
   await writeDomainDocumentation(domainId, {
     content: documentationMarkdown,
     metadata,

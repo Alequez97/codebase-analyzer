@@ -1,5 +1,9 @@
 import express from "express";
-import * as domainsPersistence from "../persistence/domains.js";
+import * as domainAggregatePersistence from "../persistence/domain-aggregate.js";
+import * as domainDocumentationPersistence from "../persistence/domain-documentation.js";
+import * as domainRequirementsPersistence from "../persistence/domain-requirements.js";
+import * as domainTestingPersistence from "../persistence/domain-testing.js";
+import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { DEFAULT_AGENTS } from "../agents/index.js";
@@ -14,7 +18,7 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const analysis = await domainsPersistence.readDomain(id);
+    const analysis = await domainAggregatePersistence.readDomain(id);
 
     if (!analysis) {
       return res.status(404).json({
@@ -75,7 +79,8 @@ router.get("/:id/documentation", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainsPersistence.readDomainDocumentation(id);
+    const data =
+      await domainDocumentationPersistence.readDomainDocumentation(id);
 
     if (!data) {
       return res.status(404).json({
@@ -101,7 +106,7 @@ router.get("/:id/requirements", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainsPersistence.readDomainRequirements(id);
+    const data = await domainRequirementsPersistence.readDomainRequirements(id);
 
     if (!data) {
       return res.status(404).json({
@@ -127,12 +132,31 @@ router.get("/:id/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainsPersistence.readDomainBugsSecurity(id);
+    const data = await domainBugsSecurityPersistence.readDomainBugsSecurity(id);
 
     if (!data) {
       return res.status(404).json({
         error: "Domain bugs & security not found",
         message: `No bugs & security analysis found for domain: ${id}`,
+      });
+    }
+
+    // Enrich findings with action status
+    const actionsRegistry =
+      await domainBugsSecurityPersistence.readBugsSecurityFindingActions(id);
+
+    if (data.findings && actionsRegistry?.actions) {
+      const actionsByFindingId = new Map(
+        actionsRegistry.actions.map((action) => [action.findingId, action]),
+      );
+
+      data.findings = data.findings.map((finding) => {
+        const action = actionsByFindingId.get(finding.id);
+        return {
+          ...finding,
+          action: action ? action.action : null,
+          actionMetadata: action ? action.metadata : null,
+        };
       });
     }
 
@@ -153,7 +177,7 @@ router.get("/:id/testing", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainsPersistence.readDomainTesting(id);
+    const data = await domainTestingPersistence.readDomainTesting(id);
 
     if (!data) {
       return res.status(404).json({
@@ -281,6 +305,52 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
 });
 
 /**
+ * Record action for a bugs & security finding
+ */
+router.post(
+  "/:id/bugs-security/findings/:findingId/actions",
+  async (req, res) => {
+    try {
+      const { id, findingId } = req.params;
+      const { action, reason, metadata } = req.body;
+
+      if (
+        !action ||
+        !["apply", "wont-fix", "fixed-manually"].includes(action)
+      ) {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "action must be one of: apply, wont-fix, fixed-manually",
+        });
+      }
+
+      const result =
+        await domainBugsSecurityPersistence.recordBugsSecurityFindingAction(
+          id,
+          {
+            findingId,
+            action,
+            reason: reason || "",
+            metadata: metadata || {},
+          },
+        );
+
+      res.status(201).json({
+        success: true,
+        action: result.action,
+        summary: result.registry.summary,
+      });
+    } catch (error) {
+      logger.error(
+        `Error recording action for finding ${req.params.findingId} in domain ${req.params.id}`,
+        { error, component: "API" },
+      );
+      res.status(500).json({ error: "Failed to record finding action" });
+    }
+  },
+);
+
+/**
  * Analyze domain testing section
  */
 router.post("/:id/analyze/testing", async (req, res) => {
@@ -322,7 +392,7 @@ router.post("/:id/documentation/save", async (req, res) => {
       });
     }
 
-    await domainsPersistence.writeDomainDocumentation(id, {
+    await domainDocumentationPersistence.writeDomainDocumentation(id, {
       content: documentation,
       metadata: {
         status: "completed",
@@ -358,7 +428,7 @@ router.post("/:id/requirements/save", async (req, res) => {
       });
     }
 
-    await domainsPersistence.writeDomainRequirements(id, {
+    await domainRequirementsPersistence.writeDomainRequirements(id, {
       domainId: id,
       domainName: domainName || id,
       timestamp: new Date().toISOString(),
@@ -458,7 +528,10 @@ router.get("/:id/logs/:section", async (req, res) => {
       });
     }
 
-    const logs = await domainsPersistence.readDomainSectionLogs(id, section);
+    const logs = await domainAggregatePersistence.readDomainSectionLogs(
+      id,
+      section,
+    );
 
     if (!logs) {
       return res.status(404).json({

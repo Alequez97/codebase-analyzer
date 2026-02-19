@@ -371,6 +371,7 @@ export default function DomainDetailsPage() {
         />
 
         <DomainBugsSecuritySection
+          domainId={domainId}
           bugsSecurity={bugsSecurity}
           loading={bugsSecurityLoading}
           progress={bugsSecurityProgress}
@@ -378,6 +379,7 @@ export default function DomainDetailsPage() {
           onAnalyze={(includeRequirements) =>
             domain && analyzeDomainBugsSecurity(domain, includeRequirements)
           }
+          onRefresh={() => fetchDomainBugsSecurity(domainId)}
           showLogs={showDomainLogs}
           logs={bugsSecurityLogs}
           logsLoading={bugsSecurityLogsLoading}

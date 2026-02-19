@@ -1,5 +1,5 @@
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import * as domainsPersistence from "../persistence/domains.js";
+import * as domainsPersistence from "../persistence/domain-aggregate.js";
 
 /**
  * Get full codebase analysis results with enriched domain data

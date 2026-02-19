@@ -41,6 +41,7 @@ import {
 } from "../ui/dialog";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { toaster } from "../ui/toaster";
+import api from "../../api";
 
 const SEVERITY_COLORS = {
   critical: "red",
@@ -59,8 +60,9 @@ const CATEGORY_ICONS = {
 
 const FINDING_STATUS = {
   OPEN: "open",
-  APPLIED: "applied",
+  APPLIED: "apply",
   WONT_FIX: "wont-fix",
+  FIXED_MANUALLY: "fixed-manually",
 };
 
 const TYPE_COLORS = {
@@ -82,10 +84,12 @@ function sortFindingsBySeverity(findings = []) {
 }
 
 export default function DomainBugsSecuritySection({
+  domainId,
   bugsSecurity,
   loading = false,
   progress = null,
   onAnalyze,
+  onRefresh,
   showLogs = false,
   logs = "",
   logsLoading = false,
@@ -96,7 +100,6 @@ export default function DomainBugsSecuritySection({
   const [includeRequirements, setIncludeRequirements] = useState(false);
   const [analysisDescription, setAnalysisDescription] = useState("");
   const [expandedFindings, setExpandedFindings] = useState(new Set());
-  const [findingStatusById, setFindingStatusById] = useState(() => new Map());
 
   const isAnalyzing = loading && !bugsSecurity;
   const hasData = !!bugsSecurity;
@@ -164,46 +167,36 @@ export default function DomainBugsSecuritySection({
     }
   };
 
-  const getFindingStatus = (findingId) =>
-    findingStatusById.get(findingId) || FINDING_STATUS.OPEN;
+  const getFindingStatus = (finding) => finding.action || FINDING_STATUS.OPEN;
 
-  const handleSetFindingStatus = (findingId, nextStatus) => {
-    const currentStatus = getFindingStatus(findingId);
-    const resolvedStatus =
-      currentStatus === nextStatus ? FINDING_STATUS.OPEN : nextStatus;
+  const handleSetFindingStatus = async (findingId, nextStatus) => {
+    if (!domainId) return;
 
-    setFindingStatusById((prev) => {
-      const next = new Map(prev);
+    try {
+      await api.recordFindingAction(domainId, findingId, nextStatus);
 
-      if (resolvedStatus === FINDING_STATUS.OPEN) {
-        next.delete(findingId);
-      } else {
-        next.set(findingId, resolvedStatus);
-      }
+      // Refetch to get updated data from backend
+      await onRefresh?.();
 
-      return next;
-    });
-
-    if (resolvedStatus === FINDING_STATUS.APPLIED) {
       toaster.create({
-        title: "Finding marked as applied",
+        title:
+          nextStatus === FINDING_STATUS.APPLIED
+            ? "Finding marked as applied"
+            : nextStatus === FINDING_STATUS.WONT_FIX
+              ? "Finding marked as won't fix"
+              : nextStatus === FINDING_STATUS.FIXED_MANUALLY
+                ? "Finding marked as fixed manually"
+                : "Finding status reset",
         type: "success",
       });
-      return;
-    }
-
-    if (resolvedStatus === FINDING_STATUS.WONT_FIX) {
+    } catch (error) {
+      console.error("Failed to persist finding action:", error);
       toaster.create({
-        title: "Finding marked as won't fix",
-        type: "success",
+        title: "Failed to save finding status",
+        description: error.response?.data?.error || "Unknown error",
+        type: "error",
       });
-      return;
     }
-
-    toaster.create({
-      title: "Finding status reset",
-      type: "success",
-    });
   };
 
   return (
@@ -233,10 +226,10 @@ export default function DomainBugsSecuritySection({
                 )}
               </IconButton>
               <Heading size="md">Bugs & Security</Heading>
-              {hasData && (
-                <Badge colorPalette="purple" size="sm" variant="subtle">
+              {hasData && sortedFindings.length > 0 && (
+                <Text fontSize="sm" color="gray.600" fontWeight="medium">
                   {sortedFindings.length} findings
-                </Badge>
+                </Text>
               )}
               {showLogs && (
                 <Badge colorPalette="purple" size="sm">
@@ -344,13 +337,14 @@ export default function DomainBugsSecuritySection({
                           const isExpanded = expandedFindings.has(finding.id);
                           const CategoryIcon =
                             CATEGORY_ICONS[finding.category] || Bug;
-                          const findingStatus = getFindingStatus(finding.id);
+                          const findingStatus = getFindingStatus(finding);
                           const normalizedSeverity = normalizeSeverity(
                             finding.severity,
                           );
                           const typeColor =
-                            TYPE_COLORS[String(finding.type || "").toLowerCase()] ||
-                            "gray";
+                            TYPE_COLORS[
+                              String(finding.type || "").toLowerCase()
+                            ] || "gray";
                           const source = finding.location
                             ? `${finding.location.file}:${finding.location.line}`
                             : finding.source;
@@ -423,6 +417,12 @@ export default function DomainBugsSecuritySection({
                                           Won't fix
                                         </Badge>
                                       )}
+                                      {findingStatus ===
+                                        FINDING_STATUS.FIXED_MANUALLY && (
+                                        <Badge colorPalette="purple" size="sm">
+                                          Fixed manually
+                                        </Badge>
+                                      )}
                                       <Button
                                         size="xs"
                                         colorPalette="gray"
@@ -431,6 +431,10 @@ export default function DomainBugsSecuritySection({
                                           FINDING_STATUS.WONT_FIX
                                             ? "solid"
                                             : "outline"
+                                        }
+                                        disabled={
+                                          findingStatus ===
+                                          FINDING_STATUS.WONT_FIX
                                         }
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -444,12 +448,39 @@ export default function DomainBugsSecuritySection({
                                       </Button>
                                       <Button
                                         size="xs"
+                                        colorPalette="purple"
+                                        variant={
+                                          findingStatus ===
+                                          FINDING_STATUS.FIXED_MANUALLY
+                                            ? "solid"
+                                            : "outline"
+                                        }
+                                        disabled={
+                                          findingStatus ===
+                                          FINDING_STATUS.FIXED_MANUALLY
+                                        }
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSetFindingStatus(
+                                            finding.id,
+                                            FINDING_STATUS.FIXED_MANUALLY,
+                                          );
+                                        }}
+                                      >
+                                        Fixed manually
+                                      </Button>
+                                      <Button
+                                        size="xs"
                                         colorPalette="green"
                                         variant={
                                           findingStatus ===
                                           FINDING_STATUS.APPLIED
                                             ? "solid"
                                             : "outline"
+                                        }
+                                        disabled={
+                                          findingStatus ===
+                                          FINDING_STATUS.APPLIED
                                         }
                                         onClick={(e) => {
                                           e.stopPropagation();

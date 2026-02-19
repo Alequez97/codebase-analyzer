@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../services/api";
+import api from "../api";
 import { TASK_TYPES } from "../constants/task-types";
 
 /**
