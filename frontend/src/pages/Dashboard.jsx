@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Box, Button, Container, HStack, VStack } from "@chakra-ui/react";
-import { useAnalysisStore } from "../store/useAnalysisStore";
+import { useCodebaseStore } from "../store/useCodebaseStore";
 import { useConfigStore } from "../store/useConfigStore";
 import { useLogsStore } from "../store/useLogsStore";
 import { useSocketStore } from "../store/useSocketStore";
@@ -15,9 +15,9 @@ export default function Dashboard() {
   // Config store (server configuration, agents, target project)
   const { config, configLoading, fetchConfig } = useConfigStore();
 
-  // Analysis store (codebase analysis data)
+  // Codebase store (codebase analysis data)
   const { loading, error, analysis, analyzingCodebase, fetchAnalysis } =
-    useAnalysisStore();
+    useCodebaseStore();
 
   // Logs store (UI state for showing/hiding logs)
   const { showDashboardLogs, toggleDashboardLogs, fetchCodebaseAnalysisLogs } =

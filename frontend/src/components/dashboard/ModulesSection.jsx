@@ -17,7 +17,7 @@ import { Card } from "../ui/card";
 import { Alert } from "../ui/alert";
 import { toaster } from "../ui/toaster";
 import { useConfigStore } from "../../store/useConfigStore";
-import { useAnalysisStore } from "../../store/useAnalysisStore";
+import { useCodebaseStore } from "../../store/useCodebaseStore";
 
 export function ModulesSection() {
   const navigate = useNavigate();
@@ -30,9 +30,8 @@ export function ModulesSection() {
     analyzingCodebase,
     pendingCodebaseTask,
     analyzeCodebase,
-    domainAnalyzeLoadingById,
     saveCodebaseSummary,
-  } = useAnalysisStore();
+  } = useCodebaseStore();
 
   const domains = analysis?.domains || [];
 
@@ -188,7 +187,6 @@ export function ModulesSection() {
               </Table.Header>
               <Table.Body>
                 {domains.map((domain) => {
-                  const isAnalyzing = !!domainAnalyzeLoadingById.get(domain.id);
                   return (
                     <Table.Row key={domain.id}>
                       <Table.Cell>

@@ -2,7 +2,12 @@ import { create } from "zustand";
 import { io } from "socket.io-client";
 import { SOCKET_EVENTS } from "../constants/socket-events";
 import { TASK_TYPES } from "../constants/task-types";
-import { useAnalysisStore } from "./useAnalysisStore";
+import { useCodebaseStore } from "./useCodebaseStore";
+import { useDomainDocumentationStore } from "./useDomainDocumentationStore";
+import { useDomainRequirementsStore } from "./useDomainRequirementsStore";
+import { useDomainBugsSecurityStore } from "./useDomainBugsSecurityStore";
+import { useDomainTestingStore } from "./useDomainTestingStore";
+import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
 
@@ -41,24 +46,21 @@ export const useSocketStore = create((set, get) => ({
 
     // Analysis events
     socket.on(SOCKET_EVENTS.ANALYSIS_STARTED, (data) => {
-      useAnalysisStore.getState().setStatus("analyzing");
-      useAnalysisStore.getState().setAnalyzingCodebase(true);
+      useCodebaseStore.getState().setAnalyzingCodebase(true);
     });
 
     socket.on(SOCKET_EVENTS.ANALYSIS_PROGRESS, (data) => {
-      useAnalysisStore.getState().setStatus(data.message || "analyzing");
+      // Progress updates handled via TASK_PROGRESS event
     });
 
     socket.on(SOCKET_EVENTS.ANALYSIS_COMPLETED, async (data) => {
-      useAnalysisStore.getState().setStatus("completed");
-      useAnalysisStore.getState().setAnalyzingCodebase(false);
-      await useAnalysisStore.getState().fetchAnalysis();
+      useCodebaseStore.getState().setAnalyzingCodebase(false);
+      await useCodebaseStore.getState().fetchAnalysis();
     });
 
     socket.on(SOCKET_EVENTS.ANALYSIS_ERROR, (data) => {
-      useAnalysisStore.getState().setStatus("error");
-      useAnalysisStore.getState().setError(data.error || "Analysis failed");
-      useAnalysisStore.getState().setAnalyzingCodebase(false);
+      useCodebaseStore.getState().setError(data.error || "Analysis failed");
+      useCodebaseStore.getState().setAnalyzingCodebase(false);
     });
 
     // Task completion events - handle all task types by checking type property
@@ -67,60 +69,27 @@ export const useSocketStore = create((set, get) => ({
 
       // Clear progress indicator for this domain
       if (domainId) {
-        useAnalysisStore.getState().setDomainTaskProgress(domainId, null);
+        useTaskProgressStore.getState().clearProgress(domainId);
       }
 
       // Handle different task types
       if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
-        // Clear pending task state
-        useAnalysisStore.getState().clearPendingCodebaseTask();
-
-        // Refresh analysis data
-        await useAnalysisStore.getState().fetchAnalysis();
+        useCodebaseStore.getState().clearPendingCodebaseTask();
+        await useCodebaseStore.getState().fetchAnalysis();
       } else if (type === TASK_TYPES.DOCUMENTATION && domainId) {
-        // Clear loading state
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainDocumentationLoadingById);
-        newLoadingMap.set(domainId, false);
-        useAnalysisStore.setState({
-          domainDocumentationLoadingById: newLoadingMap,
-        });
-
-        // Fetch updated documentation section
-        await useAnalysisStore.getState().fetchDomainDocumentation(domainId);
+        useDomainDocumentationStore.getState().setLoading(domainId, false);
+        await useDomainDocumentationStore.getState().fetch(domainId);
         useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
       } else if (type === TASK_TYPES.REQUIREMENTS && domainId) {
-        // Clear loading state
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainRequirementsLoadingById);
-        newLoadingMap.set(domainId, false);
-        useAnalysisStore.setState({
-          domainRequirementsLoadingById: newLoadingMap,
-        });
-
-        // Fetch updated requirements section
-        await useAnalysisStore.getState().fetchDomainRequirements(domainId);
+        useDomainRequirementsStore.getState().setLoading(domainId, false);
+        await useDomainRequirementsStore.getState().fetch(domainId);
         useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
       } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
-        // Clear loading state
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
-        newLoadingMap.set(domainId, false);
-        useAnalysisStore.setState({
-          domainBugsSecurityLoadingById: newLoadingMap,
-        });
-
-        // Fetch updated bugs & security section
-        await useAnalysisStore.getState().fetchDomainBugsSecurity(domainId);
+        useDomainBugsSecurityStore.getState().setLoading(domainId, false);
+        await useDomainBugsSecurityStore.getState().fetch(domainId);
       } else if (type === TASK_TYPES.TESTING && domainId) {
-        // Clear loading state
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainTestingLoadingById);
-        newLoadingMap.set(domainId, false);
-        useAnalysisStore.setState({ domainTestingLoadingById: newLoadingMap });
-
-        // Fetch updated testing section
-        await useAnalysisStore.getState().fetchDomainTesting(domainId);
+        useDomainTestingStore.getState().setLoading(domainId, false);
+        await useDomainTestingStore.getState().fetch(domainId);
       }
     });
 
@@ -128,45 +97,32 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_PROGRESS, (data) => {
       const { domainId, type, stage, message } = data;
       if (domainId) {
-        useAnalysisStore.getState().setDomainTaskProgress(domainId, {
+        useTaskProgressStore.getState().setProgress(domainId, {
           type,
           stage,
           message,
         });
 
         // Ensure loading state remains true during progress
-        const state = useAnalysisStore.getState();
         if (type === TASK_TYPES.DOCUMENTATION) {
-          const loadingMap = new Map(state.domainDocumentationLoadingById);
-          if (!loadingMap.get(domainId)) {
-            loadingMap.set(domainId, true);
-            useAnalysisStore.setState({
-              domainDocumentationLoadingById: loadingMap,
-            });
+          const store = useDomainDocumentationStore.getState();
+          if (!store.loadingById.get(domainId)) {
+            store.setLoading(domainId, true);
           }
         } else if (type === TASK_TYPES.REQUIREMENTS) {
-          const loadingMap = new Map(state.domainRequirementsLoadingById);
-          if (!loadingMap.get(domainId)) {
-            loadingMap.set(domainId, true);
-            useAnalysisStore.setState({
-              domainRequirementsLoadingById: loadingMap,
-            });
+          const store = useDomainRequirementsStore.getState();
+          if (!store.loadingById.get(domainId)) {
+            store.setLoading(domainId, true);
           }
         } else if (type === TASK_TYPES.BUGS_SECURITY) {
-          const loadingMap = new Map(state.domainBugsSecurityLoadingById);
-          if (!loadingMap.get(domainId)) {
-            loadingMap.set(domainId, true);
-            useAnalysisStore.setState({
-              domainBugsSecurityLoadingById: loadingMap,
-            });
+          const store = useDomainBugsSecurityStore.getState();
+          if (!store.loadingById.get(domainId)) {
+            store.setLoading(domainId, true);
           }
         } else if (type === TASK_TYPES.TESTING) {
-          const loadingMap = new Map(state.domainTestingLoadingById);
-          if (!loadingMap.get(domainId)) {
-            loadingMap.set(domainId, true);
-            useAnalysisStore.setState({
-              domainTestingLoadingById: loadingMap,
-            });
+          const store = useDomainTestingStore.getState();
+          if (!store.loadingById.get(domainId)) {
+            store.setLoading(domainId, true);
           }
         }
       }
@@ -178,57 +134,31 @@ export const useSocketStore = create((set, get) => ({
 
       // Clear progress indicator for this domain
       if (domainId) {
-        useAnalysisStore.getState().setDomainTaskProgress(domainId, null);
+        useTaskProgressStore.getState().clearProgress(domainId);
       }
 
       // Handle different task types
       if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
-        // Clear pending task state
-        useAnalysisStore.getState().clearPendingCodebaseTask();
+        useCodebaseStore.getState().clearPendingCodebaseTask();
       } else if (type === TASK_TYPES.DOCUMENTATION && domainId) {
-        // Clear loading state and set error
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainDocumentationLoadingById);
-        const newErrorMap = new Map(state.domainDocumentationErrorById);
-        newLoadingMap.set(domainId, false);
-        newErrorMap.set(domainId, error || "Documentation analysis failed");
-        useAnalysisStore.setState({
-          domainDocumentationLoadingById: newLoadingMap,
-          domainDocumentationErrorById: newErrorMap,
-        });
+        const store = useDomainDocumentationStore.getState();
+        store.setLoading(domainId, false);
+        store.errorById.set(domainId, error || "Documentation analysis failed");
       } else if (type === TASK_TYPES.REQUIREMENTS && domainId) {
-        // Clear loading state and set error
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainRequirementsLoadingById);
-        const newErrorMap = new Map(state.domainRequirementsErrorById);
-        newLoadingMap.set(domainId, false);
-        newErrorMap.set(domainId, error || "Requirements analysis failed");
-        useAnalysisStore.setState({
-          domainRequirementsLoadingById: newLoadingMap,
-          domainRequirementsErrorById: newErrorMap,
-        });
+        const store = useDomainRequirementsStore.getState();
+        store.setLoading(domainId, false);
+        store.errorById.set(domainId, error || "Requirements analysis failed");
       } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
-        // Clear loading state and set error
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainBugsSecurityLoadingById);
-        const newErrorMap = new Map(state.domainBugsSecurityErrorById);
-        newLoadingMap.set(domainId, false);
-        newErrorMap.set(domainId, error || "Bugs & security analysis failed");
-        useAnalysisStore.setState({
-          domainBugsSecurityLoadingById: newLoadingMap,
-          domainBugsSecurityErrorById: newErrorMap,
-        });
+        const store = useDomainBugsSecurityStore.getState();
+        store.setLoading(domainId, false);
+        store.errorById.set(
+          domainId,
+          error || "Bugs & security analysis failed",
+        );
       } else if (type === TASK_TYPES.TESTING && domainId) {
-        // Clear loading state and set error
-        const state = useAnalysisStore.getState();
-        const newLoadingMap = new Map(state.domainTestingLoadingById);
-        const newErrorMap = new Map(state.domainTestingErrorById);
-        newLoadingMap.set(domainId, false);
-        newErrorMap.set(domainId, error || "Testing analysis failed");
-        useAnalysisStore.setState({
-          domainTestingLoadingById: newLoadingMap,
-          domainTestingErrorById: newErrorMap,
-        });
+        const store = useDomainTestingStore.getState();
+        store.setLoading(domainId, false);
+        store.errorById.set(domainId, error || "Testing analysis failed");
       }
     });
 

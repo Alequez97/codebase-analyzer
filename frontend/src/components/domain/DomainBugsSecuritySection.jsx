@@ -42,7 +42,7 @@ import {
 import MarkdownRenderer from "../MarkdownRenderer";
 import { toaster } from "../ui/toaster";
 import api from "../../api";
-import { useAnalysisStore } from "../../store/useAnalysisStore";
+import { useDomainBugsSecurityStore } from "../../store/useDomainBugsSecurityStore";
 
 const SEVERITY_COLORS = {
   critical: "red",
@@ -96,8 +96,8 @@ export default function DomainBugsSecuritySection({
   logsLoading = false,
   hasRequirements = false,
 }) {
-  const updateBugsSecurityFindingAction = useAnalysisStore(
-    (state) => state.updateBugsSecurityFindingAction,
+  const updateBugsSecurityFindingAction = useDomainBugsSecurityStore(
+    (state) => state.updateFindingAction,
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);

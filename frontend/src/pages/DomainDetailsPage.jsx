@@ -2,7 +2,12 @@ import { useEffect } from "react";
 import { Container, VStack, List } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toaster } from "../components/ui/toaster";
-import { useAnalysisStore } from "../store/useAnalysisStore";
+import { useCodebaseStore } from "../store/useCodebaseStore";
+import { useDomainDocumentationStore } from "../store/useDomainDocumentationStore";
+import { useDomainRequirementsStore } from "../store/useDomainRequirementsStore";
+import { useDomainBugsSecurityStore } from "../store/useDomainBugsSecurityStore";
+import { useDomainTestingStore } from "../store/useDomainTestingStore";
+import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useTestingStore } from "../store/useTestingStore";
 import { useLogsStore } from "../store/useLogsStore";
@@ -18,33 +23,17 @@ export default function DomainDetailsPage() {
   const navigate = useNavigate();
   const { domainId } = useParams();
 
-  // Analysis store
-  const {
-    analysis,
-    fetchAnalysis,
-    fetchDomainDocumentation,
-    fetchDomainRequirements,
-    fetchDomainBugsSecurity,
-    fetchDomainTesting,
-    analyzeDomainDocumentation,
-    analyzeDomainRequirements,
-    analyzeDomainBugsSecurity,
-    analyzeDomainTesting,
-    domainDocumentationById,
-    domainRequirementsById,
-    domainBugsSecurityById,
-    domainTestingById,
-    domainAnalyzeLoadingById,
-    domainDocumentationLoadingById,
-    domainRequirementsLoadingById,
-    domainBugsSecurityLoadingById,
-    domainTestingLoadingById,
-    domainDocumentationErrorById,
-    domainRequirementsErrorById,
-    domainBugsSecurityErrorById,
-    domainTestingErrorById,
-    domainTaskProgressById,
-  } = useAnalysisStore();
+  // Codebase store (for analysis and domain list)
+  const { analysis, fetchAnalysis } = useCodebaseStore();
+
+  // Domain section stores
+  const docStore = useDomainDocumentationStore();
+  const reqStore = useDomainRequirementsStore();
+  const bugsStore = useDomainBugsSecurityStore();
+  const testStore = useDomainTestingStore();
+
+  // Task progress store
+  const { progressById } = useTaskProgressStore();
 
   // Domain editor store
   const {
@@ -76,28 +65,27 @@ export default function DomainDetailsPage() {
   } = useLogsStore();
 
   const domain = (analysis?.domains || []).find((item) => item.id === domainId);
-  const analyzing = !!domainAnalyzeLoadingById.get(domainId);
 
   // Section-specific data
-  const documentation = domainDocumentationById.get(domainId);
-  const requirements = domainRequirementsById.get(domainId);
-  const bugsSecurity = domainBugsSecurityById.get(domainId);
-  const testing = domainTestingById.get(domainId);
+  const documentation = docStore.dataById.get(domainId);
+  const requirements = reqStore.dataById.get(domainId);
+  const bugsSecurity = bugsStore.dataById.get(domainId);
+  const testing = testStore.dataById.get(domainId);
 
   // Loading states for individual sections
-  const documentationLoading = !!domainDocumentationLoadingById.get(domainId);
-  const requirementsLoading = !!domainRequirementsLoadingById.get(domainId);
-  const bugsSecurityLoading = !!domainBugsSecurityLoadingById.get(domainId);
-  const testingLoading = !!domainTestingLoadingById.get(domainId);
+  const documentationLoading = !!docStore.loadingById.get(domainId);
+  const requirementsLoading = !!reqStore.loadingById.get(domainId);
+  const bugsSecurityLoading = !!bugsStore.loadingById.get(domainId);
+  const testingLoading = !!testStore.loadingById.get(domainId);
 
   // Error states for individual sections
-  const documentationError = domainDocumentationErrorById.get(domainId);
-  const requirementsError = domainRequirementsErrorById.get(domainId);
-  const bugsSecurityError = domainBugsSecurityErrorById.get(domainId);
-  const testingError = domainTestingErrorById.get(domainId);
+  const documentationError = docStore.errorById.get(domainId);
+  const requirementsError = reqStore.errorById.get(domainId);
+  const bugsSecurityError = bugsStore.errorById.get(domainId);
+  const testingError = testStore.errorById.get(domainId);
 
   // Task progress - filter by section type
-  const taskProgress = domainTaskProgressById.get(domainId);
+  const taskProgress = progressById.get(domainId);
   const documentationProgress =
     taskProgress?.type === "analyze-documentation" ? taskProgress : null;
   const requirementsProgress =
@@ -155,22 +143,22 @@ export default function DomainDetailsPage() {
 
     // Only fetch documentation if not already loaded or loading
     if (!documentation && !documentationLoading) {
-      fetchPromises.push(fetchDomainDocumentation(domainId));
+      fetchPromises.push(docStore.fetch(domainId));
     }
 
     // Only fetch requirements if not already loaded or loading
     if (!requirements && !requirementsLoading) {
-      fetchPromises.push(fetchDomainRequirements(domainId));
+      fetchPromises.push(reqStore.fetch(domainId));
     }
 
     // Only fetch bugs & security if not already loaded or loading
     if (!bugsSecurity && !bugsSecurityLoading) {
-      fetchPromises.push(fetchDomainBugsSecurity(domainId));
+      fetchPromises.push(bugsStore.fetch(domainId));
     }
 
     // Only fetch testing if not already loaded or loading
     if (!testing && !testingLoading) {
-      fetchPromises.push(fetchDomainTesting(domainId));
+      fetchPromises.push(testStore.fetch(domainId));
     }
 
     // If there are any fetch operations, initialize editors after they complete
@@ -296,7 +284,7 @@ export default function DomainDetailsPage() {
         <DomainHeader
           domain={domain}
           domainId={domainId}
-          analyzing={analyzing}
+          analyzing={false}
           onBack={() => navigate("/")}
         />
 
@@ -335,7 +323,7 @@ export default function DomainDetailsPage() {
           documentation={documentation}
           loading={documentationLoading}
           progress={documentationProgress}
-          onAnalyze={() => domain && analyzeDomainDocumentation(domain)}
+          onAnalyze={() => domain && docStore.analyze(domain)}
           editedDocumentation={documentationText}
           onDocumentationChange={(value) =>
             updateEditedDocumentation(domainId, value)
@@ -361,7 +349,7 @@ export default function DomainDetailsPage() {
           }
           onAnalyze={(userContext, includeDocumentation) =>
             domain &&
-            analyzeDomainRequirements(domain, userContext, includeDocumentation)
+            reqStore.analyze(domain, userContext, includeDocumentation)
           }
           onSave={handleSaveRequirements}
           onReset={() => resetEditedRequirements(domainId)}
@@ -377,9 +365,9 @@ export default function DomainDetailsPage() {
           progress={bugsSecurityProgress}
           hasRequirements={!!requirements}
           onAnalyze={(includeRequirements) =>
-            domain && analyzeDomainBugsSecurity(domain, includeRequirements)
+            domain && bugsStore.analyze(domain, includeRequirements)
           }
-          onRefresh={() => fetchDomainBugsSecurity(domainId)}
+          onRefresh={() => bugsStore.fetch(domainId)}
           showLogs={showDomainLogs}
           logs={bugsSecurityLogs}
           logsLoading={bugsSecurityLogsLoading}
@@ -390,7 +378,7 @@ export default function DomainDetailsPage() {
           loading={testingLoading}
           progress={testingProgress}
           applyingTests={applyingTests}
-          onAnalyze={() => domain && analyzeDomainTesting(domain)}
+          onAnalyze={() => domain && testStore.analyze(domain)}
           onApplyTest={handleApplyTest}
           showLogs={showDomainLogs}
           logs={testingLogs}

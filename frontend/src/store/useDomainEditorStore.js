@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import api from "../api";
-import { useAnalysisStore } from "./useAnalysisStore";
+import { useCodebaseStore } from "./useCodebaseStore";
+import { useDomainDocumentationStore } from "./useDomainDocumentationStore";
+import { useDomainRequirementsStore } from "./useDomainRequirementsStore";
 
 function requirementsToEditableText(requirements = []) {
   if (!Array.isArray(requirements) || requirements.length === 0) {
@@ -46,20 +48,18 @@ export const useDomainEditorStore = create((set, get) => ({
 
   // Actions
   initializeEditorsForDomain: (domainId) => {
-    const analysisStore = useAnalysisStore.getState();
-    const detail = analysisStore.domainAnalysisById.get(domainId);
-    const documentation = analysisStore.domainDocumentationById.get(domainId);
-    const requirements = analysisStore.domainRequirementsById.get(domainId);
+    const docStore = useDomainDocumentationStore.getState();
+    const reqStore = useDomainRequirementsStore.getState();
+
+    const documentation = docStore.dataById.get(domainId);
+    const requirements = reqStore.dataById.get(domainId);
 
     set((state) => {
       const updates = {};
 
       // Initialize requirements if not already set
       if (!state.editedRequirementsByDomainId[domainId]) {
-        // Use requirements from new API endpoint if available
-        // Otherwise fall back to legacy domainAnalysisById
-        const requirementsArray =
-          requirements?.requirements || detail?.requirements || [];
+        const requirementsArray = requirements?.requirements || [];
         updates.editedRequirementsByDomainId = {
           ...state.editedRequirementsByDomainId,
           [domainId]: requirementsToEditableText(requirementsArray),
@@ -67,8 +67,7 @@ export const useDomainEditorStore = create((set, get) => ({
       }
 
       if (!state.editedRequirementsStructuredByDomainId.has(domainId)) {
-        const requirementsArray =
-          requirements?.requirements || detail?.requirements || [];
+        const requirementsArray = requirements?.requirements || [];
         const newMap = new Map(state.editedRequirementsStructuredByDomainId);
         newMap.set(domainId, requirementsArray);
         updates.editedRequirementsStructuredByDomainId = newMap;
@@ -81,9 +80,6 @@ export const useDomainEditorStore = create((set, get) => ({
           [domainId]: documentation?.content || "",
         };
       }
-
-      // Don't initialize files - they should come from codebase analysis (domain.files)
-      // Only track edited files when user actually modifies them
 
       return Object.keys(updates).length > 0 ? updates : state;
     });
@@ -107,14 +103,10 @@ export const useDomainEditorStore = create((set, get) => ({
   },
 
   resetEditedRequirements: (domainId) => {
-    const analysisStore = useAnalysisStore.getState();
-    const detail = analysisStore.domainAnalysisById.get(domainId);
-    const requirements = analysisStore.domainRequirementsById.get(domainId);
+    const reqStore = useDomainRequirementsStore.getState();
+    const requirementsData = reqStore.dataById.get(domainId);
 
-    // Use requirements from new API endpoint if available
-    // Otherwise fall back to legacy domainAnalysisById
-    const requirementsArray =
-      requirements?.requirements || detail?.requirements || [];
+    const requirementsArray = requirementsData?.requirements || [];
 
     set((state) => ({
       editedRequirementsByDomainId: {
@@ -137,11 +129,11 @@ export const useDomainEditorStore = create((set, get) => ({
   },
 
   resetEditedFiles: (domainId) => {
-    const analysisStore = useAnalysisStore.getState();
-    const domain = (analysisStore.analysis?.domains || []).find(
+    const codebaseStore = useCodebaseStore.getState();
+    const domainData = (codebaseStore.analysis?.domains || []).find(
       (d) => d.id === domainId,
     );
-    const filesArray = domain?.files || [];
+    const filesArray = domainData?.files || [];
 
     set((state) => ({
       editedFilesByDomainId: {
@@ -161,8 +153,8 @@ export const useDomainEditorStore = create((set, get) => ({
   },
 
   resetEditedDocumentation: (domainId) => {
-    const analysisStore = useAnalysisStore.getState();
-    const documentation = analysisStore.domainDocumentationById.get(domainId);
+    const docStore = useDomainDocumentationStore.getState();
+    const documentation = docStore.dataById.get(domainId);
 
     set((state) => ({
       editedDocumentationByDomainId: {
@@ -182,11 +174,11 @@ export const useDomainEditorStore = create((set, get) => ({
     }
 
     try {
-      const analysisStore = useAnalysisStore.getState();
-      const domain = (analysisStore.analysis?.domains || []).find(
+      const codebaseStore = useCodebaseStore.getState();
+      const domainData = (codebaseStore.analysis?.domains || []).find(
         (d) => d.id === domainId,
       );
-      const domainName = domain?.name || domainId;
+      const domainName = domainData?.name || domainId;
 
       const requirements =
         structured.length > 0
@@ -214,14 +206,16 @@ export const useDomainEditorStore = create((set, get) => ({
     try {
       await api.saveDomainFiles(domainId, filesArray);
 
-      // Update the domain files in the analysis store directly
-      const analysisStore = useAnalysisStore.getState();
-      const currentAnalysis = analysisStore.analysis;
+      // Update the domain files in the codebase store directly
+      const codebaseStore = useCodebaseStore.getState();
+      const currentAnalysis = codebaseStore.analysis;
       if (currentAnalysis?.domains) {
-        const updatedDomains = currentAnalysis.domains.map((domain) =>
-          domain.id === domainId ? { ...domain, files: filesArray } : domain,
+        const updatedDomains = currentAnalysis.domains.map((domainData) =>
+          domainData.id === domainId
+            ? { ...domainData, files: filesArray }
+            : domainData,
         );
-        analysisStore.setAnalysis({
+        codebaseStore.setAnalysis({
           ...currentAnalysis,
           domains: updatedDomains,
         });
@@ -243,9 +237,9 @@ export const useDomainEditorStore = create((set, get) => ({
     try {
       await api.saveDocumentation(domainId, documentation);
 
-      // Update the cache in analysis store with correct structure
-      const analysisStore = useAnalysisStore.getState();
-      const currentDoc = analysisStore.domainDocumentationById.get(domainId);
+      // Update the cache in documentation store with correct structure
+      const docStore = useDomainDocumentationStore.getState();
+      const currentDoc = docStore.dataById.get(domainId);
       const updatedDoc = {
         content: documentation,
         metadata: {
@@ -254,9 +248,7 @@ export const useDomainEditorStore = create((set, get) => ({
           updatedAt: new Date().toISOString(),
         },
       };
-      const newMap = new Map(analysisStore.domainDocumentationById);
-      newMap.set(domainId, updatedDoc);
-      useAnalysisStore.setState({ domainDocumentationById: newMap });
+      docStore.updateData(domainId, updatedDoc);
 
       return { success: true };
     } catch (err) {
