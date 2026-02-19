@@ -546,4 +546,60 @@ router.get("/:id/logs/:section", async (req, res) => {
   }
 });
 
+/**
+ * Apply a bug or security fix
+ */
+router.post(
+  "/:id/bugs-security/findings/:findingId/apply",
+  async (req, res) => {
+    try {
+      const { id, findingId } = req.params;
+
+      // Read the bugs & security analysis to get the finding details
+      const bugsSecurityData =
+        await domainBugsSecurityPersistence.readDomainBugsSecurity(id);
+
+      if (!bugsSecurityData) {
+        return res.status(404).json({
+          error: "Domain bugs & security not found",
+          message: `No bugs & security analysis found for domain: ${id}`,
+        });
+      }
+
+      // Find the specific finding
+      const finding = (bugsSecurityData.findings || []).find(
+        (f) => f.id === findingId,
+      );
+
+      if (!finding) {
+        return res.status(404).json({
+          error: "Finding not found",
+          message: `No finding found with id: ${findingId}`,
+        });
+      }
+
+      const executeNow = req.body.executeNow !== false;
+
+      // Create a task to apply the fix using Aider
+      const task = await taskOrchestrator.createApplyFixTask(
+        id,
+        finding,
+        executeNow,
+      );
+
+      res.status(201).json({
+        success: true,
+        message: "Fix application task created",
+        task,
+      });
+    } catch (error) {
+      logger.error(
+        `Error applying fix ${req.params.findingId} for domain ${req.params.id}`,
+        { error, component: "API" },
+      );
+      res.status(500).json({ error: "Failed to apply fix" });
+    }
+  },
+);
+
 export default router;

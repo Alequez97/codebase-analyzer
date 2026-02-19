@@ -99,6 +99,7 @@ export default function DomainBugsSecuritySection({
   const updateBugsSecurityFindingAction = useDomainBugsSecurityStore(
     (state) => state.updateFindingAction,
   );
+  const applyFix = useDomainBugsSecurityStore((state) => state.applyFix);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);
   const [includeRequirements, setIncludeRequirements] = useState(false);
@@ -200,6 +201,10 @@ export default function DomainBugsSecuritySection({
         type: "error",
       });
     }
+  };
+
+  const handleApplyFix = async (findingId) => {
+    await applyFix(domainId, findingId);
   };
 
   return (
@@ -474,6 +479,22 @@ export default function DomainBugsSecuritySection({
                                       </Button>
                                       <Button
                                         size="xs"
+                                        colorPalette="blue"
+                                        variant="outline"
+                                        disabled={
+                                          findingStatus ===
+                                          FINDING_STATUS.APPLIED
+                                        }
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleApplyFix(finding.id);
+                                        }}
+                                      >
+                                        <Sparkles size={14} />
+                                        Apply Fix
+                                      </Button>
+                                      <Button
+                                        size="xs"
                                         colorPalette="green"
                                         variant={
                                           findingStatus ===
@@ -493,7 +514,7 @@ export default function DomainBugsSecuritySection({
                                           );
                                         }}
                                       >
-                                        Apply
+                                        Mark Applied
                                       </Button>
                                     </HStack>
                                   </HStack>

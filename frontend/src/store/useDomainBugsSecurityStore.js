@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "../api";
+import { toaster } from "../components/ui/toaster";
 import { useLogsStore } from "./useLogsStore";
 import { SECTION_TYPES } from "../constants/section-types";
 
@@ -115,6 +116,39 @@ export const useDomainBugsSecurityStore = create((set, get) => ({
 
       return { dataById: newDataMap };
     });
+  },
+
+  applyFix: async (domainId, findingId) => {
+    if (!domainId || !findingId) {
+      toaster.create({
+        title: "Invalid request",
+        description: "Domain ID and Finding ID are required",
+        type: "error",
+      });
+      return { success: false, error: "Invalid request" };
+    }
+
+    try {
+      await api.applyFindingFix(domainId, findingId, true);
+
+      toaster.create({
+        title: "Fix application started",
+        description: "Aider is applying the fix. Check logs for progress.",
+        type: "success",
+      });
+
+      return { success: true };
+    } catch (err) {
+      const message = err?.response?.data?.error || "Failed to apply fix";
+
+      toaster.create({
+        title: "Failed to apply fix",
+        description: message,
+        type: "error",
+      });
+
+      return { success: false, error: message };
+    }
   },
 
   updateData: (domainId, data) => {

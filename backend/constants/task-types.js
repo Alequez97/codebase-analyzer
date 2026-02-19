@@ -9,4 +9,5 @@ export const TASK_TYPES = {
   REQUIREMENTS: "analyze-requirements",
   BUGS_SECURITY: "analyze-bugs-security",
   TESTING: "analyze-testing",
+  APPLY_FIX: "apply-fix",
 };

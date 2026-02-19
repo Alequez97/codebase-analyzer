@@ -213,6 +213,67 @@ export async function createAnalyzeBugsSecurityTask(
 }
 
 /**
+ * Create a task to apply a bug or security fix
+ * @param {string} domainId - The domain ID
+ * @param {Object} finding - The finding object to fix
+ * @param {boolean} executeNow - Whether to execute immediately
+ * @returns {Promise<Object>} The created task
+ */
+export async function createApplyFixTask(domainId, finding, executeNow) {
+  const agentConfig = getAgentConfig(TASK_TYPES.APPLY_FIX);
+
+  // Determine which file(s) to include
+  const files = [];
+  if (finding.location?.file) {
+    files.push(finding.location.file);
+  }
+
+  // Build parameters for template replacement
+  const params = {
+    domainId,
+    targetDirectory: config.target.directory,
+    files,
+    findingId: finding.id,
+    findingType: finding.type || "bug",
+    findingSeverity: finding.severity || "unknown",
+    findingTitle: finding.title || "Untitled Finding",
+    findingDescription: finding.description || "",
+    findingImpact: finding.impact || "",
+    findingRecommendation: finding.recommendation || "",
+    findingFixExample: finding.fixExample || finding.suggestedFix || "",
+    findingLocation: finding.location || null,
+    findingFile: finding.location?.file || "",
+    findingLine: finding.location?.line || "",
+    findingSnippet: finding.location?.snippet || "",
+  };
+
+  const task = {
+    id: generateTaskId("apply-fix"),
+    type: TASK_TYPES.APPLY_FIX,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    params,
+    agentConfig,
+    instructionFile: "backend/instructions/apply-finding-fix.md",
+    outputFile: null, // No JSON output needed - agent modifies source files directly
+  };
+
+  await tasksPersistence.writeTask(task);
+
+  if (executeNow) {
+    // Trigger agent execution asynchronously
+    executeTask(task.id).catch((err) => {
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
+    });
+  }
+
+  return task;
+}
+
+/**
  * Post-process analysis output files to add task metadata
  * @param {Object} task - The task object
  */

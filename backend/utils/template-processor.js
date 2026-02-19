@@ -3,6 +3,8 @@
  * Processes Handlebars-like templates in instruction files
  */
 
+import { TASK_TYPES } from "../constants/task-types.js";
+
 /**
  * Process a template string with variables
  * @param {string} template - Template string with {{VARIABLE}} placeholders
@@ -168,20 +170,49 @@ export function buildCodebaseTemplateVariables(task) {
 }
 
 /**
+ * Build variables object for apply-fix task template
+ * @param {Object} task - Task object
+ * @returns {Object} Variables for template processing
+ */
+export function buildApplyFixTemplateVariables(task) {
+  const { params } = task;
+
+  return {
+    CODEBASE_PATH: params.targetDirectory || "",
+    DOMAIN_ID: params.domainId || "",
+    FILES: params.files || [],
+    FINDING_ID: params.findingId || "",
+    FINDING_TYPE: params.findingType || "",
+    FINDING_SEVERITY: params.findingSeverity || "",
+    FINDING_TITLE: params.findingTitle || "",
+    FINDING_DESCRIPTION: params.findingDescription || "",
+    FINDING_IMPACT: params.findingImpact || "",
+    FINDING_RECOMMENDATION: params.findingRecommendation || "",
+    FINDING_FIX_EXAMPLE: params.findingFixExample || "",
+    FINDING_LOCATION: params.findingLocation,
+    FINDING_FILE: params.findingFile || "",
+    FINDING_LINE: params.findingLine || "",
+    FINDING_SNIPPET: params.findingSnippet || "",
+  };
+}
+
+/**
  * Build template variables based on task type
  * @param {Object} task - Task object
  * @returns {Promise<Object>} Variables for template processing
  */
 export async function buildTemplateVariables(task) {
   switch (task.type) {
-    case "analyze-requirements":
+    case TASK_TYPES.REQUIREMENTS:
       return await buildRequirementsTemplateVariables(task);
-    case "analyze-bugs-security":
+    case TASK_TYPES.BUGS_SECURITY:
       return await buildBugsSecurityTemplateVariables(task);
-    case "analyze-documentation":
+    case TASK_TYPES.DOCUMENTATION:
       return await buildDocumentationTemplateVariables(task);
-    case "analyze-codebase":
+    case TASK_TYPES.CODEBASE_ANALYSIS:
       return buildCodebaseTemplateVariables(task);
+    case TASK_TYPES.APPLY_FIX:
+      return buildApplyFixTemplateVariables(task);
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

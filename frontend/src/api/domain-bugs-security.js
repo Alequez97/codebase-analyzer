@@ -30,3 +30,11 @@ export const recordFindingAction = (
       metadata,
     },
   );
+
+export const applyFindingFix = (domainId, findingId, executeNow = true) =>
+  client.post(
+    `/analysis/domain/${domainId}/bugs-security/findings/${findingId}/apply`,
+    {
+      executeNow,
+    },
+  );

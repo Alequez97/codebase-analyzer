@@ -97,6 +97,12 @@ const config = {
       provider: PROVIDERS.ANTHROPIC,
       maxTokens: 64000,
     },
+    [TASK_TYPES.APPLY_FIX]: {
+      agent: "aider",
+      model: MODELS.CLAUDE_SONNET,
+      provider: PROVIDERS.ANTHROPIC,
+      maxTokens: 64000,
+    },
   },
 
   // Aider-specific configuration (when agent is "aider")

@@ -5,101 +5,18 @@ import path from "path";
 import config from "../config.js";
 import { emitTaskLog } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
+import {
+  processTemplate,
+  buildTemplateVariables,
+} from "../utils/template-processor.js";
+import { getProviderFromModel } from "../utils/model-utils.js";
+import { getApiKeyForProvider } from "../utils/api-keys.js";
 
 const execAsync = promisify(exec);
+const shouldMirrorAiderStreamLogs = process.env.AIDER_STREAM_LOGS === "true";
 
-/**
- * Replace template variables in instruction content
- * @param {string} content - The instruction content with template variables
- * @param {Object} task - The task object containing parameters
- * @returns {string} Content with replaced variables
- */
-function replaceTemplateVariables(content, task) {
-  const { params } = task;
-
-  // Get domain name from codebase analysis if available
-  let domainName = params.domainId || "Unknown Domain";
-
-  // Create a map of variables to replace
-  const variables = {
-    CODEBASE_PATH: params.targetDirectory || config.target.directory,
-    DOMAIN_ID: params.domainId || "",
-    DOMAIN_NAME: domainName,
-    FILES: params.files || [],
-    USER_CONTEXT: params.userContext || "",
-  };
-
-  // Replace simple {{VARIABLE}} patterns
-  let result = content.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
-    return variables[varName] !== undefined ? variables[varName] : match;
-  });
-
-  // Replace {{#if VARIABLE}} blocks
-  result = result.replace(
-    /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
-    (match, varName, blockContent) => {
-      const value = variables[varName];
-      // Only include block if variable exists and is not empty
-      if (value && (typeof value !== "string" || value.trim() !== "")) {
-        return blockContent.replace(/\{\{(\w+)\}\}/g, (m, v) => {
-          return variables[v] !== undefined ? variables[v] : m;
-        });
-      }
-      return "";
-    },
-  );
-
-  // Replace {{#each FILES}} blocks
-  result = result.replace(
-    /\{\{#each FILES\}\}([\s\S]*?)\{\{\/each\}\}/g,
-    (match, itemTemplate) => {
-      const files = variables.FILES || [];
-      return files
-        .map((file) => {
-          return itemTemplate.replace(/\{\{this\}\}/g, file);
-        })
-        .join("\n");
-    },
-  );
-
-  return result;
-}
-
-/**
- * Helper function to determine the API key flag for a given model
- * @param {string} model - The model name
- * @param {Object} apiKeys - Object containing API keys
- * @returns {string|null} The API key flag or null
- */
-function getApiKeyForModel(model, apiKeys) {
-  if (!model) return null;
-
-  // Handle OpenRouter models
-  if (model.startsWith("openrouter/")) {
-    return apiKeys.openrouter
-      ? `--api-key openrouter=${apiKeys.openrouter}`
-      : null;
-  }
-
-  // Handle specific providers
-  const providerMap = {
-    deepseek: "deepseek",
-    sonnet: "anthropic",
-    "claude-3": "anthropic",
-    claude: "anthropic",
-    gpt: "openai",
-    o1: "openai",
-    o3: "openai",
-  };
-
-  for (const [prefix, provider] of Object.entries(providerMap)) {
-    if (model.toLowerCase().includes(prefix)) {
-      const apiKey = apiKeys[provider];
-      return apiKey ? `--api-key ${provider}=${apiKey}` : null;
-    }
-  }
-
-  return null;
+function redactSensitiveCommandParts(command) {
+  return command.replace(/--api-key\s+\S+/g, "--api-key [REDACTED]");
 }
 
 /**
@@ -138,7 +55,8 @@ export async function execute(task) {
   let instructionContent = await fs.readFile(instructionPath, "utf-8");
 
   // Replace template variables in the instruction
-  instructionContent = replaceTemplateVariables(instructionContent, task);
+  const templateVariables = await buildTemplateVariables(task);
+  instructionContent = processTemplate(instructionContent, templateVariables);
 
   // Create a temporary instruction file with replaced variables
   const tempInstructionPath = path.join(
@@ -159,8 +77,13 @@ export async function execute(task) {
 
   const filesArg = files.length > 0 ? files.map((f) => `"${f}"`).join(" ") : "";
 
-  // Determine API key based on model
-  const modelApiKey = getApiKeyForModel(task.agentConfig.model, config.apiKeys);
+  // Determine API key flag based on model
+  const provider = getProviderFromModel(task.agentConfig.model);
+  const apiKey = provider
+    ? getApiKeyForProvider(provider, config.apiKeys)
+    : null;
+  const apiKeyFlag =
+    apiKey && provider ? `--api-key ${provider}=${apiKey}` : null;
 
   // Build Aider command with smart context management
   const commandParts = [
@@ -172,15 +95,14 @@ export async function execute(task) {
     "--map-refresh auto", // Auto-refresh repo map
     "--map-tokens 4096", // Use repo map to manage large codebases
     task.agentConfig.model ? `--model ${task.agentConfig.model}` : null,
-    modelApiKey ? modelApiKey : null,
-    config.aider.extraArgs || null,
+    apiKeyFlag,
     "--message-file",
     `"${tempInstructionPath}"`,
     filesArg,
   ].filter(Boolean);
 
   const command = commandParts.join(" ");
-  logger.info(`Executing Aider: ${command}`, {
+  logger.info(`Executing Aider: ${redactSensitiveCommandParts(command)}`, {
     component: "Aider",
     taskId: task.id,
   });
@@ -235,6 +157,14 @@ export async function execute(task) {
         component: "Aider",
         taskId: task.id,
       });
+
+      if (shouldMirrorAiderStreamLogs && text.trim()) {
+        logger.info(text.trim(), {
+          component: "Aider",
+          taskId: task.id,
+          stream: "stdout",
+        });
+      }
     });
 
     aiderProcess.stderr.on("data", (data) => {
@@ -258,6 +188,14 @@ export async function execute(task) {
         taskId: task.id,
         stream: "stderr",
       });
+
+      if (shouldMirrorAiderStreamLogs && text.trim()) {
+        logger.info(text.trim(), {
+          component: "Aider",
+          taskId: task.id,
+          stream: "stderr",
+        });
+      }
     });
 
     aiderProcess.on("close", async (code) => {
