@@ -7,7 +7,7 @@ import { useSocketStore } from "../store/useSocketStore";
 import { LoadingState, ErrorState } from "../components/dashboard/States";
 import { StatusBar } from "../components/dashboard/StatusBar";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
-import { ConfigurationPanel } from "../components/dashboard/ConfigurationPanel";
+import { ConfigurationDialog } from "../components/dashboard/ConfigurationDialog";
 import { ModulesSection } from "../components/dashboard/ModulesSection";
 import { CodebaseAnalysisLogs } from "../components/dashboard/CodebaseAnalysisLogs";
 
@@ -68,12 +68,12 @@ export default function Dashboard() {
         connected={!error && !!config}
         statusLoading={configLoading}
         socketConnected={socketConnected}
+        rightContent={<ConfigurationDialog />}
       />
 
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">
           <DashboardHeader />
-          <ConfigurationPanel />
           <HStack justify="flex-end">
             <Button
               variant="outline"

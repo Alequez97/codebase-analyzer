@@ -1,6 +1,11 @@
 import { HStack, Badge, Text } from "@chakra-ui/react";
 
-export function StatusBar({ connected, statusLoading, socketConnected }) {
+export function StatusBar({
+  connected,
+  statusLoading,
+  socketConnected,
+  rightContent = null,
+}) {
   // Determine API status display
   const getApiStatus = () => {
     if (statusLoading) {
@@ -41,6 +46,8 @@ export function StatusBar({ connected, statusLoading, socketConnected }) {
           {socketConnected ? "Connected" : "Connecting..."}
         </Badge>
       </HStack>
+
+      {rightContent}
     </HStack>
   );
 }
