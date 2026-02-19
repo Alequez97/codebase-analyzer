@@ -1,4 +1,4 @@
-import * as logger from "../utils/logger.js";
+import * as logger from "../../utils/logger.js";
 
 /**
  * Chat State Manager
