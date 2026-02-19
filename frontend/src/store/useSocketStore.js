@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { io } from "socket.io-client";
 import { SOCKET_EVENTS } from "../constants/socket-events";
 import { TASK_TYPES } from "../constants/task-types";
-import { SECTION_TYPES } from "../constants/section-types";
+import { taskTypeToSection } from "../utils/task-utils";
 import { useCodebaseStore } from "./useCodebaseStore";
 import { useDomainDocumentationStore } from "./useDomainDocumentationStore";
 import { useDomainRequirementsStore } from "./useDomainRequirementsStore";
@@ -167,17 +167,7 @@ export const useSocketStore = create((set, get) => ({
 
       // If this is a domain-specific log, also append to domain logs
       if (domainId && type) {
-        let sectionType = null;
-        if (type === TASK_TYPES.DOCUMENTATION) {
-          sectionType = SECTION_TYPES.DOCUMENTATION;
-        } else if (type === TASK_TYPES.REQUIREMENTS) {
-          sectionType = SECTION_TYPES.REQUIREMENTS;
-        } else if (type === TASK_TYPES.BUGS_SECURITY) {
-          sectionType = SECTION_TYPES.BUGS_SECURITY;
-        } else if (type === TASK_TYPES.TESTING) {
-          sectionType = SECTION_TYPES.TESTING;
-        }
-
+        const sectionType = taskTypeToSection(type);
         if (sectionType) {
           useLogsStore.getState().appendLogs(domainId, sectionType, log);
         }
