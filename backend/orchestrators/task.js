@@ -213,6 +213,53 @@ export async function createAnalyzeBugsSecurityTask(
 }
 
 /**
+ * Create a domain testing analysis task
+ * @param {string} domainId - The domain ID
+ * @param {string[]} files - Files in the domain
+ * @param {boolean} includeRequirements - Whether to include requirements in analysis
+ * @param {boolean} executeNow - Whether to execute immediately
+ * @returns {Promise<Object>} The created task
+ */
+export async function createAnalyzeTestingTask(
+  domainId,
+  files,
+  includeRequirements,
+  executeNow,
+) {
+  const agentConfig = getAgentConfig(TASK_TYPES.TESTING);
+
+  const task = {
+    id: generateTaskId("analyze-testing"),
+    type: TASK_TYPES.TESTING,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    params: {
+      domainId,
+      files,
+      includeRequirements: !!includeRequirements,
+      targetDirectory: config.target.directory,
+    },
+    agentConfig,
+    instructionFile: "backend/instructions/analyze-domain-testing.md",
+    outputFile: `.code-analysis/domains/${domainId}/testing.json`,
+  };
+
+  await tasksPersistence.writeTask(task);
+
+  if (executeNow) {
+    // Trigger agent execution asynchronously
+    executeTask(task.id).catch((err) => {
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
+    });
+  }
+
+  return task;
+}
+
+/**
  * Create a task to apply a bug or security fix
  * @param {string} domainId - The domain ID
  * @param {Object} finding - The finding object to fix
@@ -274,6 +321,72 @@ export async function createApplyFixTask(domainId, finding, executeNow) {
 
   if (executeNow) {
     // Trigger agent execution asynchronously
+    executeTask(task.id).catch((err) => {
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
+    });
+  }
+
+  return task;
+}
+
+/**
+ * Create a task to apply a missing test
+ * @param {string} domainId - The domain ID
+ * @param {Object} testRecommendation - The test recommendation object
+ * @param {boolean} executeNow - Whether to execute immediately
+ * @returns {Promise<Object>} The created task
+ */
+export async function createApplyTestTask(
+  domainId,
+  testRecommendation,
+  executeNow,
+) {
+  const agentConfig = getAgentConfig(TASK_TYPES.APPLY_TEST);
+
+  // Determine source file from suggested test file
+  // For unit tests: file.test.js -> file.js
+  // For integration tests: read the test description
+  const testFile = testRecommendation.suggestedTestFile || "";
+  const sourceFile = testFile
+    .replace(/\.test\.(js|ts)$/, ".$1")
+    .replace(/\.spec\.(js|ts)$/, ".$1")
+    .replace(/^tests\/integration\//, "")
+    .replace(/^tests\/unit\//, "");
+
+  // Build parameters for template replacement
+  const params = {
+    domainId,
+    targetDirectory: config.target.directory,
+    testId: testRecommendation.id,
+    testFile: testFile,
+    testType: testRecommendation.testType || "unit",
+    testDescription: testRecommendation.description || "",
+    testScenarios: testRecommendation.testScenarios || [],
+    sourceFile: sourceFile,
+    priority: testRecommendation.priority || "P2",
+    category: testRecommendation.category || "unknown",
+    relatedRequirement: testRecommendation.relatedRequirement || null,
+    reason: testRecommendation.reason || "",
+  };
+
+  const task = {
+    id: generateTaskId("apply-test"),
+    type: TASK_TYPES.APPLY_TEST,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    params,
+    agentConfig,
+    instructionFile: "backend/instructions/apply-test.md",
+    outputFile: null, // No JSON output needed - agent creates test file directly
+  };
+
+  await tasksPersistence.writeTask(task);
+
+  if (executeNow) {
+    // Trig ger agent execution asynchronously
     executeTask(task.id).catch((err) => {
       logger.error(`Failed to execute task ${task.id}`, {
         error: err,

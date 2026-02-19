@@ -7,7 +7,6 @@ import {
   Text,
   VStack,
   Badge,
-  List,
   Separator,
   Grid,
   Table,
@@ -15,6 +14,8 @@ import {
   Collapsible,
   IconButton,
   Skeleton,
+  Code,
+  Stack,
 } from "@chakra-ui/react";
 import {
   CheckCircle,
@@ -38,47 +39,77 @@ function getPriorityColor(priority) {
   return "gray";
 }
 
-function TestCoverageMetrics({ coverage }) {
+function TestCaseDetails({ testCases }) {
+  if (!testCases || testCases.length === 0) {
+    return (
+      <Box p={3} bg="gray.50" borderRadius="md">
+        <Text fontSize="sm" color="gray.600">
+          No detailed test cases available
+        </Text>
+      </Box>
+    );
+  }
+
   return (
-    <Box>
-      <Text fontWeight="semibold" mb={3} fontSize="md">
-        Current Coverage
+    <VStack align="stretch" gap={3} p={4} bg="gray.50" borderRadius="md">
+      <Text fontWeight="medium" fontSize="sm" color="gray.700">
+        Test Cases ({testCases.length})
       </Text>
-      <Grid templateColumns="repeat(auto-fit, minmax(120px, 1fr))" gap={3}>
-        <Box borderWidth="1px" borderRadius="md" p={3} textAlign="center">
-          <Text fontSize="xs" color="gray.600" mb={1}>
-            Overall
-          </Text>
-          <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-            {coverage?.overall || "0%"}
-          </Text>
+      {testCases.map((testCase, index) => (
+        <Box
+          key={index}
+          p={3}
+          bg="white"
+          borderWidth="1px"
+          borderRadius="md"
+          borderColor="gray.200"
+        >
+          <VStack align="stretch" gap={2}>
+            <Text fontWeight="semibold" fontSize="sm" color="blue.700">
+              {index + 1}. {testCase.scenario}
+            </Text>
+            <Box>
+              <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                Input:
+              </Text>
+              <Code
+                fontSize="xs"
+                p={2}
+                bg="gray.100"
+                borderRadius="sm"
+                display="block"
+                whiteSpace="pre-wrap"
+                wordBreak="break-word"
+              >
+                {testCase.input}
+              </Code>
+            </Box>
+            <Box>
+              <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>
+                Expected Output:
+              </Text>
+              <Code
+                fontSize="xs"
+                p={2}
+                bg="green.50"
+                color="green.800"
+                borderRadius="sm"
+                display="block"
+                whiteSpace="pre-wrap"
+                wordBreak="break-word"
+              >
+                {testCase.expectedOutput}
+              </Code>
+            </Box>
+            <HStack gap={2}>
+              <Badge size="xs" colorPalette="purple">
+                {testCase.assertionType}
+              </Badge>
+            </HStack>
+          </VStack>
         </Box>
-        <Box borderWidth="1px" borderRadius="md" p={3} textAlign="center">
-          <Text fontSize="xs" color="gray.600" mb={1}>
-            Statements
-          </Text>
-          <Text fontSize="2xl" fontWeight="bold" color="purple.600">
-            {coverage?.statements || "0%"}
-          </Text>
-        </Box>
-        <Box borderWidth="1px" borderRadius="md" p={3} textAlign="center">
-          <Text fontSize="xs" color="gray.600" mb={1}>
-            Branches
-          </Text>
-          <Text fontSize="2xl" fontWeight="bold" color="orange.600">
-            {coverage?.branches || "0%"}
-          </Text>
-        </Box>
-        <Box borderWidth="1px" borderRadius="md" p={3} textAlign="center">
-          <Text fontSize="xs" color="gray.600" mb={1}>
-            Functions
-          </Text>
-          <Text fontSize="2xl" fontWeight="bold" color="green.600">
-            {coverage?.functions || "0%"}
-          </Text>
-        </Box>
-      </Grid>
-    </Box>
+      ))}
+    </VStack>
   );
 }
 
@@ -99,9 +130,8 @@ function ExistingTestsTable({ testFiles }) {
       <Table.Header>
         <Table.Row>
           <Table.ColumnHeader>File</Table.ColumnHeader>
-          <Table.ColumnHeader>Tests</Table.ColumnHeader>
-          <Table.ColumnHeader>Pass Rate</Table.ColumnHeader>
-          <Table.ColumnHeader>Last Run</Table.ColumnHeader>
+          <Table.ColumnHeader>Type</Table.ColumnHeader>
+          <Table.ColumnHeader>Description</Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -113,27 +143,21 @@ function ExistingTestsTable({ testFiles }) {
               </Text>
             </Table.Cell>
             <Table.Cell>
-              <Badge colorPalette="blue">{test.testsCount || 0} tests</Badge>
+              <Badge
+                colorPalette={
+                  test.testType === "unit"
+                    ? "purple"
+                    : test.testType === "integration"
+                      ? "blue"
+                      : "green"
+                }
+              >
+                {test.testType || "unit"}
+              </Badge>
             </Table.Cell>
             <Table.Cell>
-              <HStack>
-                {test.passRate === "100%" ? (
-                  <Icon color="green.600">
-                    <CheckCircle size={16} />
-                  </Icon>
-                ) : (
-                  <Icon color="orange.600">
-                    <AlertCircle size={16} />
-                  </Icon>
-                )}
-                <Text fontSize="sm">{test.passRate || "N/A"}</Text>
-              </HStack>
-            </Table.Cell>
-            <Table.Cell>
-              <Text fontSize="xs" color="gray.600">
-                {test.lastRun
-                  ? new Date(test.lastRun).toLocaleDateString()
-                  : "Never"}
+              <Text fontSize="sm" color="gray.600">
+                {test.description || "No description"}
               </Text>
             </Table.Cell>
           </Table.Row>
@@ -144,6 +168,20 @@ function ExistingTestsTable({ testFiles }) {
 }
 
 function MissingTestsSection({ missingTests, applyingTests, onApplyTest }) {
+  const [expandedTests, setExpandedTests] = useState(new Set());
+
+  const toggleExpand = (testId) => {
+    setExpandedTests((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(testId)) {
+        newSet.delete(testId);
+      } else {
+        newSet.add(testId);
+      }
+      return newSet;
+    });
+  };
+
   const hasTests =
     missingTests?.unit?.length > 0 ||
     missingTests?.integration?.length > 0 ||
@@ -225,10 +263,10 @@ function MissingTestsSection({ missingTests, applyingTests, onApplyTest }) {
         <Table.Root size="sm" variant="outline" striped>
           <Table.Header>
             <Table.Row bg="gray.50">
+              <Table.ColumnHeader width="40px"></Table.ColumnHeader>
               <Table.ColumnHeader width="80px">ID</Table.ColumnHeader>
               <Table.ColumnHeader width="100px">Type</Table.ColumnHeader>
               <Table.ColumnHeader width="80px">Priority</Table.ColumnHeader>
-              <Table.ColumnHeader width="90px">Effort</Table.ColumnHeader>
               <Table.ColumnHeader>Description</Table.ColumnHeader>
               <Table.ColumnHeader>Suggested File</Table.ColumnHeader>
               <Table.ColumnHeader width="90px" textAlign="center">
@@ -238,220 +276,260 @@ function MissingTestsSection({ missingTests, applyingTests, onApplyTest }) {
           </Table.Header>
           <Table.Body>
             {/* Unit Tests */}
-            {missingTests.unit?.map((test) => (
-              <Table.Row
-                key={test.id}
-                bg={
-                  test.priority === "P0"
-                    ? "red.50"
-                    : test.priority === "P1"
-                      ? "orange.50"
-                      : undefined
-                }
-                _hover={{ bg: "gray.100" }}
-              >
-                <Table.Cell>
-                  <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
-                    {test.id}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge colorPalette="purple" size="sm">
-                    Unit
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    colorPalette={getPriorityColor(test.priority)}
-                    size="sm"
+            {missingTests.unit?.map((test) => {
+              const isExpanded = expandedTests.has(test.id);
+              return (
+                <>
+                  <Table.Row
+                    key={test.id}
+                    bg={
+                      test.priority === "P0"
+                        ? "red.50"
+                        : test.priority === "P1"
+                          ? "orange.50"
+                          : undefined
+                    }
+                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    onClick={() => toggleExpand(test.id)}
                   >
-                    {test.priority}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="xs" color="gray.600">
-                    {test.estimatedEffort || "Unknown"}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="sm">{test.description}</Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text
-                    fontSize="xs"
-                    fontFamily="mono"
-                    color="gray.700"
-                    wordBreak="break-all"
-                  >
-                    {test.suggestedTestFile}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell textAlign="center">
-                  <Button
-                    size="xs"
-                    colorPalette="green"
-                    onClick={() => onApplyTest(test.id)}
-                    loading={!!applyingTests[test.id]}
-                    loadingText="Applying"
-                  >
-                    <Check size={12} />
-                    Apply
-                  </Button>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                    <Table.Cell>
+                      <Icon size="sm" color="gray.500">
+                        {isExpanded ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        )}
+                      </Icon>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
+                        {test.id}
+                      </Text>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge colorPalette="purple" size="sm">
+                        Unit
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        colorPalette={getPriorityColor(test.priority)}
+                        size="sm"
+                      >
+                        {test.priority}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text fontSize="sm">{test.description}</Text>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text
+                        fontSize="xs"
+                        fontFamily="mono"
+                        color="gray.700"
+                        wordBreak="break-all"
+                      >
+                        {test.suggestedTestFile}
+                      </Text>
+                    </Table.Cell>
+                    <Table.Cell textAlign="center">
+                      <Button
+                        size="xs"
+                        colorPalette="green"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onApplyTest(test.id);
+                        }}
+                        loading={!!applyingTests[test.id]}
+                        loadingText="Applying"
+                      >
+                        <Check size={12} />
+                        Apply
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                  {isExpanded && test.testCases && (
+                    <Table.Row key={`${test.id}-details`}>
+                      <Table.Cell colSpan={7} bg="gray.50" p={4}>
+                        <TestCaseDetails testCases={test.testCases} />
+                      </Table.Cell>
+                    </Table.Row>
+                  )}
+                </>
+              );
+            })}
 
             {/* Integration Tests */}
-            {missingTests.integration?.map((test) => (
-              <Table.Row
-                key={test.id}
-                bg={
-                  test.priority === "P0"
-                    ? "red.50"
-                    : test.priority === "P1"
-                      ? "orange.50"
-                      : undefined
-                }
-                _hover={{ bg: "gray.100" }}
-              >
-                <Table.Cell>
-                  <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
-                    {test.id}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge colorPalette="blue" size="sm">
-                    Integration
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    colorPalette={getPriorityColor(test.priority)}
-                    size="sm"
+            {missingTests.integration?.map((test) => {
+              const isExpanded = expandedTests.has(test.id);
+              return (
+                <>
+                  <Table.Row
+                    key={test.id}
+                    bg={
+                      test.priority === "P0"
+                        ? "red.50"
+                        : test.priority === "P1"
+                          ? "orange.50"
+                          : undefined
+                    }
+                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    onClick={() => toggleExpand(test.id)}
                   >
-                    {test.priority}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="xs" color="gray.600">
-                    {test.estimatedEffort || "Unknown"}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="sm">{test.description}</Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text
-                    fontSize="xs"
-                    fontFamily="mono"
-                    color="gray.700"
-                    wordBreak="break-all"
-                  >
-                    {test.suggestedTestFile}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell textAlign="center">
-                  <Button
-                    size="xs"
-                    colorPalette="green"
-                    onClick={() => onApplyTest(test.id)}
-                    loading={!!applyingTests[test.id]}
-                    loadingText="Applying"
-                  >
-                    <Check size={12} />
-                    Apply
-                  </Button>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                    <Table.Cell>
+                      <Icon size="sm" color="gray.500">
+                        {isExpanded ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        )}
+                      </Icon>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
+                        {test.id}
+                      </Text>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge colorPalette="blue" size="sm">
+                        Integration
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        colorPalette={getPriorityColor(test.priority)}
+                        size="sm"
+                      >
+                        {test.priority}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text fontSize="sm">{test.description}</Text>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text
+                        fontSize="xs"
+                        fontFamily="mono"
+                        color="gray.700"
+                        wordBreak="break-all"
+                      >
+                        {test.suggestedTestFile}
+                      </Text>
+                    </Table.Cell>
+                    <Table.Cell textAlign="center">
+                      <Button
+                        size="xs"
+                        colorPalette="green"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onApplyTest(test.id);
+                        }}
+                        loading={!!applyingTests[test.id]}
+                        loadingText="Applying"
+                      >
+                        <Check size={12} />
+                        Apply
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                  {isExpanded && test.testCases && (
+                    <Table.Row key={`${test.id}-details`}>
+                      <Table.Cell colSpan={7} bg="gray.50" p={4}>
+                        <TestCaseDetails testCases={test.testCases} />
+                      </Table.Cell>
+                    </Table.Row>
+                  )}
+                </>
+              );
+            })}
 
             {/* E2E Tests */}
-            {missingTests.e2e?.map((test) => (
-              <Table.Row
-                key={test.id}
-                bg={
-                  test.priority === "P0"
-                    ? "red.50"
-                    : test.priority === "P1"
-                      ? "orange.50"
-                      : undefined
-                }
-                _hover={{ bg: "gray.100" }}
-              >
-                <Table.Cell>
-                  <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
-                    {test.id}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge colorPalette="green" size="sm">
-                    E2E
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    colorPalette={getPriorityColor(test.priority)}
-                    size="sm"
+            {missingTests.e2e?.map((test) => {
+              const isExpanded = expandedTests.has(test.id);
+              return (
+                <>
+                  <Table.Row
+                    key={test.id}
+                    bg={
+                      test.priority === "P0"
+                        ? "red.50"
+                        : test.priority === "P1"
+                          ? "orange.50"
+                          : undefined
+                    }
+                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    onClick={() => toggleExpand(test.id)}
                   >
-                    {test.priority}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="xs" color="gray.600">
-                    {test.estimatedEffort || "Unknown"}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="sm">{test.description}</Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text
-                    fontSize="xs"
-                    fontFamily="mono"
-                    color="gray.700"
-                    wordBreak="break-all"
-                  >
-                    {test.suggestedTestFile}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell textAlign="center">
-                  <Button
-                    size="xs"
-                    colorPalette="green"
-                    onClick={() => onApplyTest(test.id)}
-                    loading={!!applyingTests[test.id]}
-                    loadingText="Applying"
-                  >
-                    <Check size={12} />
-                    Apply
-                  </Button>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                    <Table.Cell>
+                      <Icon size="sm" color="gray.500">
+                        {isExpanded ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        )}
+                      </Icon>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
+                        {test.id}
+                      </Text>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge colorPalette="green" size="sm">
+                        E2E
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        colorPalette={getPriorityColor(test.priority)}
+                        size="sm"
+                      >
+                        {test.priority}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text fontSize="sm">{test.description}</Text>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Text
+                        fontSize="xs"
+                        fontFamily="mono"
+                        color="gray.700"
+                        wordBreak="break-all"
+                      >
+                        {test.suggestedTestFile}
+                      </Text>
+                    </Table.Cell>
+                    <Table.Cell textAlign="center">
+                      <Button
+                        size="xs"
+                        colorPalette="green"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onApplyTest(test.id);
+                        }}
+                        loading={!!applyingTests[test.id]}
+                        loadingText="Applying"
+                      >
+                        <Check size={12} />
+                        Apply
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                  {isExpanded && test.testCases && (
+                    <Table.Row key={`${test.id}-details`}>
+                      <Table.Cell colSpan={7} bg="gray.50" p={4}>
+                        <TestCaseDetails testCases={test.testCases} />
+                      </Table.Cell>
+                    </Table.Row>
+                  )}
+                </>
+              );
+            })}
           </Table.Body>
         </Table.Root>
       </Box>
     </VStack>
-  );
-}
-
-function TestRecommendations({ recommendations }) {
-  if (!recommendations || recommendations.length === 0) {
-    return (
-      <Text color="gray.500" fontSize="sm">
-        No additional recommendations at this time.
-      </Text>
-    );
-  }
-
-  return (
-    <List.Root gap={2}>
-      {recommendations.map((rec, index) => (
-        <List.Item key={index}>
-          <Text fontSize="sm">{rec}</Text>
-        </List.Item>
-      ))}
-    </List.Root>
   );
 }
 
@@ -534,7 +612,7 @@ export default function DomainTestingSection({
                   <FileText size={16} />
                   <Text fontSize="sm" fontWeight="medium" color="blue.800">
                     {progress?.message ||
-                      "AI is analyzing domain files and generating test recommendations..."}
+                      "AI is analyzing domain files and identifying missing tests..."}
                   </Text>
                 </HStack>
               </Box>
@@ -543,19 +621,6 @@ export default function DomainTestingSection({
               <LogsViewer logs={logs} loading={logsLoading} />
             ) : loading && !testing ? (
               <VStack align="stretch" gap={6}>
-                <Box>
-                  <Skeleton height="20px" width="150px" mb={3} />
-                  <Grid
-                    templateColumns="repeat(auto-fit, minmax(120px, 1fr))"
-                    gap={3}
-                  >
-                    <Skeleton height="80px" />
-                    <Skeleton height="80px" />
-                    <Skeleton height="80px" />
-                    <Skeleton height="80px" />
-                  </Grid>
-                </Box>
-                <Separator />
                 <Box>
                   <Skeleton height="20px" width="180px" mb={3} />
                   <Skeleton height="120px" />
@@ -575,11 +640,6 @@ export default function DomainTestingSection({
               />
             ) : (
               <VStack align="stretch" gap={6}>
-                {/* Coverage Metrics */}
-                <TestCoverageMetrics coverage={testing.currentCoverage} />
-
-                <Separator />
-
                 {/* Existing Tests */}
                 <Box>
                   <Text fontWeight="semibold" mb={3} fontSize="md">
@@ -599,18 +659,6 @@ export default function DomainTestingSection({
                     missingTests={testing.missingTests}
                     applyingTests={applyingTests}
                     onApplyTest={onApplyTest}
-                  />
-                </Box>
-
-                <Separator />
-
-                {/* Recommendations */}
-                <Box>
-                  <Text fontWeight="semibold" mb={3} fontSize="md">
-                    General Recommendations
-                  </Text>
-                  <TestRecommendations
-                    recommendations={testing.recommendations}
                   />
                 </Box>
               </VStack>

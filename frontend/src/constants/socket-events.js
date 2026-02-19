@@ -20,4 +20,5 @@ export const SOCKET_EVENTS = {
   LOG_BUGS_SECURITY: "log:bugs-security",
   LOG_TESTING: "log:testing",
   LOG_APPLY_FIX: "log:apply-fix",
+  LOG_APPLY_TEST: "log:apply-test",
 };

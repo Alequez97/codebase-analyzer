@@ -1,0 +1,241 @@
+{
+  "domainId": "user-authentication",
+  "domainName": "User Authentication",
+  "analyzedAt": "2026-02-17T14:45:00.000Z",
+  "existingTests": [
+    {
+      "file": "backend/validators/password.test.js",
+      "description": "Tests password validation rules including length, character requirements, and special characters",
+      "testType": "unit"
+    },
+    {
+      "file": "backend/utils/tokenManager.test.js",
+      "description": "Tests JWT token generation, validation, and refresh token logic",
+      "testType": "unit"
+    },
+    {
+      "file": "backend/middleware/rateLimiter.test.js",
+      "description": "Tests rate limiting logic for failed login attempts",
+      "testType": "unit"
+    },
+    {
+      "file": "tests/integration/auth/login.test.js",
+      "description": "Integration tests for login flow including database and JWT generation",
+      "testType": "integration"
+    },
+    {
+      "file": "tests/integration/auth/passwordReset.test.js",
+      "description": "Integration tests for password reset flow",
+      "testType": "integration"
+    }
+  ],
+  "missingTests": {
+    "unit": [
+      {
+        "id": "TEST-001",
+        "description": "Test password hashing with various special characters and unicode characters",
+        "priority": "P0",
+        "category": "security",
+        "suggestedTestFile": "backend/validators/password.test.js",
+        "relatedRequirement": "REQ-001",
+        "testCases": [
+          {
+            "scenario": "Password with emoji characters",
+            "input": "password: 'MyP@ss123😀🔒'",
+            "expectedOutput": "Should hash successfully and verify correctly",
+            "assertionType": "toBeTruthy"
+          },
+          {
+            "scenario": "Password with non-ASCII unicode (Chinese characters)",
+            "input": "password: 'Test密码123!'",
+            "expectedOutput": "Should hash successfully without encoding errors",
+            "assertionType": "toBeTruthy"
+          },
+          {
+            "scenario": "Password with escaped special characters",
+            "input": "password: 'P@ss\\\"w0rd\\nTest'",
+            "expectedOutput": "Should handle escaped characters without breaking hash",
+            "assertionType": "toBeTruthy"
+          }
+        ],
+        "reason": "Current tests only cover ASCII characters, but password hashing must work with any unicode input to prevent encoding-related vulnerabilities"
+      },
+      {
+        "id": "TEST-002",
+        "description": "Test rate limiter behavior when Redis connection fails",
+        "priority": "P0",
+        "category": "resilience",
+        "suggestedTestFile": "backend/middleware/rateLimiter.test.js",
+        "relatedRequirement": "REQ-002",
+        "testCases": [
+          {
+            "scenario": "Redis connection timeout",
+            "input": "Mock Redis client to throw ETIMEDOUT error",
+            "expectedOutput": "Should allow request through (fail-safe) and log warning",
+            "assertionType": "resolves"
+          },
+          {
+            "scenario": "Redis connection refused",
+            "input": "Mock Redis client to throw ECONNREFUSED error",
+            "expectedOutput": "Should allow request through (fail-safe) without blocking user",
+            "assertionType": "resolves"
+          },
+          {
+            "scenario": "Redis command timeout during incr operation",
+            "input": "Mock Redis.incr() to timeout after 5 seconds",
+            "expectedOutput": "Should fail-safe to allow request, rate limiting disabled temporarily",
+            "assertionType": "resolves"
+          }
+        ],
+        "reason": "No tests exist for rate limiter failure scenarios. System should fail-safe (allow requests) when Redis is unavailable to prevent complete service outage"
+      },
+      {
+        "id": "TEST-003",
+        "description": "Test JWT token validation with malformed tokens and edge cases",
+        "priority": "P0",
+        "category": "security",
+        "suggestedTestFile": "backend/utils/tokenManager.test.js",
+        "relatedRequirement": "REQ-003",
+        "testCases": [
+          {
+            "scenario": "Token with invalid signature",
+            "input": "token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyM30.invalid_signature'",
+            "expectedOutput": "Should throw JsonWebTokenError with message 'invalid signature'",
+            "assertionType": "rejects"
+          },
+          {
+            "scenario": "Token with tampered payload (changed userId)",
+            "input": "Generate valid token, then modify payload userId from 123 to 456",
+            "expectedOutput": "Should reject with 'invalid signature' error",
+            "assertionType": "rejects"
+          },
+          {
+            "scenario": "Token with 'none' algorithm (critical security vulnerability)",
+            "input": "token: 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VySWQiOjEyM30.'",
+            "expectedOutput": "Should reject immediately, must not accept 'none' algorithm",
+            "assertionType": "rejects"
+          },
+          {
+            "scenario": "Token expired 1 second ago",
+            "input": "Generate token with exp: Date.now() - 1000",
+            "expectedOutput": "Should throw TokenExpiredError",
+            "assertionType": "rejects"
+          }
+        ],
+        "reason": "Current tests only validate happy path scenarios. Missing tests for common JWT attack vectors"
+      }
+    ],
+    "integration": [
+      {
+        "id": "TEST-101",
+        "description": "Test complete authentication flow with invalid credentials and rate limiting",
+        "priority": "P0",
+        "category": "security",
+        "suggestedTestFile": "tests/integration/auth/login.test.js",
+        "relatedRequirement": "REQ-002",
+        "testCases": [
+          {
+            "scenario": "6 consecutive failed login attempts trigger rate limit",
+            "input": "Make 6 POST requests to /api/auth/login from same IP with wrong password",
+            "expectedOutput": "7th request returns 429 Too Many Requests with message 'Rate limit exceeded. Try again in 15 minutes'",
+            "assertionType": "toEqual"
+          },
+          {
+            "scenario": "Rate limit persists for 15 minutes",
+            "input": "After hitting rate limit, wait 14 minutes and try again",
+            "expectedOutput": "Request still returns 429, rate limit not yet expired",
+            "assertionType": "toEqual"
+          },
+          {
+            "scenario": "Different IPs don't share rate limit counters",
+            "input": "IP 192.168.1.1 hits rate limit, then IP 192.168.1.2 attempts login",
+            "expectedOutput": "Second IP should be able to make requests normally, counters are independent",
+            "assertionType": "resolves"
+          }
+        ],
+        "reason": "Rate limiting is critical for preventing brute force attacks. Need end-to-end test of complete flow including Redis, middleware, and controller"
+      }
+    ],
+    "e2e": [
+      {
+        "id": "TEST-201",
+        "description": "Complete user registration and verification flow",
+        "priority": "P1",
+        "category": "critical-path",
+        "suggestedTestFile": "tests/e2e/auth/registration.spec.js",
+        "relatedRequirement": "REQ-007",
+        "testCases": [
+          {
+            "scenario": "User registers with valid credentials",
+            "input": "Fill form: email='test@example.com', password='SecureP@ss123', click 'Register'",
+            "expectedOutput": "Success message displayed: 'Verification email sent to test@example.com'",
+            "assertionType": "toBeVisible"
+          },
+          {
+            "scenario": "User cannot log in before verification",
+            "input": "Navigate to /login, enter test@example.com credentials, click 'Login'",
+            "expectedOutput": "Error message: 'Please verify your email before logging in'",
+            "assertionType": "toContainText"
+          },
+          {
+            "scenario": "User clicks verification link",
+            "input": "Extract verification link from email (mock), navigate to verification URL",
+            "expectedOutput": "Success page: 'Email verified! You can now log in'",
+            "assertionType": "toBeVisible"
+          },
+          {
+            "scenario": "User can log in after verification",
+            "input": "Navigate to /login, enter verified credentials",
+            "expectedOutput": "Redirected to /dashboard, user session active",
+            "assertionType": "toHaveURL"
+          }
+        ],
+        "reason": "Registration is the entry point for all users. Need E2E test covering UI, backend, and email service"
+      }
+    ]
+  },
+  "testingPrinciples": {
+    "description": "Testing principles and guidelines for this domain",
+    "principles": [
+      {
+        "title": "Security-First Testing",
+        "description": "All authentication-related code must have comprehensive security tests covering attack vectors like SQL injection, token theft, session hijacking, and brute force attacks"
+      },
+      {
+        "title": "Fail-Safe Design",
+        "description": "When external dependencies (Redis, database, email service) fail, tests should verify the system fails safely - either denying access or allowing degraded functionality, never exposing security vulnerabilities"
+      },
+      {
+        "title": "Test Realistic Scenarios",
+        "description": "Tests should cover real-world scenarios including concurrent requests, token expiration edge cases, timezone issues, and network failures"
+      },
+      {
+        "title": "Isolate Tests",
+        "description": "Each test should be independent and not rely on shared state. Use test fixtures and mocking to ensure isolation"
+      },
+      {
+        "title": "Coverage Goals",
+        "description": "Aim for >90% branch coverage on critical paths (authentication, authorization, password management). Accept lower coverage on less critical paths"
+      }
+    ]
+  },
+  "summary": {
+    "totalExistingTests": 5,
+    "totalMissingTests": 5,
+    "missingByType": {
+      "unit": 3,
+      "integration": 1,
+      "e2e": 1
+    },
+    "missingByPriority": {
+      "P0": 4,
+      "P1": 1,
+      "P2": 0
+    },
+    "criticalGaps": [
+      "No tests for JWT token attack vectors (none algorithm, signature tampering)",
+      "No tests for rate limiter failure scenarios (Redis down)",
+      "Missing E2E tests for complete user registration flow"
+    ]
+  }
+}

@@ -8,6 +8,7 @@ import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.j
 import * as taskOrchestrator from "../orchestrators/task.js";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
+import { readMockJson } from "../utils/mock-data.js";
 
 const router = express.Router();
 
@@ -106,13 +107,26 @@ router.get("/:id/requirements", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainRequirementsPersistence.readDomainRequirements(id);
+    // Try to read from persistence first
+    let data = await domainRequirementsPersistence.readDomainRequirements(id);
 
+    // If not found, return mock data for UI testing
     if (!data) {
-      return res.status(404).json({
-        error: "Domain requirements not found",
-        message: `No requirements found for domain: ${id}`,
-      });
+      try {
+        data = await readMockJson([
+          "domains",
+          "user-authentication",
+          "requirements.json",
+        ]);
+        logger.info(`Serving mock requirements data for domain ${id}`, {
+          component: "API",
+        });
+      } catch (mockError) {
+        return res.status(404).json({
+          error: "Domain requirements not found",
+          message: `No requirements found for domain: ${id}`,
+        });
+      }
     }
 
     res.json(data);
@@ -132,13 +146,26 @@ router.get("/:id/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainBugsSecurityPersistence.readDomainBugsSecurity(id);
+    // Try to read from persistence first
+    let data = await domainBugsSecurityPersistence.readDomainBugsSecurity(id);
 
+    // If not found, return mock data for UI testing
     if (!data) {
-      return res.status(404).json({
-        error: "Domain bugs & security not found",
-        message: `No bugs & security analysis found for domain: ${id}`,
-      });
+      try {
+        data = await readMockJson([
+          "domains",
+          "user-authentication",
+          "bugs-security-analysis.json",
+        ]);
+        logger.info(`Serving mock bugs & security data for domain ${id}`, {
+          component: "API",
+        });
+      } catch (mockError) {
+        return res.status(404).json({
+          error: "Domain bugs & security not found",
+          message: `No bugs & security analysis found for domain: ${id}`,
+        });
+      }
     }
 
     // Enrich findings with action status
@@ -177,13 +204,26 @@ router.get("/:id/testing", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const data = await domainTestingPersistence.readDomainTesting(id);
+    // Try to read from persistence first
+    let data = await domainTestingPersistence.readDomainTesting(id);
 
+    // If not found, return mock data for UI testing
     if (!data) {
-      return res.status(404).json({
-        error: "Domain testing not found",
-        message: `No testing data found for domain: ${id}`,
-      });
+      try {
+        data = await readMockJson([
+          "domains",
+          "user-authentication",
+          "testing.json",
+        ]);
+        logger.info(`Serving mock testing data for domain ${id}`, {
+          component: "API",
+        });
+      } catch (mockError) {
+        return res.status(404).json({
+          error: "Domain testing not found",
+          message: `No testing data found for domain: ${id}`,
+        });
+      }
     }
 
     res.json(data);
@@ -350,8 +390,7 @@ router.post(
 router.post("/:id/analyze/testing", async (req, res) => {
   try {
     const { id } = req.params;
-    const { files } = req.body;
-    const agent = DEFAULT_AGENTS.DOMAIN_TESTING;
+    const { files, includeRequirements = false } = req.body;
 
     if (!files || !Array.isArray(files)) {
       return res.status(400).json({
@@ -360,8 +399,14 @@ router.post("/:id/analyze/testing", async (req, res) => {
       });
     }
 
-    // TODO: Implement testing analysis task orchestrator
-    res.status(501).json({ error: "Testing analysis not implemented yet" });
+    const executeNow = req.body.executeNow !== false;
+    const task = await taskOrchestrator.createAnalyzeTestingTask(
+      id,
+      files,
+      includeRequirements,
+      executeNow,
+    );
+    res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating testing analysis task", {
       error,
@@ -490,8 +535,46 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
   try {
     const { id, testId } = req.params;
 
-    // TODO: Implement test application logic
-    res.status(501).json({ error: "Test application not implemented yet" });
+    // Read the testing analysis to get the test details
+    const testingData = await domainTestingPersistence.readDomainTesting(id);
+
+    if (!testingData) {
+      return res.status(404).json({
+        error: "Domain testing not found",
+        message: `No testing analysis found for domain: ${id}`,
+      });
+    }
+
+    // Find the specific test recommendation
+    const allTests = [
+      ...(testingData.missingTests?.unit || []),
+      ...(testingData.missingTests?.integration || []),
+      ...(testingData.missingTests?.e2e || []),
+    ];
+
+    const testRecommendation = allTests.find((t) => t.id === testId);
+
+    if (!testRecommendation) {
+      return res.status(404).json({
+        error: "Test not found",
+        message: `No test recommendation found with id: ${testId}`,
+      });
+    }
+
+    const executeNow = req.body.executeNow !== false;
+
+    // Create a task to apply the test
+    const task = await taskOrchestrator.createApplyTestTask(
+      id,
+      testRecommendation,
+      executeNow,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Test application task created",
+      task,
+    });
   } catch (error) {
     logger.error(
       `Error applying test ${req.params.testId} for domain ${req.params.id}`,
