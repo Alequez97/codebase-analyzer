@@ -596,6 +596,27 @@ export const useAnalysisStore = create((set, get) => ({
     }
   },
 
+  updateBugsSecurityFindingAction: (domainId, findingId, action) => {
+    set((state) => {
+      const bugsSecurityData = state.domainBugsSecurityById.get(domainId);
+      if (!bugsSecurityData || !bugsSecurityData.findings) {
+        return state;
+      }
+
+      const updatedFindings = bugsSecurityData.findings.map((finding) =>
+        finding.id === findingId ? { ...finding, action } : finding,
+      );
+
+      const newDataMap = new Map(state.domainBugsSecurityById);
+      newDataMap.set(domainId, {
+        ...bugsSecurityData,
+        findings: updatedFindings,
+      });
+
+      return { domainBugsSecurityById: newDataMap };
+    });
+  },
+
   reset: () =>
     set({
       analysis: null,

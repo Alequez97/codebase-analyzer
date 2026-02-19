@@ -42,6 +42,7 @@ import {
 import MarkdownRenderer from "../MarkdownRenderer";
 import { toaster } from "../ui/toaster";
 import api from "../../api";
+import { useAnalysisStore } from "../../store/useAnalysisStore";
 
 const SEVERITY_COLORS = {
   critical: "red",
@@ -95,6 +96,9 @@ export default function DomainBugsSecuritySection({
   logsLoading = false,
   hasRequirements = false,
 }) {
+  const updateBugsSecurityFindingAction = useAnalysisStore(
+    (state) => state.updateBugsSecurityFindingAction,
+  );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);
   const [includeRequirements, setIncludeRequirements] = useState(false);
@@ -175,8 +179,8 @@ export default function DomainBugsSecuritySection({
     try {
       await api.recordFindingAction(domainId, findingId, nextStatus);
 
-      // Refetch to get updated data from backend
-      await onRefresh?.();
+      // Update UI immediately
+      updateBugsSecurityFindingAction(domainId, findingId, nextStatus);
 
       toaster.create({
         title:
