@@ -11,13 +11,10 @@ import {
 } from "../utils/template-processor.js";
 import { getProviderFromModel } from "../utils/model-utils.js";
 import { getApiKeyForProvider } from "../utils/api-keys.js";
+import { createLineBufferedStream } from "../utils/line-buffered-stream.js";
 
 const execAsync = promisify(exec);
 const shouldMirrorAiderStreamLogs = process.env.AIDER_STREAM_LOGS === "true";
-
-function redactSensitiveCommandParts(command) {
-  return command.replace(/--api-key\s+\S+/g, "--api-key [REDACTED]");
-}
 
 /**
  * Detect if Aider is installed and accessible
@@ -103,10 +100,6 @@ export async function execute(task) {
   ].filter(Boolean);
 
   const command = commandParts.join(" ");
-  logger.info(`Executing Aider: ${redactSensitiveCommandParts(command)}`, {
-    component: "Aider",
-    taskId: task.id,
-  });
 
   // Create log directory
   const logDir = path.join(config.paths.targetAnalysis, "logs");
@@ -127,6 +120,14 @@ export async function execute(task) {
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
+    const stdoutLineBuffer = createLineBufferedStream((line) => {
+      if (shouldMirrorAiderStreamLogs) {
+        logger.info(line);
+      }
+    });
+    const stderrLineBuffer = createLineBufferedStream((line) => {
+      logger.error(line);
+    });
 
     const aiderProcess = spawn(command, {
       cwd: config.target.directory,
@@ -154,18 +155,7 @@ export async function execute(task) {
         log: text,
       });
 
-      logger.debug(`${text.trim()}`, {
-        component: "Aider",
-        taskId: task.id,
-      });
-
-      if (shouldMirrorAiderStreamLogs && text.trim()) {
-        logger.info(text.trim(), {
-          component: "Aider",
-          taskId: task.id,
-          stream: "stdout",
-        });
-      }
+      stdoutLineBuffer.push(text);
     });
 
     aiderProcess.stderr.on("data", (data) => {
@@ -184,22 +174,13 @@ export async function execute(task) {
         log: text,
       });
 
-      logger.error(`${text.trim()}`, {
-        component: "Aider",
-        taskId: task.id,
-        stream: "stderr",
-      });
-
-      if (shouldMirrorAiderStreamLogs && text.trim()) {
-        logger.info(text.trim(), {
-          component: "Aider",
-          taskId: task.id,
-          stream: "stderr",
-        });
-      }
+      stderrLineBuffer.push(text);
     });
 
     aiderProcess.on("close", async (code) => {
+      stdoutLineBuffer.flush();
+      stderrLineBuffer.flush();
+
       // End the write stream and wait for it to finish
       logStream.end();
       await new Promise((resolveStream) =>
