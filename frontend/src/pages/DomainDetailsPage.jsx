@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Container, VStack, List } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toaster } from "../components/ui/toaster";
+import { TASK_TYPES } from "../constants/task-types";
+import { SECTION_TYPES } from "../constants/section-types";
 import { useCodebaseStore } from "../store/useCodebaseStore";
 import { useDomainDocumentationStore } from "../store/useDomainDocumentationStore";
 import { useDomainRequirementsStore } from "../store/useDomainRequirementsStore";
@@ -87,27 +89,31 @@ export default function DomainDetailsPage() {
   // Task progress - filter by section type
   const taskProgress = progressById.get(domainId);
   const documentationProgress =
-    taskProgress?.type === "analyze-documentation" ? taskProgress : null;
+    taskProgress?.type === TASK_TYPES.DOCUMENTATION ? taskProgress : null;
   const requirementsProgress =
-    taskProgress?.type === "analyze-requirements" ? taskProgress : null;
+    taskProgress?.type === TASK_TYPES.REQUIREMENTS ? taskProgress : null;
   const bugsSecurityProgress =
-    taskProgress?.type === "analyze-bugs-security" ? taskProgress : null;
+    taskProgress?.type === TASK_TYPES.BUGS_SECURITY ? taskProgress : null;
   const testingProgress =
-    taskProgress?.type === "analyze-testing" ? taskProgress : null;
+    taskProgress?.type === TASK_TYPES.TESTING ? taskProgress : null;
 
   // Logs data for each section
   const domainLogs = domainLogsBySection.get(domainId) || new Map();
-  const documentationLogs = domainLogs.get("documentation") || "";
-  const requirementsLogs = domainLogs.get("requirements") || "";
-  const bugsSecurityLogs = domainLogs.get("bugs-security") || "";
-  const testingLogs = domainLogs.get("testing") || "";
+  const documentationLogs = domainLogs.get(SECTION_TYPES.DOCUMENTATION) || "";
+  const requirementsLogs = domainLogs.get(SECTION_TYPES.REQUIREMENTS) || "";
+  const bugsSecurityLogs = domainLogs.get(SECTION_TYPES.BUGS_SECURITY) || "";
+  const testingLogs = domainLogs.get(SECTION_TYPES.TESTING) || "";
 
   // Logs loading states
   const logsLoading = logsLoadingBySection.get(domainId) || new Map();
-  const documentationLogsLoading = !!logsLoading.get("documentation");
-  const requirementsLogsLoading = !!logsLoading.get("requirements");
-  const bugsSecurityLogsLoading = !!logsLoading.get("bugs-security");
-  const testingLogsLoading = !!logsLoading.get("testing");
+  const documentationLogsLoading = !!logsLoading.get(
+    SECTION_TYPES.DOCUMENTATION,
+  );
+  const requirementsLogsLoading = !!logsLoading.get(SECTION_TYPES.REQUIREMENTS);
+  const bugsSecurityLogsLoading = !!logsLoading.get(
+    SECTION_TYPES.BUGS_SECURITY,
+  );
+  const testingLogsLoading = !!logsLoading.get(SECTION_TYPES.TESTING);
 
   // Collect all errors into a single array
   const errors = [
@@ -178,22 +184,22 @@ export default function DomainDetailsPage() {
 
     // Fetch documentation logs if section exists
     if (documentation) {
-      fetchDomainSectionLogs(domainId, "documentation");
+      fetchDomainSectionLogs(domainId, SECTION_TYPES.DOCUMENTATION);
     }
 
     // Fetch requirements logs if section exists
     if (requirements) {
-      fetchDomainSectionLogs(domainId, "requirements");
+      fetchDomainSectionLogs(domainId, SECTION_TYPES.REQUIREMENTS);
     }
 
     // Fetch bugs & security logs if section exists
     if (bugsSecurity) {
-      fetchDomainSectionLogs(domainId, "bugs-security");
+      fetchDomainSectionLogs(domainId, SECTION_TYPES.BUGS_SECURITY);
     }
 
     // Fetch testing logs if section exists
     if (testing) {
-      fetchDomainSectionLogs(domainId, "testing");
+      fetchDomainSectionLogs(domainId, SECTION_TYPES.TESTING);
     }
   }, [
     domainId,

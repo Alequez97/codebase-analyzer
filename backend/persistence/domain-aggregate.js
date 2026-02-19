@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { SECTION_TYPES } from "../constants/section-types.js";
 import {
   readDomainDocumentation,
   writeDomainDocumentation,
@@ -136,16 +137,16 @@ export async function readDomainSectionLogs(domainId, section) {
     let sectionData = null;
 
     switch (section) {
-      case "documentation":
+      case SECTION_TYPES.DOCUMENTATION:
         sectionData = await readDomainDocumentation(domainId);
         break;
-      case "requirements":
+      case SECTION_TYPES.REQUIREMENTS:
         sectionData = await readDomainRequirements(domainId);
         break;
-      case "testing":
+      case SECTION_TYPES.TESTING:
         sectionData = await readDomainTesting(domainId);
         break;
-      case "bugs-security":
+      case SECTION_TYPES.BUGS_SECURITY:
         sectionData = await readDomainBugsSecurity(domainId);
         break;
       default:

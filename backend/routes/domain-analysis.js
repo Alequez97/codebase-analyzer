@@ -8,6 +8,7 @@ import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.j
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { DEFAULT_AGENTS } from "../agents/index.js";
 import * as logger from "../utils/logger.js";
+import { SECTION_TYPES } from "../constants/section-types.js";
 
 const router = express.Router();
 
@@ -516,10 +517,10 @@ router.get("/:id/logs/:section", async (req, res) => {
 
     // Validate section parameter
     const validSections = [
-      "documentation",
-      "requirements",
-      "testing",
-      "bugs-security",
+      SECTION_TYPES.DOCUMENTATION,
+      SECTION_TYPES.REQUIREMENTS,
+      SECTION_TYPES.TESTING,
+      SECTION_TYPES.BUGS_SECURITY,
     ];
     if (!validSections.includes(section)) {
       return res.status(400).json({

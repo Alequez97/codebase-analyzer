@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { io } from "socket.io-client";
 import { SOCKET_EVENTS } from "../constants/socket-events";
 import { TASK_TYPES } from "../constants/task-types";
+import { SECTION_TYPES } from "../constants/section-types";
 import { useCodebaseStore } from "./useCodebaseStore";
 import { useDomainDocumentationStore } from "./useDomainDocumentationStore";
 import { useDomainRequirementsStore } from "./useDomainRequirementsStore";
@@ -171,13 +172,13 @@ export const useSocketStore = create((set, get) => ({
       if (domainId && type) {
         let sectionType = null;
         if (type === TASK_TYPES.DOCUMENTATION) {
-          sectionType = "documentation";
+          sectionType = SECTION_TYPES.DOCUMENTATION;
         } else if (type === TASK_TYPES.REQUIREMENTS) {
-          sectionType = "requirements";
+          sectionType = SECTION_TYPES.REQUIREMENTS;
         } else if (type === TASK_TYPES.BUGS_SECURITY) {
-          sectionType = "bugs-security";
+          sectionType = SECTION_TYPES.BUGS_SECURITY;
         } else if (type === TASK_TYPES.TESTING) {
-          sectionType = "testing";
+          sectionType = SECTION_TYPES.TESTING;
         }
 
         if (sectionType) {

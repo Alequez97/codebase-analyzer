@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import api from "../api";
 import { useLogsStore } from "./useLogsStore";
+import { SECTION_TYPES } from "../constants/section-types";
 
 export const useDomainBugsSecurityStore = create((set, get) => ({
   // State - using Map for better performance
@@ -58,7 +59,7 @@ export const useDomainBugsSecurityStore = create((set, get) => ({
   analyze: async (domain, includeRequirements = false) => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
 
-    useLogsStore.getState().clearLogs(domain.id, "bugs-security");
+    useLogsStore.getState().clearLogs(domain.id, SECTION_TYPES.BUGS_SECURITY);
 
     set((state) => {
       const newLoadingMap = new Map(state.loadingById);

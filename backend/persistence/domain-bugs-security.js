@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { SECTION_TYPES } from "../constants/section-types.js";
 import { tryReadJsonFile } from "./utils.js";
 
 /**
@@ -99,7 +100,7 @@ function createRegistry(domainId) {
 
   return {
     domainId,
-    section: "bugs-security",
+    section: SECTION_TYPES.BUGS_SECURITY,
     metadata: {
       created: timestamp,
       lastUpdated: timestamp,
