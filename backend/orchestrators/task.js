@@ -224,8 +224,20 @@ export async function createApplyFixTask(domainId, finding, executeNow) {
 
   // Determine which file(s) to include
   const files = [];
-  if (finding.location?.file) {
-    files.push(finding.location.file);
+  const sourceText = typeof finding.source === "string" ? finding.source : "";
+  const sourceFirstSegment = sourceText.split(",")[0]?.trim() || "";
+  const sourcePathMatch = sourceFirstSegment.match(/^(.+?):\d/);
+  const sourceFile = sourcePathMatch
+    ? sourcePathMatch[1].trim()
+    : sourceFirstSegment;
+  const sourceLineMatch = sourceFirstSegment.match(/:(\d+)/);
+  const sourceLine = sourceLineMatch ? sourceLineMatch[1] : "";
+
+  const findingFile = finding.location?.file || sourceFile || "";
+  const findingLine = finding.location?.line || sourceLine || "";
+
+  if (findingFile) {
+    files.push(findingFile);
   }
 
   // Build parameters for template replacement
@@ -242,8 +254,8 @@ export async function createApplyFixTask(domainId, finding, executeNow) {
     findingRecommendation: finding.recommendation || "",
     findingFixExample: finding.fixExample || finding.suggestedFix || "",
     findingLocation: finding.location || null,
-    findingFile: finding.location?.file || "",
-    findingLine: finding.location?.line || "",
+    findingFile,
+    findingLine,
     findingSnippet: finding.location?.snippet || "",
   };
 

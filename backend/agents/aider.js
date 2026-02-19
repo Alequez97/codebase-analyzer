@@ -90,6 +90,7 @@ export async function execute(task) {
     "aider",
     "--yes-always", // Auto-approve all changes
     "--exit", // Exit after processing message file
+    "--no-auto-commits", // Never create git commits automatically
     "--no-suggest-shell-commands", // Don't suggest additional shell commands
     "--edit-format whole", // Use whole-file format (better for creating new files)
     "--map-refresh auto", // Auto-refresh repo map
