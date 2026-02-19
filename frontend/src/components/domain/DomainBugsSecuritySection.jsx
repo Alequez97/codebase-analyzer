@@ -194,7 +194,6 @@ export default function DomainBugsSecuritySection({
         type: "success",
       });
     } catch (error) {
-      console.error("Failed to persist finding action:", error);
       toaster.create({
         title: "Failed to save finding status",
         description: error.response?.data?.error || "Unknown error",

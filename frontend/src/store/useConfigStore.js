@@ -38,7 +38,6 @@ export const useConfigStore = create((set, get) => ({
       });
       return response.data;
     } catch (err) {
-      console.error("Failed to fetch server config:", err);
       set({
         config: null,
         configLoading: false,

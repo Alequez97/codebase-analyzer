@@ -32,7 +32,6 @@ export const useProjectFilesStore = create((set, get) => ({
         lastFetched: Date.now(),
       });
     } catch (error) {
-      console.error("Failed to fetch project files:", error);
       set({
         loading: false,
         error: error?.response?.data?.error || "Failed to load project files",

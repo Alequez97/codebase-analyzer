@@ -72,7 +72,6 @@ export const useCodebaseStore = create((set, get) => ({
       const tasks = response.data?.tasks || [];
 
       if (!Array.isArray(tasks)) {
-        console.error("Invalid tasks response:", tasks);
         return [];
       }
 
@@ -89,7 +88,6 @@ export const useCodebaseStore = create((set, get) => ({
 
       return tasks;
     } catch (err) {
-      console.error("Failed to fetch pending tasks:", err);
       return [];
     }
   },

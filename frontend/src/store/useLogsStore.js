@@ -83,10 +83,6 @@ export const useLogsStore = create((set, get) => ({
       // Set logs
       get().setLogs(domainId, sectionType, response?.data?.content || "");
     } catch (error) {
-      console.error(
-        `Failed to fetch logs for domain ${domainId} section ${sectionType}:`,
-        error,
-      );
       get().setLogs(
         domainId,
         sectionType,
