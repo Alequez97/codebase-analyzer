@@ -144,22 +144,19 @@ export const useSocketStore = create((set, get) => ({
       } else if (type === TASK_TYPES.DOCUMENTATION && domainId) {
         const store = useDomainDocumentationStore.getState();
         store.setLoading(domainId, false);
-        store.errorById.set(domainId, error || "Documentation analysis failed");
+        store.setError(domainId, error || "Documentation analysis failed");
       } else if (type === TASK_TYPES.REQUIREMENTS && domainId) {
         const store = useDomainRequirementsStore.getState();
         store.setLoading(domainId, false);
-        store.errorById.set(domainId, error || "Requirements analysis failed");
+        store.setError(domainId, error || "Requirements analysis failed");
       } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
         const store = useDomainBugsSecurityStore.getState();
         store.setLoading(domainId, false);
-        store.errorById.set(
-          domainId,
-          error || "Bugs & security analysis failed",
-        );
+        store.setError(domainId, error || "Bugs & security analysis failed");
       } else if (type === TASK_TYPES.TESTING && domainId) {
         const store = useDomainTestingStore.getState();
         store.setLoading(domainId, false);
-        store.errorById.set(domainId, error || "Testing analysis failed");
+        store.setError(domainId, error || "Testing analysis failed");
       }
     });
 

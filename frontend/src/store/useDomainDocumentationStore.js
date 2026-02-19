@@ -108,6 +108,14 @@ export const useDomainDocumentationStore = create((set, get) => ({
     });
   },
 
+  setError: (domainId, error) => {
+    set((state) => {
+      const newErrorMap = new Map(state.errorById);
+      newErrorMap.set(domainId, error);
+      return { errorById: newErrorMap };
+    });
+  },
+
   clearError: (domainId) => {
     set((state) => {
       const newErrorMap = new Map(state.errorById);
