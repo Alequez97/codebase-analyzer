@@ -6,7 +6,6 @@ import * as domainTestingPersistence from "../persistence/domain-testing.js";
 import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as taskOrchestrator from "../orchestrators/task.js";
-import { DEFAULT_AGENTS } from "../agents/index.js";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
 
@@ -204,7 +203,6 @@ router.post("/:id/analyze/documentation", async (req, res) => {
   try {
     const { id } = req.params;
     const { files } = req.body;
-    const agent = DEFAULT_AGENTS.DOMAIN_DOCUMENTATION;
 
     if (!files || !Array.isArray(files)) {
       return res.status(400).json({
@@ -218,7 +216,6 @@ router.post("/:id/analyze/documentation", async (req, res) => {
       id,
       files,
       executeNow,
-      agent,
     );
     res.status(201).json(task);
   } catch (error) {
@@ -239,7 +236,6 @@ router.post("/:id/analyze/requirements", async (req, res) => {
   try {
     const { id } = req.params;
     const { files, userContext, includeDocumentation = false } = req.body;
-    const agent = DEFAULT_AGENTS.DOMAIN_REQUIREMENTS;
 
     if (!files || !Array.isArray(files)) {
       return res.status(400).json({
@@ -255,7 +251,6 @@ router.post("/:id/analyze/requirements", async (req, res) => {
       userContext || "",
       includeDocumentation,
       executeNow,
-      agent,
     );
     res.status(201).json(task);
   } catch (error) {
@@ -276,7 +271,6 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
     const { files, includeRequirements = false } = req.body;
-    const agent = DEFAULT_AGENTS.DOMAIN_BUGS_SECURITY;
 
     if (!files || !Array.isArray(files)) {
       return res.status(400).json({
@@ -291,7 +285,6 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
       files,
       includeRequirements,
       executeNow,
-      agent,
     );
     res.status(201).json(task);
   } catch (error) {

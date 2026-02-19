@@ -2,7 +2,6 @@ import express from "express";
 import * as codebaseAnalysisOrchestrator from "../orchestrators/codebase-analysis.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as taskOrchestrator from "../orchestrators/task.js";
-import { getSupportedAgents } from "../agents/index.js";
 import * as logger from "../utils/logger.js";
 
 const router = express.Router();
@@ -37,20 +36,9 @@ router.get("/", async (req, res) => {
 router.post("/request", async (req, res) => {
   try {
     const executeNow = req.body.executeNow !== false; // Default to true
-    const agent = req.body.agent || "llm-api"; // Use llm-api by default for codebase analysis
-    const supportedAgentIds = getSupportedAgents().map((item) => item.id);
 
-    if (!supportedAgentIds.includes(agent)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: `Unsupported agent: ${agent}`,
-      });
-    }
-
-    const task = await taskOrchestrator.createFullCodebaseAnalysisTask(
-      executeNow,
-      agent,
-    );
+    const task =
+      await taskOrchestrator.createFullCodebaseAnalysisTask(executeNow);
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating codebase analysis task", {

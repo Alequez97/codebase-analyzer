@@ -3,8 +3,8 @@ import fs from "fs/promises";
 import path from "path";
 import { ClaudeClient } from "../llm/clients/claude-client.js";
 import { OpenAIClient } from "../llm/clients/openai-client.js";
-import { ChatState } from "../llm/chat-state.js";
-import { OpenAIChatState } from "../llm/openai-chat-state.js";
+import { ChatState } from "../llm/state/chat-state.js";
+import { OpenAIChatState } from "../llm/state/openai-chat-state.js";
 import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import {
@@ -20,11 +20,11 @@ import {
 
 /**
  * Detect if the LLM API agent is available.
- * Checks if any API key is configured in config.llm.apiKeys
+ * Checks if any API key is configured in config.apiKeys
  * @returns {Promise<boolean>}
  */
 export async function detect() {
-  const { apiKeys } = config.llm;
+  const { apiKeys } = config;
   const hasApiKey = Boolean(
     apiKeys.anthropic ||
     apiKeys.openai ||
@@ -41,56 +41,55 @@ export async function detect() {
 
   logger.debug("LLM API agent available", {
     component: "LLM-API",
-    model: config.llm.model,
   });
 
   return true;
 }
 
 /**
- * Create LLM client based on configured model
- * Prioritizes LLM_MODEL choice over which API key is available
- * @returns {BaseLLMClient}
+ * Create LLM agent with client and state management
+ * @param {Object} agentConfig - Agent configuration with model, provider, maxTokens
+ * @returns {{ client: BaseLLMClient, state: ChatState }} Agent with client and state
  */
-function createLLMClient() {
-  const { model, apiKeys, maxTokens } = config.llm;
+function createLLMAgent(agentConfig) {
+  const { model, provider, maxTokens } = agentConfig;
+  const { apiKeys } = config;
 
-  // Determine which client to use based on LLM_MODEL setting
-  const isOpenAIModel = model.toLowerCase().startsWith("gpt");
-  const isClaudeModel = model.toLowerCase().startsWith("claude");
+  let client;
+  let state;
 
-  // User wants OpenAI model
-  if (isOpenAIModel) {
+  // Create client and state based on provider
+  if (provider === "openai") {
     if (!apiKeys.openai) {
       throw new Error(
         `OpenAI model "${model}" is selected but OPENAI_API_KEY is not configured`,
       );
     }
-    return new OpenAIClient({
+    client = new OpenAIClient({
       apiKey: apiKeys.openai,
       model,
       maxTokens,
     });
-  }
-
-  // User wants Claude model
-  if (isClaudeModel) {
+    state = new OpenAIChatState(client);
+  } else if (provider === "anthropic") {
     if (!apiKeys.anthropic) {
       throw new Error(
         `Claude model "${model}" is selected but ANTHROPIC_API_KEY is not configured`,
       );
     }
-    return new ClaudeClient({
+    client = new ClaudeClient({
       apiKey: apiKeys.anthropic,
       model,
       maxTokens,
     });
+    state = new ChatState(client);
+  } else {
+    throw new Error(
+      `Unsupported provider "${provider}". Supported providers: openai, anthropic`,
+    );
   }
 
-  // Unknown model prefix - provide helpful error
-  throw new Error(
-    `Unsupported model "${model}". LLM_MODEL should start with "gpt" (OpenAI) or "claude" (Anthropic)`,
-  );
+  return { client, state };
 }
 
 /**
@@ -102,7 +101,7 @@ export async function execute(task) {
   logger.info(`Executing LLM API task: ${task.type}`, {
     component: "LLM-API",
     taskId: task.id,
-    model: config.llm.model,
+    model: task.agentConfig.model,
   });
 
   // For documentation tasks, use the specialized documentation generator
@@ -166,7 +165,9 @@ async function executeDocumentationTask(task) {
     });
     taskLogger.info(`📋 Domain: ${domainName}`, { component: "LLM-API" });
     taskLogger.info(`📁 Files: ${files.length}`, { component: "LLM-API" });
-    taskLogger.info(`🤖 Model: ${config.llm.model}`, { component: "LLM-API" });
+    taskLogger.info(`🤖 Model: ${task.agentConfig.model}`, {
+      component: "LLM-API",
+    });
     taskLogger.info(`🎯 Target directory: ${config.target.directory}`, {
       component: "LLM-API",
     });
@@ -278,18 +279,14 @@ async function generateDomainDocumentation({
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
 
-  taskLogger.info(`🔧 Initializing LLM client (${config.llm.model})...`, {
+  taskLogger.info(`🔧 Initializing LLM client (${task.agentConfig.model})...`, {
     component: "LLM-API",
   });
 
   onProgress({ stage: "initializing", message: "Initializing LLM client..." });
 
-  // Create LLM client
-  const client = createLLMClient();
-  const chatState =
-    client instanceof OpenAIClient
-      ? new OpenAIChatState(client)
-      : new ChatState(client);
+  // Create LLM agent with client and state
+  const { client, state: chatState } = createLLMAgent(task.agentConfig);
   const fileToolExecutor = new FileToolExecutor(config.target.directory);
 
   taskLogger.info(`📂 Domain files to analyze:`, { component: "LLM-API" });
@@ -819,13 +816,9 @@ async function executeAnalysisTask(task) {
     emitTaskProgress(task, "initializing", "Initializing LLM client...");
     taskLogger.info("🤖 Initializing LLM client...", {
       component: "LLM-API",
-      model: config.llm.model,
+      model: task.agentConfig.model,
     });
-    const client = createLLMClient();
-    const chatState =
-      client instanceof OpenAIClient
-        ? new OpenAIChatState(client)
-        : new ChatState(client);
+    const { client, state: chatState } = createLLMAgent(task.agentConfig);
     const fileToolExecutor = new FileToolExecutor(config.target.directory);
     taskLogger.info("✅ LLM client initialized", { component: "LLM-API" });
 

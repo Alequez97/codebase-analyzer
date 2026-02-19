@@ -3,6 +3,9 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import * as logger from "./utils/logger.js";
+import { TASK_TYPES } from "./constants/task-types.js";
+import { MODELS } from "./constants/models.js";
+import { PROVIDERS } from "./constants/providers.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,9 +42,10 @@ const projectName = path.basename(targetDirectory);
 /**
  * Application configuration
  *
- * Tool Usage:
- * - LLM API: Used for generating analysis JSON files (codebase & domain analysis)
- * - Aider: Used for editing files and writing code (applying fixes, writing tests)
+ * Task-based agent and model configuration:
+ * - Each task type can use a different agent (llm-api or aider)
+ * - Each task type can use a different model
+ * - API keys are loaded from .env file
  */
 const config = {
   // Server
@@ -53,28 +57,51 @@ const config = {
     name: projectName,
   },
 
-  // LLM API configuration (used for analysis JSON generation)
-  llm: {
-    model: process.env.LLM_MODEL || "deepseek",
-    maxTokens: 64000, // GPT-5.2 supports up to 128K output tokens for large analysis outputs
-    apiKeys: {
-      deepseek: process.env.DEEPSEEK_API_KEY,
-      anthropic: process.env.ANTHROPIC_API_KEY,
-      openai: process.env.OPENAI_API_KEY,
-      openrouter: process.env.OPENROUTER_API_KEY,
+  // API Keys (loaded from .env)
+  apiKeys: {
+    [PROVIDERS.OPENAI]: process.env.OPENAI_API_KEY,
+    [PROVIDERS.ANTHROPIC]: process.env.ANTHROPIC_API_KEY,
+    [PROVIDERS.DEEPSEEK]: process.env.DEEPSEEK_API_KEY,
+    [PROVIDERS.OPENROUTER]: process.env.OPENROUTER_API_KEY,
+  },
+
+  // Task-specific agent and model configuration
+  tasks: {
+    [TASK_TYPES.CODEBASE_ANALYSIS]: {
+      agent: "llm-api",
+      model: MODELS.CLAUDE_SONNET,
+      provider: PROVIDERS.ANTHROPIC,
+      maxTokens: 64000,
+    },
+    [TASK_TYPES.DOCUMENTATION]: {
+      agent: "llm-api",
+      model: MODELS.GPT_5,
+      provider: PROVIDERS.OPENAI,
+      maxTokens: 64000,
+    },
+    [TASK_TYPES.REQUIREMENTS]: {
+      agent: "llm-api",
+      model: MODELS.CLAUDE_SONNET,
+      provider: PROVIDERS.ANTHROPIC,
+      maxTokens: 64000,
+    },
+    [TASK_TYPES.BUGS_SECURITY]: {
+      agent: "llm-api",
+      model: MODELS.CLAUDE_SONNET,
+      provider: PROVIDERS.ANTHROPIC,
+      maxTokens: 64000,
+    },
+    [TASK_TYPES.TESTING]: {
+      agent: "llm-api",
+      model: MODELS.CLAUDE_SONNET,
+      provider: PROVIDERS.ANTHROPIC,
+      maxTokens: 64000,
     },
   },
 
-  // Aider configuration (used for code editing and fixes)
+  // Aider-specific configuration (when agent is "aider")
   aider: {
-    model: process.env.LLM_MODEL || "deepseek",
-    apiKeys: {
-      deepseek: process.env.DEEPSEEK_API_KEY,
-      anthropic: process.env.ANTHROPIC_API_KEY,
-      openai: process.env.OPENAI_API_KEY,
-      openrouter: process.env.OPENROUTER_API_KEY,
-    },
-    extraArgs: process.env.AGENT_EXTRA_ARGS || "",
+    extraArgs: "",
   },
 
   // Paths

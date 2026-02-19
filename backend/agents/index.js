@@ -1,5 +1,6 @@
 import * as llmApi from "./llm-api.js";
 import * as aider from "./aider.js";
+import config from "../config.js";
 
 /**
  * Available AI agents
@@ -23,15 +24,24 @@ const AGENTS = {
 };
 
 /**
- * Default agents for different task types
+ * Get agent configuration for a specific task type
+ * @param {string} taskType - The task type from TASK_TYPES
+ * @returns {Object} Agent configuration with agent, model, provider
  */
-export const DEFAULT_AGENTS = {
-  CODEBASE_ANALYSIS: "llm-api",
-  DOMAIN_DOCUMENTATION: "llm-api",
-  DOMAIN_REQUIREMENTS: "llm-api",
-  DOMAIN_BUGS_SECURITY: "llm-api",
-  DOMAIN_TESTING: "llm-api",
-};
+export function getAgentConfig(taskType) {
+  const taskConfig = config.tasks[taskType];
+
+  if (!taskConfig) {
+    throw new Error(`No configuration found for task type: ${taskType}`);
+  }
+
+  return {
+    agent: taskConfig.agent,
+    model: taskConfig.model,
+    provider: taskConfig.provider,
+    maxTokens: taskConfig.maxTokens,
+  };
+}
 
 /**
  * Get available agent based on config and detection

@@ -160,10 +160,7 @@ export async function execute(task) {
   const filesArg = files.length > 0 ? files.map((f) => `"${f}"`).join(" ") : "";
 
   // Determine API key based on model
-  const modelApiKey = getApiKeyForModel(
-    config.aider.model,
-    config.aider.apiKeys,
-  );
+  const modelApiKey = getApiKeyForModel(task.agentConfig.model, config.apiKeys);
 
   // Build Aider command with smart context management
   const commandParts = [
@@ -174,7 +171,7 @@ export async function execute(task) {
     "--edit-format whole", // Use whole-file format (better for creating new files)
     "--map-refresh auto", // Auto-refresh repo map
     "--map-tokens 4096", // Use repo map to manage large codebases
-    config.aider.model ? `--model ${config.aider.model}` : null,
+    task.agentConfig.model ? `--model ${task.agentConfig.model}` : null,
     modelApiKey ? modelApiKey : null,
     config.aider.extraArgs || null,
     "--message-file",

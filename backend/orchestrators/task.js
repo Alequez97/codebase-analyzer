@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import fs from "fs/promises";
 import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
-import { getAgent } from "../agents/index.js";
+import { getAgent, getAgentConfig } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { TASK_TYPES } from "../constants/task-types.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
@@ -24,16 +24,18 @@ function generateTaskId(prefix) {
  * @param {boolean} executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createFullCodebaseAnalysisTask(executeNow, agent) {
+export async function createFullCodebaseAnalysisTask(executeNow) {
+  const agentConfig = getAgentConfig(TASK_TYPES.CODEBASE_ANALYSIS);
+
   const task = {
     id: generateTaskId("analyze-codebase"),
     type: TASK_TYPES.CODEBASE_ANALYSIS,
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
-      agent,
       targetDirectory: config.target.directory,
     },
+    agentConfig,
     instructionFile: "backend/instructions/analyze-full-codebase.md",
     outputFile: ".code-analysis/analysis/codebase-analysis.json",
   };
@@ -75,26 +77,26 @@ export async function getTask(taskId) {
  * @param {string} domainId - The domain ID
  * @param {string[]} files - Files in the domain
  * @param {boolean} executeNow - Whether to execute immediately
- * @param {string} agent - Agent to use for analysis
  * @returns {Promise<Object>} The created task
  */
 export async function createAnalyzeDocumentationTask(
   domainId,
   files,
   executeNow,
-  agent,
 ) {
+  const agentConfig = getAgentConfig(TASK_TYPES.DOCUMENTATION);
+
   const task = {
     id: generateTaskId("analyze-documentation"),
     type: TASK_TYPES.DOCUMENTATION,
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
-      agent,
       domainId,
       files,
       targetDirectory: config.target.directory,
     },
+    agentConfig,
     instructionFile: "backend/instructions/analyze-domain-documentation.md",
     outputFile: `.code-analysis/domains/${domainId}/documentation.json`,
   };
@@ -120,7 +122,6 @@ export async function createAnalyzeDocumentationTask(
  * @param {string[]} files - Files in the domain
  * @param {string} userContext - Optional user-provided context
  * @param {boolean} executeNow - Whether to execute immediately
- * @param {string} agent - Agent to use for analysis
  * @returns {Promise<Object>} The created task
  */
 export async function createAnalyzeRequirementsTask(
@@ -129,21 +130,22 @@ export async function createAnalyzeRequirementsTask(
   userContext,
   includeDocumentation,
   executeNow,
-  agent,
 ) {
+  const agentConfig = getAgentConfig(TASK_TYPES.REQUIREMENTS);
+
   const task = {
     id: generateTaskId("analyze-requirements"),
     type: TASK_TYPES.REQUIREMENTS,
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
-      agent,
       domainId,
       files,
       userContext: userContext || "",
       includeDocumentation: includeDocumentation === true,
       targetDirectory: config.target.directory,
     },
+    agentConfig,
     instructionFile: "backend/instructions/analyze-domain-requirements.md",
     outputFile: `.code-analysis/domains/${domainId}/requirements.json`,
   };
@@ -169,7 +171,6 @@ export async function createAnalyzeRequirementsTask(
  * @param {string[]} files - Files in the domain
  * @param {boolean} includeRequirements - Whether to include requirements in analysis
  * @param {boolean} executeNow - Whether to execute immediately
- * @param {string} agent - Agent to use for analysis
  * @returns {Promise<Object>} The created task
  */
 export async function createAnalyzeBugsSecurityTask(
@@ -177,20 +178,21 @@ export async function createAnalyzeBugsSecurityTask(
   files,
   includeRequirements,
   executeNow,
-  agent,
 ) {
+  const agentConfig = getAgentConfig(TASK_TYPES.BUGS_SECURITY);
+
   const task = {
     id: generateTaskId("analyze-bugs-security"),
     type: TASK_TYPES.BUGS_SECURITY,
     status: "pending",
     createdAt: new Date().toISOString(),
     params: {
-      agent,
       domainId,
       files,
       includeRequirements: !!includeRequirements,
       targetDirectory: config.target.directory,
     },
+    agentConfig,
     instructionFile: "backend/instructions/analyze-domain-bugs-security.md",
     outputFile: `.code-analysis/domains/${domainId}/bugs-security.json`,
   };
@@ -355,7 +357,7 @@ export async function executeTask(taskId) {
     throw new Error(`Task ${taskId} is not pending (status: ${task.status})`);
   }
 
-  const agent = await getAgent(task.params?.agent);
+  const agent = await getAgent(task.agentConfig?.agent);
   const result = await agent.execute(task);
 
   if (result.success) {
