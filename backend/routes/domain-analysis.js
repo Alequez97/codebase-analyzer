@@ -107,26 +107,13 @@ router.get("/:id/requirements", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Try to read from persistence first
-    let data = await domainRequirementsPersistence.readDomainRequirements(id);
+    const data = await domainRequirementsPersistence.readDomainRequirements(id);
 
-    // If not found, return mock data for UI testing
     if (!data) {
-      try {
-        data = await readMockJson([
-          "domains",
-          "user-authentication",
-          "requirements.json",
-        ]);
-        logger.info(`Serving mock requirements data for domain ${id}`, {
-          component: "API",
-        });
-      } catch (mockError) {
-        return res.status(404).json({
-          error: "Domain requirements not found",
-          message: `No requirements found for domain: ${id}`,
-        });
-      }
+      return res.status(404).json({
+        error: "Domain requirements not found",
+        message: `No requirements found for domain: ${id}`,
+      });
     }
 
     res.json(data);
@@ -146,26 +133,13 @@ router.get("/:id/bugs-security", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Try to read from persistence first
-    let data = await domainBugsSecurityPersistence.readDomainBugsSecurity(id);
+    const data = await domainBugsSecurityPersistence.readDomainBugsSecurity(id);
 
-    // If not found, return mock data for UI testing
     if (!data) {
-      try {
-        data = await readMockJson([
-          "domains",
-          "user-authentication",
-          "bugs-security-analysis.json",
-        ]);
-        logger.info(`Serving mock bugs & security data for domain ${id}`, {
-          component: "API",
-        });
-      } catch (mockError) {
-        return res.status(404).json({
-          error: "Domain bugs & security not found",
-          message: `No bugs & security analysis found for domain: ${id}`,
-        });
-      }
+      return res.status(404).json({
+        error: "Domain bugs & security not found",
+        message: `No bugs & security analysis found for domain: ${id}`,
+      });
     }
 
     // Enrich findings with action status
