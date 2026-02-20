@@ -137,9 +137,32 @@ You MUST output your analysis as a valid JSON object with the following structur
         "testCases": [
           {
             "scenario": "Specific scenario to test",
-            "input": "What input data/conditions to test with",
-            "expectedOutput": "What should happen",
-            "assertionType": "toBeTruthy | toEqual | rejects | throws | etc"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "TestPassword123!"
+                  }
+                ],
+                "expectedOutput": "What should happen for this input",
+                "assertionType": "toBeTruthy | toEqual | rejects | throws | etc"
+              },
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "test@example.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "SecureP@ss123"
+                  }
+                ],
+                "expectedOutput": "What should happen for these inputs",
+                "assertionType": "toEqual | rejects | etc"
+              }
+            ]
           }
         ],
         "reason": "Why this test is important and what risk it mitigates"
@@ -209,8 +232,8 @@ You MUST output your analysis as a valid JSON object with the following structur
 - **relatedRequirement**: Requirement ID this test verifies (if applicable)
 - **testCases**: Array of specific test cases to write, each with:
   - `scenario`: Brief description of what this test case verifies
-  - `input`: Specific input data, conditions, or function parameters to test with
-  - `expectedOutput`: What should happen / what the test should verify
+  - `inputs`: **Array** of different input variations to test (e.g., different parameter values, edge cases, or test conditions). Each test case can have multiple inputs that should produce the same expected behavior.
+  - `expectedOutput`: What should happen / what the test should verify (applies to all inputs in this scenario)
   - `assertionType`: Jest/Vitest assertion method (toBeTruthy, toEqual, rejects, throws, toContain, etc.)
 - **reason**: Why this test is important (what risk it mitigates, what bug it prevents)
 
@@ -267,27 +290,63 @@ You MUST output your analysis as a valid JSON object with the following structur
         "testCases": [
           {
             "scenario": "Token with invalid signature",
-            "input": "JWT token with valid structure but invalid signature: 'eyJhbGc...invalid'",
-            "expectedOutput": "Should throw TokenInvalidError",
-            "assertionType": "rejects.toThrow"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "token",
+                    "value": "eyJhbGc...invalid"
+                  }
+                ],
+                "expectedOutput": "Should throw TokenInvalidError",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
           },
           {
             "scenario": "Token with tampered payload",
-            "input": "Valid token with modified userId in payload",
-            "expectedOutput": "Should reject and throw signature verification error",
-            "assertionType": "rejects.toThrow"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate valid token, then modify payload userId from 123 to 456"
+                  }
+                ],
+                "expectedOutput": "Should reject and throw signature verification error",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
           },
           {
             "scenario": "Token with 'none' algorithm",
-            "input": "JWT with alg: 'none' header (common attack vector)",
-            "expectedOutput": "Should reject tokens without proper algorithm",
-            "assertionType": "rejects.toThrow"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate JWT with alg: 'none' header (common attack vector)"
+                  }
+                ],
+                "expectedOutput": "Should reject tokens without proper algorithm",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
           },
           {
             "scenario": "Token with expired timestamp",
-            "input": "Token with exp timestamp in the past",
-            "expectedOutput": "Should throw TokenExpiredError",
-            "assertionType": "rejects.toThrow"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate token with exp timestamp in the past"
+                  }
+                ],
+                "expectedOutput": "Should throw TokenExpiredError",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
           }
         ],
         "reason": "Current tests only validate happy path. Missing tests for common JWT attack vectors that could allow unauthorized access"
@@ -302,21 +361,48 @@ You MUST output your analysis as a valid JSON object with the following structur
         "testCases": [
           {
             "scenario": "Redis connection timeout",
-            "input": "Mock Redis client to timeout after 5 seconds",
-            "expectedOutput": "Should fail-safe: either block all requests or allow with warning logged",
-            "assertionType": "toBeDefined"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis client times out after 5 seconds"
+                  }
+                ],
+                "expectedOutput": "Should fail-safe: either block all requests or allow with warning logged",
+                "assertionType": "toBeDefined"
+              }
+            ]
           },
           {
             "scenario": "Redis connection refused",
-            "input": "Mock Redis client.connect() to throw ECONNREFUSED",
-            "expectedOutput": "Should handle gracefully without crashing the app",
-            "assertionType": "not.toThrow"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis client.connect() throws ECONNREFUSED"
+                  }
+                ],
+                "expectedOutput": "Should handle gracefully without crashing the app",
+                "assertionType": "not.toThrow"
+              }
+            ]
           },
           {
             "scenario": "Rate limiter fails to increment counter",
-            "input": "Mock Redis incr() to fail",
-            "expectedOutput": "Should fail-safe and log error without exposing security bypass",
-            "assertionType": "toBeTruthy"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Mock Redis incr() to fail"
+                  }
+                ],
+                "expectedOutput": "Should fail-safe and log error without exposing security bypass",
+                "assertionType": "toBeTruthy"
+              }
+            ]
           }
         ],
         "reason": "No tests for rate limiter failure scenarios. System must fail safely when Redis is down to prevent complete service outage OR security bypass"
@@ -333,21 +419,48 @@ You MUST output your analysis as a valid JSON object with the following structur
         "testCases": [
           {
             "scenario": "6 consecutive failed login attempts trigger rate limit",
-            "input": "POST /auth/login with wrong password 6 times for same IP",
-            "expectedOutput": "7th attempt should return 429 Too Many Requests",
-            "assertionType": "toEqual"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "POST /auth/login with wrong password 6 times for same IP"
+                  }
+                ],
+                "expectedOutput": "7th attempt should return 429 Too Many Requests",
+                "assertionType": "toEqual"
+              }
+            ]
           },
           {
             "scenario": "Rate limit persists for configured duration",
-            "input": "After rate limit triggered, wait 14 minutes and try again",
-            "expectedOutput": "Should still be rate limited (15 min window)",
-            "assertionType": "toEqual"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "After rate limit triggered, wait 14 minutes and try again"
+                  }
+                ],
+                "expectedOutput": "Should still be rate limited (15 min window)",
+                "assertionType": "toEqual"
+              }
+            ]
           },
           {
             "scenario": "Successful login resets failed attempt counter",
-            "input": "3 failed attempts, then 1 successful login, then 5 more failed",
-            "expectedOutput": "Should not trigger rate limit (counter reset after success)",
-            "assertionType": "not.toEqual"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "3 failed attempts, then 1 successful login, then 5 more failed"
+                  }
+                ],
+                "expectedOutput": "Should not trigger rate limit (counter reset after success)",
+                "assertionType": "not.toEqual"
+              }
+            ]
           }
         ],
         "reason": "Rate limiting is critical for preventing brute force attacks. Need end-to-end test of Redis, middleware, and controller working together"
@@ -364,33 +477,94 @@ You MUST output your analysis as a valid JSON object with the following structur
         "testCases": [
           {
             "scenario": "User registers with valid credentials",
-            "input": "Fill registration form with email: 'newuser@test.com', password: 'Test123!@#'",
-            "expectedOutput": "Should show success message and redirect to 'check email' page",
-            "assertionType": "toContain"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "newuser@test.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "Test123!@#"
+                  },
+                  {
+                    "field": "userAction",
+                    "value": "Fill registration form and click 'Register'"
+                  }
+                ],
+                "expectedOutput": "Should show success message and redirect to 'check email' page",
+                "assertionType": "toContain"
+              }
+            ]
           },
           {
             "scenario": "Verification email is sent",
-            "input": "Check test email inbox for verification email",
-            "expectedOutput": "Should receive email with verification link",
-            "assertionType": "toBeDefined"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "Check test email inbox for verification email"
+                  }
+                ],
+                "expectedOutput": "Should receive email with verification link",
+                "assertionType": "toBeDefined"
+              }
+            ]
           },
           {
             "scenario": "User clicks verification link",
-            "input": "Navigate to verification link from email",
-            "expectedOutput": "Should confirm email and show 'Email verified' message",
-            "assertionType": "toContain"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "userAction",
+                    "value": "Navigate to verification link from email"
+                  }
+                ],
+                "expectedOutput": "Should confirm email and show 'Email verified' message",
+                "assertionType": "toContain"
+              }
+            ]
           },
           {
             "scenario": "User can login after verification",
-            "input": "Login with verified email and password",
-            "expectedOutput": "Should successfully authenticate and redirect to dashboard",
-            "assertionType": "toContain"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "verified@test.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "Test123!"
+                  },
+                  {
+                    "field": "userAction",
+                    "value": "Login with verified credentials"
+                  }
+                ],
+                "expectedOutput": "Should successfully authenticate and redirect to dashboard",
+                "assertionType": "toContain"
+              }
+            ]
           },
           {
             "scenario": "User cannot login before verification",
-            "input": "Register new user but don't verify, attempt login immediately",
-            "expectedOutput": "Should show 'Email not verified' error",
-            "assertionType": "toContain"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "Register new user but don't verify, attempt login immediately"
+                  }
+                ],
+                "expectedOutput": "Should show 'Email not verified' error",
+                "assertionType": "toContain"
+              }
+            ]
           }
         ],
         "reason": "Registration is the entry point for all users. Need E2E test covering UI, backend, and email service"

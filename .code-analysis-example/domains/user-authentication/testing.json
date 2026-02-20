@@ -41,21 +41,203 @@
         "testCases": [
           {
             "scenario": "Password with emoji characters",
-            "input": "password: 'MyP@ss123😀🔒'",
-            "expectedOutput": "Should hash successfully and verify correctly",
-            "assertionType": "toBeTruthy"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "MyP@ss123😀🔒"
+                  }
+                ],
+                "expectedOutput": "Should hash successfully and verify correctly",
+                "assertionType": "toBeTruthy"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Test🔑🔐🔒"
+                  },
+                  {
+                    "field": "salt",
+                    "value": "random-salt-123"
+                  }
+                ],
+                "expectedOutput": "Hash should match expected format: /^\\$2[aby]\\$/",
+                "assertionType": "toMatch"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "🎉Party123!"
+                  }
+                ],
+                "expectedOutput": "Should hash successfully",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": ""
+                  }
+                ],
+                "expectedOutput": "Should throw validation error for empty password",
+                "assertionType": "rejects"
+              }
+            ]
           },
           {
-            "scenario": "Password with non-ASCII unicode (Chinese characters)",
-            "input": "password: 'Test密码123!'",
-            "expectedOutput": "Should hash successfully without encoding errors",
-            "assertionType": "toBeTruthy"
+            "scenario": "Password with non-ASCII unicode characters",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Test密码123!"
+                  },
+                  {
+                    "field": "username",
+                    "value": "测试用户"
+                  }
+                ],
+                "expectedOutput": "Should hash successfully without encoding errors",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "パスワード123"
+                  }
+                ],
+                "expectedOutput": "Hash length should be 60 characters",
+                "assertionType": "toHaveLength"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Пароль123!"
+                  },
+                  {
+                    "field": "rounds",
+                    "value": "10"
+                  }
+                ],
+                "expectedOutput": "Should complete hashing within 200ms",
+                "assertionType": "toBeLessThan"
+              }
+            ]
           },
           {
             "scenario": "Password with escaped special characters",
-            "input": "password: 'P@ss\\\"w0rd\\nTest'",
-            "expectedOutput": "Should handle escaped characters without breaking hash",
-            "assertionType": "toBeTruthy"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "P@ss\\\"w0rd\\nTest"
+                  },
+                  {
+                    "field": "confirmPassword",
+                    "value": "P@ss\\\"w0rd\\nTest"
+                  }
+                ],
+                "expectedOutput": "Passwords should match exactly",
+                "assertionType": "toEqual"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Test\\t\\r\\nPass"
+                  }
+                ],
+                "expectedOutput": "Should handle tab and CR/LF characters",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Pass\\'quote"
+                  },
+                  {
+                    "field": "hashAlgorithm",
+                    "value": "bcrypt"
+                  }
+                ],
+                "expectedOutput": "Hash should start with $2b$",
+                "assertionType": "toContain"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Short"
+                  }
+                ],
+                "expectedOutput": "Should throw error: Password must be at least 8 characters",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
+          },
+          {
+            "scenario": "Password validation with multiple constraints",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "ValidP@ss123"
+                  },
+                  {
+                    "field": "minLength",
+                    "value": "8"
+                  },
+                  {
+                    "field": "requireSpecialChar",
+                    "value": "true"
+                  },
+                  {
+                    "field": "requireNumber",
+                    "value": "true"
+                  }
+                ],
+                "expectedOutput": "Validation should pass all requirements",
+                "assertionType": "toBe"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "nospecialchar123"
+                  },
+                  {
+                    "field": "requireSpecialChar",
+                    "value": "true"
+                  }
+                ],
+                "expectedOutput": "Should fail validation",
+                "assertionType": "rejects"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Test@Pass123"
+                  },
+                  {
+                    "field": "oldPassword",
+                    "value": "Test@Pass123"
+                  }
+                ],
+                "expectedOutput": "Should reject: new password cannot match old password",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
           }
         ],
         "reason": "Current tests only cover ASCII characters, but password hashing must work with any unicode input to prevent encoding-related vulnerabilities"
@@ -70,21 +252,191 @@
         "testCases": [
           {
             "scenario": "Redis connection timeout",
-            "input": "Mock Redis client to throw ETIMEDOUT error",
-            "expectedOutput": "Should allow request through (fail-safe) and log warning",
-            "assertionType": "resolves"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis client throws ETIMEDOUT error"
+                  },
+                  {
+                    "field": "connectionTimeout",
+                    "value": "5000"
+                  },
+                  {
+                    "field": "retryAttempts",
+                    "value": "3"
+                  }
+                ],
+                "expectedOutput": "Should allow request through (fail-safe) and log warning",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis client.connect() rejects after 5s timeout"
+                  }
+                ],
+                "expectedOutput": "Error instance should be TimeoutError",
+                "assertionType": "toBeInstanceOf"
+              },
+              {
+                "input": [
+                  {
+                    "field": "connectionTimeout",
+                    "value": "5000"
+                  },
+                  {
+                    "field": "loggerSpy",
+                    "value": "jest.spyOn(logger, 'warn')"
+                  }
+                ],
+                "expectedOutput": "Logger.warn should be called with timeout message",
+                "assertionType": "toHaveBeenCalled"
+              }
+            ]
           },
           {
             "scenario": "Redis connection refused",
-            "input": "Mock Redis client to throw ECONNREFUSED error",
-            "expectedOutput": "Should allow request through (fail-safe) without blocking user",
-            "assertionType": "resolves"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis client throws ECONNREFUSED error"
+                  },
+                  {
+                    "field": "host",
+                    "value": "localhost"
+                  },
+                  {
+                    "field": "port",
+                    "value": "6379"
+                  }
+                ],
+                "expectedOutput": "Should allow request through (fail-safe) without blocking user",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis.createClient() throws connection error"
+                  }
+                ],
+                "expectedOutput": "Should throw connection error with specific code",
+                "assertionType": "toThrow"
+              },
+              {
+                "input": [
+                  {
+                    "field": "errorHandler",
+                    "value": "jest.fn()"
+                  },
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis emits 'error' event"
+                  }
+                ],
+                "expectedOutput": "Error handler should be called with ECONNREFUSED",
+                "assertionType": "toHaveBeenCalledWith"
+              }
+            ]
+          },
+          {
+            "scenario": "Redis retry mechanism with exponential backoff",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "retryAttempts",
+                    "value": "5"
+                  },
+                  {
+                    "field": "backoffMultiplier",
+                    "value": "2"
+                  },
+                  {
+                    "field": "initialDelay",
+                    "value": "100"
+                  }
+                ],
+                "expectedOutput": "Should retry 5 times with exponential backoff",
+                "assertionType": "toHaveBeenCalled"
+              },
+              {
+                "input": [
+                  {
+                    "field": "retryAttempts",
+                    "value": "3"
+                  },
+                  {
+                    "field": "maxRetryDelay",
+                    "value": "10000"
+                  }
+                ],
+                "expectedOutput": "Retry delays should not exceed max delay",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "All retry attempts fail"
+                  }
+                ],
+                "expectedOutput": "Final error should have retryCount property",
+                "assertionType": "toHaveProperty"
+              }
+            ]
           },
           {
             "scenario": "Redis command timeout during incr operation",
-            "input": "Mock Redis.incr() to timeout after 5 seconds",
-            "expectedOutput": "Should fail-safe to allow request, rate limiting disabled temporarily",
-            "assertionType": "resolves"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis.incr() times out after 5 seconds"
+                  },
+                  {
+                    "field": "commandTimeout",
+                    "value": "5000"
+                  },
+                  {
+                    "field": "fallbackBehavior",
+                    "value": "allow"
+                  }
+                ],
+                "expectedOutput": "Should fail-safe to allow request, rate limiting disabled temporarily",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "mockSetup",
+                    "value": "Redis.get() hangs indefinitely"
+                  }
+                ],
+                "expectedOutput": "Promise should reject with timeout error",
+                "assertionType": "rejects"
+              },
+              {
+                "input": [
+                  {
+                    "field": "incrSpy",
+                    "value": "jest.spyOn(redisClient, 'incr')"
+                  },
+                  {
+                    "field": "commandTimeout",
+                    "value": "3000"
+                  }
+                ],
+                "expectedOutput": "incr should be called with correct key",
+                "assertionType": "toHaveBeenCalledWith"
+              }
+            ]
           }
         ],
         "reason": "No tests exist for rate limiter failure scenarios. System should fail-safe (allow requests) when Redis is unavailable to prevent complete service outage"
@@ -99,27 +451,172 @@
         "testCases": [
           {
             "scenario": "Token with invalid signature",
-            "input": "token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyM30.invalid_signature'",
-            "expectedOutput": "Should throw JsonWebTokenError with message 'invalid signature'",
-            "assertionType": "rejects"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "token",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyM30.invalid_signature"
+                  }
+                ],
+                "expectedOutput": "Should throw JsonWebTokenError with message 'invalid signature'",
+                "assertionType": "rejects"
+              },
+              {
+                "input": [
+                  {
+                    "field": "token",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.wrong_sig"
+                  },
+                  {
+                    "field": "secret",
+                    "value": "correct-secret-key"
+                  }
+                ],
+                "expectedOutput": "Verification should fail and return false",
+                "assertionType": "toBeFalsy"
+              },
+              {
+                "input": [
+                  {
+                    "field": "token",
+                    "value": "malformed.token"
+                  }
+                ],
+                "expectedOutput": "Should throw 'jwt malformed' error",
+                "assertionType": "rejects.toThrow"
+              }
+            ]
           },
           {
-            "scenario": "Token with tampered payload (changed userId)",
-            "input": "Generate valid token, then modify payload userId from 123 to 456",
-            "expectedOutput": "Should reject with 'invalid signature' error",
-            "assertionType": "rejects"
+            "scenario": "Token with tampered payload",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate valid token, then modify payload userId from 123 to 456"
+                  }
+                ],
+                "expectedOutput": "Should reject with 'invalid signature' error",
+                "assertionType": "rejects"
+              },
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate valid token, then change role from 'user' to 'admin'"
+                  }
+                ],
+                "expectedOutput": "Should detect tampering and reject",
+                "assertionType": "rejects"
+              }
+            ]
           },
           {
             "scenario": "Token with 'none' algorithm (critical security vulnerability)",
-            "input": "token: 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VySWQiOjEyM30.'",
-            "expectedOutput": "Should reject immediately, must not accept 'none' algorithm",
-            "assertionType": "rejects"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "token",
+                    "value": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VySWQiOjEyM30."
+                  }
+                ],
+                "expectedOutput": "Should reject immediately, must not accept 'none' algorithm",
+                "assertionType": "rejects"
+              },
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate token with header {alg: 'none', typ: 'JWT'}"
+                  }
+                ],
+                "expectedOutput": "Should throw 'invalid algorithm' error",
+                "assertionType": "rejects"
+              }
+            ]
           },
           {
-            "scenario": "Token expired 1 second ago",
-            "input": "Generate token with exp: Date.now() - 1000",
-            "expectedOutput": "Should throw TokenExpiredError",
-            "assertionType": "rejects"
+            "scenario": "Token expired",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate token with exp: Date.now() - 1000"
+                  }
+                ],
+                "expectedOutput": "Should throw TokenExpiredError",
+                "assertionType": "rejects"
+              },
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate token with exp: Date.now() - 3600000 (1 hour ago)"
+                  },
+                  {
+                    "field": "clockTolerance",
+                    "value": "0"
+                  }
+                ],
+                "expectedOutput": "Error message should contain 'jwt expired'",
+                "assertionType": "toContain"
+              },
+              {
+                "input": [
+                  {
+                    "field": "tokenSetup",
+                    "value": "Generate token with exp: Date.now() + 1000 (1 second in future)"
+                  }
+                ],
+                "expectedOutput": "Should verify successfully as token is not expired",
+                "assertionType": "resolves"
+              }
+            ]
+          },
+          {
+            "scenario": "Token refresh with multiple claims",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "userId",
+                    "value": "12345"
+                  },
+                  {
+                    "field": "email",
+                    "value": "user@example.com"
+                  },
+                  {
+                    "field": "role",
+                    "value": "admin"
+                  },
+                  {
+                    "field": "expiresIn",
+                    "value": "1h"
+                  }
+                ],
+                "expectedOutput": "New token should contain all claims with updated expiration",
+                "assertionType": "toMatchObject"
+              },
+              {
+                "input": [
+                  {
+                    "field": "refreshToken",
+                    "value": "valid-refresh-token"
+                  },
+                  {
+                    "field": "deviceId",
+                    "value": "device-123"
+                  }
+                ],
+                "expectedOutput": "Should generate new access token bound to same device",
+                "assertionType": "resolves"
+              }
+            ]
           }
         ],
         "reason": "Current tests only validate happy path scenarios. Missing tests for common JWT attack vectors"
@@ -135,22 +632,176 @@
         "relatedRequirement": "REQ-002",
         "testCases": [
           {
-            "scenario": "6 consecutive failed login attempts trigger rate limit",
-            "input": "Make 6 POST requests to /api/auth/login from same IP with wrong password",
-            "expectedOutput": "7th request returns 429 Too Many Requests with message 'Rate limit exceeded. Try again in 15 minutes'",
-            "assertionType": "toEqual"
+            "scenario": "Failed login attempts trigger rate limit",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "test@example.com"
+                  },
+                  {
+                    "field": "wrongPassword",
+                    "value": "WrongPass123"
+                  },
+                  {
+                    "field": "attempts",
+                    "value": "6"
+                  },
+                  {
+                    "field": "sourceIP",
+                    "value": "192.168.1.100"
+                  }
+                ],
+                "expectedOutput": "7th request returns 429 Too Many Requests",
+                "assertionType": "toEqual"
+              },
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "Make 6 failed attempts with different wrong passwords from same IP"
+                  }
+                ],
+                "expectedOutput": "Response should include Retry-After header",
+                "assertionType": "toHaveProperty"
+              },
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "admin@example.com"
+                  },
+                  {
+                    "field": "attempts",
+                    "value": "3"
+                  },
+                  {
+                    "field": "sourceIP",
+                    "value": "10.0.0.5"
+                  }
+                ],
+                "expectedOutput": "Should not trigger rate limit before threshold",
+                "assertionType": "resolves"
+              }
+            ]
           },
           {
-            "scenario": "Rate limit persists for 15 minutes",
-            "input": "After hitting rate limit, wait 14 minutes and try again",
-            "expectedOutput": "Request still returns 429, rate limit not yet expired",
-            "assertionType": "toEqual"
+            "scenario": "Rate limit persists for configured duration",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "After hitting rate limit, wait 14 minutes and try again"
+                  }
+                ],
+                "expectedOutput": "Request still returns 429, rate limit not yet expired",
+                "assertionType": "toEqual"
+              },
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "After hitting rate limit, wait 1 minute and verify still blocked"
+                  }
+                ],
+                "expectedOutput": "Should still be blocked",
+                "assertionType": "toEqual"
+              }
+            ]
           },
           {
-            "scenario": "Different IPs don't share rate limit counters",
-            "input": "IP 192.168.1.1 hits rate limit, then IP 192.168.1.2 attempts login",
-            "expectedOutput": "Second IP should be able to make requests normally, counters are independent",
-            "assertionType": "resolves"
+            "scenario": "Different IPs have independent rate limit counters",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "ip1",
+                    "value": "192.168.1.1"
+                  },
+                  {
+                    "field": "ip1Attempts",
+                    "value": "6"
+                  },
+                  {
+                    "field": "ip2",
+                    "value": "192.168.1.2"
+                  },
+                  {
+                    "field": "ip2Attempts",
+                    "value": "1"
+                  }
+                ],
+                "expectedOutput": "IP2 should be able to make requests normally",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "testSetup",
+                    "value": "IP 10.0.0.1 hits rate limit, then IP 10.0.0.2 attempts login"
+                  }
+                ],
+                "expectedOutput": "Response status for IP2 should be 200, not 429",
+                "assertionType": "toBe"
+              },
+              {
+                "input": [
+                  {
+                    "field": "ip1",
+                    "value": "203.0.113.10"
+                  },
+                  {
+                    "field": "ip2",
+                    "value": "203.0.113.11"
+                  },
+                  {
+                    "field": "simultaneousAttacks",
+                    "value": "true"
+                  }
+                ],
+                "expectedOutput": "Counters should remain independent under concurrent load",
+                "assertionType": "toStrictEqual"
+              }
+            ]
+          },
+          {
+            "scenario": "Successful login after failed attempts",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "user@test.com"
+                  },
+                  {
+                    "field": "failedAttempts",
+                    "value": "3"
+                  },
+                  {
+                    "field": "correctPassword",
+                    "value": "CorrectP@ss123"
+                  }
+                ],
+                "expectedOutput": "Should authenticate successfully and reset counter",
+                "assertionType": "resolves"
+              },
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "user@test.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "CorrectP@ss123"
+                  }
+                ],
+                "expectedOutput": "Response should include valid JWT token",
+                "assertionType": "toMatch"
+              }
+            ]
           }
         ],
         "reason": "Rate limiting is critical for preventing brute force attacks. Need end-to-end test of complete flow including Redis, middleware, and controller"
@@ -167,27 +818,230 @@
         "testCases": [
           {
             "scenario": "User registers with valid credentials",
-            "input": "Fill form: email='test@example.com', password='SecureP@ss123', click 'Register'",
-            "expectedOutput": "Success message displayed: 'Verification email sent to test@example.com'",
-            "assertionType": "toBeVisible"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "test@example.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "SecureP@ss123"
+                  },
+                  {
+                    "field": "confirmPassword",
+                    "value": "SecureP@ss123"
+                  },
+                  {
+                    "field": "agreeToTerms",
+                    "value": "true"
+                  }
+                ],
+                "expectedOutput": "Success message displayed: 'Verification email sent to test@example.com'",
+                "assertionType": "toBeVisible"
+              },
+              {
+                "input": [
+                  {
+                    "field": "formAction",
+                    "value": "click 'Register' button"
+                  },
+                  {
+                    "field": "expectedSuccessElement",
+                    "value": "#success-message"
+                  }
+                ],
+                "expectedOutput": "Success element should have 'visible' class",
+                "assertionType": "toHaveClass"
+              },
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "another@test.org"
+                  },
+                  {
+                    "field": "password",
+                    "value": "AnotherP@ss456"
+                  }
+                ],
+                "expectedOutput": "Success message displayed for second user",
+                "assertionType": "toBeVisible"
+              }
+            ]
           },
           {
             "scenario": "User cannot log in before verification",
-            "input": "Navigate to /login, enter test@example.com credentials, click 'Login'",
-            "expectedOutput": "Error message: 'Please verify your email before logging in'",
-            "assertionType": "toContainText"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "navigateTo",
+                    "value": "/login"
+                  },
+                  {
+                    "field": "email",
+                    "value": "test@example.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "SecureP@ss123"
+                  }
+                ],
+                "expectedOutput": "Error message: 'Please verify your email before logging in'",
+                "assertionType": "toContainText"
+              },
+              {
+                "input": [
+                  {
+                    "field": "errorElement",
+                    "value": ".error-banner"
+                  }
+                ],
+                "expectedOutput": "Error banner should have aria-live='polite' attribute",
+                "assertionType": "toHaveAttribute"
+              },
+              {
+                "input": [
+                  {
+                    "field": "userAction",
+                    "value": "Navigate to /login, enter unverified user credentials"
+                  }
+                ],
+                "expectedOutput": "Should show verification required error",
+                "assertionType": "toContainText"
+              }
+            ]
           },
           {
             "scenario": "User clicks verification link",
-            "input": "Extract verification link from email (mock), navigate to verification URL",
-            "expectedOutput": "Success page: 'Email verified! You can now log in'",
-            "assertionType": "toBeVisible"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "verificationToken",
+                    "value": "abc123def456"
+                  },
+                  {
+                    "field": "navigateTo",
+                    "value": "/verify?token=abc123def456"
+                  }
+                ],
+                "expectedOutput": "Success page: 'Email verified! You can now log in'",
+                "assertionType": "toBeVisible"
+              },
+              {
+                "input": [
+                  {
+                    "field": "mockEmailClient",
+                    "value": "Extract verification link from email"
+                  }
+                ],
+                "expectedOutput": "Page should contain success icon selector",
+                "assertionType": "toHaveSelector"
+              },
+              {
+                "input": [
+                  {
+                    "field": "userAction",
+                    "value": "Click verification link in email client simulation"
+                  }
+                ],
+                "expectedOutput": "Should show verification success page",
+                "assertionType": "toBeVisible"
+              }
+            ]
           },
           {
             "scenario": "User can log in after verification",
-            "input": "Navigate to /login, enter verified credentials",
-            "expectedOutput": "Redirected to /dashboard, user session active",
-            "assertionType": "toHaveURL"
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "navigateTo",
+                    "value": "/login"
+                  },
+                  {
+                    "field": "email",
+                    "value": "test@example.com"
+                  },
+                  {
+                    "field": "password",
+                    "value": "SecureP@ss123"
+                  }
+                ],
+                "expectedOutput": "Redirected to /dashboard, user session active",
+                "assertionType": "toHaveURL"
+              },
+              {
+                "input": [
+                  {
+                    "field": "userAction",
+                    "value": "Use verified email and password to authenticate"
+                  }
+                ],
+                "expectedOutput": "Should successfully authenticate and redirect to dashboard",
+                "assertionType": "toHaveURL"
+              },
+              {
+                "input": [
+                  {
+                    "field": "sessionStorage",
+                    "value": "check for authToken key"
+                  }
+                ],
+                "expectedOutput": "Session storage should have JWT token",
+                "assertionType": "toHaveProperty"
+              }
+            ]
+          },
+          {
+            "scenario": "Form validation prevents submission with invalid data",
+            "cases": [
+              {
+                "input": [
+                  {
+                    "field": "email",
+                    "value": "invalid-email"
+                  },
+                  {
+                    "field": "password",
+                    "value": "weak"
+                  },
+                  {
+                    "field": "submitButton",
+                    "value": "#register-button"
+                  }
+                ],
+                "expectedOutput": "Submit button should be disabled",
+                "assertionType": "toHaveAttribute"
+              },
+              {
+                "input": [
+                  {
+                    "field": "password",
+                    "value": "Test@123"
+                  },
+                  {
+                    "field": "confirmPassword",
+                    "value": "Test@456"
+                  }
+                ],
+                "expectedOutput": "Password mismatch error should be visible",
+                "assertionType": "toBeVisible"
+              },
+              {
+                "input": [
+                  {
+                    "field": "emailInput",
+                    "value": "#email-field"
+                  }
+                ],
+                "expectedOutput": "Email input should have value attribute",
+                "assertionType": "toHaveValue"
+              }
+            ]
           }
         ],
         "reason": "Registration is the entry point for all users. Need E2E test covering UI, backend, and email service"
