@@ -380,6 +380,7 @@ export default function DomainDetailsPage() {
         />
 
         <DomainTestingSection
+          domainId={domainId}
           testing={testing}
           loading={testingLoading}
           progress={testingProgress}

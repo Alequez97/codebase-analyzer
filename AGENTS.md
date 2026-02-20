@@ -348,9 +348,17 @@ Dashboard shows: "Click Analyze Codebase to begin"
 
 - **Use Zustand stores** for all complex business logic, shared state, and data that needs to be accessed across multiple components
 - **Use React useState** only for simple, internal component-specific UI state (toggles, form inputs, local visibility)
-- **Examples of Zustand usage**: API data caching, analysis results, domain editing, project files, configuration
-- **Examples of useState usage**: dropdown open/closed, input field values, local search terms, modal visibility
-- Store state should be organized by domain (e.g., `useAnalysisStore`, `useProjectFilesStore`, `useDomainEditorStore`)
+- **Examples of Zustand usage**:
+  - API data caching, analysis results, domain editing
+  - Project files, configuration
+  - **Edited/draft data** that may be saved or shared (e.g., `editedTestCases`, `editedMissingTests`)
+  - **Working state** that affects application behavior (e.g., `editingTest`, task status)
+- **Examples of useState usage**:
+  - dropdown open/closed, input field values within a form
+  - local search terms, modal visibility
+  - **Pure UI state** like `expandedRows`, `activeTab` that doesn't affect data or need to be shared
+- **IMPORTANT**: If data is being modified and will be saved (e.g., editing test cases, editing domain data), it should be in a Zustand store, not useState
+- Store state should be organized by domain (e.g., `useAnalysisStore`, `useProjectFilesStore`, `useTestingEditorStore`)
 - Implement smart caching in stores to avoid redundant API calls
 - Keep stores focused and avoid creating a single monolithic store
 - **CRITICAL: Always use sessionStorage, never localStorage** - All persisted state must use `sessionStorage` via Zustand's `storage: () => sessionStorage` option to ensure data is cleared when the browser tab/session ends (not persisted across browser restarts)
@@ -517,6 +525,44 @@ Dashboard shows: "Click Analyze Codebase to begin"
   - Multiple developers frequently edit the same file
 
 - **Keep index files thin** - Only re-export, don't add logic
+
+#### 10.1 **Component File Organization**
+
+- **One component per file** - Each React component should have its own file
+- **Component file naming**: Use PascalCase matching the component name (e.g., `TestCaseDetails.jsx`)
+- **Shared components folder structure**:
+  ```
+  components/
+    domain/
+      testing/
+        TestCaseDetails.jsx
+        TestCaseInlineEditor.jsx
+        ExistingTestsTable.jsx
+        MissingTestsSection.jsx
+        DomainTestingSection.jsx   # Main component
+        index.js                    # Re-exports
+  ```
+- **Benefits of component separation**:
+  - Easier to locate and modify specific components
+  - Better code reusability
+  - Clearer dependencies and imports
+  - Easier to test individual components
+  - Reduced file size (better IDE performance)
+  - Follows single responsibility principle
+- **When to split components from a file**:
+  - File exceeds ~300-400 lines
+  - Contains 2+ independent components
+  - Component is reusable in other contexts
+  - Component has complex logic that warrants isolation
+- **Component co-location**: Keep related components in subdirectories (e.g., all testing-related components in `components/domain/testing/`)
+- **Index files**: Use `index.js` to re-export components for clean imports:
+  ```javascript
+  // components/domain/testing/index.js
+  export { default as DomainTestingSection } from "./DomainTestingSection";
+  export { TestCaseDetails } from "./TestCaseDetails";
+  export { TestCaseInlineEditor } from "./TestCaseInlineEditor";
+  // ... etc
+  ```
 
 ### 11. **Mock Data Workflow (When User Requests Mocking)**
 
