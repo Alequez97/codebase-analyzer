@@ -58,10 +58,10 @@ if (command === "start") {
 
     const processes = [];
 
-    // Start the backend server
+    // Start the backend server with auto-reload
     const backendPath = join(__dirname, "..", "backend", "index.js");
 
-    const backend = spawn("node", [backendPath], {
+    const backend = spawn("node", ["--watch", backendPath], {
       stdio: "inherit",
       env: {
         ...process.env,

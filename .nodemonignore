@@ -1,0 +1,4 @@
+.code-analysis/
+node_modules/
+.git/
+*.log
