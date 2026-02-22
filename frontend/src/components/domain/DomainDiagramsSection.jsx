@@ -58,8 +58,10 @@ export default function DomainDiagramsSection({
   const [diagramXml, setDiagramXml] = useState(null);
   const [loadingDiagram, setLoadingDiagram] = useState(false);
   const [iframeReady, setIframeReady] = useState(false);
+  const [iframeInit, setIframeInit] = useState(false);
   const iframeRef = useRef(null);
   const diagramXmlRef = useRef(null);
+  const hasLoggedIframeMessageRef = useRef(false);
 
   const selectedDiagram = diagrams?.diagrams?.[selectedDiagramIndex];
 
@@ -122,7 +124,20 @@ export default function DomainDiagramsSection({
 
     let messageHandler = null;
     let sendAttempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 25;
+
+    const sendDiagram = () => {
+      if (!iframeRef.current?.contentWindow) {
+        return;
+      }
+      iframeRef.current.contentWindow.postMessage(
+        {
+          action: "load",
+          xml: diagramXmlRef.current,
+        },
+        "https://embed.diagrams.net",
+      );
+    };
 
     const attemptSendDiagram = () => {
       if (sendAttempts >= maxAttempts) {
@@ -132,46 +147,13 @@ export default function DomainDiagramsSection({
       }
 
       try {
-        // Avoid sending while iframe is still about:blank (same-origin)
-        if (iframeRef.current?.contentWindow?.location) {
-          const href = iframeRef.current.contentWindow.location.href;
-          if (
-            !href ||
-            href.startsWith("about:blank") ||
-            href.startsWith(window.location.origin)
-          ) {
-            setTimeout(attemptSendDiagram, 200);
-            return;
-          }
-        }
-        // Send the diagram data using draw.io JSON protocol
-        // Try multiple target origins to ensure message gets through
-        iframeRef.current.contentWindow.postMessage(
-          {
-            action: "load",
-            xml: diagramXmlRef.current,
-          },
-          "https://embed.diagrams.net",
-        );
-        sendAttempts++;
-
-        // Retry if needed - sometimes the iframe isn't ready immediately
+        sendDiagram();
+        sendAttempts += 1;
         setTimeout(attemptSendDiagram, 200);
       } catch (error) {
-        // If cross-origin blocks access, assume iframe is ready and send
-        try {
-          iframeRef.current.contentWindow.postMessage(
-            {
-              action: "load",
-              xml: diagramXmlRef.current,
-            },
-            "https://embed.diagrams.net",
-          );
-          sendAttempts++;
-          setTimeout(attemptSendDiagram, 200);
-        } catch (sendError) {
-          console.error("Error sending diagram to iframe:", sendError);
-        }
+        console.error("Error sending diagram to iframe:", error);
+        sendAttempts += 1;
+        setTimeout(attemptSendDiagram, 200);
       }
     };
 
@@ -181,26 +163,35 @@ export default function DomainDiagramsSection({
         return;
       }
 
-      // Draw.io sends various events - when we get any message, stop retrying
-      if (event.data) {
-        if (typeof event.data === "object" && event.data.event === "save") {
-          // Don't stop on save events
-          return;
-        }
-        // Message received - diagram is loaded, stop attempting
-        sendAttempts = maxAttempts;
+      if (!hasLoggedIframeMessageRef.current) {
+        hasLoggedIframeMessageRef.current = true;
+        console.info("Draw.io iframe message:", event.data);
       }
+
+      const data = event.data;
+      if (data === "init" || data?.event === "init" || data?.event === "ready") {
+        setIframeInit(true);
+        return;
+      }
+
+      if (data && typeof data === "object" && data.event === "save") {
+        return;
+      }
+
+      sendAttempts = maxAttempts;
     };
 
-    // Start sending attempts immediately
-    attemptSendDiagram();
+    // Wait for init before sending, but keep retrying after init to be safe
+    if (iframeInit) {
+      attemptSendDiagram();
+    }
 
     window.addEventListener("message", messageHandler);
     return () => {
       window.removeEventListener("message", messageHandler);
       sendAttempts = maxAttempts; // Stop retrying on cleanup
     };
-  }, [diagramXml, iframeReady]);
+  }, [diagramXml, iframeReady, iframeInit]);
 
   const handleAnalyze = () => {
     if (onAnalyze) {
@@ -267,6 +258,7 @@ export default function DomainDiagramsSection({
     setViewerError(null);
     setDiagramXml(null);
     setIframeReady(false);
+    setIframeInit(false);
   };
 
   const handleNextDiagram = () => {
@@ -275,6 +267,7 @@ export default function DomainDiagramsSection({
     setViewerError(null);
     setDiagramXml(null);
     setIframeReady(false);
+    setIframeInit(false);
   };
 
   // Loading state
@@ -504,6 +497,7 @@ export default function DomainDiagramsSection({
                       setViewerError(null);
                       setDiagramXml(null);
                       setIframeReady(false);
+                      setIframeInit(false);
                     }}
                   >
                     <Badge
