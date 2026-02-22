@@ -1,11 +1,88 @@
+import { useEffect, useRef, useState } from "react";
 import { Box, Heading, Text } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import mermaid from "mermaid";
+
+// Initialize Mermaid once
+mermaid.initialize({
+  startOnLoad: false,
+  theme: "default",
+  securityLevel: "loose",
+  fontFamily: "inherit",
+});
+
+// Counter for unique IDs
+let diagramCounter = 0;
 
 /**
- * Reusable Markdown renderer with VS Code-style syntax highlighting
- * and consistent styling across the application.
+ * Mermaid diagram component that renders diagrams from code blocks
+ */
+function MermaidDiagram({ chart }) {
+  const containerRef = useRef(null);
+  const [svg, setSvg] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!chart) return;
+
+    const renderDiagram = async () => {
+      try {
+        // Generate unique ID for each diagram instance
+        const id = `mermaid-diagram-${++diagramCounter}`;
+
+        // Render the diagram
+        const { svg } = await mermaid.render(id, chart);
+        setSvg(svg);
+        setError(null);
+      } catch (err) {
+        console.error("Mermaid rendering error:", err);
+        setError(err.message);
+      }
+    };
+
+    renderDiagram();
+  }, [chart]);
+
+  if (error) {
+    return (
+      <Box
+        mb={4}
+        p={4}
+        bg="red.50"
+        borderRadius="md"
+        borderWidth="1px"
+        borderColor="red.200"
+      >
+        <Text color="red.700" fontSize="sm">
+          Failed to render diagram: {error}
+        </Text>
+        <Box as="pre" mt={2} fontSize="xs" color="red.600">
+          {chart}
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      ref={containerRef}
+      mb={4}
+      p={4}
+      bg="white"
+      borderRadius="md"
+      borderWidth="1px"
+      borderColor="gray.200"
+      overflow="auto"
+      dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
+    />
+  );
+}
+
+/**
+ * Reusable Markdown renderer with VS Code-style syntax highlighting,
+ * Mermaid diagram support, and consistent styling across the application.
  */
 export default function MarkdownRenderer({ content, ...props }) {
   const markdownComponents = {
@@ -67,10 +144,15 @@ export default function MarkdownRenderer({ content, ...props }) {
           </Box>
         );
       }
-      // Block code with VS Code-style syntax highlighting
+      // Check if it's a Mermaid diagram
       const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : "text";
 
+      if (language === "mermaid") {
+        return <MermaidDiagram chart={String(children).trim()} />;
+      }
+
+      // Block code with VS Code-style syntax highlighting
       return (
         <Box mb={3} borderRadius="md" overflow="hidden">
           <SyntaxHighlighter
