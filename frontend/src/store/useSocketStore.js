@@ -5,6 +5,7 @@ import { TASK_TYPES } from "../constants/task-types";
 import { taskTypeToSection } from "../utils/task-utils";
 import { useCodebaseStore } from "./useCodebaseStore";
 import { useDomainDocumentationStore } from "./useDomainDocumentationStore";
+import { useDomainDiagramsStore } from "./useDomainDiagramsStore";
 import { useDomainRequirementsStore } from "./useDomainRequirementsStore";
 import { useDomainBugsSecurityStore } from "./useDomainBugsSecurityStore";
 import { useDomainTestingStore } from "./useDomainTestingStore";
@@ -81,6 +82,9 @@ export const useSocketStore = create((set, get) => ({
         useDomainDocumentationStore.getState().setLoading(domainId, false);
         await useDomainDocumentationStore.getState().fetch(domainId);
         useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
+      } else if (type === TASK_TYPES.DIAGRAMS && domainId) {
+        useDomainDiagramsStore.getState().setLoading(domainId, false);
+        await useDomainDiagramsStore.getState().fetch(domainId);
       } else if (type === TASK_TYPES.REQUIREMENTS && domainId) {
         useDomainRequirementsStore.getState().setLoading(domainId, false);
         await useDomainRequirementsStore.getState().fetch(domainId);
@@ -107,6 +111,11 @@ export const useSocketStore = create((set, get) => ({
         // Ensure loading state remains true during progress
         if (type === TASK_TYPES.DOCUMENTATION) {
           const store = useDomainDocumentationStore.getState();
+          if (!store.loadingById.get(domainId)) {
+            store.setLoading(domainId, true);
+          }
+        } else if (type === TASK_TYPES.DIAGRAMS) {
+          const store = useDomainDiagramsStore.getState();
           if (!store.loadingById.get(domainId)) {
             store.setLoading(domainId, true);
           }
@@ -145,6 +154,10 @@ export const useSocketStore = create((set, get) => ({
         const store = useDomainDocumentationStore.getState();
         store.setLoading(domainId, false);
         store.setError(domainId, error || "Documentation analysis failed");
+      } else if (type === TASK_TYPES.DIAGRAMS && domainId) {
+        const store = useDomainDiagramsStore.getState();
+        store.setLoading(domainId, false);
+        store.setError(domainId, error || "Diagrams analysis failed");
       } else if (type === TASK_TYPES.REQUIREMENTS && domainId) {
         const store = useDomainRequirementsStore.getState();
         store.setLoading(domainId, false);
@@ -176,6 +189,7 @@ export const useSocketStore = create((set, get) => ({
 
     socket.on(SOCKET_EVENTS.LOG_CODEBASE_ANALYSIS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_DOCUMENTATION, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_DIAGRAMS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_TESTING, handleLogEvent);

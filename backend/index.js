@@ -13,10 +13,12 @@ import {
   statusRoutes,
   projectRoutes,
   codebaseAnalysisRoutes,
-  domainAnalysisRoutes,
   tasksRoutes,
   logsRoutes,
 } from "./routes/index.js";
+
+// Domain routes (modular structure)
+import * as domainRoutes from "./routes/domain/index.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -52,7 +54,15 @@ app.use((req, res, next) => {
 app.use("/api/status", statusRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/analysis/codebase", codebaseAnalysisRoutes);
-app.use("/api/analysis/domain", domainAnalysisRoutes);
+
+// Domain routes
+app.use("/api/analysis/domain", domainRoutes.coreRoutes);
+app.use("/api/analysis/domain", domainRoutes.documentationRoutes);
+app.use("/api/analysis/domain", domainRoutes.diagramsRoutes);
+app.use("/api/analysis/domain", domainRoutes.requirementsRoutes);
+app.use("/api/analysis/domain", domainRoutes.bugsSecurityRoutes);
+app.use("/api/analysis/domain", domainRoutes.testingRoutes);
+
 app.use("/api/tasks", tasksRoutes);
 app.use("/api/logs", logsRoutes);
 

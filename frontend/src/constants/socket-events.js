@@ -16,6 +16,7 @@ export const SOCKET_EVENTS = {
   // Task-specific logs
   LOG_CODEBASE_ANALYSIS: "log:codebase-analysis",
   LOG_DOCUMENTATION: "log:documentation",
+  LOG_DIAGRAMS: "log:diagrams",
   LOG_REQUIREMENTS: "log:requirements",
   LOG_BUGS_SECURITY: "log:bugs-security",
   LOG_TESTING: "log:testing",

@@ -4,6 +4,7 @@ export * from "./project";
 export * from "./codebase";
 export * from "./domain";
 export * from "./domain-documentation";
+export * from "./domain-diagrams";
 export * from "./domain-requirements";
 export * from "./domain-bugs-security";
 export * from "./domain-testing";
@@ -15,6 +16,7 @@ import * as project from "./project";
 import * as codebase from "./codebase";
 import * as domain from "./domain";
 import * as domainDocumentation from "./domain-documentation";
+import * as domainDiagrams from "./domain-diagrams";
 import * as domainRequirements from "./domain-requirements";
 import * as domainBugsSecurity from "./domain-bugs-security";
 import * as domainTesting from "./domain-testing";
@@ -26,6 +28,7 @@ export default {
   ...codebase,
   ...domain,
   ...domainDocumentation,
+  ...domainDiagrams,
   ...domainRequirements,
   ...domainBugsSecurity,
   ...domainTesting,

@@ -213,6 +213,53 @@ export async function createAnalyzeBugsSecurityTask(
 }
 
 /**
+ * Create a domain diagrams analysis task
+ * @param {string} domainId - The domain ID
+ * @param {string[]} files - Files in the domain
+ * @param {boolean} includeDocumentation - Whether to include documentation in analysis
+ * @param {boolean} executeNow - Whether to execute immediately
+ * @returns {Promise<Object>} The created task
+ */
+export async function createAnalyzeDiagramsTask(
+  domainId,
+  files,
+  includeDocumentation,
+  executeNow,
+) {
+  const agentConfig = getAgentConfig(TASK_TYPES.DIAGRAMS);
+
+  const task = {
+    id: generateTaskId("analyze-diagrams"),
+    type: TASK_TYPES.DIAGRAMS,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    params: {
+      domainId,
+      files,
+      includeDocumentation: !!includeDocumentation,
+      targetDirectory: config.target.directory,
+    },
+    agentConfig,
+    instructionFile: "backend/instructions/analyze-domain-diagrams.md",
+    outputFile: `.code-analysis/domains/${domainId}/diagrams/metadata.json`,
+  };
+
+  await tasksPersistence.writeTask(task);
+
+  if (executeNow) {
+    // Trigger agent execution asynchronously
+    executeTask(task.id).catch((err) => {
+      logger.error(`Failed to execute task ${task.id}`, {
+        error: err,
+        component: "TaskOrchestrator",
+      });
+    });
+  }
+
+  return task;
+}
+
+/**
  * Create a domain testing analysis task
  * @param {string} domainId - The domain ID
  * @param {string[]} files - Files in the domain

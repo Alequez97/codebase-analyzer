@@ -6,6 +6,7 @@ import { TASK_TYPES } from "../constants/task-types";
 import { SECTION_TYPES } from "../constants/section-types";
 import { useCodebaseStore } from "../store/useCodebaseStore";
 import { useDomainDocumentationStore } from "../store/useDomainDocumentationStore";
+import { useDomainDiagramsStore } from "../store/useDomainDiagramsStore";
 import { useDomainRequirementsStore } from "../store/useDomainRequirementsStore";
 import { useDomainBugsSecurityStore } from "../store/useDomainBugsSecurityStore";
 import { useDomainTestingStore } from "../store/useDomainTestingStore";
@@ -17,6 +18,7 @@ import { Alert } from "../components/ui/alert";
 import DomainHeader from "../components/domain/DomainHeader";
 import DomainFilesSection from "../components/domain/DomainFilesSection";
 import DomainDocumentationSection from "../components/domain/DomainDocumentationSection";
+import DomainDiagramsSection from "../components/domain/DomainDiagramsSection";
 import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
 import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
 import DomainTestingSection from "../components/domain/DomainTestingSection";
@@ -30,6 +32,7 @@ export default function DomainDetailsPage() {
 
   // Domain section stores
   const docStore = useDomainDocumentationStore();
+  const diagramsStore = useDomainDiagramsStore();
   const reqStore = useDomainRequirementsStore();
   const bugsStore = useDomainBugsSecurityStore();
   const testStore = useDomainTestingStore();
@@ -70,18 +73,21 @@ export default function DomainDetailsPage() {
 
   // Section-specific data
   const documentation = docStore.dataById.get(domainId);
+  const diagrams = diagramsStore.dataById.get(domainId);
   const requirements = reqStore.dataById.get(domainId);
   const bugsSecurity = bugsStore.dataById.get(domainId);
   const testing = testStore.dataById.get(domainId);
 
   // Loading states for individual sections
   const documentationLoading = !!docStore.loadingById.get(domainId);
+  const diagramsLoading = !!diagramsStore.loadingById.get(domainId);
   const requirementsLoading = !!reqStore.loadingById.get(domainId);
   const bugsSecurityLoading = !!bugsStore.loadingById.get(domainId);
   const testingLoading = !!testStore.loadingById.get(domainId);
 
   // Error states for individual sections
   const documentationError = docStore.errorById.get(domainId);
+  const diagramsError = diagramsStore.errorById.get(domainId);
   const requirementsError = reqStore.errorById.get(domainId);
   const bugsSecurityError = bugsStore.errorById.get(domainId);
   const testingError = testStore.errorById.get(domainId);
@@ -90,6 +96,8 @@ export default function DomainDetailsPage() {
   const taskProgress = progressById.get(domainId);
   const documentationProgress =
     taskProgress?.type === TASK_TYPES.DOCUMENTATION ? taskProgress : null;
+  const diagramsProgress =
+    taskProgress?.type === TASK_TYPES.DIAGRAMS ? taskProgress : null;
   const requirementsProgress =
     taskProgress?.type === TASK_TYPES.REQUIREMENTS ? taskProgress : null;
   const bugsSecurityProgress =
@@ -100,6 +108,7 @@ export default function DomainDetailsPage() {
   // Logs data for each section
   const domainLogs = domainLogsBySection.get(domainId) || new Map();
   const documentationLogs = domainLogs.get(SECTION_TYPES.DOCUMENTATION) || "";
+  const diagramsLogs = domainLogs.get(SECTION_TYPES.DIAGRAMS) || "";
   const requirementsLogs = domainLogs.get(SECTION_TYPES.REQUIREMENTS) || "";
   const bugsSecurityLogs = domainLogs.get(SECTION_TYPES.BUGS_SECURITY) || "";
   const testingLogs = domainLogs.get(SECTION_TYPES.TESTING) || "";
@@ -109,6 +118,7 @@ export default function DomainDetailsPage() {
   const documentationLogsLoading = !!logsLoading.get(
     SECTION_TYPES.DOCUMENTATION,
   );
+  const diagramsLogsLoading = !!logsLoading.get(SECTION_TYPES.DIAGRAMS);
   const requirementsLogsLoading = !!logsLoading.get(SECTION_TYPES.REQUIREMENTS);
   const bugsSecurityLogsLoading = !!logsLoading.get(
     SECTION_TYPES.BUGS_SECURITY,
@@ -120,6 +130,10 @@ export default function DomainDetailsPage() {
     documentationError && {
       section: "Documentation",
       message: documentationError,
+    },
+    diagramsError && {
+      section: "Diagrams",
+      message: diagramsError,
     },
     requirementsError && {
       section: "Requirements",
@@ -150,6 +164,11 @@ export default function DomainDetailsPage() {
     // Only fetch documentation if not already loaded or loading
     if (!documentation && !documentationLoading) {
       fetchPromises.push(docStore.fetch(domainId));
+    }
+
+    // Only fetch diagrams if not already loaded or loading
+    if (!diagrams && !diagramsLoading) {
+      fetchPromises.push(diagramsStore.fetch(domainId));
     }
 
     // Only fetch requirements if not already loaded or loading
@@ -185,6 +204,11 @@ export default function DomainDetailsPage() {
     // Fetch documentation logs if section exists
     if (documentation) {
       fetchDomainSectionLogs(domainId, SECTION_TYPES.DOCUMENTATION);
+    }
+
+    // Fetch diagrams logs if section exists
+    if (diagrams) {
+      fetchDomainSectionLogs(domainId, SECTION_TYPES.DIAGRAMS);
     }
 
     // Fetch requirements logs if section exists
@@ -339,6 +363,17 @@ export default function DomainDetailsPage() {
           showLogs={showDomainLogs}
           logs={documentationLogs}
           logsLoading={documentationLogsLoading}
+        />
+
+        <DomainDiagramsSection
+          diagrams={diagrams}
+          loading={diagramsLoading}
+          progress={diagramsProgress}
+          onAnalyze={() => domain && diagramsStore.analyze(domain, true)}
+          domainId={domainId}
+          showLogs={showDomainLogs}
+          logs={diagramsLogs}
+          logsLoading={diagramsLogsLoading}
         />
 
         <DomainRequirementsSection

@@ -156,6 +156,56 @@ export async function buildDocumentationTemplateVariables(task) {
 }
 
 /**
+ * Build variables object for diagrams analysis template
+ * @param {Object} task - Task object
+ * @returns {Promise<Object>} Variables for template processing
+ */
+export async function buildDiagramsTemplateVariables(task) {
+  const { domainId, files, includeDocumentation, targetDirectory } =
+    task.params;
+
+  // Look up domain name from codebase analysis (if available)
+  let domainName = domainId; // Fallback to ID
+  let documentation = "";
+
+  try {
+    const { readCodebaseAnalysis } =
+      await import("../persistence/codebase-analysis.js");
+    const analysis = await readCodebaseAnalysis();
+    const domain = analysis?.domains?.find((d) => d.id === domainId);
+    if (domain?.name) {
+      domainName = domain.name;
+    }
+
+    // Load documentation if requested
+    if (includeDocumentation) {
+      const { readDomainDocumentation } =
+        await import("../persistence/domain-documentation.js");
+      const docData = await readDomainDocumentation(domainId);
+      if (docData?.documentation) {
+        documentation = docData.documentation;
+      }
+    }
+  } catch (err) {
+    // Fallback to domainId if analysis not found
+  }
+
+  // Format files as a bulleted list
+  const filesList =
+    files && files.length > 0
+      ? files.map((f) => `- ${f}`).join("\n")
+      : "(no files specified)";
+
+  return {
+    domainId,
+    targetDirectory,
+    files: filesList,
+    includeDocumentation: !!includeDocumentation,
+    documentation,
+  };
+}
+
+/**
  * Build variables object for codebase analysis template
  * @param {Object} task - Task object
  * @returns {Object} Variables for template processing
@@ -209,6 +259,8 @@ export async function buildTemplateVariables(task) {
       return await buildBugsSecurityTemplateVariables(task);
     case TASK_TYPES.DOCUMENTATION:
       return await buildDocumentationTemplateVariables(task);
+    case TASK_TYPES.DIAGRAMS:
+      return await buildDiagramsTemplateVariables(task);
     case TASK_TYPES.CODEBASE_ANALYSIS:
       return buildCodebaseTemplateVariables(task);
     case TASK_TYPES.APPLY_FIX:

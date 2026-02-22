@@ -1,6 +1,7 @@
 import * as llmApi from "./llm-api.js";
 import * as aider from "./aider.js";
 import config from "../config.js";
+import { AGENTS as AGENT_TYPES } from "../constants/agents.js";
 
 /**
  * Available AI agents
@@ -8,14 +9,14 @@ import config from "../config.js";
  * - aider: AI coding assistant for editing files and writing code
  */
 const AGENTS = {
-  "llm-api": {
-    id: "llm-api",
+  [AGENT_TYPES.LLM_API]: {
+    id: AGENT_TYPES.LLM_API,
     name: "LLM API",
     purpose: "Generates analysis JSON files",
     module: llmApi,
   },
-  aider: {
-    id: "aider",
+  [AGENT_TYPES.AIDER]: {
+    id: AGENT_TYPES.AIDER,
     name: "Aider",
     purpose: "Edits files and writes code",
     installUrl: "https://aider.chat/docs/install.html",
@@ -26,7 +27,7 @@ const AGENTS = {
 /**
  * Get agent configuration for a specific task type
  * @param {string} taskType - The task type from TASK_TYPES
- * @returns {Object} Agent configuration with agent, model, provider
+ * @returns {Object} Agent configuration with agent, model, maxTokens
  */
 export function getAgentConfig(taskType) {
   const taskConfig = config.tasks[taskType];
@@ -38,7 +39,6 @@ export function getAgentConfig(taskType) {
   return {
     agent: taskConfig.agent,
     model: taskConfig.model,
-    provider: taskConfig.provider,
     maxTokens: taskConfig.maxTokens,
   };
 }
@@ -49,7 +49,7 @@ export function getAgentConfig(taskType) {
  * @returns {Promise<Object>} Agent module with detect() and execute() functions
  */
 export async function getAgent(agentId) {
-  const selectedId = agentId || "llm-api";
+  const selectedId = agentId || AGENT_TYPES.LLM_API;
   const agent = AGENTS[selectedId];
 
   if (!agent) {

@@ -6,6 +6,7 @@
 export const TASK_TYPES = {
   CODEBASE_ANALYSIS: "codebase-analysis",
   DOCUMENTATION: "analyze-documentation",
+  DIAGRAMS: "analyze-diagrams",
   REQUIREMENTS: "analyze-requirements",
   BUGS_SECURITY: "analyze-bugs-security",
   TESTING: "analyze-testing",

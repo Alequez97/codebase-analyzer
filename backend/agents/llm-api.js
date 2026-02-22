@@ -17,6 +17,7 @@ import {
   processTemplate,
   buildTemplateVariables,
 } from "../utils/template-processor.js";
+import { getProviderFromModel } from "../utils/model-utils.js";
 
 /**
  * Detect if the LLM API agent is available.
@@ -48,12 +49,19 @@ export async function detect() {
 
 /**
  * Create LLM agent with client and state management
- * @param {Object} agentConfig - Agent configuration with model, provider, maxTokens
+ * @param {Object} agentConfig - Agent configuration with model, maxTokens
  * @returns {{ client: BaseLLMClient, state: ChatState }} Agent with client and state
  */
 function createLLMAgent(agentConfig) {
-  const { model, provider, maxTokens } = agentConfig;
+  const { model, maxTokens } = agentConfig;
   const { apiKeys } = config;
+  const provider = getProviderFromModel(model);
+
+  if (!provider) {
+    throw new Error(
+      `Unable to determine provider from model "${model}". Supported: OpenAI (gpt-*, o1-*, o3-*), Anthropic (claude-*, sonnet), DeepSeek (deepseek-*)`,
+    );
+  }
 
   let client;
   let state;

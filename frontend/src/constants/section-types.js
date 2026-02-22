@@ -5,6 +5,7 @@
 
 export const SECTION_TYPES = {
   DOCUMENTATION: "documentation",
+  DIAGRAMS: "diagrams",
   REQUIREMENTS: "requirements",
   BUGS_SECURITY: "bugs-security",
   TESTING: "testing",

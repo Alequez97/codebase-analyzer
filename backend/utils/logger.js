@@ -29,6 +29,32 @@ export function configure(options) {
 }
 
 /**
+ * Serialize Error objects to plain objects for JSON stringification
+ */
+function serializeErrors(obj) {
+  if (obj instanceof Error) {
+    return {
+      message: obj.message,
+      stack: obj.stack,
+      name: obj.name,
+      ...obj,
+    };
+  }
+
+  if (obj && typeof obj === "object") {
+    const serialized = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        serialized[key] = serializeErrors(obj[key]);
+      }
+    }
+    return serialized;
+  }
+
+  return obj;
+}
+
+/**
  * Format log message with optional timestamp
  */
 function format(level, message, context) {
@@ -41,7 +67,8 @@ function format(level, message, context) {
   formatted += `[${level}] ${message}`;
 
   if (context) {
-    formatted += ` ${JSON.stringify(context)}`;
+    const serialized = serializeErrors(context);
+    formatted += ` ${JSON.stringify(serialized)}`;
   }
 
   return formatted;

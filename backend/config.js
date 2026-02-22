@@ -6,6 +6,7 @@ import * as logger from "./utils/logger.js";
 import { TASK_TYPES } from "./constants/task-types.js";
 import { MODELS } from "./constants/models.js";
 import { PROVIDERS } from "./constants/providers.js";
+import { AGENTS } from "./constants/agents.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -68,44 +69,43 @@ const config = {
   // Task-specific agent and model configuration
   tasks: {
     [TASK_TYPES.CODEBASE_ANALYSIS]: {
-      agent: "llm-api",
+      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
-      provider: PROVIDERS.ANTHROPIC,
       maxTokens: 64000,
     },
     [TASK_TYPES.DOCUMENTATION]: {
-      agent: "llm-api",
+      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5,
-      provider: PROVIDERS.OPENAI,
+      maxTokens: 64000,
+    },
+    [TASK_TYPES.DIAGRAMS]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
     },
     [TASK_TYPES.REQUIREMENTS]: {
-      agent: "llm-api",
+      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
-      provider: PROVIDERS.ANTHROPIC,
       maxTokens: 64000,
     },
     [TASK_TYPES.BUGS_SECURITY]: {
-      agent: "llm-api",
+      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
-      provider: PROVIDERS.ANTHROPIC,
       maxTokens: 64000,
     },
     [TASK_TYPES.TESTING]: {
-      agent: "llm-api",
+      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
-      provider: PROVIDERS.ANTHROPIC,
       maxTokens: 64000,
     },
     [TASK_TYPES.APPLY_FIX]: {
-      agent: "aider",
+      agent: AGENTS.AIDER,
       model: MODELS.CLAUDE_SONNET,
-      provider: PROVIDERS.ANTHROPIC,
       maxTokens: 64000,
     },
   },
 
-  // Aider-specific configuration (when agent is "aider")
+  // Aider-specific configuration (when agent is AGENTS.AIDER)
   aider: {
     extraArgs: "",
   },
