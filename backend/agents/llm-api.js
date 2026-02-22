@@ -252,6 +252,15 @@ async function executeDocumentationTask(task) {
       taskId: task.id,
     });
     taskLogger.raw("=".repeat(80));
+
+    emitTaskLog(task, {
+      taskId: task.id,
+      domainId: task.params?.domainId,
+      type: task.type,
+      stream: "stderr",
+      log: `\n${"=".repeat(80)}\n❌ [FAILED] Documentation generation failed\n${error.message}\n${"=".repeat(80)}\n`,
+    });
+
     logStream.end();
     await new Promise((resolve) => logStream.on("finish", resolve));
 
@@ -1299,6 +1308,15 @@ async function executeAnalysisTask(task) {
       taskId: task.id,
     });
     taskLogger.raw("=".repeat(80));
+
+    emitTaskLog(task, {
+      taskId: task.id,
+      domainId: task.params?.domainId,
+      type: task.type,
+      stream: "stderr",
+      log: `\n${"=".repeat(80)}\n❌ [FAILED] LLM analysis failed\n${error.message}\n${"=".repeat(80)}\n`,
+    });
+
     logStream.end();
     await new Promise((resolve) => logStream.on("finish", resolve));
 

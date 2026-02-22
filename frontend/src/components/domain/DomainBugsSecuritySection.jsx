@@ -234,11 +234,6 @@ export default function DomainBugsSecuritySection({
                 )}
               </IconButton>
               <Heading size="md">Bugs & Security</Heading>
-              {hasData && sortedFindings.length > 0 && (
-                <Text fontSize="sm" color="gray.600" fontWeight="medium">
-                  {sortedFindings.length} findings
-                </Text>
-              )}
               {showLogs && (
                 <Badge colorPalette="purple" size="sm">
                   Logs View
