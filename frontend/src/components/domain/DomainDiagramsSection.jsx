@@ -11,6 +11,7 @@ import {
   Skeleton,
   IconButton,
   Stack,
+  Collapsible,
 } from "@chakra-ui/react";
 import {
   FileText,
@@ -20,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
+  ChevronDown,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
@@ -53,6 +55,7 @@ export default function DomainDiagramsSection({
   logs = "",
   logsLoading = false,
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedDiagramIndex, setSelectedDiagramIndex] = useState(0);
   const [viewerError, setViewerError] = useState(null);
   const [diagramXml, setDiagramXml] = useState(null);
@@ -169,7 +172,11 @@ export default function DomainDiagramsSection({
       }
 
       const data = event.data;
-      if (data === "init" || data?.event === "init" || data?.event === "ready") {
+      if (
+        data === "init" ||
+        data?.event === "init" ||
+        data?.event === "ready"
+      ) {
         setIframeInit(true);
         return;
       }
@@ -274,22 +281,50 @@ export default function DomainDiagramsSection({
   if (loading) {
     return (
       <Card.Root>
-        <Card.Header>
-          <Heading size="md">Diagrams</Heading>
+        <Card.Header py="4">
+          <HStack justify="space-between" alignItems="center">
+            <HStack
+              gap={2}
+              flex={1}
+              cursor="pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+              alignItems="center"
+            >
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+              >
+                {isExpanded ? (
+                  <ChevronDown size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+              </IconButton>
+              <Heading size="md">Diagrams</Heading>
+            </HStack>
+          </HStack>
         </Card.Header>
-        <Card.Body>
-          <VStack align="stretch" gap={4}>
-            <Skeleton height="40px" />
-            <Skeleton height="400px" />
-            {progress && (
-              <Box p={4} bg="blue.50" borderRadius="md">
-                <Text fontSize="sm" color="blue.800">
-                  {progress.message || "Analyzing..."}
-                </Text>
-              </Box>
-            )}
-          </VStack>
-        </Card.Body>
+        <Collapsible.Root open={isExpanded}>
+          <Collapsible.Content>
+            <Card.Body>
+              <VStack align="stretch" gap={4}>
+                <Skeleton height="40px" />
+                <Skeleton height="400px" />
+                {progress && (
+                  <Box p={4} bg="blue.50" borderRadius="md">
+                    <Text fontSize="sm" color="blue.800">
+                      {progress.message || "Analyzing..."}
+                    </Text>
+                  </Box>
+                )}
+              </VStack>
+            </Card.Body>
+          </Collapsible.Content>
+        </Collapsible.Root>
       </Card.Root>
     );
   }
@@ -298,33 +333,65 @@ export default function DomainDiagramsSection({
   if (!diagrams?.diagrams || diagrams.diagrams.length === 0) {
     return (
       <Card.Root>
-        <Card.Header>
-          <Heading size="md">Diagrams</Heading>
-        </Card.Header>
-        <Card.Body>
-          <VStack align="stretch" gap={4}>
-            <EmptyState
-              icon={FileText}
-              title="No diagrams generated yet"
-              description="Analyze this domain to generate architecture and flow diagrams"
-              variant="simple"
-            />
-            <Button
-              onClick={handleAnalyze}
-              colorScheme="blue"
-              size="lg"
-              alignSelf="center"
+        <Card.Header py="4">
+          <HStack justify="space-between" alignItems="center">
+            <HStack
+              gap={2}
+              flex={1}
+              cursor="pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+              alignItems="center"
             >
-              <Sparkles />
-              Generate Diagrams
-            </Button>
-          </VStack>
-          {showLogs && logs && (
-            <Box mt={6}>
-              <LogsViewer logs={logs} loading={logsLoading} />
-            </Box>
-          )}
-        </Card.Body>
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+              >
+                {isExpanded ? (
+                  <ChevronDown size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+              </IconButton>
+              <Heading size="md">Diagrams</Heading>
+            </HStack>
+            <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
+              {!showLogs && (
+                <Button
+                  size="sm"
+                  colorPalette="blue"
+                  variant="outline"
+                  onClick={handleAnalyze}
+                >
+                  <Sparkles size={14} />
+                  Generate Diagrams
+                </Button>
+              )}
+            </HStack>
+          </HStack>
+        </Card.Header>
+        <Collapsible.Root open={isExpanded}>
+          <Collapsible.Content>
+            <Card.Body>
+              <VStack align="stretch" gap={4}>
+                <EmptyState
+                  icon={FileText}
+                  title="No diagrams generated yet"
+                  description="Analyze this domain to generate architecture and flow diagrams"
+                  variant="simple"
+                />
+              </VStack>
+              {showLogs && logs && (
+                <Box mt={6}>
+                  <LogsViewer logs={logs} loading={logsLoading} />
+                </Box>
+              )}
+            </Card.Body>
+          </Collapsible.Content>
+        </Collapsible.Root>
       </Card.Root>
     );
   }
@@ -333,193 +400,234 @@ export default function DomainDiagramsSection({
 
   return (
     <Card.Root>
-      <Card.Header>
-        <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
-          <VStack align="start" gap={1}>
+      <Card.Header py="4">
+        <HStack justify="space-between" alignItems="center">
+          <HStack
+            gap={2}
+            flex={1}
+            cursor="pointer"
+            onClick={() => setIsExpanded(!isExpanded)}
+            alignItems="center"
+          >
+            <IconButton
+              size="xs"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+            >
+              {isExpanded ? (
+                <ChevronDown size={16} />
+              ) : (
+                <ChevronRight size={16} />
+              )}
+            </IconButton>
             <Heading size="md">Diagrams</Heading>
-            <Text fontSize="sm" color="gray.600">
-              {diagramCount} diagram{diagramCount !== 1 ? "s" : ""} available
-            </Text>
-          </VStack>
-          <Button onClick={handleAnalyze} colorScheme="blue" size="sm">
-            <Sparkles />
-            Re-analyze
-          </Button>
-        </Flex>
+            <Badge colorPalette="blue" size="sm">
+              {diagramCount} diagram{diagramCount !== 1 ? "s" : ""}
+            </Badge>
+          </HStack>
+          <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
+            {!showLogs && (
+              <Button
+                size="sm"
+                colorPalette="blue"
+                variant="outline"
+                onClick={handleAnalyze}
+                loading={loading}
+                loadingText="Analyzing"
+              >
+                <Sparkles size={14} />
+                Re-analyze
+              </Button>
+            )}
+          </HStack>
+        </HStack>
       </Card.Header>
 
-      <Card.Body>
-        <VStack align="stretch" gap={4}>
-          {/* Diagram selector and actions */}
-          <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
-            <HStack>
-              <IconButton
-                aria-label="Previous diagram"
-                onClick={handlePrevDiagram}
-                disabled={selectedDiagramIndex === 0}
-                size="sm"
-                variant="outline"
-              >
-                <ChevronLeft />
-              </IconButton>
-
-              <VStack align="start" gap={1} minW="300px">
+      <Collapsible.Root open={isExpanded}>
+        <Collapsible.Content>
+          <Card.Body>
+            <VStack align="stretch" gap={4}>
+              {/* Diagram selector and actions */}
+              <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
                 <HStack>
-                  <Heading size="sm">{selectedDiagram?.title}</Heading>
-                  <Badge
-                    colorScheme={
-                      DIAGRAM_TYPE_COLORS[selectedDiagram?.type] || "gray"
-                    }
+                  <IconButton
+                    aria-label="Previous diagram"
+                    onClick={handlePrevDiagram}
+                    disabled={selectedDiagramIndex === 0}
+                    size="sm"
+                    variant="outline"
                   >
-                    {DIAGRAM_TYPE_LABELS[selectedDiagram?.type] ||
-                      selectedDiagram?.type}
-                  </Badge>
+                    <ChevronLeft />
+                  </IconButton>
+
+                  <VStack align="start" gap={1} minW="300px">
+                    <HStack>
+                      <Heading size="sm">{selectedDiagram?.title}</Heading>
+                      <Badge
+                        colorScheme={
+                          DIAGRAM_TYPE_COLORS[selectedDiagram?.type] || "gray"
+                        }
+                      >
+                        {DIAGRAM_TYPE_LABELS[selectedDiagram?.type] ||
+                          selectedDiagram?.type}
+                      </Badge>
+                    </HStack>
+                    <Text fontSize="xs" color="gray.600">
+                      {selectedDiagram?.description}
+                    </Text>
+                  </VStack>
+
+                  <IconButton
+                    aria-label="Next diagram"
+                    onClick={handleNextDiagram}
+                    disabled={selectedDiagramIndex >= diagramCount - 1}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <ChevronRight />
+                  </IconButton>
                 </HStack>
-                <Text fontSize="xs" color="gray.600">
-                  {selectedDiagram?.description}
-                </Text>
-              </VStack>
 
-              <IconButton
-                aria-label="Next diagram"
-                onClick={handleNextDiagram}
-                disabled={selectedDiagramIndex >= diagramCount - 1}
-                size="sm"
-                variant="outline"
-              >
-                <ChevronRight />
-              </IconButton>
-            </HStack>
-
-            <HStack>
-              <Button
-                onClick={handleEditInVSCode}
-                size="sm"
-                variant="outline"
-                leftIcon={<ExternalLink size={16} />}
-              >
-                Edit in VS Code
-              </Button>
-              <Button
-                onClick={handleDownload}
-                size="sm"
-                variant="outline"
-                leftIcon={<Download size={16} />}
-              >
-                Download
-              </Button>
-            </HStack>
-          </Flex>
-
-          {/* Diagram viewer */}
-          <Box
-            borderWidth="1px"
-            borderRadius="lg"
-            overflow="hidden"
-            bg="gray.50"
-            position="relative"
-            minH="600px"
-          >
-            {loadingDiagram ? (
-              <VStack align="center" justify="center" minH="600px">
-                <Skeleton height="400px" width="100%" />
-                <Text fontSize="sm" color="gray.600">
-                  Loading diagram...
-                </Text>
-              </VStack>
-            ) : viewerError || !diagramXml ? (
-              <VStack
-                align="center"
-                justify="center"
-                minH="600px"
-                gap={4}
-                p={6}
-              >
-                <AlertCircle size={48} color="orange" />
-                <VStack gap={2} align="center">
-                  <Heading size="md">View Diagrams in VS Code</Heading>
-                  <Text fontSize="sm" color="gray.600" textAlign="center">
-                    Embedded diagram viewer requires a public URL. Use these
-                    options instead:
-                  </Text>
-                </VStack>
-                <Stack direction="row" gap={2}>
+                <HStack>
                   <Button
                     onClick={handleEditInVSCode}
                     size="sm"
-                    colorScheme="blue"
+                    variant="outline"
+                    leftIcon={<ExternalLink size={16} />}
                   >
-                    <ExternalLink size={16} />
-                    Open in VS Code
+                    Edit in VS Code
                   </Button>
-                  <Button onClick={handleDownload} size="sm" variant="outline">
-                    <Download size={16} />
-                    Download File
-                  </Button>
-                </Stack>
-              </VStack>
-            ) : diagramXml ? (
-              <iframe
-                ref={iframeRef}
-                src="https://embed.diagrams.net/?proto=json&spin=1"
-                onLoad={() => setIframeReady(true)}
-                style={{
-                  width: "100%",
-                  height: "600px",
-                  border: "none",
-                  borderRadius: "8px",
-                }}
-                title={selectedDiagram?.title || "Diagram"}
-                sandbox="allow-same-origin allow-scripts allow-popups"
-              />
-            ) : null}
-          </Box>
-
-          {/* Diagram list */}
-          {diagramCount > 1 && (
-            <Box>
-              <Text fontSize="sm" fontWeight="medium" mb={2}>
-                All Diagrams
-              </Text>
-              <Stack direction="row" gap={2} wrap="wrap">
-                {diagrams.diagrams.map((diagram, index) => (
                   <Button
-                    key={diagram.id}
+                    onClick={handleDownload}
                     size="sm"
-                    variant={
-                      index === selectedDiagramIndex ? "solid" : "outline"
-                    }
-                    colorScheme={
-                      index === selectedDiagramIndex ? "blue" : "gray"
-                    }
-                    onClick={() => {
-                      setSelectedDiagramIndex(index);
-                      setViewerError(null);
-                      setDiagramXml(null);
-                      setIframeReady(false);
-                      setIframeInit(false);
-                    }}
+                    variant="outline"
+                    leftIcon={<Download size={16} />}
                   >
-                    <Badge
-                      colorScheme={DIAGRAM_TYPE_COLORS[diagram.type] || "gray"}
-                      mr={2}
-                    >
-                      {DIAGRAM_TYPE_LABELS[diagram.type] || diagram.type}
-                    </Badge>
-                    {diagram.title}
+                    Download
                   </Button>
-                ))}
-              </Stack>
-            </Box>
-          )}
-        </VStack>
+                </HStack>
+              </Flex>
 
-        {showLogs && logs && (
-          <Box mt={6}>
-            <LogsViewer logs={logs} loading={logsLoading} />
-          </Box>
-        )}
-      </Card.Body>
+              {/* Diagram viewer */}
+              <Box
+                borderWidth="1px"
+                borderRadius="lg"
+                overflow="hidden"
+                bg="gray.50"
+                position="relative"
+                minH="600px"
+              >
+                {loadingDiagram ? (
+                  <VStack align="center" justify="center" minH="600px">
+                    <Skeleton height="400px" width="100%" />
+                    <Text fontSize="sm" color="gray.600">
+                      Loading diagram...
+                    </Text>
+                  </VStack>
+                ) : viewerError || !diagramXml ? (
+                  <VStack
+                    align="center"
+                    justify="center"
+                    minH="600px"
+                    gap={4}
+                    p={6}
+                  >
+                    <AlertCircle size={48} color="orange" />
+                    <VStack gap={2} align="center">
+                      <Heading size="md">View Diagrams in VS Code</Heading>
+                      <Text fontSize="sm" color="gray.600" textAlign="center">
+                        Embedded diagram viewer requires a public URL. Use these
+                        options instead:
+                      </Text>
+                    </VStack>
+                    <Stack direction="row" gap={2}>
+                      <Button
+                        onClick={handleEditInVSCode}
+                        size="sm"
+                        colorScheme="blue"
+                      >
+                        <ExternalLink size={16} />
+                        Open in VS Code
+                      </Button>
+                      <Button
+                        onClick={handleDownload}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Download size={16} />
+                        Download File
+                      </Button>
+                    </Stack>
+                  </VStack>
+                ) : diagramXml ? (
+                  <iframe
+                    ref={iframeRef}
+                    src="https://embed.diagrams.net/?proto=json&spin=1"
+                    onLoad={() => setIframeReady(true)}
+                    style={{
+                      width: "100%",
+                      height: "600px",
+                      border: "none",
+                      borderRadius: "8px",
+                    }}
+                    title={selectedDiagram?.title || "Diagram"}
+                    sandbox="allow-same-origin allow-scripts allow-popups"
+                  />
+                ) : null}
+              </Box>
+
+              {/* Diagram list */}
+              {diagramCount > 1 && (
+                <Box>
+                  <Text fontSize="sm" fontWeight="medium" mb={2}>
+                    All Diagrams
+                  </Text>
+                  <Stack direction="row" gap={2} wrap="wrap">
+                    {diagrams.diagrams.map((diagram, index) => (
+                      <Button
+                        key={diagram.id}
+                        size="sm"
+                        variant={
+                          index === selectedDiagramIndex ? "solid" : "outline"
+                        }
+                        colorScheme={
+                          index === selectedDiagramIndex ? "blue" : "gray"
+                        }
+                        onClick={() => {
+                          setSelectedDiagramIndex(index);
+                          setViewerError(null);
+                          setDiagramXml(null);
+                          setIframeReady(false);
+                          setIframeInit(false);
+                        }}
+                      >
+                        <Badge
+                          colorScheme={
+                            DIAGRAM_TYPE_COLORS[diagram.type] || "gray"
+                          }
+                          mr={2}
+                        >
+                          {DIAGRAM_TYPE_LABELS[diagram.type] || diagram.type}
+                        </Badge>
+                        {diagram.title}
+                      </Button>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+            </VStack>
+
+            {showLogs && logs && (
+              <Box mt={6}>
+                <LogsViewer logs={logs} loading={logsLoading} />
+              </Box>
+            )}
+          </Card.Body>
+        </Collapsible.Content>
+      </Collapsible.Root>
     </Card.Root>
   );
 }

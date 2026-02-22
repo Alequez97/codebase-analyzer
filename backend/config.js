@@ -75,7 +75,7 @@ const config = {
     },
     [TASK_TYPES.DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5,
+      model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
     },
     [TASK_TYPES.DIAGRAMS]: {
