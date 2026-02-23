@@ -39,98 +39,128 @@ Create Markdown documentation with these sections:
 
 **Use Mermaid diagrams extensively.** One diagram replaces paragraphs of text.
 
-## Mermaid Diagram Syntax Rules
+## Mermaid Diagram Examples
 
-**CRITICAL: Follow these rules to ensure diagrams render correctly:**
+**Use these patterns for correct Mermaid syntax:**
 
-### General Rules
-
-1. **Always use quotes for labels with special characters** (spaces, slashes, colons, parentheses, etc.)
-2. **Comments must be on their own line** - never inline with code
-3. **No special characters in node IDs** - use simple alphanumeric IDs only
-4. **Test syntax** - validate diagrams render without errors
-
-### Flowchart / Graph Syntax
+### Flowchart (with subgraphs)
 
 ```mermaid
 flowchart LR
-  %% Comments on their own line
-  NodeA["Label with /special:chars()"]
-  NodeB["Another label"]
-
-  subgraph Group["Group Name"]
-    NodeC["Item 1"]
-    NodeD["Item 2"]
+  %% High-level architecture
+  subgraph Frontend["Frontend Layer"]
+    UI["User Interface"]
+    Form["Form Components"]
   end
 
-  NodeA --> NodeB
-  NodeB --> NodeC
+  subgraph Backend["Backend API"]
+    API["Controllers"]
+    Service["Business Logic"]
+  end
+
+  subgraph Data["Data Layer"]
+    DB["Database"]
+    Cache["Redis Cache"]
+  end
+
+  UI --> API
+  Form --> API
+  API --> Service
+  Service --> DB
+  Service --> Cache
 ```
 
-**Rules:**
+**Key points:**
 
-- Node IDs: simple names (A, B, NodeA, AUTH, DB)
-- Labels: always use quotes if they contain: `/`, `:`, `(`, `)`, `[`, `]`, spaces
-- Subgraph syntax: `subgraph ID["Label"]`
-- Comments: `%% Comment text` on separate line
+- Flowchart directions: `LR` (left-right) or `TD` (top-down)
+- Multiple subgraphs: `subgraph ID["Label"]`
+- Connections between subgraphs work automatically
 
-### Sequence Diagram Syntax
+### Flowchart (with decisions)
+
+```mermaid
+flowchart TD
+  %% Business logic flow
+  A["Start: Create user"] --> B["Validate input"]
+  B --> C{Is valid?}
+  C -->|"Yes"| D["Save to database"]
+  C -->|"No"| E["Return error"]
+  D --> F["Send welcome email"]
+  F --> G["Return success"]
+```
+
+**Key points:**
+
+- Diamond nodes: `{label}` - no quotes inside braces
+- Labels with special chars: use quotes `["Label with /path:chars()"]`
+- Comments: separate line with `%%`
+
+### Sequence Diagram (with loops and alternatives)
 
 ```mermaid
 sequenceDiagram
   autonumber
-  actor Client
+  actor User
   participant API as "API Server"
   participant DB as "Database"
 
-  Client->>API: POST /login
-  API->>DB: findOne({email})
-  DB-->>API: user object
+  User->>API: POST /login
+  API->>DB: findUser(email)
+  DB-->>API: user data
 
-  %% Conditional logic
-  alt User found
-    API-->>Client: 200 Success
-  else Not found
-    API-->>Client: 404 Not Found
+  alt User valid
+    API->>API: Generate token
+    API-->>User: 200 Success
+  else Invalid
+    API-->>User: 401 Unauthorized
   end
 
-  Note over API,DB: This is a note
+  loop For each session
+    API->>DB: Store session
+  end
+
+  Note over API: Tokens expire after 24 hours
 ```
 
-**Rules:**
+**Key points:**
 
-- Use quotes for participant aliases: `participant API as "API Server"`
-- Message syntax: `A->>B: message text` (no quotes needed for simple messages)
-- Use quotes if message contains special chars: `A->>B: "POST /api/login"`
-- Comments on own line: `%% This is why we do this`
-- Notes syntax: `Note over A,B: text` or `Note right of A: text`
+- Simple Note text - avoid `<`, `>`, `=>`, semicolons
+- Use descriptive words instead of operators
+- Place Notes outside loops when possible
+- `alt`/`else` for conditionals, `loop` for iterations
 
-### State Diagram Syntax
+### State Diagram (with nested states)
 
 ```mermaid
 stateDiagram-v2
-  [*] --> Idle
-  Idle --> Processing: start()
-  Processing --> Complete: finish()
-  Processing --> Error: fail()
+  [*] --> Draft
+  Draft --> Active: publish()
 
-  Complete --> [*]
-  Error --> [*]
+  state Active {
+    [*] --> Running
+    Running --> Paused: pause()
+    Paused --> Running: resume()
+  }
+
+  Active --> Archived: archive()
+  Archived --> Active: restore()
+  Active --> [*]
 ```
 
-**Rules:**
+**Key points:**
 
 - Use `stateDiagram-v2` (not v1)
-- Transition syntax: `From --> To: label`
-- Start/end: `[*]`
+- Nested states: `state Name { ... }`
+- Transitions: `From --> To: label`
 
-### Class Diagram Syntax
+### Class Diagram (with relationships)
 
 ```mermaid
 classDiagram
   class User {
     +String email
     +String password
+    +Number age
     +login()
     +logout()
   }
@@ -138,73 +168,26 @@ classDiagram
   class Session {
     +String token
     +Date expiry
+    +refresh()
   }
 
-  User --> Session: creates
+  class Permission {
+    +String resourceType
+    +Array actions
+  }
 
-  note for User "Users can have multiple sessions"
+  User --> Session : "creates"
+  User --> Permission : "has many"
+  Session --> User : "belongs to"
+
+  note for User "Each user can have multiple active sessions"
 ```
 
-**Rules:**
+**Key points:**
 
-- No inline comments inside class definitions
-- Use `note for ClassName "text"` for annotations
+- Relationships: `-->` (association), `--|>` (inheritance)
+- Labels on relationships: `Class1 --> Class2 : "label"`
 - Visibility: `+` public, `-` private, `#` protected
-- Keep field/method names simple (no special chars)
-
-### Common Mistakes to Avoid
-
-❌ **WRONG:**
-
-```mermaid
-flowchart LR
-  AUTH[backend/controllers/auth.js]  %% inline comment
-  DB[MongoDB(User)]
-```
-
-✅ **CORRECT:**
-
-```mermaid
-flowchart LR
-  %% Comments on their own line
-  AUTH["backend/controllers/auth.js"]
-  DB["MongoDB User Model"]
-```
-
-❌ **WRONG:**
-
-```mermaid
-sequenceDiagram
-  User->>API: POST /login (username, password)  %% login request
-```
-
-✅ **CORRECT:**
-
-```mermaid
-sequenceDiagram
-  %% User authentication flow
-  User->>API: POST /login (username, password)
-```
-
-❌ **WRONG:**
-
-```mermaid
-classDiagram
-  class User {
-    +Object permissions  %% nested arrays
-  }
-```
-
-✅ **CORRECT:**
-
-```mermaid
-classDiagram
-  class User {
-    +Object permissions
-  }
-
-  note for User "permissions contains nested arrays by resource category"
-```
 
 ## Example Output
 
