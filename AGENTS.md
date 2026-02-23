@@ -564,6 +564,43 @@ Dashboard shows: "Click Analyze Codebase to begin"
   // ... etc
   ```
 
+#### 10.2 **Documentation File Organization**
+
+- **Don't place documentation in docs root** - Organize documentation files into appropriate subdirectories
+- **Documentation folder structure**:
+  ```
+  docs/
+    README.md                    # Only the main docs index in root
+    frontend/                    # Frontend-specific docs
+      architecture.md
+      ai-chat-integration.md
+    backend/                     # Backend-specific docs
+      architecture.md
+      api-endpoints.md
+    guides/                      # How-to guides and tutorials
+      TOKEN-MANAGEMENT.md
+      DEPLOYMENT.md
+    agents/                      # AI agent documentation
+      AIDER.md
+      LLM-AGENT.md
+    examples/                    # Example configurations and use cases
+      README.md
+  ```
+- **Benefits of organized documentation**:
+  - Easy to find relevant documentation
+  - Clear separation of concerns
+  - Better maintenance and updates
+  - Prevents docs root from becoming cluttered
+  - Improves discoverability
+- **Documentation placement guidelines**:
+  - Frontend features → `docs/frontend/`
+  - Backend features → `docs/backend/`
+  - User guides → `docs/guides/`
+  - Agent-specific → `docs/agents/`
+  - Work in progress → `docs/in-progress/`
+  - Examples and templates → `docs/examples/`
+- **Don't create**: Large documentation files directly in `docs/` root (except README.md)
+
 ### 11. **Mock Data Workflow (When User Requests Mocking)**
 
 - If the user asks for mock responses, prefer reading JSON files from `.code-analysis-example/` instead of hardcoding large inline objects in route handlers.

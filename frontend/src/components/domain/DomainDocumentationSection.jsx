@@ -11,6 +11,7 @@ import {
   Collapsible,
   Skeleton,
   VStack,
+  Portal,
 } from "@chakra-ui/react";
 import {
   Pencil,
@@ -20,11 +21,14 @@ import {
   Sparkles,
   ChevronDown,
   ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
 import MarkdownRenderer from "../MarkdownRenderer";
 import LogsViewer from "./LogsViewer";
+import { AISectionChat } from "./chat";
+import { DOCUMENTATION_CHAT_CONFIG } from "../../config";
 
 export default function DomainDocumentationSection({
   documentation,
@@ -41,6 +45,7 @@ export default function DomainDocumentationSection({
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleEnterEditMode = () => {
     setIsEditMode(true);
@@ -117,19 +122,35 @@ export default function DomainDocumentationSection({
           </HStack>
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
             {!isEditMode && !showLogs && (
-              <Button
-                size="sm"
-                colorPalette="blue"
-                variant="outline"
-                onClick={onAnalyze}
-                loading={loading}
-                loadingText="Analyzing"
-              >
-                <Sparkles size={14} />
-                {documentation
-                  ? "Re-analyze documentation"
-                  : "Analyze documentation"}
-              </Button>
+              <>
+                {/* Analyze button - only shown when no documentation exists */}
+                {!documentation && (
+                  <Button
+                    size="sm"
+                    colorPalette="blue"
+                    variant="outline"
+                    onClick={onAnalyze}
+                    loading={loading}
+                    loadingText="Analyzing"
+                  >
+                    <Sparkles size={14} />
+                    Analyze documentation
+                  </Button>
+                )}
+
+                {/* Edit with AI button - shown when documentation exists */}
+                {documentation && (
+                  <Button
+                    size="sm"
+                    colorPalette="purple"
+                    variant="outline"
+                    onClick={() => setIsChatOpen(true)}
+                  >
+                    <MessageSquare size={14} />
+                    Edit with AI
+                  </Button>
+                )}
+              </>
             )}
             {isEditMode && (
               <Button
@@ -209,6 +230,22 @@ export default function DomainDocumentationSection({
           </Card.Body>
         </Collapsible.Content>
       </Collapsible.Root>
+
+      {/* AI Chat Panel - Opens as a side panel */}
+      {isChatOpen && (
+        <Portal>
+          <AISectionChat
+            {...DOCUMENTATION_CHAT_CONFIG}
+            currentContent={documentation}
+            onClose={() => setIsChatOpen(false)}
+            onApplyChanges={(newContent) => {
+              // MOCK: Apply AI-suggested changes
+              onDocumentationChange?.(newContent);
+              setIsChatOpen(false);
+            }}
+          />
+        </Portal>
+      )}
     </Card.Root>
   );
 }
