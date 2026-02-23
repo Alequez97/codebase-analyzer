@@ -94,6 +94,7 @@ flowchart TD
 - Diamond nodes: `{label}` - no quotes inside braces
 - Labels with special chars: use quotes `["Label with /path:chars()"]`
 - Comments: separate line with `%%`
+- Flowcharts don't support `note` syntax - use comments or text nodes instead
 
 ### Sequence Diagram (with loops and alternatives)
 
@@ -145,6 +146,8 @@ stateDiagram-v2
   Active --> Archived: archive()
   Archived --> Active: restore()
   Active --> [*]
+
+  note right of Active : Active items can be edited
 ```
 
 **Key points:**
@@ -152,6 +155,7 @@ stateDiagram-v2
 - Use `stateDiagram-v2` (not v1)
 - Nested states: `state Name { ... }`
 - Transitions: `From --> To: label`
+- Notes: `note right of StateName : Note text` (single colon, no `end note`)
 
 ### Class Diagram (with relationships)
 
