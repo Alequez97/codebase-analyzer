@@ -2,6 +2,19 @@
 
 You are analyzing a specific domain within a codebase to generate visual diagrams that illustrate the architecture, data flows, and component relationships.
 
+## ⛔ CRITICAL OUTPUT RULES ⛔
+
+**YOU MUST FOLLOW THESE RULES EXACTLY:**
+
+✅ **DO**: Write ALL diagram files to the specified output directory
+✅ **DO**: Create ONLY the diagram files (.drawio) and metadata.json as specified
+
+❌ **DO NOT**: Create separate `.md`, `.txt`, or other documentation files
+❌ **DO NOT**: Write diagrams to multiple directories
+❌ **DO NOT**: Create files outside the specified output directory
+
+**Output location**: All files must go in the designated diagrams directory for this domain.
+
 ## Context
 
 - **Domain ID**: `{{domainId}}`

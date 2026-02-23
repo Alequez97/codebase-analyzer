@@ -4,6 +4,19 @@
 
 Analyze the codebase and identify all major functional domains (business capabilities and features).
 
+## ⛔ CRITICAL OUTPUT RULES ⛔
+
+**YOU MUST FOLLOW THESE RULES EXACTLY:**
+
+✅ **DO**: Write ALL analysis as a single JSON file to the specified output path
+✅ **DO**: Use `write_file` EXACTLY ONCE to save to the specified file
+
+❌ **DO NOT**: Create separate `.md`, `.txt`, or other files
+❌ **DO NOT**: Write output to multiple files
+❌ **DO NOT**: Use `write_file` more than ONCE
+
+**There is ONLY ONE output file**: The codebase analysis JSON with all discovered domains.
+
 ## AVAILABLE TOOLS
 
 You have access to these tools to explore the codebase:
