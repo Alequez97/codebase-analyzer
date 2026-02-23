@@ -27,7 +27,7 @@ const AGENTS = {
 /**
  * Get agent configuration for a specific task type
  * @param {string} taskType - The task type from TASK_TYPES
- * @returns {Object} Agent configuration with agent, model, maxTokens
+ * @returns {Object} Agent configuration with agent, model, maxTokens, reasoningEffort
  */
 export function getAgentConfig(taskType) {
   const taskConfig = config.tasks[taskType];
@@ -40,6 +40,7 @@ export function getAgentConfig(taskType) {
     agent: taskConfig.agent,
     model: taskConfig.model,
     maxTokens: taskConfig.maxTokens,
+    reasoningEffort: taskConfig.reasoningEffort,
   };
 }
 

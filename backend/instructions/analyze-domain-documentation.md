@@ -2,15 +2,9 @@
 
 ## Your Task
 
-Analyze the domain files and create comprehensive business documentation. Output a single JSON file to **`{{OUTPUT_FILE}}`** with this structure:
+Analyze the domain files and create comprehensive business documentation. Write pure Markdown to **`{{OUTPUT_FILE}}`**.
 
-```json
-{
-  "content": "# Domain Name\n\n[Your complete Markdown documentation here]"
-}
-```
-
-**All documentation goes in the `content` field as a Markdown string. Use `write_file` once to save this JSON.**
+**Use `write_file` once to save your complete Markdown documentation.**
 
 ## Available Tools
 
@@ -47,19 +41,51 @@ Create Markdown documentation with these sections:
 
 ## Example Output
 
-````json
-{
-  "content": "# User Authentication\n\nHandles user login, session management, and access control.\n\n## Core Responsibilities\n\n- Validate credentials\n- Generate JWT tokens\n- Manage sessions\n\n## Authentication Flow\n\n```mermaid\nsequenceDiagram\n    User->>API: Login\n    API->>Database: Verify\n    Database-->>API: User\n    API-->>User: Token\n```\n\n## Why it matters\n\nAuthentication secures the platform...\n\n## Key Components\n\n**File**: `auth/service.js` - Handles password validation\n\n## Risk Areas\n\n- Password security\n- Token expiration\n"
-}
+````markdown
+# User Authentication
+
+Handles user login, session management, and access control.
+
+## Core Responsibilities
+
+- Validate credentials
+- Generate JWT tokens
+- Manage sessions
+
+## Authentication Flow
+
+```mermaid
+sequenceDiagram
+    User->>API: Login
+    API->>Database: Verify
+    Database-->>API: User
+    API-->>User: Token
+```
 ````
+
+## Why it matters
+
+Authentication secures the platform...
+
+## Key Components
+
+**File**: `auth/service.js` - Handles password validation
+
+## Risk Areas
+
+- Password security
+- Token expiration
+
+```
 
 ## Execution
 
 1. Read all files using `read_file`
-2. Create Markdown documentation with multiple Mermaid diagrams
-3. Put all Markdown in JSON `content` field as a string
-4. Save to `{{OUTPUT_FILE}}` using `write_file`
-5. Exit
+2. Create comprehensive Markdown documentation with multiple Mermaid diagrams
+3. Save complete Markdown to `{{OUTPUT_FILE}}` using `write_file`
+4. Exit
+
+```
 
 ```
 

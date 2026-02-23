@@ -18,6 +18,7 @@ export class ClaudeClient extends BaseLLMClient {
 
     // See: https://docs.anthropic.com/en/docs/about-claude/models
     this.model = config.model;
+    this.reasoningEffort = config.reasoningEffort;
   }
 
   /**
@@ -54,12 +55,38 @@ export class ClaudeClient extends BaseLLMClient {
       requestParams.temperature = this.config.temperature;
     }
 
+    // Add thinking/reasoning for extended thinking models (Claude Opus 4 supports this)
+    if (options.reasoningEffort !== undefined) {
+      requestParams.thinking = {
+        type: "enabled",
+        budget_tokens: this.getThinkingBudget(options.reasoningEffort),
+      };
+    } else if (this.reasoningEffort !== undefined) {
+      requestParams.thinking = {
+        type: "enabled",
+        budget_tokens: this.getThinkingBudget(this.reasoningEffort),
+      };
+    }
+
     try {
       const response = await this.client.messages.create(requestParams);
       return this.normalizeResponse(response);
     } catch (error) {
       throw new Error(`Claude API error: ${error.message}`);
     }
+  }
+
+  /**
+   * Get thinking token budget based on reasoning effort
+   * @private
+   */
+  getThinkingBudget(effort) {
+    const budgets = {
+      low: 1000,
+      medium: 5000,
+      high: 10000,
+    };
+    return budgets[effort] || budgets.medium;
   }
 
   /**

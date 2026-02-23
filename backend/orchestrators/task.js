@@ -98,7 +98,7 @@ export async function createAnalyzeDocumentationTask(
     },
     agentConfig,
     instructionFile: "backend/instructions/analyze-domain-documentation.md",
-    outputFile: `.code-analysis/domains/${domainId}/documentation.json`,
+    outputFile: `.code-analysis/domains/${domainId}/documentation/content.md`,
   };
 
   await tasksPersistence.writeTask(task);
@@ -454,6 +454,12 @@ async function enhanceOutputWithTaskMetadata(task) {
     return;
   }
 
+  // Skip enhancement for documentation tasks - they output .md files, not JSON
+  // Documentation metadata is generated programatically in the orchestrator
+  if (task.type === TASK_TYPES.DOCUMENTATION) {
+    return;
+  }
+
   try {
     // Read the output file that was just created by the agent
     const outputPath = task.outputFile;
@@ -608,7 +614,13 @@ export async function executeTask(taskId) {
       timestamp: new Date().toISOString(),
     });
   } else {
-    // Task failed - emit failure event
+    // Task failed - move to failed directory
+    await tasksPersistence.moveToFailed(
+      taskId,
+      result.error || "Task execution failed",
+    );
+
+    // Emit failure event
     emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
       taskId,
       type: task.type,

@@ -41,8 +41,9 @@ export async function readDomain(domainId) {
     };
 
     if (documentation) {
-      merged.documentation = documentation.documentation;
-      merged.domainName = documentation.domainName || domainId;
+      merged.documentation = documentation.content;
+      // domainName can come from metadata or fallback to domainId
+      merged.domainName = documentation.metadata?.domainName || domainId;
     }
 
     if (requirements) {
@@ -99,8 +100,13 @@ export async function writeDomain(domainId, data) {
 
   if (documentation) {
     await writeDomainDocumentation(domainId, {
-      ...baseData,
-      documentation,
+      content: documentation,
+      metadata: {
+        domainId,
+        domainName: baseData.domainName,
+        timestamp: baseData.timestamp,
+        status: "completed",
+      },
     });
   }
 

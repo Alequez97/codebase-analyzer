@@ -49,11 +49,11 @@ export async function detect() {
 
 /**
  * Create LLM agent with client and state management
- * @param {Object} agentConfig - Agent configuration with model, maxTokens
+ * @param {Object} agentConfig - Agent configuration with model, maxTokens, reasoningEffort
  * @returns {{ client: BaseLLMClient, state: ChatState }} Agent with client and state
  */
 function createLLMAgent(agentConfig) {
-  const { model, maxTokens } = agentConfig;
+  const { model, maxTokens, reasoningEffort } = agentConfig;
   const { apiKeys } = config;
   const provider = getProviderFromModel(model);
 
@@ -77,6 +77,7 @@ function createLLMAgent(agentConfig) {
       apiKey: apiKeys.openai,
       model,
       maxTokens,
+      reasoningEffort,
     });
     state = new OpenAIChatState(client);
   } else if (provider === "anthropic") {
@@ -89,6 +90,7 @@ function createLLMAgent(agentConfig) {
       apiKey: apiKeys.anthropic,
       model,
       maxTokens,
+      reasoningEffort,
     });
     state = new ChatState(client);
   } else {
@@ -316,8 +318,15 @@ async function generateDomainDocumentation({
     message: `Preparing to analyze ${files.length} files...`,
   });
 
-  // Build system prompt
-  const systemPrompt = buildDocumentationPrompt(domainId, domainName, files);
+  // Read instruction template and process with variables
+  const instructionPath = path.join(
+    config.paths.instructions,
+    "analyze-domain-documentation.md",
+  );
+  const instructionTemplate = await fs.readFile(instructionPath, "utf-8");
+  const templateVariables = await buildTemplateVariables(task);
+  const systemPrompt = processTemplate(instructionTemplate, templateVariables);
+
   chatState.addSystemMessage(systemPrompt);
 
   taskLogger.info(`📝 System prompt prepared (${systemPrompt.length} chars)`, {
@@ -326,7 +335,7 @@ async function generateDomainDocumentation({
 
   // Start conversation
   chatState.addUserMessage(
-    `Analyze the ${domainName} domain and generate comprehensive documentation in Markdown format. Focus on business purpose, architecture, and key components.`,
+    `Analyze the ${domainName} domain and generate the complete documentation with Mermaid diagrams as specified in the instructions.`,
   );
 
   taskLogger.info(`🤖 Starting conversation with LLM...`, {
@@ -338,7 +347,7 @@ async function generateDomainDocumentation({
 
   let iterationCount = 0;
   const maxIterations = 30;
-  let documentationMarkdown = "";
+  let llmWrittenFilePath = null; // Track where LLM wrote the file
   const conversationLog = [];
 
   while (iterationCount < maxIterations) {
@@ -450,6 +459,11 @@ async function generateDomainDocumentation({
           toolCall.arguments,
         );
 
+        // Track write_file calls
+        if (toolCall.name === "write_file" && toolCall.arguments?.path) {
+          llmWrittenFilePath = toolCall.arguments.path;
+        }
+
         chatState.addToolResult(toolCall.id, toolCall.name, result);
 
         const resultSize =
@@ -481,8 +495,12 @@ async function generateDomainDocumentation({
       continue;
     }
 
-    // Extract documentation from response
-    if (response.content) {
+    // Check if LLM indicated it's done (no more tool calls)
+    if (
+      response.stopReason === "end_turn" ||
+      response.stopReason === "stop_sequence" ||
+      response.stopReason === "completed"
+    ) {
       const contentPreview = response.content
         .substring(0, 100)
         .replace(/\n/g, " ");
@@ -493,53 +511,44 @@ async function generateDomainDocumentation({
         },
       );
 
-      documentationMarkdown = extractMarkdownFromResponse(response.content);
+      taskLogger.info("✨ LLM indicated completion!", {
+        component: "LLM-API",
+        taskId: task.id,
+        iterations: iterationCount,
+      });
 
-      if (documentationMarkdown) {
-        taskLogger.info("✨ Documentation generation completed!", {
-          component: "LLM-API",
-          taskId: task.id,
-          iterations: iterationCount,
-          markdownLength: documentationMarkdown.length,
-          markdownSizeKB: Math.round(documentationMarkdown.length / 1000),
-        });
+      emitTaskLog(task, {
+        taskId: task.id,
+        domainId,
+        type: task.type,
+        stream: "stdout",
+        log: `\n✨ [Documentation Complete] LLM finished after ${iterationCount} iterations\n`,
+      });
 
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✨ [Documentation Complete] Generated ${Math.round(documentationMarkdown.length / 1000)}KB of Markdown after ${iterationCount} iterations\n`,
-        });
+      onProgress({
+        stage: "saving",
+        message: "Documentation complete, saving...",
+      });
 
-        onProgress({
-          stage: "saving",
-          message: "Documentation complete, saving...",
-        });
-
-        break;
-      } else {
-        taskLogger.info(
-          "⚠️  Response doesn't contain valid markdown documentation, requesting documentation...",
-          {
-            component: "LLM-API",
-          },
-        );
-
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `⚠️  [Response] No valid markdown found, requesting documentation in next iteration...\n`,
-        });
-      }
+      break;
     }
 
-    // If no tool calls and no documentation, add assistant response and continue
+    // If no completion, add response and ask for documentation
+    if (response.content) {
+      const contentPreview = response.content
+        .substring(0, 100)
+        .replace(/\n/g, " ");
+      taskLogger.info(
+        `💬 LLM response: ${contentPreview}${response.content.length > 100 ? "..." : ""}`,
+        {
+          component: "LLM-API",
+        },
+      );
+    }
+
     chatState.addAssistantMessage(response.content);
     chatState.addUserMessage(
-      "Please provide the complete documentation in Markdown format.",
+      "Please use write_file to save the complete documentation as specified in the instructions.",
     );
 
     onProgress({
@@ -549,9 +558,46 @@ async function generateDomainDocumentation({
     });
   }
 
-  if (!documentationMarkdown) {
+  // Read the output file that LLM should have created
+  const outputPath = path.join(config.target.directory, task.outputFile);
+
+  // Check if LLM wrote to a different path
+  if (llmWrittenFilePath && llmWrittenFilePath !== task.outputFile) {
+    const actualPath = path.join(config.target.directory, llmWrittenFilePath);
+    taskLogger.warn("⚠️  LLM wrote to wrong path, moving file...", {
+      component: "LLM-API",
+      expected: task.outputFile,
+      actual: llmWrittenFilePath,
+    });
+
+    try {
+      const content = await fs.readFile(actualPath, "utf-8");
+      await fs.writeFile(outputPath, content, "utf-8");
+      await fs.unlink(actualPath);
+      taskLogger.info("✅ File moved to correct location", {
+        component: "LLM-API",
+      });
+    } catch (moveError) {
+      taskLogger.error("❌ Failed to move file", {
+        component: "LLM-API",
+        error: moveError.message,
+      });
+    }
+  }
+
+  // Read the markdown documentation file
+  let documentationMarkdown;
+  try {
+    documentationMarkdown = await fs.readFile(outputPath, "utf-8");
+  } catch (error) {
     throw new Error(
-      `Failed to generate documentation after ${maxIterations} iterations`,
+      `Failed to read documentation output: ${error.message}. LLM may not have written the file correctly.`,
+    );
+  }
+
+  if (!documentationMarkdown || documentationMarkdown.length < 100) {
+    throw new Error(
+      `Generated documentation is too short (${documentationMarkdown?.length || 0} chars)`,
     );
   }
 
@@ -616,29 +662,37 @@ async function generateDomainDocumentation({
     logFile: `logs/${task.id}.log`,
   };
 
-  taskLogger.info(`💾 Saving documentation to JSON...`, {
+  taskLogger.info(`💾 Saving documentation metadata...`, {
     component: "LLM-API",
   });
 
   onProgress({
     stage: "saving",
-    message: "Saving documentation...",
+    message: "Saving documentation metadata...",
   });
 
-  // Save documentation with metadata
-  const { writeDomainDocumentation } =
-    await import("../persistence/domain-documentation.js");
-  await writeDomainDocumentation(domainId, {
-    content: documentationMarkdown,
-    metadata,
-  });
+  // Save metadata.json in the documentation folder
+  const documentationDir = path.join(
+    config.target.directory,
+    `.code-analysis/domains/${domainId}/documentation`,
+  );
+  await fs.mkdir(documentationDir, { recursive: true });
+
+  const metadataPath = path.join(documentationDir, "metadata.json");
+  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2), "utf-8");
 
   taskLogger.info(`✅ Documentation saved successfully!`, {
     component: "LLM-API",
   });
   taskLogger.info(`   📂 Domain: ${domainId}`, { component: "LLM-API" });
   taskLogger.info(
-    `   📄 Path: .code-analysis/domains/${domainId}/documentation.json`,
+    `   📄 Content: .code-analysis/domains/${domainId}/documentation/content.md`,
+    {
+      component: "LLM-API",
+    },
+  );
+  taskLogger.info(
+    `   📄 Metadata: .code-analysis/domains/${domainId}/documentation/metadata.json`,
     {
       component: "LLM-API",
     },
@@ -649,7 +703,7 @@ async function generateDomainDocumentation({
     domainId,
     type: task.type,
     stream: "stdout",
-    log: `\n✅ [COMPLETE] Documentation generation finished successfully\n📂 Domain: ${domainId}\n📄 Path: .code-analysis/domains/${domainId}/documentation.json\n`,
+    log: `\n✅ [COMPLETE] Documentation generation finished successfully\n📂 Domain: ${domainId}\n📄 Content: .code-analysis/domains/${domainId}/documentation/content.md\n📄 Metadata: .code-analysis/domains/${domainId}/documentation/metadata.json\n`,
   });
 
   return {
@@ -657,112 +711,6 @@ async function generateDomainDocumentation({
     metadata,
     markdownLength: documentationMarkdown.length,
   };
-}
-
-/**
- * Build system prompt for documentation generation
- */
-function buildDocumentationPrompt(domainId, domainName, files) {
-  return `# Domain Documentation Generation
-
-You are tasked with generating comprehensive business documentation for a software domain.
-
-## Domain Information
-- **Domain ID**: ${domainId}
-- **Domain Name**: ${domainName}
-- **Number of Files**: ${files.length}
-
-## Files to Analyze
-${files.map((f) => `- ${f}`).join("\\n")}
-
-## Your Task
-
-Generate comprehensive Markdown documentation that explains:
-
-1. **Business Purpose** - What this domain does and why it matters
-2. **Core Responsibilities** - Key functions and capabilities
-3. **Architecture** - How components work together
-4. **Key Components** - Important files and their roles
-5. **Risk Areas** - Critical paths that need special attention
-
-## Tools Available
-
-You have access to file reading tools:
-- \`read_file\`: Read the complete contents of a file
-- \`list_directory\`: List files in a directory
-- \`read_file_range\`: Read specific lines from a file
-
-Use these tools to analyze the domain files thoroughly before generating documentation.
-
-## Output Format
-
-Your final output should be pure Markdown with this structure:
-
-\`\`\`markdown
-# ${domainName}
-
-[Brief description of what this domain does]
-
-## Core Responsibilities
-
-- Responsibility 1
-- Responsibility 2
-- Responsibility 3
-
-## Why it matters
-
-[Explain the business value and importance of this domain]
-
-## Key Components
-
-### Component Name (\`path/to/file.js\`)
-Description of what this component does and its role.
-
-### Another Component (\`path/to/another.js\`)
-Description of what this component does and its role.
-
-## Architecture
-
-[Explain how the components work together, data flow, dependencies, etc.]
-
-## Risk Areas
-
-[Identify critical paths, security concerns, performance bottlenecks, etc.]
-\`\`\`
-
-## Guidelines
-
-1. **Clear and Professional** - Write for both technical and non-technical readers
-2. **Business-Focused** - Explain WHY, not just WHAT
-3. **Rich Markdown** - Use headings, lists, code examples, and formatting
-4. **Code Examples** - Include relevant code snippets when helpful
-5. **Component Descriptions** - For each key file, explain its purpose and role
-6. **Architecture Clarity** - Explain how components interact and data flows
-
-Begin by reading the domain files to understand the code, then generate the documentation.`;
-}
-
-/**
- * Extract markdown content from LLM response
- */
-function extractMarkdownFromResponse(content) {
-  // Remove code fences if present
-  let markdown = content.trim();
-
-  // Check if content is wrapped in markdown code fence
-  const markdownFenceRegex = /^```markdown\\s*\\n([\\s\\S]*?)\\n```$/;
-  const match = markdown.match(markdownFenceRegex);
-
-  if (match) {
-    markdown = match[1].trim();
-  }
-
-  // Check if it looks like valid markdown (has headers)
-  if (markdown.includes("#") && markdown.length > 100) {
-    return markdown;
-  }
-
-  return null;
 }
 
 /**

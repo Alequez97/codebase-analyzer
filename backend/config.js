@@ -7,6 +7,7 @@ import { TASK_TYPES } from "./constants/task-types.js";
 import { MODELS } from "./constants/models.js";
 import { PROVIDERS } from "./constants/providers.js";
 import { AGENTS } from "./constants/agents.js";
+import { REASONING_EFFORT } from "./constants/reasoning-effort.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,36 +73,43 @@ const config = {
       agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DIAGRAMS]: {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.REQUIREMENTS]: {
       agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.BUGS_SECURITY]: {
       agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.HIGH,
     },
     [TASK_TYPES.TESTING]: {
       agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_FIX]: {
       agent: AGENTS.AIDER,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
   },
 

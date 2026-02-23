@@ -23,6 +23,7 @@ export async function readTask(taskId) {
       "completed",
       `${taskId}.json`,
     ),
+    path.join(config.paths.targetAnalysis, "tasks", "failed", `${taskId}.json`),
   ];
 
   for (const filePath of locations) {
@@ -113,7 +114,43 @@ export async function moveToCompleted(taskId) {
 }
 
 /**
- * Delete a task from pending or completed
+ * Move task from pending to failed
+ * @param {string} taskId - The task ID
+ * @param {string} error - Error message
+ * @returns {Promise<Object>} The failed task
+ */
+export async function moveToFailed(taskId, error) {
+  const pendingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    "pending",
+    `${taskId}.json`,
+  );
+  const failedPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    "failed",
+    `${taskId}.json`,
+  );
+
+  // Ensure failed directory exists
+  const failedDir = path.dirname(failedPath);
+  await fs.mkdir(failedDir, { recursive: true });
+
+  const content = await fs.readFile(pendingPath, "utf-8");
+  const task = JSON.parse(content);
+  task.status = "failed";
+  task.failedAt = new Date().toISOString();
+  task.error = error || "Task execution failed";
+
+  await fs.writeFile(failedPath, JSON.stringify(task, null, 2), "utf-8");
+  await fs.unlink(pendingPath);
+
+  return task;
+}
+
+/**
+ * Delete a task from pending, completed, or failed
  * Also deletes associated log file if it exists
  * @param {string} taskId - The task ID
  */
@@ -130,19 +167,25 @@ export async function deleteTask(taskId) {
     "completed",
     `${taskId}.json`,
   );
+  const failedPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    "failed",
+    `${taskId}.json`,
+  );
 
   // First read the task to get log file path
   let task = null;
-  try {
-    const content = await fs.readFile(pendingPath, "utf-8");
-    task = JSON.parse(content);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      try {
-        const content = await fs.readFile(completedPath, "utf-8");
-        task = JSON.parse(content);
-      } catch (err) {
-        // Task doesn't exist anywhere
+  const paths = [pendingPath, completedPath, failedPath];
+
+  for (const taskPath of paths) {
+    try {
+      const content = await fs.readFile(taskPath, "utf-8");
+      task = JSON.parse(content);
+      break;
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
       }
     }
   }
@@ -163,14 +206,21 @@ export async function deleteTask(taskId) {
     }
   }
 
-  // Delete task file
-  try {
-    await fs.unlink(pendingPath);
-  } catch (error) {
-    if (error.code !== "ENOENT") {
-      throw error;
+  // Delete task file (try all locations)
+  let deleted = false;
+  for (const taskPath of paths) {
+    try {
+      await fs.unlink(taskPath);
+      deleted = true;
+      break;
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
     }
-    // Try completed
-    await fs.unlink(completedPath);
+  }
+
+  if (!deleted) {
+    throw new Error(`Task ${taskId} not found in any location`);
   }
 }

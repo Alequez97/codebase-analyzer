@@ -6,17 +6,34 @@ import { tryReadJsonFile } from "./utils.js";
 /**
  * Read domain documentation section
  * @param {string} domainId - The domain ID
- * @returns {Promise<Object|null>} Documentation section or null if not found
+ * @returns {Promise<Object|null>} Documentation data {content: string, metadata: object} or null if not found
  */
 export async function readDomainDocumentation(domainId) {
   try {
-    const jsonPath = path.join(
+    const docDir = path.join(
       config.paths.targetAnalysis,
       "domains",
       domainId,
-      "documentation.json",
+      "documentation",
     );
-    return await tryReadJsonFile(jsonPath, `domain ${domainId} documentation`);
+
+    // Read content.md
+    const contentPath = path.join(docDir, "content.md");
+    const content = await fs.readFile(contentPath, "utf-8");
+
+    // Read metadata.json (if exists)
+    const metadataPath = path.join(docDir, "metadata.json");
+    let metadata = null;
+    try {
+      metadata = await tryReadJsonFile(metadataPath, "documentation metadata");
+    } catch (err) {
+      // Metadata is optional
+    }
+
+    return {
+      content,
+      metadata,
+    };
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;
@@ -26,16 +43,32 @@ export async function readDomainDocumentation(domainId) {
 }
 
 /**
- * Write domain documentation section
+ * Write domain documentation (content + metadata)
  * @param {string} domainId - The domain ID
- * @param {Object} data - Documentation data {content: string, metadata: object}
+ * @param {Object} data - Documentation data {content: string, metadata?: object}
  */
 export async function writeDomainDocumentation(domainId, data) {
-  const dirPath = path.join(config.paths.targetAnalysis, "domains", domainId);
-  await fs.mkdir(dirPath, { recursive: true });
+  const docDir = path.join(
+    config.paths.targetAnalysis,
+    "domains",
+    domainId,
+    "documentation",
+  );
+  await fs.mkdir(docDir, { recursive: true });
 
-  const filePath = path.join(dirPath, "documentation.json");
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+  // Write content.md
+  const contentPath = path.join(docDir, "content.md");
+  await fs.writeFile(contentPath, data.content, "utf-8");
+
+  // Write metadata.json (if provided)
+  if (data.metadata) {
+    const metadataPath = path.join(docDir, "metadata.json");
+    await fs.writeFile(
+      metadataPath,
+      JSON.stringify(data.metadata, null, 2),
+      "utf-8",
+    );
+  }
 }
 
 /**
@@ -49,7 +82,8 @@ export async function readDomainDocumentationMetadata(domainId) {
       config.paths.targetAnalysis,
       "domains",
       domainId,
-      "documentation.meta.json",
+      "documentation",
+      "metadata.json",
     );
     return await tryReadJsonFile(
       metadataPath,

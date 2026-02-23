@@ -23,6 +23,7 @@ export class OpenAIClient extends BaseLLMClient {
     // Supports future models like gpt-5.2 when available
     // Current models: gpt-4, gpt-4-turbo, gpt-4o, gpt-4o-mini
     this.model = config.model || "gpt-4o";
+    this.reasoningEffort = config.reasoningEffort;
   }
 
   /**
@@ -38,11 +39,11 @@ export class OpenAIClient extends BaseLLMClient {
       max_output_tokens: this.config.maxTokens || 4096,
     };
 
-    // Add reasoning level if specified (for reasoning models)
-    if (options.reasoning !== undefined) {
-      requestParams.reasoning = options.reasoning;
-    } else if (this.config.reasoning !== undefined) {
-      requestParams.reasoning = this.config.reasoning;
+    // Add reasoning effort if specified (for reasoning models)
+    if (options.reasoningEffort !== undefined) {
+      requestParams.reasoning = { effort: options.reasoningEffort };
+    } else if (this.reasoningEffort !== undefined) {
+      requestParams.reasoning = { effort: this.reasoningEffort };
     }
 
     // Add text verbosity if specified
