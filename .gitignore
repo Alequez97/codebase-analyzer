@@ -6,3 +6,4 @@ analysis-output/
 *.playwright-mcp
 *.aider*
 .DS_Store
+package-lock.json
