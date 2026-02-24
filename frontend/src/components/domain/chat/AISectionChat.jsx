@@ -159,21 +159,21 @@ export default function AISectionChat({
 
   return (
     <Box
-      position="fixed"
-      top={0}
-      right={0}
-      bottom={0}
-      width={{ base: "100%", md: "600px" }}
+      height="100%"
+      maxH="calc(100vh - 40px)"
       bg="white"
-      boxShadow="2xl"
-      zIndex={1000}
+      borderRadius="lg"
+      boxShadow="lg"
+      border="1px solid"
+      borderColor="gray.200"
       display="flex"
       flexDirection="column"
+      overflow="hidden"
     >
       {/* Header */}
       <HStack
-        px={6}
-        py={4}
+        px={4}
+        py={3}
         borderBottom="1px solid"
         borderColor="gray.200"
         justify="space-between"
@@ -181,34 +181,35 @@ export default function AISectionChat({
         bgGradient="to-r"
         gradientFrom="purple.50"
         gradientTo="blue.50"
+        flexShrink={0}
       >
-        <HStack gap={3}>
-          <Box p={2} borderRadius="lg" bg="purple.100" color="purple.600">
-            <Sparkles size={20} />
+        <HStack gap={2}>
+          <Box p={1.5} borderRadius="md" bg="purple.100" color="purple.600">
+            <Sparkles size={18} />
           </Box>
           <Box>
-            <Heading size="md">Edit {sectionName} with AI</Heading>
+            <Heading size="sm">Edit {sectionName} with AI</Heading>
             <Text fontSize="xs" color="gray.600">
-              Chat with AI to improve your {sectionName.toLowerCase()}
+              Chat to improve content
             </Text>
           </Box>
         </HStack>
-        <HStack gap={2}>
+        <HStack gap={1}>
           <IconButton
-            size="sm"
+            size="xs"
             variant="ghost"
             onClick={handleReset}
             title="Reset conversation"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={14} />
           </IconButton>
           <IconButton
-            size="sm"
+            size="xs"
             variant="ghost"
             onClick={onClose}
             title="Close chat"
           >
-            <X size={18} />
+            <X size={16} />
           </IconButton>
         </HStack>
       </HStack>
@@ -216,11 +217,12 @@ export default function AISectionChat({
       {/* Context Banner - Show current content */}
       {currentContent && (
         <Box
-          px={6}
-          py={3}
+          px={4}
+          py={2}
           bg="blue.50"
           borderBottom="1px solid"
           borderColor="blue.100"
+          flexShrink={0}
         >
           <HStack gap={2}>
             <Badge colorPalette="blue" size="sm">
@@ -234,13 +236,13 @@ export default function AISectionChat({
       )}
 
       {/* Messages Area */}
-      <Box flex={1} overflowY="auto" px={6} py={4} bg="gray.50">
-        <VStack align="stretch" gap={4}>
+      <Box flex={1} overflowY="auto" px={4} py={3} bg="gray.50">
+        <VStack align="stretch" gap={3}>
           {messages.map((message) => (
             <Box
               key={message.id}
               alignSelf={message.role === "user" ? "flex-end" : "flex-start"}
-              maxW="85%"
+              maxW="90%"
             >
               <Card.Root
                 size="sm"
@@ -248,8 +250,8 @@ export default function AISectionChat({
                 color={message.role === "user" ? "white" : "gray.800"}
                 boxShadow="sm"
               >
-                <Card.Body>
-                  <HStack gap={2} mb={2} align="center">
+                <Card.Body p={3}>
+                  <HStack gap={2} mb={1.5} align="center">
                     {message.role === "assistant" ? (
                       <Box
                         p={1}
@@ -257,11 +259,11 @@ export default function AISectionChat({
                         bg="purple.100"
                         color="purple.600"
                       >
-                        <Bot size={14} />
+                        <Bot size={12} />
                       </Box>
                     ) : (
                       <Box p={1} borderRadius="md" bg="blue.400" color="white">
-                        <User size={14} />
+                        <User size={12} />
                       </Box>
                     )}
                     <Text
@@ -269,7 +271,7 @@ export default function AISectionChat({
                       fontWeight="medium"
                       color={message.role === "user" ? "blue.100" : "gray.600"}
                     >
-                      {message.role === "assistant" ? "AI Assistant" : "You"}
+                      {message.role === "assistant" ? "AI" : "You"}
                     </Text>
                     <IconButton
                       size="xs"
@@ -282,37 +284,37 @@ export default function AISectionChat({
                       color={message.role === "user" ? "white" : "gray.600"}
                     >
                       {copiedMessageId === message.id ? (
-                        <Check size={12} />
+                        <Check size={10} />
                       ) : (
-                        <Copy size={12} />
+                        <Copy size={10} />
                       )}
                     </IconButton>
                   </HStack>
 
                   {message.role === "assistant" ? (
-                    <Box fontSize="sm" lineHeight="1.6">
+                    <Box fontSize="xs" lineHeight="1.5">
                       <MarkdownRenderer content={message.content} />
                     </Box>
                   ) : (
-                    <Text fontSize="sm" lineHeight="1.6" whiteSpace="pre-wrap">
+                    <Text fontSize="xs" lineHeight="1.5" whiteSpace="pre-wrap">
                       {message.content}
                     </Text>
                   )}
 
                   {message.hasSuggestion && (
                     <Box
-                      mt={3}
-                      pt={3}
+                      mt={2}
+                      pt={2}
                       borderTop="1px solid"
                       borderColor="gray.200"
                     >
                       <Button
-                        size="sm"
+                        size="xs"
                         colorPalette="green"
                         variant="subtle"
                         onClick={() => handleApplySuggestion(message)}
                       >
-                        <Check size={14} />
+                        <Check size={12} />
                         Apply this suggestion
                       </Button>
                     </Box>
@@ -325,15 +327,18 @@ export default function AISectionChat({
                 mt={1}
                 textAlign={message.role === "user" ? "right" : "left"}
               >
-                {message.timestamp.toLocaleTimeString()}
+                {message.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </Text>
             </Box>
           ))}
 
           {isLoading && (
-            <Box alignSelf="flex-start" maxW="85%">
+            <Box alignSelf="flex-start" maxW="90%">
               <Card.Root size="sm" bg="white" boxShadow="sm">
-                <Card.Body>
+                <Card.Body p={3}>
                   <HStack gap={2}>
                     <Box
                       p={1}
@@ -341,9 +346,9 @@ export default function AISectionChat({
                       bg="purple.100"
                       color="purple.600"
                     >
-                      <Bot size={14} />
+                      <Bot size={12} />
                     </Box>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text fontSize="xs" color="gray.600">
                       AI is thinking...
                     </Text>
                   </HStack>
@@ -358,11 +363,12 @@ export default function AISectionChat({
 
       {/* Input Area */}
       <Box
-        px={6}
-        py={4}
+        px={4}
+        py={3}
         borderTop="1px solid"
         borderColor="gray.200"
         bg="white"
+        flexShrink={0}
       >
         <VStack gap={2} align="stretch">
           <Textarea
@@ -371,22 +377,23 @@ export default function AISectionChat({
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={inputPlaceholder}
-            rows={3}
+            rows={2}
             resize="none"
             disabled={isLoading}
+            fontSize="sm"
           />
           <HStack justify="space-between">
             <Text fontSize="xs" color="gray.500">
-              Press Enter to send, Shift+Enter for new line
+              Enter to send
             </Text>
             <Button
-              size="sm"
+              size="xs"
               colorPalette="blue"
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || isLoading}
               loading={isLoading}
             >
-              <Send size={14} />
+              <Send size={12} />
               Send
             </Button>
           </HStack>
@@ -395,12 +402,12 @@ export default function AISectionChat({
 
       {/* Sample Prompts (shown when no messages yet) */}
       {messages.length <= 1 && samplePrompts.length > 0 && (
-        <Box px={6} pb={4}>
+        <Box px={4} pb={3} flexShrink={0}>
           <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={2}>
             Try asking:
           </Text>
           <VStack align="stretch" gap={1}>
-            {samplePrompts.map((prompt, index) => (
+            {samplePrompts.slice(0, 3).map((prompt, index) => (
               <Button
                 key={index}
                 size="xs"

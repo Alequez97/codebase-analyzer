@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Container, VStack, List } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { Container, VStack, List, Grid, GridItem, Box } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toaster } from "../components/ui/toaster";
 import { TASK_TYPES } from "../constants/task-types";
@@ -22,10 +22,15 @@ import DomainDiagramsSection from "../components/domain/DomainDiagramsSection";
 import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
 import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
 import DomainTestingSection from "../components/domain/DomainTestingSection";
+import { AISectionChat } from "../components/domain/chat";
+import { DOCUMENTATION_CHAT_CONFIG } from "../config";
 
 export default function DomainDetailsPage() {
   const navigate = useNavigate();
   const { domainId } = useParams();
+
+  // Chat panel state - tracks which section's chat is open
+  const [activeChatSection, setActiveChatSection] = useState(null);
 
   // Codebase store (for analysis and domain list)
   const { analysis, fetchAnalysis } = useCodebaseStore();
@@ -309,124 +314,167 @@ export default function DomainDetailsPage() {
   };
 
   return (
-    <Container maxW="container.xl" py={8}>
-      <VStack align="stretch" gap={6}>
-        <DomainHeader
-          domain={domain}
-          domainId={domainId}
-          analyzing={false}
-          onBack={() => navigate("/")}
-        />
+    <Container maxW="100%" py={8} px={4}>
+      <Grid
+        templateColumns={{
+          base: "1fr",
+          lg: activeChatSection ? "1fr 400px" : "1fr",
+        }}
+        gap={6}
+        alignItems="start"
+      >
+        {/* Main Content Column */}
+        <GridItem overflowX="hidden">
+          <VStack align="stretch" gap={6}>
+            <DomainHeader
+              domain={domain}
+              domainId={domainId}
+              analyzing={false}
+              onBack={() => navigate("/")}
+            />
 
-        {/* Section-specific errors in a single alert */}
-        {domain && errors.length > 0 && (
-          <Alert.Root status="error" alignItems="flex-start">
-            <Alert.Indicator mt={1} />
-            <VStack align="stretch" gap={1}>
-              <Alert.Title>
-                {errors.length === 1
-                  ? "Analysis Error"
-                  : `${errors.length} Analysis Errors`}
-              </Alert.Title>
-              <Alert.Description>
-                <List.Root>
-                  {errors.map((error, index) => (
-                    <List.Item key={index}>
-                      <strong>{error.section}:</strong> {error.message}
-                    </List.Item>
-                  ))}
-                </List.Root>
-              </Alert.Description>
-            </VStack>
-          </Alert.Root>
+            {/* Section-specific errors in a single alert */}
+            {domain && errors.length > 0 && (
+              <Alert.Root status="error" alignItems="flex-start">
+                <Alert.Indicator mt={1} />
+                <VStack align="stretch" gap={1}>
+                  <Alert.Title>
+                    {errors.length === 1
+                      ? "Analysis Error"
+                      : `${errors.length} Analysis Errors`}
+                  </Alert.Title>
+                  <Alert.Description>
+                    <List.Root>
+                      {errors.map((error, index) => (
+                        <List.Item key={index}>
+                          <strong>{error.section}:</strong> {error.message}
+                        </List.Item>
+                      ))}
+                    </List.Root>
+                  </Alert.Description>
+                </VStack>
+              </Alert.Root>
+            )}
+
+            <DomainFilesSection
+              files={filesArray}
+              loading={!domain}
+              onFilesChange={(files) => updateEditedFiles(domainId, files)}
+              onSave={handleSaveFiles}
+              onReset={() => resetEditedFiles(domainId)}
+            />
+
+            <DomainDocumentationSection
+              documentation={documentation}
+              loading={documentationLoading}
+              progress={documentationProgress}
+              onAnalyze={() => domain && docStore.analyze(domain)}
+              editedDocumentation={documentationText}
+              onDocumentationChange={(value) =>
+                updateEditedDocumentation(domainId, value)
+              }
+              onSave={handleSaveDocumentation}
+              onReset={() => resetEditedDocumentation(domainId)}
+              showLogs={showDomainLogs}
+              logs={documentationLogs}
+              logsLoading={documentationLogsLoading}
+              onOpenChat={() =>
+                setActiveChatSection(SECTION_TYPES.DOCUMENTATION)
+              }
+              isChatOpen={activeChatSection === SECTION_TYPES.DOCUMENTATION}
+            />
+
+            <DomainDiagramsSection
+              diagrams={diagrams}
+              loading={diagramsLoading}
+              progress={diagramsProgress}
+              onAnalyze={() => domain && diagramsStore.analyze(domain, true)}
+              domainId={domainId}
+              showLogs={showDomainLogs}
+              logs={diagramsLogs}
+              logsLoading={diagramsLogsLoading}
+            />
+
+            <DomainRequirementsSection
+              requirements={requirements}
+              requirementsText={requirementsText}
+              loading={requirementsLoading}
+              progress={requirementsProgress}
+              hasDocumentation={!!documentation}
+              onRequirementsChange={(value) =>
+                updateEditedRequirements(domainId, value)
+              }
+              onRequirementsStructuredChange={(value) =>
+                updateEditedRequirementsStructured(domainId, value)
+              }
+              onAnalyze={(userContext, includeDocumentation) =>
+                domain &&
+                reqStore.analyze(domain, userContext, includeDocumentation)
+              }
+              onSave={handleSaveRequirements}
+              onReset={() => resetEditedRequirements(domainId)}
+              showLogs={showDomainLogs}
+              logs={requirementsLogs}
+              logsLoading={requirementsLogsLoading}
+            />
+
+            <DomainBugsSecuritySection
+              domainId={domainId}
+              bugsSecurity={bugsSecurity}
+              loading={bugsSecurityLoading}
+              progress={bugsSecurityProgress}
+              hasRequirements={!!requirements}
+              onAnalyze={(includeRequirements) =>
+                domain && bugsStore.analyze(domain, includeRequirements)
+              }
+              onRefresh={() => bugsStore.fetch(domainId)}
+              showLogs={showDomainLogs}
+              logs={bugsSecurityLogs}
+              logsLoading={bugsSecurityLogsLoading}
+            />
+
+            <DomainTestingSection
+              domainId={domainId}
+              testing={testing}
+              loading={testingLoading}
+              progress={testingProgress}
+              applyingTests={applyingTests}
+              onAnalyze={() => domain && testStore.analyze(domain)}
+              onApplyTest={handleApplyTest}
+              showLogs={showDomainLogs}
+              logs={testingLogs}
+              logsLoading={testingLogsLoading}
+            />
+          </VStack>
+        </GridItem>
+
+        {/* Chat Panel Column - Sticky on the right */}
+        {activeChatSection && (
+          <GridItem
+            display={{ base: "none", lg: "block" }}
+            position="sticky"
+            top="20px"
+            maxH="calc(100vh - 40px)"
+            overflowY="hidden"
+          >
+            <Box h="full">
+              <AISectionChat
+                {...DOCUMENTATION_CHAT_CONFIG}
+                currentContent={documentation}
+                onClose={() => setActiveChatSection(null)}
+                onApplyChanges={(newContent) => {
+                  // Apply AI-suggested changes based on section
+                  if (activeChatSection === SECTION_TYPES.DOCUMENTATION) {
+                    updateEditedDocumentation(domainId, newContent);
+                  }
+                  setActiveChatSection(null);
+                }}
+                domainId={domainId}
+              />
+            </Box>
+          </GridItem>
         )}
-
-        <DomainFilesSection
-          files={filesArray}
-          loading={!domain}
-          onFilesChange={(files) => updateEditedFiles(domainId, files)}
-          onSave={handleSaveFiles}
-          onReset={() => resetEditedFiles(domainId)}
-        />
-
-        <DomainDocumentationSection
-          documentation={documentation}
-          loading={documentationLoading}
-          progress={documentationProgress}
-          onAnalyze={() => domain && docStore.analyze(domain)}
-          editedDocumentation={documentationText}
-          onDocumentationChange={(value) =>
-            updateEditedDocumentation(domainId, value)
-          }
-          onSave={handleSaveDocumentation}
-          onReset={() => resetEditedDocumentation(domainId)}
-          showLogs={showDomainLogs}
-          logs={documentationLogs}
-          logsLoading={documentationLogsLoading}
-        />
-
-        <DomainDiagramsSection
-          diagrams={diagrams}
-          loading={diagramsLoading}
-          progress={diagramsProgress}
-          onAnalyze={() => domain && diagramsStore.analyze(domain, true)}
-          domainId={domainId}
-          showLogs={showDomainLogs}
-          logs={diagramsLogs}
-          logsLoading={diagramsLogsLoading}
-        />
-
-        <DomainRequirementsSection
-          requirements={requirements}
-          requirementsText={requirementsText}
-          loading={requirementsLoading}
-          progress={requirementsProgress}
-          hasDocumentation={!!documentation}
-          onRequirementsChange={(value) =>
-            updateEditedRequirements(domainId, value)
-          }
-          onRequirementsStructuredChange={(value) =>
-            updateEditedRequirementsStructured(domainId, value)
-          }
-          onAnalyze={(userContext, includeDocumentation) =>
-            domain &&
-            reqStore.analyze(domain, userContext, includeDocumentation)
-          }
-          onSave={handleSaveRequirements}
-          onReset={() => resetEditedRequirements(domainId)}
-          showLogs={showDomainLogs}
-          logs={requirementsLogs}
-          logsLoading={requirementsLogsLoading}
-        />
-
-        <DomainBugsSecuritySection
-          domainId={domainId}
-          bugsSecurity={bugsSecurity}
-          loading={bugsSecurityLoading}
-          progress={bugsSecurityProgress}
-          hasRequirements={!!requirements}
-          onAnalyze={(includeRequirements) =>
-            domain && bugsStore.analyze(domain, includeRequirements)
-          }
-          onRefresh={() => bugsStore.fetch(domainId)}
-          showLogs={showDomainLogs}
-          logs={bugsSecurityLogs}
-          logsLoading={bugsSecurityLogsLoading}
-        />
-
-        <DomainTestingSection
-          domainId={domainId}
-          testing={testing}
-          loading={testingLoading}
-          progress={testingProgress}
-          applyingTests={applyingTests}
-          onAnalyze={() => domain && testStore.analyze(domain)}
-          onApplyTest={handleApplyTest}
-          showLogs={showDomainLogs}
-          logs={testingLogs}
-          logsLoading={testingLogsLoading}
-        />
-      </VStack>
+      </Grid>
     </Container>
   );
 }

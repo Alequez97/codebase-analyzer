@@ -11,7 +11,6 @@ import {
   Collapsible,
   Skeleton,
   VStack,
-  Portal,
 } from "@chakra-ui/react";
 import {
   Pencil,
@@ -27,8 +26,6 @@ import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
 import MarkdownRenderer from "../MarkdownRenderer";
 import LogsViewer from "./LogsViewer";
-import { AISectionChat } from "./chat";
-import { DOCUMENTATION_CHAT_CONFIG } from "../../config";
 
 export default function DomainDocumentationSection({
   documentation,
@@ -42,10 +39,11 @@ export default function DomainDocumentationSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
+  onOpenChat,
+  isChatOpen = false,
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleEnterEditMode = () => {
     setIsEditMode(true);
@@ -143,11 +141,11 @@ export default function DomainDocumentationSection({
                   <Button
                     size="sm"
                     colorPalette="purple"
-                    variant="outline"
-                    onClick={() => setIsChatOpen(true)}
+                    variant={isChatOpen ? "solid" : "outline"}
+                    onClick={onOpenChat}
                   >
                     <MessageSquare size={14} />
-                    Edit with AI
+                    {isChatOpen ? "Chat Open" : "Edit with AI"}
                   </Button>
                 )}
               </>
@@ -230,22 +228,6 @@ export default function DomainDocumentationSection({
           </Card.Body>
         </Collapsible.Content>
       </Collapsible.Root>
-
-      {/* AI Chat Panel - Opens as a side panel */}
-      {isChatOpen && (
-        <Portal>
-          <AISectionChat
-            {...DOCUMENTATION_CHAT_CONFIG}
-            currentContent={documentation}
-            onClose={() => setIsChatOpen(false)}
-            onApplyChanges={(newContent) => {
-              // MOCK: Apply AI-suggested changes
-              onDocumentationChange?.(newContent);
-              setIsChatOpen(false);
-            }}
-          />
-        </Portal>
-      )}
     </Card.Root>
   );
 }
