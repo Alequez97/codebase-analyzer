@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
   TestTube,
+  MessageSquare,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
@@ -36,6 +37,8 @@ export default function DomainTestingSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
+  onOpenChat,
+  isChatOpen = false,
 }) {
   const existingTestFiles = testing?.existingTests || [];
   const [isExpanded, setIsExpanded] = useState(false);
@@ -74,17 +77,32 @@ export default function DomainTestingSection({
           </HStack>
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
             {!showLogs && (
-              <Button
-                size="sm"
-                colorPalette="blue"
-                variant="outline"
-                onClick={onAnalyze}
-                loading={loading}
-                loadingText="Analyzing"
-              >
-                <Sparkles size={14} />
-                {testing ? "Re-analyze tests" : "Analyze tests"}
-              </Button>
+              <>
+                {/* Show "Edit with AI" if testing data exists, otherwise "Analyze tests" */}
+                {testing ? (
+                  <Button
+                    size="sm"
+                    colorPalette="purple"
+                    variant={isChatOpen ? "solid" : "outline"}
+                    onClick={onOpenChat}
+                  >
+                    <MessageSquare size={14} />
+                    Edit with AI
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    colorPalette="blue"
+                    variant="outline"
+                    onClick={onAnalyze}
+                    loading={loading}
+                    loadingText="Analyzing"
+                  >
+                    <Sparkles size={14} />
+                    Analyze tests
+                  </Button>
+                )}
+              </>
             )}
           </HStack>
         </HStack>

@@ -121,8 +121,18 @@ export default function DomainDocumentationSection({
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
             {!isEditMode && !showLogs && (
               <>
-                {/* Analyze button - only shown when no documentation exists */}
-                {!documentation && (
+                {/* Show "Edit with AI" if content exists, otherwise "Analyze" */}
+                {documentation ? (
+                  <Button
+                    size="sm"
+                    colorPalette="purple"
+                    variant={isChatOpen ? "solid" : "outline"}
+                    onClick={onOpenChat}
+                  >
+                    <MessageSquare size={14} />
+                    Edit with AI
+                  </Button>
+                ) : (
                   <Button
                     size="sm"
                     colorPalette="blue"
@@ -133,19 +143,6 @@ export default function DomainDocumentationSection({
                   >
                     <Sparkles size={14} />
                     Analyze documentation
-                  </Button>
-                )}
-
-                {/* Edit with AI button - shown when documentation exists */}
-                {documentation && (
-                  <Button
-                    size="sm"
-                    colorPalette="purple"
-                    variant={isChatOpen ? "solid" : "outline"}
-                    onClick={onOpenChat}
-                  >
-                    <MessageSquare size={14} />
-                    {isChatOpen ? "Chat Open" : "Edit with AI"}
                   </Button>
                 )}
               </>

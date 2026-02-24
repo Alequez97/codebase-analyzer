@@ -22,6 +22,7 @@ import {
   ChevronRight,
   AlertCircle,
   ChevronDown,
+  MessageSquare,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
@@ -54,6 +55,8 @@ export default function DomainDiagramsSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
+  onOpenChat,
+  isChatOpen = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedDiagramIndex, setSelectedDiagramIndex] = useState(0);
@@ -430,17 +433,32 @@ export default function DomainDiagramsSection({
           </HStack>
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
             {!showLogs && (
-              <Button
-                size="sm"
-                colorPalette="blue"
-                variant="outline"
-                onClick={handleAnalyze}
-                loading={loading}
-                loadingText="Analyzing"
-              >
-                <Sparkles size={14} />
-                Re-analyze
-              </Button>
+              <>
+                {/* Show "Edit with AI" if diagrams exist, otherwise "Generate Diagrams" */}
+                {diagrams?.diagrams?.length > 0 ? (
+                  <Button
+                    size="sm"
+                    colorPalette="purple"
+                    variant={isChatOpen ? "solid" : "outline"}
+                    onClick={onOpenChat}
+                  >
+                    <MessageSquare size={14} />
+                    Edit with AI
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    colorPalette="blue"
+                    variant="outline"
+                    onClick={handleAnalyze}
+                    loading={loading}
+                    loadingText="Generating"
+                  >
+                    <Sparkles size={14} />
+                    Generate Diagrams
+                  </Button>
+                )}
+              </>
             )}
           </HStack>
         </HStack>

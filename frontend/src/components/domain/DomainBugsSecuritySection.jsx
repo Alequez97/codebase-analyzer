@@ -25,6 +25,7 @@ import {
   FileCode,
   Lightbulb,
   ListChecks,
+  MessageSquare,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
@@ -95,6 +96,8 @@ export default function DomainBugsSecuritySection({
   logs = "",
   logsLoading = false,
   hasRequirements = false,
+  onOpenChat,
+  isChatOpen = false,
 }) {
   const updateBugsSecurityFindingAction = useDomainBugsSecurityStore(
     (state) => state.updateFindingAction,
@@ -283,17 +286,30 @@ export default function DomainBugsSecuritySection({
               )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-              <Button
-                size="sm"
-                variant="outline"
-                colorPalette="purple"
-                onClick={handleAnalyzeClick}
-                loading={isAnalyzing}
-                disabled={isAnalyzing}
-              >
-                <Sparkles size={16} />
-                {isAnalyzing ? "Analyzing..." : "Analyze"}
-              </Button>
+              {/* Show "Edit with AI" if findings exist, otherwise "Analyze" */}
+              {hasData && sortedFindings.length > 0 ? (
+                <Button
+                  size="sm"
+                  colorPalette="purple"
+                  variant={isChatOpen ? "solid" : "outline"}
+                  onClick={onOpenChat}
+                >
+                  <MessageSquare size={14} />
+                  Edit with AI
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  colorPalette="blue"
+                  onClick={handleAnalyzeClick}
+                  loading={isAnalyzing}
+                  disabled={isAnalyzing}
+                >
+                  <Sparkles size={16} />
+                  {isAnalyzing ? "Analyzing..." : "Analyze"}
+                </Button>
+              )}
             </HStack>
           </HStack>
         </Card.Header>

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Card } from "../../ui/card";
 import MarkdownRenderer from "../../MarkdownRenderer";
+import { useDomainSectionsChatStore } from "../../../store/useDomainSectionsChatStore";
 
 /**
  * AISectionChat - Generic AI-powered chat interface for editing domain sections
@@ -37,7 +38,6 @@ import MarkdownRenderer from "../../MarkdownRenderer";
  * @param {string} sectionName - Display name (e.g., "Documentation", "Requirements")
  * @param {string} sectionType - Type identifier for API calls (e.g., "documentation", "requirements")
  * @param {object} currentContent - Current section content object
- * @param {string} contextDescription - Description shown in context banner
  * @param {string} initialGreeting - AI's initial greeting message
  * @param {array} samplePrompts - Array of sample prompt strings
  * @param {string} inputPlaceholder - Placeholder text for input field
@@ -51,7 +51,6 @@ export default function AISectionChat({
   sectionName = "Section",
   sectionType = "section",
   currentContent = null,
-  contextDescription = null,
   initialGreeting = "Hello! I'm your AI assistant. How can I help you improve this section?",
   samplePrompts = [
     "Add more detailed examples",
@@ -65,16 +64,17 @@ export default function AISectionChat({
   onApplyChanges,
   domainId,
 }) {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      role: "assistant",
-      content: initialGreeting,
-      timestamp: new Date(),
-    },
-  ]);
+  // Get messages from domain sections chat store
+  const {
+    getMessages,
+    sendMessage,
+    clearChatHistory,
+    isAiResponding,
+    addMessage,
+  } = useDomainSectionsChatStore();
+  const messages = getMessages(domainId, sectionType);
+
   const [inputMessage, setInputMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -85,31 +85,16 @@ export default function AISectionChat({
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return;
+    if (!inputMessage.trim() || isAiResponding) return;
 
-    const userMessage = {
-      id: Date.now(),
-      role: "user",
-      content: inputMessage.trim(),
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const message = inputMessage.trim();
     setInputMessage("");
-    setIsLoading(true);
 
-    // MOCK: Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      const aiMessage = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: `I understand you want to: "${userMessage.content}"\n\nHere's my suggested update to the ${sectionName.toLowerCase()}:\n\n---\n\n## Updated Section\n\nI've made the following improvements based on your request...\n\n*[This is a mock response. In production, this will call the backend AI service for ${sectionType}]*`,
-        timestamp: new Date(),
-        hasSuggestion: true, // Indicates this message contains a content update
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
-    }, 1500);
+    try {
+      await sendMessage(domainId, sectionType, message, currentContent);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -137,25 +122,15 @@ export default function AISectionChat({
   };
 
   const handleReset = () => {
-    setMessages([
-      {
-        id: Date.now(),
-        role: "assistant",
-        content: initialGreeting,
-        timestamp: new Date(),
-      },
-    ]);
+    clearChatHistory(domainId, sectionType);
+    // Re-add the initial greeting
+    addMessage(domainId, sectionType, {
+      id: Date.now(),
+      role: "assistant",
+      content: initialGreeting,
+      timestamp: new Date(),
+    });
   };
-
-  // Calculate context description
-  const defaultContextDescription = currentContent
-    ? `AI has access to your current ${sectionName.toLowerCase()} (${
-        currentContent.content?.length || 0
-      } characters)`
-    : `AI will help you create ${sectionName.toLowerCase()}`;
-
-  const displayContextDescription =
-    contextDescription || defaultContextDescription;
 
   return (
     <Box
@@ -188,10 +163,7 @@ export default function AISectionChat({
             <Sparkles size={18} />
           </Box>
           <Box>
-            <Heading size="sm">Edit {sectionName} with AI</Heading>
-            <Text fontSize="xs" color="gray.600">
-              Chat to improve content
-            </Text>
+            <Heading size="sm">{sectionName}</Heading>
           </Box>
         </HStack>
         <HStack gap={1}>
@@ -213,27 +185,6 @@ export default function AISectionChat({
           </IconButton>
         </HStack>
       </HStack>
-
-      {/* Context Banner - Show current content */}
-      {currentContent && (
-        <Box
-          px={4}
-          py={2}
-          bg="blue.50"
-          borderBottom="1px solid"
-          borderColor="blue.100"
-          flexShrink={0}
-        >
-          <HStack gap={2}>
-            <Badge colorPalette="blue" size="sm">
-              Context
-            </Badge>
-            <Text fontSize="xs" color="gray.700">
-              {displayContextDescription}
-            </Text>
-          </HStack>
-        </Box>
-      )}
 
       {/* Messages Area */}
       <Box flex={1} overflowY="auto" px={4} py={3} bg="gray.50">
@@ -327,7 +278,7 @@ export default function AISectionChat({
                 mt={1}
                 textAlign={message.role === "user" ? "right" : "left"}
               >
-                {message.timestamp.toLocaleTimeString([], {
+                {new Date(message.timestamp).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -335,7 +286,7 @@ export default function AISectionChat({
             </Box>
           ))}
 
-          {isLoading && (
+          {isAiResponding && (
             <Box alignSelf="flex-start" maxW="90%">
               <Card.Root size="sm" bg="white" boxShadow="sm">
                 <Card.Body p={3}>
@@ -379,19 +330,16 @@ export default function AISectionChat({
             placeholder={inputPlaceholder}
             rows={2}
             resize="none"
-            disabled={isLoading}
+            disabled={isAiResponding}
             fontSize="sm"
           />
-          <HStack justify="space-between">
-            <Text fontSize="xs" color="gray.500">
-              Enter to send
-            </Text>
+          <HStack justify="flex-end">
             <Button
               size="xs"
               colorPalette="blue"
               onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              loading={isLoading}
+              disabled={!inputMessage.trim() || isAiResponding}
+              loading={isAiResponding}
             >
               <Send size={12} />
               Send

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Container, VStack, List, Grid, GridItem, Box } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toaster } from "../components/ui/toaster";
@@ -14,6 +14,7 @@ import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useTestingStore } from "../store/useTestingStore";
 import { useLogsStore } from "../store/useLogsStore";
+import { useDomainSectionsChatStore } from "../store/useDomainSectionsChatStore";
 import { Alert } from "../components/ui/alert";
 import DomainHeader from "../components/domain/DomainHeader";
 import DomainFilesSection from "../components/domain/DomainFilesSection";
@@ -23,14 +24,27 @@ import DomainRequirementsSection from "../components/domain/DomainRequirementsSe
 import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
 import DomainTestingSection from "../components/domain/DomainTestingSection";
 import { AISectionChat } from "../components/domain/chat";
-import { DOCUMENTATION_CHAT_CONFIG } from "../config";
+import {
+  getChatConfig,
+  DOCUMENTATION_CHAT_CONFIG,
+  REQUIREMENTS_CHAT_CONFIG,
+  DIAGRAMS_CHAT_CONFIG,
+  BUGS_SECURITY_CHAT_CONFIG,
+  TESTING_CHAT_CONFIG,
+} from "../config";
 
 export default function DomainDetailsPage() {
   const navigate = useNavigate();
   const { domainId } = useParams();
 
-  // Chat panel state - tracks which section's chat is open
-  const [activeChatSection, setActiveChatSection] = useState(null);
+  // Domain sections chat store
+  const {
+    openChat,
+    closeChat,
+    activeDomainId,
+    activeSectionType,
+    isChatActive,
+  } = useDomainSectionsChatStore();
 
   // Codebase store (for analysis and domain list)
   const { analysis, fetchAnalysis } = useCodebaseStore();
@@ -313,12 +327,69 @@ export default function DomainDetailsPage() {
     }
   };
 
+  // Get current chat configuration and content based on active section
+  const getCurrentChatData = () => {
+    if (!activeSectionType) return null;
+
+    const configs = {
+      [SECTION_TYPES.DOCUMENTATION]: {
+        config: DOCUMENTATION_CHAT_CONFIG,
+        content: documentation,
+      },
+      [SECTION_TYPES.REQUIREMENTS]: {
+        config: REQUIREMENTS_CHAT_CONFIG,
+        content: requirements,
+      },
+      [SECTION_TYPES.DIAGRAMS]: {
+        config: DIAGRAMS_CHAT_CONFIG,
+        content: diagrams,
+      },
+      [SECTION_TYPES.BUGS_SECURITY]: {
+        config: BUGS_SECURITY_CHAT_CONFIG,
+        content: bugsSecurity,
+      },
+      [SECTION_TYPES.TESTING]: {
+        config: TESTING_CHAT_CONFIG,
+        content: testing,
+      },
+    };
+
+    return configs[activeSectionType] || null;
+  };
+
+  const handleApplyChatChanges = (newContent) => {
+    // Apply AI-suggested changes based on section
+    switch (activeSectionType) {
+      case SECTION_TYPES.DOCUMENTATION:
+        updateEditedDocumentation(domainId, newContent);
+        break;
+      case SECTION_TYPES.REQUIREMENTS:
+        updateEditedRequirements(domainId, newContent);
+        break;
+      case SECTION_TYPES.DIAGRAMS:
+        // Diagrams might need special handling
+        console.log("Apply diagrams changes:", newContent);
+        break;
+      case SECTION_TYPES.BUGS_SECURITY:
+        // Bugs & Security might need special handling
+        console.log("Apply bugs/security changes:", newContent);
+        break;
+      case SECTION_TYPES.TESTING:
+        // Testing might need special handling
+        console.log("Apply testing changes:", newContent);
+        break;
+    }
+    closeChat();
+  };
+
+  const chatData = getCurrentChatData();
+
   return (
     <Container maxW="100%" py={8} px={4}>
       <Grid
         templateColumns={{
           base: "1fr",
-          lg: activeChatSection ? "1fr 400px" : "1fr",
+          lg: activeSectionType ? "1fr 400px" : "1fr",
         }}
         gap={6}
         alignItems="start"
@@ -379,9 +450,13 @@ export default function DomainDetailsPage() {
               logs={documentationLogs}
               logsLoading={documentationLogsLoading}
               onOpenChat={() =>
-                setActiveChatSection(SECTION_TYPES.DOCUMENTATION)
+                openChat(
+                  domainId,
+                  SECTION_TYPES.DOCUMENTATION,
+                  DOCUMENTATION_CHAT_CONFIG.initialGreeting,
+                )
               }
-              isChatOpen={activeChatSection === SECTION_TYPES.DOCUMENTATION}
+              isChatOpen={isChatActive(domainId, SECTION_TYPES.DOCUMENTATION)}
             />
 
             <DomainDiagramsSection
@@ -393,6 +468,14 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={diagramsLogs}
               logsLoading={diagramsLogsLoading}
+              onOpenChat={() =>
+                openChat(
+                  domainId,
+                  SECTION_TYPES.DIAGRAMS,
+                  DIAGRAMS_CHAT_CONFIG.initialGreeting,
+                )
+              }
+              isChatOpen={isChatActive(domainId, SECTION_TYPES.DIAGRAMS)}
             />
 
             <DomainRequirementsSection
@@ -416,6 +499,14 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={requirementsLogs}
               logsLoading={requirementsLogsLoading}
+              onOpenChat={() =>
+                openChat(
+                  domainId,
+                  SECTION_TYPES.REQUIREMENTS,
+                  REQUIREMENTS_CHAT_CONFIG.initialGreeting,
+                )
+              }
+              isChatOpen={isChatActive(domainId, SECTION_TYPES.REQUIREMENTS)}
             />
 
             <DomainBugsSecuritySection
@@ -431,6 +522,14 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={bugsSecurityLogs}
               logsLoading={bugsSecurityLogsLoading}
+              onOpenChat={() =>
+                openChat(
+                  domainId,
+                  SECTION_TYPES.BUGS_SECURITY,
+                  BUGS_SECURITY_CHAT_CONFIG.initialGreeting,
+                )
+              }
+              isChatOpen={isChatActive(domainId, SECTION_TYPES.BUGS_SECURITY)}
             />
 
             <DomainTestingSection
@@ -444,12 +543,20 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={testingLogs}
               logsLoading={testingLogsLoading}
+              onOpenChat={() =>
+                openChat(
+                  domainId,
+                  SECTION_TYPES.TESTING,
+                  TESTING_CHAT_CONFIG.initialGreeting,
+                )
+              }
+              isChatOpen={isChatActive(domainId, SECTION_TYPES.TESTING)}
             />
           </VStack>
         </GridItem>
 
         {/* Chat Panel Column - Sticky on the right */}
-        {activeChatSection && (
+        {activeSectionType && chatData && (
           <GridItem
             display={{ base: "none", lg: "block" }}
             position="sticky"
@@ -459,17 +566,12 @@ export default function DomainDetailsPage() {
           >
             <Box h="full">
               <AISectionChat
-                {...DOCUMENTATION_CHAT_CONFIG}
-                currentContent={documentation}
-                onClose={() => setActiveChatSection(null)}
-                onApplyChanges={(newContent) => {
-                  // Apply AI-suggested changes based on section
-                  if (activeChatSection === SECTION_TYPES.DOCUMENTATION) {
-                    updateEditedDocumentation(domainId, newContent);
-                  }
-                  setActiveChatSection(null);
-                }}
+                {...chatData.config}
+                currentContent={chatData.content}
+                onClose={closeChat}
+                onApplyChanges={handleApplyChatChanges}
                 domainId={domainId}
+                sectionType={activeSectionType}
               />
             </Box>
           </GridItem>
