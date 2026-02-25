@@ -53,9 +53,10 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 - **Files**:
   {{#each FILES}}
   - {{this}}
-  {{/each}}
+    {{/each}}
 
 {{#if INCLUDE_REQUIREMENTS}}
+
 ## Requirements Reference
 
 Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to map requirements to tests and identify which requirements lack test coverage.
@@ -82,6 +83,34 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to map requirement
    - Critical user flows
    - Multi-step processes
 
+## Quality Rules for Suggested Tests
+
+1. **Prefer deterministic assertions**
+
+- Favor assertions about behavior and correctness (returned value, thrown error, persisted state, side effects).
+- Avoid vague assertions like "works", "resolves", or "handles correctly" without a specific expected outcome.
+
+2. **Avoid flaky time-based unit test checks**
+
+- Do not suggest strict runtime thresholds in unit tests (for example: "must complete within 200ms").
+- If performance is relevant, recommend a separate benchmark/performance test suite and label it clearly as performance-focused.
+
+3. **Use realistic test mechanics**
+
+- For expiry/rate-limit windows, prefer time mocking/fake timers over real waiting.
+- For concurrency scenarios, suggest controlled parallel calls and deterministic assertions.
+
+4. **Map test type to scope**
+
+- Unit: pure logic, validation, error branches, deterministic behavior.
+- Integration: API + DB/cache/service interactions and contracts.
+- E2E: critical user journeys and observable UI/system outcomes.
+
+5. **Security tests must be explicit**
+
+- Include concrete attack vectors and expected rejection behavior (status code, error type/message, no privilege escalation).
+- Prefer assertions that prove safe failure behavior when dependencies are unavailable.
+
 ## Test Priority
 
 - **P0**: Critical business logic, security-sensitive code, data integrity
@@ -93,13 +122,13 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to map requirement
 
 1. Read all files using `read_file`
 2. Search for existing test files
-{{#if INCLUDE_REQUIREMENTS}}
+   {{#if INCLUDE_REQUIREMENTS}}
 3. Read requirements for context
 4. Identify gaps between requirements and tests
 5. Suggest missing tests
 6. Save to `{{OUTPUT_FILE}}` using `write_file`
-{{else}}
-3. Identify untested code paths
-4. Suggest missing tests
-5. Save to `{{OUTPUT_FILE}}` using `write_file`
-{{/if}}
+   {{else}}
+7. Identify untested code paths
+8. Suggest missing tests
+9. Save to `{{OUTPUT_FILE}}` using `write_file`
+   {{/if}}
