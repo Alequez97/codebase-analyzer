@@ -22,6 +22,7 @@ import {
 import * as domainRoutes from "./routes/domain/index.js";
 
 const app = express();
+app.set("etag", false);
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -43,6 +44,18 @@ initSocketEmitter(io);
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
+  }
+  next();
+});
 
 // Request logging middleware
 app.use((req, res, next) => {

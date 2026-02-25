@@ -156,6 +156,39 @@ export async function buildDocumentationTemplateVariables(task) {
 }
 
 /**
+ * Build variables object for testing analysis template
+ * @param {Object} task - Task object
+ * @returns {Promise<Object>} Variables for template processing
+ */
+export async function buildTestingTemplateVariables(task) {
+  const { domainId, files, includeRequirements, targetDirectory } = task.params;
+
+  // Look up domain name from codebase analysis (if available)
+  let domainName = domainId; // Fallback to ID
+
+  try {
+    const { readCodebaseAnalysis } =
+      await import("../persistence/codebase-analysis.js");
+    const analysis = await readCodebaseAnalysis();
+    const domain = analysis?.domains?.find((d) => d.id === domainId);
+    if (domain?.name) {
+      domainName = domain.name;
+    }
+  } catch (err) {
+    // Fallback to domainId if analysis not found
+  }
+
+  return {
+    CODEBASE_PATH: targetDirectory,
+    DOMAIN_ID: domainId,
+    DOMAIN_NAME: domainName,
+    FILES: files || [],
+    INCLUDE_REQUIREMENTS: includeRequirements ? "true" : "",
+    OUTPUT_FILE: task.outputFile || "",
+  };
+}
+
+/**
  * Build variables object for diagrams analysis template
  * @param {Object} task - Task object
  * @returns {Promise<Object>} Variables for template processing
@@ -300,6 +333,8 @@ export async function buildTemplateVariables(task) {
       return await buildBugsSecurityTemplateVariables(task);
     case TASK_TYPES.DOCUMENTATION:
       return await buildDocumentationTemplateVariables(task);
+    case TASK_TYPES.TESTING:
+      return await buildTestingTemplateVariables(task);
     case TASK_TYPES.DIAGRAMS:
       return await buildDiagramsTemplateVariables(task);
     case TASK_TYPES.CODEBASE_ANALYSIS:

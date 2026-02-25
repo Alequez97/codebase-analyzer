@@ -19,62 +19,15 @@ import { ASSERTION_TYPES } from "./utils";
 function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
   const { setEditedTestCases, getEditedTestCases } = useTestingEditorStore();
 
-  // Normalize test cases to ensure cases is always an array with structured input
-  const normalizedTestCases = (test.testCases || []).map((tc) => {
-    // New structure: cases array exists
-    if (Array.isArray(tc.cases) && tc.cases.length > 0) {
-      return {
-        ...tc,
-        cases: tc.cases.map((c) => ({
-          ...c,
-          // Ensure input is an array of field/value objects
-          input: Array.isArray(c.input)
-            ? c.input
-            : typeof c.input === "string"
-              ? [{ field: "value", value: c.input }]
-              : [{ field: "", value: "" }],
-        })),
-      };
-    }
-    // Legacy: inputs array with shared expectedOutput/assertionType
-    if (Array.isArray(tc.inputs) && tc.inputs.length > 0) {
-      return {
-        ...tc,
-        cases: tc.inputs.map((input) => ({
-          input:
-            typeof input === "string"
-              ? [{ field: "value", value: input }]
-              : [{ field: "", value: "" }],
-          expectedOutput: tc.expectedOutput || "",
-          assertionType: tc.assertionType || "toBeTruthy",
-        })),
-      };
-    }
-    // Legacy: single input field
-    if (tc.input) {
-      return {
-        ...tc,
-        cases: [
-          {
-            input: [{ field: "value", value: tc.input }],
-            expectedOutput: tc.expectedOutput || "",
-            assertionType: tc.assertionType || "toBeTruthy",
-          },
-        ],
-      };
-    }
-    // Fallback: empty case
-    return {
-      ...tc,
-      cases: [
-        {
-          input: [{ field: "", value: "" }],
-          expectedOutput: "",
-          assertionType: "toBeTruthy",
-        },
-      ],
-    };
-  });
+  const normalizedTestCases = (test.scenarios || []).map((scenario) => ({
+    ...scenario,
+    cases: (scenario.checks || []).map((check) => ({
+      ...check,
+      input: Array.isArray(check.input)
+        ? check.input
+        : [{ field: "", value: "" }],
+    })),
+  }));
 
   // Get edited test cases from store or use normalized
   const storedTestCases = getEditedTestCases(test.id);
@@ -210,7 +163,11 @@ function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
   };
 
   const handleSave = () => {
-    onSave({ ...test, testCases: editedTestCases });
+    const scenarios = editedTestCases.map((scenario) => ({
+      ...scenario,
+      checks: scenario.cases || [],
+    }));
+    onSave({ ...test, scenarios });
   };
 
   // Expose save and cancel methods to parent
@@ -285,7 +242,7 @@ function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
                 <Box>
                   <HStack justify="space-between" mb={2}>
                     <Text fontSize="xs" fontWeight="medium" color="gray.700">
-                      Test Cases ({(testCase.cases || []).length})
+                      Checks ({(testCase.cases || []).length})
                     </Text>
                     <Button
                       size="xs"

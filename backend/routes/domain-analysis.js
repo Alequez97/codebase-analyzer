@@ -10,7 +10,6 @@ import * as taskFactory from "../tasks/factory/index.js";
 import { TASK_STATUS } from "../constants/task-status.js";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { readMockJson } from "../utils/mock-data.js";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -184,26 +183,13 @@ router.get("/:id/testing", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Try to read from persistence first
-    let data = await domainTestingPersistence.readDomainTesting(id);
+    const data = await domainTestingPersistence.readDomainTesting(id);
 
-    // If not found, return mock data for UI testing
     if (!data) {
-      try {
-        data = await readMockJson([
-          "domains",
-          "user-authentication",
-          "testing.json",
-        ]);
-        logger.info(`Serving mock testing data for domain ${id}`, {
-          component: "API",
-        });
-      } catch (mockError) {
-        return res.status(404).json({
-          error: "Domain testing not found",
-          message: `No testing data found for domain: ${id}`,
-        });
-      }
+      return res.status(404).json({
+        error: "Domain testing not found",
+        message: `No testing analysis found for domain: ${id}. Run testing analysis first.`,
+      });
     }
 
     res.json(data);

@@ -266,8 +266,8 @@ export function MissingTestsSection({
                             }}
                             onCancel={() => clearEditingTest()}
                           />
-                        ) : test.testCases ? (
-                          <TestCaseDetails testCases={test.testCases} />
+                        ) : test.scenarios ? (
+                          <TestCaseDetails scenarios={test.scenarios} />
                         ) : null}
                       </Table.Cell>
                     </Table.Row>
@@ -390,8 +390,8 @@ export function MissingTestsSection({
                             }}
                             onCancel={() => clearEditingTest()}
                           />
-                        ) : test.testCases ? (
-                          <TestCaseDetails testCases={test.testCases} />
+                        ) : test.scenarios ? (
+                          <TestCaseDetails scenarios={test.scenarios} />
                         ) : null}
                       </Table.Cell>
                     </Table.Row>
@@ -514,8 +514,8 @@ export function MissingTestsSection({
                             }}
                             onCancel={() => clearEditingTest()}
                           />
-                        ) : test.testCases ? (
-                          <TestCaseDetails testCases={test.testCases} />
+                        ) : test.scenarios ? (
+                          <TestCaseDetails scenarios={test.scenarios} />
                         ) : null}
                       </Table.Cell>
                     </Table.Row>

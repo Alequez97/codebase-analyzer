@@ -2,7 +2,21 @@ import { Text, Badge, Table } from "@chakra-ui/react";
 import { Alert } from "../../ui/alert";
 
 export function ExistingTestsTable({ testFiles }) {
-  if (testFiles.length === 0) {
+  const normalizedTestFiles = (testFiles || [])
+    .map((test) => {
+      const filePath = test?.filePath || test?.file || "";
+      const type = test?.type || test?.testType || "unit";
+      const description = test?.description || "No description";
+
+      return {
+        filePath,
+        type,
+        description,
+      };
+    })
+    .filter((test) => test.filePath);
+
+  if (normalizedTestFiles.length === 0) {
     return (
       <Alert.Root status="warning">
         <Alert.Indicator />
@@ -23,29 +37,29 @@ export function ExistingTestsTable({ testFiles }) {
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {testFiles.map((test) => (
-          <Table.Row key={test.file}>
+        {normalizedTestFiles.map((test) => (
+          <Table.Row key={test.filePath}>
             <Table.Cell>
               <Text fontSize="sm" fontFamily="mono">
-                {test.file}
+                {test.filePath}
               </Text>
             </Table.Cell>
             <Table.Cell>
               <Badge
                 colorPalette={
-                  test.testType === "unit"
+                  test.type === "unit"
                     ? "purple"
-                    : test.testType === "integration"
+                    : test.type === "integration"
                       ? "blue"
                       : "green"
                 }
               >
-                {test.testType || "unit"}
+                {test.type || "unit"}
               </Badge>
             </Table.Cell>
             <Table.Cell>
               <Text fontSize="sm" color="gray.600">
-                {test.description || "No description"}
+                {test.description}
               </Text>
             </Table.Cell>
           </Table.Row>

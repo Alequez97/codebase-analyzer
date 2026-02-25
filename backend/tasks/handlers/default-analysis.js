@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
+import { TASK_TYPES } from "../../constants/task-types.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 
@@ -184,6 +185,115 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
         taskLogger.info("✅ Output file written", {
           component: "Analysis",
         });
+      }
+
+      if (task.type === TASK_TYPES.TESTING) {
+        const outputContent = await fs.readFile(outputPath, "utf-8");
+
+        let testingJson;
+        try {
+          testingJson = JSON.parse(outputContent);
+        } catch {
+          throw new Error("Testing analysis output is not valid JSON");
+        }
+
+        if (testingJson?.domainId !== task.params?.domainId) {
+          throw new Error(
+            `Testing analysis domain mismatch: expected '${task.params?.domainId}', got '${testingJson?.domainId || "missing"}'`,
+          );
+        }
+
+        const missingTests = testingJson?.missingTests;
+        const hasGroupedMissingTests =
+          missingTests &&
+          typeof missingTests === "object" &&
+          !Array.isArray(missingTests) &&
+          Array.isArray(missingTests.unit) &&
+          Array.isArray(missingTests.integration) &&
+          Array.isArray(missingTests.e2e);
+
+        if (!hasGroupedMissingTests) {
+          throw new Error(
+            "Testing analysis schema invalid: missingTests must be an object with unit/integration/e2e arrays",
+          );
+        }
+
+        if (!Array.isArray(testingJson?.existingTests)) {
+          throw new Error(
+            "Testing analysis schema invalid: existingTests must be an array",
+          );
+        }
+
+        for (const [
+          index,
+          existingTest,
+        ] of testingJson.existingTests.entries()) {
+          if (
+            !existingTest?.file ||
+            !existingTest?.description ||
+            !existingTest?.testType
+          ) {
+            throw new Error(
+              `Testing analysis schema invalid: existingTests[${index}] must include file, description, and testType`,
+            );
+          }
+        }
+
+        const allMissingTests = [
+          ...missingTests.unit,
+          ...missingTests.integration,
+          ...missingTests.e2e,
+        ];
+
+        for (const [index, missingTest] of allMissingTests.entries()) {
+          const hasRequiredFields =
+            missingTest?.id &&
+            missingTest?.description &&
+            missingTest?.priority &&
+            missingTest?.category &&
+            missingTest?.suggestedTestFile &&
+            missingTest?.relatedRequirement &&
+            missingTest?.reason &&
+            Array.isArray(missingTest?.scenarios) &&
+            missingTest.scenarios.length > 0;
+
+          if (!hasRequiredFields) {
+            throw new Error(
+              `Testing analysis schema invalid: missing test at index ${index} has missing required fields or empty scenarios`,
+            );
+          }
+
+          for (const [
+            scenarioIndex,
+            scenario,
+          ] of missingTest.scenarios.entries()) {
+            if (
+              !scenario?.scenario ||
+              !Array.isArray(scenario?.checks) ||
+              scenario.checks.length === 0
+            ) {
+              throw new Error(
+                `Testing analysis schema invalid: scenarios[${scenarioIndex}] for ${missingTest.id} must include scenario and non-empty checks array`,
+              );
+            }
+
+            for (const [checkIndex, checkItem] of scenario.checks.entries()) {
+              const hasCaseShape =
+                Array.isArray(checkItem?.input) &&
+                checkItem.input.length > 0 &&
+                typeof checkItem?.expectedOutput === "string" &&
+                checkItem.expectedOutput.length > 0 &&
+                typeof checkItem?.assertionType === "string" &&
+                checkItem.assertionType.length > 0;
+
+              if (!hasCaseShape) {
+                throw new Error(
+                  `Testing analysis schema invalid: check ${checkIndex} in ${missingTest.id}/${scenario.scenario} must include input[], expectedOutput, assertionType`,
+                );
+              }
+            }
+          }
+        }
       }
 
       return { outputFile: outputPath };
