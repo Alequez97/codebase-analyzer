@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import * as api from "../api";
+import { chatWithAI } from "../api/domain-sections-chat.js";
 
 /**
  * Domain Sections Chat Store - Manages AI chat conversations for domain sections editing
@@ -12,6 +12,9 @@ export const useDomainSectionsChatStore = create((set, get) => ({
   // Key format: `${domainId}_${sectionType}` (e.g., "user-auth_documentation")
   chatHistoryByDomainSection: new Map(),
 
+  // Pending suggestions (to show diff in main content area)
+  pendingSuggestionByDomainSection: new Map(),
+
   // Currently active chat (domainId + sectionType)
   activeDomainId: null,
   activeSectionType: null,
@@ -19,7 +22,24 @@ export const useDomainSectionsChatStore = create((set, get) => ({
   // Loading state for AI responses
   isAiResponding: false,
 
+  // Thinking state (AI is processing but hasn't responded yet)
+  isAiThinking: false,
+
   // Actions
+
+  /**
+   * Set AI thinking state
+   */
+  setAiThinking: (thinking) => {
+    set({ isAiThinking: thinking });
+  },
+
+  /**
+   * Set AI responding state
+   */
+  setAiResponding: (responding) => {
+    set({ isAiResponding: responding });
+  },
 
   /**
    * Open chat for a specific domain section
@@ -100,43 +120,47 @@ export const useDomainSectionsChatStore = create((set, get) => ({
     };
     get().addMessage(domainId, sectionType, userMsg);
 
-    // Set loading state
-    set({ isAiResponding: true });
+    // Set loading state (thinking until backend processes)
+    set({ isAiResponding: true, isAiThinking: true });
 
     try {
-      // Call backend API (you'll need to implement this endpoint)
-      const response = await api.chatWithAI({
+      // Get conversation history (excluding system/initial greeting)
+      const messages = get().getMessages(domainId, sectionType);
+      const history = messages
+        .filter((msg) => msg.role !== "system")
+        .map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
+
+      // Call backend API to initiate task
+      // AI responses will come via socket events
+      await chatWithAI({
         domainId,
         sectionType,
         message: userMessage,
         context: currentContent,
-        history: get().getMessages(domainId, sectionType),
+        history,
       });
 
-      // Add AI response
-      const aiMsg = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: response.message,
-        timestamp: new Date(),
-        hasSuggestion: response.hasSuggestion || false,
-      };
-      get().addMessage(domainId, sectionType, aiMsg);
-
-      return aiMsg;
+      // Socket events will handle adding AI messages and updating state
     } catch (error) {
+      console.error("Error sending chat message:", error);
+
       // Add error message
       const errorMsg = {
         id: Date.now() + 1,
         role: "assistant",
-        content: `Sorry, I encountered an error: ${error.message}`,
+        content: `Sorry, I encountered an error: ${error.response?.data?.message || error.message}`,
         timestamp: new Date(),
         isError: true,
       };
       get().addMessage(domainId, sectionType, errorMsg);
+
+      // Reset state on error
+      set({ isAiResponding: false, isAiThinking: false });
+
       throw error;
-    } finally {
-      set({ isAiResponding: false });
     }
   },
 
@@ -165,6 +189,34 @@ export const useDomainSectionsChatStore = create((set, get) => ({
 
     keysToDelete.forEach((key) => history.delete(key));
     set({ chatHistoryByDomainSection: history });
+  },
+
+  /**
+   * Get pending suggestion for a specific domain section
+   */
+  getPendingSuggestion: (domainId, sectionType) => {
+    const key = `${domainId}_${sectionType}`;
+    return get().pendingSuggestionByDomainSection.get(key) || null;
+  },
+
+  /**
+   * Set pending suggestion (for AI-suggested content)
+   */
+  setPendingSuggestion: (domainId, sectionType, suggestion) => {
+    const key = `${domainId}_${sectionType}`;
+    const suggestions = new Map(get().pendingSuggestionByDomainSection);
+    suggestions.set(key, suggestion);
+    set({ pendingSuggestionByDomainSection: suggestions });
+  },
+
+  /**
+   * Clear pending suggestion (called when applying or dismissing)
+   */
+  clearPendingSuggestion: (domainId, sectionType) => {
+    const key = `${domainId}_${sectionType}`;
+    const suggestions = new Map(get().pendingSuggestionByDomainSection);
+    suggestions.delete(key);
+    set({ pendingSuggestionByDomainSection: suggestions });
   },
 
   /**

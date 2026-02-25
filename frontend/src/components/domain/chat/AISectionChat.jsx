@@ -70,6 +70,7 @@ export default function AISectionChat({
     sendMessage,
     clearChatHistory,
     isAiResponding,
+    isAiThinking,
     addMessage,
   } = useDomainSectionsChatStore();
   const messages = getMessages(domainId, sectionType);
@@ -108,17 +109,6 @@ export default function AISectionChat({
     navigator.clipboard.writeText(content);
     setCopiedMessageId(messageId);
     setTimeout(() => setCopiedMessageId(null), 2000);
-  };
-
-  const handleApplySuggestion = (message) => {
-    // MOCK: In production, this would extract the suggested content
-    // and call the parent component's onApplyChanges
-    console.log(`Apply ${sectionType} suggestion from message:`, message.id);
-
-    // Mock: Show confirmation
-    alert(
-      `In production, this would apply the AI's suggested changes to your ${sectionName.toLowerCase()}.`,
-    );
   };
 
   const handleReset = () => {
@@ -189,104 +179,106 @@ export default function AISectionChat({
       {/* Messages Area */}
       <Box flex={1} overflowY="auto" px={4} py={3} bg="gray.50">
         <VStack align="stretch" gap={3}>
-          {messages.map((message) => (
-            <Box
-              key={message.id}
-              alignSelf={message.role === "user" ? "flex-end" : "flex-start"}
-              maxW="90%"
-            >
-              <Card.Root
-                size="sm"
-                bg={message.role === "user" ? "blue.500" : "white"}
-                color={message.role === "user" ? "white" : "gray.800"}
-                boxShadow="sm"
+          {messages
+            .filter((msg) => msg.content && msg.content.trim())
+            .map((message) => (
+              <Box
+                key={message.id}
+                alignSelf={message.role === "user" ? "flex-end" : "flex-start"}
+                maxW="90%"
               >
-                <Card.Body p={3}>
-                  <HStack gap={2} mb={1.5} align="center">
-                    {message.role === "assistant" ? (
-                      <Box
-                        p={1}
-                        borderRadius="md"
-                        bg="purple.100"
-                        color="purple.600"
+                <Card.Root
+                  size="sm"
+                  bg={message.role === "user" ? "blue.500" : "white"}
+                  color={message.role === "user" ? "white" : "gray.800"}
+                  boxShadow="sm"
+                >
+                  <Card.Body p={3}>
+                    <HStack gap={2} mb={1.5} align="center">
+                      {message.role === "assistant" ? (
+                        <Box
+                          p={1}
+                          borderRadius="md"
+                          bg="purple.100"
+                          color="purple.600"
+                        >
+                          <Bot size={12} />
+                        </Box>
+                      ) : (
+                        <Box
+                          p={1}
+                          borderRadius="md"
+                          bg="blue.400"
+                          color="white"
+                        >
+                          <User size={12} />
+                        </Box>
+                      )}
+                      <Text
+                        fontSize="xs"
+                        fontWeight="medium"
+                        color={
+                          message.role === "user" ? "blue.100" : "gray.600"
+                        }
                       >
-                        <Bot size={12} />
+                        {message.role === "assistant" ? "AI" : "You"}
+                      </Text>
+                      <IconButton
+                        size="xs"
+                        variant="ghost"
+                        ml="auto"
+                        onClick={() =>
+                          handleCopyMessage(message.id, message.content)
+                        }
+                        title="Copy message"
+                        color={message.role === "user" ? "white" : "gray.600"}
+                      >
+                        {copiedMessageId === message.id ? (
+                          <Check size={10} />
+                        ) : (
+                          <Copy size={10} />
+                        )}
+                      </IconButton>
+                    </HStack>
+
+                    {message.role === "assistant" ? (
+                      <Box fontSize="xs" lineHeight="1.5">
+                        <MarkdownRenderer content={message.content} />
                       </Box>
                     ) : (
-                      <Box p={1} borderRadius="md" bg="blue.400" color="white">
-                        <User size={12} />
-                      </Box>
-                    )}
-                    <Text
-                      fontSize="xs"
-                      fontWeight="medium"
-                      color={message.role === "user" ? "blue.100" : "gray.600"}
-                    >
-                      {message.role === "assistant" ? "AI" : "You"}
-                    </Text>
-                    <IconButton
-                      size="xs"
-                      variant="ghost"
-                      ml="auto"
-                      onClick={() =>
-                        handleCopyMessage(message.id, message.content)
-                      }
-                      title="Copy message"
-                      color={message.role === "user" ? "white" : "gray.600"}
-                    >
-                      {copiedMessageId === message.id ? (
-                        <Check size={10} />
-                      ) : (
-                        <Copy size={10} />
-                      )}
-                    </IconButton>
-                  </HStack>
-
-                  {message.role === "assistant" ? (
-                    <Box fontSize="xs" lineHeight="1.5">
-                      <MarkdownRenderer content={message.content} />
-                    </Box>
-                  ) : (
-                    <Text fontSize="xs" lineHeight="1.5" whiteSpace="pre-wrap">
-                      {message.content}
-                    </Text>
-                  )}
-
-                  {message.hasSuggestion && (
-                    <Box
-                      mt={2}
-                      pt={2}
-                      borderTop="1px solid"
-                      borderColor="gray.200"
-                    >
-                      <Button
-                        size="xs"
-                        colorPalette="green"
-                        variant="subtle"
-                        onClick={() => handleApplySuggestion(message)}
+                      <Text
+                        fontSize="xs"
+                        lineHeight="1.5"
+                        whiteSpace="pre-wrap"
                       >
-                        <Check size={12} />
-                        Apply this suggestion
-                      </Button>
-                    </Box>
-                  )}
-                </Card.Body>
-              </Card.Root>
-              <Text
-                fontSize="xs"
-                color="gray.500"
-                mt={1}
-                textAlign={message.role === "user" ? "right" : "left"}
-              >
-                {new Date(message.timestamp).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-            </Box>
-          ))}
+                        {message.content}
+                      </Text>
+                    )}
+                  </Card.Body>
+                </Card.Root>
+                <Text
+                  fontSize="xs"
+                  color="gray.500"
+                  mt={1}
+                  textAlign={message.role === "user" ? "right" : "left"}
+                >
+                  {(() => {
+                    const date = message.timestamp
+                      ? new Date(message.timestamp)
+                      : null;
+                    if (!date || Number.isNaN(date.getTime())) {
+                      return "";
+                    }
+                    return date.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                  })()}
+                </Text>
+              </Box>
+            ))}
 
-          {isAiResponding && (
+          {(isAiResponding || isAiThinking) && (
             <Box alignSelf="flex-start" maxW="90%">
               <Card.Root size="sm" bg="white" boxShadow="sm">
                 <Card.Body p={3}>
@@ -296,11 +288,24 @@ export default function AISectionChat({
                       borderRadius="md"
                       bg="purple.100"
                       color="purple.600"
+                      animation={
+                        isAiThinking
+                          ? "pulse 1.5s ease-in-out infinite"
+                          : "none"
+                      }
+                      css={{
+                        "@keyframes pulse": {
+                          "0%, 100%": { opacity: 1 },
+                          "50%": { opacity: 0.5 },
+                        },
+                      }}
                     >
                       <Bot size={12} />
                     </Box>
                     <Text fontSize="xs" color="gray.600">
-                      AI is thinking...
+                      {isAiThinking
+                        ? "AI is thinking..."
+                        : "Generating updated content..."}
                     </Text>
                   </HStack>
                 </Card.Body>

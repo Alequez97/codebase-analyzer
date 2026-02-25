@@ -2,6 +2,7 @@ import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
+import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
 import * as logger from "../../utils/logger.js";
 
@@ -60,7 +61,7 @@ export async function createApplyFixTask(
   const task = {
     id: generateTaskId("apply-fix"),
     type: TASK_TYPES.APPLY_FIX,
-    status: "pending",
+    status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params,
     agentConfig,

@@ -10,3 +10,4 @@ export { default as projectRoutes } from "./project.js";
 export { default as codebaseAnalysisRoutes } from "./codebase-analysis.js";
 export { default as tasksRoutes } from "./tasks.js";
 export { default as logsRoutes } from "./logs.js";
+export { default as domainSectionsChatRoutes } from "./domain-sections-chat.js";

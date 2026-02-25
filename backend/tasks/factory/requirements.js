@@ -2,6 +2,7 @@ import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
+import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
 import * as logger from "../../utils/logger.js";
 
@@ -25,7 +26,7 @@ export async function createAnalyzeRequirementsTask(
   const task = {
     id: generateTaskId("analyze-requirements"),
     type: TASK_TYPES.REQUIREMENTS,
-    status: "pending",
+    status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
       domainId,

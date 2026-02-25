@@ -127,7 +127,11 @@ export default function MarkdownRenderer({ content, ...props }) {
       </Box>
     ),
     code: ({ inline, children, className }) => {
-      if (inline) {
+      const codeValue = String(children || "");
+      const isInlineCode =
+        inline === true || (!className && !codeValue.includes("\n"));
+
+      if (isInlineCode) {
         return (
           <Box
             as="code"
@@ -140,10 +144,11 @@ export default function MarkdownRenderer({ content, ...props }) {
             fontFamily="mono"
             whiteSpace="nowrap"
           >
-            {children}
+            {codeValue}
           </Box>
         );
       }
+
       // Check if it's a Mermaid diagram
       const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : "text";
@@ -171,7 +176,7 @@ export default function MarkdownRenderer({ content, ...props }) {
               textAlign: "right",
             }}
           >
-            {String(children).replace(/\n$/, "")}
+            {codeValue.replace(/\n$/, "")}
           </SyntaxHighlighter>
         </Box>
       );

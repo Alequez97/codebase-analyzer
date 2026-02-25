@@ -15,6 +15,7 @@ import {
   codebaseAnalysisRoutes,
   tasksRoutes,
   logsRoutes,
+  domainSectionsChatRoutes,
 } from "./routes/index.js";
 
 // Domain routes (modular structure)
@@ -65,6 +66,7 @@ app.use("/api/analysis/domain", domainRoutes.testingRoutes);
 
 app.use("/api/tasks", tasksRoutes);
 app.use("/api/logs", logsRoutes);
+app.use("/api", domainSectionsChatRoutes);
 
 // ==================== Error Handler ====================
 

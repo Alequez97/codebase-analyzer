@@ -7,27 +7,37 @@ import { generateTaskId } from "../utils.js";
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a full codebase analysis task
+ * Create a documentation edit task (AI chat)
+ * @param {Object} params - Task parameters
+ * @param {string} params.domainId - The domain ID
+ * @param {string} params.userMessage - User's message/request
+ * @param {string} params.currentContent - Current documentation content
+ * @param {Array} params.history - Conversation history
  * @param {Object} options - Task options
  * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createFullCodebaseAnalysisTask({
-  executeNow = false,
-} = {}) {
-  const agentConfig = getAgentConfig(TASK_TYPES.CODEBASE_ANALYSIS);
+export async function createEditDocumentationTask(
+  { domainId, userMessage, currentContent, history },
+  { executeNow = false } = {},
+) {
+  const agentConfig = getAgentConfig(TASK_TYPES.EDIT_DOCUMENTATION);
 
   const task = {
-    id: generateTaskId("analyze-codebase"),
-    type: TASK_TYPES.CODEBASE_ANALYSIS,
+    id: generateTaskId("edit-documentation"),
+    type: TASK_TYPES.EDIT_DOCUMENTATION,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
-      targetDirectory: config.target.directory,
+      domainId,
+      userMessage,
+      currentContent,
+      history,
+      sectionType: "documentation",
     },
     agentConfig,
-    instructionFile: "backend/instructions/analyze-full-codebase.md",
-    outputFile: ".code-analysis/analysis/codebase-analysis.json",
+    instructionFile: "backend/instructions/edit-domain-section.md",
+    // No output file - results are streamed via socket
   };
 
   await tasksPersistence.writeTask(task);

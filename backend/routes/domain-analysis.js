@@ -7,6 +7,7 @@ import * as domainTestingPersistence from "../persistence/domain-testing.js";
 import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as taskFactory from "../tasks/factory/index.js";
+import { TASK_STATUS } from "../constants/task-status.js";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
 import { readMockJson } from "../utils/mock-data.js";
@@ -405,7 +406,7 @@ router.post("/:id/documentation/save", async (req, res) => {
     await domainDocumentationPersistence.writeDomainDocumentation(id, {
       content: documentation,
       metadata: {
-        status: "completed",
+        status: TASK_STATUS.COMPLETED,
         lastModified: new Date().toISOString(),
       },
     });

@@ -370,7 +370,7 @@ export default function DomainDiagramsSection({
                   onClick={handleAnalyze}
                 >
                   <Sparkles size={14} />
-                  Generate Diagrams
+                  Generate diagrams
                 </Button>
               )}
             </HStack>
@@ -455,7 +455,7 @@ export default function DomainDiagramsSection({
                     loadingText="Generating"
                   >
                     <Sparkles size={14} />
-                    Generate Diagrams
+                    Generate diagrams
                   </Button>
                 )}
               </>

@@ -5,10 +5,7 @@ import path from "path";
 import config from "../config.js";
 import { emitTaskLog } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
-import {
-  processTemplate,
-  buildTemplateVariables,
-} from "../utils/template-processor.js";
+import { loadInstructionForTask } from "../utils/instruction-loader.js";
 import { getProviderFromModel } from "../utils/model-utils.js";
 import { getApiKeyForProvider } from "../utils/api-keys.js";
 import { createLineBufferedStream } from "../utils/line-buffered-stream.js";
@@ -43,17 +40,8 @@ export async function execute(task) {
     throw new Error("Aider is not installed or not in PATH");
   }
 
-  // Read instruction file
-  const instructionPath = path.join(
-    config.paths.analyzerRoot,
-    task.instructionFile,
-  );
-
-  let instructionContent = await fs.readFile(instructionPath, "utf-8");
-
-  // Replace template variables in the instruction
-  const templateVariables = await buildTemplateVariables(task);
-  instructionContent = processTemplate(instructionContent, templateVariables);
+  // Load and process instruction template
+  const instructionContent = await loadInstructionForTask(task);
 
   // Create a temporary instruction file with replaced variables
   const tempInstructionPath = path.join(

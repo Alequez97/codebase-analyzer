@@ -13,3 +13,6 @@ export { createAnalyzeDiagramsTask } from "./diagrams.js";
 export { createAnalyzeTestingTask } from "./testing.js";
 export { createApplyFixTask } from "./apply-fix.js";
 export { createApplyTestTask } from "./apply-test.js";
+
+// Edit tasks (AI chat)
+export { createEditDocumentationTask } from "./edit-documentation.js";

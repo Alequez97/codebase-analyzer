@@ -4,6 +4,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import * as logger from "./utils/logger.js";
 import { TASK_TYPES } from "./constants/task-types.js";
+import { TASK_FOLDERS } from "./constants/task-status.js";
 import { MODELS } from "./constants/models.js";
 import { PROVIDERS } from "./constants/providers.js";
 import { AGENTS } from "./constants/agents.js";
@@ -118,11 +119,35 @@ const config = {
       maxIterations: 15,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
+    [TASK_TYPES.APPLY_TEST]: {
+      agent: AGENTS.AIDER,
+      model: MODELS.CLAUDE_SONNET,
+      maxTokens: 64000,
+      maxIterations: 15,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
+
+    // Edit tasks (AI chat for editing domain sections)
+    [TASK_TYPES.EDIT_DOCUMENTATION]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.CLAUDE_SONNET,
+      maxTokens: 16000,
+      maxIterations: 2, // Two iterations: description + content
+      reasoningEffort: REASONING_EFFORT.LOW,
+    },
   },
 
   // Aider-specific configuration (when agent is AGENTS.AIDER)
   aider: {
     extraArgs: "",
+  },
+
+  // Default agent config
+  defaultAgentConfig: {
+    agent: AGENTS.LLM_API,
+    model: MODELS.CLAUDE_SONNET,
+    maxTokens: 16000,
+    reasoningEffort: REASONING_EFFORT.MEDIUM,
   },
 
   // Paths
@@ -150,8 +175,8 @@ const dirs = [
   path.join(config.paths.targetAnalysis, "analysis"),
   path.join(config.paths.targetAnalysis, "domains"),
   path.join(config.paths.targetAnalysis, "tasks"),
-  path.join(config.paths.targetAnalysis, "tasks", "pending"),
-  path.join(config.paths.targetAnalysis, "tasks", "completed"),
+  path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.PENDING),
+  path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.COMPLETED),
   path.join(config.paths.targetAnalysis, "logs"),
 ];
 

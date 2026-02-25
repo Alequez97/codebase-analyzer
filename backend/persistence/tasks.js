@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { tryReadJsonFile } from "./utils.js";
+import { TASK_STATUS, TASK_FOLDERS } from "../constants/task-status.js";
 import * as logger from "../utils/logger.js";
 
 /**
@@ -14,16 +15,21 @@ export async function readTask(taskId) {
     path.join(
       config.paths.targetAnalysis,
       "tasks",
-      "pending",
+      TASK_FOLDERS.PENDING,
       `${taskId}.json`,
     ),
     path.join(
       config.paths.targetAnalysis,
       "tasks",
-      "completed",
+      TASK_FOLDERS.COMPLETED,
       `${taskId}.json`,
     ),
-    path.join(config.paths.targetAnalysis, "tasks", "failed", `${taskId}.json`),
+    path.join(
+      config.paths.targetAnalysis,
+      "tasks",
+      TASK_FOLDERS.FAILED,
+      `${taskId}.json`,
+    ),
   ];
 
   for (const filePath of locations) {
@@ -50,7 +56,7 @@ export async function writeTask(task) {
   const filePath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "pending",
+    TASK_FOLDERS.PENDING,
     `${task.id}.json`,
   );
   await fs.writeFile(filePath, JSON.stringify(task, null, 2), "utf-8");
@@ -62,7 +68,11 @@ export async function writeTask(task) {
  */
 export async function listPending() {
   try {
-    const tasksDir = path.join(config.paths.targetAnalysis, "tasks", "pending");
+    const tasksDir = path.join(
+      config.paths.targetAnalysis,
+      "tasks",
+      TASK_FOLDERS.PENDING,
+    );
     const files = await fs.readdir(tasksDir);
 
     const tasks = await Promise.all(
@@ -92,19 +102,19 @@ export async function moveToCompleted(taskId) {
   const pendingPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "pending",
+    TASK_FOLDERS.PENDING,
     `${taskId}.json`,
   );
   const completedPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "completed",
+    TASK_FOLDERS.COMPLETED,
     `${taskId}.json`,
   );
 
   const content = await fs.readFile(pendingPath, "utf-8");
   const task = JSON.parse(content);
-  task.status = "completed";
+  task.status = TASK_STATUS.COMPLETED;
   task.completedAt = new Date().toISOString();
 
   await fs.writeFile(completedPath, JSON.stringify(task, null, 2), "utf-8");
@@ -123,13 +133,13 @@ export async function moveToFailed(taskId, error) {
   const pendingPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "pending",
+    TASK_FOLDERS.PENDING,
     `${taskId}.json`,
   );
   const failedPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "failed",
+    TASK_FOLDERS.FAILED,
     `${taskId}.json`,
   );
 
@@ -139,7 +149,7 @@ export async function moveToFailed(taskId, error) {
 
   const content = await fs.readFile(pendingPath, "utf-8");
   const task = JSON.parse(content);
-  task.status = "failed";
+  task.status = TASK_STATUS.FAILED;
   task.failedAt = new Date().toISOString();
   task.error = error || "Task execution failed";
 
@@ -158,19 +168,19 @@ export async function deleteTask(taskId) {
   const pendingPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "pending",
+    TASK_FOLDERS.PENDING,
     `${taskId}.json`,
   );
   const completedPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "completed",
+    TASK_FOLDERS.COMPLETED,
     `${taskId}.json`,
   );
   const failedPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
-    "failed",
+    TASK_FOLDERS.FAILED,
     `${taskId}.json`,
   );
 

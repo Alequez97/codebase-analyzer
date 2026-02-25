@@ -1,4 +1,5 @@
 import { FileToolExecutor, FILE_TOOLS } from "./tools/file-tools.js";
+import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 
 /**
@@ -59,7 +60,10 @@ export class LLMAgent {
     this.state.addSystemMessage(systemPrompt);
     this.state.addUserMessage(initialMessage);
 
-    onProgress({ stage: "initializing", message: "Starting conversation..." });
+    onProgress({
+      stage: PROGRESS_STAGES.INITIALIZING,
+      message: "Starting conversation...",
+    });
 
     let iterationCount = 0;
     let stopReason = null;
@@ -73,7 +77,7 @@ export class LLMAgent {
       });
 
       onProgress({
-        stage: "processing",
+        stage: PROGRESS_STAGES.PROCESSING,
         message: `Waiting for AI response...`,
         iteration: iterationCount,
       });
@@ -84,7 +88,7 @@ export class LLMAgent {
           component: "LLMAgent",
         });
         onProgress({
-          stage: "compacting",
+          stage: PROGRESS_STAGES.COMPACTING,
           message: "Compacting context...",
         });
         await this.state.compact(this.client);
@@ -141,7 +145,7 @@ export class LLMAgent {
         response.stopReason === "completed"
       ) {
         onProgress({
-          stage: "completing",
+          stage: PROGRESS_STAGES.COMPLETING,
           message: "AI analysis complete",
           iteration: iterationCount,
         });
@@ -156,6 +160,8 @@ export class LLMAgent {
         if (!continueConversation) {
           break;
         }
+        // Custom logic says continue - skip default checks
+        continue;
       } else {
         // Default: stop if LLM indicates completion
         if (
@@ -256,7 +262,7 @@ export class LLMAgent {
       });
 
       onProgress({
-        stage: "tool-execution",
+        stage: PROGRESS_STAGES.TOOL_EXECUTION,
         message: toolDescription,
         iteration,
         tool: toolCall.name,

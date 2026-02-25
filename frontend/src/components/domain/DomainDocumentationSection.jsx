@@ -21,7 +21,9 @@ import {
   ChevronDown,
   ChevronRight,
   MessageSquare,
+  Check,
 } from "lucide-react";
+import ReactDiffViewer from "react-diff-viewer-continued";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
 import MarkdownRenderer from "../MarkdownRenderer";
@@ -41,6 +43,9 @@ export default function DomainDocumentationSection({
   logsLoading = false,
   onOpenChat,
   isChatOpen = false,
+  pendingSuggestion,
+  onApplyChanges,
+  onDismissChanges,
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -183,6 +188,77 @@ export default function DomainDocumentationSection({
             )}
             {showLogs ? (
               <LogsViewer logs={logs} loading={logsLoading} />
+            ) : pendingSuggestion ? (
+              // Show diff view when AI has generated a suggestion
+              <VStack align="stretch" gap={4}>
+                <Box
+                  p={3}
+                  bg="purple.50"
+                  borderRadius="md"
+                  borderLeft="4px solid"
+                  borderColor="purple.500"
+                >
+                  <HStack justify="space-between" alignItems="center">
+                    <Text fontSize="sm" fontWeight="medium" color="purple.800">
+                      AI has suggested changes to your documentation
+                    </Text>
+                    <HStack gap={2}>
+                      <Button
+                        size="sm"
+                        colorPalette="green"
+                        onClick={() =>
+                          onApplyChanges?.(pendingSuggestion.newContent)
+                        }
+                      >
+                        <Check size={14} />
+                        Apply Changes
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        colorPalette="gray"
+                        onClick={onDismissChanges}
+                      >
+                        <X size={14} />
+                        Dismiss
+                      </Button>
+                    </HStack>
+                  </HStack>
+                </Box>
+                <Box
+                  borderRadius="md"
+                  overflow="hidden"
+                  border="1px solid"
+                  borderColor="gray.200"
+                >
+                  <ReactDiffViewer
+                    oldValue={pendingSuggestion.oldContent || ""}
+                    newValue={pendingSuggestion.newContent || ""}
+                    splitView={false}
+                    showDiffOnly={false}
+                    useDarkTheme={false}
+                    styles={{
+                      variables: {
+                        light: {
+                          diffViewerBackground: "#ffffff",
+                          addedBackground: "#e6ffed",
+                          addedColor: "#24292e",
+                          removedBackground: "#ffeef0",
+                          removedColor: "#24292e",
+                          wordAddedBackground: "#acf2bd",
+                          wordRemovedBackground: "#fdb8c0",
+                          addedGutterBackground: "#cdffd8",
+                          removedGutterBackground: "#ffdce0",
+                          gutterBackground: "#f6f8fa",
+                          gutterBackgroundDark: "#f0f0f0",
+                          highlightBackground: "#fffbdd",
+                          highlightGutterBackground: "#fff5b1",
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </VStack>
             ) : isEditMode ? (
               <Textarea
                 value={displayContent}

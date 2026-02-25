@@ -12,4 +12,11 @@ export const TASK_TYPES = {
   TESTING: "analyze-testing",
   APPLY_FIX: "apply-fix",
   APPLY_TEST: "apply-test",
+
+  // Edit tasks
+  EDIT_DOCUMENTATION: "edit-documentation",
+  EDIT_DIAGRAMS: "edit-diagrams",
+  EDIT_REQUIREMENTS: "edit-requirements",
+  EDIT_BUGS_SECURITY: "edit-bugs-security",
+  EDIT_TESTING: "edit-testing",
 };

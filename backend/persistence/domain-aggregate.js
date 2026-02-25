@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
+import { TASK_STATUS } from "../constants/task-status.js";
 import {
   readDomainDocumentation,
   writeDomainDocumentation,
@@ -105,7 +106,7 @@ export async function writeDomain(domainId, data) {
         domainId,
         domainName: baseData.domainName,
         timestamp: baseData.timestamp,
-        status: "completed",
+        status: TASK_STATUS.COMPLETED,
       },
     });
   }

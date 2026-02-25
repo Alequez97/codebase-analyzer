@@ -44,6 +44,8 @@ export default function DomainDetailsPage() {
     activeDomainId,
     activeSectionType,
     isChatActive,
+    getPendingSuggestion,
+    clearPendingSuggestion,
   } = useDomainSectionsChatStore();
 
   // Codebase store (for analysis and domain list)
@@ -379,7 +381,8 @@ export default function DomainDetailsPage() {
         console.log("Apply testing changes:", newContent);
         break;
     }
-    closeChat();
+    // Clear pending suggestion after applying
+    clearPendingSuggestion(domainId, activeSectionType);
   };
 
   const chatData = getCurrentChatData();
@@ -457,6 +460,14 @@ export default function DomainDetailsPage() {
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.DOCUMENTATION)}
+              pendingSuggestion={getPendingSuggestion(
+                domainId,
+                SECTION_TYPES.DOCUMENTATION,
+              )}
+              onApplyChanges={handleApplyChatChanges}
+              onDismissChanges={() =>
+                clearPendingSuggestion(domainId, SECTION_TYPES.DOCUMENTATION)
+              }
             />
 
             <DomainDiagramsSection
@@ -476,6 +487,14 @@ export default function DomainDetailsPage() {
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.DIAGRAMS)}
+              pendingSuggestion={getPendingSuggestion(
+                domainId,
+                SECTION_TYPES.DIAGRAMS,
+              )}
+              onApplyChanges={handleApplyChatChanges}
+              onDismissChanges={() =>
+                clearPendingSuggestion(domainId, SECTION_TYPES.DIAGRAMS)
+              }
             />
 
             <DomainRequirementsSection
@@ -507,6 +526,14 @@ export default function DomainDetailsPage() {
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.REQUIREMENTS)}
+              pendingSuggestion={getPendingSuggestion(
+                domainId,
+                SECTION_TYPES.REQUIREMENTS,
+              )}
+              onApplyChanges={handleApplyChatChanges}
+              onDismissChanges={() =>
+                clearPendingSuggestion(domainId, SECTION_TYPES.REQUIREMENTS)
+              }
             />
 
             <DomainBugsSecuritySection
@@ -530,6 +557,14 @@ export default function DomainDetailsPage() {
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.BUGS_SECURITY)}
+              pendingSuggestion={getPendingSuggestion(
+                domainId,
+                SECTION_TYPES.BUGS_SECURITY,
+              )}
+              onApplyChanges={handleApplyChatChanges}
+              onDismissChanges={() =>
+                clearPendingSuggestion(domainId, SECTION_TYPES.BUGS_SECURITY)
+              }
             />
 
             <DomainTestingSection
@@ -551,6 +586,14 @@ export default function DomainDetailsPage() {
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.TESTING)}
+              pendingSuggestion={getPendingSuggestion(
+                domainId,
+                SECTION_TYPES.TESTING,
+              )}
+              onApplyChanges={handleApplyChatChanges}
+              onDismissChanges={() =>
+                clearPendingSuggestion(domainId, SECTION_TYPES.TESTING)
+              }
             />
           </VStack>
         </GridItem>

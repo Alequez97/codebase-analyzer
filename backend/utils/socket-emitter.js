@@ -65,7 +65,7 @@ export function emitTaskLog(task, payload = {}) {
  * Emit task progress event
  * Convenience helper for emitting task progress updates
  * @param {Object} task - Task object with id, type, and params
- * @param {string} stage - Progress stage (initializing, analyzing, compacting, saving, etc.)
+ * @param {string} stage - Progress stage (use PROGRESS_STAGES constants)
  * @param {string} message - Progress message to display
  */
 export function emitTaskProgress(task, stage, message) {

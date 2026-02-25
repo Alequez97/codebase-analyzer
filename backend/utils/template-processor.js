@@ -247,11 +247,52 @@ export function buildApplyFixTemplateVariables(task) {
 }
 
 /**
+ * Build template variables for edit tasks (AI chat)
+ * @param {Object} task - Edit task object
+ * @returns {Object} Variables for template processing
+ */
+export async function buildEditTemplateVariables(task) {
+  const { domainId, sectionType, currentContent, history } = task.params;
+
+  // Look up domain name from codebase analysis (if available)
+  let domainName = domainId; // Fallback to ID
+
+  try {
+    const { readCodebaseAnalysis } =
+      await import("../persistence/codebase-analysis.js");
+    const analysis = await readCodebaseAnalysis();
+    const domain = analysis?.domains?.find((d) => d.id === domainId);
+    if (domain?.name) {
+      domainName = domain.name;
+    }
+  } catch (err) {
+    // Fallback to domainId if analysis not found
+  }
+
+  return {
+    SECTION_TYPE: sectionType,
+    DOMAIN_NAME: domainName,
+    HAS_CONTENT: currentContent ? true : false,
+    CURRENT_CONTENT: currentContent || "",
+    IS_DOCUMENTATION: sectionType === "documentation",
+    IS_REQUIREMENTS: sectionType === "requirements",
+    IS_DIAGRAMS: sectionType === "diagrams",
+    IS_BUGS_SECURITY: sectionType === "bugs-security",
+    IS_TESTING: sectionType === "testing",
+  };
+}
+
+/**
  * Build template variables based on task type
  * @param {Object} task - Task object
  * @returns {Promise<Object>} Variables for template processing
  */
 export async function buildTemplateVariables(task) {
+  // Handle edit tasks
+  if (task.type.startsWith("edit-")) {
+    return await buildEditTemplateVariables(task);
+  }
+
   switch (task.type) {
     case TASK_TYPES.REQUIREMENTS:
       return await buildRequirementsTemplateVariables(task);

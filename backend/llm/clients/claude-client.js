@@ -48,24 +48,27 @@ export class ClaudeClient extends BaseLLMClient {
       requestParams.tools = this.formatTools(options.tools);
     }
 
-    // Add temperature if specified
-    if (options.temperature !== undefined) {
-      requestParams.temperature = options.temperature;
-    } else if (this.config.temperature !== undefined) {
-      requestParams.temperature = this.config.temperature;
-    }
+    // Check if thinking/reasoning is enabled
+    const thinkingEnabled =
+      options.reasoningEffort !== undefined ||
+      this.reasoningEffort !== undefined;
 
-    // Add thinking/reasoning for extended thinking models (Claude Opus 4 supports this)
-    if (options.reasoningEffort !== undefined) {
+    // Add thinking/reasoning for extended thinking models
+    if (thinkingEnabled) {
+      const effort = options.reasoningEffort || this.reasoningEffort;
       requestParams.thinking = {
         type: "enabled",
-        budget_tokens: this.getThinkingBudget(options.reasoningEffort),
+        budget_tokens: this.getThinkingBudget(effort),
       };
-    } else if (this.reasoningEffort !== undefined) {
-      requestParams.thinking = {
-        type: "enabled",
-        budget_tokens: this.getThinkingBudget(this.reasoningEffort),
-      };
+      // When thinking is enabled, temperature must be 1.0
+      requestParams.temperature = 1.0;
+    } else {
+      // Only set temperature when thinking is NOT enabled
+      if (options.temperature !== undefined) {
+        requestParams.temperature = options.temperature;
+      } else if (this.config.temperature !== undefined) {
+        requestParams.temperature = this.config.temperature;
+      }
     }
 
     try {
@@ -82,7 +85,7 @@ export class ClaudeClient extends BaseLLMClient {
    */
   getThinkingBudget(effort) {
     const budgets = {
-      low: 1000,
+      low: 1024, // Minimum required by Claude API
       medium: 5000,
       high: 10000,
     };

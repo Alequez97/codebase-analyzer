@@ -307,7 +307,9 @@ export default function DomainBugsSecuritySection({
                   disabled={isAnalyzing}
                 >
                   <Sparkles size={16} />
-                  {isAnalyzing ? "Analyzing..." : "Analyze"}
+                  {isAnalyzing
+                    ? "Analyzing..."
+                    : "Analyze bugs and security issues"}
                 </Button>
               )}
             </HStack>

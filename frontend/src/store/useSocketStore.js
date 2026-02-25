@@ -12,6 +12,7 @@ import { useDomainTestingStore } from "./useDomainTestingStore";
 import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
+import { useDomainSectionsChatStore } from "./useDomainSectionsChatStore";
 
 const SOCKET_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
@@ -95,6 +96,10 @@ export const useSocketStore = create((set, get) => ({
       } else if (type === TASK_TYPES.TESTING && domainId) {
         useDomainTestingStore.getState().setLoading(domainId, false);
         await useDomainTestingStore.getState().fetch(domainId);
+      } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
+        const chatStore = useDomainSectionsChatStore.getState();
+        chatStore.setAiThinking(false);
+        chatStore.setAiResponding(false);
       }
     });
 
@@ -170,6 +175,10 @@ export const useSocketStore = create((set, get) => ({
         const store = useDomainTestingStore.getState();
         store.setLoading(domainId, false);
         store.setError(domainId, error || "Testing analysis failed");
+      } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
+        const chatStore = useDomainSectionsChatStore.getState();
+        chatStore.setAiThinking(false);
+        chatStore.setAiResponding(false);
       }
     });
 
@@ -193,6 +202,67 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_TESTING, handleLogEvent);
+    // Edit task logs
+    socket.on(SOCKET_EVENTS.LOG_EDIT_DOCUMENTATION, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_EDIT_DIAGRAMS, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_EDIT_REQUIREMENTS, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_EDIT_BUGS_SECURITY, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_EDIT_TESTING, handleLogEvent);
+
+    // Chat events - AI thinking indicator
+    socket.on(
+      SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING,
+      ({ domainId, sectionType, thinking }) => {
+        if (thinking) {
+          const chatStore = useDomainSectionsChatStore.getState();
+          chatStore.setAiResponding(true);
+          chatStore.setAiThinking(true);
+        }
+      },
+    );
+
+    // Chat events - AI responses (description and content)
+    socket.on(
+      SOCKET_EVENTS.EDIT_DOCUMENTATION_DESCRIPTION,
+      ({ domainId, sectionType, content, timestamp }) => {
+        // Stop thinking, add description message
+        const chatStore = useDomainSectionsChatStore.getState();
+        const effectiveSectionType = sectionType || "documentation";
+        chatStore.setAiThinking(false);
+        chatStore.setAiResponding(true); // Still responding (waiting for content)
+        if (content && content.trim()) {
+          chatStore.addMessage(domainId, effectiveSectionType, {
+            id: Date.now(),
+            role: "assistant",
+            content,
+            timestamp: timestamp ? new Date(timestamp) : new Date(),
+          });
+        }
+      },
+    );
+
+    socket.on(
+      SOCKET_EVENTS.EDIT_DOCUMENTATION_CONTENT,
+      ({ domainId, sectionType, content, timestamp }) => {
+        const effectiveSectionType = sectionType || "documentation";
+        const currentDocumentation = useDomainDocumentationStore
+          .getState()
+          .dataById.get(domainId);
+        const oldContent = currentDocumentation?.content || "";
+
+        // Set as pending suggestion for diff view (shape expected by section components)
+        const chatStore = useDomainSectionsChatStore.getState();
+        chatStore.setPendingSuggestion(domainId, effectiveSectionType, {
+          oldContent,
+          newContent: content || "",
+          timestamp,
+        });
+
+        // All done - stop responding
+        chatStore.setAiThinking(false);
+        chatStore.setAiResponding(false);
+      },
+    );
   },
 
   disconnectSocket: () => {

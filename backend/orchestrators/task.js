@@ -4,6 +4,7 @@ import * as tasksPersistence from "../persistence/tasks.js";
 import { getAgent } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { TASK_TYPES } from "../constants/task-types.js";
+import { TASK_STATUS } from "../constants/task-status.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 
@@ -171,7 +172,7 @@ export async function executeTask(taskId) {
     throw new Error(`Task ${taskId} not found`);
   }
 
-  if (task.status !== "pending") {
+  if (task.status !== TASK_STATUS.PENDING) {
     throw new Error(`Task ${taskId} is not pending (status: ${task.status})`);
   }
 
