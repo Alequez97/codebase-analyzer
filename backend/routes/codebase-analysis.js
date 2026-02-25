@@ -1,7 +1,7 @@
 import express from "express";
 import * as codebaseAnalysisOrchestrator from "../orchestrators/codebase-analysis.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import * as taskOrchestrator from "../orchestrators/task.js";
+import { createFullCodebaseAnalysisTask } from "../tasks/factory/index.js";
 import * as logger from "../utils/logger.js";
 
 const router = express.Router();
@@ -37,8 +37,7 @@ router.post("/request", async (req, res) => {
   try {
     const executeNow = req.body.executeNow !== false; // Default to true
 
-    const task =
-      await taskOrchestrator.createFullCodebaseAnalysisTask(executeNow);
+    const task = await createFullCodebaseAnalysisTask({ executeNow });
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating codebase analysis task", {

@@ -2,7 +2,7 @@ import express from "express";
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as domainDiagramsPersistence from "../../persistence/domain-diagrams.js";
-import * as taskOrchestrator from "../../orchestrators/task.js";
+import * as taskFactory from "../../tasks/factory/index.js";
 import * as logger from "../../utils/logger.js";
 
 const execAsync = promisify(exec);
@@ -86,11 +86,9 @@ router.post("/:id/analyze/diagrams", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeDiagramsTask(
-      id,
-      files,
-      includeDocumentation,
-      executeNow,
+    const task = await taskFactory.createAnalyzeDiagramsTask(
+      { domainId: id, files, includeDocumentation },
+      { executeNow },
     );
     res.status(201).json(task);
   } catch (error) {

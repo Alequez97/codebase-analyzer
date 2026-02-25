@@ -5,7 +5,7 @@ import { ClaudeClient } from "../llm/clients/claude-client.js";
 import { OpenAIClient } from "../llm/clients/openai-client.js";
 import { ChatState } from "../llm/state/chat-state.js";
 import { OpenAIChatState } from "../llm/state/openai-chat-state.js";
-import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
+import { LLMAgent } from "../llm/agent.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import {
   emitSocketEvent,
@@ -49,11 +49,11 @@ export async function detect() {
 
 /**
  * Create LLM agent with client and state management
- * @param {Object} agentConfig - Agent configuration with model, maxTokens, reasoningEffort
- * @returns {{ client: BaseLLMClient, state: ChatState }} Agent with client and state
+ * @param {Object} agentConfig - Agent configuration with model, maxTokens, reasoningEffort, maxIterations
+ * @returns {LLMAgent} Configured LLM agent instance
  */
 function createLLMAgent(agentConfig) {
-  const { model, maxTokens, reasoningEffort } = agentConfig;
+  const { model, maxTokens, reasoningEffort, maxIterations } = agentConfig;
   const { apiKeys } = config;
   const provider = getProviderFromModel(model);
 
@@ -99,7 +99,12 @@ function createLLMAgent(agentConfig) {
     );
   }
 
-  return { client, state };
+  // Create and return LLMAgent instance
+  return new LLMAgent(client, state, {
+    workingDirectory: config.target.directory,
+    maxIterations: maxIterations || 30,
+    maxTokens,
+  });
 }
 
 /**
@@ -304,9 +309,8 @@ async function generateDomainDocumentation({
 
   onProgress({ stage: "initializing", message: "Initializing LLM client..." });
 
-  // Create LLM agent with client and state
-  const { client, state: chatState } = createLLMAgent(task.agentConfig);
-  const fileToolExecutor = new FileToolExecutor(config.target.directory);
+  // Create LLM agent
+  const agent = createLLMAgent(task.agentConfig);
 
   taskLogger.info(`📂 Domain files to analyze:`, { component: "LLM-API" });
   files.forEach((file, index) => {
@@ -327,17 +331,9 @@ async function generateDomainDocumentation({
   const templateVariables = await buildTemplateVariables(task);
   const systemPrompt = processTemplate(instructionTemplate, templateVariables);
 
-  chatState.addSystemMessage(systemPrompt);
-
   taskLogger.info(`📝 System prompt prepared (${systemPrompt.length} chars)`, {
     component: "LLM-API",
   });
-
-  // Start conversation
-  chatState.addUserMessage(
-    `Analyze the ${domainName} domain and generate the complete documentation with Mermaid diagrams as specified in the instructions.`,
-  );
-
   taskLogger.info(`🤖 Starting conversation with LLM...`, {
     component: "LLM-API",
   });
@@ -345,63 +341,45 @@ async function generateDomainDocumentation({
 
   onProgress({ stage: "analyzing", message: "Analyzing domain files..." });
 
-  let iterationCount = 0;
-  const maxIterations = 30;
-  let llmWrittenFilePath = null; // Track where LLM wrote the file
-  const conversationLog = [];
+  // Run the agent with callbacks for progress/logging
+  const result = await agent.run({
+    systemPrompt,
+    initialMessage: `Analyze the ${domainName} domain and generate the complete documentation with Mermaid diagrams as specified in the instructions.`,
 
-  while (iterationCount < maxIterations) {
-    iterationCount++;
+    onProgress: (progress) => {
+      if (progress.iteration) {
+        taskLogger.info(
+          `🔄 Iteration ${progress.iteration}/${agent.maxIterations}`,
+          { component: "LLM-API" },
+        );
+        emitTaskLog(task, {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `\n${"-".repeat(80)}\n[Iteration ${progress.iteration}/${agent.maxIterations}] ${progress.message}\n${"-".repeat(80)}\n`,
+        });
+      }
 
-    taskLogger.info(
-      `🔄 Iteration ${iterationCount}/${maxIterations} - Sending request to LLM...`,
-      {
-        component: "LLM-API",
-        taskId: task.id,
-        tokenCount: chatState.getTokenCount(),
-      },
-    );
+      // Log tool execution progress
+      if (progress.stage === "tool-execution") {
+        taskLogger.info(`  📋 ${progress.message}`, { component: "LLM-API" });
 
-    emitTaskLog(task, {
-      taskId: task.id,
-      domainId,
-      type: task.type,
-      stream: "stdout",
-      log: `\n${"-".repeat(80)}\n[Iteration ${iterationCount}/${maxIterations}] 📤 Sending message to LLM...\n${"-".repeat(80)}\n`,
-    });
+        emitTaskLog(task, {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `  ⚡ ${progress.message}\n`,
+        });
+      }
 
-    // Send message to LLM
-    const response = await client.sendMessage(chatState.getMessages(), {
-      tools: FILE_TOOLS,
-      maxTokens: 4096,
-    });
+      onProgress(progress);
+    },
 
-    conversationLog.push({
-      iteration: iterationCount,
-      timestamp: new Date().toISOString(),
-      inputTokens: response.usage.inputTokens,
-      outputTokens: response.usage.outputTokens,
-      stopReason: response.stopReason,
-    });
-
-    taskLogger.info(
-      `📊 Response received - ${response.usage.inputTokens} tokens in, ${response.usage.outputTokens} tokens out (stop: ${response.stopReason})`,
-      { component: "LLM-API" },
-    );
-
-    emitTaskLog(task, {
-      taskId: task.id,
-      domainId,
-      type: task.type,
-      stream: "stdout",
-      log: `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`,
-    });
-
-    // Handle tool calls
-    if (response.toolCalls && response.toolCalls.length > 0) {
-      const toolNames = response.toolCalls.map((tc) => tc.name).join(", ");
+    onIteration: (iteration, response) => {
       taskLogger.info(
-        `🔧 LLM requested ${response.toolCalls.length} tool call(s): ${toolNames}`,
+        `📊 Response - ${response.usage.inputTokens} tokens in, ${response.usage.outputTokens} tokens out (stop: ${response.stopReason})`,
         { component: "LLM-API" },
       );
 
@@ -410,183 +388,91 @@ async function generateDomainDocumentation({
         domainId,
         type: task.type,
         stream: "stdout",
-        log: `\n🔧 [Tool Calls] LLM requested ${response.toolCalls.length} tool(s): ${toolNames}\n`,
+        log: `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`,
       });
+    },
 
-      chatState.addToolUse(response.toolCalls);
+    onToolCall: (toolName, args, result, error) => {
+      const filePath = args?.path || args?.file_path || "unknown";
+      const startLine = args?.start_line;
+      const endLine = args?.end_line;
 
-      for (const toolCall of response.toolCalls) {
-        // Extract file path from arguments for better logging
-        const filePath =
-          toolCall.arguments?.path ||
-          toolCall.arguments?.file_path ||
-          "unknown";
-        const startLine = toolCall.arguments?.start_line;
-        const endLine = toolCall.arguments?.end_line;
-
-        let toolDescription = `${toolCall.name}`;
-        if (toolCall.name === "read_file") {
-          toolDescription =
-            startLine && endLine
-              ? `Reading ${filePath} (lines ${startLine}-${endLine})`
-              : `Reading ${filePath}`;
-        } else if (toolCall.name === "list_directory") {
-          toolDescription = `Listing directory ${filePath}`;
-        }
-
-        taskLogger.info(`  📖 ${toolDescription}`, { component: "LLM-API" });
-
-        onProgress({
-          stage: "analyzing",
-          message: toolDescription,
-          iteration: iterationCount,
-        });
-
-        const argsPreview = JSON.stringify(toolCall.arguments).substring(
-          0,
-          150,
-        );
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `  ├─ 📖 ${toolDescription}\n  │  Args: ${argsPreview}${JSON.stringify(toolCall.arguments).length > 150 ? "..." : ""}\n`,
-        });
-
-        const result = await fileToolExecutor.executeTool(
-          toolCall.name,
-          toolCall.arguments,
-        );
-
-        // Track write_file calls
-        if (toolCall.name === "write_file" && toolCall.arguments?.path) {
-          llmWrittenFilePath = toolCall.arguments.path;
-        }
-
-        chatState.addToolResult(toolCall.id, toolCall.name, result);
-
-        const resultSize =
-          result.length > 1000
-            ? `${Math.round(result.length / 1000)}KB`
-            : `${result.length} bytes`;
-
-        taskLogger.info(`  ✅ Tool completed - returned ${resultSize}`, {
-          component: "LLM-API",
-        });
-
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `  └─ ✅ Tool completed - returned ${resultSize}\n`,
-        });
+      let toolDescription = toolName;
+      if (toolName === "read_file") {
+        toolDescription =
+          startLine && endLine
+            ? `Reading ${filePath} (lines ${startLine}-${endLine})`
+            : `Reading ${filePath}`;
+      } else if (toolName === "list_directory") {
+        toolDescription = `Listing directory ${filePath}`;
+      } else if (toolName === "write_file") {
+        toolDescription = `Writing ${filePath}`;
       }
 
-      emitTaskLog(task, {
-        taskId: task.id,
-        domainId,
-        type: task.type,
-        stream: "stdout",
-        log: `✅ All tool executions complete, continuing...\n\n`,
-      });
+      taskLogger.info(`  📖 ${toolDescription}`, { component: "LLM-API" });
 
-      continue;
-    }
-
-    // Check if LLM indicated it's done (no more tool calls)
-    if (
-      response.stopReason === "end_turn" ||
-      response.stopReason === "stop_sequence" ||
-      response.stopReason === "completed"
-    ) {
-      const contentPreview = response.content
-        .substring(0, 100)
-        .replace(/\n/g, " ");
-      taskLogger.info(
-        `💬 LLM response: ${contentPreview}${response.content.length > 100 ? "..." : ""}`,
-        {
-          component: "LLM-API",
-        },
-      );
-
-      taskLogger.info("✨ LLM indicated completion!", {
-        component: "LLM-API",
-        taskId: task.id,
-        iterations: iterationCount,
-      });
+      const argsPreview = JSON.stringify(args).substring(0, 150);
+      const resultSize =
+        result.length > 1000
+          ? `${Math.round(result.length / 1000)}KB`
+          : `${result.length} bytes`;
 
       emitTaskLog(task, {
         taskId: task.id,
         domainId,
         type: task.type,
         stream: "stdout",
-        log: `\n✨ [Documentation Complete] LLM finished after ${iterationCount} iterations\n`,
+        log: `  ├─ 📖 ${toolDescription}\n  │  Args: ${argsPreview}${JSON.stringify(args).length > 150 ? "..." : ""}\n  └─ ✅ Tool completed - ${resultSize}\n`,
       });
+    },
 
-      onProgress({
-        stage: "saving",
-        message: "Documentation complete, saving...",
-      });
-
-      break;
-    }
-
-    // If no completion, add response and ask for documentation
-    if (response.content) {
-      const contentPreview = response.content
-        .substring(0, 100)
-        .replace(/\n/g, " ");
-      taskLogger.info(
-        `💬 LLM response: ${contentPreview}${response.content.length > 100 ? "..." : ""}`,
-        {
+    shouldContinue: (response, iteration) => {
+      // Continue until LLM indicates completion or uses write_file
+      if (
+        response.stopReason === "end_turn" ||
+        response.stopReason === "stop_sequence" ||
+        response.stopReason === "completed"
+      ) {
+        taskLogger.info("✨ LLM indicated completion!", {
           component: "LLM-API",
-        },
-      );
-    }
+          taskId: task.id,
+          iterations: iteration,
+        });
 
-    chatState.addAssistantMessage(response.content);
-    chatState.addUserMessage(
-      "Please use write_file to save the complete documentation as specified in the instructions.",
-    );
+        emitTaskLog(task, {
+          taskId: task.id,
+          domainId,
+          type: task.type,
+          stream: "stdout",
+          log: `\n✨ [Documentation Complete] LLM finished after ${iteration} iterations\n`,
+        });
 
-    onProgress({
-      stage: "analyzing",
-      message: "Requesting documentation from LLM...",
-      iteration: iterationCount,
-    });
-  }
+        onProgress({
+          stage: "saving",
+          message: "Documentation complete, saving...",
+        });
+
+        return false; // Stop
+      }
+
+      // Ask for final output if needed
+      if (response.stopReason === "max_tokens" && !response.toolCalls?.length) {
+        agent.addUserMessage(
+          "Please use write_file to save the complete documentation as specified in the instructions.",
+        );
+        return true; // Continue
+      }
+
+      return true; // Continue by default
+    },
+  });
+
+  onProgress({ stage: "saving", message: "Verifying output..." });
 
   // Read the output file that LLM should have created
   const outputPath = path.join(config.target.directory, task.outputFile);
-
-  // Check if LLM wrote to a different path
-  if (llmWrittenFilePath && llmWrittenFilePath !== task.outputFile) {
-    const actualPath = path.join(config.target.directory, llmWrittenFilePath);
-    taskLogger.warn("⚠️  LLM wrote to wrong path, moving file...", {
-      component: "LLM-API",
-      expected: task.outputFile,
-      actual: llmWrittenFilePath,
-    });
-
-    try {
-      const content = await fs.readFile(actualPath, "utf-8");
-      await fs.writeFile(outputPath, content, "utf-8");
-      await fs.unlink(actualPath);
-      taskLogger.info("✅ File moved to correct location", {
-        component: "LLM-API",
-      });
-    } catch (moveError) {
-      taskLogger.error("❌ Failed to move file", {
-        component: "LLM-API",
-        error: moveError.message,
-      });
-    }
-  }
-
-  // Read the markdown documentation file
   let documentationMarkdown;
+
   try {
     documentationMarkdown = await fs.readFile(outputPath, "utf-8");
   } catch (error) {
@@ -605,34 +491,31 @@ async function generateDomainDocumentation({
   const durationMs = endTime - startTime;
   const durationSec = Math.round(durationMs / 100) / 10;
 
-  // Calculate total token usage
-  const totalTokens = conversationLog.reduce(
-    (acc, log) => ({
-      input: acc.input + log.inputTokens,
-      output: acc.output + log.outputTokens,
-    }),
-    { input: 0, output: 0 },
-  );
+  // Get metadata from agent
+  const agentMetadata = agent.getMetadata();
 
   taskLogger.raw("");
   taskLogger.info(`📊 Generation Statistics:`, { component: "LLM-API" });
   taskLogger.info(`   ⏱️  Duration: ${durationSec}s`, { component: "LLM-API" });
-  taskLogger.info(`   🔄 Iterations: ${iterationCount}`, {
+  taskLogger.info(`   🔄 Iterations: ${agentMetadata.iterations}`, {
     component: "LLM-API",
   });
   taskLogger.info(
     `   📝 Markdown size: ${Math.round(documentationMarkdown.length / 1000)}KB`,
     { component: "LLM-API" },
   );
-  taskLogger.info(`   🪙 Input tokens: ${totalTokens.input.toLocaleString()}`, {
-    component: "LLM-API",
-  });
   taskLogger.info(
-    `   🪙 Output tokens: ${totalTokens.output.toLocaleString()}`,
+    `   🪙 Input tokens: ${agentMetadata.tokenUsage.input.toLocaleString()}`,
+    {
+      component: "LLM-API",
+    },
+  );
+  taskLogger.info(
+    `   🪙 Output tokens: ${agentMetadata.tokenUsage.output.toLocaleString()}`,
     { component: "LLM-API" },
   );
   taskLogger.info(
-    `   🪙 Total tokens: ${(totalTokens.input + totalTokens.output).toLocaleString()}`,
+    `   🪙 Total tokens: ${agentMetadata.tokenUsage.total.toLocaleString()}`,
     { component: "LLM-API" },
   );
   taskLogger.raw("");
@@ -642,7 +525,7 @@ async function generateDomainDocumentation({
     domainId,
     type: task.type,
     stream: "stdout",
-    log: `\n${"=".repeat(80)}\n📊 [Statistics]\n⏱️  Duration: ${durationSec}s\n🔄 Iterations: ${iterationCount}\n📝 Markdown: ${Math.round(documentationMarkdown.length / 1000)}KB\n🪙 Tokens: ${(totalTokens.input + totalTokens.output).toLocaleString()} total (${totalTokens.input.toLocaleString()} in / ${totalTokens.output.toLocaleString()} out)\n${"=".repeat(80)}\n`,
+    log: `\n${"=".repeat(80)}\n📊 [Statistics]\n⏱️  Duration: ${durationSec}s\n🔄 Iterations: ${agentMetadata.iterations}\n📝 Markdown: ${Math.round(documentationMarkdown.length / 1000)}KB\n🪙 Tokens: ${agentMetadata.tokenUsage.total.toLocaleString()} total (${agentMetadata.tokenUsage.input.toLocaleString()} in / ${agentMetadata.tokenUsage.output.toLocaleString()} out)\n${"=".repeat(80)}\n`,
   });
 
   // Create minimal metadata
@@ -651,14 +534,14 @@ async function generateDomainDocumentation({
     generatedAt: timestamp,
     completedAt: new Date().toISOString(),
     durationMs,
-    iterations: iterationCount,
+    iterations: agentMetadata.iterations,
     tokenUsage: {
-      inputTokens: totalTokens.input,
-      outputTokens: totalTokens.output,
-      totalTokens: totalTokens.input + totalTokens.output,
+      inputTokens: agentMetadata.tokenUsage.input,
+      outputTokens: agentMetadata.tokenUsage.output,
+      totalTokens: agentMetadata.tokenUsage.total,
     },
     agent: "llm-api",
-    model: client.model,
+    model: agent.client.model,
     logFile: `logs/${task.id}.log`,
   };
 
@@ -783,8 +666,7 @@ async function executeAnalysisTask(task) {
       component: "LLM-API",
       model: task.agentConfig.model,
     });
-    const { client, state: chatState } = createLLMAgent(task.agentConfig);
-    const fileToolExecutor = new FileToolExecutor(config.target.directory);
+    const agent = createLLMAgent(task.agentConfig);
     taskLogger.info("✅ LLM client initialized", { component: "LLM-API" });
 
     // Add system message with instructions
@@ -792,235 +674,131 @@ async function executeAnalysisTask(task) {
       component: "LLM-API",
       instructionLength: instructions.length,
     });
-    chatState.addSystemMessage(instructions);
 
-    // Add initial user message to start the conversation
     taskLogger.info("💬 Sending initial prompt to LLM...", {
       component: "LLM-API",
     });
-    chatState.addUserMessage(
-      "Begin the codebase analysis as specified in the instructions.",
-    );
-
-    let iterationCount = 0;
-    const maxIterations = 50; // Prevent infinite loops
-    let llmWrittenFilePath = null; // Track where LLM actually wrote the file
 
     emitTaskProgress(task, "analyzing", "Analyzing domain files...");
     taskLogger.info(
-      `🔄 Starting analysis loop (max ${maxIterations} iterations)`,
+      `🔄 Starting analysis loop (max ${agent.maxIterations} iterations)`,
       {
         component: "LLM-API",
       },
     );
 
-    while (iterationCount < maxIterations) {
-      iterationCount++;
+    // Run the agent with callbacks for progress/logging
+    const result = await agent.run({
+      systemPrompt: instructions,
+      initialMessage:
+        "Begin the codebase analysis as specified in the instructions.",
 
-      taskLogger.raw("-".repeat(80));
-      taskLogger.info(
-        `📤 Iteration ${iterationCount}/${maxIterations}: Sending message to LLM`,
-        {
-          component: "LLM-API",
-          taskId: task.id,
-        },
-      );
-      taskLogger.raw("-".repeat(80));
+      onProgress: (progress) => {
+        if (progress.iteration) {
+          taskLogger.raw("-".repeat(80));
+          taskLogger.info(
+            `📤 Iteration ${progress.iteration}/${agent.maxIterations}: ${progress.message || "Sending message to LLM"}`,
+            {
+              component: "LLM-API",
+              taskId: task.id,
+            },
+          );
+          taskLogger.raw("-".repeat(80));
 
-      emitTaskLog(task, {
-        taskId: task.id,
-        domainId: task.params?.domainId,
-        type: task.type,
-        stream: "stdout",
-        log: `\n${"-".repeat(80)}\n[Iteration ${iterationCount}/${maxIterations}] 📤 Sending message to LLM...\n${"-".repeat(80)}\n`,
-      });
+          emitTaskLog(task, {
+            taskId: task.id,
+            domainId: task.params?.domainId,
+            type: task.type,
+            stream: "stdout",
+            log: `\n${"-".repeat(80)}\n[Iteration ${progress.iteration}/${agent.maxIterations}] 📤 ${progress.message || "Sending message to LLM"}...\n${"-".repeat(80)}\n`,
+          });
+        }
 
-      // Check if we need to compact context
-      if (chatState.needsCompaction()) {
-        taskLogger.info("🗜️  Context too large, compacting chat history...", {
-          component: "LLM-API",
-          taskId: task.id,
-        });
-
-        emitTaskProgress(
-          task,
-          "compacting",
-          "Context too large, compacting chat history...",
-        );
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n🗜️  [Compacting] Using LLM to intelligently summarize conversation...\n`,
-        });
-
-        await chatState.compact(client);
-
-        taskLogger.info("✅ Context compaction complete", {
-          component: "LLM-API",
-        });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `✅ [Compaction Complete] Conversation summarized by LLM\n`,
-        });
-      }
-
-      // Send message to LLM
-      taskLogger.debug("⏳ Waiting for LLM response...", {
-        component: "LLM-API",
-      });
-      const response = await client.sendMessage(chatState.getMessages(), {
-        tools: FILE_TOOLS,
-      });
-
-      taskLogger.info("📥 Received LLM response", {
-        component: "LLM-API",
-        stopReason: response.stopReason,
-        hasToolCalls: Boolean(response.toolCalls?.length),
-        toolCount: response.toolCalls?.length || 0,
-        inputTokens: response.usage.inputTokens,
-        outputTokens: response.usage.outputTokens,
-      });
-
-      // Summarize response content for logging
-      const contentPreview = response.content
-        ? response.content.substring(0, 200).replace(/\n/g, " ")
-        : "(no text content)";
-      taskLogger.debug(
-        `Response preview: ${contentPreview}${response.content?.length > 200 ? "..." : ""}`,
-        {
-          component: "LLM-API",
-        },
-      );
-
-      const responseLog = `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`;
-      emitTaskLog(task, {
-        taskId: task.id,
-        domainId: task.params?.domainId,
-        type: task.type,
-        stream: "stdout",
-        log: responseLog,
-      });
-
-      // Add assistant's response to chat state
-      if (response.content) {
-        chatState.addAssistantMessage(response.content);
-      }
-
-      // Handle tool calls
-      if (response.toolCalls && response.toolCalls.length > 0) {
-        const toolNames = response.toolCalls.map((tc) => tc.name).join(", ");
-        taskLogger.raw("");
-        taskLogger.info(
-          `🔧 LLM requested ${response.toolCalls.length} tool(s): ${toolNames}`,
-          {
+        if (progress.compacting) {
+          taskLogger.info("🗜️  Context too large, compacting chat history...", {
             component: "LLM-API",
-          },
-        );
-
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n🔧 [Tool Calls] LLM requested ${response.toolCalls.length} tool(s): ${toolNames}\n`,
-        });
-
-        // Store tool calls in chat state
-        chatState.addToolUse(
-          response.toolCalls.map((tc) => ({
-            type: "tool_use",
-            id: tc.id,
-            name: tc.name,
-            arguments: tc.arguments, // Use 'arguments' to match normalized format
-          })),
-        );
-
-        // Execute each tool call
-        for (const toolCall of response.toolCalls) {
-          // Extract file path for progress message
-          const filePath =
-            toolCall.arguments?.path || toolCall.arguments?.file_path || "file";
-          let progressMessage = `Reading ${filePath}`;
-          if (toolCall.name === "list_directory") {
-            progressMessage = `Listing directory ${filePath}`;
-          }
-          emitTaskProgress(task, "analyzing", progressMessage);
-
-          taskLogger.info(`  🔨 Executing: ${toolCall.name}`, {
-            component: "LLM-API",
-            toolName: toolCall.name,
-            args: toolCall.arguments,
+            taskId: task.id,
           });
 
-          const argsPreview = JSON.stringify(toolCall.arguments).substring(
-            0,
-            150,
+          emitTaskProgress(
+            task,
+            "compacting",
+            "Context too large, compacting chat history...",
           );
           emitTaskLog(task, {
             taskId: task.id,
             domainId: task.params?.domainId,
             type: task.type,
             stream: "stdout",
-            log: `  ├─ 🔨 Executing: ${toolCall.name}\n  │  Args: ${argsPreview}${JSON.stringify(toolCall.arguments).length > 150 ? "..." : ""}\n`,
+            log: `\n🗜️  [Compacting] Using LLM to intelligently summarize conversation...\n`,
           });
+        } else if (progress.stage === "tool-execution") {
+          // Emit progress for file operations
+          taskLogger.info(`  ⚡ ${progress.message}`, { component: "LLM-API" });
 
-          try {
-            const result = await fileToolExecutor.executeTool(
-              toolCall.name,
-              toolCall.arguments,
-            );
+          emitTaskProgress(task, "analyzing", progress.message);
 
-            // Track write_file calls to detect misplaced files
-            if (toolCall.name === "write_file" && toolCall.arguments?.path) {
-              llmWrittenFilePath = toolCall.arguments.path;
-            }
-
-            taskLogger.debug(
-              `  ✅ Tool ${toolCall.name} completed (${result.length} chars)`,
-              {
-                component: "LLM-API",
-                resultLength: result.length,
-              },
-            );
-
-            chatState.addToolResult(toolCall.id, toolCall.name, result);
-          } catch (error) {
-            const errorResult = `Error: ${error.message}`;
-            taskLogger.error(
-              `  ❌ Tool ${toolCall.name} failed: ${errorResult}`,
-              {
-                component: "LLM-API",
-              },
-            );
-
-            chatState.addToolResult(toolCall.id, toolCall.name, errorResult);
-          }
+          emitTaskLog(task, {
+            taskId: task.id,
+            domainId: task.params?.domainId,
+            type: task.type,
+            stream: "stdout",
+            log: `  ⚡ ${progress.message}\n`,
+          });
+        } else if (progress.stage) {
+          emitTaskProgress(task, progress.stage, progress.message);
         }
+      },
 
-        taskLogger.info("✅ All tool executions complete, continuing...", {
-          component: "LLM-API",
-        });
-
-        // Continue conversation after tool execution
-        continue;
-      }
-
-      // Check if LLM indicated it's done (no more tool calls and stop_reason is end_turn)
-      if (
-        response.stopReason === "end_turn" ||
-        response.stopReason === "stop_sequence" ||
-        response.stopReason === "completed"
-      ) {
-        taskLogger.raw("");
-        taskLogger.info("✅ LLM indicated completion (no more tool calls)", {
+      onIteration: (iteration, response) => {
+        taskLogger.info("📥 Received LLM response", {
           component: "LLM-API",
           stopReason: response.stopReason,
-          iterations: iterationCount,
+          hasToolCalls: Boolean(response.toolCalls?.length),
+          toolCount: response.toolCalls?.length || 0,
+          inputTokens: response.usage.inputTokens,
+          outputTokens: response.usage.outputTokens,
+        });
+
+        // Summarize response content for logging
+        const contentPreview = response.content
+          ? response.content.substring(0, 200).replace(/\n/g, " ")
+          : "(no text content)";
+        taskLogger.debug(
+          `Response preview: ${contentPreview}${response.content?.length > 200 ? "..." : ""}`,
+          {
+            component: "LLM-API",
+          },
+        );
+
+        const responseLog = `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`;
+        emitTaskLog(task, {
+          taskId: task.id,
+          domainId: task.params?.domainId,
+          type: task.type,
+          stream: "stdout",
+          log: responseLog,
+        });
+      },
+
+      onToolCall: (toolName, args, result, error) => {
+        const filePath = args?.path || args?.file_path || "file";
+        let progressMessage = `Reading ${filePath}`;
+        if (toolName === "list_directory") {
+          progressMessage = `Listing directory ${filePath}`;
+        } else if (toolName === "write_file") {
+          progressMessage = `Writing ${filePath}`;
+        }
+        emitTaskProgress(task, "analyzing", progressMessage);
+
+        const argsPreview = JSON.stringify(args).substring(0, 150);
+        const logPrefix = error ? "❌" : "✅";
+        const logStatus = error
+          ? `failed: ${error}`
+          : `completed (${result?.length || 0} chars)`;
+
+        taskLogger.info(`  ${logPrefix} ${toolName}: ${logStatus}`, {
+          component: "LLM-API",
         });
 
         emitTaskLog(task, {
@@ -1028,75 +806,61 @@ async function executeAnalysisTask(task) {
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `\n✅ [Analysis Complete] LLM has finished analyzing, now extracting results...\n`,
+          log: `  ├─ 🔨 Executing: ${toolName}\n  │  Args: ${argsPreview}${JSON.stringify(args).length > 150 ? "..." : ""}\n  └─ ${logPrefix} ${logStatus}\n`,
         });
+      },
 
-        break;
-      }
-
-      // If stop_reason is max_tokens, ask for final JSON output
-      if (response.stopReason === "max_tokens") {
-        taskLogger.warn(
-          "⚠️  Max tokens reached, requesting final JSON output",
-          {
+      shouldContinue: (response, iteration) => {
+        // Continue until LLM indicates completion
+        if (
+          response.stopReason === "end_turn" ||
+          response.stopReason === "stop_sequence" ||
+          response.stopReason === "completed"
+        ) {
+          taskLogger.raw("");
+          taskLogger.info("✅ LLM indicated completion (no more tool calls)", {
             component: "LLM-API",
-          },
-        );
-        chatState.addUserMessage(
-          "You've hit the token limit. Please output the complete JSON with all the requirements/analysis you've identified so far. Make sure it's valid, complete JSON.",
-        );
-        continue;
-      }
+            stopReason: response.stopReason,
+            iterations: iteration,
+          });
 
-      // No tool calls and unexpected stop reason - break
-      taskLogger.warn(
-        `Unexpected stop reason: ${response.stopReason}, ending loop`,
-        {
-          component: "LLM-API",
-          stopReason: response.stopReason,
-        },
-      );
-      break;
-    }
+          emitTaskLog(task, {
+            taskId: task.id,
+            domainId: task.params?.domainId,
+            type: task.type,
+            stream: "stdout",
+            log: `\n✅ [Analysis Complete] LLM has finished analyzing, now extracting results...\n`,
+          });
 
+          return false; // Stop
+        }
+
+        // If max_tokens reached, ask for JSON output
+        if (
+          response.stopReason === "max_tokens" &&
+          !response.toolCalls?.length
+        ) {
+          taskLogger.warn(
+            "⚠️  Max tokens reached, requesting final JSON output",
+            {
+              component: "LLM-API",
+            },
+          );
+          agent.addUserMessage(
+            "You've hit the token limit. Please output the complete JSON with all the requirements/analysis you've identified so far. Make sure it's valid, complete JSON.",
+          );
+          return true; // Continue
+        }
+
+        return true; // Continue by default
+      },
+    });
+
+    emitTaskProgress(task, "processing", "Processing results...");
     taskLogger.info("🔍 Checking for output file...", {
       component: "LLM-API",
       expectedPath: outputPath,
     });
-
-    // Check if LLM wrote to a different path than expected
-    if (llmWrittenFilePath && llmWrittenFilePath !== task.outputFile) {
-      const actualPath = path.join(config.target.directory, llmWrittenFilePath);
-      taskLogger.warn(
-        "⚠️  LLM HALLUCINATED FILE PATH - wrote to wrong location!",
-        {
-          component: "LLM-API",
-          expected: task.outputFile,
-          actual: llmWrittenFilePath,
-        },
-      );
-      taskLogger.info(
-        "📋 Moving file from hallucinated path to expected location...",
-        { component: "LLM-API" },
-      );
-
-      try {
-        // Read content from the wrong location
-        const content = await fs.readFile(actualPath, "utf-8");
-        // Write to correct location
-        await fs.writeFile(outputPath, content, "utf-8");
-        // Delete the misplaced file
-        await fs.unlink(actualPath);
-        taskLogger.info("✅ File moved successfully to correct location", {
-          component: "LLM-API",
-        });
-      } catch (moveError) {
-        taskLogger.error("❌ Failed to move misplaced file", {
-          component: "LLM-API",
-          error: moveError.message,
-        });
-      }
-    }
 
     // Check if output file was created
     let outputExists = false;
@@ -1122,63 +886,7 @@ async function executeAnalysisTask(task) {
         component: "LLM-API",
       });
 
-      // Get all assistant messages
-      const messages = chatState.getMessages();
-      let jsonContent = null;
-
-      // Find the last message with JSON content (skip tool calls)
-      for (let i = messages.length - 1; i >= 0; i--) {
-        const msg = messages[i];
-
-        // Only process text content from assistant, skip tool calls
-        if (
-          msg.role === "assistant" &&
-          msg.content &&
-          typeof msg.content === "string"
-        ) {
-          const content = msg.content;
-
-          // Try to extract JSON from markdown code blocks or plain text
-          const jsonMatch =
-            content.match(/```json\s*\n?([\s\S]*?)\n?```/) ||
-            content.match(/```\s*\n?([\s\S]*?)\n?```/) ||
-            content.match(/(\{[\s\S]*\})/);
-
-          if (jsonMatch) {
-            try {
-              const extractedJson = jsonMatch[1].trim();
-              const parsed = JSON.parse(extractedJson);
-
-              // Validate it's not tool call metadata (has "type": "tool_use")
-              if (parsed.type === "tool_use" || parsed.name === "write_file") {
-                taskLogger.debug(
-                  "⏭️  Skipping tool call metadata, looking for actual output",
-                  { component: "LLM-API" },
-                );
-                continue;
-              }
-
-              jsonContent = parsed;
-              taskLogger.info(
-                "✅ JSON successfully extracted from LLM response",
-                {
-                  component: "LLM-API",
-                },
-              );
-              emitTaskLog(task, {
-                taskId: task.id,
-                domainId: task.params?.domainId,
-                type: task.type,
-                stream: "stdout",
-                log: `[JSON Found] ✅ Successfully extracted and parsed JSON from response\n`,
-              });
-              break;
-            } catch (parseError) {
-              // Continue searching
-            }
-          }
-        }
-      }
+      const jsonContent = agent.extractJSON();
 
       if (jsonContent) {
         // Write the extracted JSON to file
@@ -1220,15 +928,21 @@ async function executeAnalysisTask(task) {
       }
     }
 
+    // Get metadata from agent
+    const agentMetadata = agent.getMetadata();
+
     // Close log stream
     taskLogger.raw("");
     taskLogger.raw("=".repeat(80));
     taskLogger.info(`🎉 PROCESS COMPLETED SUCCESSFULLY`, {
       component: "LLM-API",
       taskId: task.id,
-      iterations: iterationCount,
+      iterations: agentMetadata.iterations,
     });
-    taskLogger.info(`📊 Total iterations: ${iterationCount}`, {
+    taskLogger.info(`📊 Total iterations: ${agentMetadata.iterations}`, {
+      component: "LLM-API",
+    });
+    taskLogger.info(`   🪙 Total tokens: ${agentMetadata.tokenUsage.total}`, {
       component: "LLM-API",
     });
     taskLogger.info(`📁 Output file: ${task.outputFile}`, {
@@ -1242,7 +956,7 @@ async function executeAnalysisTask(task) {
       domainId: task.params?.domainId,
       type: task.type,
       stream: "stdout",
-      log: `\n${"=".repeat(80)}\n✅ [COMPLETE] Process finished successfully\n📊 Iterations: ${iterationCount}\n📁 Output: ${task.outputFile}\n${"=".repeat(80)}\n`,
+      log: `\n${"=".repeat(80)}\n✅ [COMPLETE] Process finished successfully\n📊 Iterations: ${agentMetadata.iterations}\n🪙 Tokens: ${agentMetadata.tokenUsage.total}\n📁 Output: ${task.outputFile}\n${"=".repeat(80)}\n`,
     });
 
     logStream.end();

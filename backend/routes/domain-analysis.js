@@ -6,7 +6,7 @@ import * as domainRequirementsPersistence from "../persistence/domain-requiremen
 import * as domainTestingPersistence from "../persistence/domain-testing.js";
 import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import * as taskOrchestrator from "../orchestrators/task.js";
+import * as taskFactory from "../tasks/factory/index.js";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
 import { readMockJson } from "../utils/mock-data.js";
@@ -231,11 +231,9 @@ router.post("/:id/analyze/documentation", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeDocumentationTask(
-      id,
-      files,
+    const task = await taskFactory.createAnalyzeDocumentationTask(id, files, {
       executeNow,
-    );
+    });
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating documentation analysis task", {
@@ -264,13 +262,11 @@ router.post("/:id/analyze/requirements", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeRequirementsTask(
-      id,
-      files,
-      userContext || "",
+    const task = await taskFactory.createAnalyzeRequirementsTask(id, files, {
+      userContext: userContext || "",
       includeDocumentation,
       executeNow,
-    );
+    });
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating requirements analysis task", {
@@ -299,12 +295,10 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeBugsSecurityTask(
-      id,
-      files,
+    const task = await taskFactory.createAnalyzeBugsSecurityTask(id, files, {
       includeRequirements,
       executeNow,
-    );
+    });
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating bugs & security analysis task", {
@@ -379,12 +373,10 @@ router.post("/:id/analyze/testing", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeTestingTask(
-      id,
-      files,
+    const task = await taskFactory.createAnalyzeTestingTask(id, files, {
       includeRequirements,
       executeNow,
-    );
+    });
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating testing analysis task", {
@@ -543,11 +535,9 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     const executeNow = req.body.executeNow !== false;
 
     // Create a task to apply the test
-    const task = await taskOrchestrator.createApplyTestTask(
-      id,
-      testRecommendation,
+    const task = await taskFactory.createApplyTestTask(id, testRecommendation, {
       executeNow,
-    );
+    });
 
     res.status(201).json({
       success: true,
@@ -643,11 +633,9 @@ router.post(
       const executeNow = req.body.executeNow !== false;
 
       // Create a task to apply the fix using Aider
-      const task = await taskOrchestrator.createApplyFixTask(
-        id,
-        finding,
+      const task = await taskFactory.createApplyFixTask(id, finding, {
         executeNow,
-      );
+      });
 
       res.status(201).json({
         success: true,
@@ -742,12 +730,10 @@ router.post("/:id/analyze/diagrams", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeDiagramsTask(
-      id,
-      files,
+    const task = await taskFactory.createAnalyzeDiagramsTask(id, files, {
       includeDocumentation,
       executeNow,
-    );
+    });
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating diagrams analysis task", {

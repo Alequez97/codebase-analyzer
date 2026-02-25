@@ -1,6 +1,6 @@
 import express from "express";
 import * as domainBugsSecurityPersistence from "../../persistence/domain-bugs-security.js";
-import * as taskOrchestrator from "../../orchestrators/task.js";
+import * as taskFactory from "../../tasks/factory/index.js";
 import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
@@ -66,11 +66,9 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeBugsSecurityTask(
-      id,
-      files,
-      includeRequirements,
-      executeNow,
+    const task = await taskFactory.createAnalyzeBugsSecurityTask(
+      { domainId: id, files, includeRequirements },
+      { executeNow },
     );
     res.status(201).json(task);
   } catch (error) {
@@ -165,10 +163,9 @@ router.post(
       const executeNow = req.body.executeNow !== false;
 
       // Create a task to apply the fix using Aider
-      const task = await taskOrchestrator.createApplyFixTask(
-        id,
-        finding,
-        executeNow,
+      const task = await taskFactory.createApplyFixTask(
+        { domainId: id, finding },
+        { executeNow },
       );
 
       res.status(201).json({

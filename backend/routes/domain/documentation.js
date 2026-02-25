@@ -1,6 +1,6 @@
 import express from "express";
 import * as domainDocumentationPersistence from "../../persistence/domain-documentation.js";
-import * as taskOrchestrator from "../../orchestrators/task.js";
+import * as taskFactory from "../../tasks/factory/index.js";
 import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
@@ -48,10 +48,9 @@ router.post("/:id/analyze/documentation", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeDocumentationTask(
-      id,
-      files,
-      executeNow,
+    const task = await taskFactory.createAnalyzeDocumentationTask(
+      { domainId: id, files },
+      { executeNow },
     );
     res.status(201).json(task);
   } catch (error) {

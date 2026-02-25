@@ -1,6 +1,6 @@
 import express from "express";
 import * as domainTestingPersistence from "../../persistence/domain-testing.js";
-import * as taskOrchestrator from "../../orchestrators/task.js";
+import * as taskFactory from "../../tasks/factory/index.js";
 import * as logger from "../../utils/logger.js";
 import { readMockJson } from "../../utils/mock-data.js";
 
@@ -61,11 +61,9 @@ router.post("/:id/analyze/testing", async (req, res) => {
     }
 
     const executeNow = req.body.executeNow !== false;
-    const task = await taskOrchestrator.createAnalyzeTestingTask(
-      id,
-      files,
-      includeRequirements,
-      executeNow,
+    const task = await taskFactory.createAnalyzeTestingTask(
+      { domainId: id, files, includeRequirements },
+      { executeNow },
     );
     res.status(201).json(task);
   } catch (error) {
@@ -113,10 +111,9 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     const executeNow = req.body.executeNow !== false;
 
     // Create a task to apply the test
-    const task = await taskOrchestrator.createApplyTestTask(
-      id,
-      testRecommendation,
-      executeNow,
+    const task = await taskFactory.createApplyTestTask(
+      { domainId: id, testRecommendation },
+      { executeNow },
     );
 
     res.status(201).json({
