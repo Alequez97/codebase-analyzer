@@ -1,3 +1,6 @@
+import { Badge, Table, Text } from "@chakra-ui/react";
+import { Alert } from "../../ui/alert";
+
 export function ExistingTestsTable({ testFiles }) {
   const normalizedTestFiles = (testFiles || [])
     .map((test) => {

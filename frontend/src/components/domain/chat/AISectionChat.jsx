@@ -1,5 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-
+import { Box, Button, Heading, HStack, IconButton, Text, Textarea, VStack } from "@chakra-ui/react";
+import {
+  Bot,
+  Check,
+  Copy,
+  RotateCcw,
+  Send,
+  Sparkles,
+  User,
+  X,
+} from "lucide-react";
+import MarkdownRenderer from "../../MarkdownRenderer";
+import { Card } from "../../ui/card";
 import { useDomainSectionsChatStore } from "../../../store/useDomainSectionsChatStore";
 
 /**

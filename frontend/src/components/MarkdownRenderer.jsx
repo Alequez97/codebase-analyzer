@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Box, Heading, Text } from "@chakra-ui/react";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import mermaid from "mermaid";
 
@@ -16,7 +19,6 @@ let diagramCounter = 0;
 /**
  * Mermaid diagram component that renders diagrams from code blocks
  */
-// eslint-disable-next-line unused-imports/no-unused-vars
 function MermaidDiagram({ chart }) {
   const containerRef = useRef(null);
   const [svg, setSvg] = useState(null);

@@ -1,3 +1,5 @@
+import { Box, Text, VStack } from "@chakra-ui/react";
+
 /**
  * EmptyState - Reusable component for displaying empty/no-data states
  * @param {Object} icon - Lucide icon component
@@ -6,7 +8,7 @@
  * @param {string} variant - "bordered" (dashed border) or "simple" (no border)
  */
 export function EmptyState({
-  icon: Icon, // eslint-disable-line unused-imports/no-unused-vars
+  icon: Icon,
   title,
   description,
   variant = "bordered",

@@ -1,5 +1,15 @@
 import { useEffect } from "react";
+import { Box, Container, Grid, GridItem, List, VStack } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
+import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
+import DomainDiagramsSection from "../components/domain/DomainDiagramsSection";
+import DomainDocumentationSection from "../components/domain/DomainDocumentationSection";
+import DomainFilesSection from "../components/domain/DomainFilesSection";
+import DomainHeader from "../components/domain/DomainHeader";
+import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
+import DomainTestingSection from "../components/domain/DomainTestingSection";
+import AISectionChat from "../components/domain/chat/AISectionChat";
+import { Alert } from "../components/ui/alert";
 import { toaster } from "../components/ui/toaster";
 import { TASK_TYPES } from "../constants/task-types";
 import { SECTION_TYPES } from "../constants/section-types";

@@ -1,7 +1,22 @@
 import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
-
+import {
+  Box,
+  Button,
+  HStack,
+  IconButton,
+  Input,
+  NativeSelect,
+  Tabs,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import { Plus, Trash2 } from "lucide-react";
 import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
 import { ASSERTION_TYPES } from "./utils";
+
+const NativeSelectRoot = NativeSelect.Root;
+const NativeSelectField = NativeSelect.Field;
 
 function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
   const { setEditedTestCases, getEditedTestCases } = useTestingEditorStore();

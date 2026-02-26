@@ -1,4 +1,9 @@
 import { useEffect } from "react";
+import { Button, Container, HStack, VStack } from "@chakra-ui/react";
+import { CodebaseAnalysisLogs } from "../components/dashboard/CodebaseAnalysisLogs";
+import { DashboardHeader } from "../components/dashboard/DashboardHeader";
+import { ModulesSection } from "../components/dashboard/ModulesSection";
+import { ErrorState, LoadingState } from "../components/dashboard/States";
 import { useCodebaseStore } from "../store/useCodebaseStore";
 import { useConfigStore } from "../store/useConfigStore";
 import { useLogsStore } from "../store/useLogsStore";

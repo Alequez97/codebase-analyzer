@@ -1,3 +1,4 @@
+import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { useConfigStore } from "../../store/useConfigStore";
 
 export function ConfigurationPanel() {

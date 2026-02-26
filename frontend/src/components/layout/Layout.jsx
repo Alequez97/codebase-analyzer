@@ -1,3 +1,6 @@
+import { Box } from "@chakra-ui/react";
+import { ConfigurationDialog } from "../dashboard/ConfigurationDialog";
+import { StatusBar } from "../dashboard/StatusBar";
 import { useConfigStore } from "../../store/useConfigStore";
 import { useSocketStore } from "../../store/useSocketStore";
 

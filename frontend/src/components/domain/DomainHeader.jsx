@@ -1,3 +1,5 @@
+import { Badge, Button, Heading, HStack, Skeleton, Text, VStack } from "@chakra-ui/react";
+import { ArrowLeft, Eye, FileText } from "lucide-react";
 import { useLogsStore } from "../../store/useLogsStore";
 
 function getPriorityColor(priority) {

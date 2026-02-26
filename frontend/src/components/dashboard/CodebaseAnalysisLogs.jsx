@@ -1,3 +1,6 @@
+import { Box, Heading } from "@chakra-ui/react";
+import LogsViewer from "../domain/LogsViewer";
+import { Card } from "../ui/card";
 import { useLogsStore } from "../../store/useLogsStore";
 
 /**

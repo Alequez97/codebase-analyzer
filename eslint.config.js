@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import globals from "globals";
 import prettier from "eslint-config-prettier";
+import react from "eslint-plugin-react";
 import unusedImports from "eslint-plugin-unused-imports";
 
 export default [
@@ -65,6 +66,9 @@ export default [
   // Frontend-specific config
   {
     files: ["frontend/**/*.js", "frontend/**/*.jsx"],
+    plugins: {
+      react,
+    },
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -80,6 +84,9 @@ export default [
     },
     rules: {
       "react/prop-types": "off", // Turn off if not using prop-types
+      "react/jsx-no-undef": "error",
+      "react/jsx-uses-vars": "error",
+      "react/jsx-uses-react": "off", // Not needed with the new JSX transform
       "react/react-in-jsx-scope": "off", // Not needed in React 17+
     },
   },

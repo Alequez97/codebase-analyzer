@@ -1,5 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
-
+import {
+  Box,
+  Heading,
+  HStack,
+  IconButton,
+  Input,
+  Skeleton,
+  Table,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { Pencil, Plus, X } from "lucide-react";
+import { Card } from "../ui/card";
 import { useProjectFilesStore } from "../../store/useProjectFilesStore";
 
 export default function DomainFilesSection({

@@ -1,3 +1,4 @@
+import { Box, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useConfigStore } from "../../store/useConfigStore";
 
 export function DashboardHeader() {

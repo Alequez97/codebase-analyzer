@@ -1,10 +1,51 @@
 import { useState } from "react";
-
-import { Shield } from "lucide-react";
-
+import {
+  Badge,
+  Box,
+  Button,
+  Code,
+  Heading,
+  HStack,
+  IconButton,
+  Separator,
+  Skeleton,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FileText,
+  Lightbulb,
+  ListChecks,
+  MessageSquare,
+  Shield,
+  Sparkles,
+} from "lucide-react";
+import MarkdownRenderer from "../MarkdownRenderer";
+import { Checkbox } from "../ui/checkbox";
+import {
+  DialogActionTrigger,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "../ui/dialog";
+import { EmptyState } from "../ui/empty-state";
 import { toaster } from "../ui/toaster";
+import { Card } from "../ui/card";
+import LogsViewer from "./LogsViewer";
 import api from "../../api";
 import { useDomainBugsSecurityStore } from "../../store/useDomainBugsSecurityStore";
+
+const CategoryIcon = FileText;
 
 const SEVERITY_COLORS = {
   critical: "red",

@@ -1,7 +1,46 @@
 import { useState, useMemo, useEffect } from "react";
+import {
+  Badge,
+  Box,
+  Button,
+  Code,
+  Collapsible,
+  Heading,
+  HStack,
+  IconButton,
+  Separator,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Code2,
+  FileCode,
+  FileText,
+  MessageSquare,
+  Pencil,
+  Save,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { Card } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
+import {
+  DialogActionTrigger,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "../ui/dialog";
+import { EmptyState } from "../ui/empty-state";
+import LogsViewer from "./LogsViewer";
 
-// eslint-disable-next-line unused-imports/no-unused-imports
-import { FileText, Code2 } from "lucide-react";
+const CategoryIcon = FileText;
 
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
 
