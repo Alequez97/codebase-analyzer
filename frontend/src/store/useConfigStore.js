@@ -55,3 +55,6 @@ export const useConfigStore = create((set, get) => ({
     return !state.configError && !!state.config;
   },
 }));
+
+// Auto-fetch config on store initialization
+useConfigStore.getState().fetchConfig();

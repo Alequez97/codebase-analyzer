@@ -76,7 +76,7 @@ export const useCodebaseStore = create((set, get) => ({
       }
 
       const codebaseTask = tasks.find(
-        (task) => task.type === TASK_TYPES.CODEBASE_ANALYSIS,
+        (task) => task.type === TASK_TYPES.CODEBASE_ANALYSIS
       );
 
       if (codebaseTask) {
@@ -156,3 +156,6 @@ export const useCodebaseStore = create((set, get) => ({
       error: null,
     }),
 }));
+
+// Auto-fetch analysis on store initialization
+useCodebaseStore.getState().fetchAnalysis();
