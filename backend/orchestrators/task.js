@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
 import { getAgent } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";

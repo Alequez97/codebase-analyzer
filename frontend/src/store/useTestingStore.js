@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import api from "../api";
 
-export const useTestingStore = create((set, get) => ({
+export const useTestingStore = create((set, _) => ({
   // State
   applyingTestsByDomainId: {},
 

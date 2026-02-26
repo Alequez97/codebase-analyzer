@@ -1,47 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
+
+
 import {
-  Button,
-  Heading,
-  HStack,
-  Text,
-  Textarea,
-  Box,
-  IconButton,
-  Badge,
-  VStack,
-  Code,
-  Separator,
-  Collapsible,
-} from "@chakra-ui/react";
-import {
-  Pencil,
-  X,
-  Save,
   FileText,
-  Sparkles,
-  ChevronDown,
-  ChevronRight,
   Shield,
   CheckCircle,
   AlertCircle,
   Code2,
-  FileCode,
-  BookOpen,
-  MessageSquare,
 } from "lucide-react";
-import { Card } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
-import { EmptyState } from "../ui/empty-state";
-import LogsViewer from "./LogsViewer";
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogActionTrigger,
-} from "../ui/dialog";
+
+
 
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
 

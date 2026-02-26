@@ -1,8 +1,5 @@
-import { Box } from "@chakra-ui/react";
 import { useConfigStore } from "../../store/useConfigStore";
 import { useSocketStore } from "../../store/useSocketStore";
-import { StatusBar } from "../dashboard/StatusBar";
-import { ConfigurationDialog } from "../dashboard/ConfigurationDialog";
 
 export function Layout({ children }) {
   const { config, configLoading } = useConfigStore();

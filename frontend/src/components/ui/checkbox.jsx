@@ -1,4 +1,3 @@
-import { Checkbox as ChakraCheckbox } from "@chakra-ui/react";
 import { forwardRef } from "react";
 
 export const Checkbox = forwardRef((props, ref) => {

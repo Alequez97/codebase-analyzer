@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Container, VStack, List, Grid, GridItem, Box } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toaster } from "../components/ui/toaster";
 import { TASK_TYPES } from "../constants/task-types";
@@ -15,17 +14,7 @@ import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useTestingStore } from "../store/useTestingStore";
 import { useLogsStore } from "../store/useLogsStore";
 import { useDomainSectionsChatStore } from "../store/useDomainSectionsChatStore";
-import { Alert } from "../components/ui/alert";
-import DomainHeader from "../components/domain/DomainHeader";
-import DomainFilesSection from "../components/domain/DomainFilesSection";
-import DomainDocumentationSection from "../components/domain/DomainDocumentationSection";
-import DomainDiagramsSection from "../components/domain/DomainDiagramsSection";
-import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
-import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
-import DomainTestingSection from "../components/domain/DomainTestingSection";
-import { AISectionChat } from "../components/domain/chat";
 import {
-  getChatConfig,
   DOCUMENTATION_CHAT_CONFIG,
   REQUIREMENTS_CHAT_CONFIG,
   DIAGRAMS_CHAT_CONFIG,

@@ -1,20 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  VStack,
-  HStack,
-  Box,
-  Heading,
-  Text,
-  Badge,
-  Button,
-  Table,
-  Textarea,
-  IconButton,
-} from "@chakra-ui/react";
-import { Pencil, X, Save } from "lucide-react";
+
+
 import { useNavigate } from "react-router-dom";
-import { Card } from "../ui/card";
-import { Alert } from "../ui/alert";
 import { toaster } from "../ui/toaster";
 import { useConfigStore } from "../../store/useConfigStore";
 import { useCodebaseStore } from "../../store/useCodebaseStore";

@@ -48,15 +48,15 @@ export const useSocketStore = create((set, get) => ({
     });
 
     // Analysis events
-    socket.on(SOCKET_EVENTS.ANALYSIS_STARTED, (data) => {
+    socket.on(SOCKET_EVENTS.ANALYSIS_STARTED, (_) => {
       useCodebaseStore.getState().setAnalyzingCodebase(true);
     });
 
-    socket.on(SOCKET_EVENTS.ANALYSIS_PROGRESS, (data) => {
+    socket.on(SOCKET_EVENTS.ANALYSIS_PROGRESS, (_) => {
       // Progress updates handled via TASK_PROGRESS event
     });
 
-    socket.on(SOCKET_EVENTS.ANALYSIS_COMPLETED, async (data) => {
+    socket.on(SOCKET_EVENTS.ANALYSIS_COMPLETED, async (_) => {
       useCodebaseStore.getState().setAnalyzingCodebase(false);
       await useCodebaseStore.getState().fetchAnalysis();
     });
@@ -68,7 +68,7 @@ export const useSocketStore = create((set, get) => ({
 
     // Task completion events - handle all task types by checking type property
     socket.on(SOCKET_EVENTS.TASK_COMPLETED, async (data) => {
-      const { type, taskId, domainId } = data;
+      const { type, domainId } = data;
 
       // Clear progress indicator for this domain
       if (domainId) {
@@ -145,7 +145,7 @@ export const useSocketStore = create((set, get) => ({
 
     // Task failure events
     socket.on(SOCKET_EVENTS.TASK_FAILED, (data) => {
-      const { type, taskId, domainId, error } = data;
+      const { type, domainId, error } = data;
 
       // Clear progress indicator for this domain
       if (domainId) {
@@ -183,7 +183,7 @@ export const useSocketStore = create((set, get) => ({
     });
 
     // Log events - stream logs to logs store
-    const handleLogEvent = ({ taskId, type, stream, log, domainId }) => {
+    const handleLogEvent = ({ type, log, domainId }) => {
       // Add to codebase analysis logs (visible in dashboard)
       useLogsStore.getState().appendCodebaseAnalysisLog(log);
 
@@ -210,16 +210,13 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_EDIT_TESTING, handleLogEvent);
 
     // Chat events - AI thinking indicator
-    socket.on(
-      SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING,
-      ({ domainId, sectionType, thinking }) => {
-        if (thinking) {
-          const chatStore = useDomainSectionsChatStore.getState();
-          chatStore.setAiResponding(true);
-          chatStore.setAiThinking(true);
-        }
-      },
-    );
+    socket.on(SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING, ({ thinking }) => {
+      if (thinking) {
+        const chatStore = useDomainSectionsChatStore.getState();
+        chatStore.setAiResponding(true);
+        chatStore.setAiThinking(true);
+      }
+    });
 
     // Chat events - AI responses (description and content)
     socket.on(

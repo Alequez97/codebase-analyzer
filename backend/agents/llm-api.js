@@ -1,17 +1,11 @@
 import config from "../config.js";
-import fs from "fs/promises";
-import path from "path";
 import { ClaudeClient } from "../llm/clients/claude-client.js";
 import { OpenAIClient } from "../llm/clients/openai-client.js";
 import { ChatState } from "../llm/state/chat-state.js";
 import { OpenAIChatState } from "../llm/state/openai-chat-state.js";
 import { LLMAgent } from "../llm/agent.js";
-import { SOCKET_EVENTS } from "../constants/socket-events.js";
-import { TASK_STATUS } from "../constants/task-status.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import {
-  emitSocketEvent,
-  emitTaskLog,
   emitTaskProgress,
 } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";

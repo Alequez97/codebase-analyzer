@@ -1,11 +1,6 @@
 import { useEffect } from "react";
-import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "./components/ui/toaster";
+import { defaultSystem } from "@chakra-ui/react";
 import { useSocketStore } from "./store/useSocketStore";
-import { Layout } from "./components/layout";
-import Dashboard from "./pages/Dashboard";
-import DomainDetailsPage from "./pages/DomainDetailsPage";
 
 function App() {
   // Initialize socket connection before any routing

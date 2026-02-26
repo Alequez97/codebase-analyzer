@@ -1,33 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  VStack,
-  Text,
-  Badge,
-  Flex,
-  Skeleton,
-  IconButton,
-  Stack,
-  Collapsible,
-} from "@chakra-ui/react";
+
+
 import {
   FileText,
-  Sparkles,
-  ExternalLink,
-  Download,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-  ChevronDown,
-  MessageSquare,
 } from "lucide-react";
-import { Card } from "../ui/card";
-import { EmptyState } from "../ui/empty-state";
 import { toaster } from "../ui/toaster";
-import LogsViewer from "./LogsViewer";
 import { getDiagramFile, openDiagramInEditor } from "../../api/domain-diagrams";
 
 const DIAGRAM_TYPE_LABELS = {

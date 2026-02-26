@@ -1,33 +1,9 @@
 import { useState, useEffect } from "react";
+
+
 import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  IconButton,
-  Textarea,
-  Text,
-  Badge,
-  Collapsible,
-  Skeleton,
-  VStack,
-} from "@chakra-ui/react";
-import {
-  Pencil,
-  X,
-  Save,
   FileText,
-  Sparkles,
-  ChevronDown,
-  ChevronRight,
-  MessageSquare,
-  Check,
 } from "lucide-react";
-import ReactDiffViewer from "react-diff-viewer-continued";
-import { Card } from "../ui/card";
-import { EmptyState } from "../ui/empty-state";
-import MarkdownRenderer from "../MarkdownRenderer";
-import LogsViewer from "./LogsViewer";
 
 export default function DomainDocumentationSection({
   documentation,

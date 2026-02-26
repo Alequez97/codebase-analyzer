@@ -1,7 +1,4 @@
-import { Box, Heading } from "@chakra-ui/react";
 import { useLogsStore } from "../../store/useLogsStore";
-import { Card } from "../ui/card";
-import LogsViewer from "../domain/LogsViewer";
 
 /**
  * Codebase analysis logs viewer - displays logs from full codebase analysis task

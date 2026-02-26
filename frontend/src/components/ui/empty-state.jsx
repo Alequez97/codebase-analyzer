@@ -1,5 +1,3 @@
-import { Box, Text, VStack } from "@chakra-ui/react";
-
 /**
  * EmptyState - Reusable component for displaying empty/no-data states
  * @param {Object} icon - Lucide icon component

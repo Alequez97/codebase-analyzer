@@ -1,30 +1,9 @@
 import { useState } from "react";
+
+
 import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Text,
-  VStack,
-  Badge,
-  Separator,
-  Collapsible,
-  IconButton,
-  Skeleton,
-} from "@chakra-ui/react";
-import {
-  FileText,
-  Sparkles,
-  ChevronDown,
-  ChevronRight,
   TestTube,
-  MessageSquare,
 } from "lucide-react";
-import { Card } from "../ui/card";
-import { EmptyState } from "../ui/empty-state";
-import LogsViewer from "./LogsViewer";
-import { ExistingTestsTable } from "./testing/ExistingTestsTable";
-import { MissingTestsSection } from "./testing/MissingTestsSection";
 
 export default function DomainTestingSection({
   domainId,

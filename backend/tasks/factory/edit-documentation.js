@@ -1,4 +1,3 @@
-import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { TASK_TYPES } from "../../constants/task-types.js";

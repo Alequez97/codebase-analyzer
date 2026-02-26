@@ -1,4 +1,3 @@
-import { HStack, Badge, Text } from "@chakra-ui/react";
 
 export function StatusBar({
   connected,

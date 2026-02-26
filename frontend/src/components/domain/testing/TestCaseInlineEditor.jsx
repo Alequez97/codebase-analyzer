@@ -1,18 +1,6 @@
 import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
-import {
-  Box,
-  Button,
-  HStack,
-  Text,
-  VStack,
-  IconButton,
-  Input,
-  Textarea,
-  Tabs,
-  NativeSelectRoot,
-  NativeSelectField,
-} from "@chakra-ui/react";
-import { Plus, Trash2 } from "lucide-react";
+
+
 import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
 import { ASSERTION_TYPES } from "./utils";
 

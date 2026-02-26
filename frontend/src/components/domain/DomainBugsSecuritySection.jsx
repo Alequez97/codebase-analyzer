@@ -1,46 +1,13 @@
 import { useState } from "react";
+
+
 import {
-  Button,
-  Heading,
-  HStack,
-  Text,
-  Textarea,
-  Box,
-  IconButton,
-  Badge,
-  VStack,
-  Separator,
-  Skeleton,
-  Code,
-} from "@chakra-ui/react";
-import {
-  Sparkles,
-  ChevronDown,
-  ChevronRight,
-  AlertTriangle,
   Shield,
   Bug,
   AlertCircle,
-  CheckCircle,
-  FileCode,
-  Lightbulb,
-  ListChecks,
-  MessageSquare,
 } from "lucide-react";
-import { Card } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
-import { EmptyState } from "../ui/empty-state";
-import LogsViewer from "./LogsViewer";
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogActionTrigger,
-} from "../ui/dialog";
-import MarkdownRenderer from "../MarkdownRenderer";
+
+
 import { toaster } from "../ui/toaster";
 import api from "../../api";
 import { useDomainBugsSecurityStore } from "../../store/useDomainBugsSecurityStore";

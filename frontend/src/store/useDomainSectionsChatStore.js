@@ -109,8 +109,6 @@ export const useDomainSectionsChatStore = create((set, get) => ({
    * Send user message and get AI response from backend
    */
   sendMessage: async (domainId, sectionType, userMessage, currentContent) => {
-    const key = `${domainId}_${sectionType}`;
-
     // Add user message
     const userMsg = {
       id: Date.now(),

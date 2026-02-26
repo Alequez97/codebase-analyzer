@@ -87,7 +87,7 @@ export const useCodebaseStore = create((set, get) => ({
       }
 
       return tasks;
-    } catch (err) {
+    } catch {
       return [];
     }
   },

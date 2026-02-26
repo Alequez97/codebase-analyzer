@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Box, Text, VStack, Badge, HStack, Code, Tabs } from "@chakra-ui/react";
 import { formatAssertionType } from "./utils";
 
 export function TestCaseDetails({ scenarios }) {

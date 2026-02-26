@@ -1,12 +1,7 @@
 import { useEffect } from "react";
-import { Button, Container, HStack, VStack } from "@chakra-ui/react";
 import { useCodebaseStore } from "../store/useCodebaseStore";
 import { useConfigStore } from "../store/useConfigStore";
 import { useLogsStore } from "../store/useLogsStore";
-import { LoadingState, ErrorState } from "../components/dashboard/States";
-import { DashboardHeader } from "../components/dashboard/DashboardHeader";
-import { ModulesSection } from "../components/dashboard/ModulesSection";
-import { CodebaseAnalysisLogs } from "../components/dashboard/CodebaseAnalysisLogs";
 
 export default function Dashboard() {
   // Config store (server configuration, agents, target project)

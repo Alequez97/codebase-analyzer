@@ -1,16 +1,5 @@
-import { Button, IconButton } from "@chakra-ui/react";
-import { Settings } from "lucide-react";
-import {
-  DialogRoot,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogActionTrigger,
-} from "../ui/dialog";
-import { ConfigurationPanel } from "./ConfigurationPanel";
+
+
 
 export function ConfigurationDialog() {
   return (

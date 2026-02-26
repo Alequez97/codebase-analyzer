@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import globals from "globals";
 import prettier from "eslint-config-prettier";
+import unusedImports from "eslint-plugin-unused-imports";
 
 export default [
   // Ignore patterns
@@ -18,6 +19,9 @@ export default [
   // Base config for all JS files
   {
     files: ["**/*.js", "**/*.jsx"],
+    plugins: {
+      "unused-imports": unusedImports,
+    },
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -28,9 +32,19 @@ export default [
     },
     rules: {
       ...js.configs.recommended.rules,
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": "off", // Replaced by unused-imports/no-unused-vars
+      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-vars": [
+        "error",
+        {
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
       "no-console": "off", // We use a centralized logger, but allow console for now
-      "prefer-const": "warn",
+      "prefer-const": "error",
       "no-var": "error",
     },
   },
@@ -44,7 +58,7 @@ export default [
       },
     },
     rules: {
-      "no-process-exit": "warn",
+      "no-process-exit": "off",
     },
   },
 

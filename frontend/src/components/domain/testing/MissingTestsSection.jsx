@@ -1,21 +1,7 @@
-import { useState, useRef, Fragment } from "react";
-import {
-  Box,
-  Button,
-  HStack,
-  Text,
-  VStack,
-  Badge,
-  Grid,
-  Table,
-  Icon,
-  IconButton,
-} from "@chakra-ui/react";
-import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
-import { Alert } from "../../ui/alert";
+import { useState, useRef } from "react";
+
+
 import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
-import { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
-import { TestCaseDetails } from "./TestCaseDetails";
 import { getPriorityColor } from "./utils";
 
 export function MissingTestsSection({
