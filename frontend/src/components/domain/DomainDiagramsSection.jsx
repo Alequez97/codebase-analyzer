@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-
-import {
-  FileText,
-} from "lucide-react";
+import { FileText } from "lucide-react";
 import { toaster } from "../ui/toaster";
 import { getDiagramFile, openDiagramInEditor } from "../../api/domain-diagrams";
 

@@ -1,9 +1,6 @@
 import { useState } from "react";
 
-
-import {
-  TestTube,
-} from "lucide-react";
+import { TestTube } from "lucide-react";
 
 export default function DomainTestingSection({
   domainId,

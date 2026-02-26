@@ -1,6 +1,3 @@
-
-
-
 export function ConfigurationDialog() {
   return (
     <DialogRoot size="xl">

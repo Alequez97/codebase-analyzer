@@ -1,4 +1,3 @@
-
 export function ExistingTestsTable({ testFiles }) {
   const normalizedTestFiles = (testFiles || [])
     .map((test) => {

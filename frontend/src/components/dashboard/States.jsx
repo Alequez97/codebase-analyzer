@@ -1,4 +1,3 @@
-
 export function LoadingState() {
   return (
     <Container maxW="container.xl" py={8}>
