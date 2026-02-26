@@ -20,11 +20,20 @@ export function processTemplate(template, variables = {}) {
     result = result.replace(placeholder, value || "");
   }
 
-  // Process conditional blocks: {{#if VARIABLE}}...{{/if}}
+  // Process conditional blocks: {{#if VARIABLE}}...{{else}}...{{/if}}
   result = result.replace(
     /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
     (match, varName, content) => {
       const value = variables[varName];
+
+      // Check if there's an {{else}} block
+      const elseSplit = content.split(/\{\{else\}\}/);
+      if (elseSplit.length === 2) {
+        // Has else block: show one or the other
+        return value ? elseSplit[0] : elseSplit[1];
+      }
+
+      // No else block: show content if truthy, nothing otherwise
       return value ? content : "";
     },
   );
