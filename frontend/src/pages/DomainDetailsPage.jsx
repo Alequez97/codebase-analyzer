@@ -566,7 +566,10 @@ export default function DomainDetailsPage() {
               loading={testingLoading}
               progress={testingProgress}
               applyingTests={applyingTests}
-              onAnalyze={() => domain && testStore.analyze(domain)}
+              hasRequirements={!!requirements}
+              onAnalyze={(includeRequirements) =>
+                domain && testStore.analyze(domain, includeRequirements)
+              }
               onApplyTest={handleApplyTest}
               showLogs={showDomainLogs}
               logs={testingLogs}

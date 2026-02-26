@@ -56,7 +56,7 @@ export const useDomainTestingStore = create((set, get) => ({
     }
   },
 
-  analyze: async (domain) => {
+  analyze: async (domain, includeRequirements = false) => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
 
     useLogsStore.getState().clearLogs(domain.id, SECTION_TYPES.TESTING);
@@ -73,7 +73,11 @@ export const useDomainTestingStore = create((set, get) => ({
     });
 
     try {
-      await api.analyzeDomainTesting(domain.id, domain.files || []);
+      await api.analyzeDomainTesting(
+        domain.id,
+        domain.files || [],
+        includeRequirements,
+      );
       return { success: true };
     } catch (err) {
       const message =

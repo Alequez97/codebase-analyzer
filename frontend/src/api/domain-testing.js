@@ -3,9 +3,15 @@ import client from "./client";
 export const getDomainTesting = (id) =>
   client.get(`/analysis/domain/${id}/testing`);
 
-export const analyzeDomainTesting = (id, files, executeNow = true) =>
+export const analyzeDomainTesting = (
+  id,
+  files,
+  includeRequirements = false,
+  executeNow = true,
+) =>
   client.post(`/analysis/domain/${id}/analyze/testing`, {
     files,
+    includeRequirements,
     executeNow,
   });
 
