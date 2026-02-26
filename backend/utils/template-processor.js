@@ -279,6 +279,26 @@ export function buildApplyFixTemplateVariables(task) {
 }
 
 /**
+ * Build variables object for apply-test task template
+ * @param {Object} task - Task object
+ * @returns {Object} Variables for template processing
+ */
+export function buildApplyTestTemplateVariables(task) {
+  const { params } = task;
+
+  return {
+    CODEBASE_PATH: params.targetDirectory || "",
+    DOMAIN_ID: params.domainId || "",
+    TEST_ID: params.testId || "",
+    TEST_FILE: params.testFile || "",
+    TEST_TYPE: params.testType || "",
+    TEST_DESCRIPTION: params.testDescription || "",
+    TEST_SCENARIOS: params.testScenarios || [],
+    SOURCE_FILE: params.sourceFile || "",
+  };
+}
+
+/**
  * Build template variables for edit tasks (AI chat)
  * @param {Object} task - Edit task object
  * @returns {Object} Variables for template processing
@@ -340,6 +360,8 @@ export async function buildTemplateVariables(task) {
       return buildCodebaseTemplateVariables(task);
     case TASK_TYPES.APPLY_FIX:
       return buildApplyFixTemplateVariables(task);
+    case TASK_TYPES.APPLY_TEST:
+      return buildApplyTestTemplateVariables(task);
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

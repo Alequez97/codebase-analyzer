@@ -78,7 +78,7 @@ export class LLMAgent {
 
       onProgress({
         stage: PROGRESS_STAGES.PROCESSING,
-        message: `Waiting for AI response...`,
+        message: `Thinking...`,
         iteration: iterationCount,
       });
 

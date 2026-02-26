@@ -117,9 +117,31 @@ export async function execute(task) {
       logger.error(line);
     });
 
+    const startupTime = new Date().toISOString();
+    const startupBanner = `\n${"=".repeat(80)}\n🚀 [AGENT STARTING] Aider is preparing task ${task.id}\n📌 Type: ${task.type}\n📂 Domain: ${task.params?.domainId || "n/a"}\n🕒 ${startupTime}\n${"=".repeat(80)}\n`;
+
+    logStream.write(startupBanner);
+    emitTaskLog(task, {
+      taskId: task.id,
+      domainId: task.params?.domainId,
+      type: task.type,
+      stream: "stdout",
+      log: startupBanner,
+    });
+
     const aiderProcess = spawn(command, {
       cwd: config.target.directory,
       shell: true,
+    });
+
+    const startedBanner = `✅ [AGENT STARTED] Aider process launched (pid: ${aiderProcess.pid || "unknown"})\n`;
+    logStream.write(startedBanner);
+    emitTaskLog(task, {
+      taskId: task.id,
+      domainId: task.params?.domainId,
+      type: task.type,
+      stream: "stdout",
+      log: startedBanner,
     });
 
     // Close stdin immediately - we're using --message-file, no interaction needed
