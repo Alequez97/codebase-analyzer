@@ -7,6 +7,7 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadInstructionForTask } from "../../utils/instruction-loader.js";
 import { editDocumentationHandler } from "./edit-documentation.js";
 import { analyzeDocumentationHandler } from "./analyze-documentation.js";
+import { analyzeTestingHandler } from "./analyze-testing.js";
 import { defaultAnalysisHandler } from "./default-analysis.js";
 
 /**
@@ -34,6 +35,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = editDocumentationHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DOCUMENTATION) {
     overrides = analyzeDocumentationHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.TESTING) {
+    overrides = analyzeTestingHandler(task, taskLogger, agent);
   }
 
   // Merge: defaults provide all callbacks, overrides replace what's needed
