@@ -44,7 +44,7 @@ function serializeErrors(obj) {
   if (obj && typeof obj === "object") {
     const serialized = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.hasOwn(obj, key)) {
         serialized[key] = serializeErrors(obj[key]);
       }
     }
