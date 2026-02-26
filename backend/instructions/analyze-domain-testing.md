@@ -71,7 +71,10 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
             "scenario": "End-to-end user flow",
             "checks": [
               {
-                "input": [{ "field": "step", "value": "describe action" }],
+                "input": [
+                  { "field": "step", "value": "Navigate to /admin/fleet" },
+                  { "field": "step", "value": "Click 'New Aircraft' button" }
+                ],
                 "expectedOutput": "Observable user-visible outcome",
                 "assertionType": "toBeVisible | toContainText | toHaveURL"
               }
@@ -119,6 +122,8 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 - `scenarios` must be a non-empty array.
 - Each `scenarios[]` item must include: `scenario`, `checks` (non-empty).
 - Each `checks[]` item must include: `input` (array of `{ field, value }`), `expectedOutput`, `assertionType`.
+- For e2e checks, represent user actions as `input` items with `field: "step"` and the action in `value`.
+- JSON must use valid key-value syntax. Do not output invalid objects like `{ "step", "value": "..." }`.
 - Do not omit `suggestedTestFile` or `scenarios` for any missing-test entry.
 
 ## Suggested Test File Placement (Strict)
