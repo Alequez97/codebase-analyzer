@@ -22,7 +22,7 @@ export async function detect() {
     const { stdout } = await execAsync("aider --version");
     logger.debug(`Aider detected: ${stdout.trim()}`, { component: "Aider" });
     return true;
-  } catch (error) {
+  } catch {
     logger.debug("Aider not detected", { component: "Aider" });
     return false;
   }

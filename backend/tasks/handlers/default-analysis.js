@@ -122,7 +122,7 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       }
     },
 
-    shouldContinue: (response, iteration) => {
+    shouldContinue: (response) => {
       if (
         response.stopReason === "end_turn" ||
         response.stopReason === "stop_sequence" ||

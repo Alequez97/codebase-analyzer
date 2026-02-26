@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 
-
-import {
-  FileText,
-} from "lucide-react";
+import { FileText } from "lucide-react";
 
 export default function DomainDocumentationSection({
   documentation,
@@ -60,7 +57,6 @@ export default function DomainDocumentationSection({
       : documentation?.content || "";
 
   const statusText = documentation?.metadata?.status || null;
-  const logFile = documentation?.metadata?.logFile || null;
 
   return (
     <Card.Root>

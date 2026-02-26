@@ -1,5 +1,3 @@
-
-
 import { useLogsStore } from "../../store/useLogsStore";
 
 function getPriorityColor(priority) {
@@ -9,7 +7,7 @@ function getPriorityColor(priority) {
   return "gray";
 }
 
-export default function DomainHeader({ domain, domainId, analyzing, onBack }) {
+export default function DomainHeader({ domain, domainId, onBack }) {
   const { showDomainLogs, toggleDomainLogs } = useLogsStore();
 
   if (!domain) {

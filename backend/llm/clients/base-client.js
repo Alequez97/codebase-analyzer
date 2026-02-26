@@ -26,7 +26,7 @@ export class BaseLLMClient {
    * @param {number} [options.temperature] - Override default temperature
    * @returns {Promise<Object>} Response object with content, toolCalls (if any), usage, etc.
    */
-  async sendMessage(messages, options = {}) {
+  async sendMessage() {
     throw new Error("sendMessage() must be implemented by subclass");
   }
 

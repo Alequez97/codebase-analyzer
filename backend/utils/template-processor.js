@@ -84,7 +84,7 @@ export async function buildRequirementsTemplateVariables(task) {
     if (domain?.name) {
       domainName = domain.name;
     }
-  } catch (err) {
+  } catch {
     // Fallback to domainId if analysis not found
   }
 
@@ -118,7 +118,7 @@ export async function buildBugsSecurityTemplateVariables(task) {
     if (domain?.name) {
       domainName = domain.name;
     }
-  } catch (err) {
+  } catch {
     // Fallback to domainId if analysis not found
   }
 
@@ -151,7 +151,7 @@ export async function buildDocumentationTemplateVariables(task) {
     if (domain?.name) {
       domainName = domain.name;
     }
-  } catch (err) {
+  } catch {
     // Fallback to domainId if analysis not found
   }
 
@@ -183,7 +183,7 @@ export async function buildTestingTemplateVariables(task) {
     if (domain?.name) {
       domainName = domain.name;
     }
-  } catch (err) {
+  } catch {
     // Fallback to domainId if analysis not found
   }
 
@@ -206,19 +206,9 @@ export async function buildDiagramsTemplateVariables(task) {
   const { domainId, files, includeDocumentation, targetDirectory } =
     task.params;
 
-  // Look up domain name from codebase analysis (if available)
-  let domainName = domainId; // Fallback to ID
   let documentation = "";
 
   try {
-    const { readCodebaseAnalysis } =
-      await import("../persistence/codebase-analysis.js");
-    const analysis = await readCodebaseAnalysis();
-    const domain = analysis?.domains?.find((d) => d.id === domainId);
-    if (domain?.name) {
-      domainName = domain.name;
-    }
-
     // Load documentation if requested
     if (includeDocumentation) {
       const { readDomainDocumentation } =
@@ -228,8 +218,8 @@ export async function buildDiagramsTemplateVariables(task) {
         documentation = docData.documentation;
       }
     }
-  } catch (err) {
-    // Fallback to domainId if analysis not found
+  } catch {
+    // Fallback to empty documentation
   }
 
   // Format files as a bulleted list
@@ -294,7 +284,7 @@ export function buildApplyFixTemplateVariables(task) {
  * @returns {Object} Variables for template processing
  */
 export async function buildEditTemplateVariables(task) {
-  const { domainId, sectionType, currentContent, history } = task.params;
+  const { domainId, sectionType, currentContent } = task.params;
 
   // Look up domain name from codebase analysis (if available)
   let domainName = domainId; // Fallback to ID
@@ -307,7 +297,7 @@ export async function buildEditTemplateVariables(task) {
     if (domain?.name) {
       domainName = domain.name;
     }
-  } catch (err) {
+  } catch {
     // Fallback to domainId if analysis not found
   }
 

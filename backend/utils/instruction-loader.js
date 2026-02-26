@@ -47,7 +47,7 @@ export async function buildChatSystemPrompt(domainId, sectionType, context) {
     if (domain?.name) {
       domainName = domain.name;
     }
-  } catch (err) {
+  } catch {
     // Fallback to domainId if analysis not found
   }
 

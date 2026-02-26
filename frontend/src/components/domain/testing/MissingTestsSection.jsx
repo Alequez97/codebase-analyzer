@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 
-
 import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
 import { getPriorityColor } from "./utils";
 
@@ -14,7 +13,6 @@ export function MissingTestsSection({
   const editorRef = useRef(null);
 
   const {
-    editedMissingTestsByDomain,
     editingTestId,
     setEditedMissingTests,
     getEditedMissingTests,

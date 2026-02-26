@@ -16,6 +16,7 @@ let diagramCounter = 0;
 /**
  * Mermaid diagram component that renders diagrams from code blocks
  */
+// eslint-disable-next-line unused-imports/no-unused-vars
 function MermaidDiagram({ chart }) {
   const containerRef = useRef(null);
   const [svg, setSvg] = useState(null);

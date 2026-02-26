@@ -1,12 +1,6 @@
 import { useState } from "react";
 
-
-import {
-  Shield,
-  Bug,
-  AlertCircle,
-} from "lucide-react";
-
+import { Shield } from "lucide-react";
 
 import { toaster } from "../ui/toaster";
 import api from "../../api";
@@ -20,12 +14,6 @@ const SEVERITY_COLORS = {
 };
 
 const SEVERITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
-
-const CATEGORY_ICONS = {
-  security: Shield,
-  bug: Bug,
-  quality: AlertCircle,
-};
 
 const FINDING_STATUS = {
   OPEN: "open",
@@ -58,7 +46,6 @@ export default function DomainBugsSecuritySection({
   loading = false,
   progress = null,
   onAnalyze,
-  onRefresh,
   showLogs = false,
   logs = "",
   logsLoading = false,
@@ -323,8 +310,6 @@ export default function DomainBugsSecuritySection({
                         </Heading>
                         {sortedFindings.map((finding) => {
                           const isExpanded = expandedFindings.has(finding.id);
-                          const CategoryIcon =
-                            CATEGORY_ICONS[finding.category] || Bug;
                           const findingStatus = getFindingStatus(finding);
                           const normalizedSeverity = normalizeSeverity(
                             finding.severity,

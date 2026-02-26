@@ -5,7 +5,7 @@ import { useLogsStore } from "../store/useLogsStore";
 
 export default function Dashboard() {
   // Config store (server configuration, agents, target project)
-  const { config, configLoading } = useConfigStore();
+  const { config } = useConfigStore();
 
   // Codebase store (codebase analysis data)
   const { loading, error, analysis, analyzingCodebase } = useCodebaseStore();

@@ -83,7 +83,7 @@ app.use("/api", domainSectionsChatRoutes);
 
 // ==================== Error Handler ====================
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   logger.error("Unhandled error", { error: err, component: "API" });
   res.status(500).json({
     error: "Internal server error",

@@ -6,7 +6,7 @@
  * @param {string} variant - "bordered" (dashed border) or "simple" (no border)
  */
 export function EmptyState({
-  icon: Icon,
+  icon: Icon, // eslint-disable-line unused-imports/no-unused-vars
   title,
   description,
   variant = "bordered",

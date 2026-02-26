@@ -76,7 +76,7 @@ async function enhanceOutputWithTaskMetadata(task) {
     } else {
       try {
         analysis = JSON.parse(content);
-      } catch (parseError) {
+      } catch {
         logger.debug(
           `Output file ${outputPath} contains invalid JSON, creating minimal metadata structure`,
           { component: "TaskOrchestrator", taskId: task.id },

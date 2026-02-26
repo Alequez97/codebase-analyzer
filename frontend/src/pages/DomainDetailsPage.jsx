@@ -30,7 +30,6 @@ export default function DomainDetailsPage() {
   const {
     openChat,
     closeChat,
-    activeDomainId,
     activeSectionType,
     isChatActive,
     getPendingSuggestion,

@@ -7,7 +7,7 @@ import { defaultAnalysisHandler } from "./default-analysis.js";
  */
 export function analyzeTestingHandler(task, taskLogger, agent) {
   return {
-    postProcess: async (result, task, agent, taskLogger) => {
+    postProcess: async (result) => {
       const defaults = defaultAnalysisHandler(task, taskLogger, agent);
       const defaultResult = await defaults.postProcess(
         result,

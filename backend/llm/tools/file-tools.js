@@ -331,7 +331,7 @@ export class FileToolExecutor {
           matches.push(relativePath);
         }
       }
-    } catch (error) {
+    } catch {
       // Skip directories we can't read
       return;
     }

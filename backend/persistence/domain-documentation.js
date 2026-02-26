@@ -26,7 +26,7 @@ export async function readDomainDocumentation(domainId) {
     let metadata = null;
     try {
       metadata = await tryReadJsonFile(metadataPath, "documentation metadata");
-    } catch (err) {
+    } catch {
       // Metadata is optional
     }
 

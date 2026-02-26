@@ -1,15 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 
-
-import {
-  FileText,
-  Shield,
-  CheckCircle,
-  AlertCircle,
-  Code2,
-} from "lucide-react";
-
-
+// eslint-disable-next-line unused-imports/no-unused-imports
+import { FileText, Code2 } from "lucide-react";
 
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
 
@@ -18,13 +10,6 @@ const PRIORITY_COLORS = {
   P1: "orange",
   P2: "blue",
   P3: "gray",
-};
-
-const CATEGORY_ICONS = {
-  validation: Shield,
-  "business-rule": CheckCircle,
-  security: AlertCircle,
-  other: Code2,
 };
 
 const CONFIDENCE_COLORS = {
@@ -402,9 +387,6 @@ export default function DomainRequirementsSection({
 
                               <VStack align="stretch" gap={2}>
                                 {reqs.map((req) => {
-                                  const CategoryIcon =
-                                    CATEGORY_ICONS[req.category] ||
-                                    CATEGORY_ICONS.other;
                                   const isExpanded = expandedRequirements.has(
                                     req.id,
                                   );
@@ -646,9 +628,6 @@ export default function DomainRequirementsSection({
 
                           <VStack align="stretch" gap={2}>
                             {reqs.map((req) => {
-                              const CategoryIcon =
-                                CATEGORY_ICONS[req.category] ||
-                                CATEGORY_ICONS.other;
                               const isExpanded = expandedRequirements.has(
                                 req.id,
                               );

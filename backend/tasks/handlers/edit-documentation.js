@@ -63,7 +63,7 @@ export function editDocumentationHandler(task, taskLogger, agent) {
       }
     },
 
-    shouldContinue: (response, iteration) => {
+    shouldContinue: (response) => {
       // After first message, prompt for the full updated content
       if (messageCount === 1) {
         taskLogger.info("📝 Requesting full updated content...", {

@@ -5,9 +5,7 @@ import { ChatState } from "../llm/state/chat-state.js";
 import { OpenAIChatState } from "../llm/state/openai-chat-state.js";
 import { LLMAgent } from "../llm/agent.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
-import {
-  emitTaskProgress,
-} from "../utils/socket-emitter.js";
+import { emitTaskProgress } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 import {
   setupTaskLogger,
@@ -119,7 +117,7 @@ export async function execute(task) {
   });
 
   // Set up logging infrastructure
-  const { taskLogger, logStream, logFile } = await setupTaskLogger(task);
+  const { taskLogger, logStream } = await setupTaskLogger(task);
 
   try {
     // Log task start

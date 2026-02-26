@@ -369,7 +369,7 @@ export class LLMAgent {
             }
 
             return parsed;
-          } catch (parseError) {
+          } catch {
             // Continue searching
           }
         }

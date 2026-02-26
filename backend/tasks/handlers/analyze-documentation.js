@@ -13,7 +13,7 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
   return {
     initialMessage: `Analyze the domain and generate the complete documentation with Mermaid diagrams as specified in the instructions.`,
 
-    shouldContinue: (response, iteration) => {
+    shouldContinue: (response) => {
       if (
         response.stopReason === "end_turn" ||
         response.stopReason === "stop_sequence" ||

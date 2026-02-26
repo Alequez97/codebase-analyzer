@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 
-
-
-
 import { useDomainSectionsChatStore } from "../../../store/useDomainSectionsChatStore";
 
 /**
@@ -42,7 +39,6 @@ export default function AISectionChat({
   ],
   inputPlaceholder = "Ask AI to improve this section...",
   onClose,
-  onApplyChanges,
   domainId,
 }) {
   // Get messages from domain sections chat store
