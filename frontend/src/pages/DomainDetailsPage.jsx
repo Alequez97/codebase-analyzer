@@ -591,16 +591,22 @@ export default function DomainDetailsPage() {
           </VStack>
         </GridItem>
 
-        {/* Chat Panel Column - Sticky on the right */}
+        {/* Chat Panel Column - Fixed on the right */}
         {activeSectionType && chatData && (
           <GridItem
             display={{ base: "none", lg: "block" }}
-            position="sticky"
-            top="20px"
-            maxH="calc(100vh - 40px)"
-            overflowY="hidden"
+            position="relative"
+            minH="1px"
           >
-            <Box h="full">
+            <Box
+              position="fixed"
+              top="80px"
+              right="16px"
+              w="400px"
+              maxW="calc(100vw - 32px)"
+              h="calc(100vh - 96px)"
+              zIndex={900}
+            >
               <AISectionChat
                 {...chatData.config}
                 currentContent={chatData.content}
