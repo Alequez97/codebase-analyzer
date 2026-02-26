@@ -10,7 +10,6 @@ import {
   Separator,
   Skeleton,
   Text,
-  Textarea,
   VStack,
 } from "@chakra-ui/react";
 import {
@@ -22,26 +21,17 @@ import {
   FileCode,
   FileText,
   Lightbulb,
-  ListChecks,
   MessageSquare,
   Shield,
   Sparkles,
 } from "lucide-react";
 import MarkdownRenderer from "../MarkdownRenderer";
-import { Checkbox } from "../ui/checkbox";
-import {
-  DialogActionTrigger,
-  DialogBody,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-} from "../ui/dialog";
 import { EmptyState } from "../ui/empty-state";
 import { toaster } from "../ui/toaster";
 import { Card } from "../ui/card";
 import LogsViewer from "./LogsViewer";
+import SectionProgressBanner from "./SectionProgressBanner";
+import AnalyzeWithContextDialog from "./AnalyzeWithContextDialog";
 import api from "../../api";
 import { useDomainBugsSecurityStore } from "../../store/useDomainBugsSecurityStore";
 
@@ -100,8 +90,6 @@ export default function DomainBugsSecuritySection({
   const applyFix = useDomainBugsSecurityStore((state) => state.applyFix);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);
-  const [includeRequirements, setIncludeRequirements] = useState(false);
-  const [analysisDescription, setAnalysisDescription] = useState("");
   const [expandedFindings, setExpandedFindings] = useState(new Set());
 
   const isAnalyzing = loading && !bugsSecurity;
@@ -131,17 +119,13 @@ export default function DomainBugsSecuritySection({
     setShowAnalyzeDialog(true);
   };
 
-  const handleStartAnalysis = () => {
+  const handleStartAnalysis = (includeRequirements) => {
     setShowAnalyzeDialog(false);
     onAnalyze?.(includeRequirements);
-    setIncludeRequirements(false);
-    setAnalysisDescription("");
   };
 
   const handleCancelAnalysis = () => {
     setShowAnalyzeDialog(false);
-    setIncludeRequirements(false);
-    setAnalysisDescription("");
   };
 
   const toggleFindingExpanded = (findingId) => {
@@ -317,18 +301,18 @@ export default function DomainBugsSecuritySection({
 
             {!showLogs && (
               <>
+                {(loading || progress) && (
+                  <SectionProgressBanner
+                    progress={progress}
+                    fallbackMessage="AI is analyzing domain files and identifying bugs, security vulnerabilities, and quality issues..."
+                  />
+                )}
+
                 {isAnalyzing && (
                   <VStack align="stretch" gap={3}>
                     <Skeleton height="60px" />
                     <Skeleton height="120px" />
                     <Skeleton height="120px" />
-                    {progress && (
-                      <Box p={3} bg="gray.50" borderRadius="md">
-                        <Text fontSize="sm" color="gray.600">
-                          {progress.message}
-                        </Text>
-                      </Box>
-                    )}
                   </VStack>
                 )}
 
@@ -708,88 +692,23 @@ export default function DomainBugsSecuritySection({
         )}
       </Card.Root>
 
-      {/* Analyze Dialog */}
-      <DialogRoot
+      <AnalyzeWithContextDialog
         open={showAnalyzeDialog}
-        onOpenChange={(e) => !e.open && handleCancelAnalysis()}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Analyze Bugs & Security</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <VStack align="stretch" gap={4}>
-              <Text fontSize="sm" color="gray.600">
-                AI will analyze this domain's code to identify potential bugs,
-                security vulnerabilities, and code quality issues.
-              </Text>
-              <VStack align="stretch" gap={2}>
-                <Text fontSize="sm" fontWeight="medium">
-                  Examples of helpful context:
-                </Text>
-                <Box
-                  fontSize="xs"
-                  color="gray.600"
-                  pl={4}
-                  borderLeft="2px solid"
-                  borderColor="purple.200"
-                >
-                  <Text>
-                    • Focus on authentication and authorization vulnerabilities
-                  </Text>
-                  <Text>• Check for SQL injection and XSS vulnerabilities</Text>
-                  <Text>• Identify race conditions and concurrency issues</Text>
-                  <Text>
-                    • Look for input validation and error handling gaps
-                  </Text>
-                </Box>
-              </VStack>
-              <Textarea
-                value={analysisDescription}
-                onChange={(e) => setAnalysisDescription(e.target.value)}
-                placeholder="Enter additional context here (optional)..."
-                minHeight="150px"
-                fontSize="sm"
-              />
-              <Text fontSize="xs" color="gray.500">
-                Leave empty to analyze without additional guidance.
-              </Text>
-              <Separator />
-              <Checkbox
-                checked={includeRequirements}
-                onCheckedChange={(e) => setIncludeRequirements(e.checked)}
-                disabled={!hasRequirements}
-              >
-                <HStack gap={2}>
-                  <ListChecks size={16} />
-                  <Text fontSize="sm" fontWeight="medium">
-                    Include requirements analysis
-                  </Text>
-                </HStack>
-              </Checkbox>
-              <Text fontSize="xs" color="gray.500" pl={6}>
-                {hasRequirements
-                  ? "LLM will cross-reference identified bugs with domain requirements for better context"
-                  : "Requirements must be generated first before they can be included as context"}
-              </Text>
-            </VStack>
-          </DialogBody>
-          <DialogFooter>
-            <DialogActionTrigger asChild>
-              <Button variant="outline" size="sm">
-                Cancel
-              </Button>
-            </DialogActionTrigger>
-            <Button
-              colorPalette="purple"
-              size="sm"
-              onClick={handleStartAnalysis}
-            >
-              Start Analysis
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </DialogRoot>
+        onClose={handleCancelAnalysis}
+        onStart={handleStartAnalysis}
+        title="Analyze Bugs & Security"
+        description="AI will analyze this domain's code to identify potential bugs, security vulnerabilities, and code quality issues."
+        examples={[
+          "Focus on authentication and authorization vulnerabilities",
+          "Check for SQL injection and XSS vulnerabilities",
+          "Identify race conditions and concurrency issues",
+          "Look for input validation and error handling gaps",
+        ]}
+        hasRequirements={hasRequirements}
+        includeRequirementsLabel="Include requirements analysis"
+        includeRequirementsHelpEnabled="LLM will cross-reference identified bugs with domain requirements for better context"
+        includeRequirementsHelpDisabled="Requirements must be generated first before they can be included as context"
+      />
     </>
   );
 }

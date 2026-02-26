@@ -28,6 +28,7 @@ import { EmptyState } from "../ui/empty-state";
 import { toaster } from "../ui/toaster";
 import { Card } from "../ui/card";
 import LogsViewer from "./LogsViewer";
+import SectionProgressBanner from "./SectionProgressBanner";
 import { getDiagramFile, openDiagramInEditor } from "../../api/domain-diagrams";
 
 const DIAGRAM_TYPE_LABELS = {
@@ -315,15 +316,12 @@ export default function DomainDiagramsSection({
           <Collapsible.Content>
             <Card.Body>
               <VStack align="stretch" gap={4}>
+                <SectionProgressBanner
+                  progress={progress}
+                  fallbackMessage="AI is analyzing domain files and generating diagrams..."
+                />
                 <Skeleton height="40px" />
                 <Skeleton height="400px" />
-                {progress && (
-                  <Box p={4} bg="blue.50" borderRadius="md">
-                    <Text fontSize="sm" color="blue.800">
-                      {progress.message || "Analyzing..."}
-                    </Text>
-                  </Box>
-                )}
               </VStack>
             </Card.Body>
           </Collapsible.Content>

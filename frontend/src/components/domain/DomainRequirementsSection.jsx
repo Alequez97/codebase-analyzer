@@ -39,6 +39,7 @@ import {
 } from "../ui/dialog";
 import { EmptyState } from "../ui/empty-state";
 import LogsViewer from "./LogsViewer";
+import SectionProgressBanner from "./SectionProgressBanner";
 
 const CategoryIcon = FileText;
 
@@ -373,22 +374,10 @@ export default function DomainRequirementsSection({
           <Collapsible.Content>
             <Card.Body>
               {(loading || progress) && !showLogs && (
-                <Box
-                  mb={4}
-                  p={3}
-                  bg="blue.50"
-                  borderRadius="md"
-                  borderLeft="4px solid"
-                  borderColor="blue.500"
-                >
-                  <HStack gap={2}>
-                    <FileText size={16} />
-                    <Text fontSize="sm" fontWeight="medium" color="blue.800">
-                      {progress?.message ||
-                        "AI is analyzing domain files and extracting requirements..."}
-                    </Text>
-                  </HStack>
-                </Box>
+                <SectionProgressBanner
+                  progress={progress}
+                  fallbackMessage="AI is analyzing domain files and extracting requirements..."
+                />
               )}
               {showLogs ? (
                 <LogsViewer logs={logs} loading={logsLoading} />
