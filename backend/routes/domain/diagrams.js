@@ -90,6 +90,14 @@ router.post("/:id/analyze/diagrams", async (req, res) => {
       { domainId: id, files, includeDocumentation },
       { executeNow },
     );
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create diagrams analysis task",
+        code: task.code,
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating diagrams analysis task", {

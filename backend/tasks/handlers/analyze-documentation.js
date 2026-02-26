@@ -47,9 +47,10 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
       const documentationMarkdown = await fs.readFile(outputPath, "utf-8");
 
       if (!documentationMarkdown || documentationMarkdown.length < 100) {
-        throw new Error(
-          `Generated documentation too short (${documentationMarkdown?.length || 0} chars)`,
-        );
+        return {
+          success: false,
+          error: `Generated documentation too short (${documentationMarkdown?.length || 0} chars)`,
+        };
       }
 
       // Save metadata
@@ -89,6 +90,7 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
       });
 
       return {
+        success: true,
         metadata: metadata,
         markdownLength: documentationMarkdown.length,
       };

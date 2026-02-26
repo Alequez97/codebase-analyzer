@@ -20,7 +20,12 @@ export async function createAnalyzeTestingTask(
   { domainId, files, includeRequirements = false },
   { executeNow = false } = {},
 ) {
-  const agentConfig = getAgentConfig(TASK_TYPES.TESTING);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.TESTING);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
     id: generateTaskId("analyze-testing"),

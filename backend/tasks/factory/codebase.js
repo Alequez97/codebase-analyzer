@@ -15,7 +15,12 @@ import * as logger from "../../utils/logger.js";
 export async function createFullCodebaseAnalysisTask({
   executeNow = false,
 } = {}) {
-  const agentConfig = getAgentConfig(TASK_TYPES.CODEBASE_ANALYSIS);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.CODEBASE_ANALYSIS);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
     id: generateTaskId("analyze-codebase"),

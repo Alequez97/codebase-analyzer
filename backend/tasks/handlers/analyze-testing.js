@@ -16,6 +16,10 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
         taskLogger,
       );
 
+      if (!defaultResult?.success) {
+        return defaultResult;
+      }
+
       const outputPath = defaultResult.outputFile;
       const outputContent = await fs.readFile(outputPath, "utf-8");
 
@@ -23,13 +27,17 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
       try {
         testingJson = JSON.parse(outputContent);
       } catch {
-        throw new Error("Testing analysis output is not valid JSON");
+        return {
+          success: false,
+          error: "Testing analysis output is not valid JSON",
+        };
       }
 
       if (testingJson?.domainId !== task.params?.domainId) {
-        throw new Error(
-          `Testing analysis domain mismatch: expected '${task.params?.domainId}', got '${testingJson?.domainId || "missing"}'`,
-        );
+        return {
+          success: false,
+          error: `Testing analysis domain mismatch: expected '${task.params?.domainId}', got '${testingJson?.domainId || "missing"}'`,
+        };
       }
 
       const missingTests = testingJson?.missingTests;
@@ -42,15 +50,19 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
         Array.isArray(missingTests.e2e);
 
       if (!hasGroupedMissingTests) {
-        throw new Error(
-          "Testing analysis schema invalid: missingTests must be an object with unit/integration/e2e arrays",
-        );
+        return {
+          success: false,
+          error:
+            "Testing analysis schema invalid: missingTests must be an object with unit/integration/e2e arrays",
+        };
       }
 
       if (!Array.isArray(testingJson?.existingTests)) {
-        throw new Error(
-          "Testing analysis schema invalid: existingTests must be an array",
-        );
+        return {
+          success: false,
+          error:
+            "Testing analysis schema invalid: existingTests must be an array",
+        };
       }
 
       for (const [index, existingTest] of testingJson.existingTests.entries()) {
@@ -59,9 +71,10 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
           !existingTest?.description ||
           !existingTest?.testType
         ) {
-          throw new Error(
-            `Testing analysis schema invalid: existingTests[${index}] must include file, description, and testType`,
-          );
+          return {
+            success: false,
+            error: `Testing analysis schema invalid: existingTests[${index}] must include file, description, and testType`,
+          };
         }
       }
 
@@ -84,9 +97,10 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
           missingTest.scenarios.length > 0;
 
         if (!hasRequiredFields) {
-          throw new Error(
-            `Testing analysis schema invalid: missing test at index ${index} has missing required fields or empty scenarios`,
-          );
+          return {
+            success: false,
+            error: `Testing analysis schema invalid: missing test at index ${index} has missing required fields or empty scenarios`,
+          };
         }
 
         for (const [
@@ -98,9 +112,10 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
             !Array.isArray(scenario?.checks) ||
             scenario.checks.length === 0
           ) {
-            throw new Error(
-              `Testing analysis schema invalid: scenarios[${scenarioIndex}] for ${missingTest.id} must include scenario and non-empty checks array`,
-            );
+            return {
+              success: false,
+              error: `Testing analysis schema invalid: scenarios[${scenarioIndex}] for ${missingTest.id} must include scenario and non-empty checks array`,
+            };
           }
 
           for (const [checkIndex, checkItem] of scenario.checks.entries()) {
@@ -113,15 +128,19 @@ export function analyzeTestingHandler(task, taskLogger, agent) {
               checkItem.assertionType.length > 0;
 
             if (!hasCaseShape) {
-              throw new Error(
-                `Testing analysis schema invalid: check ${checkIndex} in ${missingTest.id}/${scenario.scenario} must include input[], expectedOutput, assertionType`,
-              );
+              return {
+                success: false,
+                error: `Testing analysis schema invalid: check ${checkIndex} in ${missingTest.id}/${scenario.scenario} must include input[], expectedOutput, assertionType`,
+              };
             }
           }
         }
       }
 
-      return defaultResult;
+      return {
+        success: true,
+        outputFile: defaultResult.outputFile,
+      };
     },
   };
 }

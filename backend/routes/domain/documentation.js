@@ -53,6 +53,14 @@ router.post("/:id/analyze/documentation", async (req, res) => {
       { domainId: id, files },
       { executeNow },
     );
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create documentation analysis task",
+        code: task.code,
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating documentation analysis task", {

@@ -51,6 +51,14 @@ router.post("/:id/analyze/testing", async (req, res) => {
       { domainId: id, files, includeRequirements },
       { executeNow },
     );
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create testing analysis task",
+        code: task.code,
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating testing analysis task", {
@@ -101,6 +109,13 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
       { domainId: id, testRecommendation },
       { executeNow },
     );
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to apply test",
+        code: task.code,
+      });
+    }
 
     res.status(201).json({
       success: true,

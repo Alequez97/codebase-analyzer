@@ -19,7 +19,12 @@ export async function createAnalyzeDocumentationTask(
   { domainId, files },
   { executeNow = false } = {},
 ) {
-  const agentConfig = getAgentConfig(TASK_TYPES.DOCUMENTATION);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.DOCUMENTATION);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
     id: generateTaskId("analyze-documentation"),

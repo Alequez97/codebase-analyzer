@@ -9,7 +9,7 @@ import path from "path";
 /**
  * Map task type to socket log event
  * @param {string} taskType - The task type
- * @returns {string} The socket event name for logging
+ * @returns {{success: boolean, eventName?: string, error?: string}} Mapping result
  */
 export function getLogEventForTaskType(taskType) {
   const eventMap = {
@@ -32,12 +32,16 @@ export function getLogEventForTaskType(taskType) {
   const event = eventMap[taskType];
 
   if (!event) {
-    throw new Error(
-      `Unknown task type: ${taskType}. Cannot determine log event.`,
-    );
+    return {
+      success: false,
+      error: `Unknown task type: ${taskType}. Cannot determine log event.`,
+    };
   }
 
-  return event;
+  return {
+    success: true,
+    eventName: event,
+  };
 }
 
 /**

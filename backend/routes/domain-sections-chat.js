@@ -51,6 +51,13 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
         },
         { executeNow: true },
       );
+
+      if (task?.success === false) {
+        return res.status(500).json({
+          error: task.error || "Failed to create edit task",
+          code: task.code,
+        });
+      }
     } else {
       // For other section types, return not implemented for now
       return res.status(501).json({

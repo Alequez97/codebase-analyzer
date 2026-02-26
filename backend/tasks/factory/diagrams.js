@@ -20,7 +20,12 @@ export async function createAnalyzeDiagramsTask(
   { domainId, files, includeDocumentation = true },
   { executeNow = false } = {},
 ) {
-  const agentConfig = getAgentConfig(TASK_TYPES.DIAGRAMS);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.DIAGRAMS);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
     id: generateTaskId("analyze-diagrams"),

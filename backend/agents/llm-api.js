@@ -152,12 +152,28 @@ export async function execute(task) {
     const result = await agent.run(taskHandler);
 
     // Post-process results
-    const processedResult = await taskHandler.postProcess(
+    const postProcessResult = await taskHandler.postProcess(
       result,
       task,
       agent,
       taskLogger,
     );
+
+    if (postProcessResult?.success === false) {
+      const postProcessError =
+        postProcessResult.error || "Task post-processing failed";
+
+      logTaskError(taskLogger, task, new Error(postProcessError));
+      logStream.end();
+      await new Promise((resolve) => logStream.on("finish", resolve));
+
+      return {
+        success: false,
+        error: postProcessError,
+        taskId: task.id,
+        logFile: task.logFile,
+      };
+    }
 
     // Log success
     logTaskSuccess(taskLogger, task, agent);
@@ -168,7 +184,7 @@ export async function execute(task) {
       success: true,
       taskId: task.id,
       logFile: task.logFile,
-      ...processedResult,
+      ...postProcessResult,
     };
   } catch (error) {
     // Log failure

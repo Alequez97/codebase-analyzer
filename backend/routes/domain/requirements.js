@@ -56,6 +56,14 @@ router.post("/:id/analyze/requirements", async (req, res) => {
       },
       { executeNow },
     );
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create requirements analysis task",
+        code: task.code,
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating requirements analysis task", {

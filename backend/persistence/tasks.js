@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { tryReadJsonFile } from "./utils.js";
 import { TASK_STATUS, TASK_FOLDERS } from "../constants/task-status.js";
 import * as logger from "../utils/logger.js";
@@ -163,6 +164,7 @@ export async function moveToFailed(taskId, error) {
  * Delete a task from pending, completed, or failed
  * Also deletes associated log file if it exists
  * @param {string} taskId - The task ID
+ * @returns {Promise<{success: boolean, code?: string, error?: string}>}
  */
 export async function deleteTask(taskId) {
   const pendingPath = path.join(
@@ -231,6 +233,12 @@ export async function deleteTask(taskId) {
   }
 
   if (!deleted) {
-    throw new Error(`Task ${taskId} not found in any location`);
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.NOT_FOUND,
+      error: `Task ${taskId} not found in any location`,
+    };
   }
+
+  return { success: true };
 }

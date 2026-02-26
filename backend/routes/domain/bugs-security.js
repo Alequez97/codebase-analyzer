@@ -70,6 +70,14 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
       { domainId: id, files, includeRequirements },
       { executeNow },
     );
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create bugs & security analysis task",
+        code: task.code,
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating bugs & security analysis task", {
@@ -167,6 +175,13 @@ router.post(
         { domainId: id, finding },
         { executeNow },
       );
+
+      if (task?.success === false) {
+        return res.status(500).json({
+          error: task.error || "Failed to apply fix",
+          code: task.code,
+        });
+      }
 
       res.status(201).json({
         success: true,

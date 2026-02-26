@@ -3,6 +3,7 @@ import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
 import { getAgent } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { TASK_TYPES } from "../constants/task-types.js";
 import { TASK_STATUS } from "../constants/task-status.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
@@ -169,15 +170,70 @@ export async function executeTask(taskId) {
   const task = await tasksPersistence.readTask(taskId);
 
   if (!task) {
-    throw new Error(`Task ${taskId} not found`);
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.NOT_FOUND,
+      error: `Task ${taskId} not found`,
+      taskId,
+    };
   }
 
   if (task.status !== TASK_STATUS.PENDING) {
-    throw new Error(`Task ${taskId} is not pending (status: ${task.status})`);
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.INVALID_STATUS,
+      error: `Task ${taskId} is not pending (status: ${task.status})`,
+      taskId,
+    };
   }
 
-  const agent = await getAgent(task.agentConfig?.agent);
-  const result = await agent.execute(task);
+  let result;
+  try {
+    const agentResult = await getAgent(task.agentConfig?.agent);
+    if (!agentResult.success) {
+      const selectionError = agentResult.error || "Agent selection failed";
+
+      await tasksPersistence.moveToFailed(taskId, selectionError);
+
+      emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
+        taskId,
+        type: task.type,
+        domainId: task.params?.domainId,
+        error: selectionError,
+        code: agentResult.code,
+        timestamp: new Date().toISOString(),
+      });
+
+      return {
+        success: false,
+        code: agentResult.code,
+        error: selectionError,
+        taskId,
+        logFile: task.logFile,
+      };
+    }
+
+    result = await agentResult.agent.execute(task);
+  } catch (error) {
+    const executionError = error?.message || "Task execution failed";
+
+    await tasksPersistence.moveToFailed(taskId, executionError);
+
+    emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
+      taskId,
+      type: task.type,
+      domainId: task.params?.domainId,
+      error: executionError,
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      success: false,
+      error: executionError,
+      taskId,
+      logFile: task.logFile,
+    };
+  }
 
   if (result.success) {
     // Enhance output file with task metadata (taskId, logFile, timestamp)
@@ -218,7 +274,13 @@ export async function executeTask(taskId) {
  * @param {string} taskId - The task ID
  */
 export async function deleteTask(taskId) {
-  return tasksPersistence.deleteTask(taskId);
+  const result = await tasksPersistence.deleteTask(taskId);
+
+  if (!result.success) {
+    return result;
+  }
+
+  return { success: true };
 }
 
 /**
@@ -249,12 +311,21 @@ export async function restartPendingTasks() {
         });
 
         // Execute task asynchronously
-        executeTask(task.id).catch((err) => {
-          logger.error(`Failed to restart task ${task.id}`, {
-            error: err,
-            component: "TaskOrchestrator",
+        executeTask(task.id)
+          .then((executionResult) => {
+            if (!executionResult.success) {
+              logger.error(`Failed to restart task ${task.id}`, {
+                error: executionResult.error,
+                component: "TaskOrchestrator",
+              });
+            }
+          })
+          .catch((err) => {
+            logger.error(`Failed to restart task ${task.id}`, {
+              error: err,
+              component: "TaskOrchestrator",
+            });
           });
-        });
 
         restartedTasks.push(task.id);
       } catch (error) {

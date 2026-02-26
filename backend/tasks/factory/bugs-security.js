@@ -20,7 +20,12 @@ export async function createAnalyzeBugsSecurityTask(
   { domainId, files, includeRequirements = false },
   { executeNow = false } = {},
 ) {
-  const agentConfig = getAgentConfig(TASK_TYPES.BUGS_SECURITY);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.BUGS_SECURITY);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
     id: generateTaskId("analyze-bugs-security"),

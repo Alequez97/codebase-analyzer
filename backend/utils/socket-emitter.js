@@ -5,6 +5,7 @@
 
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { getLogEventForTaskType } from "./task-logger.js";
+import * as logger from "./logger.js";
 
 let socketInstance = null;
 
@@ -51,7 +52,17 @@ export function isSocketReady() {
  * @param {Object} payload - Additional payload fields (e.g. log, stream)
  */
 export function emitTaskLog(task, payload = {}) {
-  const logEventName = getLogEventForTaskType(task.type);
+  const logEventResult = getLogEventForTaskType(task.type);
+  if (!logEventResult.success) {
+    logger.warn(logEventResult.error, {
+      component: "SocketEmitter",
+      taskId: task?.id,
+      taskType: task?.type,
+    });
+    return;
+  }
+
+  const logEventName = logEventResult.eventName;
   emitSocketEvent(logEventName, {
     taskId: task.id,
     domainId: task.params?.domainId,

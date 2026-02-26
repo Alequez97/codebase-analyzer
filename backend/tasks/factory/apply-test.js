@@ -19,7 +19,12 @@ export async function createApplyTestTask(
   { domainId, testRecommendation },
   { executeNow = false } = {},
 ) {
-  const agentConfig = getAgentConfig(TASK_TYPES.APPLY_TEST);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.APPLY_TEST);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   // Determine source file from suggested test file
   // For unit tests: file.test.js -> file.js

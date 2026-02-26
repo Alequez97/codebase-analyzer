@@ -19,7 +19,12 @@ export async function createApplyFixTask(
   { domainId, finding },
   { executeNow = false } = {},
 ) {
-  const agentConfig = getAgentConfig(TASK_TYPES.APPLY_FIX);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.APPLY_FIX);
+  if (!agentConfigResult.success) {
+    return agentConfigResult;
+  }
+
+  const agentConfig = agentConfigResult.agentConfig;
 
   // Determine which file(s) to include
   const files = [];

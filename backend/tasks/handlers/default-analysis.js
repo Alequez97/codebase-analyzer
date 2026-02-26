@@ -179,7 +179,10 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       if (!outputExists) {
         const jsonContent = agent.extractJSON();
         if (!jsonContent) {
-          throw new Error("LLM did not output valid JSON");
+          return {
+            success: false,
+            error: "LLM did not output valid JSON",
+          };
         }
 
         await fs.writeFile(
@@ -192,7 +195,10 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
         });
       }
 
-      return { outputFile: outputPath };
+      return {
+        success: true,
+        outputFile: outputPath,
+      };
     },
   };
 }

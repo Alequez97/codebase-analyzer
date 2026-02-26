@@ -1,6 +1,7 @@
 import * as llmApi from "./llm-api.js";
 import * as aider from "./aider.js";
 import config from "../config.js";
+import { AGENT_ERROR_CODES } from "../constants/agent-error-codes.js";
 import { AGENTS as AGENT_TYPES } from "../constants/agents.js";
 
 /**
@@ -13,57 +14,77 @@ const AGENTS = {
     id: AGENT_TYPES.LLM_API,
     name: "LLM API",
     purpose: "Generates analysis JSON files",
-    module: llmApi,
+    agent: llmApi,
   },
   [AGENT_TYPES.AIDER]: {
     id: AGENT_TYPES.AIDER,
     name: "Aider",
     purpose: "Edits files and writes code",
     installUrl: "https://aider.chat/docs/install.html",
-    module: aider,
+    agent: aider,
   },
 };
 
 /**
  * Get agent configuration for a specific task type
  * @param {string} taskType - The task type from TASK_TYPES
- * @returns {Object} Agent configuration with agent, model, maxTokens, maxIterations, reasoningEffort
+ * @returns {{success: boolean, agentConfig?: Object, error?: string, code?: string}}
  */
 export function getAgentConfig(taskType) {
   const taskConfig = config.tasks[taskType];
 
   if (!taskConfig) {
-    throw new Error(`No configuration found for task type: ${taskType}`);
+    return {
+      success: false,
+      code: AGENT_ERROR_CODES.TASK_CONFIG_MISSING,
+      error: `No configuration found for task type: ${taskType}`,
+    };
   }
 
   return {
-    agent: taskConfig.agent,
-    model: taskConfig.model,
-    maxTokens: taskConfig.maxTokens,
-    maxIterations: taskConfig.maxIterations || 30,
-    reasoningEffort: taskConfig.reasoningEffort,
+    success: true,
+    agentConfig: {
+      agent: taskConfig.agent,
+      model: taskConfig.model,
+      maxTokens: taskConfig.maxTokens,
+      maxIterations: taskConfig.maxIterations || 30,
+      reasoningEffort: taskConfig.reasoningEffort,
+    },
   };
 }
 
 /**
  * Get available agent based on config and detection
  * @param {string} agentId - The agent ID to retrieve
- * @returns {Promise<Object>} Agent module with detect() and execute() functions
+ * @returns {Promise<{success: boolean, agent?: Object, error?: string, code?: string}>}
  */
 export async function getAgent(agentId) {
   const selectedId = agentId || AGENT_TYPES.LLM_API;
-  const agent = AGENTS[selectedId];
+  const agentEntry = AGENTS[selectedId];
 
-  if (!agent) {
-    throw new Error(`Unsupported AI agent: ${selectedId}`);
+  if (!agentEntry) {
+    return {
+      success: false,
+      code: AGENT_ERROR_CODES.UNSUPPORTED_AGENT,
+      error: `Unsupported AI agent: ${selectedId}`,
+    };
   }
 
-  const available = await agent.module.detect();
+  const selectedAgent = agentEntry.agent;
+
+  const available = await selectedAgent.detect();
   if (!available) {
-    throw new Error(`${agent.name} is not available on this machine`);
+    return {
+      success: false,
+      code: AGENT_ERROR_CODES.AGENT_UNAVAILABLE,
+      error: `${agentEntry.name} is not available on this machine`,
+    };
   }
 
-  return agent.module;
+  return {
+    success: true,
+    agent: selectedAgent,
+  };
 }
 
 /**
@@ -72,9 +93,9 @@ export async function getAgent(agentId) {
  */
 export async function detectAvailableAgents() {
   const entries = await Promise.all(
-    Object.values(AGENTS).map(async (agent) => [
-      agent.id,
-      await agent.module.detect(),
+    Object.values(AGENTS).map(async (agentEntry) => [
+      agentEntry.id,
+      await agentEntry.agent.detect(),
     ]),
   );
 
@@ -86,5 +107,7 @@ export async function detectAvailableAgents() {
  * @returns {string[]} Supported tool IDs
  */
 export function getSupportedAgents() {
-  return Object.values(AGENTS).map(({ module, ...agent }) => agent);
+  return Object.values(AGENTS).map(
+    ({ agent: _agent, ...agentEntry }) => agentEntry,
+  );
 }

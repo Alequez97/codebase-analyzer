@@ -38,6 +38,14 @@ router.post("/request", async (req, res) => {
     const executeNow = req.body.executeNow !== false; // Default to true
 
     const task = await createFullCodebaseAnalysisTask({ executeNow });
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create codebase analysis task",
+        code: task.code,
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     logger.error("Error creating codebase analysis task", {
