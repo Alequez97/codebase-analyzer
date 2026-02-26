@@ -76,7 +76,7 @@ export const useCodebaseStore = create((set, get) => ({
       }
 
       const codebaseTask = tasks.find(
-        (task) => task.type === TASK_TYPES.CODEBASE_ANALYSIS
+        (task) => task.type === TASK_TYPES.CODEBASE_ANALYSIS,
       );
 
       if (codebaseTask) {

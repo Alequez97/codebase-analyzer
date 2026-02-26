@@ -17,7 +17,9 @@ function normalizeLogFilePath(relativeLogFile) {
     return null;
   }
 
-  const normalizedRelative = path.normalize(relativeLogFile).replace(/\\/g, "/");
+  const normalizedRelative = path
+    .normalize(relativeLogFile)
+    .replace(/\\/g, "/");
   if (
     path.isAbsolute(relativeLogFile) ||
     normalizedRelative.startsWith("../") ||
@@ -108,7 +110,11 @@ export async function readCodebaseAnalysisLogs() {
 export async function readTaskLogs(taskId) {
   const task = await tasksPersistence.readTask(taskId);
   if (!task) {
-    throw createHttpError(404, "Task not found", `No task found with ID: ${taskId}`);
+    throw createHttpError(
+      404,
+      "Task not found",
+      `No task found with ID: ${taskId}`,
+    );
   }
 
   if (!task.logFile) {

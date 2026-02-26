@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.code-analysis
+.code-analysis-example
+coverage
+*.min.js
+package-lock.json
+*.log

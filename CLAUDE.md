@@ -13,6 +13,7 @@ READ: AGENTS.md
 ```
 
 The AGENTS.md file contains:
+
 - Project architecture and design principles
 - Development guidelines and best practices
 - State management patterns (Zustand stores)
@@ -23,11 +24,13 @@ The AGENTS.md file contains:
 ## Quick Reference
 
 ### Tech Stack
+
 - **Backend**: Node.js + Express + Socket.IO
 - **Frontend**: React + Vite + Zustand
 - **AI Agents**: Aider (current), LLM API (Claude/OpenAI/DeepSeek)
 
 ### Key Directories
+
 ```
 backend/
   agents/          # AI agent implementations (aider, llm-api)
@@ -76,6 +79,7 @@ frontend/
 ## Common Tasks
 
 ### Adding a New Zustand Store
+
 ```javascript
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -101,28 +105,31 @@ export const useMyStore = create(
 ```
 
 ### Using the Logger
+
 ```javascript
 import * as logger from "../utils/logger.js";
 
 logger.info("Something happened", {
   component: "MyComponent",
-  additionalData: value
+  additionalData: value,
 });
 
 logger.error("Error occurred", {
   error: error.message,
   stack: error.stack,
-  component: "MyComponent"
+  component: "MyComponent",
 });
 ```
 
 ### Making API Calls
+
 - Backend: Check existing patterns in `backend/agents/` and `backend/persistence/`
 - Frontend: Use the centralized API service at `frontend/src/services/api.js`
 
 ## Getting Help
 
 If unclear about project conventions or architecture:
+
 1. First, check AGENTS.md
 2. Search for similar patterns in the codebase
 3. Ask for clarification if needed

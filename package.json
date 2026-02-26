@@ -11,7 +11,13 @@
     "backend": "cd backend && npm run dev",
     "frontend": "cd frontend && npm run dev",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
-    "link": "npm link"
+    "link": "npm link",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:backend": "eslint backend/ bin/",
+    "lint:frontend": "eslint frontend/",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "codebase",
@@ -24,7 +30,12 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "eslint": "^9.18.0",
+    "globals": "^15.14.0",
+    "@eslint/js": "^9.18.0",
+    "prettier": "^3.2.5",
+    "eslint-config-prettier": "^9.1.0"
   },
   "dependencies": {
     "get-port": "^7.1.0"

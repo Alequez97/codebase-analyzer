@@ -26,7 +26,7 @@ Analyze domain files and extract business requirements. Output to **`{{OUTPUT_FI
 
 - `read_file`: Read file contents
 - `list_directory`: List directory contents
-- `search_files`: Find files by pattern  
+- `search_files`: Find files by pattern
 - `write_file`: Save output to `{{OUTPUT_FILE}}`
 
 ## Target Files
@@ -36,15 +36,17 @@ Analyze domain files and extract business requirements. Output to **`{{OUTPUT_FI
 - **Files**:
   {{#each FILES}}
   - {{this}}
-  {{/each}}
+    {{/each}}
 
 {{#if USER_CONTEXT}}
+
 ## User Context
 
 {{USER_CONTEXT}}
 {{/if}}
 
 {{#if INCLUDE_DOCUMENTATION}}
+
 ## Documentation Reference
 
 Read `.code-analysis/domains/{{DOMAIN_ID}}/documentation.json` to understand the business context, then extract requirements that align with documented functionality and risk areas.
@@ -71,11 +73,11 @@ Look for:
 ## Execution
 
 1. Read all files using `read_file`
-{{#if INCLUDE_DOCUMENTATION}}
+   {{#if INCLUDE_DOCUMENTATION}}
 2. Read documentation for context
 3. Extract requirements from code
 4. Save to `{{OUTPUT_FILE}}` using `write_file`
-{{else}}
-2. Extract requirements from code
-3. Save to `{{OUTPUT_FILE}}` using `write_file`
-{{/if}}
+   {{else}}
+5. Extract requirements from code
+6. Save to `{{OUTPUT_FILE}}` using `write_file`
+   {{/if}}

@@ -38,9 +38,10 @@ Analyze domain files for bugs and security issues. Output to **`{{OUTPUT_FILE}}`
 - **Files**:
   {{#each FILES}}
   - {{this}}
-  {{/each}}
+    {{/each}}
 
 {{#if INCLUDE_REQUIREMENTS}}
+
 ## Requirements Reference
 
 Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to understand what the code should do, then identify where it falls short.
@@ -67,11 +68,11 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to understand what
 ## Execution
 
 1. Read all files using `read_file`
-{{#if INCLUDE_REQUIREMENTS}}
+   {{#if INCLUDE_REQUIREMENTS}}
 2. Read requirements for context
 3. Identify bugs and security issues
 4. Save to `{{OUTPUT_FILE}}` using `write_file`
-{{else}}
-2. Identify bugs and security issues
-3. Save to `{{OUTPUT_FILE}}` using `write_file`
-{{/if}}
+   {{else}}
+5. Identify bugs and security issues
+6. Save to `{{OUTPUT_FILE}}` using `write_file`
+   {{/if}}

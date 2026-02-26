@@ -1,7 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "WebFetch(domain:chakra-ui.com)"
-    ]
+    "allow": ["WebFetch(domain:chakra-ui.com)"]
   }
 }

@@ -137,12 +137,12 @@ export default function DomainDetailsPage() {
   // Logs loading states
   const logsLoading = logsLoadingBySection.get(domainId) || new Map();
   const documentationLogsLoading = !!logsLoading.get(
-    SECTION_TYPES.DOCUMENTATION
+    SECTION_TYPES.DOCUMENTATION,
   );
   const diagramsLogsLoading = !!logsLoading.get(SECTION_TYPES.DIAGRAMS);
   const requirementsLogsLoading = !!logsLoading.get(SECTION_TYPES.REQUIREMENTS);
   const bugsSecurityLogsLoading = !!logsLoading.get(
-    SECTION_TYPES.BUGS_SECURITY
+    SECTION_TYPES.BUGS_SECURITY,
   );
   const testingLogsLoading = !!logsLoading.get(SECTION_TYPES.TESTING);
 
@@ -451,13 +451,13 @@ export default function DomainDetailsPage() {
                 openChat(
                   domainId,
                   SECTION_TYPES.DOCUMENTATION,
-                  DOCUMENTATION_CHAT_CONFIG.initialGreeting
+                  DOCUMENTATION_CHAT_CONFIG.initialGreeting,
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.DOCUMENTATION)}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
-                SECTION_TYPES.DOCUMENTATION
+                SECTION_TYPES.DOCUMENTATION,
               )}
               onApplyChanges={handleApplyChatChanges}
               onDismissChanges={() =>
@@ -478,13 +478,13 @@ export default function DomainDetailsPage() {
                 openChat(
                   domainId,
                   SECTION_TYPES.DIAGRAMS,
-                  DIAGRAMS_CHAT_CONFIG.initialGreeting
+                  DIAGRAMS_CHAT_CONFIG.initialGreeting,
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.DIAGRAMS)}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
-                SECTION_TYPES.DIAGRAMS
+                SECTION_TYPES.DIAGRAMS,
               )}
               onApplyChanges={handleApplyChatChanges}
               onDismissChanges={() =>
@@ -517,13 +517,13 @@ export default function DomainDetailsPage() {
                 openChat(
                   domainId,
                   SECTION_TYPES.REQUIREMENTS,
-                  REQUIREMENTS_CHAT_CONFIG.initialGreeting
+                  REQUIREMENTS_CHAT_CONFIG.initialGreeting,
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.REQUIREMENTS)}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
-                SECTION_TYPES.REQUIREMENTS
+                SECTION_TYPES.REQUIREMENTS,
               )}
               onApplyChanges={handleApplyChatChanges}
               onDismissChanges={() =>
@@ -548,13 +548,13 @@ export default function DomainDetailsPage() {
                 openChat(
                   domainId,
                   SECTION_TYPES.BUGS_SECURITY,
-                  BUGS_SECURITY_CHAT_CONFIG.initialGreeting
+                  BUGS_SECURITY_CHAT_CONFIG.initialGreeting,
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.BUGS_SECURITY)}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
-                SECTION_TYPES.BUGS_SECURITY
+                SECTION_TYPES.BUGS_SECURITY,
               )}
               onApplyChanges={handleApplyChatChanges}
               onDismissChanges={() =>
@@ -577,13 +577,13 @@ export default function DomainDetailsPage() {
                 openChat(
                   domainId,
                   SECTION_TYPES.TESTING,
-                  TESTING_CHAT_CONFIG.initialGreeting
+                  TESTING_CHAT_CONFIG.initialGreeting,
                 )
               }
               isChatOpen={isChatActive(domainId, SECTION_TYPES.TESTING)}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
-                SECTION_TYPES.TESTING
+                SECTION_TYPES.TESTING,
               )}
               onApplyChanges={handleApplyChatChanges}
               onDismissChanges={() =>
