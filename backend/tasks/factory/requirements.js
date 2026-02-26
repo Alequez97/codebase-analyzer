@@ -42,7 +42,9 @@ export async function createAnalyzeRequirementsTask(
     },
     agentConfig,
     instructionFile: "backend/instructions/analyze-domain-requirements.md",
-    outputFile: `.code-analysis/domains/${domainId}/requirements.json`,
+    outputFile: `.code-analysis/domains/${domainId}/requirements/content.json`,
+    generateMetadata: true,
+    metadataFile: `.code-analysis/domains/${domainId}/requirements/metadata.json`,
   };
 
   await tasksPersistence.writeTask(task);

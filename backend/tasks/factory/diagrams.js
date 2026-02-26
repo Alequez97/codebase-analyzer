@@ -41,6 +41,7 @@ export async function createAnalyzeDiagramsTask(
     agentConfig,
     instructionFile: "backend/instructions/analyze-domain-diagrams.md",
     outputFile: `.code-analysis/domains/${domainId}/diagrams/metadata.json`,
+    generateMetadata: true,
   };
 
   await tasksPersistence.writeTask(task);

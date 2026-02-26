@@ -1,10 +1,13 @@
 import fs from "fs/promises";
+import path from "path";
+import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
 import { getAgent } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { TASK_TYPES } from "../constants/task-types.js";
 import { TASK_STATUS } from "../constants/task-status.js";
+import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
 
@@ -42,7 +45,15 @@ async function enhanceOutputWithTaskMetadata(task) {
 
   try {
     // Read the output file that was just created by the agent
-    const outputPath = task.outputFile;
+    const outputPath = path.isAbsolute(task.outputFile)
+      ? task.outputFile
+      : path.join(config.target.directory, task.outputFile);
+    const shouldGenerateMetadata = task.generateMetadata === true;
+    const metadataOutputPath = task.metadataFile
+      ? path.isAbsolute(task.metadataFile)
+        ? task.metadataFile
+        : path.join(config.target.directory, task.metadataFile)
+      : null;
     let content;
     let analysis;
 
@@ -92,30 +103,24 @@ async function enhanceOutputWithTaskMetadata(task) {
       }
     }
 
-    if (analysis && typeof analysis === "object" && !Array.isArray(analysis)) {
-      const metadata =
-        analysis.metadata && typeof analysis.metadata === "object"
-          ? { ...analysis.metadata }
-          : {};
+    const analyzedAt = new Date().toISOString();
+    const existingMetadata =
+      analysis &&
+      typeof analysis === "object" &&
+      !Array.isArray(analysis) &&
+      analysis.metadata &&
+      typeof analysis.metadata === "object"
+        ? { ...analysis.metadata }
+        : {};
 
-      if (!metadata.logFile) {
-        metadata.logFile = task.logFile || null;
-      }
-
-      if (!metadata.taskId) {
-        metadata.taskId = task.id;
-      }
-
-      analysis.metadata = metadata;
-    }
-
-    // Add task metadata to the analysis
-    analysis.taskId = task.id;
-    analysis.logFile = task.logFile || null;
-
-    // Add analyzedAt if not present
-    if (!analysis.analyzedAt && !analysis.timestamp) {
-      analysis.analyzedAt = new Date().toISOString();
+    if (
+      shouldGenerateMetadata &&
+      metadataOutputPath &&
+      analysis &&
+      typeof analysis === "object" &&
+      !Array.isArray(analysis)
+    ) {
+      delete analysis.metadata;
     }
 
     // Auto-calculate summary for bugs-security analysis if findings exist
@@ -143,8 +148,46 @@ async function enhanceOutputWithTaskMetadata(task) {
       analysis.summary = summary;
     }
 
-    // Write back the enhanced analysis
+    // Write back enhanced analysis content
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
+
+    if (shouldGenerateMetadata && metadataOutputPath) {
+      const taskMetadata = {
+        ...existingMetadata,
+        taskId: task.id,
+        logFile: task.logFile || null,
+        analyzedAt,
+        status: TASK_STATUS.COMPLETED,
+      };
+
+      await fs.mkdir(path.dirname(metadataOutputPath), { recursive: true });
+      await fs.writeFile(
+        metadataOutputPath,
+        JSON.stringify(taskMetadata, null, 2),
+        "utf-8",
+      );
+    } else if (
+      shouldGenerateMetadata &&
+      analysis &&
+      typeof analysis === "object" &&
+      !Array.isArray(analysis)
+    ) {
+      const taskMetadata = {
+        ...existingMetadata,
+        taskId: task.id,
+        logFile: task.logFile || null,
+        analyzedAt,
+        status: TASK_STATUS.COMPLETED,
+      };
+
+      analysis.metadata = taskMetadata;
+      await fs.writeFile(
+        outputPath,
+        JSON.stringify(analysis, null, 2),
+        "utf-8",
+      );
+    }
 
     logger.debug(
       `Enhanced ${outputPath} with task metadata (taskId: ${task.id})`,

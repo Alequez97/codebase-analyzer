@@ -41,6 +41,7 @@ export async function createEditDocumentationTask(
     },
     agentConfig,
     instructionFile: "backend/instructions/edit-domain-section.md",
+    generateMetadata: true,
     // No output file - results are streamed via socket
   };
 

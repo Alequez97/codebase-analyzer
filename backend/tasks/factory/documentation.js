@@ -39,6 +39,7 @@ export async function createAnalyzeDocumentationTask(
     agentConfig,
     instructionFile: "backend/instructions/analyze-domain-documentation.md",
     outputFile: `.code-analysis/domains/${domainId}/documentation/content.md`,
+    generateMetadata: true,
   };
 
   await tasksPersistence.writeTask(task);

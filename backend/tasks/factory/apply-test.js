@@ -61,6 +61,7 @@ export async function createApplyTestTask(
     agentConfig,
     instructionFile: "backend/instructions/apply-test.md",
     outputFile: null, // No JSON output needed - agent creates test file directly
+    generateMetadata: true,
   };
 
   await tasksPersistence.writeTask(task);

@@ -40,7 +40,9 @@ export async function createAnalyzeBugsSecurityTask(
     },
     agentConfig,
     instructionFile: "backend/instructions/analyze-domain-bugs-security.md",
-    outputFile: `.code-analysis/domains/${domainId}/bugs-security.json`,
+    outputFile: `.code-analysis/domains/${domainId}/bugs-security/content.json`,
+    generateMetadata: true,
+    metadataFile: `.code-analysis/domains/${domainId}/bugs-security/metadata.json`,
   };
 
   await tasksPersistence.writeTask(task);

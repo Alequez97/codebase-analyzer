@@ -9,11 +9,17 @@ import {
 } from "./domain-documentation.js";
 import {
   readDomainRequirements,
+  readDomainRequirementsMetadata,
   writeDomainRequirements,
 } from "./domain-requirements.js";
-import { readDomainTesting, writeDomainTesting } from "./domain-testing.js";
+import {
+  readDomainTesting,
+  readDomainTestingMetadata,
+  writeDomainTesting,
+} from "./domain-testing.js";
 import {
   readDomainBugsSecurity,
+  readDomainBugsSecurityMetadata,
   writeDomainBugsSecurity,
 } from "./domain-bugs-security.js";
 
@@ -142,6 +148,7 @@ export async function writeDomain(domainId, data) {
 export async function readDomainSectionLogs(domainId, section) {
   try {
     let sectionData = null;
+    let readSectionMetadata = null;
 
     switch (section) {
       case SECTION_TYPES.DOCUMENTATION:
@@ -149,18 +156,26 @@ export async function readDomainSectionLogs(domainId, section) {
         break;
       case SECTION_TYPES.REQUIREMENTS:
         sectionData = await readDomainRequirements(domainId);
+        readSectionMetadata = readDomainRequirementsMetadata;
         break;
       case SECTION_TYPES.TESTING:
         sectionData = await readDomainTesting(domainId);
+        readSectionMetadata = readDomainTestingMetadata;
         break;
       case SECTION_TYPES.BUGS_SECURITY:
         sectionData = await readDomainBugsSecurity(domainId);
+        readSectionMetadata = readDomainBugsSecurityMetadata;
         break;
       default:
         return null;
     }
 
-    const logFilePath = sectionData?.metadata?.logFile || sectionData?.logFile;
+    let logFilePath = sectionData?.metadata?.logFile || sectionData?.logFile;
+
+    if (!logFilePath && readSectionMetadata) {
+      const sectionMetadata = await readSectionMetadata(domainId);
+      logFilePath = sectionMetadata?.logFile || null;
+    }
 
     if (!logFilePath) {
       return null;

@@ -44,7 +44,7 @@ Analyze domain files for bugs and security issues. Output to **`{{OUTPUT_FILE}}`
 
 ## Requirements Reference
 
-Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to understand what the code should do, then identify where it falls short.
+Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to understand what the code should do, then identify where it falls short.
 {{/if}}
 
 ## What to Look For

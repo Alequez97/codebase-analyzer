@@ -185,6 +185,7 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
           };
         }
 
+        await fs.mkdir(path.dirname(outputPath), { recursive: true });
         await fs.writeFile(
           outputPath,
           JSON.stringify(jsonContent, null, 2),

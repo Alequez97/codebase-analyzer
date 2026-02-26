@@ -52,9 +52,14 @@ The backend is a Node.js/Express service that orchestrates AI-driven analysis ta
 ## Storage Layout
 
 - `.code-analysis/analysis/codebase-analysis.json`
-- `.code-analysis/domains/{domainId}/documentation.json`
-- `.code-analysis/domains/{domainId}/requirements.json`
-- `.code-analysis/domains/{domainId}/testing.json`
+- `.code-analysis/domains/{domainId}/documentation/content.md`
+- `.code-analysis/domains/{domainId}/documentation/metadata.json`
+- `.code-analysis/domains/{domainId}/requirements/content.json`
+- `.code-analysis/domains/{domainId}/requirements/metadata.json`
+- `.code-analysis/domains/{domainId}/testing/content.json`
+- `.code-analysis/domains/{domainId}/testing/metadata.json`
+- `.code-analysis/domains/{domainId}/bugs-security/content.json`
+- `.code-analysis/domains/{domainId}/bugs-security/metadata.json`
 - `.code-analysis/tasks/pending/*.json`
 - `.code-analysis/tasks/completed/*.json`
 - `.code-analysis/logs/*.log`

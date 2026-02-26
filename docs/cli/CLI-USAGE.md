@@ -69,8 +69,12 @@ your-project/
     domains/                        # Detailed analysis per domain
       user-auth/
         documentation.json
-        requirements.json
-        testing.json
+        requirements/
+          content.json
+          metadata.json
+        testing/
+          content.json
+          metadata.json
     tasks/
       pending/                      # Queued analysis tasks
       completed/                    # Finished tasks

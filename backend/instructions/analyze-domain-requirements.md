@@ -49,7 +49,7 @@ Analyze domain files and extract business requirements. Output to **`{{OUTPUT_FI
 
 ## Documentation Reference
 
-Read `.code-analysis/domains/{{DOMAIN_ID}}/documentation.json` to understand the business context, then extract requirements that align with documented functionality and risk areas.
+Read `.code-analysis/domains/{{DOMAIN_ID}}/documentation/content.md` and `.code-analysis/domains/{{DOMAIN_ID}}/documentation/metadata.json` to understand the business context, then extract requirements that align with documented functionality and risk areas.
 {{/if}}
 
 ## What to Extract

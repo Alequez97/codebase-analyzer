@@ -40,7 +40,9 @@ export async function createAnalyzeTestingTask(
     },
     agentConfig,
     instructionFile: "backend/instructions/analyze-domain-testing.md",
-    outputFile: `.code-analysis/domains/${domainId}/testing.json`,
+    outputFile: `.code-analysis/domains/${domainId}/testing/content.json`,
+    generateMetadata: true,
+    metadataFile: `.code-analysis/domains/${domainId}/testing/metadata.json`,
   };
 
   await tasksPersistence.writeTask(task);

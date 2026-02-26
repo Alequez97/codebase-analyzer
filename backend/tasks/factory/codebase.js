@@ -33,6 +33,7 @@ export async function createFullCodebaseAnalysisTask({
     agentConfig,
     instructionFile: "backend/instructions/analyze-full-codebase.md",
     outputFile: ".code-analysis/analysis/codebase-analysis.json",
+    generateMetadata: true,
   };
 
   await tasksPersistence.writeTask(task);

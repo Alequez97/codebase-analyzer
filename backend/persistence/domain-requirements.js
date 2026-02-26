@@ -1,7 +1,12 @@
 import fs from "fs/promises";
-import path from "path";
-import config from "../config.js";
 import { tryReadJsonFile } from "./utils.js";
+import {
+  getDomainSectionContentPath,
+  getDomainSectionDir,
+  getDomainSectionMetadataPath,
+} from "./domain-section-paths.js";
+
+const REQUIREMENTS_SECTION = "requirements";
 
 /**
  * Read domain requirements section
@@ -10,13 +15,25 @@ import { tryReadJsonFile } from "./utils.js";
  */
 export async function readDomainRequirements(domainId) {
   try {
-    const filePath = path.join(
-      config.paths.targetAnalysis,
-      "domains",
+    const filePath = getDomainSectionContentPath(
       domainId,
-      "requirements.json",
+      REQUIREMENTS_SECTION,
     );
-    return await tryReadJsonFile(filePath, `domain ${domainId} requirements`);
+    const content = await tryReadJsonFile(
+      filePath,
+      `domain ${domainId} requirements`,
+    );
+
+    const metadata = await readDomainRequirementsMetadata(domainId);
+
+    if (!metadata) {
+      return content;
+    }
+
+    return {
+      ...content,
+      metadata,
+    };
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;
@@ -31,11 +48,24 @@ export async function readDomainRequirements(domainId) {
  * @param {Object} data - Requirements data
  */
 export async function writeDomainRequirements(domainId, data) {
-  const dirPath = path.join(config.paths.targetAnalysis, "domains", domainId);
+  const dirPath = getDomainSectionDir(domainId, REQUIREMENTS_SECTION);
   await fs.mkdir(dirPath, { recursive: true });
 
-  const filePath = path.join(dirPath, "requirements.json");
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+  const { metadata, ...content } = data;
+  const filePath = getDomainSectionContentPath(domainId, REQUIREMENTS_SECTION);
+  await fs.writeFile(filePath, JSON.stringify(content, null, 2), "utf-8");
+
+  if (metadata) {
+    const metadataPath = getDomainSectionMetadataPath(
+      domainId,
+      REQUIREMENTS_SECTION,
+    );
+    await fs.writeFile(
+      metadataPath,
+      JSON.stringify(metadata, null, 2),
+      "utf-8",
+    );
+  }
 }
 
 /**
@@ -45,11 +75,9 @@ export async function writeDomainRequirements(domainId, data) {
  */
 export async function readDomainRequirementsMetadata(domainId) {
   try {
-    const metadataPath = path.join(
-      config.paths.targetAnalysis,
-      "domains",
+    const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      "requirements.meta.json",
+      REQUIREMENTS_SECTION,
     );
     return await tryReadJsonFile(
       metadataPath,

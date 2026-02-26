@@ -71,7 +71,7 @@ export const FILE_TOOLS = [
       path: {
         type: "string",
         description:
-          "Relative path to the output file (MUST start with '.code-analysis/', e.g., '.code-analysis/domains/my-domain/requirements.json')",
+          "Relative path to the output file (MUST start with '.code-analysis/', e.g., '.code-analysis/domains/my-domain/requirements/content.json')",
       },
       content: {
         type: "string",

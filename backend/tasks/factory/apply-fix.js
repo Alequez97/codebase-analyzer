@@ -72,6 +72,7 @@ export async function createApplyFixTask(
     agentConfig,
     instructionFile: "backend/instructions/apply-finding-fix.md",
     outputFile: null, // No JSON output needed - agent modifies source files directly
+    generateMetadata: true,
   };
 
   await tasksPersistence.writeTask(task);

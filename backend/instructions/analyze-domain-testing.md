@@ -178,7 +178,7 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 
 ## Requirements Reference
 
-Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements.json` to map requirements to tests and identify which requirements lack test coverage.
+Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to map requirements to tests and identify which requirements lack test coverage.
 {{/if}}
 
 ## What to Analyze
