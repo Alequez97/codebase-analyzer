@@ -9,6 +9,7 @@ import { MODELS } from "./constants/models.js";
 import { PROVIDERS } from "./constants/providers.js";
 import { AGENTS } from "./constants/agents.js";
 import { REASONING_EFFORT } from "./constants/reasoning-effort.js";
+import { PERSISTENCE_FILES } from "./constants/persistence-files.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -157,7 +158,10 @@ const config = {
 
     // Target project paths
     targetRoot: targetDirectory,
-    targetAnalysis: path.join(targetDirectory, ".code-analysis"),
+    targetAnalysis: path.join(
+      targetDirectory,
+      PERSISTENCE_FILES.ANALYSIS_ROOT_DIR,
+    ),
 
     // Analyzer internal paths
     instructions: path.join(__dirname, "instructions"),

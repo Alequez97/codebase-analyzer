@@ -6,6 +6,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { INSTRUCTION_FILES_NAMES } from "../constants/instruction-files.js";
 import {
   processTemplate,
   buildTemplateVariables,
@@ -13,7 +14,7 @@ import {
 
 /**
  * Load and process an instruction template
- * @param {string} templateName - Name of template file (e.g., "edit-domain-section.md")
+ * @param {string} templateName - Name of template file (e.g., INSTRUCTION_FILES_NAMES.EDIT_DOMAIN_SECTION)
  *                                or absolute file path
  * @param {Object} variables - Variables to replace in template
  * @returns {Promise<string>} Processed instruction template
@@ -64,7 +65,10 @@ export async function buildChatSystemPrompt(domainId, sectionType, context) {
     IS_TESTING: sectionType === "testing",
   };
 
-  return loadInstructionTemplate("edit-domain-section.md", variables);
+  return loadInstructionTemplate(
+    INSTRUCTION_FILES_NAMES.EDIT_DOMAIN_SECTION,
+    variables,
+  );
 }
 
 /**
@@ -88,5 +92,8 @@ export async function loadInstructionForTask(task) {
  */
 export async function loadDocumentationInstruction(task) {
   const variables = await buildTemplateVariables(task);
-  return loadInstructionTemplate("analyze-domain-documentation.md", variables);
+  return loadInstructionTemplate(
+    INSTRUCTION_FILES_NAMES.ANALYZE_DOMAIN_DOCUMENTATION,
+    variables,
+  );
 }

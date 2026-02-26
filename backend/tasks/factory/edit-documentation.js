@@ -1,5 +1,6 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -28,7 +29,7 @@ export async function createEditDocumentationTask(
   const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
-    id: generateTaskId("edit-documentation"),
+    id: generateTaskId(TASK_TYPES.EDIT_DOCUMENTATION),
     type: TASK_TYPES.EDIT_DOCUMENTATION,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -40,7 +41,7 @@ export async function createEditDocumentationTask(
       sectionType: "documentation",
     },
     agentConfig,
-    instructionFile: "backend/instructions/edit-domain-section.md",
+    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DOMAIN_SECTION,
     generateMetadata: true,
     // No output file - results are streamed via socket
   };

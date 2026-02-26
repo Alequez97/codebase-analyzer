@@ -1,10 +1,11 @@
 import fs from "fs/promises";
 import path from "path";
+import { PERSISTENCE_FILES } from "../../constants/persistence-files.js";
 
 /**
  * Constants
  */
-const ANALYSIS_OUTPUT_DIR = ".code-analysis";
+const ANALYSIS_OUTPUT_DIR = PERSISTENCE_FILES.ANALYSIS_ROOT_DIR;
 
 /**
  * File system tools that LLM can use during codebase analysis
@@ -65,13 +66,11 @@ export const FILE_TOOLS = [
   },
   {
     name: "write_file",
-    description:
-      "Write content to a file in the .code-analysis directory. REQUIRED to save your analysis output. The path must be relative to the project root and MUST start with '.code-analysis/'.",
+    description: `Write content to a file in the ${ANALYSIS_OUTPUT_DIR} directory. REQUIRED to save your analysis output. The path must be relative to the project root and MUST start with '${ANALYSIS_OUTPUT_DIR}/'.`,
     parameters: {
       path: {
         type: "string",
-        description:
-          "Relative path to the output file (MUST start with '.code-analysis/', e.g., '.code-analysis/domains/my-domain/requirements/content.json')",
+        description: `Relative path to the output file (MUST start with '${ANALYSIS_OUTPUT_DIR}/', e.g., '${ANALYSIS_OUTPUT_DIR}/domains/my-domain/requirements/content.json')`,
       },
       content: {
         type: "string",

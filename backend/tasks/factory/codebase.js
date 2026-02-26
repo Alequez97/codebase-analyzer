@@ -1,6 +1,8 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { getCodebaseAnalysisOutputPath } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -23,7 +25,7 @@ export async function createFullCodebaseAnalysisTask({
   const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
-    id: generateTaskId("analyze-codebase"),
+    id: generateTaskId(TASK_TYPES.CODEBASE_ANALYSIS),
     type: TASK_TYPES.CODEBASE_ANALYSIS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -31,8 +33,8 @@ export async function createFullCodebaseAnalysisTask({
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: "backend/instructions/analyze-full-codebase.md",
-    outputFile: ".code-analysis/analysis/codebase-analysis.json",
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_FULL_CODEBASE,
+    outputFile: getCodebaseAnalysisOutputPath(),
     generateMetadata: true,
   };
 

@@ -1,6 +1,11 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import {
+  DOMAIN_SECTION_IDS,
+  getDomainSectionContentJsonOutputPath,
+} from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -28,7 +33,7 @@ export async function createAnalyzeBugsSecurityTask(
   const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
-    id: generateTaskId("analyze-bugs-security"),
+    id: generateTaskId(TASK_TYPES.BUGS_SECURITY),
     type: TASK_TYPES.BUGS_SECURITY,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -39,10 +44,12 @@ export async function createAnalyzeBugsSecurityTask(
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: "backend/instructions/analyze-domain-bugs-security.md",
-    outputFile: `.code-analysis/domains/${domainId}/bugs-security/content.json`,
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_BUGS_SECURITY,
+    outputFile: getDomainSectionContentJsonOutputPath(
+      domainId,
+      DOMAIN_SECTION_IDS.BUGS_SECURITY,
+    ),
     generateMetadata: true,
-    metadataFile: `.code-analysis/domains/${domainId}/bugs-security/metadata.json`,
   };
 
   await tasksPersistence.writeTask(task);

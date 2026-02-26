@@ -1,6 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -53,13 +54,13 @@ export async function createApplyTestTask(
   };
 
   const task = {
-    id: generateTaskId("apply-test"),
+    id: generateTaskId(TASK_TYPES.APPLY_TEST),
     type: TASK_TYPES.APPLY_TEST,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params,
     agentConfig,
-    instructionFile: "backend/instructions/apply-test.md",
+    instructionFile: INSTRUCTION_FILES_PATHS.APPLY_TEST,
     outputFile: null, // No JSON output needed - agent creates test file directly
     generateMetadata: true,
   };

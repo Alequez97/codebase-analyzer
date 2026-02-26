@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
 
 /**
  * Recursively scan directory for all files
@@ -18,7 +19,7 @@ async function scanFiles(
     "build",
     ".next",
     "coverage",
-    ".code-analysis",
+    PERSISTENCE_FILES.ANALYSIS_ROOT_DIR,
     ".vscode",
     ".idea",
   ],

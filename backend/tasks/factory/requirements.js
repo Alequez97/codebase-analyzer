@@ -1,6 +1,11 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import {
+  DOMAIN_SECTION_IDS,
+  getDomainSectionContentJsonOutputPath,
+} from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -29,7 +34,7 @@ export async function createAnalyzeRequirementsTask(
   const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
-    id: generateTaskId("analyze-requirements"),
+    id: generateTaskId(TASK_TYPES.REQUIREMENTS),
     type: TASK_TYPES.REQUIREMENTS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -41,10 +46,12 @@ export async function createAnalyzeRequirementsTask(
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: "backend/instructions/analyze-domain-requirements.md",
-    outputFile: `.code-analysis/domains/${domainId}/requirements/content.json`,
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_REQUIREMENTS,
+    outputFile: getDomainSectionContentJsonOutputPath(
+      domainId,
+      DOMAIN_SECTION_IDS.REQUIREMENTS,
+    ),
     generateMetadata: true,
-    metadataFile: `.code-analysis/domains/${domainId}/requirements/metadata.json`,
   };
 
   await tasksPersistence.writeTask(task);

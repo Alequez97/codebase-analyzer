@@ -1,6 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -64,13 +65,13 @@ export async function createApplyFixTask(
   };
 
   const task = {
-    id: generateTaskId("apply-fix"),
+    id: generateTaskId(TASK_TYPES.APPLY_FIX),
     type: TASK_TYPES.APPLY_FIX,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params,
     agentConfig,
-    instructionFile: "backend/instructions/apply-finding-fix.md",
+    instructionFile: INSTRUCTION_FILES_PATHS.APPLY_FINDING_FIX,
     outputFile: null, // No JSON output needed - agent modifies source files directly
     generateMetadata: true,
   };

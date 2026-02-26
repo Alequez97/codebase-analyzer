@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
+import { PERSISTENCE_FILES } from "../../constants/persistence-files.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { emitTaskLog } from "../../utils/socket-emitter.js";
 
@@ -55,13 +56,13 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
 
       // Save metadata
       const metadata = agent.getMetadata();
-      const documentationDir = path.join(
-        config.target.directory,
-        `.code-analysis/domains/${task.params.domainId}/documentation`,
-      );
+      const documentationDir = path.dirname(outputPath);
       await fs.mkdir(documentationDir, { recursive: true });
 
-      const metadataPath = path.join(documentationDir, "metadata.json");
+      const metadataPath = path.join(
+        documentationDir,
+        PERSISTENCE_FILES.METADATA_JSON,
+      );
       await fs.writeFile(
         metadataPath,
         JSON.stringify(

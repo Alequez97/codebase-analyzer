@@ -49,11 +49,11 @@ async function enhanceOutputWithTaskMetadata(task) {
       ? task.outputFile
       : path.join(config.target.directory, task.outputFile);
     const shouldGenerateMetadata = task.generateMetadata === true;
-    const metadataOutputPath = task.metadataFile
-      ? path.isAbsolute(task.metadataFile)
-        ? task.metadataFile
-        : path.join(config.target.directory, task.metadataFile)
-      : null;
+    const metadataOutputPath = path.join(
+      path.dirname(outputPath),
+      PERSISTENCE_FILES.METADATA_JSON,
+    );
+    const usesSeparateMetadataFile = metadataOutputPath !== outputPath;
     let content;
     let analysis;
 
@@ -115,7 +115,7 @@ async function enhanceOutputWithTaskMetadata(task) {
 
     if (
       shouldGenerateMetadata &&
-      metadataOutputPath &&
+      usesSeparateMetadataFile &&
       analysis &&
       typeof analysis === "object" &&
       !Array.isArray(analysis)
@@ -152,7 +152,7 @@ async function enhanceOutputWithTaskMetadata(task) {
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
 
-    if (shouldGenerateMetadata && metadataOutputPath) {
+    if (shouldGenerateMetadata && usesSeparateMetadataFile) {
       const taskMetadata = {
         ...existingMetadata,
         taskId: task.id,

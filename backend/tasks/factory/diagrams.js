@@ -1,6 +1,11 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
+import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import {
+  DOMAIN_SECTION_IDS,
+  getDomainSectionMetadataOutputPath,
+} from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -28,7 +33,7 @@ export async function createAnalyzeDiagramsTask(
   const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
-    id: generateTaskId("analyze-diagrams"),
+    id: generateTaskId(TASK_TYPES.DIAGRAMS),
     type: TASK_TYPES.DIAGRAMS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -39,8 +44,11 @@ export async function createAnalyzeDiagramsTask(
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: "backend/instructions/analyze-domain-diagrams.md",
-    outputFile: `.code-analysis/domains/${domainId}/diagrams/metadata.json`,
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_DIAGRAMS,
+    outputFile: getDomainSectionMetadataOutputPath(
+      domainId,
+      DOMAIN_SECTION_IDS.DIAGRAMS,
+    ),
     generateMetadata: true,
   };
 
