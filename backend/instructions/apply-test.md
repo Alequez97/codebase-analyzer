@@ -6,14 +6,13 @@
 
 Your ONLY job is to generate and write the missing test file based on the test recommendation.
 
-## AVAILABLE TOOLS
+## Available Tools
 
-You have access to these tools to work with the codebase:
+You have access to these tools:
 
-- `list_directory`: List files and subdirectories
-- `read_file`: Read specific file contents
-- `search_files`: Find files matching patterns
-- `write_file`: **REQUIRED** - Write the generated test file
+- **`read_file`**: Read file contents (use this to examine source files and example tests)
+- **`list_directory`**: List directory contents (use to find test files)
+- **`write_file`**: Write the generated test file (REQUIRED - use this to save the test)
 
 ## Objective
 
@@ -29,34 +28,71 @@ Generate a complete, working test file based on the test recommendation. The tes
 - **Codebase Path**: `{{CODEBASE_PATH}}`
 - **Domain ID**: `{{DOMAIN_ID}}`
 - **Test ID**: `{{TEST_ID}}`
-- **Test File**: `{{TEST_FILE}}`
+- **Test File Path**: `{{TEST_FILE}}`
 - **Test Type**: `{{TEST_TYPE}}`
 - **Test Description**: `{{TEST_DESCRIPTION}}`
-- **Test Scenarios**:
+- **Source File**: `{{SOURCE_FILE}}`
+- **Test Scenarios to Cover**:
   {{#each TEST_SCENARIOS}}
   - {{this}}
     {{/each}}
 
-## Source File to Test
+## Task Workflow
 
-**File**: `{{SOURCE_FILE}}`
+**Follow these steps EXACTLY**:
 
-This is the file that needs test coverage. You MUST read this file to understand:
+### Step 1: Read the Source File
 
-- What functions/classes it exports
+Use `read_file` to read `{{SOURCE_FILE}}` to understand:
+
+- What functions/classes/routes it exports
 - What logic needs to be tested
 - What dependencies it uses
 - What error cases exist
 
-## Task
+### Step 2: Find Example Test Files
 
-**Step-by-step process**:
+Use `list_directory` to explore directories like:
 
-1. **Read the source file** using `read_file` tool to understand what needs to be tested
-2. **Find existing test files** in the same directory or `__tests__/` to understand testing conventions
-3. **Determine the testing framework** (Jest, Vitest, Mocha, etc.) from existing tests
-4. **Generate the test file** following the same patterns as existing tests
-5. **Write the test file** to `{{TEST_FILE}}` using the `write_file` tool
+- `tests/`
+- `test/`
+- `__tests__/`
+- `backend/tests/`
+- `src/tests/`
+
+Look for files matching patterns:
+
+- `*.test.js`, `*.test.ts`
+- `*.spec.js`, `*.spec.ts`
+
+**For integration tests**: Prioritize files in `integration/` or `e2e/` directories
+**For unit tests**: Prioritize files NOT in `integration/` or `e2e/` directories
+
+### Step 3: Study Example Test Files
+
+Use `read_file` to read 1-2 example test files to understand:
+
+- What testing framework is used (Jest, Vitest, Mocha, etc.)
+- How tests are structured (describe blocks, test/it blocks)
+- How imports are written
+- How mocking is done
+- What assertion style is used
+
+### Step 4: Generate the Test File
+
+Create a complete test file that:
+
+- Follows the same framework and patterns as the examples
+- Covers ALL scenarios listed in `TEST_SCENARIOS` above
+- Uses proper AAA pattern (Arrange, Act, Assert)
+- Includes all necessary imports
+- Is ready to run with `npm test`
+
+### Step 5: Write the Test File
+
+**CRITICAL**: Use `write_file` to save the generated test to: **`{{TEST_FILE}}`**
+
+This is MANDATORY - the task is not complete until you write the file.
 
 ### What to Include in the Generated Test
 
@@ -70,7 +106,7 @@ This is the file that needs test coverage. You MUST read this file to understand
    - `describe` block for the module/function being tested
    - `test` or `it` blocks for each scenario
    - Proper setup (`beforeEach`) and teardown (`afterEach`) if needed
-   - **AAA Pattern**: Each test must follow the Arrange, Act, Assert pattern with comments:
+   - **AAA Pattern**: Each test MUST follow the Arrange, Act, Assert pattern with comments:
      ```javascript
      test("description", () => {
        // Arrange - Setup test data and dependencies
@@ -78,11 +114,10 @@ This is the file that needs test coverage. You MUST read this file to understand
        // Assert - Verify the results
      });
      ```
-   - Always place assertions under `// Assert` comment
-     For tests that throw errors, use `// Act & Assert` when the act and assert are combined
+   - For tests that throw errors, use `// Act & Assert` when the act and assert are combined
 
 3. **Test Scenarios**
-   - Cover ALL scenarios listed in `{{TEST_SCENARIOS}}`
+   - Cover ALL scenarios listed above in `TEST_SCENARIOS`
    - Add additional edge cases that make sense
    - Test both success and failure paths
 
@@ -96,7 +131,7 @@ This is the file that needs test coverage. You MUST read this file to understand
    - Mock timers if testing time-based logic
    - Provide mock data that's realistic
 
-## Testing Framework Guidelines
+## Testing Framework Examples
 
 ### For Jest/Vitest
 
@@ -189,122 +224,28 @@ describe("POST /api/endpoint", () => {
 });
 ```
 
-## E// Arrange
+## CRITICAL REQUIREMENTS
 
-    const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+**MUST DO**:
 
-    // Act
-    const result = validateToken(validToken);
+1. ✅ Follow AAA pattern with `// Arrange`, `// Act`, `// Assert` comments in EVERY test
+2. ✅ Cover ALL scenarios listed in `TEST_SCENARIOS`
+3. ✅ Follow the same testing framework and patterns as the example test files
+4. ✅ Include all necessary imports and setup
+5. ✅ Make the test runnable (it should work when `npm test` is run)
+6. ✅ Write the completed test file to `{{TEST_FILE}}` and exit
 
-    // Assert
-    expect(result).toBe(true);
+**MUST NOT DO**:
 
-});
+7. ❌ DO NOT ask questions or wait for input
+8. ❌ DO NOT ask for files - they are already provided
+9. ❌ DO NOT just describe what should be done - write the file
+10. ❌ DO NOT use Markdown code blocks in your response - write the actual file
 
-test('should return false for token with invalid signature', () => {
-// Arrange
-const tokenWithBadSignature = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.INVALIDSIGNATURE';
+## Final Step
 
-    // Act
-    const result = validateToken(tokenWithBadSignature);
+**IMMEDIATELY write the test file to `{{TEST_FILE}}` using the `write_file` tool and exit.**
 
-    // Assert
-    expect(result).toBe(false);
+The file path is: **`{{TEST_FILE}}`**
 
-});
-
-test('should return false for token with tampered payload', () => {
-// Arrange
-const tamperedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.TAMPERED.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-
-    // Act
-    const result = validateToken(tamperedToken);
-
-    // Assert
-    expect(result).toBe(false);
-
-});
-
-test('should return false for token with "none" algorithm', () => {
-// Arrange
-const noneAlgoToken = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.';
-
-    // Act
-    const result = validateToken(noneAlgoToken);
-
-    // Assert
-    expect(result).toBe(false);
-
-});
-
-test('should return false for expired token', () => {
-// Arrange
-const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjoxNTE2MjM5MDIyfQ.4Adcj0p3O8P3PxhP6MxKQaqOXhLYjO1YJN1CjP1p_ns';
-
-    // Act
-    const result = validateToken(expiredToken);
-
-    // Assert
-    expect(result).toBe(false);
-
-});
-
-test('should throw error for null token', () => {
-// Arrange
-const nullToken = null;
-
-    // Act & Assert
-    expect(() => validateToken(nullToken)).toThrow('Token is required');
-
-});
-
-test('should throw error for empty string token', () => {
-// Arrange
-const emptyToken = '';
-
-    // Act & Assert
-    expect(() => validateToken(emptyTokeniOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjoxNTE2MjM5MDIyfQ.4Adcj0p3O8P3PxhP6MxKQaqOXhLYjO1YJN1CjP1p_ns';
-    const result = validateToken(expiredToken);
-    expect(result).toBe(false);
-
-});
-
-test('should throw error for null token', () => {
-expect(() => validateToken(null)).toThrow('Token is required');
-});Follow AAA Pattern** - EVERY test MUST use `// Arrange`, `// Act`, `// Assert` comments (or `// Act & Assert` for exceptions) 4. **Cover all scenarios** - Every scenario listed in `TEST_SCENARIOS` must have a test 5. **Use proper assertions** - Test actual behavior, not implementation details 6. **Make tests runnable** - Include all imports and setup needed to run the test 7. **Add helpful descriptions\*\* - Test names should clearly describe what is being tested
-8 });
-});
-
-```
-
-## Important Guidelines
-
-1. **Read the source file FIRST** - You cannot write tests without understanding what the code does
-2. **Match existing patterns** - Find and read other test files to match the project's testing style
-3. **Cover all scenarios** - Every scenario listed in `TEST_SCENARIOS` must have a test
-4. **Use proper assertions** - Test actual behavior, not implementation details
-5. **Make tests runnable** - Include all imports and setup needed to run the test
-6. **Add helpful descriptions** - Test names should clearly describe what is being tested
-7. **Mock external dependencies** - Don't make real API calls, database queries, or file system operations in tests
-
-## Task Execution
-
-1. Use `read_file` to read the source file at `{{SOURCE_FILE}}`
-2. Use `search_files` or `list_directory` to find existing test files and understand testing conventions
-3. Use `read_file` to read 1-2 existing test files to understand framework and patterns
-4. Generate a complete test file following the same patterns
-5. Use `write_file` to save the test to: **`{{TEST_FILE}}`**
-
-**CRITICAL REQUIREMENTS**:
-
-1. ✅ **MUST** follow AAA pattern with `// Arrange`, `// Act`, `// Assert` comments in EVERY test
-4. ✅ **MUST** cover ALL scenarios listed in `TEST_SCENARIOS`
-5. ✅ **MUST** follow the same testing framework and patterns as existing tests
-6. ✅ **MUST** include all necessary imports and setup
-7. ✅ **MUST** make the test runnable (it should work when `npm test` is run)
-8. ❌ **DO NOT** ask questions or wait for input
-9. ❌ **DO NOT** just describe what should be done
-10. ❌ **DO NOT** ask questions or wait for input
-8. ❌ **DO NOT** just describe what should be done
-9. ✅ **WRITE THE FILE NOW** using `write_file` tool and exit
-```
+Generate the complete, runnable test code and write it now.

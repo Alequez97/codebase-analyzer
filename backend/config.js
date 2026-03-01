@@ -121,10 +121,10 @@ const config = {
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_TEST]: {
-      agent: AGENTS.AIDER,
+      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
-      maxIterations: 15,
+      maxIterations: 20,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
 

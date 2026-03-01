@@ -9,6 +9,7 @@ import * as logger from "../../utils/logger.js";
 
 /**
  * Create a task to apply a missing test
+ * Uses LLM API agent with autonomous file discovery
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
  * @param {Object} params.testRecommendation - The test recommendation object
@@ -29,15 +30,25 @@ export async function createApplyTestTask(
 
   // Determine source file from suggested test file
   // For unit tests: file.test.js -> file.js
-  // For integration tests: read the test description
+  // For integration tests: backend/tests/integration/foo.js -> backend/foo.js (or similar)
   const testFile = testRecommendation.suggestedTestFile || "";
   const sourceFile = testFile
     .replace(/\.test\.(js|ts)$/, ".$1")
     .replace(/\.spec\.(js|ts)$/, ".$1")
     .replace(/^tests\/integration\//, "")
-    .replace(/^tests\/unit\//, "");
+    .replace(/^tests\/unit\//, "")
+    .replace(/\/tests\/integration\//, "/")
+    .replace(/\/tests\/unit\//, "/");
+
+  logger.debug("Creating apply-test task", {
+    component: "TaskFactory",
+    testFile,
+    sourceFile,
+    testType: testRecommendation.testType,
+  });
 
   // Build parameters for template replacement
+  // The LLM agent will use read_file and list_directory tools to discover files autonomously
   const params = {
     domainId,
     targetDirectory: config.target.directory,
@@ -61,7 +72,7 @@ export async function createApplyTestTask(
     params,
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.APPLY_TEST,
-    outputFile: null, // No JSON output needed - agent creates test file directly
+    outputFile: null, // No JSON output - agent creates test file directly using write_file tool
     generateMetadata: true,
   };
 
