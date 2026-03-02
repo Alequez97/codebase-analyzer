@@ -2,6 +2,30 @@ import { useState } from "react";
 import { Badge, Box, Code, HStack, Tabs, Text, VStack } from "@chakra-ui/react";
 import { formatAssertionType } from "./utils";
 
+function formatValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return "[Unserializable object]";
+    }
+  }
+
+  return String(value);
+}
+
 export function TestCaseDetails({ scenarios }) {
   const [activeTab, setActiveTab] = useState(0);
   const scenarioList = scenarios || [];
@@ -99,7 +123,7 @@ export function TestCaseDetails({ scenarios }) {
                                       whiteSpace="pre-wrap"
                                       wordBreak="break-word"
                                     >
-                                      {inputField.value}
+                                      {formatValue(inputField.value)}
                                     </Code>
                                   </HStack>
                                 </Box>
@@ -116,7 +140,7 @@ export function TestCaseDetails({ scenarios }) {
                             whiteSpace="pre-wrap"
                             wordBreak="break-word"
                           >
-                            {testCaseItem.input}
+                            {formatValue(testCaseItem.input)}
                           </Code>
                         ) : (
                           <Text fontSize="xs" color="gray.500">
@@ -144,7 +168,7 @@ export function TestCaseDetails({ scenarios }) {
                           whiteSpace="pre-wrap"
                           wordBreak="break-word"
                         >
-                          {testCaseItem.expectedOutput}
+                          {formatValue(testCaseItem.expectedOutput)}
                         </Code>
                       </Box>
                     </VStack>
