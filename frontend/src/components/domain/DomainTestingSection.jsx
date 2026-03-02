@@ -32,6 +32,7 @@ export default function DomainTestingSection({
   loading,
   progress,
   applyingTests,
+  applyLogs,
   onAnalyze,
   onApplyTest,
   hasRequirements = false,
@@ -174,6 +175,7 @@ export default function DomainTestingSection({
                       domainId={domainId}
                       missingTests={testing.missingTests}
                       applyingTests={applyingTests}
+                      applyLogs={applyLogs}
                       onApplyTest={onApplyTest}
                     />
                   </Box>

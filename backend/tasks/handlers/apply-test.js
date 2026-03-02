@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
+import * as domainTestingPersistence from "../../persistence/domain-testing.js";
 import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
@@ -106,6 +107,25 @@ export function applyTestHandler(task, taskLogger, agent) {
       taskLogger.info(`✅ Test file verified (${stats.size} bytes)`, {
         component: "ApplyTest",
       });
+
+      if (task.params?.domainId && task.params?.testId) {
+        try {
+          await domainTestingPersistence.recordTestingApplyCompleted(
+            task.params.domainId,
+            {
+              taskId: task.id,
+              testId: task.params.testId,
+              testFile: task.params.testFile,
+            },
+          );
+        } catch (error) {
+          taskLogger.error("Failed to record completed testing action", {
+            error,
+            component: "ApplyTest",
+            taskId: task.id,
+          });
+        }
+      }
 
       emitTaskProgress(
         task,

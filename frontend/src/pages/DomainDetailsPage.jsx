@@ -78,7 +78,8 @@ export default function DomainDetailsPage() {
   } = useDomainEditorStore();
 
   // Testing store
-  const { applyingTestsByDomainId, applyTest } = useTestingStore();
+  const { applyingTestsByDomainId, applyLogsByDomainId, applyTest } =
+    useTestingStore();
 
   // Logs store
   const {
@@ -167,6 +168,7 @@ export default function DomainDetailsPage() {
 
   // Test application states
   const applyingTests = applyingTestsByDomainId[domainId] || {};
+  const applyLogs = applyLogsByDomainId[domainId] || {};
 
   useEffect(() => {
     if (!domainId) return;
@@ -310,7 +312,7 @@ export default function DomainDetailsPage() {
     const result = await applyTest(domainId, testId);
     if (result.success) {
       toaster.create({
-        title: result.message || "Test applied successfully",
+        title: result.message || "Test application started",
         type: "success",
       });
     } else {
@@ -566,6 +568,7 @@ export default function DomainDetailsPage() {
               loading={testingLoading}
               progress={testingProgress}
               applyingTests={applyingTests}
+              applyLogs={applyLogs}
               hasRequirements={!!requirements}
               onAnalyze={(includeRequirements) =>
                 domain && testStore.analyze(domain, includeRequirements)

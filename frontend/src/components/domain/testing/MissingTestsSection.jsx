@@ -14,15 +14,14 @@ import {
 import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { Alert } from "../../ui/alert";
 import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
-import {
-  TestCaseDetails,
-  TestCaseInlineEditorComponent,
-} from "./index";
+import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
+import { TestCaseDetails, TestCaseInlineEditorComponent } from "./index";
 import { getPriorityColor } from "./utils";
 
 export function MissingTestsSection({
   missingTests,
   applyingTests,
+  applyLogs,
   onApplyTest,
   domainId,
 }) {
@@ -156,6 +155,8 @@ export function MissingTestsSection({
             {/* Unit Tests */}
             {editedMissingTests.unit?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
+              const isApplied =
+                test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
               return (
                 <Fragment key={test.id}>
                   <Table.Row
@@ -216,6 +217,7 @@ export function MissingTestsSection({
                             size="xs"
                             variant="ghost"
                             colorPalette="red"
+                            disabled={!!applyingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearEditingTest();
@@ -229,6 +231,7 @@ export function MissingTestsSection({
                             size="xs"
                             colorPalette="blue"
                             variant="ghost"
+                            disabled={!!applyingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingTest(test.id, domainId);
@@ -238,19 +241,21 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        <Button
-                          size="xs"
-                          colorPalette="green"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onApplyTest(test.id);
-                          }}
-                          loading={!!applyingTests[test.id]}
-                          loadingText="Applying"
-                        >
-                          <Check size={12} />
-                          Apply
-                        </Button>
+                        {!isApplied && (
+                          <Button
+                            size="xs"
+                            colorPalette="green"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApplyTest(test.id);
+                            }}
+                            loading={!!applyingTests[test.id]}
+                            loadingText="Applying"
+                          >
+                            <Check size={12} />
+                            Apply
+                          </Button>
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -267,9 +272,61 @@ export function MissingTestsSection({
                             }}
                             onCancel={() => clearEditingTest()}
                           />
-                        ) : test.scenarios ? (
-                          <TestCaseDetails scenarios={test.scenarios} />
-                        ) : null}
+                        ) : (
+                          <VStack align="stretch" gap={3}>
+                            {test.scenarios ? (
+                              <TestCaseDetails scenarios={test.scenarios} />
+                            ) : null}
+
+                            {Array.isArray(test.actionHistory) &&
+                              test.actionHistory.length > 0 && (
+                                <Box borderWidth="1px" borderRadius="md" p={3}>
+                                  <Text
+                                    fontSize="xs"
+                                    fontWeight="semibold"
+                                    mb={2}
+                                  >
+                                    Action History
+                                  </Text>
+                                  {test.actionHistory.map((action) => (
+                                    <Text
+                                      key={action.id}
+                                      fontSize="xs"
+                                      color="gray.700"
+                                    >
+                                      {action.action} • {action.status} •{" "}
+                                      {action.timestamp}
+                                    </Text>
+                                  ))}
+                                </Box>
+                              )}
+
+                            {applyLogs?.[test.id] && (
+                              <Box borderWidth="1px" borderRadius="md" p={3}>
+                                <Text
+                                  fontSize="xs"
+                                  fontWeight="semibold"
+                                  mb={2}
+                                >
+                                  Apply Logs
+                                </Text>
+                                <Box
+                                  bg="gray.900"
+                                  color="green.300"
+                                  p={3}
+                                  borderRadius="sm"
+                                  fontFamily="mono"
+                                  fontSize="xs"
+                                  maxH="240px"
+                                  overflowY="auto"
+                                  whiteSpace="pre-wrap"
+                                >
+                                  {applyLogs[test.id]}
+                                </Box>
+                              </Box>
+                            )}
+                          </VStack>
+                        )}
                       </Table.Cell>
                     </Table.Row>
                   )}
@@ -280,6 +337,8 @@ export function MissingTestsSection({
             {/* Integration Tests */}
             {editedMissingTests.integration?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
+              const isApplied =
+                test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
               return (
                 <Fragment key={test.id}>
                   <Table.Row
@@ -340,6 +399,7 @@ export function MissingTestsSection({
                             size="xs"
                             variant="ghost"
                             colorPalette="red"
+                            disabled={!!applyingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearEditingTest();
@@ -353,6 +413,7 @@ export function MissingTestsSection({
                             size="xs"
                             colorPalette="blue"
                             variant="ghost"
+                            disabled={!!applyingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingTest(test.id, domainId);
@@ -362,19 +423,21 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        <Button
-                          size="xs"
-                          colorPalette="green"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onApplyTest(test.id);
-                          }}
-                          loading={!!applyingTests[test.id]}
-                          loadingText="Applying"
-                        >
-                          <Check size={12} />
-                          Apply
-                        </Button>
+                        {!isApplied && (
+                          <Button
+                            size="xs"
+                            colorPalette="green"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApplyTest(test.id);
+                            }}
+                            loading={!!applyingTests[test.id]}
+                            loadingText="Applying"
+                          >
+                            <Check size={12} />
+                            Apply
+                          </Button>
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -391,9 +454,61 @@ export function MissingTestsSection({
                             }}
                             onCancel={() => clearEditingTest()}
                           />
-                        ) : test.scenarios ? (
-                          <TestCaseDetails scenarios={test.scenarios} />
-                        ) : null}
+                        ) : (
+                          <VStack align="stretch" gap={3}>
+                            {test.scenarios ? (
+                              <TestCaseDetails scenarios={test.scenarios} />
+                            ) : null}
+
+                            {Array.isArray(test.actionHistory) &&
+                              test.actionHistory.length > 0 && (
+                                <Box borderWidth="1px" borderRadius="md" p={3}>
+                                  <Text
+                                    fontSize="xs"
+                                    fontWeight="semibold"
+                                    mb={2}
+                                  >
+                                    Action History
+                                  </Text>
+                                  {test.actionHistory.map((action) => (
+                                    <Text
+                                      key={action.id}
+                                      fontSize="xs"
+                                      color="gray.700"
+                                    >
+                                      {action.action} • {action.status} •{" "}
+                                      {action.timestamp}
+                                    </Text>
+                                  ))}
+                                </Box>
+                              )}
+
+                            {applyLogs?.[test.id] && (
+                              <Box borderWidth="1px" borderRadius="md" p={3}>
+                                <Text
+                                  fontSize="xs"
+                                  fontWeight="semibold"
+                                  mb={2}
+                                >
+                                  Apply Logs
+                                </Text>
+                                <Box
+                                  bg="gray.900"
+                                  color="green.300"
+                                  p={3}
+                                  borderRadius="sm"
+                                  fontFamily="mono"
+                                  fontSize="xs"
+                                  maxH="240px"
+                                  overflowY="auto"
+                                  whiteSpace="pre-wrap"
+                                >
+                                  {applyLogs[test.id]}
+                                </Box>
+                              </Box>
+                            )}
+                          </VStack>
+                        )}
                       </Table.Cell>
                     </Table.Row>
                   )}
@@ -404,6 +519,8 @@ export function MissingTestsSection({
             {/* E2E Tests */}
             {editedMissingTests.e2e?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
+              const isApplied =
+                test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
               return (
                 <Fragment key={test.id}>
                   <Table.Row
@@ -464,6 +581,7 @@ export function MissingTestsSection({
                             size="xs"
                             variant="ghost"
                             colorPalette="red"
+                            disabled={!!applyingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearEditingTest();
@@ -477,6 +595,7 @@ export function MissingTestsSection({
                             size="xs"
                             colorPalette="blue"
                             variant="ghost"
+                            disabled={!!applyingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingTest(test.id, domainId);
@@ -486,19 +605,21 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        <Button
-                          size="xs"
-                          colorPalette="green"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onApplyTest(test.id);
-                          }}
-                          loading={!!applyingTests[test.id]}
-                          loadingText="Applying"
-                        >
-                          <Check size={12} />
-                          Apply
-                        </Button>
+                        {!isApplied && (
+                          <Button
+                            size="xs"
+                            colorPalette="green"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApplyTest(test.id);
+                            }}
+                            loading={!!applyingTests[test.id]}
+                            loadingText="Applying"
+                          >
+                            <Check size={12} />
+                            Apply
+                          </Button>
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -515,9 +636,61 @@ export function MissingTestsSection({
                             }}
                             onCancel={() => clearEditingTest()}
                           />
-                        ) : test.scenarios ? (
-                          <TestCaseDetails scenarios={test.scenarios} />
-                        ) : null}
+                        ) : (
+                          <VStack align="stretch" gap={3}>
+                            {test.scenarios ? (
+                              <TestCaseDetails scenarios={test.scenarios} />
+                            ) : null}
+
+                            {Array.isArray(test.actionHistory) &&
+                              test.actionHistory.length > 0 && (
+                                <Box borderWidth="1px" borderRadius="md" p={3}>
+                                  <Text
+                                    fontSize="xs"
+                                    fontWeight="semibold"
+                                    mb={2}
+                                  >
+                                    Action History
+                                  </Text>
+                                  {test.actionHistory.map((action) => (
+                                    <Text
+                                      key={action.id}
+                                      fontSize="xs"
+                                      color="gray.700"
+                                    >
+                                      {action.action} • {action.status} •{" "}
+                                      {action.timestamp}
+                                    </Text>
+                                  ))}
+                                </Box>
+                              )}
+
+                            {applyLogs?.[test.id] && (
+                              <Box borderWidth="1px" borderRadius="md" p={3}>
+                                <Text
+                                  fontSize="xs"
+                                  fontWeight="semibold"
+                                  mb={2}
+                                >
+                                  Apply Logs
+                                </Text>
+                                <Box
+                                  bg="gray.900"
+                                  color="green.300"
+                                  p={3}
+                                  borderRadius="sm"
+                                  fontFamily="mono"
+                                  fontSize="xs"
+                                  maxH="240px"
+                                  overflowY="auto"
+                                  whiteSpace="pre-wrap"
+                                >
+                                  {applyLogs[test.id]}
+                                </Box>
+                              </Box>
+                            )}
+                          </VStack>
+                        )}
                       </Table.Cell>
                     </Table.Row>
                   )}

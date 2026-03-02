@@ -10,11 +10,11 @@ export const useDomainTestingStore = create((set, get) => ({
   errorById: new Map(),
 
   // Actions
-  fetch: async (domainId) => {
+  fetch: async (domainId, force = false) => {
     if (!domainId) return null;
 
     const cached = get().dataById.get(domainId);
-    if (cached) return cached;
+    if (!force && cached) return cached;
 
     set((state) => {
       const newLoadingMap = new Map(state.loadingById);

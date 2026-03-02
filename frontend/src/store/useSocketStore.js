@@ -13,6 +13,7 @@ import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
 import { useDomainSectionsChatStore } from "./useDomainSectionsChatStore";
+import { useTestingStore } from "./useTestingStore";
 
 const SOCKET_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
@@ -96,6 +97,10 @@ export const useSocketStore = create((set, get) => ({
       } else if (type === TASK_TYPES.TESTING && domainId) {
         useDomainTestingStore.getState().setLoading(domainId, false);
         await useDomainTestingStore.getState().fetch(domainId);
+      } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
+        await useTestingStore
+          .getState()
+          .completeApplyByTaskId(domainId, data.taskId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
@@ -175,6 +180,8 @@ export const useSocketStore = create((set, get) => ({
         const store = useDomainTestingStore.getState();
         store.setLoading(domainId, false);
         store.setError(domainId, error || "Testing analysis failed");
+      } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
+        useTestingStore.getState().failApplyByTaskId(domainId, data.taskId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
@@ -183,7 +190,7 @@ export const useSocketStore = create((set, get) => ({
     });
 
     // Log events - stream logs to logs store
-    const handleLogEvent = ({ type, log, domainId }) => {
+    const handleLogEvent = ({ type, log, domainId, taskId }) => {
       // Add to codebase analysis logs (visible in dashboard)
       useLogsStore.getState().appendCodebaseAnalysisLog(log);
 
@@ -192,6 +199,12 @@ export const useSocketStore = create((set, get) => ({
         const sectionType = taskTypeToSection(type);
         if (sectionType) {
           useLogsStore.getState().appendLogs(domainId, sectionType, log);
+        }
+
+        if (type === TASK_TYPES.APPLY_TEST && taskId) {
+          useTestingStore
+            .getState()
+            .appendApplyLogByTaskId(domainId, taskId, log);
         }
       }
     };
@@ -202,6 +215,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_TESTING, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_APPLY_TEST, handleLogEvent);
     // Edit task logs
     socket.on(SOCKET_EVENTS.LOG_EDIT_DOCUMENTATION, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_DIAGRAMS, handleLogEvent);

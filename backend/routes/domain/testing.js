@@ -5,6 +5,35 @@ import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
 
+function enrichMissingTestsWithApplyHistory(missingTests, applyActions) {
+  const actionsByTestId = new Map();
+
+  (applyActions || []).forEach((action) => {
+    const existing = actionsByTestId.get(action.testId) || [];
+    existing.push(action);
+    actionsByTestId.set(action.testId, existing);
+  });
+
+  const enrichList = (tests = []) =>
+    tests.map((test) => {
+      const actionHistory = (actionsByTestId.get(test.id) || []).sort(
+        (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
+      );
+
+      return {
+        ...test,
+        actionHistory,
+        actionStatus: actionHistory[0]?.status || null,
+      };
+    });
+
+  return {
+    unit: enrichList(missingTests?.unit || []),
+    integration: enrichList(missingTests?.integration || []),
+    e2e: enrichList(missingTests?.e2e || []),
+  };
+}
+
 /**
  * Get domain testing section
  */
@@ -21,7 +50,16 @@ router.get("/:id/testing", async (req, res) => {
       });
     }
 
-    res.json(data);
+    const applyActions = data.metadata?.applyActions || [];
+    const missingTests = enrichMissingTestsWithApplyHistory(
+      data.missingTests || {},
+      applyActions,
+    );
+
+    res.json({
+      ...data,
+      missingTests,
+    });
   } catch (error) {
     logger.error(`Error reading domain testing ${req.params.id}`, {
       error,
