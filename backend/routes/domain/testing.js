@@ -42,6 +42,8 @@ router.get("/:id/testing", async (req, res) => {
     const { id } = req.params;
 
     const data = await domainTestingPersistence.readDomainTesting(id);
+    const applyActionsRegistry =
+      await domainTestingPersistence.readTestingApplyActions(id);
 
     if (!data) {
       return res.status(404).json({
@@ -50,7 +52,7 @@ router.get("/:id/testing", async (req, res) => {
       });
     }
 
-    const applyActions = data.metadata?.applyActions || [];
+    const applyActions = applyActionsRegistry?.actions || [];
     const missingTests = enrichMissingTestsWithApplyHistory(
       data.missingTests || {},
       applyActions,

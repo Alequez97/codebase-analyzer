@@ -1,0 +1,20 @@
+{
+  "domainId": "aircraft-management",
+  "section": "testing",
+  "metadata": {
+    "created": "2026-03-02T11:12:50.000Z",
+    "lastUpdated": "2026-03-02T11:12:50.000Z",
+    "version": "1.0"
+  },
+  "actions": [
+    {
+      "id": "ACTION-1740901200000-ab12cd",
+      "testId": "TEST-001",
+      "action": "apply",
+      "status": "completed",
+      "taskId": "apply-test-20260302-111210-ef34gh",
+      "testFile": "backend/models/aircrafts/aircraft.test.js",
+      "timestamp": "2026-03-02T11:12:50.000Z"
+    }
+  ]
+}

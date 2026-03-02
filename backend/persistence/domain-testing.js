@@ -3,10 +3,12 @@ import {
   TESTING_ACTION_STATUS,
   TESTING_ACTION_TYPES,
 } from "../constants/testing-actions.js";
+import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
 import { tryReadJsonFile } from "./utils.js";
 import {
   getDomainSectionContentPath,
   getDomainSectionDir,
+  getDomainSectionFilePath,
   getDomainSectionMetadataPath,
 } from "./domain-section-paths.js";
 
@@ -96,6 +98,53 @@ function createTestingActionId() {
   return `ACTION-${Date.now()}-${suffix}`;
 }
 
+function createApplyActionsRegistry(domainId) {
+  const timestamp = new Date().toISOString();
+
+  return {
+    domainId,
+    section: TESTING_SECTION,
+    metadata: {
+      created: timestamp,
+      lastUpdated: timestamp,
+      version: "1.0",
+    },
+    actions: [],
+  };
+}
+
+export async function readTestingApplyActions(domainId) {
+  try {
+    const filePath = getDomainSectionFilePath(
+      domainId,
+      TESTING_SECTION,
+      PERSISTENCE_FILES.ACTIONS_JSON,
+    );
+
+    return await tryReadJsonFile(
+      filePath,
+      `domain ${domainId} testing apply actions`,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function writeTestingApplyActions(domainId, data) {
+  const dirPath = getDomainSectionDir(domainId, TESTING_SECTION);
+  await fs.mkdir(dirPath, { recursive: true });
+
+  const filePath = getDomainSectionFilePath(
+    domainId,
+    TESTING_SECTION,
+    PERSISTENCE_FILES.ACTIONS_JSON,
+  );
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+}
+
 export async function recordTestingApplyCompleted(domainId, actionInput) {
   const existing = await readDomainTesting(domainId);
   if (!existing) {
@@ -105,10 +154,9 @@ export async function recordTestingApplyCompleted(domainId, actionInput) {
     };
   }
 
-  const metadata = existing.metadata || {};
-  const applyActions = Array.isArray(metadata.applyActions)
-    ? metadata.applyActions
-    : [];
+  const registry =
+    (await readTestingApplyActions(domainId)) ||
+    createApplyActionsRegistry(domainId);
 
   const action = {
     id: createTestingActionId(),
@@ -120,16 +168,13 @@ export async function recordTestingApplyCompleted(domainId, actionInput) {
     timestamp: new Date().toISOString(),
   };
 
-  const updatedData = {
-    ...existing,
-    metadata: {
-      ...metadata,
-      applyActions: [...applyActions, action],
-      lastApplyActionAt: action.timestamp,
-    },
+  registry.actions = [...(registry.actions || []), action];
+  registry.metadata = {
+    ...(registry.metadata || {}),
+    lastUpdated: action.timestamp,
   };
 
-  await writeDomainTesting(domainId, updatedData);
+  await writeTestingApplyActions(domainId, registry);
 
   return {
     success: true,
