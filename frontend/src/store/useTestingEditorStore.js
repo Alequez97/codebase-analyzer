@@ -7,6 +7,7 @@ export const useTestingEditorStore = create(
       // State - using Map for better performance
       editedTestCasesById: new Map(), // Map<testId, testCases[]>
       editedMissingTestsByDomain: new Map(), // Map<domainId, { unit, integration, e2e }>
+      pendingEditedTestsByDomain: new Map(), // Map<domainId, testId[]>
       editingTestId: null, // Which test is currently being edited
       editingDomainId: null, // Which domain is being edited
 
@@ -59,6 +60,44 @@ export const useTestingEditorStore = create(
         get().setEditedMissingTests(domainId, updated);
       },
 
+      markPendingEditedTest: (domainId, testId) => {
+        if (!domainId || !testId) return;
+
+        set((state) => {
+          const newMap = new Map(state.pendingEditedTestsByDomain);
+          const current = newMap.get(domainId) || [];
+
+          if (!current.includes(testId)) {
+            newMap.set(domainId, [...current, testId]);
+          }
+
+          return { pendingEditedTestsByDomain: newMap };
+        });
+      },
+
+      clearPendingEditedTest: (domainId, testId) => {
+        if (!domainId || !testId) return;
+
+        set((state) => {
+          const newMap = new Map(state.pendingEditedTestsByDomain);
+          const current = newMap.get(domainId) || [];
+          const updated = current.filter((id) => id !== testId);
+
+          if (updated.length > 0) {
+            newMap.set(domainId, updated);
+          } else {
+            newMap.delete(domainId);
+          }
+
+          return { pendingEditedTestsByDomain: newMap };
+        });
+      },
+
+      hasPendingEditedTest: (domainId, testId) => {
+        const current = get().pendingEditedTestsByDomain.get(domainId) || [];
+        return current.includes(testId);
+      },
+
       setEditingTest: (testId, domainId) => {
         set({ editingTestId: testId, editingDomainId: domainId });
       },
@@ -71,6 +110,7 @@ export const useTestingEditorStore = create(
         set({
           editedTestCasesById: new Map(),
           editedMissingTestsByDomain: new Map(),
+          pendingEditedTestsByDomain: new Map(),
           editingTestId: null,
           editingDomainId: null,
         }),
@@ -94,6 +134,7 @@ export const useTestingEditorStore = create(
       partialize: (state) => ({
         editedTestCasesById: state.editedTestCasesById,
         editedMissingTestsByDomain: state.editedMissingTestsByDomain,
+        pendingEditedTestsByDomain: state.pendingEditedTestsByDomain,
         // Don't persist editing state (testId/domainId)
       }),
     },

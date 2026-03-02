@@ -35,6 +35,7 @@ export default function DomainTestingSection({
   applyLogs,
   onAnalyze,
   onApplyTest,
+  onApplyTestEdits,
   hasRequirements = false,
   showLogs = false,
   logs = "",
@@ -177,6 +178,7 @@ export default function DomainTestingSection({
                       applyingTests={applyingTests}
                       applyLogs={applyLogs}
                       onApplyTest={onApplyTest}
+                      onApplyTestEdits={onApplyTestEdits}
                     />
                   </Box>
                 </VStack>

@@ -23,6 +23,7 @@ export function MissingTestsSection({
   applyingTests,
   applyLogs,
   onApplyTest,
+  onApplyTestEdits,
   domainId,
 }) {
   const [expandedTests, setExpandedTests] = useState(new Set());
@@ -33,6 +34,8 @@ export function MissingTestsSection({
     setEditedMissingTests,
     getEditedMissingTests,
     updateTestInMissingTests,
+    markPendingEditedTest,
+    hasPendingEditedTest,
     setEditingTest,
     clearEditingTest,
   } = useTestingEditorStore();
@@ -55,8 +58,12 @@ export function MissingTestsSection({
     });
   };
 
-  const handleSaveTestCases = (updatedTest) => {
+  const handleSaveTestCases = (updatedTest, previousTest) => {
     updateTestInMissingTests(domainId, updatedTest);
+
+    if (previousTest?.actionStatus === TESTING_ACTION_STATUS.COMPLETED) {
+      markPendingEditedTest(domainId, updatedTest.id);
+    }
   };
 
   const hasTests =
@@ -157,6 +164,7 @@ export function MissingTestsSection({
               const isExpanded = expandedTests.has(test.id);
               const isApplied =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+              const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               return (
                 <Fragment key={test.id}>
                   <Table.Row
@@ -256,6 +264,20 @@ export function MissingTestsSection({
                             Apply
                           </Button>
                         )}
+                        {isApplied && hasPendingEdits && (
+                          <Button
+                            size="xs"
+                            colorPalette="yellow"
+                            variant="solid"
+                            disabled={!!applyingTests[test.id]}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApplyTestEdits?.(test.id);
+                            }}
+                          >
+                            Apply edits
+                          </Button>
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -267,7 +289,7 @@ export function MissingTestsSection({
                             ref={editorRef}
                             test={test}
                             onSave={(updatedTest) => {
-                              handleSaveTestCases(updatedTest);
+                              handleSaveTestCases(updatedTest, test);
                               clearEditingTest();
                             }}
                             onCancel={() => clearEditingTest()}
@@ -339,6 +361,7 @@ export function MissingTestsSection({
               const isExpanded = expandedTests.has(test.id);
               const isApplied =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+              const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               return (
                 <Fragment key={test.id}>
                   <Table.Row
@@ -438,6 +461,20 @@ export function MissingTestsSection({
                             Apply
                           </Button>
                         )}
+                        {isApplied && hasPendingEdits && (
+                          <Button
+                            size="xs"
+                            colorPalette="yellow"
+                            variant="solid"
+                            disabled={!!applyingTests[test.id]}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApplyTestEdits?.(test.id);
+                            }}
+                          >
+                            Apply edits
+                          </Button>
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -449,7 +486,7 @@ export function MissingTestsSection({
                             ref={editorRef}
                             test={test}
                             onSave={(updatedTest) => {
-                              handleSaveTestCases(updatedTest);
+                              handleSaveTestCases(updatedTest, test);
                               clearEditingTest();
                             }}
                             onCancel={() => clearEditingTest()}
@@ -521,6 +558,7 @@ export function MissingTestsSection({
               const isExpanded = expandedTests.has(test.id);
               const isApplied =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+              const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               return (
                 <Fragment key={test.id}>
                   <Table.Row
@@ -620,6 +658,20 @@ export function MissingTestsSection({
                             Apply
                           </Button>
                         )}
+                        {isApplied && hasPendingEdits && (
+                          <Button
+                            size="xs"
+                            colorPalette="yellow"
+                            variant="solid"
+                            disabled={!!applyingTests[test.id]}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApplyTestEdits?.(test.id);
+                            }}
+                          >
+                            Apply edits
+                          </Button>
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -631,7 +683,7 @@ export function MissingTestsSection({
                             ref={editorRef}
                             test={test}
                             onSave={(updatedTest) => {
-                              handleSaveTestCases(updatedTest);
+                              handleSaveTestCases(updatedTest, test);
                               clearEditingTest();
                             }}
                             onCancel={() => clearEditingTest()}

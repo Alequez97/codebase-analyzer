@@ -324,6 +324,15 @@ export default function DomainDetailsPage() {
     }
   };
 
+  const handleApplyTestEdits = async (_) => {
+    toaster.create({
+      title: "Apply edits is not implemented yet",
+      description:
+        "Frontend UX is ready. Backend support for updating existing generated tests will be added next.",
+      type: "error",
+    });
+  };
+
   // Get current chat configuration and content based on active section
   const getCurrentChatData = () => {
     if (!activeSectionType) return null;
@@ -574,6 +583,7 @@ export default function DomainDetailsPage() {
                 domain && testStore.analyze(domain, includeRequirements)
               }
               onApplyTest={handleApplyTest}
+              onApplyTestEdits={handleApplyTestEdits}
               showLogs={showDomainLogs}
               logs={testingLogs}
               logsLoading={testingLogsLoading}

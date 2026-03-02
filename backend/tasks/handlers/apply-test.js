@@ -110,6 +110,23 @@ export function applyTestHandler(task, taskLogger, agent) {
 
       if (task.params?.domainId && task.params?.testId) {
         try {
+          await domainTestingPersistence.upsertDomainExistingTest(
+            task.params.domainId,
+            {
+              file: task.params.testFile,
+              description: task.params.testDescription,
+              testType: task.params.testType,
+            },
+          );
+        } catch (error) {
+          taskLogger.error("Failed to update existing tests list", {
+            error,
+            component: "ApplyTest",
+            taskId: task.id,
+          });
+        }
+
+        try {
           await domainTestingPersistence.recordTestingApplyCompleted(
             task.params.domainId,
             {
