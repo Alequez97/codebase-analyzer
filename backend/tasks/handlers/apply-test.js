@@ -11,6 +11,14 @@ import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
  * Overrides post-processing to verify test file creation
  */
 export function applyTestHandler(task, taskLogger, agent) {
+  if (agent?.fileToolExecutor && task?.params?.testFile) {
+    agent.fileToolExecutor.setAllowedWritePaths([task.params.testFile]);
+    taskLogger.info("🔓 Enabled direct test file write path", {
+      component: "ApplyTest",
+      testFile: task.params.testFile,
+    });
+  }
+
   return {
     initialMessage:
       "Begin the test generation as specified in the instructions.",

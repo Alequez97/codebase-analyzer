@@ -66,7 +66,7 @@ export const FILE_TOOLS = [
   },
   {
     name: "write_file",
-    description: `Write content to a file in the ${ANALYSIS_OUTPUT_DIR} directory. REQUIRED to save your analysis output. The path must be relative to the project root and MUST start with '${ANALYSIS_OUTPUT_DIR}/'.`,
+    description: `Write content to a file. By default, only paths in '${ANALYSIS_OUTPUT_DIR}/' are writable. Some task instructions may explicitly allow additional exact target paths.`,
     parameters: {
       path: {
         type: "string",
@@ -89,6 +89,19 @@ export class FileToolExecutor {
   constructor(projectRoot) {
     this.projectRoot = projectRoot;
     this.maxFileSize = 500 * 1024; // 500KB limit per file
+    this.allowedWritePaths = new Set();
+  }
+
+  /**
+   * Allow writing to specific project-relative file paths.
+   * @param {string[]} paths - Project-relative paths that can be written
+   */
+  setAllowedWritePaths(paths) {
+    const normalizedPaths = (paths || [])
+      .filter((p) => typeof p === "string" && p.trim().length > 0)
+      .map((p) => p.replace(/\\/g, "/"));
+
+    this.allowedWritePaths = new Set(normalizedPaths);
   }
 
   /**
@@ -118,10 +131,12 @@ export class FileToolExecutor {
    */
   async writeFile(relativePath, content) {
     const normalizedPath = relativePath.replace(/\\/g, "/");
+    const isAnalysisPath = normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`);
+    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
 
-    // Security: ONLY allow writing to .code-analysis directory
-    if (!normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`)) {
-      return `Error: Can only write files to ${ANALYSIS_OUTPUT_DIR}/ directory for security reasons. Your path: ${relativePath}`;
+    // Security: by default only allow .code-analysis writes, with optional exact-path allowlist
+    if (!isAnalysisPath && !isExplicitlyAllowedPath) {
+      return `Error: Can only write files to ${ANALYSIS_OUTPUT_DIR}/ directory for security reasons, unless the path is explicitly allowed by the task. Your path: ${relativePath}`;
     }
 
     const fullPath = path.join(this.projectRoot, relativePath);

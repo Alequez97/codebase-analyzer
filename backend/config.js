@@ -117,14 +117,14 @@ const config = {
       agent: AGENTS.AIDER,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
-      maxIterations: 15,
+      maxIterations: 30,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_TEST]: {
       agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
-      maxIterations: 20,
+      maxIterations: 30,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
 
