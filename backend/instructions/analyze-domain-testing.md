@@ -233,6 +233,12 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to map req
 - Integration: API + DB/cache/service interactions and contracts.
 - E2E: critical user journeys and observable UI/system outcomes.
 
+6. **Integration test tooling conventions**
+
+- For backend HTTP integration tests, prefer `supertest` for endpoint-level assertions.
+- Do not rely on live external HTTP services in integration tests.
+- Prefer `nock` for mocking outbound HTTP interactions unless the codebase already has an established alternative.
+
 5. **Security tests must be explicit**
 
 - Include concrete attack vectors and expected rejection behavior (status code, error type/message, no privilege escalation).

@@ -78,6 +78,8 @@ Use `read_file` to read 1-2 example test files to understand:
 - How mocking is done
 - What assertion style is used
 
+Also read `package.json` (and workspace package files if relevant) to confirm available test dependencies before generating imports.
+
 ### Step 4: Generate the Test File
 
 Create a complete test file that:
@@ -130,6 +132,16 @@ This is MANDATORY - the task is not complete until you write the file.
    - Mock external dependencies (database, APIs, file system)
    - Mock timers if testing time-based logic
    - Provide mock data that's realistic
+
+## Integration Test Constraints (Strict)
+
+When `TEST_TYPE` is `integration` or the target file path is under `integration/`:
+
+1. Use `supertest` for HTTP endpoint testing (request/response assertions).
+2. Never call real external HTTP services in tests.
+3. Mock outbound HTTP requests with `nock` when available in project dependencies.
+4. If the project already uses a different HTTP-mocking library in existing tests, follow that existing convention consistently.
+5. Include setup/cleanup to prevent mock leakage between tests (for example `beforeEach`/`afterEach` cleanup).
 
 ## Testing Framework Examples
 
@@ -234,6 +246,8 @@ describe("POST /api/endpoint", () => {
 4. ✅ Include all necessary imports and setup
 5. ✅ Make the test runnable (it should work when `npm test` is run)
 6. ✅ Write the completed test file to `{{TEST_FILE}}` and exit
+7. ✅ For integration tests, use `supertest` and avoid real network calls
+8. ✅ Mock outbound HTTP interactions (prefer `nock` unless project conventions require another library)
 
 **MUST NOT DO**:
 
@@ -241,6 +255,7 @@ describe("POST /api/endpoint", () => {
 8. ❌ DO NOT ask for files - they are already provided
 9. ❌ DO NOT just describe what should be done - write the file
 10. ❌ DO NOT use Markdown code blocks in your response - write the actual file
+11. ❌ DO NOT make live HTTP calls to third-party services in tests
 
 ## Final Step
 
