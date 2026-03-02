@@ -138,10 +138,13 @@ This is MANDATORY - the task is not complete until you write the file.
 When `TEST_TYPE` is `integration` or the target file path is under `integration/`:
 
 1. Use `supertest` for HTTP endpoint testing (request/response assertions).
-2. Never call real external HTTP services in tests.
-3. Mock outbound HTTP requests with `nock` when available in project dependencies.
-4. If the project already uses a different HTTP-mocking library in existing tests, follow that existing convention consistently.
-5. Include setup/cleanup to prevent mock leakage between tests (for example `beforeEach`/`afterEach` cleanup).
+2. Prefer importing the existing exported application (for example `app`, `server`, or equivalent) instead of creating a new custom app/server harness in the test.
+3. Do not mount controllers directly onto a custom test app unless there is no exported app entry point available.
+4. If fallback local app setup is unavoidable, document it in a short comment and mirror production middleware/route wiring as closely as possible.
+5. Never call real external HTTP services in tests.
+6. Mock outbound HTTP requests with `nock` when available in project dependencies.
+7. If the project already uses a different HTTP-mocking library in existing tests, follow that existing convention consistently.
+8. Include setup/cleanup to prevent mock leakage between tests (for example `beforeEach`/`afterEach` cleanup).
 
 ## Testing Framework Examples
 
@@ -248,6 +251,7 @@ describe("POST /api/endpoint", () => {
 6. ✅ Write the completed test file to `{{TEST_FILE}}` and exit
 7. ✅ For integration tests, use `supertest` and avoid real network calls
 8. ✅ Mock outbound HTTP interactions (prefer `nock` unless project conventions require another library)
+9. ✅ For integration tests, use the real exported app wiring by default (not a hand-rolled test server harness)
 
 **MUST NOT DO**:
 
@@ -256,6 +260,7 @@ describe("POST /api/endpoint", () => {
 9. ❌ DO NOT just describe what should be done - write the file
 10. ❌ DO NOT use Markdown code blocks in your response - write the actual file
 11. ❌ DO NOT make live HTTP calls to third-party services in tests
+12. ❌ DO NOT default to creating a new custom test app/server harness in integration tests when an existing app export exists
 
 ## Final Step
 

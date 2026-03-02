@@ -236,6 +236,7 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to map req
 6. **Integration test tooling conventions**
 
 - For backend HTTP integration tests, prefer `supertest` for endpoint-level assertions.
+- Prefer tests that exercise the real exported backend app/router wiring; avoid controller-only harnesses as the default recommendation.
 - Do not rely on live external HTTP services in integration tests.
 - Prefer `nock` for mocking outbound HTTP interactions unless the codebase already has an established alternative.
 
