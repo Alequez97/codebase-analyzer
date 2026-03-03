@@ -108,7 +108,7 @@ const config = {
     },
     [TASK_TYPES.TESTING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 35,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -122,7 +122,7 @@ const config = {
     },
     [TASK_TYPES.APPLY_TEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 30,
       reasoningEffort: REASONING_EFFORT.MEDIUM,

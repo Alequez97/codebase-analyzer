@@ -63,6 +63,20 @@ Look for:
 5. **Integration Points** - API calls, database queries, external services
 6. **Error Handling** - Try-catch blocks, error checks
 
+## Model Schema Contract Rule (Mandatory)
+
+For every model that is instantiated (`Model.create(...)`) or queried (`Model.findOne(...)`, etc.) in the domain files:
+
+1. Follow the `require`/`import` to locate the model's schema file
+2. Read the schema and extract **all** of the following as P0 `validation` requirements:
+   - Fields with `required: true` or `required: [true, "message"]`
+   - Fields with custom `validate` functions
+   - Fields with `unique: true` constraints
+   - Fields with enum restrictions (`enum: [...]`)
+3. Document each constraint as a separate requirement with `source` pointing to the schema file and field
+
+This is not optional — missing a required field in a test fixture causes the entire test to fail before any application logic is exercised. These requirements are the contract that test fixture data must satisfy.
+
 ## Priority Levels
 
 - **P0**: Critical business logic, security, data integrity
