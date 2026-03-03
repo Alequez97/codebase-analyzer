@@ -285,6 +285,10 @@ export function buildApplyFixTemplateVariables(task) {
  */
 export function buildApplyTestTemplateVariables(task) {
   const { params } = task;
+  const scenarios = params.scenarios || params.testScenarios || [];
+  const scenarioTitles = scenarios
+    .map((item) => item?.scenario)
+    .filter((item) => typeof item === "string" && item.trim().length > 0);
 
   return {
     CODEBASE_PATH: params.targetDirectory || "",
@@ -293,7 +297,8 @@ export function buildApplyTestTemplateVariables(task) {
     TEST_FILE: params.testFile || "",
     TEST_TYPE: params.testType || "",
     TEST_DESCRIPTION: params.testDescription || "",
-    TEST_SCENARIOS: params.testScenarios || [],
+    TEST_SCENARIOS: scenarioTitles,
+    TEST_SCENARIOS_JSON: JSON.stringify(scenarios, null, 2),
     SOURCE_FILE: params.sourceFile || "",
   };
 }

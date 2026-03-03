@@ -1,6 +1,8 @@
 import express from "express";
 import * as domainTestingPersistence from "../../persistence/domain-testing.js";
 import * as taskFactory from "../../tasks/factory/index.js";
+import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
+import { TEST_TYPES } from "../../constants/test-types.js";
 import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
@@ -128,9 +130,18 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
 
     // Find the specific test recommendation
     const allTests = [
-      ...(testingData.missingTests?.unit || []),
-      ...(testingData.missingTests?.integration || []),
-      ...(testingData.missingTests?.e2e || []),
+      ...(testingData.missingTests?.unit || []).map((test) => ({
+        ...test,
+        testType: test.testType || TEST_TYPES.UNIT,
+      })),
+      ...(testingData.missingTests?.integration || []).map((test) => ({
+        ...test,
+        testType: test.testType || TEST_TYPES.INTEGRATION,
+      })),
+      ...(testingData.missingTests?.e2e || []).map((test) => ({
+        ...test,
+        testType: test.testType || TEST_TYPES.E2E,
+      })),
     ];
 
     const testRecommendation = allTests.find((t) => t.id === testId);
@@ -151,6 +162,13 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     );
 
     if (task?.success === false) {
+      if (task.code === TASK_ERROR_CODES.INVALID_INPUT) {
+        return res.status(400).json({
+          error: task.error || "Invalid test recommendation",
+          code: task.code,
+        });
+      }
+
       return res.status(500).json({
         error: task.error || "Failed to apply test",
         code: task.code,

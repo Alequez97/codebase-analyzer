@@ -32,10 +32,16 @@ Generate a complete, working test file based on the test recommendation. The tes
 - **Test Type**: `{{TEST_TYPE}}`
 - **Test Description**: `{{TEST_DESCRIPTION}}`
 - **Source File**: `{{SOURCE_FILE}}`
-- **Test Scenarios to Cover**:
+- **Scenario Titles**:
   {{#each TEST_SCENARIOS}}
   - {{this}}
     {{/each}}
+
+- **Detailed Test Cases (authoritative)**:
+
+```json
+{{TEST_SCENARIOS_JSON}}
+```
 
 ## Task Workflow
 
@@ -85,7 +91,7 @@ Also read `package.json` (and workspace package files if relevant) to confirm av
 Create a complete test file that:
 
 - Follows the same framework and patterns as the examples
-- Covers ALL scenarios listed in `TEST_SCENARIOS` above
+- Covers ALL scenarios and checks from `TEST_SCENARIOS_JSON` above
 - Uses proper AAA pattern (Arrange, Act, Assert)
 - Includes all necessary imports
 - Is ready to run with `npm test`
@@ -119,9 +125,10 @@ This is MANDATORY - the task is not complete until you write the file.
    - For tests that throw errors, use `// Act & Assert` when the act and assert are combined
 
 3. **Test Scenarios**
-   - Cover ALL scenarios listed above in `TEST_SCENARIOS`
-   - Add additional edge cases that make sense
-   - Test both success and failure paths
+
+- Cover ALL scenarios and checks listed in `TEST_SCENARIOS_JSON`
+  - Add additional edge cases that make sense
+  - Test both success and failure paths
 
 4. **Assertions**
    - Use appropriate matchers (toBe, toEqual, toThrow, etc.)

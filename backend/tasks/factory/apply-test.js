@@ -2,8 +2,10 @@ import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
+import { SUPPORTED_TEST_TYPES } from "../../constants/test-types.js";
 import { generateTaskId } from "../utils.js";
 import * as logger from "../../utils/logger.js";
 
@@ -47,6 +49,21 @@ export async function createApplyTestTask(
     testType: testRecommendation.testType,
   });
 
+  const scenarios =
+    testRecommendation.scenarios || testRecommendation.testScenarios || [];
+  const testType =
+    typeof testRecommendation.testType === "string"
+      ? testRecommendation.testType.trim().toLowerCase()
+      : "";
+
+  if (!SUPPORTED_TEST_TYPES.includes(testType)) {
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.INVALID_INPUT,
+      error: `Invalid test recommendation: missing or unsupported testType. Expected one of: ${SUPPORTED_TEST_TYPES.join(", ")}.`,
+    };
+  }
+
   // Build parameters for template replacement
   // The LLM agent will use read_file and list_directory tools to discover files autonomously
   const params = {
@@ -54,9 +71,10 @@ export async function createApplyTestTask(
     targetDirectory: config.target.directory,
     testId: testRecommendation.id,
     testFile: testFile,
-    testType: testRecommendation.testType || "unit",
+    testType,
     testDescription: testRecommendation.description || "",
-    testScenarios: testRecommendation.testScenarios || [],
+    scenarios,
+    testScenarios: scenarios,
     sourceFile: sourceFile,
     priority: testRecommendation.priority || "P2",
     category: testRecommendation.category || "unknown",
