@@ -49,8 +49,7 @@ export async function createApplyTestTask(
     testType: testRecommendation.testType,
   });
 
-  const scenarios =
-    testRecommendation.scenarios || testRecommendation.testScenarios || [];
+  const scenarios = testRecommendation.scenarios || [];
   const testType =
     typeof testRecommendation.testType === "string"
       ? testRecommendation.testType.trim().toLowerCase()
@@ -74,7 +73,6 @@ export async function createApplyTestTask(
     testType,
     testDescription: testRecommendation.description || "",
     scenarios,
-    testScenarios: scenarios,
     sourceFile: sourceFile,
     priority: testRecommendation.priority || "P2",
     category: testRecommendation.category || "unknown",

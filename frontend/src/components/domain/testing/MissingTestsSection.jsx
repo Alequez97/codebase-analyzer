@@ -221,7 +221,7 @@ export function MissingTestsSection({
 
       {/* Table */}
       <Box borderWidth="1px" borderRadius="lg" overflow="hidden" bg="white">
-        <Table.Root size="sm" variant="outline" striped>
+        <Table.Root size="sm" variant="outline">
           <Table.Header>
             <Table.Row bg="gray.50">
               <Table.ColumnHeader width="40px"></Table.ColumnHeader>
@@ -245,14 +245,11 @@ export function MissingTestsSection({
               return (
                 <Fragment key={test.id}>
                   <Table.Row
-                    bg={
-                      test.priority === "P0"
-                        ? "red.50"
-                        : test.priority === "P1"
-                          ? "orange.50"
-                          : undefined
-                    }
-                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    bg={isApplied ? "green.50" : "gray.50"}
+                    _hover={{
+                      bg: isApplied ? "green.100" : "gray.100",
+                      cursor: "pointer",
+                    }}
                     onClick={() => toggleExpand(test.id)}
                   >
                     <Table.Cell>
@@ -414,14 +411,11 @@ export function MissingTestsSection({
               return (
                 <Fragment key={test.id}>
                   <Table.Row
-                    bg={
-                      test.priority === "P0"
-                        ? "red.50"
-                        : test.priority === "P1"
-                          ? "orange.50"
-                          : undefined
-                    }
-                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    bg={isApplied ? "green.50" : "gray.50"}
+                    _hover={{
+                      bg: isApplied ? "green.100" : "gray.100",
+                      cursor: "pointer",
+                    }}
                     onClick={() => toggleExpand(test.id)}
                   >
                     <Table.Cell>
@@ -583,14 +577,11 @@ export function MissingTestsSection({
               return (
                 <Fragment key={test.id}>
                   <Table.Row
-                    bg={
-                      test.priority === "P0"
-                        ? "red.50"
-                        : test.priority === "P1"
-                          ? "orange.50"
-                          : undefined
-                    }
-                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                    bg={isApplied ? "green.50" : "gray.50"}
+                    _hover={{
+                      bg: isApplied ? "green.100" : "gray.100",
+                      cursor: "pointer",
+                    }}
                     onClick={() => toggleExpand(test.id)}
                   >
                     <Table.Cell>

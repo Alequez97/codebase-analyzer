@@ -285,7 +285,7 @@ export function buildApplyFixTemplateVariables(task) {
  */
 export function buildApplyTestTemplateVariables(task) {
   const { params } = task;
-  const scenarios = params.scenarios || params.testScenarios || [];
+  const scenarios = params.scenarios || [];
   const scenarioTitles = scenarios
     .map((item) => item?.scenario)
     .filter((item) => typeof item === "string" && item.trim().length > 0);
