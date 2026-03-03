@@ -85,7 +85,19 @@ Use `read_file` to read 1-2 example test files to understand:
 - How mocking is done
 - What assertion style is used
 
-Also read `package.json` (and workspace package files if relevant) to confirm available test dependencies before generating imports.
+Also read `package.json` (and workspace package files if relevant) to:
+
+- Confirm which test framework and assertion libraries are available
+- Check whether required packages for the test type are present (e.g. `mongodb-memory-server`, `supertest`, `nock` for integration tests)
+
+### Step 3b: Install Missing Dependencies
+
+If `package.json` is missing required packages for your test, install them before writing the test:
+
+- Use `execute_command` with e.g. `npm install mongodb-memory-server --save-dev` or `npm install supertest --save-dev`
+- If `package.json` has no `test` script, add one with `npm pkg set scripts.test="jest"` (or the appropriate runner)
+- Only install packages that are genuinely absent from `package.json` — do not reinstall what is already there
+- If `node_modules` does not exist at all, run `npm install` first
 
 ### Step 4: Generate the Test File
 
@@ -170,18 +182,16 @@ If the tests FAIL:
    - Mock timers if testing time-based logic
    - Provide mock data that's realistic
 
-## Integration Test Constraints (Strict)
+## Integration Test Constraints
 
 When `TEST_TYPE` is `integration` or the target file path is under `integration/`:
 
-1. Use `supertest` for HTTP endpoint testing (request/response assertions).
-2. Prefer importing the existing exported application (for example `app`, `server`, or equivalent) instead of creating a new custom app/server harness in the test.
-3. Do not mount controllers directly onto a custom test app unless there is no exported app entry point available.
-4. If fallback local app setup is unavoidable, document it in a short comment and mirror production middleware/route wiring as closely as possible.
-5. Never call real external HTTP services in tests.
-6. Mock outbound HTTP requests with `nock` when available in project dependencies.
-7. If the project already uses a different HTTP-mocking library in existing tests, follow that existing convention consistently.
-8. Include setup/cleanup to prevent mock leakage between tests (for example `beforeEach`/`afterEach` cleanup).
+1. Use a real database — if the project uses MongoDB, spin up `mongodb-memory-server` for the test suite and seed required data in `beforeEach`/`afterAll`
+2. Use the real exported app (e.g. `app`, `server`) with `supertest` for HTTP assertions — do not replace it with a hand-rolled test harness
+3. Use real middleware (auth, validation, etc.) — generate valid tokens/sessions as needed instead of mocking middleware
+4. Only stub genuine external I/O boundaries that cannot be run locally: third-party HTTP APIs (mock with `nock`), cloud storage (e.g. AWS S3), email/SMS services
+5. Clean up database state after each test to keep tests isolated
+6. Follow any existing integration test conventions already present in the project
 
 ## Testing Framework Examples
 
@@ -231,16 +241,30 @@ describe("functionToTest", () => {
 });
 ```
 
-### For Integration Tests
+### For Integration Tests (MongoDB + supertest)
 
 ```javascript
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
 import request from "supertest";
 import app from "../../app";
-import db from "../../db";
+import User from "../../models/user";
+
+let mongod;
+
+beforeAll(async () => {
+  mongod = await MongoMemoryServer.create();
+  await mongoose.connect(mongod.getUri());
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongod.stop();
+});
 
 describe("POST /api/endpoint", () => {
   beforeEach(async () => {
-    await db.clearTestData();
+    await mongoose.connection.dropDatabase();
   });
 
   test("should create resource with valid data", async () => {
@@ -254,52 +278,23 @@ describe("POST /api/endpoint", () => {
       .expect(201);
 
     // Assert
-    expect(response.body).toMatchObject({
-      name: "Test",
-      value: 123,
-    });
-  });
-
-  test("should return 400 when data is invalid", async () => {
-    // Arrange
-    const invalidData = { invalidField: "value" };
-
-    // Act
-    const response = await request(app)
-      .post("/api/endpoint")
-      .send(invalidData)
-      .expect(400);
-
-    // Assert
-    expect(response.body.error).toBeDefined();
+    expect(response.body).toMatchObject({ name: "Test", value: 123 });
+    const saved = await MyModel.findById(response.body._id);
+    expect(saved).not.toBeNull();
   });
 });
 ```
 
-## CRITICAL REQUIREMENTS
+## Critical Requirements
 
-**MUST DO**:
-
-1. ✅ Follow AAA pattern with `// Arrange`, `// Act`, `// Assert` comments in EVERY test
-2. ✅ Cover ALL scenarios listed in `TEST_SCENARIOS`
-3. ✅ Follow the same testing framework and patterns as the example test files
-4. ✅ Include all necessary imports and setup
-5. ✅ Write the completed test file to `{{TEST_FILE}}` using `write_file`
-6. ✅ **Run the test file** with `execute_command` after writing it — tests MUST pass before you finish
-7. ✅ **Fix and re-run** if tests fail (up to 3 times) before declaring the task complete
-8. ✅ For integration tests, use `supertest` and avoid real network calls
-9. ✅ Mock outbound HTTP interactions (prefer `nock` unless project conventions require another library)
-10. ✅ For integration tests, use the real exported app wiring by default (not a hand-rolled test server harness)
-
-**MUST NOT DO**:
-
-7. ❌ DO NOT ask questions or wait for input
-8. ❌ DO NOT ask for files - they are already provided
-9. ❌ DO NOT just describe what should be done - write the file
-10. ❌ DO NOT use Markdown code blocks in your response - write the actual file
-11. ❌ DO NOT make live HTTP calls to third-party services in tests
-12. ❌ DO NOT default to creating a new custom test app/server harness in integration tests when an existing app export exists
-13. ❌ DO NOT declare the task complete if the tests are still failing
+1. Follow the AAA pattern with `// Arrange`, `// Act`, `// Assert` comments in every test
+2. Cover all scenarios listed in `TEST_SCENARIOS`
+3. Match the testing framework and patterns found in the existing test files
+4. Include all necessary imports and setup
+5. Write the file content directly using `write_file` — no prose descriptions, no markdown code blocks
+6. Run the test with `execute_command` after writing — the task is only complete when tests pass
+7. Fix and re-run if tests fail (up to 3 iterations)
+8. For integration tests: use the real database (spin up `mongodb-memory-server` if the project uses MongoDB — install it first if absent), use the real exported app, and use `supertest` for HTTP assertions — do not mock the database layer or application models
 
 ## Final Step
 

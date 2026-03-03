@@ -13,9 +13,19 @@ const MAX_OUTPUT_LENGTH = 8_000;
 
 /**
  * Prefixes of commands that are safe to execute.
- * Only test-runner-style commands are permitted.
+ * Includes test-runner commands and package installation commands.
  */
 const SAFE_COMMAND_PREFIXES = [
+  // Package configuration
+  "npm pkg set",
+  // Package installation
+  "npm install",
+  "npm ci",
+  "yarn install",
+  "yarn add",
+  "pnpm install",
+  "pnpm add",
+  // Test runners
   "npm test",
   "npm run test",
   "npx jest",
@@ -29,6 +39,8 @@ const SAFE_COMMAND_PREFIXES = [
   "pytest",
   "python -m pytest",
   "python3 -m pytest",
+  "pip install",
+  "pip3 install",
   "go test",
   "cargo test",
   "dotnet test",
@@ -36,8 +48,10 @@ const SAFE_COMMAND_PREFIXES = [
   "gradle test",
   "rake test",
   "bundle exec rspec",
+  "bundle install",
   "php artisan test",
   "vendor/bin/phpunit",
+  "composer install",
 ];
 
 /**
@@ -47,7 +61,7 @@ export const COMMAND_TOOLS = [
   {
     name: "execute_command",
     description:
-      "Execute a test command in the project root directory. Use this AFTER writing a test file to verify the tests pass. Only test-runner commands are allowed (e.g., 'npm test', 'npx jest path/to/test.js', 'pytest tests/test_foo.py'). Do NOT use this for arbitrary shell commands.",
+      "Execute a command in the project root directory. Use this to install missing test dependencies (e.g., 'npm install mongodb-memory-server --save-dev'), configure package.json scripts (e.g., 'npm pkg set scripts.test=jest'), or run tests after writing a test file (e.g., 'npx jest path/to/test.js'). Only installation, configuration, and test-runner commands are allowed.",
     parameters: {
       command: {
         type: "string",
