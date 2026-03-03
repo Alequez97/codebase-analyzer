@@ -189,4 +189,16 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
   }
 });
 
+/**
+ * Apply edits to an already applied test
+ * Placeholder endpoint for future file replacement workflow
+ */
+router.post("/:id/tests/:testId/edit", async (_, res) => {
+  res.status(501).json({
+    error: "Not implemented",
+    message:
+      "Editing generated tests is not implemented yet. This endpoint will use file replacement tooling in a future update.",
+  });
+});
+
 export default router;

@@ -17,3 +17,6 @@ export const analyzeDomainTesting = (
 
 export const applyTest = (domainId, testId) =>
   client.post(`/analysis/domain/${domainId}/tests/${testId}/apply`);
+
+export const applyTestEdits = (domainId, testId) =>
+  client.post(`/analysis/domain/${domainId}/tests/${testId}/edit`);

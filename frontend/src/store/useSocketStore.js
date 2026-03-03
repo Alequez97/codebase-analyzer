@@ -13,7 +13,7 @@ import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
 import { useDomainSectionsChatStore } from "./useDomainSectionsChatStore";
-import { useTestingStore } from "./useTestingStore";
+import { useApplyTestStore } from "./useApplyTestStore";
 
 const SOCKET_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
@@ -98,7 +98,7 @@ export const useSocketStore = create((set, get) => ({
         useDomainTestingStore.getState().setLoading(domainId, false);
         await useDomainTestingStore.getState().fetch(domainId);
       } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
-        await useTestingStore
+        await useApplyTestStore
           .getState()
           .completeApplyByTaskId(domainId, data.taskId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
@@ -181,7 +181,7 @@ export const useSocketStore = create((set, get) => ({
         store.setLoading(domainId, false);
         store.setError(domainId, error || "Testing analysis failed");
       } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
-        useTestingStore.getState().failApplyByTaskId(domainId, data.taskId);
+        useApplyTestStore.getState().failApplyByTaskId(domainId, data.taskId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
@@ -202,7 +202,7 @@ export const useSocketStore = create((set, get) => ({
         }
 
         if (type === TASK_TYPES.APPLY_TEST && taskId) {
-          useTestingStore
+          useApplyTestStore
             .getState()
             .appendApplyLogByTaskId(domainId, taskId, log);
         }

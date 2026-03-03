@@ -40,8 +40,42 @@ export function MissingTestsSection({
     clearEditingTest,
   } = useTestingEditorStore();
 
+  const mergeActionStatusFromSource = (edited, source) => {
+    if (!edited) return source;
+
+    const sourceById = new Map();
+    ["unit", "integration", "e2e"].forEach((type) => {
+      (source?.[type] || []).forEach((test) => {
+        sourceById.set(test.id, test);
+      });
+    });
+
+    const mergeList = (tests = []) =>
+      tests.map((test) => {
+        const sourceTest = sourceById.get(test.id);
+        if (!sourceTest) return test;
+
+        return {
+          ...test,
+          actionStatus: sourceTest.actionStatus || null,
+          actionHistory: sourceTest.actionHistory || [],
+          suggestedTestFile:
+            sourceTest.suggestedTestFile || test.suggestedTestFile,
+        };
+      });
+
+    return {
+      unit: mergeList(edited.unit || []),
+      integration: mergeList(edited.integration || []),
+      e2e: mergeList(edited.e2e || []),
+    };
+  };
+
   // Initialize store with missing tests if not already set
-  const editedMissingTests = getEditedMissingTests(domainId) || missingTests;
+  const editedMissingTests = mergeActionStatusFromSource(
+    getEditedMissingTests(domainId),
+    missingTests,
+  );
   if (!getEditedMissingTests(domainId)) {
     setEditedMissingTests(domainId, missingTests);
   }
@@ -64,6 +98,49 @@ export function MissingTestsSection({
     if (previousTest?.actionStatus === TESTING_ACTION_STATUS.COMPLETED) {
       markPendingEditedTest(domainId, updatedTest.id);
     }
+  };
+
+  const renderActionButton = (test, isApplied, hasPendingEdits) => {
+    if (isApplied && hasPendingEdits) {
+      return (
+        <Button
+          size="xs"
+          colorPalette="yellow"
+          variant="solid"
+          disabled={!!applyingTests[test.id]}
+          onClick={(e) => {
+            e.stopPropagation();
+            onApplyTestEdits?.(test.id);
+          }}
+        >
+          Apply edits
+        </Button>
+      );
+    }
+
+    if (isApplied) {
+      return (
+        <Button size="xs" colorPalette="green" variant="subtle" disabled>
+          Applied
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        size="xs"
+        colorPalette="green"
+        onClick={(e) => {
+          e.stopPropagation();
+          onApplyTest(test.id);
+        }}
+        loading={!!applyingTests[test.id]}
+        loadingText="Applying"
+      >
+        <Check size={12} />
+        Apply
+      </Button>
+    );
   };
 
   const hasTests =
@@ -249,35 +326,7 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {!isApplied && (
-                          <Button
-                            size="xs"
-                            colorPalette="green"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApplyTest(test.id);
-                            }}
-                            loading={!!applyingTests[test.id]}
-                            loadingText="Applying"
-                          >
-                            <Check size={12} />
-                            Apply
-                          </Button>
-                        )}
-                        {isApplied && hasPendingEdits && (
-                          <Button
-                            size="xs"
-                            colorPalette="yellow"
-                            variant="solid"
-                            disabled={!!applyingTests[test.id]}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApplyTestEdits?.(test.id);
-                            }}
-                          >
-                            Apply edits
-                          </Button>
-                        )}
+                        {renderActionButton(test, isApplied, hasPendingEdits)}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -446,35 +495,7 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {!isApplied && (
-                          <Button
-                            size="xs"
-                            colorPalette="green"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApplyTest(test.id);
-                            }}
-                            loading={!!applyingTests[test.id]}
-                            loadingText="Applying"
-                          >
-                            <Check size={12} />
-                            Apply
-                          </Button>
-                        )}
-                        {isApplied && hasPendingEdits && (
-                          <Button
-                            size="xs"
-                            colorPalette="yellow"
-                            variant="solid"
-                            disabled={!!applyingTests[test.id]}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApplyTestEdits?.(test.id);
-                            }}
-                          >
-                            Apply edits
-                          </Button>
-                        )}
+                        {renderActionButton(test, isApplied, hasPendingEdits)}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -643,35 +664,7 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {!isApplied && (
-                          <Button
-                            size="xs"
-                            colorPalette="green"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApplyTest(test.id);
-                            }}
-                            loading={!!applyingTests[test.id]}
-                            loadingText="Applying"
-                          >
-                            <Check size={12} />
-                            Apply
-                          </Button>
-                        )}
-                        {isApplied && hasPendingEdits && (
-                          <Button
-                            size="xs"
-                            colorPalette="yellow"
-                            variant="solid"
-                            disabled={!!applyingTests[test.id]}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApplyTestEdits?.(test.id);
-                            }}
-                          >
-                            Apply edits
-                          </Button>
-                        )}
+                        {renderActionButton(test, isApplied, hasPendingEdits)}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>

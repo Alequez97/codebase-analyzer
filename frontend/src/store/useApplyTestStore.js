@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import api from "../api";
 import { useDomainTestingStore } from "./useDomainTestingStore";
+import { useTestingEditorStore } from "./useTestingEditorStore";
 
-export const useTestingStore = create((set, _) => ({
+export const useApplyTestStore = create((set, _) => ({
   // State
   applyingTestsByDomainId: {},
   applyTaskIdsByDomainId: {},
+  applyTaskMetaByDomainId: {},
   applyLogsByDomainId: {},
 
   // Actions
@@ -27,6 +29,7 @@ export const useTestingStore = create((set, _) => ({
     try {
       const response = await api.applyTest(domainId, testId);
       const taskId = response.data?.task?.id;
+      const taskParams = response.data?.task?.params || null;
       const message = response.data?.message || "Test application task created";
 
       set((state) => ({
@@ -37,6 +40,17 @@ export const useTestingStore = create((set, _) => ({
             [testId]: taskId,
           },
         },
+        ...(taskId
+          ? {
+              applyTaskMetaByDomainId: {
+                ...state.applyTaskMetaByDomainId,
+                [domainId]: {
+                  ...(state.applyTaskMetaByDomainId[domainId] || {}),
+                  [taskId]: taskParams,
+                },
+              },
+            }
+          : {}),
         applyLogsByDomainId: {
           ...state.applyLogsByDomainId,
           [domainId]: {
@@ -60,6 +74,24 @@ export const useTestingStore = create((set, _) => ({
         },
       }));
 
+      return { success: false, error: message };
+    }
+  },
+
+  applyTestEdits: async (domainId, testId) => {
+    if (!domainId || !testId) {
+      return { success: false, error: "Invalid parameters" };
+    }
+
+    try {
+      const response = await api.applyTestEdits(domainId, testId);
+      return {
+        success: true,
+        message: response?.data?.message || "Test edits task created",
+      };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Failed to apply test edits";
       return { success: false, error: message };
     }
   },
@@ -104,6 +136,27 @@ export const useTestingStore = create((set, _) => ({
       };
     });
 
+    const storeState = useApplyTestStore.getState();
+    const taskMeta = storeState.applyTaskMetaByDomainId[domainId]?.[taskId];
+
+    if (taskMeta?.testId) {
+      useDomainTestingStore.getState().syncTestApplied(domainId, {
+        testId: taskMeta.testId,
+        taskId,
+        testFile: taskMeta.testFile,
+        testType: taskMeta.testType,
+        testDescription: taskMeta.testDescription,
+      });
+      useTestingEditorStore
+        .getState()
+        .clearPendingEditedTest(domainId, taskMeta.testId);
+      useTestingEditorStore.getState().updateTestInMissingTests(domainId, {
+        id: taskMeta.testId,
+        actionStatus: "completed",
+      });
+      return;
+    }
+
     await useDomainTestingStore.getState().fetch(domainId, true);
   },
 
@@ -131,6 +184,7 @@ export const useTestingStore = create((set, _) => ({
     set({
       applyingTestsByDomainId: {},
       applyTaskIdsByDomainId: {},
+      applyTaskMetaByDomainId: {},
       applyLogsByDomainId: {},
     }),
 }));

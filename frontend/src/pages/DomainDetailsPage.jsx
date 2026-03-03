@@ -21,7 +21,7 @@ import { useDomainBugsSecurityStore } from "../store/useDomainBugsSecurityStore"
 import { useDomainTestingStore } from "../store/useDomainTestingStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
-import { useTestingStore } from "../store/useTestingStore";
+import { useApplyTestStore } from "../store/useApplyTestStore";
 import { useLogsStore } from "../store/useLogsStore";
 import { useDomainSectionsChatStore } from "../store/useDomainSectionsChatStore";
 import {
@@ -78,8 +78,12 @@ export default function DomainDetailsPage() {
   } = useDomainEditorStore();
 
   // Testing store
-  const { applyingTestsByDomainId, applyLogsByDomainId, applyTest } =
-    useTestingStore();
+  const {
+    applyingTestsByDomainId,
+    applyLogsByDomainId,
+    applyTest,
+    applyTestEdits,
+  } = useApplyTestStore();
 
   // Logs store
   const {
@@ -324,11 +328,20 @@ export default function DomainDetailsPage() {
     }
   };
 
-  const handleApplyTestEdits = async (_) => {
+  const handleApplyTestEdits = async (testId) => {
+    const result = await applyTestEdits(domainId, testId);
+
+    if (result.success) {
+      toaster.create({
+        title: result.message || "Test edits task created",
+        type: "success",
+      });
+      return;
+    }
+
     toaster.create({
-      title: "Apply edits is not implemented yet",
-      description:
-        "Frontend UX is ready. Backend support for updating existing generated tests will be added next.",
+      title: "Failed to apply test edits",
+      description: result.error,
       type: "error",
     });
   };
