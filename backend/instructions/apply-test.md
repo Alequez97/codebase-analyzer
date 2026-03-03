@@ -4,7 +4,7 @@
 
 **DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. COMPLETE THE TASK AND EXIT.**
 
-Your ONLY job is to generate and write the missing test file based on the test recommendation.
+Your job is to generate the missing test file, write it, **run it to verify it passes**, and fix any failures before finishing.
 
 ## Available Tools
 
@@ -13,6 +13,7 @@ You have access to these tools:
 - **`read_file`**: Read file contents (use this to examine source files and example tests)
 - **`list_directory`**: List directory contents (use to find test files)
 - **`write_file`**: Write the generated test file (REQUIRED - use this to save the test)
+- **`execute_command`**: Run the test suite to validate your test file passes (REQUIRED - must be used after writing the test)
 
 ## Objective
 
@@ -20,7 +21,7 @@ Generate a complete, working test file based on the test recommendation. The tes
 
 1. **Follow project testing conventions** - Use the same testing framework and patterns as existing tests
 2. **Be comprehensive** - Cover all scenarios listed in the test recommendation
-3. **Be runnable** - Include all necessary imports, setup, and teardown
+3. **Be runnable and passing** - Include all necessary imports, setup, and teardown; confirmed by running `execute_command`
 4. **Follow best practices** - Use proper assertions, mocking, and test structure
 
 ## Target Information
@@ -101,6 +102,35 @@ Create a complete test file that:
 **CRITICAL**: Use `write_file` to save the generated test to: **`{{TEST_FILE}}`**
 
 This is MANDATORY - the task is not complete until you write the file.
+
+### Step 6: Run the Tests
+
+After writing the file, use `execute_command` to run the test and verify it passes.
+
+Choose the most targeted command that exercises only your new test file, for example:
+
+- **Jest / Vitest**: `npx jest {{TEST_FILE}} --no-coverage` or `npx vitest run {{TEST_FILE}}`
+- **Mocha**: `npx mocha {{TEST_FILE}}`
+- **Pytest**: `pytest {{TEST_FILE}}`
+- If you are unsure of the runner, check `package.json` → `scripts.test` and adapt accordingly.
+
+**If the tests PASS** (exit code 0): the task is complete — stop here.
+
+### Step 7: Fix Failures and Re-run
+
+If the tests FAIL:
+
+1. Read the error output carefully — identify the root cause (import path wrong, wrong assertion, missing mock, etc.)
+2. Use `write_file` to overwrite `{{TEST_FILE}}` with the corrected test code
+3. Use `execute_command` again to re-run the tests
+4. Repeat until all tests pass or you have exhausted reasonable fixes (max 3 fix iterations)
+
+**Common failure causes**:
+
+- Wrong import path → check the source file's actual location with `list_directory`
+- Missing dependency → read `package.json` and adjust mocking strategy
+- Incorrect mock → read the source file again to understand the actual API shape
+- Wrong assertion value → run the code mentally and adjust the expectation
 
 ### What to Include in the Generated Test
 
@@ -254,11 +284,12 @@ describe("POST /api/endpoint", () => {
 2. ✅ Cover ALL scenarios listed in `TEST_SCENARIOS`
 3. ✅ Follow the same testing framework and patterns as the example test files
 4. ✅ Include all necessary imports and setup
-5. ✅ Make the test runnable (it should work when `npm test` is run)
-6. ✅ Write the completed test file to `{{TEST_FILE}}` and exit
-7. ✅ For integration tests, use `supertest` and avoid real network calls
-8. ✅ Mock outbound HTTP interactions (prefer `nock` unless project conventions require another library)
-9. ✅ For integration tests, use the real exported app wiring by default (not a hand-rolled test server harness)
+5. ✅ Write the completed test file to `{{TEST_FILE}}` using `write_file`
+6. ✅ **Run the test file** with `execute_command` after writing it — tests MUST pass before you finish
+7. ✅ **Fix and re-run** if tests fail (up to 3 times) before declaring the task complete
+8. ✅ For integration tests, use `supertest` and avoid real network calls
+9. ✅ Mock outbound HTTP interactions (prefer `nock` unless project conventions require another library)
+10. ✅ For integration tests, use the real exported app wiring by default (not a hand-rolled test server harness)
 
 **MUST NOT DO**:
 
@@ -268,11 +299,13 @@ describe("POST /api/endpoint", () => {
 10. ❌ DO NOT use Markdown code blocks in your response - write the actual file
 11. ❌ DO NOT make live HTTP calls to third-party services in tests
 12. ❌ DO NOT default to creating a new custom test app/server harness in integration tests when an existing app export exists
+13. ❌ DO NOT declare the task complete if the tests are still failing
 
 ## Final Step
 
-**IMMEDIATELY write the test file to `{{TEST_FILE}}` using the `write_file` tool and exit.**
-
-The file path is: **`{{TEST_FILE}}`**
+1. Write the test file to **`{{TEST_FILE}}`** using `write_file`
+2. Run it with `execute_command` (e.g. `npx jest {{TEST_FILE}} --no-coverage`)
+3. If it passes — you are done. Stop.
+4. If it fails — read the error, fix the file, re-run. Repeat up to 3 times.
 
 Generate the complete, runnable test code and write it now.

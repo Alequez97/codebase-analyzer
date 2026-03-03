@@ -1,4 +1,5 @@
 import { FileToolExecutor, FILE_TOOLS } from "./tools/file-tools.js";
+import { CommandToolExecutor, COMMAND_TOOLS } from "./tools/command-tools.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 
@@ -27,7 +28,37 @@ export class LLMAgent {
     this.maxIterations = options.maxIterations || 30;
     this.maxTokens = options.maxTokens || client.config?.maxTokens || 4096;
     this.fileToolExecutor = new FileToolExecutor(this.workingDirectory);
+    this.commandToolExecutor = null; // Enabled per-task via enableCommandTools()
     this.conversationLog = [];
+  }
+
+  /**
+   * Enable command execution tools for this agent session.
+   * Must be called before run() to take effect.
+   *
+   * @param {Object} [options]
+   * @param {number} [options.timeoutMs] - Command timeout in ms (default: 30 000)
+   * @param {string[]} [options.additionalAllowedPrefixes] - Extra safe command prefixes
+   */
+  enableCommandTools(options = {}) {
+    this.commandToolExecutor = new CommandToolExecutor(
+      this.workingDirectory,
+      options,
+    );
+    logger.info("Command tools enabled for agent session", {
+      component: "LLMAgent",
+      timeoutMs: options.timeoutMs,
+    });
+  }
+
+  /**
+   * Get the full list of tools available in this session
+   * @private
+   */
+  _getAvailableTools() {
+    return this.commandToolExecutor
+      ? [...FILE_TOOLS, ...COMMAND_TOOLS]
+      : FILE_TOOLS;
   }
 
   /**
@@ -96,7 +127,7 @@ export class LLMAgent {
 
       // Send message to LLM
       const response = await this.client.sendMessage(this.state.getMessages(), {
-        tools: FILE_TOOLS,
+        tools: this._getAvailableTools(),
         maxTokens: this.maxTokens,
       });
 
@@ -254,6 +285,8 @@ export class LLMAgent {
         toolDescription = `Listing directory ${filePath}`;
       } else if (toolCall.name === "write_file") {
         toolDescription = `Writing ${filePath}`;
+      } else if (toolCall.name === "execute_command") {
+        toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
       }
 
       logger.debug(`Executing tool: ${toolDescription}`, {
@@ -269,7 +302,15 @@ export class LLMAgent {
       });
 
       try {
-        const result = await this.fileToolExecutor.executeTool(
+        // Route to the appropriate executor based on tool name
+        const isCommandTool =
+          this.commandToolExecutor &&
+          COMMAND_TOOLS.some((t) => t.name === toolCall.name);
+        const executor = isCommandTool
+          ? this.commandToolExecutor
+          : this.fileToolExecutor;
+
+        const result = await executor.executeTool(
           toolCall.name,
           toolCall.arguments,
         );

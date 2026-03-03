@@ -7,7 +7,7 @@ import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
  * Handler for apply-test task
- * Generates a new test file based on recommendations
+ * Generates a new test file based on recommendations, then validates it runs without failures
  * Overrides post-processing to verify test file creation
  */
 export function applyTestHandler(task, taskLogger, agent) {
@@ -16,6 +16,13 @@ export function applyTestHandler(task, taskLogger, agent) {
     taskLogger.info("🔓 Enabled direct test file write path", {
       component: "ApplyTest",
       testFile: task.params.testFile,
+    });
+  }
+
+  if (agent) {
+    agent.enableCommandTools({ timeoutMs: 60_000 });
+    taskLogger.info("🔧 Command execution tools enabled (test runner)", {
+      component: "ApplyTest",
     });
   }
 
@@ -29,7 +36,7 @@ export function applyTestHandler(task, taskLogger, agent) {
         response.stopReason === "stop_sequence" ||
         response.stopReason === "completed"
       ) {
-        taskLogger.info("✅ Test generation complete", {
+        taskLogger.info("✅ Test generation and validation complete", {
           component: "ApplyTest",
         });
         emitTaskLog(task, {
@@ -37,7 +44,7 @@ export function applyTestHandler(task, taskLogger, agent) {
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `\n✅ [Complete] Test generation finished\n`,
+          log: `\n✅ [Complete] Test written and validated\n`,
         });
         return false;
       }
