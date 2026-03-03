@@ -52,7 +52,7 @@ export const useTestingEditorStore = create(
         ["unit", "integration", "e2e"].forEach((type) => {
           if (updated[type]) {
             updated[type] = updated[type].map((t) =>
-              t.id === updatedTest.id ? updatedTest : t,
+              t.id === updatedTest.id ? { ...t, ...updatedTest } : t,
             );
           }
         });

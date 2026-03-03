@@ -7,7 +7,6 @@ export const useApplyTestStore = create((set, _) => ({
   // State
   applyingTestsByDomainId: {},
   applyTaskIdsByDomainId: {},
-  applyTaskMetaByDomainId: {},
   applyLogsByDomainId: {},
 
   // Actions
@@ -29,7 +28,6 @@ export const useApplyTestStore = create((set, _) => ({
     try {
       const response = await api.applyTest(domainId, testId);
       const taskId = response.data?.task?.id;
-      const taskParams = response.data?.task?.params || null;
       const message = response.data?.message || "Test application task created";
 
       set((state) => ({
@@ -40,17 +38,6 @@ export const useApplyTestStore = create((set, _) => ({
             [testId]: taskId,
           },
         },
-        ...(taskId
-          ? {
-              applyTaskMetaByDomainId: {
-                ...state.applyTaskMetaByDomainId,
-                [domainId]: {
-                  ...(state.applyTaskMetaByDomainId[domainId] || {}),
-                  [taskId]: taskParams,
-                },
-              },
-            }
-          : {}),
         applyLogsByDomainId: {
           ...state.applyLogsByDomainId,
           [domainId]: {
@@ -117,47 +104,33 @@ export const useApplyTestStore = create((set, _) => ({
     });
   },
 
-  completeApplyByTaskId: async (domainId, taskId) => {
-    if (!domainId || !taskId) return;
+  completeApplyByTaskId: (domainId, taskId, params) => {
+    if (!domainId || !taskId || !params?.testId) return;
 
-    set((state) => {
-      const taskIds = state.applyTaskIdsByDomainId[domainId] || {};
-      const testId = Object.keys(taskIds).find((id) => taskIds[id] === taskId);
-      if (!testId) return state;
-
-      return {
-        applyingTestsByDomainId: {
-          ...state.applyingTestsByDomainId,
-          [domainId]: {
-            ...(state.applyingTestsByDomainId[domainId] || {}),
-            [testId]: false,
-          },
+    set((state) => ({
+      applyingTestsByDomainId: {
+        ...state.applyingTestsByDomainId,
+        [domainId]: {
+          ...(state.applyingTestsByDomainId[domainId] || {}),
+          [params.testId]: false,
         },
-      };
+      },
+    }));
+
+    useDomainTestingStore.getState().syncTestApplied(domainId, {
+      testId: params.testId,
+      taskId,
+      testFile: params.testFile,
+      testType: params.testType,
+      testDescription: params.testDescription,
     });
-
-    const storeState = useApplyTestStore.getState();
-    const taskMeta = storeState.applyTaskMetaByDomainId[domainId]?.[taskId];
-
-    if (taskMeta?.testId) {
-      useDomainTestingStore.getState().syncTestApplied(domainId, {
-        testId: taskMeta.testId,
-        taskId,
-        testFile: taskMeta.testFile,
-        testType: taskMeta.testType,
-        testDescription: taskMeta.testDescription,
-      });
-      useTestingEditorStore
-        .getState()
-        .clearPendingEditedTest(domainId, taskMeta.testId);
-      useTestingEditorStore.getState().updateTestInMissingTests(domainId, {
-        id: taskMeta.testId,
-        actionStatus: "completed",
-      });
-      return;
-    }
-
-    await useDomainTestingStore.getState().fetch(domainId, true);
+    useTestingEditorStore
+      .getState()
+      .clearPendingEditedTest(domainId, params.testId);
+    useTestingEditorStore.getState().updateTestInMissingTests(domainId, {
+      id: params.testId,
+      actionStatus: "completed",
+    });
   },
 
   failApplyByTaskId: (domainId, taskId) => {
@@ -184,7 +157,6 @@ export const useApplyTestStore = create((set, _) => ({
     set({
       applyingTestsByDomainId: {},
       applyTaskIdsByDomainId: {},
-      applyTaskMetaByDomainId: {},
       applyLogsByDomainId: {},
     }),
 }));

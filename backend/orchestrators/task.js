@@ -289,6 +289,7 @@ export async function executeTask(taskId) {
       taskId,
       type: task.type,
       domainId: task.params?.domainId,
+      params: task.params,
       timestamp: new Date().toISOString(),
     });
   } else {

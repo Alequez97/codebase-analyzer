@@ -16,7 +16,7 @@ import { Alert } from "../../ui/alert";
 import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails, TestCaseInlineEditorComponent } from "./index";
-import { getPriorityColor } from "./utils";
+import { getPriorityColor, sortByPriority } from "./utils";
 
 export function MissingTestsSection({
   missingTests,
@@ -57,8 +57,8 @@ export function MissingTestsSection({
 
         return {
           ...test,
-          actionStatus: sourceTest.actionStatus || null,
-          actionHistory: sourceTest.actionHistory || [],
+          actionStatus: sourceTest.actionStatus || test.actionStatus || null,
+          actionHistory: sourceTest.actionHistory || test.actionHistory || [],
           suggestedTestFile:
             sourceTest.suggestedTestFile || test.suggestedTestFile,
         };
@@ -237,17 +237,28 @@ export function MissingTestsSection({
           </Table.Header>
           <Table.Body>
             {/* Unit Tests */}
-            {editedMissingTests.unit?.map((test) => {
+            {sortByPriority(editedMissingTests.unit)?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
               const isApplied =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+              const isApplying = !!applyingTests[test.id];
               const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               return (
                 <Fragment key={test.id}>
                   <Table.Row
-                    bg={isApplied ? "green.50" : "gray.50"}
+                    bg={
+                      isApplied
+                        ? "green.50"
+                        : isApplying
+                          ? "blue.50"
+                          : "gray.50"
+                    }
                     _hover={{
-                      bg: isApplied ? "green.100" : "gray.100",
+                      bg: isApplied
+                        ? "green.100"
+                        : isApplying
+                          ? "blue.100"
+                          : "gray.100",
                       cursor: "pointer",
                     }}
                     onClick={() => toggleExpand(test.id)}
@@ -403,17 +414,28 @@ export function MissingTestsSection({
             })}
 
             {/* Integration Tests */}
-            {editedMissingTests.integration?.map((test) => {
+            {sortByPriority(editedMissingTests.integration)?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
               const isApplied =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+              const isApplying = !!applyingTests[test.id];
               const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               return (
                 <Fragment key={test.id}>
                   <Table.Row
-                    bg={isApplied ? "green.50" : "gray.50"}
+                    bg={
+                      isApplied
+                        ? "green.50"
+                        : isApplying
+                          ? "blue.50"
+                          : "gray.50"
+                    }
                     _hover={{
-                      bg: isApplied ? "green.100" : "gray.100",
+                      bg: isApplied
+                        ? "green.100"
+                        : isApplying
+                          ? "blue.100"
+                          : "gray.100",
                       cursor: "pointer",
                     }}
                     onClick={() => toggleExpand(test.id)}
@@ -569,17 +591,28 @@ export function MissingTestsSection({
             })}
 
             {/* E2E Tests */}
-            {editedMissingTests.e2e?.map((test) => {
+            {sortByPriority(editedMissingTests.e2e)?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
               const isApplied =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+              const isApplying = !!applyingTests[test.id];
               const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               return (
                 <Fragment key={test.id}>
                   <Table.Row
-                    bg={isApplied ? "green.50" : "gray.50"}
+                    bg={
+                      isApplied
+                        ? "green.50"
+                        : isApplying
+                          ? "blue.50"
+                          : "gray.50"
+                    }
                     _hover={{
-                      bg: isApplied ? "green.100" : "gray.100",
+                      bg: isApplied
+                        ? "green.100"
+                        : isApplying
+                          ? "blue.100"
+                          : "gray.100",
                       cursor: "pointer",
                     }}
                     onClick={() => toggleExpand(test.id)}

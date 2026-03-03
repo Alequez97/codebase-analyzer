@@ -98,9 +98,9 @@ export const useSocketStore = create((set, get) => ({
         useDomainTestingStore.getState().setLoading(domainId, false);
         await useDomainTestingStore.getState().fetch(domainId);
       } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
-        await useApplyTestStore
+        useApplyTestStore
           .getState()
-          .completeApplyByTaskId(domainId, data.taskId);
+          .completeApplyByTaskId(domainId, data.taskId, data.params);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
