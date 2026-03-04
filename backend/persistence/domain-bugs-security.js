@@ -9,8 +9,6 @@ import {
   getDomainSectionMetadataPath,
 } from "./domain-section-paths.js";
 
-const BUGS_SECURITY_SECTION = "bugs-security";
-
 /**
  * Read domain bugs & security section
  * @param {string} domainId - The domain ID
@@ -20,7 +18,7 @@ export async function readDomainBugsSecurity(domainId) {
   try {
     const filePath = getDomainSectionContentPath(
       domainId,
-      BUGS_SECURITY_SECTION,
+      SECTION_TYPES.BUGS_SECURITY,
     );
     const content = await tryReadJsonFile(
       filePath,
@@ -50,17 +48,20 @@ export async function readDomainBugsSecurity(domainId) {
  * @param {Object} data - Bugs & security data
  */
 export async function writeDomainBugsSecurity(domainId, data) {
-  const dirPath = getDomainSectionDir(domainId, BUGS_SECURITY_SECTION);
+  const dirPath = getDomainSectionDir(domainId, SECTION_TYPES.BUGS_SECURITY);
   await fs.mkdir(dirPath, { recursive: true });
 
   const { metadata, ...content } = data;
-  const filePath = getDomainSectionContentPath(domainId, BUGS_SECURITY_SECTION);
+  const filePath = getDomainSectionContentPath(
+    domainId,
+    SECTION_TYPES.BUGS_SECURITY,
+  );
   await fs.writeFile(filePath, JSON.stringify(content, null, 2), "utf-8");
 
   if (metadata) {
     const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      BUGS_SECURITY_SECTION,
+      SECTION_TYPES.BUGS_SECURITY,
     );
     await fs.writeFile(
       metadataPath,
@@ -79,7 +80,7 @@ export async function readDomainBugsSecurityMetadata(domainId) {
   try {
     const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      BUGS_SECURITY_SECTION,
+      SECTION_TYPES.BUGS_SECURITY,
     );
     return await tryReadJsonFile(
       metadataPath,
@@ -159,7 +160,7 @@ export async function readBugsSecurityFindingActions(domainId) {
   try {
     const filePath = getDomainSectionFilePath(
       domainId,
-      BUGS_SECURITY_SECTION,
+      SECTION_TYPES.BUGS_SECURITY,
       PERSISTENCE_FILES.ACTIONS_JSON,
     );
 
@@ -181,12 +182,12 @@ export async function readBugsSecurityFindingActions(domainId) {
  * @param {Object} data - Finding actions registry
  */
 export async function writeBugsSecurityFindingActions(domainId, data) {
-  const dirPath = getDomainSectionDir(domainId, BUGS_SECURITY_SECTION);
+  const dirPath = getDomainSectionDir(domainId, SECTION_TYPES.BUGS_SECURITY);
   await fs.mkdir(dirPath, { recursive: true });
 
   const filePath = getDomainSectionFilePath(
     domainId,
-    BUGS_SECURITY_SECTION,
+    SECTION_TYPES.BUGS_SECURITY,
     PERSISTENCE_FILES.ACTIONS_JSON,
   );
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");

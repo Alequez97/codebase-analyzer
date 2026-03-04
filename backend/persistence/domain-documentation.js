@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { SECTION_TYPES } from "../constants/section-types.js";
 import { tryReadJsonFile } from "./utils.js";
 
 /**
@@ -14,7 +15,7 @@ export async function readDomainDocumentation(domainId) {
       config.paths.targetAnalysis,
       "domains",
       domainId,
-      "documentation",
+      SECTION_TYPES.DOCUMENTATION,
     );
 
     // Read content.md
@@ -52,7 +53,7 @@ export async function writeDomainDocumentation(domainId, data) {
     config.paths.targetAnalysis,
     "domains",
     domainId,
-    "documentation",
+    SECTION_TYPES.DOCUMENTATION,
   );
   await fs.mkdir(docDir, { recursive: true });
 
@@ -82,7 +83,7 @@ export async function readDomainDocumentationMetadata(domainId) {
       config.paths.targetAnalysis,
       "domains",
       domainId,
-      "documentation",
+      SECTION_TYPES.DOCUMENTATION,
       "metadata.json",
     );
     return await tryReadJsonFile(

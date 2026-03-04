@@ -7,7 +7,7 @@ const DOMAINS_DIR = "domains";
 export const DOMAIN_SECTION_IDS = {
   DOCUMENTATION: "documentation",
   REQUIREMENTS: "requirements",
-  TESTING: "testing",
+  TESTING: "refactoring-and-testing",
   BUGS_SECURITY: "bugs-security",
   DIAGRAMS: "diagrams",
 };

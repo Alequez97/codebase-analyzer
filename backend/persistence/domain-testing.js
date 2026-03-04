@@ -4,6 +4,7 @@ import {
   TESTING_ACTION_TYPES,
 } from "../constants/testing-actions.js";
 import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
+import { SECTION_TYPES } from "../constants/section-types.js";
 import { tryReadJsonFile } from "./utils.js";
 import {
   getDomainSectionContentPath,
@@ -12,8 +13,6 @@ import {
   getDomainSectionMetadataPath,
 } from "./domain-section-paths.js";
 
-const TESTING_SECTION = "testing";
-
 /**
  * Read domain testing section
  * @param {string} domainId - The domain ID
@@ -21,7 +20,10 @@ const TESTING_SECTION = "testing";
  */
 export async function readDomainTesting(domainId) {
   try {
-    const filePath = getDomainSectionContentPath(domainId, TESTING_SECTION);
+    const filePath = getDomainSectionContentPath(
+      domainId,
+      SECTION_TYPES.REFACTORING_AND_TESTING,
+    );
     const content = await tryReadJsonFile(
       filePath,
       `domain ${domainId} testing`,
@@ -50,17 +52,23 @@ export async function readDomainTesting(domainId) {
  * @param {Object} data - Testing data
  */
 export async function writeDomainTesting(domainId, data) {
-  const dirPath = getDomainSectionDir(domainId, TESTING_SECTION);
+  const dirPath = getDomainSectionDir(
+    domainId,
+    SECTION_TYPES.REFACTORING_AND_TESTING,
+  );
   await fs.mkdir(dirPath, { recursive: true });
 
   const { metadata, ...content } = data;
-  const filePath = getDomainSectionContentPath(domainId, TESTING_SECTION);
+  const filePath = getDomainSectionContentPath(
+    domainId,
+    SECTION_TYPES.REFACTORING_AND_TESTING,
+  );
   await fs.writeFile(filePath, JSON.stringify(content, null, 2), "utf-8");
 
   if (metadata) {
     const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      TESTING_SECTION,
+      SECTION_TYPES.REFACTORING_AND_TESTING,
     );
     await fs.writeFile(
       metadataPath,
@@ -79,7 +87,7 @@ export async function readDomainTestingMetadata(domainId) {
   try {
     const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      TESTING_SECTION,
+      SECTION_TYPES.REFACTORING_AND_TESTING,
     );
     return await tryReadJsonFile(
       metadataPath,
@@ -103,7 +111,7 @@ function createApplyActionsRegistry(domainId) {
 
   return {
     domainId,
-    section: TESTING_SECTION,
+    section: SECTION_TYPES.REFACTORING_AND_TESTING,
     metadata: {
       created: timestamp,
       lastUpdated: timestamp,
@@ -117,7 +125,7 @@ export async function readTestingApplyActions(domainId) {
   try {
     const filePath = getDomainSectionFilePath(
       domainId,
-      TESTING_SECTION,
+      SECTION_TYPES.REFACTORING_AND_TESTING,
       PERSISTENCE_FILES.ACTIONS_JSON,
     );
 
@@ -134,12 +142,15 @@ export async function readTestingApplyActions(domainId) {
 }
 
 export async function writeTestingApplyActions(domainId, data) {
-  const dirPath = getDomainSectionDir(domainId, TESTING_SECTION);
+  const dirPath = getDomainSectionDir(
+    domainId,
+    SECTION_TYPES.REFACTORING_AND_TESTING,
+  );
   await fs.mkdir(dirPath, { recursive: true });
 
   const filePath = getDomainSectionFilePath(
     domainId,
-    TESTING_SECTION,
+    SECTION_TYPES.REFACTORING_AND_TESTING,
     PERSISTENCE_FILES.ACTIONS_JSON,
   );
   await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");

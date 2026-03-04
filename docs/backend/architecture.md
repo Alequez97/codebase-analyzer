@@ -56,8 +56,8 @@ The backend is a Node.js/Express service that orchestrates AI-driven analysis ta
 - `.code-analysis/domains/{domainId}/documentation/metadata.json`
 - `.code-analysis/domains/{domainId}/requirements/content.json`
 - `.code-analysis/domains/{domainId}/requirements/metadata.json`
-- `.code-analysis/domains/{domainId}/testing/content.json`
-- `.code-analysis/domains/{domainId}/testing/metadata.json`
+- `.code-analysis/domains/{domainId}/refactoring-and-testing/content.json`
+- `.code-analysis/domains/{domainId}/refactoring-and-testing/metadata.json`
 - `.code-analysis/domains/{domainId}/bugs-security/content.json`
 - `.code-analysis/domains/{domainId}/bugs-security/metadata.json`
 - `.code-analysis/tasks/pending/*.json`

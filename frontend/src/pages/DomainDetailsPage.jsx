@@ -135,7 +135,8 @@ export default function DomainDetailsPage() {
   const diagramsLogs = domainLogs.get(SECTION_TYPES.DIAGRAMS) || "";
   const requirementsLogs = domainLogs.get(SECTION_TYPES.REQUIREMENTS) || "";
   const bugsSecurityLogs = domainLogs.get(SECTION_TYPES.BUGS_SECURITY) || "";
-  const testingLogs = domainLogs.get(SECTION_TYPES.TESTING) || "";
+  const testingLogs =
+    domainLogs.get(SECTION_TYPES.REFACTORING_AND_TESTING) || "";
 
   // Logs loading states
   const logsLoading = logsLoadingBySection.get(domainId) || new Map();
@@ -147,7 +148,9 @@ export default function DomainDetailsPage() {
   const bugsSecurityLogsLoading = !!logsLoading.get(
     SECTION_TYPES.BUGS_SECURITY,
   );
-  const testingLogsLoading = !!logsLoading.get(SECTION_TYPES.TESTING);
+  const testingLogsLoading = !!logsLoading.get(
+    SECTION_TYPES.REFACTORING_AND_TESTING,
+  );
 
   // Collect all errors into a single array
   const errors = [
@@ -243,7 +246,7 @@ export default function DomainDetailsPage() {
 
     // Fetch testing logs if section exists
     if (testing) {
-      fetchDomainSectionLogs(domainId, SECTION_TYPES.TESTING);
+      fetchDomainSectionLogs(domainId, SECTION_TYPES.REFACTORING_AND_TESTING);
     }
   }, [
     domainId,
@@ -367,7 +370,7 @@ export default function DomainDetailsPage() {
         config: BUGS_SECURITY_CHAT_CONFIG,
         content: bugsSecurity,
       },
-      [SECTION_TYPES.TESTING]: {
+      [SECTION_TYPES.REFACTORING_AND_TESTING]: {
         config: TESTING_CHAT_CONFIG,
         content: testing,
       },
@@ -393,7 +396,7 @@ export default function DomainDetailsPage() {
         // Bugs & Security might need special handling
         console.log("Apply bugs/security changes:", newContent);
         break;
-      case SECTION_TYPES.TESTING:
+      case SECTION_TYPES.REFACTORING_AND_TESTING:
         // Testing might need special handling
         console.log("Apply testing changes:", newContent);
         break;
@@ -603,18 +606,24 @@ export default function DomainDetailsPage() {
               onOpenChat={() =>
                 openChat(
                   domainId,
-                  SECTION_TYPES.TESTING,
+                  SECTION_TYPES.REFACTORING_AND_TESTING,
                   TESTING_CHAT_CONFIG.initialGreeting,
                 )
               }
-              isChatOpen={isChatActive(domainId, SECTION_TYPES.TESTING)}
+              isChatOpen={isChatActive(
+                domainId,
+                SECTION_TYPES.REFACTORING_AND_TESTING,
+              )}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
-                SECTION_TYPES.TESTING,
+                SECTION_TYPES.REFACTORING_AND_TESTING,
               )}
               onApplyChanges={handleApplyChatChanges}
               onDismissChanges={() =>
-                clearPendingSuggestion(domainId, SECTION_TYPES.TESTING)
+                clearPendingSuggestion(
+                  domainId,
+                  SECTION_TYPES.REFACTORING_AND_TESTING,
+                )
               }
             />
           </VStack>

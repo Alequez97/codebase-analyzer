@@ -59,7 +59,9 @@ export const useDomainTestingStore = create((set, get) => ({
   analyze: async (domain, includeRequirements = false) => {
     if (!domain?.id) return { success: false, error: "Invalid domain" };
 
-    useLogsStore.getState().clearLogs(domain.id, SECTION_TYPES.TESTING);
+    useLogsStore
+      .getState()
+      .clearLogs(domain.id, SECTION_TYPES.REFACTORING_AND_TESTING);
 
     set((state) => {
       const newLoadingMap = new Map(state.loadingById);

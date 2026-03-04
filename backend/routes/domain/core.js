@@ -120,7 +120,7 @@ router.get("/:id/logs/:section", async (req, res) => {
       SECTION_TYPES.DOCUMENTATION,
       SECTION_TYPES.DIAGRAMS,
       SECTION_TYPES.REQUIREMENTS,
-      SECTION_TYPES.TESTING,
+      SECTION_TYPES.REFACTORING_AND_TESTING,
       SECTION_TYPES.BUGS_SECURITY,
     ];
     if (!validSections.includes(section)) {

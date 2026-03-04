@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
+import { SECTION_TYPES } from "../constants/section-types.js";
 import { tryReadJsonFile } from "./utils.js";
 
 /**
@@ -13,7 +14,7 @@ function getDiagramsDir(domainId) {
     config.paths.targetAnalysis,
     "domains",
     domainId,
-    "diagrams",
+    SECTION_TYPES.DIAGRAMS,
   );
 }
 

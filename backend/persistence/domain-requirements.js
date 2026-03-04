@@ -1,12 +1,11 @@
 import fs from "fs/promises";
+import { SECTION_TYPES } from "../constants/section-types.js";
 import { tryReadJsonFile } from "./utils.js";
 import {
   getDomainSectionContentPath,
   getDomainSectionDir,
   getDomainSectionMetadataPath,
 } from "./domain-section-paths.js";
-
-const REQUIREMENTS_SECTION = "requirements";
 
 /**
  * Read domain requirements section
@@ -17,7 +16,7 @@ export async function readDomainRequirements(domainId) {
   try {
     const filePath = getDomainSectionContentPath(
       domainId,
-      REQUIREMENTS_SECTION,
+      SECTION_TYPES.REQUIREMENTS,
     );
     const content = await tryReadJsonFile(
       filePath,
@@ -48,17 +47,20 @@ export async function readDomainRequirements(domainId) {
  * @param {Object} data - Requirements data
  */
 export async function writeDomainRequirements(domainId, data) {
-  const dirPath = getDomainSectionDir(domainId, REQUIREMENTS_SECTION);
+  const dirPath = getDomainSectionDir(domainId, SECTION_TYPES.REQUIREMENTS);
   await fs.mkdir(dirPath, { recursive: true });
 
   const { metadata, ...content } = data;
-  const filePath = getDomainSectionContentPath(domainId, REQUIREMENTS_SECTION);
+  const filePath = getDomainSectionContentPath(
+    domainId,
+    SECTION_TYPES.REQUIREMENTS,
+  );
   await fs.writeFile(filePath, JSON.stringify(content, null, 2), "utf-8");
 
   if (metadata) {
     const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      REQUIREMENTS_SECTION,
+      SECTION_TYPES.REQUIREMENTS,
     );
     await fs.writeFile(
       metadataPath,
@@ -77,7 +79,7 @@ export async function readDomainRequirementsMetadata(domainId) {
   try {
     const metadataPath = getDomainSectionMetadataPath(
       domainId,
-      REQUIREMENTS_SECTION,
+      SECTION_TYPES.REQUIREMENTS,
     );
     return await tryReadJsonFile(
       metadataPath,

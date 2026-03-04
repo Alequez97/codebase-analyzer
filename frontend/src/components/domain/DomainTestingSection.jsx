@@ -19,7 +19,11 @@ import {
   Sparkles,
   TestTube,
 } from "lucide-react";
-import { ExistingTestsTable, MissingTestsSection } from "./testing";
+import {
+  ExistingTestsTable,
+  MissingTestsSection,
+  RefactoringRecommendationsCard,
+} from "./refactoring-and-testing";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
 import LogsViewer from "./LogsViewer";
@@ -36,6 +40,8 @@ export default function DomainTestingSection({
   onAnalyze,
   onApplyTest,
   onApplyTestEdits,
+  onApplyRefactoring,
+  applyingRefactoringId = null,
   hasRequirements = false,
   showLogs = false,
   logs = "",
@@ -86,7 +92,7 @@ export default function DomainTestingSection({
                   <ChevronRight size={16} />
                 )}
               </IconButton>
-              <Heading size="md">Testing</Heading>
+              <Heading size="md">Refactoring & Testing</Heading>
               {showLogs && (
                 <Badge colorPalette="purple" size="sm">
                   Logs View
@@ -157,6 +163,26 @@ export default function DomainTestingSection({
                 />
               ) : (
                 <VStack align="stretch" gap={6}>
+                  {/* Refactoring Recommendations - Show First! */}
+                  {testing.refactoringRecommendations &&
+                    testing.refactoringRecommendations.length > 0 && (
+                      <Box>
+                        <Text fontWeight="semibold" mb={3} fontSize="md">
+                          ⚠️ Architecture Issues Blocking Tests
+                        </Text>
+                        <RefactoringRecommendationsCard
+                          refactorings={testing.refactoringRecommendations}
+                          onApplyRefactoring={onApplyRefactoring}
+                          applyingRefactoringId={applyingRefactoringId}
+                        />
+                      </Box>
+                    )}
+
+                  {testing.refactoringRecommendations &&
+                    testing.refactoringRecommendations.length > 0 && (
+                      <Separator />
+                    )}
+
                   {/* Existing Tests */}
                   <Box>
                     <Text fontWeight="semibold" mb={3} fontSize="md">
@@ -169,9 +195,25 @@ export default function DomainTestingSection({
 
                   {/* Missing Tests */}
                   <Box>
-                    <Text fontWeight="semibold" mb={4} fontSize="md">
-                      Missing Tests (Suggestions)
-                    </Text>
+                    <HStack justify="space-between" mb={4}>
+                      <Text fontWeight="semibold" fontSize="md">
+                        Missing Tests
+                      </Text>
+                      {testing.summary && (
+                        <HStack gap={2} fontSize="sm">
+                          {testing.summary.blockedTests > 0 && (
+                            <Badge colorPalette="orange">
+                              {testing.summary.blockedTests} blocked
+                            </Badge>
+                          )}
+                          {testing.summary.readyTests > 0 && (
+                            <Badge colorPalette="green">
+                              {testing.summary.readyTests} ready
+                            </Badge>
+                          )}
+                        </HStack>
+                      )}
+                    </HStack>
                     <MissingTestsSection
                       domainId={domainId}
                       missingTests={testing.missingTests}

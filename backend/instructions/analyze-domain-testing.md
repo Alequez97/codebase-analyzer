@@ -11,15 +11,8 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
   "existingTests": [
     {
       "file": "frontend/tests/domain/feature.test.js",
-      "description": "What this test file covers",
-      "testType": "unit | integration | e2e",
-      "coveredFiles": ["file1.js", "file2.js"],
-      "testCount": 10,
-      "relatedRequirements": ["REQ-001"],
-      "lastUpdated": "2026-01-01T00:00:00.000Z",
-      "quality": "good | moderate | weak",
-      "gaps": ["Optional short list of uncovered areas"],
-      "notes": "Optional implementation details"
+      "description": "Brief summary of what this test file covers",
+      "testType": "unit | integration | e2e"
     }
   ],
   "missingTests": {
@@ -47,6 +40,7 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
       }
     ],
     "integration": [
+      // Same schema as unit tests
       {
         "id": "TEST-101",
         "description": "Integration gap",
@@ -59,31 +53,8 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
       }
     ],
     "e2e": [
-      {
-        "id": "TEST-201",
-        "description": "E2E gap",
-        "priority": "P0 | P1 | P2 | P3",
-        "category": "security | resilience | validation | business-logic | data-integrity | performance | edge-case",
-        "suggestedTestFile": "frontend/tests/e2e/domain/feature.test.js",
-        "relatedRequirement": "REQ-001",
-        "scenarios": [
-          {
-            "scenario": "End-to-end user flow",
-            "checks": [
-              {
-                "input": [
-                  { "field": "step", "value": "Navigate to /admin/fleet" },
-                  { "field": "step", "value": "Click 'New Aircraft' button" }
-                ],
-                "expectedOutput": "Observable user-visible outcome",
-                "assertionType": "toBeVisible | toContainText | toHaveURL"
-              }
-            ]
-          }
-        ],
-        "reason": "Why this test is missing and important"
-      }
-    ]
+      // Same schema as unit/integration tests
+      // Use { "field": "step", "value": "action" } for E2E checks input
   },
   "testingPrinciples": {
     "description": "Testing principles and guidelines for this domain",
@@ -117,6 +88,8 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 ## Required Output Fields (Strict)
 
 - For every `existingTests[]` item, include: `file`, `description`, `testType`.
+  - Keep `existingTests` entries **minimal** - just file path, brief description, and type. Don't analyze in depth.
+  - Focus analysis effort on `missingTests`.
 - For every item in `missingTests.unit[]`, `missingTests.integration[]`, and `missingTests.e2e[]`, include:
   - `id`, `description`, `priority`, `category`, `suggestedTestFile`, `relatedRequirement`, `scenarios`, `reason`.
 - `scenarios` must be a non-empty array.
@@ -125,6 +98,25 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 - For e2e checks, represent user actions as `input` items with `field: "step"` and the action in `value`.
 - JSON must use valid key-value syntax. Do not output invalid objects like `{ "step", "value": "..." }`.
 - Do not omit `suggestedTestFile` or `scenarios` for any missing-test entry.
+
+## Test Description Guidelines
+
+**Write specific, actionable descriptions** that explain WHAT is being tested and WHY it matters:
+
+- ❌ **Too vague**: "Aircraft status is updated and update_date is refreshed"
+- ✅ **Specific**: "updateAircraftStatus merges engine status by position without duplicating entries and refreshes timestamp"
+
+- ❌ **Too vague**: "Create aircraft with valid data"
+- ✅ **Specific**: "POST /aircraft returns 201 and creates linked Permission and MaintenanceProgramRevision records"
+
+- ❌ **Too vague**: "Test validation"
+- ✅ **Specific**: "POST /aircraft returns 400 with error details when required fields are missing"
+
+Include:
+
+- The specific function/endpoint being tested
+- The key behavior or edge case
+- Business impact when relevant (e.g., "prevents duplicate entries", "ensures data isolation")
 
 ## Suggested Test File Placement (Strict)
 
@@ -186,6 +178,204 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to map requirements to tests and identify which requirements lack test coverage.
 {{/if}}
 
+## What Makes a Valuable Test (Critical Guidance)
+
+### High-Value Tests (PRIORITIZE THESE)
+
+Focus on tests that **protect business value** and **catch real bugs**:
+
+1. **Business Logic & Calculations**
+   - Complex algorithms and transformations
+   - Multi-step business workflows
+   - State transitions and lifecycle management
+   - Conditional logic with multiple branches
+   - Data aggregations and computations
+
+2. **Authorization & Security**
+   - Permission checks and access control
+   - Role-based restrictions
+   - Data isolation between users/tenants
+   - Authentication flows and token handling
+   - Input sanitization and injection prevention
+
+3. **Error Handling & Edge Cases**
+   - Error paths in business workflows
+   - Boundary conditions (empty, null, max values)
+   - Race conditions and concurrency issues
+   - Network failures and retry logic
+   - Invalid state transitions
+
+4. **Integration Points**
+   - **API contracts**: Verify correct status codes (400, 401, 403, etc.) and error message format
+   - Database transactions and consistency
+   - External service interactions and error handling
+   - Message queuing and async operations
+
+5. **Critical User Workflows**
+   - End-to-end business processes
+   - Multi-step operations that modify state
+   - Time-sensitive or scheduled operations
+   - Payment/financial transactions
+
+### Low-Value Tests (AVOID OR DEPRIORITIZE)
+
+**Do NOT suggest tests for:**
+
+1. **Unit Tests on Model/Schema Validation**
+   - ❌ **Unit test on Mongoose model**: "Verify that aircraft.serial field is required"
+   - ❌ **Unit test on Mongoose model**: "Test that email field validates format"
+   - ❌ **Unit test on Mongoose model**: "Check that maxLength is enforced on registration"
+   - **Why avoid**: These test framework/ORM behavior, not your business logic
+   - **Important**: API contract validation in integration tests is DIFFERENT (see examples below)
+
+2. **Trivial Getters/Setters**
+   - ❌ "Test that getName() returns name"
+   - ❌ "Verify setStatus() sets status"
+
+3. **Framework/Library Behavior**
+   - ❌ "Test that Mongoose saves to database"
+   - ❌ "Verify Express routes correctly"
+
+4. **Obvious Happy Paths** (unless complex)
+   - ❌ "Test basic CRUD with valid data"
+   - Only suggest if there's non-trivial business logic involved
+
+### Important Distinction: Unit vs Integration Validation Tests
+
+- ❌ **BAD (Unit test on model)**: Testing Mongoose schema validators directly
+
+  ```javascript
+  // DON'T suggest this - tests framework, not business logic
+  it("should require serial field", async () => {
+    const aircraft = new Aircraft({
+      /* no serial */
+    });
+    await expect(aircraft.save()).rejects.toThrow();
+  });
+  ```
+
+- ✅ **GOOD (Integration test on API)**: Testing API contract and error responses
+  ```javascript
+  // DO suggest this - tests API behavior and user-facing contracts
+  it("POST /aircraft returns 400 when serial is missing", async () => {
+    const response = await request(app)
+      .post("/aircraft")
+      .send({ registration: "ABC123" }); // missing serial
+    expect(response.status).toBe(400);
+    expect(response.body.error).toContain("serial");
+  });
+  ```
+
+**The difference**: Integration tests verify the **entire API contract** (status codes, error messages, request/response flow), while unit tests on models just duplicate framework validation.
+
+### Test Suggestion Guidelines
+
+When suggesting a missing test:
+
+1. **Ask**: "Would this test catch a bug that could harm the business?"
+2. **Ask**: "Does this test verify custom business logic (not framework behavior)?"
+3. **Ask**: "What corner case or error scenario does this protect against?"
+
+If the answer to all three is "no" or "nothing specific", **skip that test**.
+
+### Examples: Good vs Bad Test Suggestions
+
+#### ❌ BAD (Unit Test on Mongoose Schema)
+
+```json
+{
+  "id": "TEST-001",
+  "description": "Validate aircraft schema constraints and field requirements",
+  "category": "data-integrity",
+  "suggestedTestFile": "backend/models/aircraft.test.js",
+  "reason": "Ensure required fields are properly validated"
+}
+```
+
+**Why bad**: Tests Mongoose schema validators, not business logic. Framework responsibility.
+
+#### ✅ GOOD (Integration Test for API Contract)
+
+```json
+{
+  "id": "TEST-101",
+  "description": "POST /aircraft validation returns 400 with clear errors for missing required fields",
+  "category": "validation",
+  "suggestedTestFile": "backend/tests/integration/aircraft/create-aircraft-validation.integration.test.js",
+  "reason": "Verifies API contract: users receive proper error messages when submitting invalid data. Protects user experience and API consumers."
+}
+```
+
+**Why good**: Tests the entire API contract (status codes, error format, user-facing behavior), not just model validation.
+
+#### ✅ GOOD (Business Logic with Edge Cases)
+
+```json
+{
+  "id": "TEST-002",
+  "description": "Aircraft status transitions respect maintenance lock rules",
+  "category": "business-logic",
+  "suggestedTestFile": "backend/services/aircraft/aircraft-lifecycle.test.js",
+  "reason": "Critical business rule: aircraft in maintenance cannot be assigned to flights. Bug could cause safety issues and scheduling conflicts."
+}
+```
+
+**Why good**: Tests custom business rule with real consequences.
+
+#### ❌ BAD (Trivial CRUD)
+
+```json
+{
+  "id": "TEST-003",
+  "description": "Create aircraft with valid data",
+  "suggestedTestFile": "backend/controllers/aircraft.test.js",
+  "reason": "Basic CRUD operation should work"
+}
+```
+
+**Why bad**: No edge cases, no business logic, just framework behavior.
+
+#### ✅ GOOD (Authorization Corner Case)
+
+```json
+{
+  "id": "TEST-004",
+  "description": "Prevent pilots from editing aircraft assigned to other airlines",
+  "category": "security",
+  "suggestedTestFile": "backend/middleware/authorization/aircraft-access.test.js",
+  "reason": "Multi-tenant authorization bug: users should only access their airline's aircraft. Bug could expose competitor data."
+}
+```
+
+**Why good**: Tests authorization with business context and data isolation.
+
+#### ❌ BAD (Framework Responsibility)
+
+```json
+{
+  "id": "TEST-005",
+  "description": "Test that registration field accepts valid format",
+  "suggestedTestFile": "backend/models/aircraft.test.js",
+  "reason": "Field validation is important"
+}
+```
+
+**Why bad**: Regex validation is tested by the validation library.
+
+#### ✅ GOOD (Complex Business Calculation)
+
+```json
+{
+  "id": "TEST-006",
+  "description": "Calculate aircraft utilization rate with partial month edge cases",
+  "category": "business-logic",
+  "suggestedTestFile": "backend/services/analytics/utilization-calculator.test.js",
+  "reason": "Complex calculation involving flight hours, downtime, and calendar boundaries. Bug could cause incorrect billing or capacity planning."
+}
+```
+
+**Why good**: Tests complex calculation with edge cases that affect business decisions.
+
 ## What to Analyze
 
 1. **Existing Tests**
@@ -196,19 +386,28 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to map req
 - Identify what they cover
 - Classify as unit/integration/e2e
 
-2. **Missing Unit Tests**
-   - Core business logic
-   - Validation functions
-   - Edge cases
+2. **Missing Unit Tests** (High-Value Focus)
+   - **Business logic** with conditional branches
+   - **Calculations and transformations**
+   - **Authorization and permission checks**
+   - **Error handling in business workflows**
+   - **State transitions and lifecycle management**
+   - **Complex validation** (not schema-level, but business rules)
 
-3. **Missing Integration Tests**
-   - API endpoints
-   - Database interactions
-   - Component integration
+3. **Missing Integration Tests** (High-Value Focus)
+   - **API contract validation**: Proper status codes (400, 401, 403, 404, 500) and error messages for invalid inputs
+   - API endpoints with **business logic**
+   - **Transaction boundaries** and data consistency
+   - **Authorization enforcement** at API layer (e.g., ensure 403 when user lacks permission)
+   - Integration between multiple services/modules
+   - **Error scenarios** in API workflows (network failures, database errors, timeouts)
+   - **Side effects**: Verify database state, notifications sent, logs written
 
 4. **Missing E2E Tests**
-   - Critical user flows
-   - Multi-step processes
+   - **Critical user journeys** that modify important state
+   - **Multi-step business processes**
+   - **Security-sensitive workflows** (admin actions, permissions)
+   - **Payment or financial operations**
 
 ## Quality Rules for Suggested Tests
 
@@ -245,12 +444,34 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to map req
 - Include concrete attack vectors and expected rejection behavior (status code, error type/message, no privilege escalation).
 - Prefer assertions that prove safe failure behavior when dependencies are unavailable.
 
-## Test Priority
+## Test Priority Guidelines
 
-- **P0**: Critical business logic, security-sensitive code, data integrity
-- **P1**: Core features, common user paths
-- **P2**: Secondary features, less common scenarios
-- **P3**: Edge cases, rare scenarios
+Assign priority based on **business impact**, not code complexity:
+
+- **P0** (Critical - Test First):
+  - Authorization/permission checks that prevent unauthorized access
+  - Financial calculations or payment processing
+  - Data integrity checks that prevent corruption
+  - Security vulnerabilities (injection, XSS, CSRF)
+  - Critical business rules that affect money, compliance, or user safety
+
+- **P1** (High - Core Features):
+  - Main business workflows with complex logic
+  - Common user operations with state changes
+  - Error handling in critical paths
+  - Multi-step processes with failure recovery
+
+- **P2** (Medium - Secondary Features):
+  - Less common but still important business scenarios
+  - Edge cases in core features
+  - Non-critical integrations
+  - Performance optimizations
+
+- **P3** (Low - Nice to Have):
+  - Rare edge cases with minimal business impact
+  - Optional features
+  - Cosmetic or UI-only logic
+  - **Schema validation tests** (framework responsibility)
 
 ## Execution
 

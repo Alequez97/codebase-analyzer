@@ -8,5 +8,5 @@ export const SECTION_TYPES = {
   DIAGRAMS: "diagrams",
   REQUIREMENTS: "requirements",
   BUGS_SECURITY: "bugs-security",
-  TESTING: "testing",
+  REFACTORING_AND_TESTING: "refactoring-and-testing",
 };

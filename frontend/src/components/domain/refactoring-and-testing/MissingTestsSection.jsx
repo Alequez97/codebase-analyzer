@@ -287,11 +287,7 @@ export function MissingTestsSection({
                           {test.id}
                         </Text>
                         {isBlocked && (
-                          <Badge
-                            colorPalette="orange"
-                            size="sm"
-                            variant="solid"
-                          >
+                          <Badge colorPalette="orange" size="sm" variant="solid">
                             🔒
                           </Badge>
                         )}
@@ -395,17 +391,13 @@ export function MissingTestsSection({
                                 </HStack>
                                 <Text fontSize="xs" color="gray.700">
                                   ⚠️ Blocked by{" "}
-                                  <Text
-                                    as="span"
-                                    fontFamily="mono"
-                                    fontWeight="semibold"
-                                  >
+                                  <Text as="span" fontFamily="mono" fontWeight="semibold">
                                     {test.blockedBy}
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above
-                                  before implementing this test.
+                                  Please apply the recommended refactoring above before
+                                  implementing this test.
                                 </Text>
                               </Box>
                             )}
@@ -521,11 +513,7 @@ export function MissingTestsSection({
                           {test.id}
                         </Text>
                         {isBlocked && (
-                          <Badge
-                            colorPalette="orange"
-                            size="sm"
-                            variant="solid"
-                          >
+                          <Badge colorPalette="orange" size="sm" variant="solid">
                             🔒
                           </Badge>
                         )}
@@ -629,17 +617,13 @@ export function MissingTestsSection({
                                 </HStack>
                                 <Text fontSize="xs" color="gray.700">
                                   ⚠️ Blocked by{" "}
-                                  <Text
-                                    as="span"
-                                    fontFamily="mono"
-                                    fontWeight="semibold"
-                                  >
+                                  <Text as="span" fontFamily="mono" fontWeight="semibold">
                                     {test.blockedBy}
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above
-                                  before implementing this test.
+                                  Please apply the recommended refactoring above before
+                                  implementing this test.
                                 </Text>
                               </Box>
                             )}
@@ -755,11 +739,7 @@ export function MissingTestsSection({
                           {test.id}
                         </Text>
                         {isBlocked && (
-                          <Badge
-                            colorPalette="orange"
-                            size="sm"
-                            variant="solid"
-                          >
+                          <Badge colorPalette="orange" size="sm" variant="solid">
                             🔒
                           </Badge>
                         )}
@@ -863,17 +843,13 @@ export function MissingTestsSection({
                                 </HStack>
                                 <Text fontSize="xs" color="gray.700">
                                   ⚠️ Blocked by{" "}
-                                  <Text
-                                    as="span"
-                                    fontFamily="mono"
-                                    fontWeight="semibold"
-                                  >
+                                  <Text as="span" fontFamily="mono" fontWeight="semibold">
                                     {test.blockedBy}
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above
-                                  before implementing this test.
+                                  Please apply the recommended refactoring above before
+                                  implementing this test.
                                 </Text>
                               </Box>
                             )}

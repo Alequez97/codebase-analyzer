@@ -3,6 +3,7 @@ import * as domainTestingPersistence from "../../persistence/domain-testing.js";
 import * as taskFactory from "../../tasks/factory/index.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TEST_TYPES } from "../../constants/test-types.js";
+import { SECTION_TYPES } from "../../constants/section-types.js";
 import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
@@ -39,77 +40,83 @@ function enrichMissingTestsWithApplyHistory(missingTests, applyActions) {
 /**
  * Get domain testing section
  */
-router.get("/:id/testing", async (req, res) => {
-  try {
-    const { id } = req.params;
+router.get(
+  `/:id/${SECTION_TYPES.REFACTORING_AND_TESTING}`,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    const data = await domainTestingPersistence.readDomainTesting(id);
-    const applyActionsRegistry =
-      await domainTestingPersistence.readTestingApplyActions(id);
+      const data = await domainTestingPersistence.readDomainTesting(id);
+      const applyActionsRegistry =
+        await domainTestingPersistence.readTestingApplyActions(id);
 
-    if (!data) {
-      return res.status(404).json({
-        error: "Domain testing not found",
-        message: `No testing analysis found for domain: ${id}. Run testing analysis first.`,
+      if (!data) {
+        return res.status(404).json({
+          error: "Domain testing not found",
+          message: `No testing analysis found for domain: ${id}. Run testing analysis first.`,
+        });
+      }
+
+      const applyActions = applyActionsRegistry?.actions || [];
+      const missingTests = enrichMissingTestsWithApplyHistory(
+        data.missingTests || {},
+        applyActions,
+      );
+
+      res.json({
+        ...data,
+        missingTests,
       });
+    } catch (error) {
+      logger.error(`Error reading domain testing ${req.params.id}`, {
+        error,
+        component: "API",
+      });
+      res.status(500).json({ error: "Failed to read domain testing" });
     }
-
-    const applyActions = applyActionsRegistry?.actions || [];
-    const missingTests = enrichMissingTestsWithApplyHistory(
-      data.missingTests || {},
-      applyActions,
-    );
-
-    res.json({
-      ...data,
-      missingTests,
-    });
-  } catch (error) {
-    logger.error(`Error reading domain testing ${req.params.id}`, {
-      error,
-      component: "API",
-    });
-    res.status(500).json({ error: "Failed to read domain testing" });
-  }
-});
+  },
+);
 
 /**
  * Analyze domain testing section
  */
-router.post("/:id/analyze/testing", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { files, includeRequirements = false } = req.body;
+router.post(
+  `/:id/analyze/${SECTION_TYPES.REFACTORING_AND_TESTING}`,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { files, includeRequirements = false } = req.body;
 
-    if (!files || !Array.isArray(files)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: "files[] are required",
+      if (!files || !Array.isArray(files)) {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "files[] are required",
+        });
+      }
+
+      const executeNow = req.body.executeNow !== false;
+      const task = await taskFactory.createAnalyzeTestingTask(
+        { domainId: id, files, includeRequirements },
+        { executeNow },
+      );
+
+      if (task?.success === false) {
+        return res.status(500).json({
+          error: task.error || "Failed to create testing analysis task",
+          code: task.code,
+        });
+      }
+
+      res.status(201).json(task);
+    } catch (error) {
+      logger.error("Error creating testing analysis task", {
+        error,
+        component: "API",
       });
+      res.status(500).json({ error: "Failed to create testing analysis task" });
     }
-
-    const executeNow = req.body.executeNow !== false;
-    const task = await taskFactory.createAnalyzeTestingTask(
-      { domainId: id, files, includeRequirements },
-      { executeNow },
-    );
-
-    if (task?.success === false) {
-      return res.status(500).json({
-        error: task.error || "Failed to create testing analysis task",
-        code: task.code,
-      });
-    }
-
-    res.status(201).json(task);
-  } catch (error) {
-    logger.error("Error creating testing analysis task", {
-      error,
-      component: "API",
-    });
-    res.status(500).json({ error: "Failed to create testing analysis task" });
-  }
-});
+  },
+);
 
 /**
  * Apply a single test

@@ -554,10 +554,10 @@ Dashboard shows: "Click Analyze Codebase to begin"
   - Contains 2+ independent components
   - Component is reusable in other contexts
   - Component has complex logic that warrants isolation
-- **Component co-location**: Keep related components in subdirectories (e.g., all testing-related components in `components/domain/testing/`)
+- **Component co-location**: Keep related components in subdirectories (e.g., all testing-related components in `components/domain/refactoring-and-testing/`)
 - **Index files**: Use `index.js` to re-export components for clean imports:
   ```javascript
-  // components/domain/testing/index.js
+  // components/domain/refactoring-and-testing/index.js
   export { default as DomainTestingSection } from "./DomainTestingSection";
   export { TestCaseDetails } from "./TestCaseDetails";
   export { TestCaseInlineEditor } from "./TestCaseInlineEditor";

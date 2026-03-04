@@ -28,7 +28,7 @@ export const useLogsStore = create((set, get) => ({
   /**
    * Append logs to a specific domain section
    * @param {string} domainId - Domain identifier
-   * @param {string} sectionType - Section type (documentation, requirements, testing)
+   * @param {string} sectionType - Section type (documentation, requirements, refactoring-and-testing)
    * @param {string} logText - Log text to append
    */
   appendLogs: (domainId, sectionType, logText) =>
@@ -63,7 +63,7 @@ export const useLogsStore = create((set, get) => ({
   /**
    * Fetch domain section logs from API
    * @param {string} domainId - Domain identifier
-   * @param {string} sectionType - Section type (documentation, requirements, testing, bugs-security)
+   * @param {string} sectionType - Section type (documentation, requirements, refactoring-and-testing, bugs-security)
    */
   fetchDomainSectionLogs: async (domainId, sectionType) => {
     // Set loading state

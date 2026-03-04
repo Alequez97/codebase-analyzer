@@ -122,7 +122,7 @@ const config = {
     },
     [TASK_TYPES.APPLY_TEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5,
+      model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,

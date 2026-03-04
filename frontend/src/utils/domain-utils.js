@@ -18,3 +18,14 @@ export function sortDomainsByPriority(domains) {
     return priorityA - priorityB;
   });
 }
+
+/**
+ * Convert kebab-case string to display name (sentence case)
+ * @param {string} str - Kebab-case string (e.g., "extract-business-logic")
+ * @returns {string} Display name (e.g., "Extract business logic")
+ */
+export function kebabCaseToDisplayName(str) {
+  if (!str) return "";
+  const words = str.replace(/-/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1).toLowerCase();
+}

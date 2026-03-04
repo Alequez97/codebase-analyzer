@@ -38,6 +38,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { EmptyState } from "../ui/empty-state";
+import { kebabCaseToDisplayName } from "../../utils/domain-utils";
 import LogsViewer from "./LogsViewer";
 import SectionProgressBanner from "./SectionProgressBanner";
 
@@ -478,7 +479,9 @@ export default function DomainRequirementsSection({
                                                     size="sm"
                                                     variant="subtle"
                                                   >
-                                                    {req.category}
+                                                    {kebabCaseToDisplayName(
+                                                      req.category,
+                                                    )}
                                                   </Badge>
                                                   <Badge
                                                     colorPalette={
@@ -710,7 +713,9 @@ export default function DomainRequirementsSection({
                                                 size="sm"
                                                 variant="subtle"
                                               >
-                                                {req.category}
+                                                {kebabCaseToDisplayName(
+                                                  req.category,
+                                                )}
                                               </Badge>
                                               <Badge
                                                 colorPalette={

@@ -179,28 +179,31 @@ router.get("/:id/bugs-security", async (req, res) => {
 /**
  * Get domain testing section
  */
-router.get("/:id/testing", async (req, res) => {
-  try {
-    const { id } = req.params;
+router.get(
+  `/:id/${SECTION_TYPES.REFACTORING_AND_TESTING}`,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    const data = await domainTestingPersistence.readDomainTesting(id);
+      const data = await domainTestingPersistence.readDomainTesting(id);
 
-    if (!data) {
-      return res.status(404).json({
-        error: "Domain testing not found",
-        message: `No testing analysis found for domain: ${id}. Run testing analysis first.`,
+      if (!data) {
+        return res.status(404).json({
+          error: "Domain testing not found",
+          message: `No testing analysis found for domain: ${id}. Run testing analysis first.`,
+        });
+      }
+
+      res.json(data);
+    } catch (error) {
+      logger.error(`Error reading domain testing ${req.params.id}`, {
+        error,
+        component: "API",
       });
+      res.status(500).json({ error: "Failed to read domain testing" });
     }
-
-    res.json(data);
-  } catch (error) {
-    logger.error(`Error reading domain testing ${req.params.id}`, {
-      error,
-      component: "API",
-    });
-    res.status(500).json({ error: "Failed to read domain testing" });
-  }
-});
+  },
+);
 
 /**
  * Analyze domain documentation section
@@ -347,32 +350,35 @@ router.post(
 /**
  * Analyze domain testing section
  */
-router.post("/:id/analyze/testing", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { files, includeRequirements = false } = req.body;
+router.post(
+  `/:id/analyze/${SECTION_TYPES.REFACTORING_AND_TESTING}`,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { files, includeRequirements = false } = req.body;
 
-    if (!files || !Array.isArray(files)) {
-      return res.status(400).json({
-        error: "Invalid request",
-        message: "files[] are required",
+      if (!files || !Array.isArray(files)) {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "files[] are required",
+        });
+      }
+
+      const executeNow = req.body.executeNow !== false;
+      const task = await taskFactory.createAnalyzeTestingTask(id, files, {
+        includeRequirements,
+        executeNow,
       });
+      res.status(201).json(task);
+    } catch (error) {
+      logger.error("Error creating testing analysis task", {
+        error,
+        component: "API",
+      });
+      res.status(500).json({ error: "Failed to create testing analysis task" });
     }
-
-    const executeNow = req.body.executeNow !== false;
-    const task = await taskFactory.createAnalyzeTestingTask(id, files, {
-      includeRequirements,
-      executeNow,
-    });
-    res.status(201).json(task);
-  } catch (error) {
-    logger.error("Error creating testing analysis task", {
-      error,
-      component: "API",
-    });
-    res.status(500).json({ error: "Failed to create testing analysis task" });
-  }
-});
+  },
+);
 
 /**
  * Save edited documentation
@@ -551,7 +557,7 @@ router.get("/:id/logs/:section", async (req, res) => {
     const validSections = [
       SECTION_TYPES.DOCUMENTATION,
       SECTION_TYPES.REQUIREMENTS,
-      SECTION_TYPES.TESTING,
+      SECTION_TYPES.REFACTORING_AND_TESTING,
       SECTION_TYPES.BUGS_SECURITY,
     ];
     if (!validSections.includes(section)) {

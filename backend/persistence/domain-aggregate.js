@@ -158,7 +158,7 @@ export async function readDomainSectionLogs(domainId, section) {
         sectionData = await readDomainRequirements(domainId);
         readSectionMetadata = readDomainRequirementsMetadata;
         break;
-      case SECTION_TYPES.TESTING:
+      case SECTION_TYPES.REFACTORING_AND_TESTING:
         sectionData = await readDomainTesting(domainId);
         readSectionMetadata = readDomainTestingMetadata;
         break;
