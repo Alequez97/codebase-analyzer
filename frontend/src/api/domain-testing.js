@@ -24,3 +24,8 @@ export const applyTest = (domainId, testId) =>
 
 export const applyTestEdits = (domainId, testId) =>
   client.post(`/analysis/domain/${domainId}/tests/${testId}/edit`);
+
+export const applyRefactoring = (domainId, refactoringId) =>
+  client.post(
+    `/analysis/domain/${domainId}/refactorings/${refactoringId}/apply`,
+  );

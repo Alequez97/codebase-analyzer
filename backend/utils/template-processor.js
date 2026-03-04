@@ -38,7 +38,7 @@ export function processTemplate(template, variables = {}) {
     },
   );
 
-  // Process array iteration: {{#each ARRAY_NAME}}{{this}}{{/each}}
+  // Process array iteration: {{#each ARRAY_NAME}}{{this}}{{/each}} or {{this.property}}
   result = result.replace(
     /\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
     (match, arrayName, itemTemplate) => {
@@ -49,8 +49,16 @@ export function processTemplate(template, variables = {}) {
 
       return array
         .map((item) => {
-          // Replace {{this}} with the array item
-          return itemTemplate.replace(/\{\{this\}\}/g, item);
+          let rendered = itemTemplate;
+          if (item !== null && typeof item === "object") {
+            // Replace {{this.property}} with item[property]
+            rendered = rendered.replace(
+              /\{\{this\.(\w+)\}\}/g,
+              (_m, prop) => item[prop] ?? "",
+            );
+          }
+          // Replace plain {{this}} with the item (for scalar arrays)
+          return rendered.replace(/\{\{this\}\}/g, item);
         })
         .join("");
     },
@@ -279,6 +287,40 @@ export function buildApplyFixTemplateVariables(task) {
 }
 
 /**
+ * Build variables object for apply-refactoring task template
+ * @param {Object} task - Task object
+ * @returns {Object} Variables for template processing
+ */
+export function buildApplyRefactoringTemplateVariables(task) {
+  const { params } = task;
+  const extractedFunctions = (params.extractedFunctions || []).map((fn) => ({
+    name: fn.name || "",
+    purpose: fn.purpose || "",
+    params: Array.isArray(fn.params) ? fn.params.join(", ") : fn.params || "",
+    returns: fn.returns || "",
+  }));
+
+  return {
+    CODEBASE_PATH: params.targetDirectory || "",
+    DOMAIN_ID: params.domainId || "",
+    REFACTORING_ID: params.refactoringId || "",
+    CATEGORY: params.category || "",
+    PRIORITY: params.priority || "",
+    TITLE: params.title || "",
+    TARGET_FILE: params.targetFile || "",
+    TARGET_FUNCTION: params.targetFunction || "",
+    START_LINE: params.startLine || "",
+    END_LINE: params.endLine || "",
+    ISSUE: params.issue || "",
+    NEW_SERVICE_FILE: params.newServiceFile || "",
+    EXTRACTED_FUNCTIONS: extractedFunctions,
+    BENEFITS: params.benefits || [],
+    UNBLOCKS: params.unblocks || [],
+    ESTIMATED_EFFORT: params.estimatedEffort || "",
+  };
+}
+
+/**
  * Build variables object for apply-test task template
  * @param {Object} task - Task object
  * @returns {Object} Variables for template processing
@@ -357,7 +399,7 @@ export async function buildTemplateVariables(task) {
       return await buildBugsSecurityTemplateVariables(task);
     case TASK_TYPES.DOCUMENTATION:
       return await buildDocumentationTemplateVariables(task);
-    case TASK_TYPES.TESTING:
+    case TASK_TYPES.REFACTORING_AND_TESTING:
       return await buildTestingTemplateVariables(task);
     case TASK_TYPES.DIAGRAMS:
       return await buildDiagramsTemplateVariables(task);
@@ -367,6 +409,8 @@ export async function buildTemplateVariables(task) {
       return buildApplyFixTemplateVariables(task);
     case TASK_TYPES.APPLY_TEST:
       return buildApplyTestTemplateVariables(task);
+    case TASK_TYPES.APPLY_REFACTORING:
+      return buildApplyRefactoringTemplateVariables(task);
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

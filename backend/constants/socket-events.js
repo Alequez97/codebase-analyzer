@@ -19,7 +19,7 @@ export const SOCKET_EVENTS = {
   LOG_DIAGRAMS: "log:diagrams",
   LOG_REQUIREMENTS: "log:requirements",
   LOG_BUGS_SECURITY: "log:bugs-security",
-  LOG_TESTING: "log:testing",
+  LOG_REFACTORING_AND_TESTING: "log:refactoring-and-testing",
   LOG_APPLY_FIX: "log:apply-fix",
   LOG_APPLY_TEST: "log:apply-test",
 
@@ -28,7 +28,7 @@ export const SOCKET_EVENTS = {
   LOG_EDIT_DIAGRAMS: "log:edit-diagrams",
   LOG_EDIT_REQUIREMENTS: "log:edit-requirements",
   LOG_EDIT_BUGS_SECURITY: "log:edit-bugs-security",
-  LOG_EDIT_TESTING: "log:edit-testing",
+  LOG_EDIT_REFACTORING_AND_TESTING: "log:edit-refactoring-and-testing",
 
   // Edit documentation events (AI chat)
   // Thinking = AI is processing the request

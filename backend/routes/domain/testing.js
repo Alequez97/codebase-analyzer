@@ -95,7 +95,7 @@ router.post(
       }
 
       const executeNow = req.body.executeNow !== false;
-      const task = await taskFactory.createAnalyzeTestingTask(
+      const task = await taskFactory.createAnalyzeRefactoringAndTestingTask(
         { domainId: id, files, includeRequirements },
         { executeNow },
       );
@@ -206,6 +206,69 @@ router.post("/:id/tests/:testId/edit", async (_, res) => {
     message:
       "Editing generated tests is not implemented yet. This endpoint will use file replacement tooling in a future update.",
   });
+});
+
+/**
+ * Apply a refactoring recommendation
+ */
+router.post("/:id/refactorings/:refactoringId/apply", async (req, res) => {
+  try {
+    const { id, refactoringId } = req.params;
+
+    // Read the testing analysis to get the refactoring details
+    const testingData = await domainTestingPersistence.readDomainTesting(id);
+
+    if (!testingData) {
+      return res.status(404).json({
+        error: "Domain testing not found",
+        message: `No testing analysis found for domain: ${id}`,
+      });
+    }
+
+    const refactoring = (testingData.refactoringRecommendations || []).find(
+      (r) => r.id === refactoringId,
+    );
+
+    if (!refactoring) {
+      return res.status(404).json({
+        error: "Refactoring not found",
+        message: `No refactoring recommendation found with id: ${refactoringId}`,
+      });
+    }
+
+    const executeNow = req.body.executeNow !== false;
+
+    const task = await taskFactory.createApplyRefactoringTask(
+      { domainId: id, refactoring },
+      { executeNow },
+    );
+
+    if (task?.success === false) {
+      if (task.code === TASK_ERROR_CODES.INVALID_INPUT) {
+        return res.status(400).json({
+          error: task.error || "Invalid refactoring recommendation",
+          code: task.code,
+        });
+      }
+
+      return res.status(500).json({
+        error: task.error || "Failed to apply refactoring",
+        code: task.code,
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Refactoring task created",
+      task,
+    });
+  } catch (error) {
+    logger.error(
+      `Error applying refactoring ${req.params.refactoringId} for domain ${req.params.id}`,
+      { error, component: "API" },
+    );
+    res.status(500).json({ error: "Failed to apply refactoring" });
+  }
 });
 
 export default router;

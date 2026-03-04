@@ -56,6 +56,7 @@ function serializeErrors(obj) {
 
 /**
  * Format log message with optional timestamp
+ * Context is only included for ERROR level to keep output clean
  */
 function format(level, message, context) {
   let formatted = "";
@@ -66,7 +67,7 @@ function format(level, message, context) {
 
   formatted += `[${level}] ${message}`;
 
-  if (context) {
+  if (context && level === "ERROR") {
     const serialized = serializeErrors(context);
     formatted += ` ${JSON.stringify(serialized)}`;
   }

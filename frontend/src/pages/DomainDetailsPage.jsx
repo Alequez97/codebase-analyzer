@@ -83,6 +83,8 @@ export default function DomainDetailsPage() {
     applyLogsByDomainId,
     applyTest,
     applyTestEdits,
+    applyingRefactoringByDomainId,
+    applyRefactoring,
   } = useApplyTestStore();
 
   // Logs store
@@ -127,7 +129,9 @@ export default function DomainDetailsPage() {
   const bugsSecurityProgress =
     taskProgress?.type === TASK_TYPES.BUGS_SECURITY ? taskProgress : null;
   const testingProgress =
-    taskProgress?.type === TASK_TYPES.TESTING ? taskProgress : null;
+    taskProgress?.type === TASK_TYPES.REFACTORING_AND_TESTING
+      ? taskProgress
+      : null;
 
   // Logs data for each section
   const domainLogs = domainLogsBySection.get(domainId) || new Map();
@@ -176,6 +180,8 @@ export default function DomainDetailsPage() {
   // Test application states
   const applyingTests = applyingTestsByDomainId[domainId] || {};
   const applyLogs = applyLogsByDomainId[domainId] || {};
+  const applyingRefactoringId =
+    applyingRefactoringByDomainId?.[domainId] || null;
 
   useEffect(() => {
     if (!domainId) return;
@@ -347,6 +353,22 @@ export default function DomainDetailsPage() {
       description: result.error,
       type: "error",
     });
+  };
+
+  const handleApplyRefactoring = async (refactoringId) => {
+    const result = await applyRefactoring(domainId, refactoringId);
+    if (result.success) {
+      toaster.create({
+        title: result.message || "Refactoring task created",
+        type: "success",
+      });
+    } else {
+      toaster.create({
+        title: "Failed to apply refactoring",
+        description: result.error,
+        type: "error",
+      });
+    }
   };
 
   // Get current chat configuration and content based on active section
@@ -600,6 +622,8 @@ export default function DomainDetailsPage() {
               }
               onApplyTest={handleApplyTest}
               onApplyTestEdits={handleApplyTestEdits}
+              onApplyRefactoring={handleApplyRefactoring}
+              applyingRefactoringId={applyingRefactoringId}
               showLogs={showDomainLogs}
               logs={testingLogs}
               logsLoading={testingLogsLoading}

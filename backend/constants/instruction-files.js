@@ -4,9 +4,11 @@ export const INSTRUCTION_FILES_NAMES = {
   ANALYZE_DOMAIN_REQUIREMENTS: "analyze-domain-requirements.md",
   ANALYZE_DOMAIN_BUGS_SECURITY: "analyze-domain-bugs-security.md",
   ANALYZE_DOMAIN_DIAGRAMS: "analyze-domain-diagrams.md",
-  ANALYZE_DOMAIN_TESTING: "analyze-domain-testing.md",
+  ANALYZE_DOMAIN_REFACTORING_AND_TESTING:
+    "analyze-domain-refactoring-and-testing.md",
   APPLY_FINDING_FIX: "apply-finding-fix.md",
   APPLY_TEST: "apply-test.md",
+  APPLY_REFACTORING: "apply-refactoring.md",
   EDIT_DOMAIN_SECTION: "edit-domain-section.md",
 };
 
@@ -19,8 +21,10 @@ export const INSTRUCTION_FILES_PATHS = {
   ANALYZE_DOMAIN_BUGS_SECURITY:
     "backend/instructions/analyze-domain-bugs-security.md",
   ANALYZE_DOMAIN_DIAGRAMS: "backend/instructions/analyze-domain-diagrams.md",
-  ANALYZE_DOMAIN_TESTING: "backend/instructions/analyze-domain-testing.md",
+  ANALYZE_DOMAIN_REFACTORING_AND_TESTING:
+    "backend/instructions/analyze-domain-refactoring-and-testing.md",
   APPLY_FINDING_FIX: "backend/instructions/apply-finding-fix.md",
   APPLY_TEST: "backend/instructions/apply-test.md",
+  APPLY_REFACTORING: "backend/instructions/apply-refactoring.md",
   EDIT_DOMAIN_SECTION: "backend/instructions/edit-domain-section.md",
 };

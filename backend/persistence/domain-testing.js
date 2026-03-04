@@ -193,6 +193,57 @@ export async function recordTestingApplyCompleted(domainId, actionInput) {
   };
 }
 
+/**
+ * Mark a refactoring recommendation as applied in the domain testing content
+ * @param {string} domainId - The domain ID
+ * @param {Object} input - Action input
+ * @param {string} input.refactoringId - The refactoring ID (e.g. "REFACTOR-001")
+ * @param {string} input.taskId - The task ID that applied the refactoring
+ * @param {string} input.serviceFile - The new service file created
+ * @param {string} input.timestamp - ISO timestamp
+ */
+export async function recordRefactoringApplied(domainId, input) {
+  const existing = await readDomainTesting(domainId);
+  if (!existing) {
+    return {
+      success: false,
+      error: `Domain testing not found for ${domainId}`,
+    };
+  }
+
+  const refactorings = Array.isArray(existing.refactoringRecommendations)
+    ? [...existing.refactoringRecommendations]
+    : [];
+
+  const index = refactorings.findIndex((r) => r.id === input.refactoringId);
+  if (index < 0) {
+    return {
+      success: false,
+      error: `Refactoring ${input.refactoringId} not found in domain ${domainId}`,
+    };
+  }
+
+  refactorings[index] = {
+    ...refactorings[index],
+    status: "applied",
+    appliedAt: input.timestamp || new Date().toISOString(),
+    appliedTaskId: input.taskId || null,
+    serviceFile: input.serviceFile || null,
+  };
+
+  const updatedData = {
+    ...existing,
+    refactoringRecommendations: refactorings,
+  };
+
+  await writeDomainTesting(domainId, updatedData);
+
+  return {
+    success: true,
+    refactoring: refactorings[index],
+  };
+}
+
 export async function upsertDomainExistingTest(domainId, testInput) {
   const existing = await readDomainTesting(domainId);
   if (!existing) {

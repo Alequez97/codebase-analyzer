@@ -365,17 +365,25 @@ router.post(
       }
 
       const executeNow = req.body.executeNow !== false;
-      const task = await taskFactory.createAnalyzeTestingTask(id, files, {
-        includeRequirements,
-        executeNow,
-      });
+      const task = await taskFactory.createAnalyzeRefactoringAndTestingTask(
+        id,
+        files,
+        {
+          includeRequirements,
+          executeNow,
+        },
+      );
       res.status(201).json(task);
     } catch (error) {
-      logger.error("Error creating testing analysis task", {
+      logger.error("Error creating refactoring-and-testing analysis task", {
         error,
         component: "API",
       });
-      res.status(500).json({ error: "Failed to create testing analysis task" });
+      res
+        .status(500)
+        .json({
+          error: "Failed to create refactoring-and-testing analysis task",
+        });
     }
   },
 );

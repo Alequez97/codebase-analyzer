@@ -123,7 +123,7 @@ export default function DomainTestingSection({
                       loadingText="Analyzing"
                     >
                       <Sparkles size={14} />
-                      Analyze tests
+                      Analyze refactoring & tests
                     </Button>
                   )}
                 </>
@@ -158,7 +158,7 @@ export default function DomainTestingSection({
                 <EmptyState
                   icon={TestTube}
                   title="No test analysis yet"
-                  description="Click 'Analyze tests' to get detailed coverage analysis and test suggestions."
+                  description="Click 'Analyze refactoring & tests' to identify refactoring needs, coverage gaps, and test suggestions."
                   variant="simple"
                 />
               ) : (
@@ -234,8 +234,8 @@ export default function DomainTestingSection({
         open={showAnalyzeDialog}
         onClose={handleCancelAnalysis}
         onStart={handleStartAnalysis}
-        title="Analyze Tests"
-        description="AI will analyze this domain's tests and identify coverage gaps, missing scenarios, and test quality improvements."
+        title="Analyze Refactoring & Tests"
+        description="AI will analyze this domain's code structure and tests to identify refactoring opportunities, coverage gaps, and missing test scenarios."
         examples={[
           "Focus on auth flows and permission boundaries",
           "Prioritize regression tests for recent bug fixes",

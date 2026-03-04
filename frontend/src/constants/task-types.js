@@ -9,7 +9,7 @@ export const TASK_TYPES = {
   DIAGRAMS: "analyze-diagrams",
   REQUIREMENTS: "analyze-requirements",
   BUGS_SECURITY: "analyze-bugs-security",
-  TESTING: "analyze-testing",
+  REFACTORING_AND_TESTING: "analyze-refactoring-and-testing",
   APPLY_FIX: "apply-fix",
   APPLY_TEST: "apply-test",
 
@@ -18,5 +18,5 @@ export const TASK_TYPES = {
   EDIT_DIAGRAMS: "edit-diagrams",
   EDIT_REQUIREMENTS: "edit-requirements",
   EDIT_BUGS_SECURITY: "edit-bugs-security",
-  EDIT_TESTING: "edit-testing",
+  EDIT_REFACTORING_AND_TESTING: "edit-refactoring-and-testing",
 };

@@ -106,9 +106,9 @@ const config = {
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.HIGH,
     },
-    [TASK_TYPES.TESTING]: {
+    [TASK_TYPES.REFACTORING_AND_TESTING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5,
+      model: MODELS.CLAUDE_SONNET,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -126,6 +126,13 @@ const config = {
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
+    [TASK_TYPES.APPLY_REFACTORING]: {
+      agent: AGENTS.AIDER,
+      model: MODELS.CLAUDE_SONNET,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.HIGH,
     },
 
     // Edit tasks (AI chat for editing domain sections)

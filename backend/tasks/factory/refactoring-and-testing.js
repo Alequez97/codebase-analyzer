@@ -21,11 +21,11 @@ import * as logger from "../../utils/logger.js";
  * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeTestingTask(
+export async function createAnalyzeRefactoringAndTestingTask(
   { domainId, files, includeRequirements = false },
   { executeNow = false } = {},
 ) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.TESTING);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.REFACTORING_AND_TESTING);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
@@ -33,8 +33,8 @@ export async function createAnalyzeTestingTask(
   const agentConfig = agentConfigResult.agentConfig;
 
   const task = {
-    id: generateTaskId(TASK_TYPES.TESTING),
-    type: TASK_TYPES.TESTING,
+    id: generateTaskId(TASK_TYPES.REFACTORING_AND_TESTING),
+    type: TASK_TYPES.REFACTORING_AND_TESTING,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
@@ -44,10 +44,11 @@ export async function createAnalyzeTestingTask(
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_TESTING,
+    instructionFile:
+      INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_REFACTORING_AND_TESTING,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
-      DOMAIN_SECTION_IDS.TESTING,
+      DOMAIN_SECTION_IDS.REFACTORING_AND_TESTING,
     ),
     generateMetadata: true,
   };

@@ -10,9 +10,10 @@ export { createAnalyzeDocumentationTask } from "./documentation.js";
 export { createAnalyzeRequirementsTask } from "./requirements.js";
 export { createAnalyzeBugsSecurityTask } from "./bugs-security.js";
 export { createAnalyzeDiagramsTask } from "./diagrams.js";
-export { createAnalyzeTestingTask } from "./testing.js";
+export { createAnalyzeRefactoringAndTestingTask } from "./refactoring-and-testing.js";
 export { createApplyFixTask } from "./apply-fix.js";
 export { createApplyTestTask } from "./apply-test.js";
+export { createApplyRefactoringTask } from "./apply-refactoring.js";
 
 // Edit tasks (AI chat)
 export { createEditDocumentationTask } from "./edit-documentation.js";

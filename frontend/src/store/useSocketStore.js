@@ -94,7 +94,7 @@ export const useSocketStore = create((set, get) => ({
       } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
         useDomainBugsSecurityStore.getState().setLoading(domainId, false);
         await useDomainBugsSecurityStore.getState().fetch(domainId);
-      } else if (type === TASK_TYPES.TESTING && domainId) {
+      } else if (type === TASK_TYPES.REFACTORING_AND_TESTING && domainId) {
         useDomainTestingStore.getState().setLoading(domainId, false);
         await useDomainTestingStore.getState().fetch(domainId);
       } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
@@ -139,7 +139,7 @@ export const useSocketStore = create((set, get) => ({
           if (!store.loadingById.get(domainId)) {
             store.setLoading(domainId, true);
           }
-        } else if (type === TASK_TYPES.TESTING) {
+        } else if (type === TASK_TYPES.REFACTORING_AND_TESTING) {
           const store = useDomainTestingStore.getState();
           if (!store.loadingById.get(domainId)) {
             store.setLoading(domainId, true);
@@ -176,10 +176,13 @@ export const useSocketStore = create((set, get) => ({
         const store = useDomainBugsSecurityStore.getState();
         store.setLoading(domainId, false);
         store.setError(domainId, error || "Bugs & security analysis failed");
-      } else if (type === TASK_TYPES.TESTING && domainId) {
+      } else if (type === TASK_TYPES.REFACTORING_AND_TESTING && domainId) {
         const store = useDomainTestingStore.getState();
         store.setLoading(domainId, false);
-        store.setError(domainId, error || "Testing analysis failed");
+        store.setError(
+          domainId,
+          error || "Refactoring & testing analysis failed",
+        );
       } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
         useApplyTestStore.getState().failApplyByTaskId(domainId, data.taskId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
@@ -214,14 +217,14 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_DIAGRAMS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_BUGS_SECURITY, handleLogEvent);
-    socket.on(SOCKET_EVENTS.LOG_TESTING, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_REFACTORING_AND_TESTING, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_APPLY_TEST, handleLogEvent);
     // Edit task logs
     socket.on(SOCKET_EVENTS.LOG_EDIT_DOCUMENTATION, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_DIAGRAMS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_BUGS_SECURITY, handleLogEvent);
-    socket.on(SOCKET_EVENTS.LOG_EDIT_TESTING, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_EDIT_REFACTORING_AND_TESTING, handleLogEvent);
 
     // Chat events - AI thinking indicator
     socket.on(SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING, ({ thinking }) => {

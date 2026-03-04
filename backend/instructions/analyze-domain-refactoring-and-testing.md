@@ -1,13 +1,46 @@
-# Domain Testing Analysis
+# Domain Refactoring & Testing Analysis
 
 ## Your Task
 
-Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
+Analyze refactoring needs and testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
 
 ```json
 {
   "domainId": "{{DOMAIN_ID}}",
   "domainName": "{{DOMAIN_NAME}}",
+
+  "refactoringRecommendations": [
+    {
+      "id": "REFACTOR-001",
+      "priority": "P0 | P1 | P2 | P3",
+      "category": "extract-business-logic | reduce-complexity | improve-modularity | enhance-testability | decouple-dependencies | extract-validation",
+      "title": "Clear refactoring title",
+      "targetFile": "path/to/file.js",
+      "targetFunction": "functionName",
+      "startLine": 100,
+      "endLine": 150,
+      "issue": "What architectural problem prevents testing",
+      "extractionPlan": {
+        "newServiceFile": "path/to/new-service.js",
+        "extractedFunctions": [
+          {
+            "name": "extractedFunctionName",
+            "purpose": "What this function does",
+            "params": ["param1", "param2"],
+            "returns": "returnType"
+          }
+        ]
+      },
+      "benefits": [
+        "Specific benefit 1",
+        "Specific benefit 2"
+      ],
+      "unblocks": ["TEST-001", "TEST-002"],
+      "estimatedEffort": "30 minutes",
+      "status": "pending"
+    }
+  ],
+
   "existingTests": [
     {
       "file": "frontend/tests/domain/feature.test.js",
@@ -19,6 +52,7 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
     "unit": [
       {
         "id": "TEST-001",
+        "blockedBy": "REFACTOR-001",  // Optional: refactoring ID that must be applied first
         "description": "What should be tested",
         "priority": "P0 | P1 | P2 | P3",
         "category": "security | resilience | validation | business-logic | data-integrity | performance | edge-case",
@@ -82,6 +116,60 @@ Analyze testing for this domain. Output to **`{{OUTPUT_FILE}}`**:
   }
 }
 ```
+
+**Important:** `missingTests` MUST be an object with `unit`, `integration`, and `e2e` arrays. Do not output a flat array.
+
+## Refactoring Recommendations (Priority: Testability)
+
+Before identifying missing tests, **analyze code for testability barriers**. Recommend refactorings that:
+
+### When to Recommend Refactoring
+
+1. **Business Logic in Controllers/Presenters**
+   - Controllers with 50+ lines of logic that should be in services
+   - Complex calculations, transformations, or algorithms in HTTP handlers
+   - Data merging, validation, or aggregation logic mixed with request/response handling
+
+2. **Untestable Code Structures**
+   - Functions that require database connections for testing simple logic
+   - Circular dependencies preventing module isolation
+   - Global state or singletons that prevent parallel testing
+
+3. **Complexity That Hinders Testing**
+   - Functions exceeding 50 lines with multiple responsibilities
+   - Deeply nested conditionals (3+ levels) that are hard to test exhaustively
+   - Mixed concerns (UI + data + API logic in one file)
+
+### Refactoring Categories
+
+- **extract-business-logic**: Move logic from controllers to services/utilities
+- **reduce-complexity**: Break down large functions into testable units
+- **improve-modularity**: Separate concerns to enable isolated testing
+- **enhance-testability**: Remove hard dependencies (DB, HTTP) from pure logic
+- **decouple-dependencies**: Break circular or tight coupling
+- **extract-validation**: Move validation logic to reusable validators
+
+### Refactoring Priority
+
+- **P0**: Blocks critical security or data-integrity tests
+- **P1**: Blocks main business workflow tests
+- **P2**: Blocks secondary feature tests
+- **P3**: Code quality improvement, no tests blocked
+
+### Extraction Plan Requirements
+
+For each refactoring:
+
+1. **Be specific**: Provide exact file, function, and line numbers
+2. **Show the plan**: Name the new service file and extracted functions
+3. **Explain benefits**: How this enables testing (e.g., "enables fast unit tests without DB")
+4. **Link to tests**: Use `unblocks` field to reference TEST-IDs that require this refactoring
+
+### Important: Link Refactoring to Tests
+
+- If a test requires refactoring first, use `blockedBy` field in missing test
+- Tests marked as blocked should have clear scenarios but note they can't be implemented yet
+- Refactoring `unblocks` array should list all TEST-IDs that will become implementable
 
 **Important:** `missingTests` MUST be an object with `unit`, `integration`, and `e2e` arrays. Do not output a flat array.
 
@@ -377,6 +465,14 @@ If the answer to all three is "no" or "nothing specific", **skip that test**.
 **Why good**: Tests complex calculation with edge cases that affect business decisions.
 
 ## What to Analyze
+
+0. **Refactoring Needs (Analyze First)**
+   - Identify controllers/handlers with 50+ lines of business logic
+   - Find functions mixing HTTP/DB concerns with pure business logic
+   - Look for complex algorithms or calculations in wrong layers
+   - Identify code that requires DB/HTTP to test simple logic
+   - Check for circular dependencies or tight coupling preventing testing
+   - **Output refactorings that would unlock better testing**
 
 1. **Existing Tests**
 

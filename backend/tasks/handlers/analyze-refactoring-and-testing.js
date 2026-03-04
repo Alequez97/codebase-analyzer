@@ -2,10 +2,10 @@ import fs from "fs/promises";
 import { defaultAnalysisHandler } from "./default-analysis.js";
 
 /**
- * Handler for analyze-testing task
- * Keeps testing-specific schema validation out of the default handler
+ * Handler for analyze-refactoring-and-testing task
+ * Keeps refactoring-and-testing-specific schema validation out of the default handler
  */
-export function analyzeTestingHandler(task, taskLogger, agent) {
+export function analyzeRefactoringAndTestingHandler(task, taskLogger, agent) {
   return {
     postProcess: async (result) => {
       const defaults = defaultAnalysisHandler(task, taskLogger, agent);

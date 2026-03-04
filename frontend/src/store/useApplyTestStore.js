@@ -8,6 +8,7 @@ export const useApplyTestStore = create((set, _) => ({
   applyingTestsByDomainId: {},
   applyTaskIdsByDomainId: {},
   applyLogsByDomainId: {},
+  applyingRefactoringByDomainId: {},
 
   // Actions
   applyTest: async (domainId, testId) => {
@@ -79,6 +80,45 @@ export const useApplyTestStore = create((set, _) => ({
     } catch (err) {
       const message =
         err?.response?.data?.message || "Failed to apply test edits";
+      return { success: false, error: message };
+    }
+  },
+
+  applyRefactoring: async (domainId, refactoringId) => {
+    if (!domainId || !refactoringId) {
+      return { success: false, error: "Invalid parameters" };
+    }
+
+    set((state) => ({
+      applyingRefactoringByDomainId: {
+        ...state.applyingRefactoringByDomainId,
+        [domainId]: refactoringId,
+      },
+    }));
+
+    try {
+      const response = await api.applyRefactoring(domainId, refactoringId);
+      const message = response.data?.message || "Refactoring task created";
+
+      set((state) => ({
+        applyingRefactoringByDomainId: {
+          ...state.applyingRefactoringByDomainId,
+          [domainId]: null,
+        },
+      }));
+
+      return { success: true, message };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Failed to apply refactoring";
+
+      set((state) => ({
+        applyingRefactoringByDomainId: {
+          ...state.applyingRefactoringByDomainId,
+          [domainId]: null,
+        },
+      }));
+
       return { success: false, error: message };
     }
   },
@@ -158,5 +198,6 @@ export const useApplyTestStore = create((set, _) => ({
       applyingTestsByDomainId: {},
       applyTaskIdsByDomainId: {},
       applyLogsByDomainId: {},
+      applyingRefactoringByDomainId: {},
     }),
 }));
