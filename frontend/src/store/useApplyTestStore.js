@@ -9,6 +9,7 @@ export const useApplyTestStore = create((set, _) => ({
   applyTaskIdsByDomainId: {},
   applyLogsByDomainId: {},
   applyingRefactoringByDomainId: {},
+  applyRefactoringTaskByDomainId: {},
 
   // Actions
   applyTest: async (domainId, testId) => {
@@ -98,16 +99,17 @@ export const useApplyTestStore = create((set, _) => ({
 
     try {
       const response = await api.applyRefactoring(domainId, refactoringId);
+      const taskId = response.data?.task?.id;
       const message = response.data?.message || "Refactoring task created";
 
       set((state) => ({
-        applyingRefactoringByDomainId: {
-          ...state.applyingRefactoringByDomainId,
-          [domainId]: null,
+        applyRefactoringTaskByDomainId: {
+          ...state.applyRefactoringTaskByDomainId,
+          [domainId]: taskId,
         },
       }));
 
-      return { success: true, message };
+      return { success: true, message, taskId };
     } catch (err) {
       const message =
         err?.response?.data?.message || "Failed to apply refactoring";
@@ -121,6 +123,35 @@ export const useApplyTestStore = create((set, _) => ({
 
       return { success: false, error: message };
     }
+  },
+
+  completeApplyRefactoring: (domainId) => {
+    if (!domainId) return;
+    set((state) => ({
+      applyingRefactoringByDomainId: {
+        ...state.applyingRefactoringByDomainId,
+        [domainId]: null,
+      },
+      applyRefactoringTaskByDomainId: {
+        ...state.applyRefactoringTaskByDomainId,
+        [domainId]: null,
+      },
+    }));
+    useDomainTestingStore.getState().fetch(domainId);
+  },
+
+  failApplyRefactoring: (domainId) => {
+    if (!domainId) return;
+    set((state) => ({
+      applyingRefactoringByDomainId: {
+        ...state.applyingRefactoringByDomainId,
+        [domainId]: null,
+      },
+      applyRefactoringTaskByDomainId: {
+        ...state.applyRefactoringTaskByDomainId,
+        [domainId]: null,
+      },
+    }));
   },
 
   appendApplyLogByTaskId: (domainId, taskId, logText) => {
@@ -199,5 +230,6 @@ export const useApplyTestStore = create((set, _) => ({
       applyTaskIdsByDomainId: {},
       applyLogsByDomainId: {},
       applyingRefactoringByDomainId: {},
+      applyRefactoringTaskByDomainId: {},
     }),
 }));

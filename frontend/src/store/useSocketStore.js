@@ -101,6 +101,8 @@ export const useSocketStore = create((set, get) => ({
         useApplyTestStore
           .getState()
           .completeApplyByTaskId(domainId, data.taskId, data.params);
+      } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
+        useApplyTestStore.getState().completeApplyRefactoring(domainId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
@@ -185,6 +187,8 @@ export const useSocketStore = create((set, get) => ({
         );
       } else if (type === TASK_TYPES.APPLY_TEST && domainId) {
         useApplyTestStore.getState().failApplyByTaskId(domainId, data.taskId);
+      } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
+        useApplyTestStore.getState().failApplyRefactoring(domainId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
@@ -219,6 +223,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REFACTORING_AND_TESTING, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_APPLY_TEST, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_APPLY_REFACTORING, handleLogEvent);
     // Edit task logs
     socket.on(SOCKET_EVENTS.LOG_EDIT_DOCUMENTATION, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_DIAGRAMS, handleLogEvent);

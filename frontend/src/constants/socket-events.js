@@ -22,6 +22,7 @@ export const SOCKET_EVENTS = {
   LOG_REFACTORING_AND_TESTING: "log:refactoring-and-testing",
   LOG_APPLY_FIX: "log:apply-fix",
   LOG_APPLY_TEST: "log:apply-test",
+  LOG_APPLY_REFACTORING: "log:apply-refactoring",
 
   // Edit task logs (AI chat)
   LOG_EDIT_DOCUMENTATION: "log:edit-documentation",
