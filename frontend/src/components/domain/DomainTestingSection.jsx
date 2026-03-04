@@ -41,6 +41,7 @@ export default function DomainTestingSection({
   onApplyTest,
   onApplyTestEdits,
   onApplyRefactoring,
+  onMarkApplied = null,
   applyingRefactoringId = null,
   hasRequirements = false,
   showLogs = false,
@@ -173,6 +174,7 @@ export default function DomainTestingSection({
                         <RefactoringRecommendationsCard
                           refactorings={testing.refactoringRecommendations}
                           onApplyRefactoring={onApplyRefactoring}
+                          onMarkApplied={onMarkApplied}
                           applyingRefactoringId={applyingRefactoringId}
                         />
                       </Box>

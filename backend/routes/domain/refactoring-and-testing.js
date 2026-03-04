@@ -209,6 +209,32 @@ router.post("/:id/tests/:testId/edit", async (_, res) => {
 });
 
 /**
+ * Unblock a missing test by clearing its blockedBy field
+ */
+router.post("/:id/tests/:testId/unblock", async (req, res) => {
+  try {
+    const { id, testId } = req.params;
+
+    const result = await domainTestingPersistence.unblockMissingTest(
+      id,
+      testId,
+    );
+
+    if (!result.success) {
+      return res.status(404).json({ error: result.error });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    logger.error(
+      `Error unblocking test ${req.params.testId} for domain ${req.params.id}`,
+      { error, component: "API" },
+    );
+    res.status(500).json({ error: "Failed to unblock test" });
+  }
+});
+
+/**
  * Apply a refactoring recommendation
  */
 router.post("/:id/refactorings/:refactoringId/apply", async (req, res) => {
@@ -270,5 +296,47 @@ router.post("/:id/refactorings/:refactoringId/apply", async (req, res) => {
     res.status(500).json({ error: "Failed to apply refactoring" });
   }
 });
+
+/**
+ * Manually mark a refactoring recommendation as applied
+ */
+router.post(
+  "/:id/refactorings/:refactoringId/mark-applied",
+  async (req, res) => {
+    try {
+      const { id, refactoringId } = req.params;
+
+      const testingData = await domainTestingPersistence.readDomainTesting(id);
+      if (!testingData) {
+        return res.status(404).json({
+          error: "Domain testing not found",
+          message: `No testing analysis found for domain: ${id}`,
+        });
+      }
+
+      const result = await domainTestingPersistence.recordRefactoringApplied(
+        id,
+        {
+          refactoringId,
+          taskId: null,
+          serviceFile: null,
+          timestamp: new Date().toISOString(),
+        },
+      );
+
+      if (!result.success) {
+        return res.status(404).json({ error: result.error });
+      }
+
+      res.json({ success: true, refactoring: result.refactoring });
+    } catch (error) {
+      logger.error(
+        `Error marking refactoring ${req.params.refactoringId} as applied for domain ${req.params.id}`,
+        { error, component: "API" },
+      );
+      res.status(500).json({ error: "Failed to mark refactoring as applied" });
+    }
+  },
+);
 
 export default router;

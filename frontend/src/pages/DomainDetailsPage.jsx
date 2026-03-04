@@ -85,6 +85,7 @@ export default function DomainDetailsPage() {
     applyTestEdits,
     applyingRefactoringByDomainId,
     applyRefactoring,
+    markRefactoringApplied,
   } = useApplyTestStore();
 
   // Logs store
@@ -371,6 +372,17 @@ export default function DomainDetailsPage() {
     }
   };
 
+  const handleMarkRefactoringApplied = async (refactoringId) => {
+    const result = await markRefactoringApplied(domainId, refactoringId);
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to mark refactoring as applied",
+        description: result.error,
+        type: "error",
+      });
+    }
+  };
+
   // Get current chat configuration and content based on active section
   const getCurrentChatData = () => {
     if (!activeSectionType) return null;
@@ -623,6 +635,7 @@ export default function DomainDetailsPage() {
               onApplyTest={handleApplyTest}
               onApplyTestEdits={handleApplyTestEdits}
               onApplyRefactoring={handleApplyRefactoring}
+              onMarkApplied={handleMarkRefactoringApplied}
               applyingRefactoringId={applyingRefactoringId}
               showLogs={showDomainLogs}
               logs={testingLogs}

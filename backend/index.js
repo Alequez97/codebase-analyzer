@@ -75,7 +75,7 @@ app.use("/api/analysis/domain", domainRoutes.documentationRoutes);
 app.use("/api/analysis/domain", domainRoutes.diagramsRoutes);
 app.use("/api/analysis/domain", domainRoutes.requirementsRoutes);
 app.use("/api/analysis/domain", domainRoutes.bugsSecurityRoutes);
-app.use("/api/analysis/domain", domainRoutes.testingRoutes);
+app.use("/api/analysis/domain", domainRoutes.refactoringAndTestingRoutes);
 
 app.use("/api/tasks", tasksRoutes);
 app.use("/api/logs", logsRoutes);

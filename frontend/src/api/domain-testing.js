@@ -29,3 +29,11 @@ export const applyRefactoring = (domainId, refactoringId) =>
   client.post(
     `/analysis/domain/${domainId}/refactorings/${refactoringId}/apply`,
   );
+
+export const markRefactoringApplied = (domainId, refactoringId) =>
+  client.post(
+    `/analysis/domain/${domainId}/refactorings/${refactoringId}/mark-applied`,
+  );
+
+export const unblockTest = (domainId, testId) =>
+  client.post(`/analysis/domain/${domainId}/tests/${testId}/unblock`);

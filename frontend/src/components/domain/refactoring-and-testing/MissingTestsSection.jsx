@@ -38,6 +38,7 @@ export function MissingTestsSection({
     hasPendingEditedTest,
     setEditingTest,
     clearEditingTest,
+    unblockTest,
   } = useTestingEditorStore();
 
   const mergeActionStatusFromSource = (edited, source) => {
@@ -100,7 +101,7 @@ export function MissingTestsSection({
     }
   };
 
-  const renderActionButton = (test, isApplied, hasPendingEdits) => {
+  const renderActionButton = (test, isApplied, hasPendingEdits, isBlocked) => {
     if (isApplied && hasPendingEdits) {
       return (
         <Button
@@ -122,6 +123,22 @@ export function MissingTestsSection({
       return (
         <Button size="xs" colorPalette="green" variant="subtle" disabled>
           Applied
+        </Button>
+      );
+    }
+
+    if (isBlocked) {
+      return (
+        <Button
+          size="xs"
+          colorPalette="orange"
+          variant="outline"
+          onClick={(e) => {
+            e.stopPropagation();
+            unblockTest(domainId, test.id);
+          }}
+        >
+          Unblock manually
         </Button>
       );
     }
@@ -287,7 +304,11 @@ export function MissingTestsSection({
                           {test.id}
                         </Text>
                         {isBlocked && (
-                          <Badge colorPalette="orange" size="sm" variant="solid">
+                          <Badge
+                            colorPalette="orange"
+                            size="sm"
+                            variant="solid"
+                          >
                             🔒
                           </Badge>
                         )}
@@ -350,7 +371,12 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {renderActionButton(test, isApplied, hasPendingEdits)}
+                        {renderActionButton(
+                          test,
+                          isApplied,
+                          hasPendingEdits,
+                          isBlocked,
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -377,27 +403,44 @@ export function MissingTestsSection({
                                 bg="orange.50"
                                 borderColor="orange.300"
                               >
-                                <HStack mb={2}>
-                                  <Badge
+                                <HStack justify="space-between" mb={2}>
+                                  <HStack>
+                                    <Badge
+                                      colorPalette="orange"
+                                      size="sm"
+                                      variant="solid"
+                                    >
+                                      🔒 BLOCKED
+                                    </Badge>
+                                    <Text fontSize="xs" fontWeight="semibold">
+                                      Requires refactoring before implementation
+                                    </Text>
+                                  </HStack>
+                                  <Button
+                                    size="xs"
                                     colorPalette="orange"
-                                    size="sm"
-                                    variant="solid"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      unblockTest(domainId, test.id);
+                                    }}
                                   >
-                                    🔒 BLOCKED
-                                  </Badge>
-                                  <Text fontSize="xs" fontWeight="semibold">
-                                    Requires refactoring before implementation
-                                  </Text>
+                                    Unblock manually
+                                  </Button>
                                 </HStack>
                                 <Text fontSize="xs" color="gray.700">
                                   ⚠️ Blocked by{" "}
-                                  <Text as="span" fontFamily="mono" fontWeight="semibold">
+                                  <Text
+                                    as="span"
+                                    fontFamily="mono"
+                                    fontWeight="semibold"
+                                  >
                                     {test.blockedBy}
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above before
-                                  implementing this test.
+                                  Apply the recommended refactoring above, or
+                                  click Unblock manually to proceed without it.
                                 </Text>
                               </Box>
                             )}
@@ -513,7 +556,11 @@ export function MissingTestsSection({
                           {test.id}
                         </Text>
                         {isBlocked && (
-                          <Badge colorPalette="orange" size="sm" variant="solid">
+                          <Badge
+                            colorPalette="orange"
+                            size="sm"
+                            variant="solid"
+                          >
                             🔒
                           </Badge>
                         )}
@@ -576,7 +623,12 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {renderActionButton(test, isApplied, hasPendingEdits)}
+                        {renderActionButton(
+                          test,
+                          isApplied,
+                          hasPendingEdits,
+                          isBlocked,
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -603,27 +655,44 @@ export function MissingTestsSection({
                                 bg="orange.50"
                                 borderColor="orange.300"
                               >
-                                <HStack mb={2}>
-                                  <Badge
+                                <HStack justify="space-between" mb={2}>
+                                  <HStack>
+                                    <Badge
+                                      colorPalette="orange"
+                                      size="sm"
+                                      variant="solid"
+                                    >
+                                      🔒 BLOCKED
+                                    </Badge>
+                                    <Text fontSize="xs" fontWeight="semibold">
+                                      Requires refactoring before implementation
+                                    </Text>
+                                  </HStack>
+                                  <Button
+                                    size="xs"
                                     colorPalette="orange"
-                                    size="sm"
-                                    variant="solid"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      unblockTest(domainId, test.id);
+                                    }}
                                   >
-                                    🔒 BLOCKED
-                                  </Badge>
-                                  <Text fontSize="xs" fontWeight="semibold">
-                                    Requires refactoring before implementation
-                                  </Text>
+                                    Unblock manually
+                                  </Button>
                                 </HStack>
                                 <Text fontSize="xs" color="gray.700">
                                   ⚠️ Blocked by{" "}
-                                  <Text as="span" fontFamily="mono" fontWeight="semibold">
+                                  <Text
+                                    as="span"
+                                    fontFamily="mono"
+                                    fontWeight="semibold"
+                                  >
                                     {test.blockedBy}
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above before
-                                  implementing this test.
+                                  Apply the recommended refactoring above, or
+                                  click Unblock manually to proceed without it.
                                 </Text>
                               </Box>
                             )}
@@ -739,7 +808,11 @@ export function MissingTestsSection({
                           {test.id}
                         </Text>
                         {isBlocked && (
-                          <Badge colorPalette="orange" size="sm" variant="solid">
+                          <Badge
+                            colorPalette="orange"
+                            size="sm"
+                            variant="solid"
+                          >
                             🔒
                           </Badge>
                         )}
@@ -802,7 +875,12 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {renderActionButton(test, isApplied, hasPendingEdits)}
+                        {renderActionButton(
+                          test,
+                          isApplied,
+                          hasPendingEdits,
+                          isBlocked,
+                        )}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -829,27 +907,44 @@ export function MissingTestsSection({
                                 bg="orange.50"
                                 borderColor="orange.300"
                               >
-                                <HStack mb={2}>
-                                  <Badge
+                                <HStack justify="space-between" mb={2}>
+                                  <HStack>
+                                    <Badge
+                                      colorPalette="orange"
+                                      size="sm"
+                                      variant="solid"
+                                    >
+                                      🔒 BLOCKED
+                                    </Badge>
+                                    <Text fontSize="xs" fontWeight="semibold">
+                                      Requires refactoring before implementation
+                                    </Text>
+                                  </HStack>
+                                  <Button
+                                    size="xs"
                                     colorPalette="orange"
-                                    size="sm"
-                                    variant="solid"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      unblockTest(domainId, test.id);
+                                    }}
                                   >
-                                    🔒 BLOCKED
-                                  </Badge>
-                                  <Text fontSize="xs" fontWeight="semibold">
-                                    Requires refactoring before implementation
-                                  </Text>
+                                    Unblock manually
+                                  </Button>
                                 </HStack>
                                 <Text fontSize="xs" color="gray.700">
                                   ⚠️ Blocked by{" "}
-                                  <Text as="span" fontFamily="mono" fontWeight="semibold">
+                                  <Text
+                                    as="span"
+                                    fontFamily="mono"
+                                    fontWeight="semibold"
+                                  >
                                     {test.blockedBy}
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above before
-                                  implementing this test.
+                                  Apply the recommended refactoring above, or
+                                  click Unblock manually to proceed without it.
                                 </Text>
                               </Box>
                             )}
@@ -919,3 +1014,4 @@ export function MissingTestsSection({
     </VStack>
   );
 }
+

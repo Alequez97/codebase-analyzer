@@ -3,7 +3,7 @@ import api from "../api";
 import { useDomainTestingStore } from "./useDomainTestingStore";
 import { useTestingEditorStore } from "./useTestingEditorStore";
 
-export const useApplyTestStore = create((set, _) => ({
+export const useApplyTestStore = create((set, get) => ({
   // State
   applyingTestsByDomainId: {},
   applyTaskIdsByDomainId: {},
@@ -127,6 +127,7 @@ export const useApplyTestStore = create((set, _) => ({
 
   completeApplyRefactoring: (domainId) => {
     if (!domainId) return;
+    const refactoringId = get().applyingRefactoringByDomainId[domainId];
     set((state) => ({
       applyingRefactoringByDomainId: {
         ...state.applyingRefactoringByDomainId,
@@ -137,7 +138,43 @@ export const useApplyTestStore = create((set, _) => ({
         [domainId]: null,
       },
     }));
+    if (refactoringId) {
+      useTestingEditorStore
+        .getState()
+        .unblockTestsByRefactoring(domainId, refactoringId);
+    }
     useDomainTestingStore.getState().fetch(domainId);
+  },
+
+  markRefactoringApplied: async (domainId, refactoringId) => {
+    if (!domainId || !refactoringId) {
+      return { success: false, error: "Invalid parameters" };
+    }
+    try {
+      await api.markRefactoringApplied(domainId, refactoringId);
+      useTestingEditorStore
+        .getState()
+        .unblockTestsByRefactoring(domainId, refactoringId);
+      set((state) => ({
+        applyingRefactoringByDomainId: {
+          ...state.applyingRefactoringByDomainId,
+          [domainId]: null,
+        },
+        applyRefactoringTaskByDomainId: {
+          ...state.applyRefactoringTaskByDomainId,
+          [domainId]: null,
+        },
+      }));
+      useDomainTestingStore.getState().fetch(domainId);
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error:
+          err?.response?.data?.message ||
+          "Failed to mark refactoring as applied",
+      };
+    }
   },
 
   failApplyRefactoring: (domainId) => {

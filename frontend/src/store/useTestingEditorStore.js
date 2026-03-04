@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import api from "../api";
 
 export const useTestingEditorStore = create(
   persist(
@@ -104,6 +105,43 @@ export const useTestingEditorStore = create(
 
       clearEditingTest: () => {
         set({ editingTestId: null, editingDomainId: null });
+      },
+
+      unblockTestsByRefactoring: (domainId, refactoringId) => {
+        const missingTests = get().editedMissingTestsByDomain.get(domainId);
+        if (!missingTests) return;
+        const updated = { ...missingTests };
+        ["unit", "integration", "e2e"].forEach((type) => {
+          if (updated[type]) {
+            updated[type] = updated[type].map((t) =>
+              t.blockedBy === refactoringId ? { ...t, blockedBy: null } : t,
+            );
+          }
+        });
+        get().setEditedMissingTests(domainId, updated);
+      },
+
+      unblockTest: async (domainId, testId) => {
+        try {
+          const result = await api.unblockTest(domainId, testId);
+          if (!result.data?.success) {
+            return {
+              success: false,
+              error: result.data?.error || "Failed to unblock test",
+            };
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error?.response?.data?.error || "Failed to unblock test",
+          };
+        }
+        // Update local state
+        get().updateTestInMissingTests(domainId, {
+          id: testId,
+          blockedBy: null,
+        });
+        return { success: true };
       },
 
       reset: () =>

@@ -244,6 +244,52 @@ export async function recordRefactoringApplied(domainId, input) {
   };
 }
 
+/**
+ * Clear the blockedBy field on a missing test
+ * @param {string} domainId - The domain ID
+ * @param {string} testId - The test ID to unblock
+ */
+export async function unblockMissingTest(domainId, testId) {
+  const existing = await readDomainTesting(domainId);
+  if (!existing) {
+    return {
+      success: false,
+      error: `Domain testing not found for ${domainId}`,
+    };
+  }
+
+  const missingTests = existing.missingTests || {};
+  let found = false;
+
+  const unblockInList = (list = []) =>
+    list.map((t) => {
+      if (t.id !== testId) return t;
+      found = true;
+      const { blockedBy, ...rest } = t;
+      return rest;
+    });
+
+  const updatedMissingTests = {
+    unit: unblockInList(missingTests.unit),
+    integration: unblockInList(missingTests.integration),
+    e2e: unblockInList(missingTests.e2e),
+  };
+
+  if (!found) {
+    return {
+      success: false,
+      error: `Test ${testId} not found in domain ${domainId}`,
+    };
+  }
+
+  await writeDomainTesting(domainId, {
+    ...existing,
+    missingTests: updatedMissingTests,
+  });
+
+  return { success: true };
+}
+
 export async function upsertDomainExistingTest(domainId, testInput) {
   const existing = await readDomainTesting(domainId);
   if (!existing) {

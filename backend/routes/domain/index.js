@@ -9,4 +9,4 @@ export { default as documentationRoutes } from "./documentation.js";
 export { default as diagramsRoutes } from "./diagrams.js";
 export { default as requirementsRoutes } from "./requirements.js";
 export { default as bugsSecurityRoutes } from "./bugs-security.js";
-export { default as testingRoutes } from "./testing.js";
+export { default as refactoringAndTestingRoutes } from "./refactoring-and-testing.js";

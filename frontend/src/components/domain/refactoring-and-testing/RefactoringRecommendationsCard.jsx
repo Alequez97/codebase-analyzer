@@ -6,6 +6,7 @@ import {
   Heading,
   HStack,
   List,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -17,6 +18,7 @@ import { kebabCaseToDisplayName } from "../../../utils/domain-utils";
 export function RefactoringRecommendationsCard({
   refactorings = [],
   onApplyRefactoring,
+  onMarkApplied,
   applyingRefactoringId = null,
 }) {
   if (!refactorings || refactorings.length === 0) {
@@ -69,6 +71,7 @@ export function RefactoringRecommendationsCard({
             key={refactoring.id}
             refactoring={refactoring}
             onApply={onApplyRefactoring}
+            onMarkApplied={onMarkApplied}
             isApplying={applyingRefactoringId === refactoring.id}
           />
         ))}
@@ -107,7 +110,7 @@ export function RefactoringRecommendationsCard({
   );
 }
 
-function RefactoringCard({ refactoring, onApply, isApplying }) {
+function RefactoringCard({ refactoring, onApply, onMarkApplied, isApplying }) {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "P0":
@@ -122,7 +125,11 @@ function RefactoringCard({ refactoring, onApply, isApplying }) {
   };
 
   return (
-    <Card.Root variant="outline" borderColor="orange.200" bg="orange.50">
+    <Card.Root
+      variant="outline"
+      borderColor={isApplying ? "blue.200" : "orange.200"}
+      bg={isApplying ? "blue.50" : "orange.50"}
+    >
       <Card.Body>
         <VStack align="stretch" gap={3}>
           {/* Header */}
@@ -135,6 +142,14 @@ function RefactoringCard({ refactoring, onApply, isApplying }) {
                 <Badge colorPalette="purple" variant="subtle">
                   {kebabCaseToDisplayName(refactoring.category)}
                 </Badge>
+                {isApplying && (
+                  <Badge colorPalette="blue" variant="subtle">
+                    <HStack gap={1}>
+                      <Spinner size="xs" />
+                      <Text>Task running</Text>
+                    </HStack>
+                  </Badge>
+                )}
               </HStack>
               <Heading size="sm">{refactoring.title}</Heading>
             </VStack>
@@ -237,15 +252,23 @@ function RefactoringCard({ refactoring, onApply, isApplying }) {
               <Clock size={12} />
               <Text>Est. {refactoring.estimatedEffort || "30 min"}</Text>
             </HStack>
-            <Button
-              colorPalette="orange"
-              size="sm"
-              onClick={() => onApply?.(refactoring.id)}
-              loading={isApplying}
-              disabled={isApplying}
-            >
-              {isApplying ? "Applying..." : "Apply Refactoring"}
-            </Button>
+            {isApplying ? (
+              <Button
+                colorPalette="blue"
+                size="sm"
+                onClick={() => onMarkApplied?.(refactoring.id)}
+              >
+                ✓ Complete review
+              </Button>
+            ) : (
+              <Button
+                colorPalette="orange"
+                size="sm"
+                onClick={() => onApply?.(refactoring.id)}
+              >
+                Apply Refactoring
+              </Button>
+            )}
           </HStack>
         </VStack>
       </Card.Body>
