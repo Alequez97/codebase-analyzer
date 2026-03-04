@@ -20,6 +20,7 @@ export function RefactoringRecommendationsCard({
   onApplyRefactoring,
   onMarkApplied,
   applyingRefactoringId = null,
+  completedRefactoringId = null,
 }) {
   if (!refactorings || refactorings.length === 0) {
     return (
@@ -73,6 +74,7 @@ export function RefactoringRecommendationsCard({
             onApply={onApplyRefactoring}
             onMarkApplied={onMarkApplied}
             isApplying={applyingRefactoringId === refactoring.id}
+            isCompleted={completedRefactoringId === refactoring.id}
           />
         ))}
       </VStack>
@@ -110,7 +112,13 @@ export function RefactoringRecommendationsCard({
   );
 }
 
-function RefactoringCard({ refactoring, onApply, onMarkApplied, isApplying }) {
+function RefactoringCard({
+  refactoring,
+  onApply,
+  onMarkApplied,
+  isApplying,
+  isCompleted,
+}) {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "P0":
@@ -127,8 +135,8 @@ function RefactoringCard({ refactoring, onApply, onMarkApplied, isApplying }) {
   return (
     <Card.Root
       variant="outline"
-      borderColor={isApplying ? "blue.200" : "orange.200"}
-      bg={isApplying ? "blue.50" : "orange.50"}
+      borderColor={isApplying || isCompleted ? "blue.200" : "orange.200"}
+      bg={isApplying || isCompleted ? "blue.50" : "orange.50"}
     >
       <Card.Body>
         <VStack align="stretch" gap={3}>
@@ -148,6 +156,11 @@ function RefactoringCard({ refactoring, onApply, onMarkApplied, isApplying }) {
                       <Spinner size="xs" />
                       <Text>Task running</Text>
                     </HStack>
+                  </Badge>
+                )}
+                {isCompleted && (
+                  <Badge colorPalette="teal" variant="subtle">
+                    Task completed
                   </Badge>
                 )}
               </HStack>
@@ -252,13 +265,17 @@ function RefactoringCard({ refactoring, onApply, onMarkApplied, isApplying }) {
               <Clock size={12} />
               <Text>Est. {refactoring.estimatedEffort || "30 min"}</Text>
             </HStack>
-            {isApplying ? (
+            {isCompleted ? (
               <Button
                 colorPalette="blue"
                 size="sm"
                 onClick={() => onMarkApplied?.(refactoring.id)}
               >
                 ✓ Complete review
+              </Button>
+            ) : isApplying ? (
+              <Button colorPalette="blue" size="sm" disabled loading>
+                Applying...
               </Button>
             ) : (
               <Button

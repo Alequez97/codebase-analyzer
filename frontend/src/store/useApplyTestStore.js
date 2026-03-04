@@ -10,6 +10,7 @@ export const useApplyTestStore = create((set, get) => ({
   applyLogsByDomainId: {},
   applyingRefactoringByDomainId: {},
   applyRefactoringTaskByDomainId: {},
+  completedRefactoringByDomainId: {},
 
   // Actions
   applyTest: async (domainId, testId) => {
@@ -137,6 +138,10 @@ export const useApplyTestStore = create((set, get) => ({
         ...state.applyRefactoringTaskByDomainId,
         [domainId]: null,
       },
+      completedRefactoringByDomainId: {
+        ...state.completedRefactoringByDomainId,
+        [domainId]: refactoringId || null,
+      },
     }));
     if (refactoringId) {
       useTestingEditorStore
@@ -164,6 +169,10 @@ export const useApplyTestStore = create((set, get) => ({
           ...state.applyRefactoringTaskByDomainId,
           [domainId]: null,
         },
+        completedRefactoringByDomainId: {
+          ...state.completedRefactoringByDomainId,
+          [domainId]: null,
+        },
       }));
       useDomainTestingStore.getState().fetch(domainId);
       return { success: true };
@@ -186,6 +195,10 @@ export const useApplyTestStore = create((set, get) => ({
       },
       applyRefactoringTaskByDomainId: {
         ...state.applyRefactoringTaskByDomainId,
+        [domainId]: null,
+      },
+      completedRefactoringByDomainId: {
+        ...state.completedRefactoringByDomainId,
         [domainId]: null,
       },
     }));
@@ -268,5 +281,6 @@ export const useApplyTestStore = create((set, get) => ({
       applyLogsByDomainId: {},
       applyingRefactoringByDomainId: {},
       applyRefactoringTaskByDomainId: {},
+      completedRefactoringByDomainId: {},
     }),
 }));

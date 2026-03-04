@@ -84,6 +84,7 @@ export default function DomainDetailsPage() {
     applyTest,
     applyTestEdits,
     applyingRefactoringByDomainId,
+    completedRefactoringByDomainId,
     applyRefactoring,
     markRefactoringApplied,
   } = useApplyTestStore();
@@ -183,6 +184,8 @@ export default function DomainDetailsPage() {
   const applyLogs = applyLogsByDomainId[domainId] || {};
   const applyingRefactoringId =
     applyingRefactoringByDomainId?.[domainId] || null;
+  const completedRefactoringId =
+    completedRefactoringByDomainId?.[domainId] || null;
 
   useEffect(() => {
     if (!domainId) return;
@@ -637,6 +640,7 @@ export default function DomainDetailsPage() {
               onApplyRefactoring={handleApplyRefactoring}
               onMarkApplied={handleMarkRefactoringApplied}
               applyingRefactoringId={applyingRefactoringId}
+              completedRefactoringId={completedRefactoringId}
               showLogs={showDomainLogs}
               logs={testingLogs}
               logsLoading={testingLogsLoading}

@@ -43,6 +43,7 @@ export default function DomainTestingSection({
   onApplyRefactoring,
   onMarkApplied = null,
   applyingRefactoringId = null,
+  completedRefactoringId = null,
   hasRequirements = false,
   showLogs = false,
   logs = "",
@@ -176,6 +177,7 @@ export default function DomainTestingSection({
                           onApplyRefactoring={onApplyRefactoring}
                           onMarkApplied={onMarkApplied}
                           applyingRefactoringId={applyingRefactoringId}
+                          completedRefactoringId={completedRefactoringId}
                         />
                       </Box>
                     )}
