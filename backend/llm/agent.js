@@ -285,6 +285,8 @@ export class LLMAgent {
         toolDescription = `Listing directory ${filePath}`;
       } else if (toolCall.name === "write_file") {
         toolDescription = `Writing ${filePath}`;
+      } else if (toolCall.name === "replace_lines") {
+        toolDescription = `Editing ${filePath} lines ${startLine}-${endLine}`;
       } else if (toolCall.name === "execute_command") {
         toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
       }

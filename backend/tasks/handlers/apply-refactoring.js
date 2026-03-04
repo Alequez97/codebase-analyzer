@@ -30,7 +30,7 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
 
   return {
     initialMessage:
-      "Begin the refactoring as specified in the instructions. Extract the business logic, create the service file, update the controller, and verify tests pass.",
+      "Begin the refactoring as specified in the instructions. Create the new service file using write_file, then use replace_lines (NOT write_file) to update the controller — call read_file first to get current line numbers, then make one replace_lines call per change (import addition, function body replacement).",
 
     shouldContinue: (response) => {
       if (
@@ -56,7 +56,7 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
           component: "ApplyRefactoring",
         });
         agent.addUserMessage(
-          `You've hit the token limit. Please complete the refactoring by writing the service file to ${task.params.newServiceFile} and updating ${task.params.targetFile}.`,
+          `You've hit the token limit. If the service file is not yet created, write it to ${task.params.newServiceFile} using write_file. If the service file exists but the controller hasn't been updated, use read_file on ${task.params.targetFile} to get current line numbers, then use replace_lines to add the import and replace the extracted function body. Do NOT rewrite the entire controller with write_file.`,
         );
         return true;
       }

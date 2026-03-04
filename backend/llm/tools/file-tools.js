@@ -18,7 +18,7 @@ export const FILE_TOOLS = [
   {
     name: "read_file",
     description:
-      "Read the complete content of a file. Use this when you need to analyze specific code files. The path should be relative to the project root.",
+      "Read the complete content of a file with line numbers. Every line is prefixed with its 1-based line number (e.g. '  42: code here'). Use the line numbers when calling replace_lines. The path should be relative to the project root.",
     parameters: {
       path: {
         type: "string",
@@ -80,6 +80,34 @@ export const FILE_TOOLS = [
     },
     required: ["path", "content"],
   },
+  {
+    name: "replace_lines",
+    description:
+      "Replace a range of lines in an existing source file with new content. The path must be in the task's explicitly allowed write paths. Use read_file first to see the line numbers, then call this tool with the exact start and end lines to replace. This is the primary tool for modifying existing files.",
+    parameters: {
+      path: {
+        type: "string",
+        description:
+          "Relative path to the source file from project root (e.g., 'src/controllers/auth.js'). Must be an explicitly allowed path.",
+      },
+      start_line: {
+        type: "number",
+        description:
+          "1-based line number of the first line to replace (inclusive).",
+      },
+      end_line: {
+        type: "number",
+        description:
+          "1-based line number of the last line to replace (inclusive).",
+      },
+      new_content: {
+        type: "string",
+        description:
+          "The replacement text. Replaces everything from start_line to end_line. Use an empty string to delete lines.",
+      },
+    },
+    required: ["path", "start_line", "end_line", "new_content"],
+  },
 ];
 
 /**
@@ -120,8 +148,79 @@ export class FileToolExecutor {
         return await this.searchFiles(args.pattern, args.directory);
       case "write_file":
         return await this.writeFile(args.path, args.content);
+      case "replace_lines":
+        return await this.replaceLines(
+          args.path,
+          args.start_line,
+          args.end_line,
+          args.new_content,
+        );
       default:
         throw new Error(`Unknown tool: ${toolName}`);
+    }
+  }
+
+  /**
+   * Replace a range of lines in a file (only allowed on explicitly allowed paths)
+   * @private
+   */
+  async replaceLines(relativePath, startLine, endLine, newContent) {
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+
+    if (!isExplicitlyAllowedPath) {
+      return `Error: replace_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+    }
+
+    const fullPath = path.join(this.projectRoot, relativePath);
+
+    const resolvedPath = path.resolve(fullPath);
+    const resolvedRoot = path.resolve(this.projectRoot);
+    if (!resolvedPath.startsWith(resolvedRoot)) {
+      throw new Error("Access denied: path outside project root");
+    }
+
+    let currentContent;
+    try {
+      currentContent = await fs.readFile(fullPath, "utf-8");
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return `Error: File not found: ${relativePath}. Cannot edit a file that does not exist. Use write_file to create it first.`;
+      }
+      return `Error reading file: ${error.message}`;
+    }
+
+    const lines = currentContent.split("\n");
+    const totalLines = lines.length;
+
+    if (startLine < 1 || startLine > totalLines) {
+      return `Error: start_line ${startLine} is out of range. File has ${totalLines} lines (1-based).`;
+    }
+    if (endLine < startLine || endLine > totalLines) {
+      return `Error: end_line ${endLine} is out of range. Must be >= start_line (${startLine}) and <= ${totalLines}.`;
+    }
+
+    const replacementLines = newContent === "" ? [] : newContent.split("\n");
+    // Remove trailing empty element caused by a trailing newline in newContent
+    if (
+      replacementLines.length > 0 &&
+      replacementLines[replacementLines.length - 1] === "" &&
+      newContent.endsWith("\n")
+    ) {
+      replacementLines.pop();
+    }
+
+    const before = lines.slice(0, startLine - 1);
+    const after = lines.slice(endLine);
+    const newLines = [...before, ...replacementLines, ...after];
+
+    try {
+      await fs.writeFile(fullPath, newLines.join("\n"), "utf-8");
+      const removedCount = endLine - startLine + 1;
+      const addedCount = replacementLines.length;
+      return `Success: Replaced lines ${startLine}-${endLine} in ${relativePath} (removed ${removedCount} lines, inserted ${addedCount} lines)`;
+    } catch (error) {
+      return `Error writing file: ${error.message}`;
     }
   }
 
@@ -195,7 +294,12 @@ export class FileToolExecutor {
       }
 
       const content = await fs.readFile(fullPath, "utf-8");
-      return content;
+      const lines = content.split("\n");
+      const width = String(lines.length).length;
+      const numbered = lines
+        .map((line, i) => `${String(i + 1).padStart(width, " ")}: ${line}`)
+        .join("\n");
+      return numbered;
     } catch (error) {
       if (error.code === "ENOENT") {
         return `Error: File not found: ${relativePath}`;

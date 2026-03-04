@@ -15,10 +15,16 @@ Your job is to apply the refactoring recommendation by:
 
 You have access to these tools:
 
-- **`read_file`**: Read file contents
+- **`read_file`**: Read file contents — every line is prefixed with its 1-based line number (e.g. `  42: code here`). Use these numbers when calling `replace_lines`.
 - **`list_directory`**: List directory contents
-- **`write_file`**: Write new or updated files
+- **`write_file`**: Write a brand new file (e.g., the new service file)
+- **`replace_lines`**: Replace a range of lines in an **existing** file by line numbers — use this for all modifications to existing source files. Call `read_file` first to identify the exact line range, then call `replace_lines` with `start_line`, `end_line`, and `new_content`.
 - **`execute_command`**: Run tests to validate your changes
+
+**Rules**:
+
+- Use `write_file` only for creating new files.
+- Use `replace_lines` for all edits to existing source files.
 
 ## Objective
 
@@ -112,16 +118,14 @@ Create `{{NEW_SERVICE_FILE}}` with:
 
 ### Step 4: Update the Target File
 
-Modify `{{TARGET_FILE}}` to:
+Use `replace_lines` to modify `{{TARGET_FILE}}` (do **not** rewrite the whole file with `write_file`):
 
-1. **Import the new service** at the top of the file
-2. **Replace extracted logic** with calls to the service functions
-3. **Preserve existing behavior** - same inputs, same outputs, same error handling
-4. **Keep HTTP handling** - request parameter extraction, response sending, status codes
-5. **Maintain code style** - match existing formatting and conventions
+1. **Add the import** — call `read_file` on `{{TARGET_FILE}}`, find the line number of the first existing import, then call `replace_lines` with `start_line` and `end_line` set to that same line and `new_content` set to the new import line followed by the original line.
+2. **Replace extracted logic** — call `read_file` again (line numbers may shift after step 1), identify the exact start and end lines of the function body that needs to change, then call `replace_lines` with the slimmed-down version that delegates to the new service.
 
 **Important**:
 
+- Always call `read_file` immediately before each `replace_lines` call — line numbers shift after every edit
 - Do not change the function signature of `{{TARGET_FUNCTION}}`
 - Do not change how errors are handled at the HTTP layer
 - Ensure the refactored code is shorter and more readable
@@ -150,7 +154,7 @@ After completing the refactoring:
    - Use `execute_command` with: `npm test` or `npm test -- {{domain_pattern}}`
 2. **If tests fail**:
    - Read the error output to identify the issue
-   - Fix the code using `write_file`
+   - Use `read_file` to inspect the affected file, identify the broken line range, then `replace_lines` to fix it
    - Re-run tests
    - Repeat until all tests pass
 
@@ -292,10 +296,6 @@ Before marking the task complete, ensure:
 
 ## Completion
 
-When all steps are complete and tests pass:
-
-1. The refactoring is considered successful
-2. Exit - no need to report status or ask for confirmation
-3. The task orchestrator will detect completion and update the status
+When all steps are complete and tests pass, stop — the task orchestrator will detect completion automatically.
 
 **Remember**: DO NOT ASK QUESTIONS. Complete the work autonomously based on the refactoring specification and project conventions you discover by reading the code.
