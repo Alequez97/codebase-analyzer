@@ -316,7 +316,6 @@ export function buildApplyRefactoringTemplateVariables(task) {
     EXTRACTED_FUNCTIONS: extractedFunctions,
     BENEFITS: params.benefits || [],
     UNBLOCKS: params.unblocks || [],
-    ESTIMATED_EFFORT: params.estimatedEffort || "",
   };
 }
 

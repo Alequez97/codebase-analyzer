@@ -77,7 +77,6 @@ export async function createApplyRefactoringTask(
     extractedFunctions: refactoring.extractionPlan.extractedFunctions || [],
     benefits: refactoring.benefits || [],
     unblocks: refactoring.unblocks || [],
-    estimatedEffort: refactoring.estimatedEffort || "",
   };
 
   const task = {

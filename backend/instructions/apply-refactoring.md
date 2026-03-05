@@ -69,8 +69,6 @@ Apply the refactoring by:
 
 **Unblocks Tests**: {{#each UNBLOCKS}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
 
-**Estimated Effort**: {{ESTIMATED_EFFORT}}
-
 ## Task Workflow
 
 **Follow these steps EXACTLY**:

@@ -36,7 +36,6 @@ Analyze refactoring needs and testing for this domain. Output to **`{{OUTPUT_FIL
         "Specific benefit 2"
       ],
       "unblocks": ["TEST-001", "TEST-002"],
-      "estimatedEffort": "30 minutes",
       "status": "pending"
     }
   ],
