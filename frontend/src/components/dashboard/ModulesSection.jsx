@@ -227,7 +227,7 @@ export function ModulesSection() {
                             variant="outline"
                             onClick={() => navigate(`/domains/${domain.id}`)}
                           >
-                            View Details
+                            View details
                           </Button>
                         </HStack>
                       </Table.Cell>

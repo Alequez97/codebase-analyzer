@@ -21,6 +21,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: parseInt(frontendPort, 10),
+    hmr: process.env.DISABLE_HMR === "true" ? false : true,
     proxy: {
       "/api": {
         target: backendTarget,
