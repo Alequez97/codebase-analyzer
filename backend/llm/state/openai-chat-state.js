@@ -14,6 +14,10 @@ export class OpenAIChatState {
     this.compactionThreshold =
       options.compactionThreshold || Math.floor(this.maxContextTokens * 0.75);
     this.fileCache = new Map(); // Track which files we've already sent
+    // Actual token tracking: anchored from real API usage counts to avoid
+    // estimation drift that causes repeated compaction
+    this.lastActualInputTokens = null;
+    this.estimatedTokensAtLastActual = 0;
   }
 
   /**
@@ -88,10 +92,33 @@ export class OpenAIChatState {
   }
 
   /**
-   * Get current token count
+   * Get current token count.
+   * When a real API count is available, uses it as the baseline and adds only
+   * the estimated delta for messages added since that API call.  This prevents
+   * over-estimation from triggering repeated compaction on every iteration.
    */
   getTokenCount() {
+    if (this.lastActualInputTokens !== null) {
+      const currentEstimate = this.client.countMessageTokens(this.messages);
+      const delta = Math.max(
+        0,
+        currentEstimate - this.estimatedTokensAtLastActual,
+      );
+      return this.lastActualInputTokens + delta;
+    }
     return this.client.countMessageTokens(this.messages);
+  }
+
+  /**
+   * Update the token baseline using the real input token count returned by the
+   * API.  Call this after every sendMessage() response.
+   * @param {number} inputTokens - Actual input tokens reported by the API
+   */
+  setActualTokenCount(inputTokens) {
+    this.lastActualInputTokens = inputTokens;
+    this.estimatedTokensAtLastActual = this.client.countMessageTokens(
+      this.messages,
+    );
   }
 
   /**
@@ -239,6 +266,11 @@ Provide a clear, structured summary that captures the essential context for cont
       },
       ...recentMessages,
     ];
+
+    // Reset actual-token baseline so estimation takes over until the next
+    // API response anchors it again with a real count.
+    this.lastActualInputTokens = null;
+    this.estimatedTokensAtLastActual = 0;
 
     const newTokenCount = this.getTokenCount();
     logger.debug(

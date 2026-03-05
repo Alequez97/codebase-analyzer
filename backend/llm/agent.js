@@ -131,6 +131,13 @@ export class LLMAgent {
         maxTokens: this.maxTokens,
       });
 
+      // Anchor state token count with the real value from the API so that
+      // needsCompaction() uses actual usage rather than a character estimate,
+      // preventing repeated compaction when the estimate overshoots reality.
+      if (response.usage?.inputTokens) {
+        this.state.setActualTokenCount(response.usage.inputTokens);
+      }
+
       // Log this iteration
       this.conversationLog.push({
         iteration: iterationCount,
