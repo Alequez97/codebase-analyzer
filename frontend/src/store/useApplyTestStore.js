@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import api from "../api";
-import { useDomainTestingStore } from "./useDomainTestingStore";
-import { useTestingEditorStore } from "./useTestingEditorStore";
+import { useDomainRefactoringAndTestingStore as useDomainTestingStore } from "./useDomainRefactoringAndTestingStore";
+import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 
 export const useApplyTestStore = create((set, get) => ({
   // State
@@ -151,12 +151,12 @@ export const useApplyTestStore = create((set, get) => ({
     useDomainTestingStore.getState().fetch(domainId);
   },
 
-  markRefactoringApplied: async (domainId, refactoringId) => {
+  markRefactoringCompleted: async (domainId, refactoringId) => {
     if (!domainId || !refactoringId) {
       return { success: false, error: "Invalid parameters" };
     }
     try {
-      await api.markRefactoringApplied(domainId, refactoringId);
+      await api.markRefactoringCompleted(domainId, refactoringId);
       useTestingEditorStore
         .getState()
         .unblockTestsByRefactoring(domainId, refactoringId);

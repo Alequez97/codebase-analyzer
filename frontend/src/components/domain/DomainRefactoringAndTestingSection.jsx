@@ -30,7 +30,7 @@ import LogsViewer from "./LogsViewer";
 import SectionProgressBanner from "./SectionProgressBanner";
 import AnalyzeWithContextDialog from "./AnalyzeWithContextDialog";
 
-export default function DomainTestingSection({
+export default function DomainRefactoringAndTestingSection({
   domainId,
   testing,
   loading,
@@ -41,7 +41,7 @@ export default function DomainTestingSection({
   onApplyTest,
   onApplyTestEdits,
   onApplyRefactoring,
-  onMarkApplied = null,
+  onMarkCompleted = null,
   applyingRefactoringId = null,
   completedRefactoringId = null,
   hasRequirements = false,
@@ -175,7 +175,7 @@ export default function DomainTestingSection({
                         <RefactoringRecommendationsCard
                           refactorings={testing.refactoringRecommendations}
                           onApplyRefactoring={onApplyRefactoring}
-                          onMarkApplied={onMarkApplied}
+                          onMarkCompleted={onMarkCompleted}
                           applyingRefactoringId={applyingRefactoringId}
                           completedRefactoringId={completedRefactoringId}
                         />

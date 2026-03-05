@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Plus, Trash2 } from "lucide-react";
-import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
+import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
 import { ASSERTION_TYPES } from "./utils";
 
 const NativeSelectRoot = NativeSelect.Root;

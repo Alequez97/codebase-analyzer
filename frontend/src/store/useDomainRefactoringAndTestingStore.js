@@ -3,7 +3,7 @@ import api from "../api";
 import { useLogsStore } from "./useLogsStore";
 import { SECTION_TYPES } from "../constants/section-types";
 
-export const useDomainTestingStore = create((set, get) => ({
+export const useDomainRefactoringAndTestingStore = create((set, get) => ({
   // State - using Map for better performance
   dataById: new Map(),
   loadingById: new Map(),

@@ -8,7 +8,7 @@ import { useDomainDocumentationStore } from "./useDomainDocumentationStore";
 import { useDomainDiagramsStore } from "./useDomainDiagramsStore";
 import { useDomainRequirementsStore } from "./useDomainRequirementsStore";
 import { useDomainBugsSecurityStore } from "./useDomainBugsSecurityStore";
-import { useDomainTestingStore } from "./useDomainTestingStore";
+import { useDomainRefactoringAndTestingStore as useDomainTestingStore } from "./useDomainRefactoringAndTestingStore";
 import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";

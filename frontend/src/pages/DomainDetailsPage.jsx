@@ -7,7 +7,7 @@ import DomainDocumentationSection from "../components/domain/DomainDocumentation
 import DomainFilesSection from "../components/domain/DomainFilesSection";
 import DomainHeader from "../components/domain/DomainHeader";
 import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
-import DomainTestingSection from "../components/domain/DomainTestingSection";
+import DomainRefactoringAndTestingSection from "../components/domain/DomainRefactoringAndTestingSection";
 import AISectionChat from "../components/domain/chat/AISectionChat";
 import { Alert } from "../components/ui/alert";
 import { toaster } from "../components/ui/toaster";
@@ -18,7 +18,7 @@ import { useDomainDocumentationStore } from "../store/useDomainDocumentationStor
 import { useDomainDiagramsStore } from "../store/useDomainDiagramsStore";
 import { useDomainRequirementsStore } from "../store/useDomainRequirementsStore";
 import { useDomainBugsSecurityStore } from "../store/useDomainBugsSecurityStore";
-import { useDomainTestingStore } from "../store/useDomainTestingStore";
+import { useDomainRefactoringAndTestingStore } from "../store/useDomainRefactoringAndTestingStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useApplyTestStore } from "../store/useApplyTestStore";
@@ -54,7 +54,7 @@ export default function DomainDetailsPage() {
   const diagramsStore = useDomainDiagramsStore();
   const reqStore = useDomainRequirementsStore();
   const bugsStore = useDomainBugsSecurityStore();
-  const testStore = useDomainTestingStore();
+  const testStore = useDomainRefactoringAndTestingStore();
 
   // Task progress store
   const { progressById } = useTaskProgressStore();
@@ -86,7 +86,7 @@ export default function DomainDetailsPage() {
     applyingRefactoringByDomainId,
     completedRefactoringByDomainId,
     applyRefactoring,
-    markRefactoringApplied,
+    markRefactoringCompleted,
   } = useApplyTestStore();
 
   // Logs store
@@ -375,11 +375,11 @@ export default function DomainDetailsPage() {
     }
   };
 
-  const handleMarkRefactoringApplied = async (refactoringId) => {
-    const result = await markRefactoringApplied(domainId, refactoringId);
+  const handleMarkRefactoringCompleted = async (refactoringId) => {
+    const result = await markRefactoringCompleted(domainId, refactoringId);
     if (!result.success) {
       toaster.create({
-        title: "Failed to mark refactoring as applied",
+        title: "Failed to mark refactoring as completed",
         description: result.error,
         type: "error",
       });
@@ -624,7 +624,7 @@ export default function DomainDetailsPage() {
               }
             />
 
-            <DomainTestingSection
+            <DomainRefactoringAndTestingSection
               domainId={domainId}
               testing={testing}
               loading={testingLoading}
@@ -638,7 +638,7 @@ export default function DomainDetailsPage() {
               onApplyTest={handleApplyTest}
               onApplyTestEdits={handleApplyTestEdits}
               onApplyRefactoring={handleApplyRefactoring}
-              onMarkApplied={handleMarkRefactoringApplied}
+              onMarkCompleted={handleMarkRefactoringCompleted}
               applyingRefactoringId={applyingRefactoringId}
               completedRefactoringId={completedRefactoringId}
               showLogs={showDomainLogs}

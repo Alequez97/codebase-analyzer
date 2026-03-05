@@ -148,7 +148,7 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
       if (task.params?.domainId && task.params?.refactoringId) {
         try {
           const domainTestingPersistence =
-            await import("../../persistence/domain-testing.js");
+            await import("../../persistence/domain-refactoring-and-testing.js");
           await domainTestingPersistence.recordRefactoringApplied(
             task.params.domainId,
             {

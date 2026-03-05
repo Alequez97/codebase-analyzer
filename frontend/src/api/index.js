@@ -7,7 +7,7 @@ export * from "./domain-documentation";
 export * from "./domain-diagrams";
 export * from "./domain-requirements";
 export * from "./domain-bugs-security";
-export * from "./domain-testing";
+export * from "./domain-refactoring-and-testing";
 export * from "./tasks";
 export * from "./domain-sections-chat";
 
@@ -20,7 +20,7 @@ import * as domainDocumentation from "./domain-documentation";
 import * as domainDiagrams from "./domain-diagrams";
 import * as domainRequirements from "./domain-requirements";
 import * as domainBugsSecurity from "./domain-bugs-security";
-import * as domainTesting from "./domain-testing";
+import * as domainTesting from "./domain-refactoring-and-testing";
 import * as tasks from "./tasks";
 import * as domainSectionsChat from "./domain-sections-chat";
 

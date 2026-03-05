@@ -73,7 +73,7 @@ const config = {
   tasks: {
     [TASK_TYPES.CODEBASE_ANALYSIS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -94,42 +94,42 @@ const config = {
     },
     [TASK_TYPES.REQUIREMENTS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.BUGS_SECURITY]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.HIGH,
     },
     [TASK_TYPES.REFACTORING_AND_TESTING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_FIX]: {
       agent: AGENTS.AIDER,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_TEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_REFACTORING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.HIGH,
@@ -138,7 +138,7 @@ const config = {
     // Edit tasks (AI chat for editing domain sections)
     [TASK_TYPES.EDIT_DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET,
+      model: MODELS.GPT_5,
       maxTokens: 16000,
       maxIterations: 2, // Two iterations: description + content
       reasoningEffort: REASONING_EFFORT.LOW,
@@ -153,7 +153,7 @@ const config = {
   // Default agent config
   defaultAgentConfig: {
     agent: AGENTS.LLM_API,
-    model: MODELS.CLAUDE_SONNET,
+    model: MODELS.GPT_5,
     maxTokens: 16000,
     reasoningEffort: REASONING_EFFORT.MEDIUM,
   },

@@ -3,7 +3,7 @@ import * as domainAggregatePersistence from "../persistence/domain-aggregate.js"
 import * as domainDocumentationPersistence from "../persistence/domain-documentation.js";
 import * as domainDiagramsPersistence from "../persistence/domain-diagrams.js";
 import * as domainRequirementsPersistence from "../persistence/domain-requirements.js";
-import * as domainTestingPersistence from "../persistence/domain-testing.js";
+import * as domainTestingPersistence from "../persistence/domain-refactoring-and-testing.js";
 import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import * as taskFactory from "../tasks/factory/index.js";
@@ -379,11 +379,9 @@ router.post(
         error,
         component: "API",
       });
-      res
-        .status(500)
-        .json({
-          error: "Failed to create refactoring-and-testing analysis task",
-        });
+      res.status(500).json({
+        error: "Failed to create refactoring-and-testing analysis task",
+      });
     }
   },
 );

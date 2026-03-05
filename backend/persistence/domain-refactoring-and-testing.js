@@ -3,6 +3,7 @@ import {
   TESTING_ACTION_STATUS,
   TESTING_ACTION_TYPES,
 } from "../constants/testing-actions.js";
+import { REFACTORING_STATUS } from "../constants/refactoring-status.js";
 import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
 import { tryReadJsonFile } from "./utils.js";
@@ -194,7 +195,7 @@ export async function recordTestingApplyCompleted(domainId, actionInput) {
 }
 
 /**
- * Mark a refactoring recommendation as applied in the domain testing content
+ * Mark a refactoring recommendation as ready_for_review after AI task completion
  * @param {string} domainId - The domain ID
  * @param {Object} input - Action input
  * @param {string} input.refactoringId - The refactoring ID (e.g. "REFACTOR-001")
@@ -225,10 +226,57 @@ export async function recordRefactoringApplied(domainId, input) {
 
   refactorings[index] = {
     ...refactorings[index],
-    status: "applied",
+    status: REFACTORING_STATUS.READY_FOR_REVIEW,
     appliedAt: input.timestamp || new Date().toISOString(),
     appliedTaskId: input.taskId || null,
     serviceFile: input.serviceFile || null,
+  };
+
+  const updatedData = {
+    ...existing,
+    refactoringRecommendations: refactorings,
+  };
+
+  await writeDomainTesting(domainId, updatedData);
+
+  return {
+    success: true,
+    refactoring: refactorings[index],
+  };
+}
+
+/**
+ * Mark a refactoring recommendation as completed after user review
+ * @param {string} domainId - The domain ID
+ * @param {Object} input - Action input
+ * @param {string} input.refactoringId - The refactoring ID (e.g. "REFACTOR-001")
+ * @param {string} input.timestamp - ISO timestamp
+ */
+export async function recordRefactoringCompleted(domainId, input) {
+  const existing = await readDomainTesting(domainId);
+  if (!existing) {
+    return {
+      success: false,
+      error: `Domain testing not found for ${domainId}`,
+    };
+  }
+
+  const refactorings = Array.isArray(existing.refactoringRecommendations)
+    ? [...existing.refactoringRecommendations]
+    : [];
+
+  const index = refactorings.findIndex((r) => r.id === input.refactoringId);
+  if (index < 0) {
+    return {
+      success: false,
+      error: `Refactoring ${input.refactoringId} not found in domain ${domainId}`,
+    };
+  }
+
+  refactorings[index] = {
+    ...refactorings[index],
+    status: REFACTORING_STATUS.COMPLETED,
+    completedAt: input.timestamp || new Date().toISOString(),
   };
 
   const updatedData = {
@@ -265,7 +313,7 @@ export async function unblockMissingTest(domainId, testId) {
     list.map((t) => {
       if (t.id !== testId) return t;
       found = true;
-      const { blockedBy, ...rest } = t;
+      const { blockedBy: _blockedBy, ...rest } = t;
       return rest;
     });
 

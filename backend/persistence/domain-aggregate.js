@@ -16,7 +16,7 @@ import {
   readDomainTesting,
   readDomainTestingMetadata,
   writeDomainTesting,
-} from "./domain-testing.js";
+} from "./domain-refactoring-and-testing.js";
 import {
   readDomainBugsSecurity,
   readDomainBugsSecurityMetadata,

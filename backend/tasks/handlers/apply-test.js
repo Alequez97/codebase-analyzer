@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import * as domainTestingPersistence from "../../persistence/domain-testing.js";
+import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
 import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**

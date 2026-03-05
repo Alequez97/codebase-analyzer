@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import api from "../api";
 
-export const useTestingEditorStore = create(
+export const useRefactoringAndTestingEditorStore = create(
   persist(
     (set, get) => ({
       // State - using Map for better performance

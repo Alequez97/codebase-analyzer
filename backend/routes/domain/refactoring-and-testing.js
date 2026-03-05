@@ -1,5 +1,5 @@
 import express from "express";
-import * as domainTestingPersistence from "../../persistence/domain-testing.js";
+import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
 import * as taskFactory from "../../tasks/factory/index.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TEST_TYPES } from "../../constants/test-types.js";
@@ -298,10 +298,10 @@ router.post("/:id/refactorings/:refactoringId/apply", async (req, res) => {
 });
 
 /**
- * Manually mark a refactoring recommendation as applied
+ * Manually mark a refactoring recommendation as completed (user review)
  */
 router.post(
-  "/:id/refactorings/:refactoringId/mark-applied",
+  "/:id/refactorings/:refactoringId/mark-completed",
   async (req, res) => {
     try {
       const { id, refactoringId } = req.params;
@@ -314,12 +314,10 @@ router.post(
         });
       }
 
-      const result = await domainTestingPersistence.recordRefactoringApplied(
+      const result = await domainTestingPersistence.recordRefactoringCompleted(
         id,
         {
           refactoringId,
-          taskId: null,
-          serviceFile: null,
           timestamp: new Date().toISOString(),
         },
       );
@@ -331,10 +329,12 @@ router.post(
       res.json({ success: true, refactoring: result.refactoring });
     } catch (error) {
       logger.error(
-        `Error marking refactoring ${req.params.refactoringId} as applied for domain ${req.params.id}`,
+        `Error marking refactoring ${req.params.refactoringId} as completed for domain ${req.params.id}`,
         { error, component: "API" },
       );
-      res.status(500).json({ error: "Failed to mark refactoring as applied" });
+      res
+        .status(500)
+        .json({ error: "Failed to mark refactoring as completed" });
     }
   },
 );

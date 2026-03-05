@@ -1,4 +1,4 @@
-export { default as DomainTestingSection } from "../DomainTestingSection";
+export { default as DomainRefactoringAndTestingSection } from "../DomainRefactoringAndTestingSection";
 export { TestCaseDetails } from "./TestCaseDetails";
 export { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
 export { ExistingTestsTable } from "./ExistingTestsTable";

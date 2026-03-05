@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { Alert } from "../../ui/alert";
-import { useTestingEditorStore } from "../../../store/useTestingEditorStore";
+import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails, TestCaseInlineEditorComponent } from "./index";
 import { getPriorityColor, sortByPriority } from "./utils";

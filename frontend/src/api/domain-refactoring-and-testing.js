@@ -30,9 +30,9 @@ export const applyRefactoring = (domainId, refactoringId) =>
     `/analysis/domain/${domainId}/refactorings/${refactoringId}/apply`,
   );
 
-export const markRefactoringApplied = (domainId, refactoringId) =>
+export const markRefactoringCompleted = (domainId, refactoringId) =>
   client.post(
-    `/analysis/domain/${domainId}/refactorings/${refactoringId}/mark-applied`,
+    `/analysis/domain/${domainId}/refactorings/${refactoringId}/mark-completed`,
   );
 
 export const unblockTest = (domainId, testId) =>
