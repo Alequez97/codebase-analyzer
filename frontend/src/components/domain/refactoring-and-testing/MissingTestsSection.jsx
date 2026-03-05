@@ -20,12 +20,16 @@ const TEST_TYPES = [
 
 export function MissingTestsSection({
   missingTests,
+  refactoringRecommendations = [],
   applyingTests,
   applyLogs,
   onApplyTest,
   onApplyTestEdits,
   domainId,
 }) {
+  const refactoringById = new Map(
+    refactoringRecommendations.map((r) => [r.id, r]),
+  );
   const { setEditedMissingTests, getEditedMissingTests } =
     useTestingEditorStore();
 
@@ -132,19 +136,29 @@ export function MissingTestsSection({
           </Table.Header>
           <Table.Body>
             {TEST_TYPES.map(({ key, label, palette }) =>
-              sortByPriority(editedMissingTests[key])?.map((test) => (
-                <TestTableRow
-                  key={test.id}
-                  test={test}
-                  typeLabel={label}
-                  typePalette={palette}
-                  domainId={domainId}
-                  applyingTests={applyingTests}
-                  applyLogs={applyLogs}
-                  onApplyTest={onApplyTest}
-                  onApplyTestEdits={onApplyTestEdits}
-                />
-              )),
+              sortByPriority(editedMissingTests[key])?.map((test) => {
+                const refactoring = test.blockedBy
+                  ? refactoringById.get(test.blockedBy)
+                  : null;
+                const sourceFiles =
+                  test.sourceFiles ||
+                  (refactoring?.targetFile ? [refactoring.targetFile] : []);
+                return (
+                  <TestTableRow
+                    key={test.id}
+                    test={test}
+                    typeLabel={label}
+                    typePalette={palette}
+                    domainId={domainId}
+                    applyingTests={applyingTests}
+                    applyLogs={applyLogs}
+                    onApplyTest={onApplyTest}
+                    onApplyTestEdits={onApplyTestEdits}
+                    sourceFiles={sourceFiles}
+                    refactoringTargetFunction={refactoring?.targetFunction}
+                  />
+                );
+              }),
             )}
           </Table.Body>
         </Table.Root>

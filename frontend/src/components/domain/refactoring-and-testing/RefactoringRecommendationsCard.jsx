@@ -239,7 +239,27 @@ function RefactoringCardBody({ refactoring }) {
               🔓 Unblocks {refactoring.unblocks.length} test
               {refactoring.unblocks.length === 1 ? "" : "s"}:
             </Text>
-            <Text>{refactoring.unblocks.join(", ")}</Text>
+            <HStack gap={1} wrap="wrap">
+              {refactoring.unblocks.map((testId, i) => (
+                <Text
+                  key={testId}
+                  as="span"
+                  fontFamily="mono"
+                  fontWeight="semibold"
+                  color="purple.600"
+                  cursor="pointer"
+                  textDecoration="underline"
+                  onClick={() =>
+                    document
+                      .getElementById(testId)
+                      ?.scrollIntoView({ behavior: "smooth", block: "center" })
+                  }
+                >
+                  {testId}
+                  {i < refactoring.unblocks.length - 1 ? "," : ""}
+                </Text>
+              ))}
+            </HStack>
           </HStack>
         </Box>
       )}

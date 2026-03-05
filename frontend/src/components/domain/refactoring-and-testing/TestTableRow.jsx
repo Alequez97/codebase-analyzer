@@ -27,6 +27,8 @@ export function TestTableRow({
   applyLogs,
   onApplyTest,
   onApplyTestEdits,
+  sourceFiles = [],
+  refactoringTargetFunction,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const editorRef = useRef(null);
@@ -106,6 +108,7 @@ export function TestTableRow({
   return (
     <Fragment>
       <Table.Row
+        id={test.id}
         bg={
           isBlocked
             ? "orange.50"
@@ -224,6 +227,79 @@ export function TestTableRow({
               <VStack align="stretch" gap={3}>
                 {test.blockedBy && (
                   <BlockedTestCard blockedBy={test.blockedBy} />
+                )}
+
+                {sourceFiles.length > 0 && (
+                  <Box
+                    borderWidth="1px"
+                    borderRadius="md"
+                    p={3}
+                    bg="gray.50"
+                    borderColor="gray.200"
+                  >
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      color="gray.600"
+                      mb={2}
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                    >
+                      Files being tested
+                    </Text>
+                    <VStack align="stretch" gap={1}>
+                      {sourceFiles.map((file) => (
+                        <HStack key={file} gap={2}>
+                          <Text
+                            fontSize="xs"
+                            fontFamily="mono"
+                            color="blue.700"
+                            bg="blue.50"
+                            px={2}
+                            py={0.5}
+                            borderRadius="sm"
+                            borderWidth="1px"
+                            borderColor="blue.200"
+                          >
+                            {file}
+                          </Text>
+                          {refactoringTargetFunction && (
+                            <Badge
+                              colorPalette="blue"
+                              size="sm"
+                              variant="outline"
+                            >
+                              {refactoringTargetFunction}()
+                            </Badge>
+                          )}
+                        </HStack>
+                      ))}
+                    </VStack>
+                  </Box>
+                )}
+
+                {test.reason && (
+                  <Box
+                    borderWidth="1px"
+                    borderRadius="md"
+                    p={3}
+                    bg="yellow.50"
+                    borderColor="yellow.200"
+                  >
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      color="gray.600"
+                      mb={1}
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                    >
+                      Why this test matters
+                    </Text>
+                    <Text fontSize="xs" color="gray.700">
+                      {test.reason}
+                    </Text>
+                  </Box>
                 )}
 
                 {test.scenarios ? (

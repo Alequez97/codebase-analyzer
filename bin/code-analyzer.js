@@ -67,6 +67,7 @@ if (command === "start") {
         ...process.env,
         ANALYSIS_TARGET_DIR: process.cwd(),
         PORT: backendPort.toString(),
+        FRONTEND_PORT: frontendPort ? frontendPort.toString() : "",
       },
     });
 
@@ -99,7 +100,8 @@ if (command === "start") {
           shell: true,
           env: {
             ...process.env,
-            VITE_API_URL: `http://localhost:${backendPort}/api`,
+            BACKEND_PORT: backendPort.toString(),
+            FRONTEND_PORT: frontendPort.toString(),
           },
         },
       );

@@ -22,6 +22,7 @@
         "priority": "P0",
         "category": "data-integrity",
         "suggestedTestFile": "backend/models/aircrafts/aircraft.test.js",
+        "sourceFiles": ["backend/models/aircrafts/Aircraft.js"],
         "relatedRequirement": "REQ-003",
         "reason": "Incorrect propeller status data can corrupt maintenance and compliance reports.",
         "scenarios": [

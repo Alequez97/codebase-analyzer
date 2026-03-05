@@ -221,6 +221,9 @@ export default function DomainRefactoringAndTestingSection({
                     <MissingTestsSection
                       domainId={domainId}
                       missingTests={testing.missingTests}
+                      refactoringRecommendations={
+                        testing.refactoringRecommendations || []
+                      }
                       applyingTests={applyingTests}
                       applyLogs={applyLogs}
                       onApplyTest={onApplyTest}

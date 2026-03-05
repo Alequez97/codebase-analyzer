@@ -15,8 +15,7 @@ import { useLogsStore } from "./useLogsStore";
 import { useDomainSectionsChatStore } from "./useDomainSectionsChatStore";
 import { useApplyTestStore } from "./useApplyTestStore";
 
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
+const SOCKET_URL = window.location.origin;
 
 export const useSocketStore = create((set, get) => ({
   // State

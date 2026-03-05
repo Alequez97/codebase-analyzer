@@ -118,7 +118,7 @@ httpServer.listen(config.port, async () => {
   logger.info("");
   logger.info(`API running at http://localhost:${config.port}`);
   logger.info(
-    `Open dashboard at http://localhost:5173 (if frontend is running)`,
+    `Open dashboard at http://localhost:${process.env.FRONTEND_PORT || "(frontend not started)"} (if frontend is running)`,
   );
   logger.info("WebSocket ready for real-time updates");
   logger.info("");

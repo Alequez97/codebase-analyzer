@@ -53,7 +53,15 @@ const projectName = path.basename(targetDirectory);
  */
 const config = {
   // Server
-  port: parseInt(process.env.PORT || "3001", 10),
+  port: (() => {
+    if (!process.env.PORT) {
+      logger.error(
+        "PORT env var is not set. Start the app via the CLI: code-analyzer start",
+      );
+      process.exit(1);
+    }
+    return parseInt(process.env.PORT, 10);
+  })(),
 
   // Target project being analyzed
   target: {
