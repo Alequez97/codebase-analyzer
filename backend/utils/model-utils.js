@@ -23,6 +23,7 @@ export function getProviderFromModel(model) {
     gpt: "openai",
     o1: "openai",
     o3: "openai",
+    codex: "openai",
   };
 
   for (const [prefix, provider] of Object.entries(providerMap)) {

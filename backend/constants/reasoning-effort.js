@@ -6,6 +6,7 @@ export const REASONING_EFFORT = {
   LOW: "low",
   MEDIUM: "medium",
   HIGH: "high",
+  XHIGH: "xhigh",
 };
 
 /**
@@ -15,4 +16,5 @@ export const REASONING_EFFORT_NAMES = {
   [REASONING_EFFORT.LOW]: "Low",
   [REASONING_EFFORT.MEDIUM]: "Medium",
   [REASONING_EFFORT.HIGH]: "High",
+  [REASONING_EFFORT.XHIGH]: "XHigh",
 };

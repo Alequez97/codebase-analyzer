@@ -5,7 +5,8 @@ export const MODELS = {
   // OpenAI models
   GPT_4: "gpt-4",
   GPT_4_TURBO: "gpt-4-turbo",
-  GPT_5: "gpt-5.2",
+  GPT_5_2: "gpt-5.2",
+  GPT_5_3_CODEX: "gpt-5.3-codex",
 
   // Anthropic models
   CLAUDE_OPUS: "claude-opus-4-20250514",
@@ -23,7 +24,8 @@ export const MODELS = {
 export const MODEL_NAMES = {
   [MODELS.GPT_4]: "GPT-4",
   [MODELS.GPT_4_TURBO]: "GPT-4 Turbo",
-  [MODELS.GPT_5]: "GPT-5.2",
+  [MODELS.GPT_5_2]: "GPT-5.2",
+  [MODELS.GPT_5_3_CODEX]: "GPT-5.3-Codex",
   [MODELS.CLAUDE_OPUS]: "Claude Opus 4",
   [MODELS.CLAUDE_SONNET]: "Claude Sonnet 4.5",
   [MODELS.CLAUDE_HAIKU]: "Claude Haiku 3.5",

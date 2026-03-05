@@ -73,13 +73,13 @@ const config = {
   tasks: {
     [TASK_TYPES.CODEBASE_ANALYSIS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
     },
     [TASK_TYPES.DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
     },
@@ -103,7 +103,7 @@ const config = {
     },
     [TASK_TYPES.REFACTORING_AND_TESTING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.DEEPSEEK_REASONER,
+      model: MODELS.GPT_5_3_CODEX,
       maxTokens: 64000,
       maxIterations: 50,
     },
@@ -143,7 +143,7 @@ const config = {
   // Default agent config
   defaultAgentConfig: {
     agent: AGENTS.LLM_API,
-    model: MODELS.GPT_5,
+    model: MODELS.GPT_5_2,
     maxTokens: 16000,
     reasoningEffort: REASONING_EFFORT.MEDIUM,
   },
