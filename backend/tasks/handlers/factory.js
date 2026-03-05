@@ -6,6 +6,7 @@
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadInstructionForTask } from "../../utils/instruction-loader.js";
 import { editDocumentationHandler } from "./edit-documentation.js";
+import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { analyzeDocumentationHandler } from "./analyze-documentation.js";
 import { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";
 import { applyTestHandler } from "./apply-test.js";
@@ -35,6 +36,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
 
   if (task.type === TASK_TYPES.EDIT_DOCUMENTATION) {
     overrides = editDocumentationHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+    overrides = customCodebaseTaskHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DOCUMENTATION) {
     overrides = analyzeDocumentationHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REFACTORING_AND_TESTING) {

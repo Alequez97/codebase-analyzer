@@ -21,7 +21,6 @@ import {
   FileCode,
   FileText,
   Lightbulb,
-  MessageSquare,
   Shield,
   Sparkles,
 } from "lucide-react";
@@ -81,8 +80,6 @@ export default function DomainBugsSecuritySection({
   logs = "",
   logsLoading = false,
   hasRequirements = false,
-  onOpenChat,
-  isChatOpen = false,
 }) {
   const updateBugsSecurityFindingAction = useDomainBugsSecurityStore(
     (state) => state.updateFindingAction,
@@ -265,18 +262,7 @@ export default function DomainBugsSecuritySection({
               )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-              {/* Show "Edit with AI" if findings exist, otherwise "Analyze" */}
-              {hasData && sortedFindings.length > 0 ? (
-                <Button
-                  size="sm"
-                  colorPalette="purple"
-                  variant={isChatOpen ? "solid" : "outline"}
-                  onClick={onOpenChat}
-                >
-                  <MessageSquare size={14} />
-                  Edit with AI
-                </Button>
-              ) : (
+              {!hasData && (
                 <Button
                   size="sm"
                   variant="outline"

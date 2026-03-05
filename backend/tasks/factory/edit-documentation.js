@@ -42,7 +42,7 @@ export async function createEditDocumentationTask(
     },
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DOMAIN_SECTION,
-    generateMetadata: true,
+
     // No output file - results are streamed via socket
   };
 

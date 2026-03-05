@@ -49,7 +49,7 @@ export async function createAnalyzeBugsSecurityTask(
       domainId,
       DOMAIN_SECTION_IDS.BUGS_SECURITY,
     ),
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);

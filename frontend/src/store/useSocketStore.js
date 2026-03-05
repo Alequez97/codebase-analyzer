@@ -14,6 +14,7 @@ import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
 import { useDomainSectionsChatStore } from "./useDomainSectionsChatStore";
 import { useApplyTestStore } from "./useApplyTestStore";
+import { useAgentChatStore } from "./useAgentChatStore";
 
 const SOCKET_URL = window.location.origin;
 
@@ -192,6 +193,11 @@ export const useSocketStore = create((set, get) => ({
         const chatStore = useDomainSectionsChatStore.getState();
         chatStore.setAiThinking(false);
         chatStore.setAiResponding(false);
+      } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+        const chatStore = useAgentChatStore.getState();
+        chatStore.setAiThinking(false);
+        chatStore.setAiWorking(false);
+        chatStore.setAwaitingResponse(false);
       }
     });
 
@@ -229,15 +235,145 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_EDIT_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_REFACTORING_AND_TESTING, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK, handleLogEvent);
 
-    // Chat events - AI thinking indicator
-    socket.on(SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING, ({ thinking }) => {
-      if (thinking) {
-        const chatStore = useDomainSectionsChatStore.getState();
-        chatStore.setAiResponding(true);
+    // ── Custom codebase task events (floating agent chat) ───────────────────
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_THINKING, ({ taskId }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
         chatStore.setAiThinking(true);
+        chatStore.setAiWorking(true);
       }
     });
+
+    socket.on(
+      SOCKET_EVENTS.CUSTOM_TASK_MESSAGE,
+      ({ taskId, content, role }) => {
+        const chatStore = useAgentChatStore.getState();
+        if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+          chatStore.setAiThinking(false);
+          chatStore.addMessage({ role: role || "assistant", content });
+        }
+      },
+    );
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_PROGRESS, ({ taskId, message }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.addMessage({
+          role: "system",
+          content: `⚙️ ${message}`,
+          isProgress: true,
+        });
+      }
+    });
+
+    socket.on(
+      SOCKET_EVENTS.CUSTOM_TASK_FILE_UPDATED,
+      ({ taskId, filePath }) => {
+        const chatStore = useAgentChatStore.getState();
+        if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+          chatStore.addMessage({
+            role: "system",
+            content: `📝 Updated: \`${filePath}\``,
+            isProgress: true,
+          });
+        }
+      },
+    );
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_DOC_UPDATED, ({ taskId, filePath }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.addMessage({
+          role: "system",
+          content: `📚 Documentation updated: \`${filePath}\``,
+          isProgress: true,
+        });
+      }
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_CONFLICT_DETECTED, ({ taskId }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.setAiThinking(false);
+        // isAwaitingResponse will be set by CUSTOM_TASK_AWAITING_RESPONSE
+      }
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_AWAITING_RESPONSE, ({ taskId }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.setAiThinking(false);
+        chatStore.setAiWorking(false);
+        chatStore.setAwaitingResponse(true);
+      }
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_COMPLETED, ({ taskId }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.setAiThinking(false);
+        chatStore.setAiWorking(false);
+        chatStore.setAwaitingResponse(false);
+      }
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_CANCELLED, ({ taskId }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.setAiThinking(false);
+        chatStore.setAiWorking(false);
+        chatStore.setAwaitingResponse(false);
+        chatStore.addMessage({
+          role: "system",
+          content:
+            "⚠️ Task cancelled by user. Any partial changes can be reviewed with `git diff`.",
+          isWarning: true,
+        });
+      }
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOM_TASK_FAILED, ({ taskId, error }) => {
+      const chatStore = useAgentChatStore.getState();
+      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+        chatStore.setAiThinking(false);
+        chatStore.setAiWorking(false);
+        chatStore.setAwaitingResponse(false);
+        chatStore.addMessage({
+          role: "assistant",
+          content: `❌ Task failed: ${error || "An unexpected error occurred."}`,
+          isError: true,
+        });
+      }
+    });
+
+    // Also handle TASK_COMPLETED / TASK_FAILED for CUSTOM_CODEBASE_TASK type
+    // → CUSTOM_CODEBASE_TASK handling is done inside TASK_COMPLETED and TASK_FAILED above.
+
+    // Chat events - AI thinking indicator
+    socket.on(
+      SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING,
+      ({ thinking, domainId, sectionType }) => {
+        if (thinking) {
+          const chatStore = useDomainSectionsChatStore.getState();
+          chatStore.setAiResponding(true);
+          chatStore.setAiThinking(true);
+
+          // Also update floating agent chat if open for this section
+          const agentChatStore = useAgentChatStore.getState();
+          const effectiveSectionType = sectionType || "documentation";
+          if (
+            agentChatStore.isOpen &&
+            agentChatStore.selectedTaskType === effectiveSectionType
+          ) {
+            agentChatStore.setAiThinking(true);
+            agentChatStore.setAiWorking(true);
+          }
+        }
+      },
+    );
 
     // Chat events - AI responses (description and content)
     socket.on(
@@ -255,6 +391,18 @@ export const useSocketStore = create((set, get) => ({
             content,
             timestamp: timestamp ? new Date(timestamp) : new Date(),
           });
+        }
+
+        // Also update floating agent chat if it's open for this section
+        const agentChatStore = useAgentChatStore.getState();
+        if (
+          agentChatStore.isOpen &&
+          agentChatStore.selectedTaskType === effectiveSectionType
+        ) {
+          agentChatStore.setAiThinking(false);
+          if (content && content.trim()) {
+            agentChatStore.addMessage({ role: "assistant", content });
+          }
         }
       },
     );
@@ -279,6 +427,16 @@ export const useSocketStore = create((set, get) => ({
         // All done - stop responding
         chatStore.setAiThinking(false);
         chatStore.setAiResponding(false);
+
+        // Also update floating agent chat if it's open for this section
+        const agentChatStore = useAgentChatStore.getState();
+        if (
+          agentChatStore.isOpen &&
+          agentChatStore.selectedTaskType === effectiveSectionType
+        ) {
+          agentChatStore.setAiWorking(false);
+          agentChatStore.setAiThinking(false);
+        }
       },
     );
   },

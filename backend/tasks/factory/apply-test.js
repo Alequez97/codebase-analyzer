@@ -89,7 +89,7 @@ export async function createApplyTestTask(
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.APPLY_TEST,
     outputFile: null, // No JSON output - agent creates test file directly using write_file tool
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);

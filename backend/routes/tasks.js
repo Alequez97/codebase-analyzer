@@ -1,6 +1,13 @@
 import express from "express";
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
+import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { emitSocketEvent } from "../utils/socket-emitter.js";
+import {
+  loadChatHistory,
+  appendChatMessage,
+  deleteChatHistory,
+} from "../utils/chat-history.js";
 import * as logger from "../utils/logger.js";
 
 const router = express.Router();
@@ -43,6 +50,111 @@ router.delete("/:id", async (req, res) => {
       component: "API",
     });
     res.status(500).json({ error: "Failed to delete task" });
+  }
+});
+
+/**
+ * Cancel a running task
+ * POST /tasks/:id/cancel
+ */
+router.post("/:id/cancel", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const task = await taskOrchestrator.getTask(id);
+
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    // Mark the task as failed with a cancellation message
+    const result = await taskOrchestrator.deleteTask(id);
+
+    if (!result.success) {
+      return res
+        .status(500)
+        .json({ error: result.error || "Failed to cancel task" });
+    }
+
+    logger.info(`Task ${id} cancelled by user`, { component: "API" });
+
+    emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_CANCELLED, {
+      taskId: id,
+      domainId: task.params?.domainId || null,
+      timestamp: new Date().toISOString(),
+    });
+
+    res.json({ success: true, message: "Task cancelled" });
+  } catch (error) {
+    logger.error(`Error cancelling task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to cancel task" });
+  }
+});
+
+/**
+ * Get chat history for a task
+ * GET /tasks/:id/chat-history
+ */
+router.get("/:id/chat-history", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const history = await loadChatHistory(id);
+
+    if (!history) {
+      return res.status(404).json({ error: "Chat history not found" });
+    }
+
+    res.json(history);
+  } catch (error) {
+    logger.error(`Error loading chat history for task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to load chat history" });
+  }
+});
+
+/**
+ * Append a message to a task's chat history
+ * POST /tasks/:id/chat-history
+ */
+router.post("/:id/chat-history", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role, content } = req.body;
+
+    if (!role || !content) {
+      return res.status(400).json({ error: "role and content are required" });
+    }
+
+    await appendChatMessage(id, { role, content });
+    res.json({ success: true });
+  } catch (error) {
+    logger.error(`Error appending chat message for task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to append chat message" });
+  }
+});
+
+/**
+ * Delete chat history for a task
+ * DELETE /tasks/:id/chat-history
+ */
+router.delete("/:id/chat-history", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await deleteChatHistory(id);
+    res.json({ success: true, message: "Chat history cleared" });
+  } catch (error) {
+    logger.error(`Error deleting chat history for task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to delete chat history" });
   }
 });
 

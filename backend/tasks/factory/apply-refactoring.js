@@ -88,7 +88,7 @@ export async function createApplyRefactoringTask(
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.APPLY_REFACTORING,
     outputFile: null, // No JSON output - agent creates/modifies files directly
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);

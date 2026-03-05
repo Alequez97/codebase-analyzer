@@ -51,7 +51,7 @@ export async function createAnalyzeRequirementsTask(
       domainId,
       DOMAIN_SECTION_IDS.REQUIREMENTS,
     ),
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);

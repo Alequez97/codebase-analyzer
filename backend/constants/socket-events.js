@@ -38,4 +38,17 @@ export const SOCKET_EVENTS = {
   EDIT_DOCUMENTATION_THINKING: "edit:documentation:thinking",
   EDIT_DOCUMENTATION_DESCRIPTION: "edit:documentation:description",
   EDIT_DOCUMENTATION_CONTENT: "edit:documentation:content",
+
+  // Custom codebase task events (floating agent chat)
+  CUSTOM_TASK_THINKING: "custom-task:thinking",
+  CUSTOM_TASK_PROGRESS: "custom-task:progress",
+  CUSTOM_TASK_FILE_UPDATED: "custom-task:file-updated",
+  CUSTOM_TASK_DOC_UPDATED: "custom-task:doc-updated",
+  CUSTOM_TASK_CONFLICT_DETECTED: "custom-task:conflict-detected",
+  CUSTOM_TASK_AWAITING_RESPONSE: "custom-task:awaiting-response",
+  CUSTOM_TASK_CANCELLED: "custom-task:cancelled",
+  CUSTOM_TASK_COMPLETED: "custom-task:completed",
+  CUSTOM_TASK_FAILED: "custom-task:failed",
+  CUSTOM_TASK_MESSAGE: "custom-task:message",
+  LOG_CUSTOM_CODEBASE_TASK: "log:custom-codebase-task",
 };

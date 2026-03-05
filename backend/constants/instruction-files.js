@@ -10,6 +10,7 @@ export const INSTRUCTION_FILES_NAMES = {
   APPLY_TEST: "apply-test.md",
   APPLY_REFACTORING: "apply-refactoring.md",
   EDIT_DOMAIN_SECTION: "edit-domain-section.md",
+  CUSTOM_CODEBASE_TASK: "custom-codebase-task.md",
 };
 
 export const INSTRUCTION_FILES_PATHS = {
@@ -27,4 +28,5 @@ export const INSTRUCTION_FILES_PATHS = {
   APPLY_TEST: "backend/instructions/apply-test.md",
   APPLY_REFACTORING: "backend/instructions/apply-refactoring.md",
   EDIT_DOMAIN_SECTION: "backend/instructions/edit-domain-section.md",
+  CUSTOM_CODEBASE_TASK: "backend/instructions/custom-codebase-task.md",
 };

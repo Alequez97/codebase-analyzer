@@ -20,7 +20,6 @@ import {
   Code2,
   FileCode,
   FileText,
-  MessageSquare,
   Pencil,
   Save,
   Sparkles,
@@ -133,8 +132,6 @@ export default function DomainRequirementsSection({
   logs = "",
   logsLoading = false,
   hasDocumentation = false,
-  onOpenChat,
-  isChatOpen = false,
 }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showContextDialog, setShowContextDialog] = useState(false);
@@ -312,27 +309,15 @@ export default function DomainRequirementsSection({
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
               {!isEditMode && !showLogs && (
                 <>
-                  {/* Show "Edit with AI" if requirements exist, otherwise "Analyze" */}
                   {sortedRequirements.length > 0 ? (
-                    <>
-                      <IconButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleEnterEditMode}
-                        title="Edit requirements"
-                      >
-                        <Pencil size={16} />
-                      </IconButton>
-                      <Button
-                        size="sm"
-                        colorPalette="purple"
-                        variant={isChatOpen ? "solid" : "outline"}
-                        onClick={onOpenChat}
-                      >
-                        <MessageSquare size={14} />
-                        Edit with AI
-                      </Button>
-                    </>
+                    <IconButton
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleEnterEditMode}
+                      title="Edit requirements"
+                    >
+                      <Pencil size={16} />
+                    </IconButton>
                   ) : (
                     <Button
                       size="sm"

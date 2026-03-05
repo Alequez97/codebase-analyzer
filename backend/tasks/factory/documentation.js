@@ -47,7 +47,7 @@ export async function createAnalyzeDocumentationTask(
       domainId,
       DOMAIN_SECTION_IDS.DOCUMENTATION,
     ),
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);

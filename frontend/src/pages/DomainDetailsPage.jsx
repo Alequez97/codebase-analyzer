@@ -509,14 +509,6 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={documentationLogs}
               logsLoading={documentationLogsLoading}
-              onOpenChat={() =>
-                openChat(
-                  domainId,
-                  SECTION_TYPES.DOCUMENTATION,
-                  DOCUMENTATION_CHAT_CONFIG.initialGreeting,
-                )
-              }
-              isChatOpen={isChatActive(domainId, SECTION_TYPES.DOCUMENTATION)}
               pendingSuggestion={getPendingSuggestion(
                 domainId,
                 SECTION_TYPES.DOCUMENTATION,
@@ -536,22 +528,6 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={diagramsLogs}
               logsLoading={diagramsLogsLoading}
-              onOpenChat={() =>
-                openChat(
-                  domainId,
-                  SECTION_TYPES.DIAGRAMS,
-                  DIAGRAMS_CHAT_CONFIG.initialGreeting,
-                )
-              }
-              isChatOpen={isChatActive(domainId, SECTION_TYPES.DIAGRAMS)}
-              pendingSuggestion={getPendingSuggestion(
-                domainId,
-                SECTION_TYPES.DIAGRAMS,
-              )}
-              onApplyChanges={handleApplyChatChanges}
-              onDismissChanges={() =>
-                clearPendingSuggestion(domainId, SECTION_TYPES.DIAGRAMS)
-              }
             />
 
             <DomainRequirementsSection
@@ -575,22 +551,6 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={requirementsLogs}
               logsLoading={requirementsLogsLoading}
-              onOpenChat={() =>
-                openChat(
-                  domainId,
-                  SECTION_TYPES.REQUIREMENTS,
-                  REQUIREMENTS_CHAT_CONFIG.initialGreeting,
-                )
-              }
-              isChatOpen={isChatActive(domainId, SECTION_TYPES.REQUIREMENTS)}
-              pendingSuggestion={getPendingSuggestion(
-                domainId,
-                SECTION_TYPES.REQUIREMENTS,
-              )}
-              onApplyChanges={handleApplyChatChanges}
-              onDismissChanges={() =>
-                clearPendingSuggestion(domainId, SECTION_TYPES.REQUIREMENTS)
-              }
             />
 
             <DomainBugsSecuritySection
@@ -606,22 +566,6 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={bugsSecurityLogs}
               logsLoading={bugsSecurityLogsLoading}
-              onOpenChat={() =>
-                openChat(
-                  domainId,
-                  SECTION_TYPES.BUGS_SECURITY,
-                  BUGS_SECURITY_CHAT_CONFIG.initialGreeting,
-                )
-              }
-              isChatOpen={isChatActive(domainId, SECTION_TYPES.BUGS_SECURITY)}
-              pendingSuggestion={getPendingSuggestion(
-                domainId,
-                SECTION_TYPES.BUGS_SECURITY,
-              )}
-              onApplyChanges={handleApplyChatChanges}
-              onDismissChanges={() =>
-                clearPendingSuggestion(domainId, SECTION_TYPES.BUGS_SECURITY)
-              }
             />
 
             <DomainRefactoringAndTestingSection
@@ -644,28 +588,6 @@ export default function DomainDetailsPage() {
               showLogs={showDomainLogs}
               logs={testingLogs}
               logsLoading={testingLogsLoading}
-              onOpenChat={() =>
-                openChat(
-                  domainId,
-                  SECTION_TYPES.REFACTORING_AND_TESTING,
-                  TESTING_CHAT_CONFIG.initialGreeting,
-                )
-              }
-              isChatOpen={isChatActive(
-                domainId,
-                SECTION_TYPES.REFACTORING_AND_TESTING,
-              )}
-              pendingSuggestion={getPendingSuggestion(
-                domainId,
-                SECTION_TYPES.REFACTORING_AND_TESTING,
-              )}
-              onApplyChanges={handleApplyChatChanges}
-              onDismissChanges={() =>
-                clearPendingSuggestion(
-                  domainId,
-                  SECTION_TYPES.REFACTORING_AND_TESTING,
-                )
-              }
             />
           </VStack>
         </GridItem>

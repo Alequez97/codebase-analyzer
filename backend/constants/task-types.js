@@ -20,4 +20,7 @@ export const TASK_TYPES = {
   EDIT_REQUIREMENTS: "edit-requirements",
   EDIT_BUGS_SECURITY: "edit-bugs-security",
   EDIT_REFACTORING_AND_TESTING: "edit-refactoring-and-testing",
+
+  // Custom codebase task (floating agent chat)
+  CUSTOM_CODEBASE_TASK: "custom-codebase-task",
 };

@@ -21,7 +21,6 @@ import {
   Download,
   ExternalLink,
   FileText,
-  MessageSquare,
   Sparkles,
 } from "lucide-react";
 import { EmptyState } from "../ui/empty-state";
@@ -56,8 +55,6 @@ export default function DomainDiagramsSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
-  onOpenChat,
-  isChatOpen = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedDiagramIndex, setSelectedDiagramIndex] = useState(0);
@@ -430,33 +427,18 @@ export default function DomainDiagramsSection({
             </Badge>
           </HStack>
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-            {!showLogs && (
-              <>
-                {/* Show "Edit with AI" if diagrams exist, otherwise "Generate Diagrams" */}
-                {diagrams?.diagrams?.length > 0 ? (
-                  <Button
-                    size="sm"
-                    colorPalette="purple"
-                    variant={isChatOpen ? "solid" : "outline"}
-                    onClick={onOpenChat}
-                  >
-                    <MessageSquare size={14} />
-                    Edit with AI
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    colorPalette="blue"
-                    variant="outline"
-                    onClick={handleAnalyze}
-                    loading={loading}
-                    loadingText="Generating"
-                  >
-                    <Sparkles size={14} />
-                    Generate diagrams
-                  </Button>
-                )}
-              </>
+            {!showLogs && !diagrams?.diagrams?.length && (
+              <Button
+                size="sm"
+                colorPalette="blue"
+                variant="outline"
+                onClick={handleAnalyze}
+                loading={loading}
+                loadingText="Generating"
+              >
+                <Sparkles size={14} />
+                Generate diagrams
+              </Button>
             )}
           </HStack>
         </HStack>

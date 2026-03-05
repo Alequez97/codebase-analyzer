@@ -35,7 +35,7 @@ export async function createFullCodebaseAnalysisTask({
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_FULL_CODEBASE,
     outputFile: getCodebaseAnalysisOutputPath(),
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);

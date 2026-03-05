@@ -151,6 +151,15 @@ const config = {
       maxIterations: 2, // Two iterations: description + content
       reasoningEffort: REASONING_EFFORT.LOW,
     },
+
+    // Custom codebase task (floating agent chat)
+    [TASK_TYPES.CUSTOM_CODEBASE_TASK]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.CLAUDE_SONNET_4_6,
+      maxTokens: 64000,
+      maxIterations: 200,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
   },
 
   // Aider-specific configuration (when agent is AGENTS.AIDER)

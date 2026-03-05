@@ -50,7 +50,7 @@ export async function createAnalyzeRefactoringAndTestingTask(
       domainId,
       DOMAIN_SECTION_IDS.REFACTORING_AND_TESTING,
     ),
-    generateMetadata: true,
+
   };
 
   await tasksPersistence.writeTask(task);
