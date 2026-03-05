@@ -48,6 +48,28 @@ export class DeepSeekClient extends BaseLLMClient {
       const response = await this.client.chat.completions.create(requestParams);
       return this.normalizeResponse(response);
     } catch (error) {
+      // If context length exceeded, parse actual token counts and retry with reduced max_tokens
+      const contextMatch = error.message?.match(
+        /maximum context length is (\d+) tokens.*?\((\d+) in the messages/s,
+      );
+      if (contextMatch) {
+        const contextLimit = parseInt(contextMatch[1], 10);
+        const inputTokens = parseInt(contextMatch[2], 10);
+        const reducedMaxTokens = contextLimit - inputTokens - 100;
+        if (
+          reducedMaxTokens > 0 &&
+          reducedMaxTokens < requestParams.max_tokens
+        ) {
+          requestParams.max_tokens = reducedMaxTokens;
+          try {
+            const retryResponse =
+              await this.client.chat.completions.create(requestParams);
+            return this.normalizeResponse(retryResponse);
+          } catch (retryError) {
+            throw new Error(`DeepSeek API error: ${retryError.message}`);
+          }
+        }
+      }
       throw new Error(`DeepSeek API error: ${error.message}`);
     }
   }
