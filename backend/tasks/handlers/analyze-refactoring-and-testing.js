@@ -122,8 +122,7 @@ export function analyzeRefactoringAndTestingHandler(task, taskLogger, agent) {
             const hasCaseShape =
               Array.isArray(checkItem?.input) &&
               checkItem.input.length > 0 &&
-              typeof checkItem?.expectedOutput === "string" &&
-              checkItem.expectedOutput.length > 0 &&
+              checkItem?.expectedOutput != null &&
               typeof checkItem?.assertionType === "string" &&
               checkItem.assertionType.length > 0;
 

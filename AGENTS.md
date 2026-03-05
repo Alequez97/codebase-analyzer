@@ -601,6 +601,40 @@ Dashboard shows: "Click Analyze Codebase to begin"
   - Examples and templates → `docs/examples/`
 - **Don't create**: Large documentation files directly in `docs/` root (except README.md)
 
+#### 10.3 **Avoid Raw Chakra Primitives in Large Components**
+
+- **Never use low-level Chakra UI building blocks directly in large pages or complex components** — doing so leads to bloated, hard-to-read files that mix layout concerns with business logic
+- **Extract repeated or visually distinct UI patterns into named components**, even if they are only used in one place (e.g., `BlockedTestCard`, `TestTableRow`, `SummaryCard`)
+- **Rule of thumb**: if a JSX block inside a component exceeds ~20–30 lines and has a clear visual identity or responsibility, extract it into its own component file
+- **Examples of what to extract**:
+  - A card/badge/alert block that repeats across test types → `BlockedTestCard.jsx`
+  - A table row with expand/collapse logic → `TestTableRow.jsx`
+  - A section header with action buttons → `SectionHeader.jsx`
+- **Benefits**:
+  - Files stay under the ~300-line limit
+  - Easier to reason about each visual unit in isolation
+  - Primitive-heavy JSX is hidden behind descriptive component names, improving readability
+  - Enables targeted changes without touching unrelated UI
+- **Anti-pattern to avoid**:
+  ```jsx
+  // ❌ BAD: 800-line file with raw Chakra primitives copy-pasted 3x
+  {test.blockedBy && (
+    <Box borderWidth="1px" borderRadius="md" p={3} bg="orange.50" ...>
+      <HStack justify="space-between" mb={2}>
+        <HStack><Badge ...>🔒 BLOCKED</Badge>...</HStack>
+        <Button ...>Unblock manually</Button>
+      </HStack>
+      ...
+    </Box>
+  )}
+  ```
+  ```jsx
+  // ✅ GOOD: extracted into BlockedTestCard.jsx, used by name
+  {
+    test.blockedBy && <BlockedTestCard blockedBy={test.blockedBy} />;
+  }
+  ```
+
 ### 11. **Mock Data Workflow (When User Requests Mocking)**
 
 - If the user asks for mock responses, prefer reading JSON files from `.code-analysis-example/` instead of hardcoding large inline objects in route handlers.

@@ -256,6 +256,7 @@ function RefactoringCard({
 }) {
   return (
     <Card.Root
+      id={refactoring.id}
       variant="outline"
       borderColor={isApplying || isJustCompleted ? "blue.200" : "orange.200"}
       bg={isApplying || isJustCompleted ? "blue.50" : "orange.50"}
@@ -266,6 +267,9 @@ function RefactoringCard({
           <HStack justify="space-between" align="start">
             <VStack align="start" gap={1} flex={1}>
               <HStack>
+                <Badge colorPalette="gray" variant="outline" fontFamily="mono">
+                  {refactoring.id}
+                </Badge>
                 <Badge colorPalette={getPriorityColor(refactoring.priority)}>
                   {refactoring.priority}
                 </Badge>
@@ -321,13 +325,21 @@ function RefactoringCard({
 /** Blue card — AI has completed the refactoring, awaiting user review */
 function ReadyForReviewCard({ refactoring, onMarkCompleted }) {
   return (
-    <Card.Root variant="outline" borderColor="blue.200" bg="blue.50">
+    <Card.Root
+      id={refactoring.id}
+      variant="outline"
+      borderColor="blue.200"
+      bg="blue.50"
+    >
       <Card.Body>
         <VStack align="stretch" gap={3}>
           {/* Header */}
           <HStack justify="space-between" align="start">
             <VStack align="start" gap={1} flex={1}>
               <HStack>
+                <Badge colorPalette="gray" variant="outline" fontFamily="mono">
+                  {refactoring.id}
+                </Badge>
                 <Badge colorPalette={getPriorityColor(refactoring.priority)}>
                   {refactoring.priority}
                 </Badge>
