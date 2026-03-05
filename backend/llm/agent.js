@@ -123,6 +123,16 @@ export class LLMAgent {
           message: "Compacting context...",
         });
         await this.state.compact(this.client);
+        const tokensAfterCompaction = this.state.getTokenCount();
+        logger.info(
+          `🗜️  Compaction complete. Tokens after: ~${tokensAfterCompaction}`,
+          { component: "LLMAgent" },
+        );
+        onProgress({
+          stage: PROGRESS_STAGES.COMPACTING,
+          message: `Compaction complete. Tokens after: ~${tokensAfterCompaction}`,
+          tokensAfterCompaction,
+        });
       }
 
       // Send message to LLM

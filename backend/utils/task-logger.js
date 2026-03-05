@@ -74,19 +74,49 @@ export async function setupTaskLogger(task) {
  * @param {Object} task - The task object
  */
 export function logTaskHeader(taskLogger, task) {
+  const agentConfig = task.agentConfig || {};
   taskLogger.raw("=".repeat(80));
   taskLogger.info(`🚀 STARTING ${task.type.toUpperCase()} TASK`, {
     component: "TaskLogger",
     taskId: task.id,
   });
-  taskLogger.info(`📋 Type: ${task.type}`, { component: "TaskLogger" });
-  taskLogger.info(`🤖 Model: ${task.agentConfig?.model || "unknown"}`, {
+  taskLogger.info(`📋 Type:              ${task.type}`, {
     component: "TaskLogger",
   });
-  taskLogger.info(`📁 Output: ${task.outputFile}`, {
+  taskLogger.info(`🤖 Agent:             ${agentConfig.agent || "unknown"}`, {
     component: "TaskLogger",
   });
-  taskLogger.info(`🎯 Target: ${config.target.directory}`, {
+  taskLogger.info(`🧠 Model:             ${agentConfig.model || "unknown"}`, {
+    component: "TaskLogger",
+  });
+  if (agentConfig.reasoningEffort) {
+    taskLogger.info(`💭 Reasoning effort:  ${agentConfig.reasoningEffort}`, {
+      component: "TaskLogger",
+    });
+  }
+  taskLogger.info(
+    `🔢 Max tokens:        ${agentConfig.maxTokens ?? "default"}`,
+    { component: "TaskLogger" },
+  );
+  taskLogger.info(
+    `🔁 Max iterations:    ${agentConfig.maxIterations ?? "default"}`,
+    { component: "TaskLogger" },
+  );
+  if (task.params?.domainId) {
+    taskLogger.info(`🗂️  Domain:            ${task.params.domainId}`, {
+      component: "TaskLogger",
+    });
+  }
+  if (Array.isArray(task.params?.files) && task.params.files.length > 0) {
+    taskLogger.info(
+      `📄 Files (${task.params.files.length}):        ${task.params.files.join(", ")}`,
+      { component: "TaskLogger" },
+    );
+  }
+  taskLogger.info(`📁 Output:            ${task.outputFile}`, {
+    component: "TaskLogger",
+  });
+  taskLogger.info(`🎯 Target:            ${config.target.directory}`, {
     component: "TaskLogger",
   });
   taskLogger.raw("=".repeat(80));
