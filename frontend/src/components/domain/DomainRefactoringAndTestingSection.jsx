@@ -95,6 +95,65 @@ export default function DomainRefactoringAndTestingSection({
                 )}
               </IconButton>
               <Heading size="md">Refactoring & Testing</Heading>
+              {testing && !showLogs && (
+                <>
+                  {testing.refactoringRecommendations?.length > 0 && (
+                    <HStack gap={1}>
+                      <Text fontSize="xs" color="gray.500">
+                        {testing.refactoringRecommendations.length}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Refactoring
+                        {testing.refactoringRecommendations.length !== 1
+                          ? "s"
+                          : ""}
+                      </Text>
+                    </HStack>
+                  )}
+                  {testing.missingTests?.unit?.length > 0 && (
+                    <HStack gap={1}>
+                      <Text
+                        fontSize="xs"
+                        color="purple.600"
+                        fontWeight="semibold"
+                      >
+                        {testing.missingTests.unit.length}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Unit
+                      </Text>
+                    </HStack>
+                  )}
+                  {testing.missingTests?.integration?.length > 0 && (
+                    <HStack gap={1}>
+                      <Text
+                        fontSize="xs"
+                        color="blue.600"
+                        fontWeight="semibold"
+                      >
+                        {testing.missingTests.integration.length}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        Integration
+                      </Text>
+                    </HStack>
+                  )}
+                  {testing.missingTests?.e2e?.length > 0 && (
+                    <HStack gap={1}>
+                      <Text
+                        fontSize="xs"
+                        color="green.600"
+                        fontWeight="semibold"
+                      >
+                        {testing.missingTests.e2e.length}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        E2E
+                      </Text>
+                    </HStack>
+                  )}
+                </>
+              )}
               {showLogs && (
                 <Badge colorPalette="purple" size="sm">
                   Logs View

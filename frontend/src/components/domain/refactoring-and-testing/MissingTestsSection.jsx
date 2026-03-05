@@ -129,6 +129,7 @@ export function MissingTestsSection({
               <Table.ColumnHeader width="80px">Priority</Table.ColumnHeader>
               <Table.ColumnHeader>Description</Table.ColumnHeader>
               <Table.ColumnHeader>Suggested File</Table.ColumnHeader>
+              <Table.ColumnHeader width="120px">Blocked By</Table.ColumnHeader>
               <Table.ColumnHeader width="140px" textAlign="center">
                 Actions
               </Table.ColumnHeader>

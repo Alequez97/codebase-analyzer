@@ -16,7 +16,7 @@ import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails } from "./TestCaseDetails";
 import { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
 import { getPriorityColor } from "./utils";
-import { BlockedTestCard } from "./BlockedTestCard";
+import { InfoTooltip } from "../../ui/info-tooltip";
 
 export function TestTableRow({
   test,
@@ -140,16 +140,9 @@ export function TestTableRow({
           </Icon>
         </Table.Cell>
         <Table.Cell>
-          <HStack gap={1}>
-            <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
-              {test.id}
-            </Text>
-            {isBlocked && (
-              <Badge colorPalette="orange" size="sm" variant="solid">
-                🔒
-              </Badge>
-            )}
-          </HStack>
+          <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
+            {test.id}
+          </Text>
         </Table.Cell>
         <Table.Cell>
           <Badge colorPalette={typePalette} size="sm">
@@ -162,7 +155,10 @@ export function TestTableRow({
           </Badge>
         </Table.Cell>
         <Table.Cell>
-          <Text fontSize="sm">{test.description}</Text>
+          <HStack gap={1.5} align="center">
+            <Text fontSize="sm">{test.description}</Text>
+            {test.reason && <InfoTooltip label={test.reason} />}
+          </HStack>
         </Table.Cell>
         <Table.Cell>
           <Text
@@ -173,6 +169,28 @@ export function TestTableRow({
           >
             {test.suggestedTestFile}
           </Text>
+        </Table.Cell>
+        <Table.Cell>
+          {isBlocked ? (
+            <Text
+              as="span"
+              fontSize="xs"
+              fontFamily="mono"
+              fontWeight="semibold"
+              color="orange.600"
+              cursor="pointer"
+              textDecoration="underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                document.getElementById(test.blockedBy)?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }}
+            >
+              {test.blockedBy}
+            </Text>
+          ) : null}
         </Table.Cell>
         <Table.Cell textAlign="center">
           <HStack gap={1} justify="center">
@@ -212,7 +230,7 @@ export function TestTableRow({
 
       {isExpanded && (
         <Table.Row key={`${test.id}-details`}>
-          <Table.Cell colSpan={7} bg="gray.50" p={4}>
+          <Table.Cell colSpan={8} bg="gray.50" p={4}>
             {editingTestId === test.id ? (
               <TestCaseInlineEditorComponent
                 ref={editorRef}
@@ -225,10 +243,6 @@ export function TestTableRow({
               />
             ) : (
               <VStack align="stretch" gap={3}>
-                {test.blockedBy && (
-                  <BlockedTestCard blockedBy={test.blockedBy} />
-                )}
-
                 {sourceFiles.length > 0 && (
                   <Box
                     borderWidth="1px"
@@ -275,30 +289,6 @@ export function TestTableRow({
                         </HStack>
                       ))}
                     </VStack>
-                  </Box>
-                )}
-
-                {test.reason && (
-                  <Box
-                    borderWidth="1px"
-                    borderRadius="md"
-                    p={3}
-                    bg="yellow.50"
-                    borderColor="yellow.200"
-                  >
-                    <Text
-                      fontSize="xs"
-                      fontWeight="semibold"
-                      color="gray.600"
-                      mb={1}
-                      textTransform="uppercase"
-                      letterSpacing="wide"
-                    >
-                      Why this test matters
-                    </Text>
-                    <Text fontSize="xs" color="gray.700">
-                      {test.reason}
-                    </Text>
                   </Box>
                 )}
 

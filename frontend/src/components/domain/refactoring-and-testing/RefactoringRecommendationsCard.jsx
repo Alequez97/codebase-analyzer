@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { AlertTriangle, CheckCircle, Clock, Code2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Code2 } from "lucide-react";
 import { Card } from "../../ui/card";
 import { Alert } from "../../ui/alert";
 import { kebabCaseToDisplayName } from "../../../utils/domain-utils";
@@ -317,11 +317,7 @@ function RefactoringCard({
           <RefactoringCardBody refactoring={refactoring} />
 
           {/* Footer */}
-          <HStack justify="space-between" pt={2}>
-            <HStack fontSize="xs" color="gray.500">
-              <Clock size={12} />
-              <Text>Est. {refactoring.estimatedEffort || "30 min"}</Text>
-            </HStack>
+          <HStack justify="flex-end" pt={2}>
             {isApplying ? (
               <Button colorPalette="blue" size="sm" disabled loading>
                 Applying...
@@ -377,11 +373,7 @@ function ReadyForReviewCard({ refactoring, onMarkCompleted }) {
           <RefactoringCardBody refactoring={refactoring} />
 
           {/* Footer */}
-          <HStack justify="space-between" pt={2}>
-            <HStack fontSize="xs" color="gray.500">
-              <Clock size={12} />
-              <Text>Est. {refactoring.estimatedEffort || "30 min"}</Text>
-            </HStack>
+          <HStack justify="flex-end" pt={2}>
             <Button
               colorPalette="blue"
               size="sm"
