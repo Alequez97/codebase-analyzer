@@ -9,9 +9,9 @@ export const MODELS = {
   GPT_5_3_CODEX: "gpt-5.3-codex",
 
   // Anthropic models
-  CLAUDE_OPUS: "claude-opus-4-20250514",
-  CLAUDE_SONNET: "claude-sonnet-4-5-20250929",
-  CLAUDE_HAIKU: "claude-3-5-haiku-20241022",
+  CLAUDE_OPUS_4: "claude-opus-4-20250514",
+  CLAUDE_SONNET_4_5: "claude-sonnet-4-5-20250929",
+  CLAUDE_HAIKU_3_5: "claude-3-5-haiku-20241022",
 
   // DeepSeek models
   DEEPSEEK_CHAT: "deepseek-chat",
@@ -26,9 +26,9 @@ export const MODEL_NAMES = {
   [MODELS.GPT_4_TURBO]: "GPT-4 Turbo",
   [MODELS.GPT_5_2]: "GPT-5.2",
   [MODELS.GPT_5_3_CODEX]: "GPT-5.3-Codex",
-  [MODELS.CLAUDE_OPUS]: "Claude Opus 4",
-  [MODELS.CLAUDE_SONNET]: "Claude Sonnet 4.5",
-  [MODELS.CLAUDE_HAIKU]: "Claude Haiku 3.5",
+  [MODELS.CLAUDE_OPUS_4]: "Claude Opus 4",
+  [MODELS.CLAUDE_SONNET_4_5]: "Claude Sonnet 4.5",
+  [MODELS.CLAUDE_HAIKU_3_5]: "Claude Haiku 3.5",
   [MODELS.DEEPSEEK_CHAT]: "DeepSeek Chat",
   [MODELS.DEEPSEEK_REASONER]: "DeepSeek Reasoner",
 };
