@@ -31,10 +31,7 @@ Analyze refactoring needs and testing for this domain. Output to **`{{OUTPUT_FIL
           }
         ]
       },
-      "benefits": [
-        "Specific benefit 1",
-        "Specific benefit 2"
-      ],
+      "benefits": ["Specific benefit 1", "Specific benefit 2"],
       "unblocks": ["TEST-001", "TEST-002"],
       "status": "pending"
     }
@@ -51,20 +48,19 @@ Analyze refactoring needs and testing for this domain. Output to **`{{OUTPUT_FIL
     "unit": [
       {
         "id": "TEST-001",
-        "blockedBy": "REFACTOR-001",  // Optional: refactoring ID that must be applied first
+        "blockedBy": "REFACTOR-001", // Optional: refactoring ID that must be applied first
         "description": "What should be tested",
         "priority": "P0 | P1 | P2 | P3",
         "category": "security | resilience | validation | business-logic | data-integrity | performance | edge-case",
         "suggestedTestFile": "path/near/source-file.test.js",
-        "relatedRequirement": "REQ-001",
+        "relatedRequirement": "REQ-001", // Only include when INCLUDE_REQUIREMENTS=true
         "scenarios": [
           {
             "scenario": "Short scenario title",
             "checks": [
               {
                 "input": [{ "field": "fieldName", "value": "example value" }],
-                "expectedOutput": "Deterministic expected result",
-                "assertionType": "toBe | toEqual | toMatch | toHaveProperty | toThrow | rejects | resolves"
+                "expectedOutput": "Deterministic expected result"
               }
             ]
           }
@@ -88,30 +84,7 @@ Analyze refactoring needs and testing for this domain. Output to **`{{OUTPUT_FIL
     "e2e": [
       // Same schema as unit/integration tests
       // Use { "field": "step", "value": "action" } for E2E checks input
-  },
-  "testingPrinciples": {
-    "description": "Testing principles and guidelines for this domain",
-    "principles": [
-      {
-        "title": "Principle title",
-        "description": "Principle details"
-      }
     ]
-  },
-  "summary": {
-    "totalExistingTests": 0,
-    "totalMissingTests": 0,
-    "missingByType": {
-      "unit": 0,
-      "integration": 0,
-      "e2e": 0
-    },
-    "missingByPriority": {
-      "P0": 0,
-      "P1": 0,
-      "P2": 0
-    },
-    "criticalGaps": ["Short critical gap summary"]
   }
 }
 ```
@@ -178,10 +151,11 @@ For each refactoring:
   - Keep `existingTests` entries **minimal** - just file path, brief description, and type. Don't analyze in depth.
   - Focus analysis effort on `missingTests`.
 - For every item in `missingTests.unit[]`, `missingTests.integration[]`, and `missingTests.e2e[]`, include:
-  - `id`, `description`, `priority`, `category`, `suggestedTestFile`, `relatedRequirement`, `scenarios`, `reason`.
+  - `id`, `description`, `priority`, `category`, `suggestedTestFile`, `scenarios`, `reason`.
+  - `relatedRequirement` — only include when `INCLUDE_REQUIREMENTS` is true.
 - `scenarios` must be a non-empty array.
 - Each `scenarios[]` item must include: `scenario`, `checks` (non-empty).
-- Each `checks[]` item must include: `input` (array of `{ field, value }`), `expectedOutput`, `assertionType`.
+- Each `checks[]` item must include: `input` (array of `{ field, value }`), `expectedOutput`.
 - For e2e checks, represent user actions as `input` items with `field: "step"` and the action in `value`.
 - The `value` in each `input` item must be a **raw JSON value** (object, array, string, number, boolean) — **never a JSON-encoded string**. ✅ Correct: `{ "field": "status", "value": {"minutes": 1000} }`
 - JSON must use valid key-value syntax. Do not output invalid objects like `{ "step", "value": "..." }`.
@@ -328,33 +302,10 @@ Focus on tests that **protect business value** and **catch real bugs**:
    - ❌ "Test basic CRUD with valid data"
    - Only suggest if there's non-trivial business logic involved
 
-### Important Distinction: Unit vs Integration Validation Tests
+### Unit vs Integration Validation Tests
 
-- ❌ **BAD (Unit test on model)**: Testing Mongoose schema validators directly
-
-  ```javascript
-  // DON'T suggest this - tests framework, not business logic
-  it("should require serial field", async () => {
-    const aircraft = new Aircraft({
-      /* no serial */
-    });
-    await expect(aircraft.save()).rejects.toThrow();
-  });
-  ```
-
-- ✅ **GOOD (Integration test on API)**: Testing API contract and error responses
-  ```javascript
-  // DO suggest this - tests API behavior and user-facing contracts
-  it("POST /aircraft returns 400 when serial is missing", async () => {
-    const response = await request(app)
-      .post("/aircraft")
-      .send({ registration: "ABC123" }); // missing serial
-    expect(response.status).toBe(400);
-    expect(response.body.error).toContain("serial");
-  });
-  ```
-
-**The difference**: Integration tests verify the **entire API contract** (status codes, error messages, request/response flow), while unit tests on models just duplicate framework validation.
+- ❌ **Unit test on model schema**: Tests ORM/framework validators — not your logic. Skip.
+- ✅ **Integration test on API endpoint**: Tests status codes, error messages, response contract. Suggest these.
 
 ### Test Suggestion Guidelines
 
@@ -366,103 +317,16 @@ When suggesting a missing test:
 
 If the answer to all three is "no" or "nothing specific", **skip that test**.
 
-### Examples: Good vs Bad Test Suggestions
+### Good vs Bad Examples
 
-#### ❌ BAD (Unit Test on Mongoose Schema)
-
-```json
-{
-  "id": "TEST-001",
-  "description": "Validate aircraft schema constraints and field requirements",
-  "category": "data-integrity",
-  "suggestedTestFile": "backend/models/aircraft.test.js",
-  "reason": "Ensure required fields are properly validated"
-}
-```
-
-**Why bad**: Tests Mongoose schema validators, not business logic. Framework responsibility.
-
-#### ✅ GOOD (Integration Test for API Contract)
-
-```json
-{
-  "id": "TEST-101",
-  "description": "POST /aircraft validation returns 400 with clear errors for missing required fields",
-  "category": "validation",
-  "suggestedTestFile": "backend/tests/integration/aircraft/create-aircraft-validation.integration.test.js",
-  "reason": "Verifies API contract: users receive proper error messages when submitting invalid data. Protects user experience and API consumers."
-}
-```
-
-**Why good**: Tests the entire API contract (status codes, error format, user-facing behavior), not just model validation.
-
-#### ✅ GOOD (Business Logic with Edge Cases)
-
-```json
-{
-  "id": "TEST-002",
-  "description": "Aircraft status transitions respect maintenance lock rules",
-  "category": "business-logic",
-  "suggestedTestFile": "backend/services/aircraft/aircraft-lifecycle.test.js",
-  "reason": "Critical business rule: aircraft in maintenance cannot be assigned to flights. Bug could cause safety issues and scheduling conflicts."
-}
-```
-
-**Why good**: Tests custom business rule with real consequences.
-
-#### ❌ BAD (Trivial CRUD)
-
-```json
-{
-  "id": "TEST-003",
-  "description": "Create aircraft with valid data",
-  "suggestedTestFile": "backend/controllers/aircraft.test.js",
-  "reason": "Basic CRUD operation should work"
-}
-```
-
-**Why bad**: No edge cases, no business logic, just framework behavior.
-
-#### ✅ GOOD (Authorization Corner Case)
-
-```json
-{
-  "id": "TEST-004",
-  "description": "Prevent pilots from editing aircraft assigned to other airlines",
-  "category": "security",
-  "suggestedTestFile": "backend/middleware/authorization/aircraft-access.test.js",
-  "reason": "Multi-tenant authorization bug: users should only access their airline's aircraft. Bug could expose competitor data."
-}
-```
-
-**Why good**: Tests authorization with business context and data isolation.
-
-#### ❌ BAD (Framework Responsibility)
-
-```json
-{
-  "id": "TEST-005",
-  "description": "Test that registration field accepts valid format",
-  "suggestedTestFile": "backend/models/aircraft.test.js",
-  "reason": "Field validation is important"
-}
-```
-
-**Why bad**: Regex validation is tested by the validation library.
-
-#### ✅ GOOD (Complex Business Calculation)
-
-```json
-{
-  "id": "TEST-006",
-  "description": "Calculate aircraft utilization rate with partial month edge cases",
-  "category": "business-logic",
-  "suggestedTestFile": "backend/services/analytics/utilization-calculator.test.js",
-  "reason": "Complex calculation involving flight hours, downtime, and calendar boundaries. Bug could cause incorrect billing or capacity planning."
-}
-```
-
-**Why good**: Tests complex calculation with edge cases that affect business decisions.
+|     | Description                                                              | Why                                                         |
+| --- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| ❌  | `"Validate aircraft schema field requirements"`                          | Tests ORM validators — framework responsibility             |
+| ✅  | `"POST /aircraft returns 400 with error details when serial is missing"` | Tests API contract and user-facing behavior                 |
+| ❌  | `"Create aircraft with valid data"`                                      | Trivial CRUD, no business logic                             |
+| ✅  | `"Aircraft in maintenance cannot be assigned to flights"`                | Custom business rule with real safety consequences          |
+| ❌  | `"Test that registration field accepts valid format"`                    | Regex validations are tested by the validation library      |
+| ✅  | `"Utilization rate calculation with partial-month edge cases"`           | Complex calculation affecting billing and capacity planning |
 
 ## What to Analyze
 
@@ -507,38 +371,12 @@ If the answer to all three is "no" or "nothing specific", **skip that test**.
 
 ## Quality Rules for Suggested Tests
 
-1. **Prefer deterministic assertions**
-
-- Favor assertions about behavior and correctness (returned value, thrown error, persisted state, side effects).
-- Avoid vague assertions like "works", "resolves", or "handles correctly" without a specific expected outcome.
-
-2. **Avoid flaky time-based unit test checks**
-
-- Do not suggest strict runtime thresholds in unit tests (for example: "must complete within 200ms").
-- If performance is relevant, recommend a separate benchmark/performance test suite and label it clearly as performance-focused.
-
-3. **Use realistic test mechanics**
-
-- For expiry/rate-limit windows, prefer time mocking/fake timers over real waiting.
-- For concurrency scenarios, suggest controlled parallel calls and deterministic assertions.
-
-4. **Map test type to scope**
-
-- Unit: pure logic, validation, error branches, deterministic behavior.
-- Integration: API + DB/cache/service interactions and contracts.
-- E2E: critical user journeys and observable UI/system outcomes.
-
-6. **Integration test tooling conventions**
-
-- For backend HTTP integration tests, prefer `supertest` for endpoint-level assertions.
-- Prefer tests that exercise the real exported backend app/router wiring; avoid controller-only harnesses as the default recommendation.
-- Do not rely on live external HTTP services in integration tests.
-- Prefer `nock` for mocking outbound HTTP interactions unless the codebase already has an established alternative.
-
-5. **Security tests must be explicit**
-
-- Include concrete attack vectors and expected rejection behavior (status code, error type/message, no privilege escalation).
-- Prefer assertions that prove safe failure behavior when dependencies are unavailable.
+- **Deterministic assertions**: Assert specific values (returned value, error thrown, persisted state) — never "works" or "handles correctly".
+- **No time thresholds in unit tests**: Use fake timers for expiry/rate-limit scenarios; flag performance tests explicitly.
+- **Concurrency**: Use controlled parallel calls with deterministic assertions.
+- **Scope**: Unit = pure logic; Integration = API + DB/service contracts (use `supertest`); E2E = critical user journeys.
+- **No live external HTTP** in integration tests — use `nock` for outbound mocking.
+- **Security tests**: Include the concrete attack vector and expected rejection (status code + error message).
 
 ## Test Priority Guidelines
 
