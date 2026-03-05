@@ -12,12 +12,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Sparkles,
-  TestTube,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Sparkles, TestTube } from "lucide-react";
 import {
   ExistingTestsTable,
   MissingTestsSection,

@@ -262,7 +262,7 @@ export default function DomainBugsSecuritySection({
               )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-              {!hasData && (
+              {!hasData && !showLogs && (
                 <Button
                   size="sm"
                   variant="outline"

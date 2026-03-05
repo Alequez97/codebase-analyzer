@@ -80,8 +80,6 @@ export default function DomainDocumentationSection({
       ? editedDocumentation
       : documentation?.content || "";
 
-  const statusText = documentation?.metadata?.status || null;
-
   return (
     <Card.Root>
       <Card.Header py="4">
@@ -108,11 +106,6 @@ export default function DomainDocumentationSection({
               )}
             </IconButton>
             <Heading size="md">Documentation</Heading>
-            {statusText && (
-              <Badge colorPalette="green" size="sm">
-                {statusText}
-              </Badge>
-            )}
             {showLogs && (
               <Badge colorPalette="purple" size="sm">
                 Logs View

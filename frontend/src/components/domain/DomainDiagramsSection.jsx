@@ -306,6 +306,11 @@ export default function DomainDiagramsSection({
                 )}
               </IconButton>
               <Heading size="md">Diagrams</Heading>
+              {showLogs && (
+                <Badge colorPalette="purple" size="sm">
+                  Logs View
+                </Badge>
+              )}
             </HStack>
           </HStack>
         </Card.Header>
@@ -355,6 +360,11 @@ export default function DomainDiagramsSection({
                 )}
               </IconButton>
               <Heading size="md">Diagrams</Heading>
+              {showLogs && (
+                <Badge colorPalette="purple" size="sm">
+                  Logs View
+                </Badge>
+              )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
               {!showLogs && (
@@ -425,6 +435,11 @@ export default function DomainDiagramsSection({
             <Badge colorPalette="blue" size="sm">
               {diagramCount} diagram{diagramCount !== 1 ? "s" : ""}
             </Badge>
+            {showLogs && (
+              <Badge colorPalette="purple" size="sm">
+                Logs View
+              </Badge>
+            )}
           </HStack>
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
             {!showLogs && !diagrams?.diagrams?.length && (
