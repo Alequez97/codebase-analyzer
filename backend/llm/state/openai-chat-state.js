@@ -53,8 +53,11 @@ export class OpenAIChatState {
   /**
    * Add tool use by assistant (when LLM calls a tool)
    * OpenAI format: tool_calls are stored separately, not in content
+   * @param {Array} toolCalls - normalized tool call array
+   * @param {Object} [options]
+   * @param {string|null} [options.reasoningContent] - DeepSeek reasoning_content to echo back
    */
-  addToolUse(toolCalls) {
+  addToolUse(toolCalls, { reasoningContent = null } = {}) {
     // Convert normalized tool calls to OpenAI's tool_call format
     const formattedToolCalls = toolCalls.map((call) => ({
       id: call.id,
@@ -65,11 +68,19 @@ export class OpenAIChatState {
       },
     }));
 
-    this.messages.push({
+    const message = {
       role: "assistant",
       content: "", // OpenAI uses empty content when there are tool calls
       tool_calls: formattedToolCalls,
-    });
+    };
+
+    // DeepSeek thinking mode requires reasoning_content to be echoed back on
+    // every assistant message within a tool-call turn, otherwise the API returns 400.
+    if (reasoningContent) {
+      message.reasoning_content = reasoningContent;
+    }
+
+    this.messages.push(message);
   }
 
   /**

@@ -80,6 +80,9 @@ export function logTaskHeader(taskLogger, task) {
     taskId: task.id,
   });
   taskLogger.info(`📋 Type: ${task.type}`, { component: "TaskLogger" });
+  taskLogger.info(`🤖 Model: ${task.agentConfig?.model || "unknown"}`, {
+    component: "TaskLogger",
+  });
   taskLogger.info(`📁 Output: ${task.outputFile}`, {
     component: "TaskLogger",
   });

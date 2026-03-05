@@ -1,6 +1,7 @@
 import config from "../config.js";
 import { ClaudeClient } from "../llm/clients/claude-client.js";
 import { OpenAIClient } from "../llm/clients/openai-client.js";
+import { DeepSeekClient } from "../llm/clients/deepseek-client.js";
 import { ChatState } from "../llm/state/chat-state.js";
 import { OpenAIChatState } from "../llm/state/openai-chat-state.js";
 import { LLMAgent } from "../llm/agent.js";
@@ -90,9 +91,21 @@ export function createLLMAgent(agentConfig) {
       reasoningEffort,
     });
     state = new ChatState(client);
+  } else if (provider === "deepseek") {
+    if (!apiKeys.deepseek) {
+      throw new Error(
+        `DeepSeek model "${model}" is selected but DEEPSEEK_API_KEY is not configured`,
+      );
+    }
+    client = new DeepSeekClient({
+      apiKey: apiKeys.deepseek,
+      model,
+      maxTokens,
+    });
+    state = new OpenAIChatState(client);
   } else {
     throw new Error(
-      `Unsupported provider "${provider}". Supported providers: openai, anthropic`,
+      `Unsupported provider "${provider}". Supported providers: openai, anthropic, deepseek`,
     );
   }
 

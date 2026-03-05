@@ -172,6 +172,7 @@ export class LLMAgent {
           onToolCall,
           onProgress,
           iteration: iterationCount,
+          reasoningContent: response.reasoningContent || null,
         });
         continue; // Continue conversation after tool execution
       }
@@ -259,7 +260,10 @@ export class LLMAgent {
    * Handle tool calls from LLM
    * @private
    */
-  async handleToolCalls(toolCalls, { onToolCall, onProgress, iteration }) {
+  async handleToolCalls(
+    toolCalls,
+    { onToolCall, onProgress, iteration, reasoningContent = null },
+  ) {
     logger.info(`Executing ${toolCalls.length} tool call(s)`, {
       component: "LLMAgent",
       tools: toolCalls.map((tc) => tc.name).join(", "),
@@ -273,6 +277,7 @@ export class LLMAgent {
         name: tc.name,
         arguments: tc.arguments,
       })),
+      { reasoningContent },
     );
 
     // Execute each tool

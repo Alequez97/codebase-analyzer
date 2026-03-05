@@ -184,6 +184,7 @@ For each refactoring:
 - Each `scenarios[]` item must include: `scenario`, `checks` (non-empty).
 - Each `checks[]` item must include: `input` (array of `{ field, value }`), `expectedOutput`, `assertionType`.
 - For e2e checks, represent user actions as `input` items with `field: "step"` and the action in `value`.
+- The `value` in each `input` item must be a **raw JSON value** (object, array, string, number, boolean) — **never a JSON-encoded string**. ✅ Correct: `{ "field": "status", "value": {"minutes": 1000} }`
 - JSON must use valid key-value syntax. Do not output invalid objects like `{ "step", "value": "..." }`.
 - Do not omit `suggestedTestFile` or `scenarios` for any missing-test entry.
 
