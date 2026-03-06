@@ -42,12 +42,21 @@ export class OpenAIChatState {
 
   /**
    * Add an assistant message with text content
+   * @param {string} content - Message text
+   * @param {Object} [options]
+   * @param {string|null} [options.reasoningContent] - DeepSeek reasoning_content to echo back
    */
-  addAssistantMessage(content) {
-    this.messages.push({
+  addAssistantMessage(content, { reasoningContent = null } = {}) {
+    const message = {
       role: "assistant",
       content,
-    });
+    };
+    // DeepSeek thinking mode requires reasoning_content on every assistant
+    // message in the conversation history, not only on tool-call turns.
+    if (reasoningContent) {
+      message.reasoning_content = reasoningContent;
+    }
+    this.messages.push(message);
   }
 
   /**

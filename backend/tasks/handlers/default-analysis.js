@@ -156,7 +156,8 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       if (
         response.stopReason === "end_turn" ||
         response.stopReason === "stop_sequence" ||
-        response.stopReason === "completed"
+        response.stopReason === "completed" ||
+        response.stopReason === "stop"
       ) {
         taskLogger.info("✅ Analysis complete", {
           component: "Analysis",

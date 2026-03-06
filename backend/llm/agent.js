@@ -172,7 +172,9 @@ export class LLMAgent {
 
       // Handle text response
       if (response.content && typeof response.content === "string") {
-        this.state.addAssistantMessage(response.content);
+        this.state.addAssistantMessage(response.content, {
+          reasoningContent: response.reasoningContent || null,
+        });
         onMessage("assistant", response.content);
       }
 
