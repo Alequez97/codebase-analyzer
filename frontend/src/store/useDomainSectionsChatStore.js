@@ -1,12 +1,20 @@
 import { create } from "zustand";
-import { chatWithAI } from "../api/domain-sections-chat.js";
-import { appendTaskChatMessage } from "../api/tasks";
+import {
+  chatWithAI,
+  getDomainSectionChatHistory,
+  appendDomainSectionChatMessage,
+  clearDomainSectionChatHistory,
+} from "../api/domain-sections-chat.js";
 
 /**
  * Domain Sections Chat Store - Manages AI chat conversations for domain sections editing
  *
- * Stores chat history for each domain section (ephemeral - lost on navigation)
- * Handles backend communication for AI responses
+ * Chat history is persisted to the backend as:
+ *   .code-analysis/tasks/chat-history/domain-{domainId}-{sectionType}.json
+ * Conversations survive page reloads and are restored on openChat().
+ *
+ * Thinking/responding state is tracked per chatId (taskId), not globally.
+ * This means multiple section chats can be independently active at the same time.
  */
 export const useDomainSectionsChatStore = create((set, get) => ({
   // State: Map of domain_section → messages array
@@ -24,26 +32,55 @@ export const useDomainSectionsChatStore = create((set, get) => ({
   // Used to match incoming CHAT_MESSAGE / DOCUMENTATION_UPDATED events to the right chat
   currentChatIdByDomainSection: new Map(),
 
-  // Loading state for AI responses
-  isAiResponding: false,
-
-  // Thinking state (AI is processing but hasn't responded yet)
-  isAiThinking: false,
+  // Per-chatId transient state: Map<chatId, { isThinking: bool, isResponding: bool }>
+  // Keyed by taskId so multiple section chats are tracked independently.
+  chatStateById: new Map(),
 
   // Actions
 
   /**
-   * Set AI thinking state
+   * Set state for a specific chat (identified by taskId)
+   * @param {string} chatId - The task ID
+   * @param {{ isThinking?: boolean, isResponding?: boolean }} patch
    */
-  setAiThinking: (thinking) => {
-    set({ isAiThinking: thinking });
+  setChatState: (chatId, patch) => {
+    const map = new Map(get().chatStateById);
+    const existing = map.get(chatId) || {
+      isThinking: false,
+      isResponding: false,
+    };
+    map.set(chatId, { ...existing, ...patch });
+    set({ chatStateById: map });
   },
 
   /**
-   * Set AI responding state
+   * Remove state entry for a chat (called on task completed/failed)
+   * @param {string} chatId
    */
-  setAiResponding: (responding) => {
-    set({ isAiResponding: responding });
+  clearChatState: (chatId) => {
+    if (!chatId) return;
+    const map = new Map(get().chatStateById);
+    map.delete(chatId);
+    set({ chatStateById: map });
+  },
+
+  /**
+   * Helper: is the AI thinking for a specific domain section?
+   * Resolves the active chatId for the section then checks chatStateById.
+   */
+  isThinkingForSection: (domainId, sectionType) => {
+    const chatId = get().getCurrentChatId(domainId, sectionType);
+    if (!chatId) return false;
+    return get().chatStateById.get(chatId)?.isThinking ?? false;
+  },
+
+  /**
+   * Helper: is the AI responding for a specific domain section?
+   */
+  isRespondingForSection: (domainId, sectionType) => {
+    const chatId = get().getCurrentChatId(domainId, sectionType);
+    if (!chatId) return false;
+    return get().chatStateById.get(chatId)?.isResponding ?? false;
   },
 
   /**
@@ -66,16 +103,42 @@ export const useDomainSectionsChatStore = create((set, get) => ({
 
   /**
    * Open chat for a specific domain section
-   * If chat history exists, it will be restored
-   * If not, initialize with greeting message
+   * Loads persisted history from backend; initializes with greeting if none exists
    */
-  openChat: (domainId, sectionType, initialGreeting) => {
-    const key = `${domainId}_${sectionType}`;
-    const history = get().chatHistoryByDomainSection;
+  openChat: async (domainId, sectionType, initialGreeting) => {
+    set({ activeDomainId: domainId, activeSectionType: sectionType });
 
-    // Initialize if no history exists
-    if (!history.has(key)) {
-      const newHistory = new Map(history);
+    const key = `${domainId}_${sectionType}`;
+    const alreadyLoaded = get().chatHistoryByDomainSection.has(key);
+    if (alreadyLoaded) return;
+
+    try {
+      const response = await getDomainSectionChatHistory(domainId, sectionType);
+      const persisted = response?.data?.messages || [];
+
+      const newHistory = new Map(get().chatHistoryByDomainSection);
+      if (persisted.length > 0) {
+        newHistory.set(
+          key,
+          persisted.map((m) => ({
+            ...m,
+            timestamp: m.timestamp ? new Date(m.timestamp) : new Date(),
+          })),
+        );
+      } else {
+        newHistory.set(key, [
+          {
+            id: Date.now(),
+            role: "assistant",
+            content: initialGreeting,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+      set({ chatHistoryByDomainSection: newHistory });
+    } catch {
+      // Fallback to greeting if backend unavailable
+      const newHistory = new Map(get().chatHistoryByDomainSection);
       newHistory.set(key, [
         {
           id: Date.now(),
@@ -84,17 +147,7 @@ export const useDomainSectionsChatStore = create((set, get) => ({
           timestamp: new Date(),
         },
       ]);
-      set({
-        chatHistoryByDomainSection: newHistory,
-        activeDomainId: domainId,
-        activeSectionType: sectionType,
-      });
-    } else {
-      // Use existing history
-      set({
-        activeDomainId: domainId,
-        activeSectionType: sectionType,
-      });
+      set({ chatHistoryByDomainSection: newHistory });
     }
   },
 
@@ -109,23 +162,27 @@ export const useDomainSectionsChatStore = create((set, get) => ({
   },
 
   /**
-   * Add a message to the chat history
+   * Add a message to the chat history and persist it to the backend
    */
   addMessage: (domainId, sectionType, message) => {
     const key = `${domainId}_${sectionType}`;
     const history = new Map(get().chatHistoryByDomainSection);
     const messages = history.get(key) || [];
 
-    history.set(key, [
-      ...messages,
-      {
-        ...message,
-        id: message.id || Date.now(),
-        timestamp: message.timestamp || new Date(),
-      },
-    ]);
+    const newMessage = {
+      ...message,
+      id: message.id || Date.now(),
+      timestamp: message.timestamp || new Date(),
+    };
 
+    history.set(key, [...messages, newMessage]);
     set({ chatHistoryByDomainSection: history });
+
+    // Persist to backend (fire and forget)
+    appendDomainSectionChatMessage(domainId, sectionType, {
+      role: newMessage.role,
+      content: newMessage.content,
+    }).catch(() => {});
   },
 
   /**
@@ -140,9 +197,6 @@ export const useDomainSectionsChatStore = create((set, get) => ({
       timestamp: new Date(),
     };
     get().addMessage(domainId, sectionType, userMsg);
-
-    // Set loading state (thinking until backend processes)
-    set({ isAiResponding: true, isAiThinking: true });
 
     try {
       // Get conversation history (excluding system/initial greeting)
@@ -167,11 +221,9 @@ export const useDomainSectionsChatStore = create((set, get) => ({
       const chatId = result?.data?.taskId;
       if (chatId) {
         get().setCurrentChatId(domainId, sectionType, chatId);
-        // Persist user message against this task
-        appendTaskChatMessage(chatId, {
-          role: "user",
-          content: userMessage,
-        }).catch(() => {});
+        // Mark this chat as thinking/responding now that the backend has accepted the task.
+        // State will be cleared when TASK_COMPLETED / TASK_FAILED / DOCUMENTATION_UPDATED arrives.
+        get().setChatState(chatId, { isThinking: true, isResponding: true });
       }
 
       // Socket events will handle adding AI messages and updating state
@@ -188,21 +240,19 @@ export const useDomainSectionsChatStore = create((set, get) => ({
       };
       get().addMessage(domainId, sectionType, errorMsg);
 
-      // Reset state on error
-      set({ isAiResponding: false, isAiThinking: false });
-
       throw error;
     }
   },
 
   /**
-   * Clear chat history for a specific domain section
+   * Clear chat history for a specific domain section (local + backend)
    */
-  clearChatHistory: (domainId, sectionType) => {
+  clearChatHistory: async (domainId, sectionType) => {
     const key = `${domainId}_${sectionType}`;
     const history = new Map(get().chatHistoryByDomainSection);
     history.delete(key);
     set({ chatHistoryByDomainSection: history });
+    clearDomainSectionChatHistory(domainId, sectionType).catch(() => {});
   },
 
   /**

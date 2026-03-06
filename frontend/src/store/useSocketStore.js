@@ -69,7 +69,7 @@ export const useSocketStore = create((set, get) => ({
 
     // Task completion events - handle all task types by checking type property
     socket.on(SOCKET_EVENTS.TASK_COMPLETED, async (data) => {
-      const { type, domainId } = data;
+      const { type, domainId, taskId } = data;
 
       // Clear progress indicator for this domain
       if (domainId) {
@@ -103,9 +103,7 @@ export const useSocketStore = create((set, get) => ({
       } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
         useApplyTestStore.getState().completeApplyRefactoring(domainId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
-        const chatStore = useDomainSectionsChatStore.getState();
-        chatStore.setAiThinking(false);
-        chatStore.setAiResponding(false);
+        useDomainSectionsChatStore.getState().clearChatState(taskId);
       }
     });
 
@@ -151,7 +149,7 @@ export const useSocketStore = create((set, get) => ({
 
     // Task failure events
     socket.on(SOCKET_EVENTS.TASK_FAILED, (data) => {
-      const { type, domainId, error } = data;
+      const { type, domainId, taskId, error } = data;
 
       // Clear progress indicator for this domain
       if (domainId) {
@@ -189,9 +187,7 @@ export const useSocketStore = create((set, get) => ({
       } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
         useApplyTestStore.getState().failApplyRefactoring(domainId);
       } else if (type === TASK_TYPES.EDIT_DOCUMENTATION) {
-        const chatStore = useDomainSectionsChatStore.getState();
-        chatStore.setAiThinking(false);
-        chatStore.setAiResponding(false);
+        useDomainSectionsChatStore.getState().clearChatState(taskId);
       } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
         const chatStore = useAgentChatStore.getState();
         chatStore.setAiThinking(false);
@@ -371,8 +367,7 @@ export const useSocketStore = create((set, get) => ({
             newContent: content || "",
             chatId,
           });
-          chatStore.setAiThinking(false);
-          chatStore.setAiResponding(false);
+          chatStore.clearChatState(chatId);
 
           const agentChatStore = useAgentChatStore.getState();
           if (
@@ -396,7 +391,7 @@ export const useSocketStore = create((set, get) => ({
     // Generic AI chat message — routes to the correct section chat by chatId
     socket.on(
       SOCKET_EVENTS.CHAT_MESSAGE,
-      ({ chatId, domainId, sectionType, content, timestamp }) => {
+      ({ chatId, domainId, sectionType, content, thinking, timestamp }) => {
         const effectiveSectionType = sectionType || "documentation";
         const chatStore = useDomainSectionsChatStore.getState();
 
@@ -407,8 +402,25 @@ export const useSocketStore = create((set, get) => ({
         );
         if (activeChatId !== chatId) return;
 
+        if (thinking) {
+          chatStore.setChatState(chatId, {
+            isThinking: true,
+            isResponding: true,
+          });
+
+          const agentChatStore = useAgentChatStore.getState();
+          if (
+            agentChatStore.isOpen &&
+            agentChatStore.selectedTaskType === effectiveSectionType
+          ) {
+            agentChatStore.setAiThinking(true);
+            agentChatStore.setAiWorking(true);
+          }
+          return;
+        }
+
         if (content && content.trim()) {
-          chatStore.setAiThinking(false);
+          chatStore.setChatState(chatId, { isThinking: false });
           chatStore.addMessage(domainId, effectiveSectionType, {
             id: Date.now(),
             role: "assistant",

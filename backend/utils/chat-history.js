@@ -154,3 +154,96 @@ export async function deleteChatHistory(taskId) {
     }
   }
 }
+
+// ─── Domain Section Chat History ─────────────────────────────────────────────
+// Persistent per domain+section file that survives across tasks and sessions.
+
+/**
+ * Load chat history for a domain section
+ * @param {string} domainId
+ * @param {string} sectionType
+ * @returns {Promise<Object|null>}
+ */
+export async function loadDomainSectionChatHistory(domainId, sectionType) {
+  const filePath = getDomainSectionChatPath(domainId, sectionType);
+  try {
+    return await tryReadJsonFile(
+      filePath,
+      `chat-history ${domainId}-${sectionType}`,
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+/**
+ * Append a message to a domain section's persistent chat history
+ * @param {string} domainId
+ * @param {string} sectionType
+ * @param {Object} message - { role, content }
+ * @returns {Promise<void>}
+ */
+export async function appendDomainSectionChatMessage(
+  domainId,
+  sectionType,
+  { role, content },
+) {
+  const filePath = getDomainSectionChatPath(domainId, sectionType);
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+
+  let history;
+  try {
+    history = await tryReadJsonFile(
+      filePath,
+      `chat-history ${domainId}-${sectionType}`,
+    );
+  } catch {
+    history = null;
+  }
+
+  if (!history) {
+    history = {
+      domainId,
+      sectionType,
+      createdAt: new Date().toISOString(),
+      lastMessageAt: new Date().toISOString(),
+      messages: [],
+    };
+  }
+
+  const message = {
+    id: history.messages.length + 1,
+    role,
+    content,
+    timestamp: new Date().toISOString(),
+  };
+
+  history.messages.push(message);
+  history.lastMessageAt = message.timestamp;
+
+  await fs.writeFile(filePath, JSON.stringify(history, null, 2), "utf-8");
+
+  logger.debug(`Chat message appended for ${domainId}/${sectionType}`, {
+    component: "ChatHistory",
+    role,
+  });
+}
+
+/**
+ * Delete chat history for a domain section
+ * @param {string} domainId
+ * @param {string} sectionType
+ * @returns {Promise<void>}
+ */
+export async function deleteDomainSectionChatHistory(domainId, sectionType) {
+  const filePath = getDomainSectionChatPath(domainId, sectionType);
+  try {
+    await fs.unlink(filePath);
+    logger.debug(`Chat history deleted for ${domainId}/${sectionType}`, {
+      component: "ChatHistory",
+    });
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+}

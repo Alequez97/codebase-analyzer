@@ -2,8 +2,88 @@ import express from "express";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
 import { createEditDocumentationTask } from "../tasks/factory/index.js";
+import {
+  loadDomainSectionChatHistory,
+  appendDomainSectionChatMessage,
+  deleteDomainSectionChatHistory,
+} from "../utils/chat-history.js";
 
 const router = express.Router();
+
+/**
+ * Get persistent chat history for a domain section
+ * GET /chat/domain/:domainId/:sectionType/history
+ */
+router.get("/chat/domain/:domainId/:sectionType/history", async (req, res) => {
+  try {
+    const { domainId, sectionType } = req.params;
+    const history = await loadDomainSectionChatHistory(domainId, sectionType);
+    res.json(history || { domainId, sectionType, messages: [] });
+  } catch (error) {
+    logger.error(
+      `Error loading chat history for ${req.params.domainId}/${req.params.sectionType}`,
+      {
+        error,
+        component: "Chat-API",
+      },
+    );
+    res.status(500).json({ error: "Failed to load chat history" });
+  }
+});
+
+/**
+ * Append a message to a domain section's chat history
+ * POST /chat/domain/:domainId/:sectionType/history
+ */
+router.post("/chat/domain/:domainId/:sectionType/history", async (req, res) => {
+  try {
+    const { domainId, sectionType } = req.params;
+    const { role, content } = req.body;
+
+    if (!role || !content) {
+      return res.status(400).json({ error: "role and content are required" });
+    }
+
+    await appendDomainSectionChatMessage(domainId, sectionType, {
+      role,
+      content,
+    });
+    res.json({ success: true });
+  } catch (error) {
+    logger.error(
+      `Error appending chat message for ${req.params.domainId}/${req.params.sectionType}`,
+      {
+        error,
+        component: "Chat-API",
+      },
+    );
+    res.status(500).json({ error: "Failed to append chat message" });
+  }
+});
+
+/**
+ * Delete chat history for a domain section
+ * DELETE /chat/domain/:domainId/:sectionType/history
+ */
+router.delete(
+  "/chat/domain/:domainId/:sectionType/history",
+  async (req, res) => {
+    try {
+      const { domainId, sectionType } = req.params;
+      await deleteDomainSectionChatHistory(domainId, sectionType);
+      res.json({ success: true });
+    } catch (error) {
+      logger.error(
+        `Error deleting chat history for ${req.params.domainId}/${req.params.sectionType}`,
+        {
+          error,
+          component: "Chat-API",
+        },
+      );
+      res.status(500).json({ error: "Failed to delete chat history" });
+    }
+  },
+);
 
 /**
  * Chat with AI for domain section editing (Task-based)
