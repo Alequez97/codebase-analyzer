@@ -5,7 +5,10 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
 import { initChatHistory } from "../../utils/chat-history.js";
-import { getProgressFilePath } from "../../utils/task-progress.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
@@ -52,6 +55,7 @@ export async function createCustomCodebaseTask(
     domainId,
   });
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

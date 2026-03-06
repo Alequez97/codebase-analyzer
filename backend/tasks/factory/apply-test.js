@@ -7,6 +7,10 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { SUPPORTED_TEST_TYPES } from "../../constants/test-types.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
@@ -80,8 +84,9 @@ export async function createApplyTestTask(
     reason: testRecommendation.reason || "",
   };
 
+  const taskId = generateTaskId(TASK_TYPES.APPLY_TEST);
   const task = {
-    id: generateTaskId(TASK_TYPES.APPLY_TEST),
+    id: taskId,
     type: TASK_TYPES.APPLY_TEST,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -89,9 +94,10 @@ export async function createApplyTestTask(
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.APPLY_TEST,
     outputFile: null, // No JSON output - agent creates test file directly using write_file tool
-
+    progressFile: getProgressFilePath(taskId),
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

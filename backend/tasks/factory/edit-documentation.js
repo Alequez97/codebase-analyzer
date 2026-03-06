@@ -4,6 +4,10 @@ import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
@@ -28,8 +32,9 @@ export async function createEditDocumentationTask(
 
   const agentConfig = agentConfigResult.agentConfig;
 
+  const taskId = generateTaskId(TASK_TYPES.EDIT_DOCUMENTATION);
   const task = {
-    id: generateTaskId(TASK_TYPES.EDIT_DOCUMENTATION),
+    id: taskId,
     type: TASK_TYPES.EDIT_DOCUMENTATION,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -42,10 +47,11 @@ export async function createEditDocumentationTask(
     },
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DOMAIN_SECTION,
-
+    progressFile: getProgressFilePath(taskId),
     // No output file - results are streamed via socket
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

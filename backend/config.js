@@ -148,7 +148,7 @@ const config = {
       agent: AGENTS.LLM_API,
       model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 16000,
-      maxIterations: 2, // Two iterations: description + content
+      maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
 

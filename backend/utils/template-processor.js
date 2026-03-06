@@ -104,6 +104,7 @@ export async function buildRequirementsTemplateVariables(task) {
     USER_CONTEXT: userContext || "",
     INCLUDE_DOCUMENTATION: includeDocumentation ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -137,6 +138,7 @@ export async function buildBugsSecurityTemplateVariables(task) {
     FILES: files || [],
     INCLUDE_REQUIREMENTS: includeRequirements ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -169,6 +171,7 @@ export async function buildDocumentationTemplateVariables(task) {
     DOMAIN_NAME: domainName,
     FILES: files || [],
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -202,6 +205,7 @@ export async function buildTestingTemplateVariables(task) {
     FILES: files || [],
     INCLUDE_REQUIREMENTS: includeRequirements ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -242,6 +246,7 @@ export async function buildDiagramsTemplateVariables(task) {
     files: filesList,
     includeDocumentation: !!includeDocumentation,
     documentation,
+    progressFile: task.progressFile || "",
   };
 }
 
@@ -256,6 +261,7 @@ export function buildCodebaseTemplateVariables(task) {
   return {
     CODEBASE_PATH: targetDirectory,
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -283,6 +289,7 @@ export function buildApplyFixTemplateVariables(task) {
     FINDING_FILE: params.findingFile || "",
     FINDING_LINE: params.findingLine || "",
     FINDING_SNIPPET: params.findingSnippet || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -316,6 +323,7 @@ export function buildApplyRefactoringTemplateVariables(task) {
     EXTRACTED_FUNCTIONS: extractedFunctions,
     BENEFITS: params.benefits || [],
     UNBLOCKS: params.unblocks || [],
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -341,6 +349,7 @@ export function buildApplyTestTemplateVariables(task) {
     TEST_SCENARIOS: scenarioTitles,
     TEST_SCENARIOS_JSON: JSON.stringify(scenarios, null, 2),
     SOURCE_FILE: params.sourceFile || "",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 
@@ -377,6 +386,7 @@ export async function buildEditTemplateVariables(task) {
     IS_DIAGRAMS: sectionType === "diagrams",
     IS_BUGS_SECURITY: sectionType === "bugs-security",
     IS_TESTING: sectionType === "testing",
+    PROGRESS_FILE: task.progressFile || "",
   };
 }
 

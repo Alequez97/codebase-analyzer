@@ -6,6 +6,10 @@ import { getCodebaseAnalysisOutputPath } from "../../constants/task-output-paths
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
@@ -24,8 +28,9 @@ export async function createFullCodebaseAnalysisTask({
 
   const agentConfig = agentConfigResult.agentConfig;
 
+  const taskId = generateTaskId(TASK_TYPES.CODEBASE_ANALYSIS);
   const task = {
-    id: generateTaskId(TASK_TYPES.CODEBASE_ANALYSIS),
+    id: taskId,
     type: TASK_TYPES.CODEBASE_ANALYSIS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -35,9 +40,10 @@ export async function createFullCodebaseAnalysisTask({
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_FULL_CODEBASE,
     outputFile: getCodebaseAnalysisOutputPath(),
-
+    progressFile: getProgressFilePath(taskId),
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

@@ -9,6 +9,10 @@ import {
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
@@ -32,8 +36,9 @@ export async function createAnalyzeDiagramsTask(
 
   const agentConfig = agentConfigResult.agentConfig;
 
+  const taskId = generateTaskId(TASK_TYPES.DIAGRAMS);
   const task = {
-    id: generateTaskId(TASK_TYPES.DIAGRAMS),
+    id: taskId,
     type: TASK_TYPES.DIAGRAMS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -49,9 +54,10 @@ export async function createAnalyzeDiagramsTask(
       domainId,
       DOMAIN_SECTION_IDS.DIAGRAMS,
     ),
-
+    progressFile: getProgressFilePath(taskId),
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {
