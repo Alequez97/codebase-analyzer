@@ -82,8 +82,7 @@ export const useSocketStore = create((set, get) => ({
         await useCodebaseStore.getState().fetchAnalysis();
       } else if (type === TASK_TYPES.DOCUMENTATION && domainId) {
         useDomainDocumentationStore.getState().setLoading(domainId, false);
-        await useDomainDocumentationStore.getState().fetch(domainId);
-        useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
+        // Content is pushed directly via DOCUMENTATION_UPDATED socket event
       } else if (type === TASK_TYPES.DIAGRAMS && domainId) {
         useDomainDiagramsStore.getState().setLoading(domainId, false);
         await useDomainDiagramsStore.getState().fetch(domainId);
@@ -352,90 +351,79 @@ export const useSocketStore = create((set, get) => ({
     // Also handle TASK_COMPLETED / TASK_FAILED for CUSTOM_CODEBASE_TASK type
     // → CUSTOM_CODEBASE_TASK handling is done inside TASK_COMPLETED and TASK_FAILED above.
 
-    // Chat events - AI thinking indicator
+    // Documentation analysis result received directly (no HTTP re-fetch needed)
+    // isEdit: true → show diff in chat; false → update store silently (fresh analysis)
     socket.on(
-      SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING,
-      ({ thinking, domainId, sectionType }) => {
-        if (thinking) {
-          const chatStore = useDomainSectionsChatStore.getState();
-          chatStore.setAiResponding(true);
-          chatStore.setAiThinking(true);
+      SOCKET_EVENTS.DOCUMENTATION_UPDATED,
+      ({ domainId, content, isEdit, chatId }) => {
+        if (!domainId) return;
 
-          // Also update floating agent chat if open for this section
+        if (isEdit) {
+          // AI chat edit — show diff view in the section chat
+          const currentDocumentation = useDomainDocumentationStore
+            .getState()
+            .dataById.get(domainId);
+          const oldContent = currentDocumentation?.content || "";
+
+          const chatStore = useDomainSectionsChatStore.getState();
+          chatStore.setPendingSuggestion(domainId, "documentation", {
+            oldContent,
+            newContent: content || "",
+            chatId,
+          });
+          chatStore.setAiThinking(false);
+          chatStore.setAiResponding(false);
+
           const agentChatStore = useAgentChatStore.getState();
-          const effectiveSectionType = sectionType || "documentation";
           if (
             agentChatStore.isOpen &&
-            agentChatStore.selectedTaskType === effectiveSectionType
+            agentChatStore.selectedTaskType === "documentation"
           ) {
-            agentChatStore.setAiThinking(true);
-            agentChatStore.setAiWorking(true);
+            agentChatStore.setAiWorking(false);
+            agentChatStore.setAiThinking(false);
           }
+        } else {
+          // Fresh analysis — update store and editors directly
+          useDomainDocumentationStore
+            .getState()
+            .updateData(domainId, { content, metadata: null });
+          useDomainDocumentationStore.getState().setLoading(domainId, false);
+          useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
         }
       },
     );
 
-    // Chat events - AI responses (description and content)
+    // Generic AI chat message — routes to the correct section chat by chatId
     socket.on(
-      SOCKET_EVENTS.EDIT_DOCUMENTATION_DESCRIPTION,
-      ({ domainId, sectionType, content, timestamp }) => {
-        // Stop thinking, add description message
-        const chatStore = useDomainSectionsChatStore.getState();
+      SOCKET_EVENTS.CHAT_MESSAGE,
+      ({ chatId, domainId, sectionType, content, timestamp }) => {
         const effectiveSectionType = sectionType || "documentation";
-        chatStore.setAiThinking(false);
-        chatStore.setAiResponding(true); // Still responding (waiting for content)
+        const chatStore = useDomainSectionsChatStore.getState();
+
+        // Only handle if chatId matches the active task for this section
+        const activeChatId = chatStore.getCurrentChatId(
+          domainId,
+          effectiveSectionType,
+        );
+        if (activeChatId !== chatId) return;
+
         if (content && content.trim()) {
+          chatStore.setAiThinking(false);
           chatStore.addMessage(domainId, effectiveSectionType, {
             id: Date.now(),
             role: "assistant",
             content,
             timestamp: timestamp ? new Date(timestamp) : new Date(),
           });
-        }
 
-        // Also update floating agent chat if it's open for this section
-        const agentChatStore = useAgentChatStore.getState();
-        if (
-          agentChatStore.isOpen &&
-          agentChatStore.selectedTaskType === effectiveSectionType
-        ) {
-          agentChatStore.setAiThinking(false);
-          if (content && content.trim()) {
+          const agentChatStore = useAgentChatStore.getState();
+          if (
+            agentChatStore.isOpen &&
+            agentChatStore.selectedTaskType === effectiveSectionType
+          ) {
+            agentChatStore.setAiThinking(false);
             agentChatStore.addMessage({ role: "assistant", content });
           }
-        }
-      },
-    );
-
-    socket.on(
-      SOCKET_EVENTS.EDIT_DOCUMENTATION_CONTENT,
-      ({ domainId, sectionType, content, timestamp }) => {
-        const effectiveSectionType = sectionType || "documentation";
-        const currentDocumentation = useDomainDocumentationStore
-          .getState()
-          .dataById.get(domainId);
-        const oldContent = currentDocumentation?.content || "";
-
-        // Set as pending suggestion for diff view (shape expected by section components)
-        const chatStore = useDomainSectionsChatStore.getState();
-        chatStore.setPendingSuggestion(domainId, effectiveSectionType, {
-          oldContent,
-          newContent: content || "",
-          timestamp,
-        });
-
-        // All done - stop responding
-        chatStore.setAiThinking(false);
-        chatStore.setAiResponding(false);
-
-        // Also update floating agent chat if it's open for this section
-        const agentChatStore = useAgentChatStore.getState();
-        if (
-          agentChatStore.isOpen &&
-          agentChatStore.selectedTaskType === effectiveSectionType
-        ) {
-          agentChatStore.setAiWorking(false);
-          agentChatStore.setAiThinking(false);
         }
       },
     );

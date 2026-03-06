@@ -1,9 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
-import { PERSISTENCE_FILES } from "../../constants/persistence-files.js";
-import { TASK_STATUS } from "../../constants/task-status.js";
-import { emitTaskLog } from "../../utils/socket-emitter.js";
+import { SOCKET_EVENTS } from "../../constants/socket-events.js";
+import { emitTaskLog, emitSocketEvent } from "../../utils/socket-emitter.js";
 
 /**
  * Handler for analyze-documentation task
@@ -45,56 +44,26 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
 
     postProcess: async (result, task, agent, taskLogger) => {
       const outputPath = path.join(config.target.directory, task.outputFile);
-      const documentationMarkdown = await fs.readFile(outputPath, "utf-8");
+      const content = await fs.readFile(outputPath, "utf-8");
 
-      if (!documentationMarkdown || documentationMarkdown.length < 100) {
+      if (!content || content.length < 100) {
         return {
           success: false,
-          error: `Generated documentation too short (${documentationMarkdown?.length || 0} chars)`,
+          error: `Generated documentation too short (${content?.length || 0} chars)`,
         };
       }
 
-      // Save metadata
-      const metadata = agent.getMetadata();
-      const documentationDir = path.dirname(outputPath);
-      await fs.mkdir(documentationDir, { recursive: true });
-
-      const metadataPath = path.join(
-        documentationDir,
-        PERSISTENCE_FILES.METADATA_JSON,
-      );
-      await fs.writeFile(
-        metadataPath,
-        JSON.stringify(
-          {
-            status: TASK_STATUS.COMPLETED,
-            generatedAt: new Date().toISOString(),
-            completedAt: new Date().toISOString(),
-            iterations: metadata.iterations,
-            tokenUsage: {
-              inputTokens: metadata.tokenUsage.input,
-              outputTokens: metadata.tokenUsage.output,
-              totalTokens: metadata.tokenUsage.total,
-            },
-            agent: "llm-api",
-            model: agent.client.model,
-            logFile: task.logFile,
-          },
-          null,
-          2,
-        ),
-        "utf-8",
-      );
-
-      taskLogger.info("✅ Documentation and metadata saved", {
-        component: "AnalyzeDocumentation",
+      emitSocketEvent(SOCKET_EVENTS.DOCUMENTATION_UPDATED, {
+        domainId: task.params?.domainId,
+        content,
       });
 
-      return {
-        success: true,
-        metadata: metadata,
-        markdownLength: documentationMarkdown.length,
-      };
+      taskLogger.info("✅ Documentation sent via socket", {
+        component: "AnalyzeDocumentation",
+        contentLength: content.length,
+      });
+
+      return { success: true };
     },
   };
 }

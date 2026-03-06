@@ -1,6 +1,10 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import {
+  DOMAIN_SECTION_IDS,
+  getDomainSectionContentMarkdownOutputPath,
+} from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -45,8 +49,11 @@ export async function createEditDocumentationTask(
     },
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DOMAIN_SECTION,
+    outputFile: getDomainSectionContentMarkdownOutputPath(
+      domainId,
+      DOMAIN_SECTION_IDS.DOCUMENTATION,
+    ),
     progressFile: getProgressFilePath(taskId),
-    // No output file - results are streamed via socket
   };
 
   await ensureProgressDirectory(taskId);

@@ -31,13 +31,13 @@ export const SOCKET_EVENTS = {
   LOG_EDIT_BUGS_SECURITY: "log:edit-bugs-security",
   LOG_EDIT_REFACTORING_AND_TESTING: "log:edit-refactoring-and-testing",
 
-  // Edit documentation events (AI chat)
-  // Thinking = AI is processing the request
-  // Description = Iteration 1 (conversational explanation)
-  // Content = Iteration 2 (full updated content)
-  EDIT_DOCUMENTATION_THINKING: "edit:documentation:thinking",
-  EDIT_DOCUMENTATION_DESCRIPTION: "edit:documentation:description",
-  EDIT_DOCUMENTATION_CONTENT: "edit:documentation:content",
+  // Documentation analysis/edit result pushed directly via socket
+  // isEdit: true when triggered by AI chat (shows diff), false for fresh analysis
+  DOCUMENTATION_UPDATED: "documentation:updated",
+
+  // Generic AI chat message event - used by all section chat tasks
+  // chatId links the message to the originating task
+  CHAT_MESSAGE: "chat:message",
 
   // Custom codebase task events (floating agent chat)
   CUSTOM_TASK_THINKING: "custom-task:thinking",

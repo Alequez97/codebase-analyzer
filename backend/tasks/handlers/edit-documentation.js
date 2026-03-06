@@ -1,3 +1,6 @@
+import fs from "fs/promises";
+import path from "path";
+import config from "../../config.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { emitSocketEvent } from "../../utils/socket-emitter.js";
@@ -8,12 +11,10 @@ import { emitSocketEvent } from "../../utils/socket-emitter.js";
  * Only overrides what's different from default
  */
 export function editDocumentationHandler(task, taskLogger, agent) {
-  let messageCount = 0;
-
   return {
     initialMessage: task.params.userMessage,
 
-    // Emit thinking status when starting
+    // Emit thinking indicator when the AI starts processing
     onProgress: (progress) => {
       if (
         progress.stage === PROGRESS_STAGES.PROCESSING &&
@@ -23,8 +24,8 @@ export function editDocumentationHandler(task, taskLogger, agent) {
           component: "EditDocumentation",
         });
 
-        emitSocketEvent(SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING, {
-          taskId: task.id,
+        emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
+          chatId: task.id,
           domainId: task.params.domainId,
           sectionType: task.params.sectionType,
           thinking: true,
@@ -33,19 +34,16 @@ export function editDocumentationHandler(task, taskLogger, agent) {
       }
     },
 
-    // Stream each AI message to the client via socket
+    // Emit each AI text message as a chat message
     onMessage: (role, content) => {
       if (role === "assistant") {
-        messageCount++;
-
-        taskLogger.info(`📨 Sending AI response to client`, {
+        taskLogger.info(`📨 Sending AI chat message to client`, {
           component: "EditDocumentation",
-          messageNumber: messageCount,
           contentLength: content.length,
         });
 
-        emitSocketEvent(SOCKET_EVENTS.EDIT_DOCUMENTATION_CONTENT, {
-          taskId: task.id,
+        emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
+          chatId: task.id,
           domainId: task.params.domainId,
           sectionType: task.params.sectionType,
           content,
@@ -55,16 +53,29 @@ export function editDocumentationHandler(task, taskLogger, agent) {
     },
 
     postProcess: async (result, task, agent, taskLogger) => {
-      const metadata = agent.getMetadata();
-      taskLogger.info(`✅ Streamed ${messageCount} messages to client`, {
-        component: "EditDocumentation",
-        messagesStreamed: messageCount,
+      const outputPath = path.join(config.target.directory, task.outputFile);
+      const content = await fs.readFile(outputPath, "utf-8");
+
+      if (!content || content.length < 10) {
+        return {
+          success: false,
+          error: `AI did not write updated documentation to file`,
+        };
+      }
+
+      emitSocketEvent(SOCKET_EVENTS.DOCUMENTATION_UPDATED, {
+        chatId: task.id,
+        domainId: task.params?.domainId,
+        content,
+        isEdit: true,
       });
 
-      return {
-        metadata,
-        messagesStreamed: messageCount,
-      };
+      taskLogger.info("✅ Updated documentation sent via socket", {
+        component: "EditDocumentation",
+        contentLength: content.length,
+      });
+
+      return { success: true };
     },
   };
 }

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { chatWithAI } from "../api/domain-sections-chat.js";
+import { appendTaskChatMessage } from "../api/tasks";
 
 /**
  * Domain Sections Chat Store - Manages AI chat conversations for domain sections editing
@@ -18,6 +19,10 @@ export const useDomainSectionsChatStore = create((set, get) => ({
   // Currently active chat (domainId + sectionType)
   activeDomainId: null,
   activeSectionType: null,
+
+  // Tracks the active taskId per domain_section key
+  // Used to match incoming CHAT_MESSAGE / DOCUMENTATION_UPDATED events to the right chat
+  currentChatIdByDomainSection: new Map(),
 
   // Loading state for AI responses
   isAiResponding: false,
@@ -39,6 +44,24 @@ export const useDomainSectionsChatStore = create((set, get) => ({
    */
   setAiResponding: (responding) => {
     set({ isAiResponding: responding });
+  },
+
+  /**
+   * Set the current chat ID (taskId) for a domain section
+   */
+  setCurrentChatId: (domainId, sectionType, chatId) => {
+    const key = `${domainId}_${sectionType}`;
+    const map = new Map(get().currentChatIdByDomainSection);
+    map.set(key, chatId);
+    set({ currentChatIdByDomainSection: map });
+  },
+
+  /**
+   * Get the current chat ID for a domain section
+   */
+  getCurrentChatId: (domainId, sectionType) => {
+    const key = `${domainId}_${sectionType}`;
+    return get().currentChatIdByDomainSection.get(key) || null;
   },
 
   /**
@@ -131,15 +154,25 @@ export const useDomainSectionsChatStore = create((set, get) => ({
           content: msg.content,
         }));
 
-      // Call backend API to initiate task
+      // Call backend API to initiate task, store taskId as chatId
       // AI responses will come via socket events
-      await chatWithAI({
+      const result = await chatWithAI({
         domainId,
         sectionType,
         message: userMessage,
         context: currentContent,
         history,
       });
+
+      const chatId = result?.data?.taskId;
+      if (chatId) {
+        get().setCurrentChatId(domainId, sectionType, chatId);
+        // Persist user message against this task
+        appendTaskChatMessage(chatId, {
+          role: "user",
+          content: userMessage,
+        }).catch(() => {});
+      }
 
       // Socket events will handle adding AI messages and updating state
     } catch (error) {
