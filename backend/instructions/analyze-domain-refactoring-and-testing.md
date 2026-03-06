@@ -416,8 +416,10 @@ Assign priority based on **business impact**, not code complexity:
 4. Identify gaps between requirements and tests.
 5. Suggest missing tests.
 6. Save to `{{OUTPUT_FILE}}` using `write_file`.
+7. Write `# Done` to `{{PROGRESS_FILE}}`.
    {{else}}
-7. Identify untested code paths.
-8. Suggest missing tests.
-9. Save to `{{OUTPUT_FILE}}` using `write_file`.
-   {{/if}}
+8. Identify untested code paths.
+9. Suggest missing tests.
+10. Save to `{{OUTPUT_FILE}}` using `write_file`.
+11. Write `# Done` to `{{PROGRESS_FILE}}`.
+    {{/if}}

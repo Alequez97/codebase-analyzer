@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, Container, Grid, GridItem, List, VStack } from "@chakra-ui/react";
+import { Container, Grid, GridItem, List, VStack } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import DomainBugsSecuritySection from "../components/domain/DomainBugsSecuritySection";
 import DomainDiagramsSection from "../components/domain/DomainDiagramsSection";
@@ -8,7 +8,6 @@ import DomainFilesSection from "../components/domain/DomainFilesSection";
 import DomainHeader from "../components/domain/DomainHeader";
 import DomainRequirementsSection from "../components/domain/DomainRequirementsSection";
 import DomainRefactoringAndTestingSection from "../components/domain/DomainRefactoringAndTestingSection";
-import AISectionChat from "../components/domain/chat/AISectionChat";
 import { Alert } from "../components/ui/alert";
 import { toaster } from "../components/ui/toaster";
 import { TASK_TYPES } from "../constants/task-types";
@@ -24,27 +23,14 @@ import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useApplyTestStore } from "../store/useApplyTestStore";
 import { useLogsStore } from "../store/useLogsStore";
 import { useDomainSectionsChatStore } from "../store/useDomainSectionsChatStore";
-import {
-  DOCUMENTATION_CHAT_CONFIG,
-  REQUIREMENTS_CHAT_CONFIG,
-  DIAGRAMS_CHAT_CONFIG,
-  BUGS_SECURITY_CHAT_CONFIG,
-  TESTING_CHAT_CONFIG,
-} from "../config";
 
 export default function DomainDetailsPage() {
   const navigate = useNavigate();
   const { domainId } = useParams();
 
   // Domain sections chat store
-  const {
-    openChat,
-    closeChat,
-    activeSectionType,
-    isChatActive,
-    getPendingSuggestion,
-    clearPendingSuggestion,
-  } = useDomainSectionsChatStore();
+  const { getPendingSuggestion, clearPendingSuggestion } =
+    useDomainSectionsChatStore();
 
   // Codebase store (for analysis and domain list)
   const { analysis } = useCodebaseStore();
@@ -386,74 +372,9 @@ export default function DomainDetailsPage() {
     }
   };
 
-  // Get current chat configuration and content based on active section
-  const getCurrentChatData = () => {
-    if (!activeSectionType) return null;
-
-    const configs = {
-      [SECTION_TYPES.DOCUMENTATION]: {
-        config: DOCUMENTATION_CHAT_CONFIG,
-        content: documentation,
-      },
-      [SECTION_TYPES.REQUIREMENTS]: {
-        config: REQUIREMENTS_CHAT_CONFIG,
-        content: requirements,
-      },
-      [SECTION_TYPES.DIAGRAMS]: {
-        config: DIAGRAMS_CHAT_CONFIG,
-        content: diagrams,
-      },
-      [SECTION_TYPES.BUGS_SECURITY]: {
-        config: BUGS_SECURITY_CHAT_CONFIG,
-        content: bugsSecurity,
-      },
-      [SECTION_TYPES.REFACTORING_AND_TESTING]: {
-        config: TESTING_CHAT_CONFIG,
-        content: testing,
-      },
-    };
-
-    return configs[activeSectionType] || null;
-  };
-
-  const handleApplyChatChanges = (newContent) => {
-    // Apply AI-suggested changes based on section
-    switch (activeSectionType) {
-      case SECTION_TYPES.DOCUMENTATION:
-        updateEditedDocumentation(domainId, newContent);
-        break;
-      case SECTION_TYPES.REQUIREMENTS:
-        updateEditedRequirements(domainId, newContent);
-        break;
-      case SECTION_TYPES.DIAGRAMS:
-        // Diagrams might need special handling
-        console.log("Apply diagrams changes:", newContent);
-        break;
-      case SECTION_TYPES.BUGS_SECURITY:
-        // Bugs & Security might need special handling
-        console.log("Apply bugs/security changes:", newContent);
-        break;
-      case SECTION_TYPES.REFACTORING_AND_TESTING:
-        // Testing might need special handling
-        console.log("Apply testing changes:", newContent);
-        break;
-    }
-    // Clear pending suggestion after applying
-    clearPendingSuggestion(domainId, activeSectionType);
-  };
-
-  const chatData = getCurrentChatData();
-
   return (
     <Container maxW="100%" py={8} px={4}>
-      <Grid
-        templateColumns={{
-          base: "1fr",
-          lg: activeSectionType ? "1fr 400px" : "1fr",
-        }}
-        gap={6}
-        alignItems="start"
-      >
+      <Grid templateColumns="1fr" gap={6} alignItems="start">
         {/* Main Content Column */}
         <GridItem overflowX="hidden">
           <VStack align="stretch" gap={6}>
@@ -513,7 +434,10 @@ export default function DomainDetailsPage() {
                 domainId,
                 SECTION_TYPES.DOCUMENTATION,
               )}
-              onApplyChanges={handleApplyChatChanges}
+              onApplyChanges={(newContent) => {
+                updateEditedDocumentation(domainId, newContent);
+                clearPendingSuggestion(domainId, SECTION_TYPES.DOCUMENTATION);
+              }}
               onDismissChanges={() =>
                 clearPendingSuggestion(domainId, SECTION_TYPES.DOCUMENTATION)
               }
@@ -591,34 +515,6 @@ export default function DomainDetailsPage() {
             />
           </VStack>
         </GridItem>
-
-        {/* Chat Panel Column - Fixed on the right */}
-        {activeSectionType && chatData && (
-          <GridItem
-            display={{ base: "none", lg: "block" }}
-            position="relative"
-            minH="1px"
-          >
-            <Box
-              position="fixed"
-              top="80px"
-              right="16px"
-              w="400px"
-              maxW="calc(100vw - 32px)"
-              h="calc(100vh - 96px)"
-              zIndex={900}
-            >
-              <AISectionChat
-                {...chatData.config}
-                currentContent={chatData.content}
-                onClose={closeChat}
-                onApplyChanges={handleApplyChatChanges}
-                domainId={domainId}
-                sectionType={activeSectionType}
-              />
-            </Box>
-          </GridItem>
-        )}
       </Grid>
     </Container>
   );

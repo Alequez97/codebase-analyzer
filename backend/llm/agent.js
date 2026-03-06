@@ -274,7 +274,7 @@ export class LLMAgent {
     toolCalls,
     { onToolCall, onProgress, iteration, reasoningContent = null },
   ) {
-    logger.info(`Executing ${toolCalls.length} tool call(s)`, {
+    logger.debug(`Executing ${toolCalls.length} tool call(s)`, {
       component: "LLMAgent",
       tools: toolCalls.map((tc) => tc.name).join(", "),
     });
@@ -292,8 +292,10 @@ export class LLMAgent {
 
     // Execute each tool
     for (const toolCall of toolCalls) {
+      const rawPath =
+        toolCall.arguments?.path || toolCall.arguments?.file_path || "";
       const filePath =
-        toolCall.arguments?.path || toolCall.arguments?.file_path || "unknown";
+        rawPath === "." ? "(project root)" : rawPath || "unknown";
       const startLine = toolCall.arguments?.start_line;
       const endLine = toolCall.arguments?.end_line;
 
@@ -308,7 +310,13 @@ export class LLMAgent {
       } else if (toolCall.name === "write_file") {
         toolDescription = `Writing ${filePath}`;
       } else if (toolCall.name === "replace_lines") {
-        toolDescription = `Editing ${filePath} lines ${startLine}-${endLine}`;
+        toolDescription = `Editing ${filePath} (lines ${startLine}-${endLine})`;
+      } else if (toolCall.name === "search_files") {
+        const pattern =
+          toolCall.arguments?.pattern || toolCall.arguments?.query || "";
+        toolDescription = pattern
+          ? `Searching for "${pattern}"`
+          : "Searching files";
       } else if (toolCall.name === "execute_command") {
         toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
       }

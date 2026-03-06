@@ -294,6 +294,6 @@ Before marking the task complete, ensure:
 
 ## Completion
 
-When all steps are complete and tests pass, stop — the task orchestrator will detect completion automatically.
+When all steps are complete and tests pass, write `# Done` to `{{PROGRESS_FILE}}`, then stop — the task orchestrator will detect completion automatically.
 
 **Remember**: DO NOT ASK QUESTIONS. Complete the work autonomously based on the refactoring specification and project conventions you discover by reading the code.

@@ -46,7 +46,6 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
         {
           domainId,
           userMessage: message,
-          currentContent: context?.content || null,
           history: history || [],
         },
         { executeNow: true },

@@ -8,14 +8,15 @@ Your task is to help users edit and improve the **{{SECTION_TYPE}}** section for
 
 ## Current Content
 
-{{#if HAS_CONTENT}}
-The user is working with the following content:
+The current content for this section is stored at:
 
-```markdown
-{{CURRENT_CONTENT}}
+```
+{{CONTENT_FILE_PATH}}
 ```
 
-{{/if}}
+Read this file at the start of the conversation to understand what already exists.
+
+> **Important:** Always use the exact path provided above. Do not construct or hardcode file paths yourself — the path is injected from the system configuration and is guaranteed to be correct.
 
 ## Response Guidelines
 

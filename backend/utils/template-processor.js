@@ -4,6 +4,7 @@
  */
 
 import { TASK_TYPES } from "../constants/task-types.js";
+import { getDomainSectionContentRelativePath } from "../persistence/domain-section-paths.js";
 
 /**
  * Process a template string with variables
@@ -359,7 +360,7 @@ export function buildApplyTestTemplateVariables(task) {
  * @returns {Object} Variables for template processing
  */
 export async function buildEditTemplateVariables(task) {
-  const { domainId, sectionType, currentContent } = task.params;
+  const { domainId, sectionType } = task.params;
 
   // Look up domain name from codebase analysis (if available)
   let domainName = domainId; // Fallback to ID
@@ -376,11 +377,15 @@ export async function buildEditTemplateVariables(task) {
     // Fallback to domainId if analysis not found
   }
 
+  const contentFile = getDomainSectionContentRelativePath(
+    domainId,
+    sectionType,
+  );
+
   return {
     SECTION_TYPE: sectionType,
     DOMAIN_NAME: domainName,
-    HAS_CONTENT: currentContent ? true : false,
-    CURRENT_CONTENT: currentContent || "",
+    CONTENT_FILE_PATH: contentFile,
     IS_DOCUMENTATION: sectionType === "documentation",
     IS_REQUIREMENTS: sectionType === "requirements",
     IS_DIAGRAMS: sectionType === "diagrams",

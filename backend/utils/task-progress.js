@@ -9,12 +9,7 @@ import * as logger from "./logger.js";
  * @returns {string}
  */
 export function getProgressFilePath(taskId) {
-  return path.join(
-    config.paths.targetAnalysis,
-    "tasks",
-    "progress",
-    `${taskId}.md`,
-  );
+  return path.join(config.paths.temp, "progress", `${taskId}.md`);
 }
 
 /**

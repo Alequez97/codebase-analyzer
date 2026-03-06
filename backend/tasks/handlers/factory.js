@@ -5,6 +5,10 @@
 
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadInstructionForTask } from "../../utils/instruction-loader.js";
+import * as logger from "../../utils/logger.js";
+import fs from "fs/promises";
+import path from "path";
+import config from "../../config.js";
 import { editDocumentationHandler } from "./edit-documentation.js";
 import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { analyzeDocumentationHandler } from "./analyze-documentation.js";
@@ -27,6 +31,22 @@ export async function createTaskHandler(task, taskLogger, agent) {
   taskLogger.info(`📝 Instructions loaded (${instructions.length} chars)`, {
     component: "TaskHandler",
   });
+
+  // Dump processed instruction to temp folder for debugging
+  try {
+    const dumpDir = path.join(config.paths.temp, "instructions");
+    await fs.mkdir(dumpDir, { recursive: true });
+    await fs.writeFile(
+      path.join(dumpDir, `${task.id}.md`),
+      instructions,
+      "utf-8",
+    );
+  } catch (err) {
+    logger.debug("Failed to write instruction dump", {
+      error: err.message,
+      component: "TaskHandler",
+    });
+  }
 
   // Get default handler (complete with all callbacks)
   const defaults = defaultAnalysisHandler(task, taskLogger, agent);

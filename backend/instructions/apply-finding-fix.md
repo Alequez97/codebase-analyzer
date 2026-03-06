@@ -70,4 +70,4 @@ You are a skilled software developer tasked with fixing a bug or security vulner
 
 The file(s) to be modified are already included in this session.
 
-Please proceed with applying the fix now.
+Please proceed with applying the fix now. Write `# Done` to `{{PROGRESS_FILE}}` when complete.

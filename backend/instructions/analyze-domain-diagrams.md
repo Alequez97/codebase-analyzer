@@ -223,5 +223,6 @@ For a user authentication domain, you might create:
 - **Be accurate** - Diagrams should reflect actual code structure
 - **Be concise** - Don't create unnecessary diagrams
 - **Metadata is critical** - The UI relies on metadata.json to display diagrams
+- **Progress** - Write `# Done` to `{{PROGRESS_FILE}}` after all diagram files have been saved
 
 Good luck! Generate diagrams that make this domain's architecture crystal clear.

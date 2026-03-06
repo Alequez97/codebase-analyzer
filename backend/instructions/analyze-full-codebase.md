@@ -84,5 +84,6 @@ You MUST output your analysis as a valid JSON object with this exact structure:
 4. Read package.json and README if available
 5. Identify functional groupings
 6. Use `write_file` tool to save the JSON to: **`{{OUTPUT_FILE}}`**
+7. Write `# Done` to **`{{PROGRESS_FILE}}`**
 
 **Generate and write your JSON analysis now using the `write_file` tool.**

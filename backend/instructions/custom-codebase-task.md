@@ -22,7 +22,7 @@ You will receive a task with:
 
 ### Step 1: Create Progress File
 
-At the very start, create `.code-analysis/tasks/progress/{taskId}.md` with:
+At the very start, create `{{PROGRESS_FILE}}` with:
 
 - The task description
 - A checklist of planned steps (will be checked off as you complete them)

@@ -7,6 +7,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { INSTRUCTION_FILES_NAMES } from "../constants/instruction-files.js";
+import { getDomainSectionContentRelativePath } from "../persistence/domain-section-paths.js";
 import {
   processTemplate,
   buildTemplateVariables,
@@ -36,7 +37,7 @@ export async function loadInstructionTemplate(templateName, variables = {}) {
  * @param {Object} context - Current section content
  * @returns {Promise<string>} Processed system prompt
  */
-export async function buildChatSystemPrompt(domainId, sectionType, context) {
+export async function buildChatSystemPrompt(domainId, sectionType) {
   // Look up domain name from codebase analysis (if available)
   let domainName = domainId; // Fallback to ID
 
@@ -53,11 +54,15 @@ export async function buildChatSystemPrompt(domainId, sectionType, context) {
   }
 
   // Build template variables
+  const contentFile = getDomainSectionContentRelativePath(
+    domainId,
+    sectionType,
+  );
+
   const variables = {
     SECTION_TYPE: sectionType,
     DOMAIN_NAME: domainName,
-    HAS_CONTENT: context?.content ? true : false,
-    CURRENT_CONTENT: context?.content || "",
+    CONTENT_FILE_PATH: contentFile,
     IS_DOCUMENTATION: sectionType === "documentation",
     IS_REQUIREMENTS: sectionType === "requirements",
     IS_DIAGRAMS: sectionType === "diagrams",

@@ -180,6 +180,9 @@ const config = {
     // Analyzer tool root (where this code lives)
     analyzerRoot: path.join(__dirname, ".."),
 
+    // Temp folder for transient task artifacts (progress files, instruction dumps)
+    temp: path.join(__dirname, "temp"),
+
     // Target project paths
     targetRoot: targetDirectory,
     targetAnalysis: path.join(
@@ -200,6 +203,7 @@ const config = {
 
 // Ensure required directories exist
 const dirs = [
+  config.paths.temp,
   path.join(config.paths.targetAnalysis, "analysis"),
   path.join(config.paths.targetAnalysis, "domains"),
   path.join(config.paths.targetAnalysis, "tasks"),

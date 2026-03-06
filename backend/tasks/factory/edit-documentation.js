@@ -15,14 +15,13 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
  * @param {string} params.userMessage - User's message/request
- * @param {string} params.currentContent - Current documentation content
  * @param {Array} params.history - Conversation history
  * @param {Object} options - Task options
  * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
 export async function createEditDocumentationTask(
-  { domainId, userMessage, currentContent, history },
+  { domainId, userMessage, history },
   { executeNow = false } = {},
 ) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.EDIT_DOCUMENTATION);
@@ -41,7 +40,6 @@ export async function createEditDocumentationTask(
     params: {
       domainId,
       userMessage,
-      currentContent,
       history,
       sectionType: "documentation",
     },
