@@ -36,8 +36,7 @@
                     "value": -1
                   }
                 ],
-                "expectedOutput": "Validation error is thrown",
-                "assertionType": "toThrow"
+                "expectedOutput": "Validation error is thrown"
               }
             ]
           }

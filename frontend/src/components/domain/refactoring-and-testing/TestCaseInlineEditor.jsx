@@ -5,7 +5,6 @@ import {
   HStack,
   IconButton,
   Input,
-  NativeSelect,
   Tabs,
   Text,
   Textarea,
@@ -13,10 +12,6 @@ import {
 } from "@chakra-ui/react";
 import { Plus, Trash2 } from "lucide-react";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
-import { ASSERTION_TYPES } from "./utils";
-
-const NativeSelectRoot = NativeSelect.Root;
-const NativeSelectField = NativeSelect.Field;
 
 function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
   const { setEditedTestCases, getEditedTestCases } = useTestingEditorStore();
@@ -52,7 +47,6 @@ function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
           {
             input: [{ field: "", value: "" }],
             expectedOutput: "",
-            assertionType: "toBeTruthy",
           },
         ],
       },
@@ -85,7 +79,6 @@ function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
       {
         input: [{ field: "", value: "" }],
         expectedOutput: "",
-        assertionType: "toBeTruthy",
       },
     ];
     setLocalEditedTestCases(updated);
@@ -114,7 +107,6 @@ function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
         {
           input: [{ field: "", value: "" }],
           expectedOutput: "",
-          assertionType: "toBeTruthy",
         },
       ];
     }
@@ -390,34 +382,6 @@ function TestCaseInlineEditor({ test, onSave, onCancel }, ref) {
                                 )
                               }
                             />
-                          </Box>
-
-                          <Box>
-                            <Text fontSize="xs" fontWeight="medium" mb={1}>
-                              Assertion Type
-                            </Text>
-                            <NativeSelectRoot size="sm">
-                              <NativeSelectField
-                                value={testCaseItem.assertionType}
-                                onChange={(e) =>
-                                  updateCase(
-                                    tcIndex,
-                                    caseIndex,
-                                    "assertionType",
-                                    e.target.value,
-                                  )
-                                }
-                              >
-                                {ASSERTION_TYPES.map((option) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </NativeSelectField>
-                            </NativeSelectRoot>
                           </Box>
                         </VStack>
                       </Box>

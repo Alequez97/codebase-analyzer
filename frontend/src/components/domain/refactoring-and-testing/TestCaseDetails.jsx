@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Badge, Box, Code, HStack, Tabs, Text, VStack } from "@chakra-ui/react";
-import { formatAssertionType } from "./utils";
+import { Box, Code, HStack, Tabs, Text, VStack } from "@chakra-ui/react";
 
 function formatValue(value) {
   if (value === null || value === undefined) {
@@ -75,18 +74,9 @@ export function TestCaseDetails({ scenarios }) {
                     borderColor="gray.300"
                   >
                     <VStack align="stretch" gap={2}>
-                      <HStack justify="space-between" align="center">
-                        <Text
-                          fontSize="xs"
-                          fontWeight="medium"
-                          color="gray.600"
-                        >
-                          Check {caseIndex + 1}
-                        </Text>
-                        <Badge size="xs" colorPalette="purple">
-                          {formatAssertionType(testCaseItem.assertionType)}
-                        </Badge>
-                      </HStack>
+                      <Text fontSize="xs" fontWeight="medium" color="gray.600">
+                        Check {caseIndex + 1}
+                      </Text>
 
                       <Box>
                         <Text
