@@ -17,7 +17,7 @@ Analyze domain files for bugs and security issues. Output to **`{{OUTPUT_FILE}}`
       "severity": "CRITICAL | HIGH | MEDIUM | LOW",
       "source": "path/to/file.js:42",
       "category": "logic | validation | security | performance | resource | null-safety | error-handling",
-      "suggestedFix": "Proposed solution",
+      "suggestedFix": "Short code snippet showing the fix. For middleware/auth issues, reference the existing middleware by name and show how to apply it. Use a prose description only when the fix spans many files or requires a large refactor.",
       "impact": "What could go wrong"
     }
   ]
@@ -46,6 +46,13 @@ Analyze domain files for bugs and security issues. Output to **`{{OUTPUT_FILE}}`
 
 Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to understand what the code should do, then identify where it falls short.
 {{/if}}
+
+## Writing a Good `suggestedFix`
+
+- **Default: write a code snippet.** A short, focused example is almost always more useful than prose.
+- **Middleware / shared utilities**: if the fix is adding an existing middleware or calling a shared helper, name it explicitly and show the one-line usage (e.g. `router.post('/login', checkAuth, checkPermission('admin'), handler)`).
+- **Use prose only** when the fix is genuinely large — touches more than two or three files, requires a non-trivial refactor, or the core insight cannot be expressed as a snippet. In that case, keep the description concise and actionable.
+- Never wrap a plain English sentence in a code block.
 
 ## What to Look For
 
