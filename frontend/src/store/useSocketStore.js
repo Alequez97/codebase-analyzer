@@ -71,9 +71,9 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_COMPLETED, async (data) => {
       const { type, domainId, taskId } = data;
 
-      // Clear progress indicator for this domain
-      if (domainId) {
-        useTaskProgressStore.getState().clearProgress(domainId);
+      // Clear progress indicator for this task
+      if (taskId) {
+        useTaskProgressStore.getState().clearProgress(taskId);
       }
 
       // Handle different task types
@@ -134,7 +134,8 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_PROGRESS, (data) => {
       const { taskId, domainId, type, stage, message } = data;
       if (domainId) {
-        useTaskProgressStore.getState().setProgress(domainId, {
+        useTaskProgressStore.getState().setProgress(taskId, {
+          domainId,
           type,
           stage,
           message,
@@ -187,9 +188,9 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_FAILED, (data) => {
       const { type, domainId, taskId, error } = data;
 
-      // Clear progress indicator for this domain
-      if (domainId) {
-        useTaskProgressStore.getState().clearProgress(domainId);
+      // Clear progress indicator for this task
+      if (taskId) {
+        useTaskProgressStore.getState().clearProgress(taskId);
       }
 
       // Handle different task types

@@ -91,7 +91,7 @@ export function analyzeRefactoringAndTestingHandler(task, taskLogger, agent) {
           missingTest?.priority &&
           missingTest?.category &&
           missingTest?.suggestedTestFile &&
-          missingTest?.relatedRequirement &&
+          // relatedRequirement is optional — only present when INCLUDE_REQUIREMENTS=true
           missingTest?.reason &&
           Array.isArray(missingTest?.scenarios) &&
           missingTest.scenarios.length > 0;

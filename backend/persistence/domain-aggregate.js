@@ -19,7 +19,10 @@ import {
   readDomainBugsSecurity,
   writeDomainBugsSecurity,
 } from "./domain-bugs-security.js";
-import { getDomainSectionMetadataPath } from "./domain-section-paths.js";
+import {
+  getDomainSectionContentPath,
+  getDomainSectionMetadataPath,
+} from "./domain-section-paths.js";
 import { tryReadJsonFile } from "./utils.js";
 import { readTask } from "./tasks.js";
 
@@ -223,4 +226,47 @@ export async function listDomains() {
     }
     throw error;
   }
+}
+
+/**
+ * Check which analysis sections exist for a domain
+ * @param {string} domainId - Domain ID
+ * @returns {Promise<{documentation: boolean, requirements: boolean, bugsSecurity: boolean, testing: boolean}>}
+ */
+export async function getDomainSectionsStatus(domainId) {
+  const checkFile = async (filePath) => {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const docPath = path.join(
+    config.paths.targetAnalysis,
+    "domains",
+    domainId,
+    SECTION_TYPES.DOCUMENTATION,
+    "content.md",
+  );
+
+  const [documentation, requirements, bugsSecurity, testing] =
+    await Promise.all([
+      checkFile(docPath),
+      checkFile(
+        getDomainSectionContentPath(domainId, SECTION_TYPES.REQUIREMENTS),
+      ),
+      checkFile(
+        getDomainSectionContentPath(domainId, SECTION_TYPES.BUGS_SECURITY),
+      ),
+      checkFile(
+        getDomainSectionContentPath(
+          domainId,
+          SECTION_TYPES.REFACTORING_AND_TESTING,
+        ),
+      ),
+    ]);
+
+  return { documentation, requirements, bugsSecurity, testing };
 }

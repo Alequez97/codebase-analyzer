@@ -6,6 +6,7 @@ import {
   Heading,
   HStack,
   IconButton,
+  Input,
   Spinner,
   Text,
   Textarea,
@@ -19,7 +20,9 @@ import {
   Pencil,
   Save,
   ScanSearch,
+  Search,
   Shield,
+  Sparkles,
   TestTube,
   X,
 } from "lucide-react";
@@ -28,6 +31,17 @@ import { useNavigate } from "react-router-dom";
 import { toaster } from "../ui/toaster";
 import { useCodebaseStore } from "../../store/useCodebaseStore";
 import { useLogsStore } from "../../store/useLogsStore";
+import {
+  useTaskProgressStore,
+  selectDomainProgress,
+} from "../../store/useTaskProgressStore";
+import { GROUPED_TASK_TYPES } from "../../utils/grouped-task-types";
+import { useDomainDocumentationStore } from "../../store/useDomainDocumentationStore";
+import { useDomainRequirementsStore } from "../../store/useDomainRequirementsStore";
+import { useDomainBugsSecurityStore } from "../../store/useDomainBugsSecurityStore";
+import { useDomainRefactoringAndTestingStore } from "../../store/useDomainRefactoringAndTestingStore";
+
+const PRIORITY_ORDER = ["P0", "P1", "P2", "P3"];
 
 const PRIORITY_CONFIG = {
   P0: {
@@ -64,10 +78,21 @@ const PRIORITY_CONFIG = {
   },
 };
 
-const PRIORITY_ORDER = ["P0", "P1", "P2", "P3"];
-
 function DomainCard({ domain, provided, snapshot }) {
   const navigate = useNavigate();
+  const progressByTaskId = useTaskProgressStore((s) => s.progressByTaskId);
+  const activeProgress = selectDomainProgress(progressByTaskId, domain.id);
+  const docAnalyze = useDomainDocumentationStore((s) => s.analyze);
+  const reqAnalyze = useDomainRequirementsStore((s) => s.analyze);
+  const bugsAnalyze = useDomainBugsSecurityStore((s) => s.analyze);
+  const testAnalyze = useDomainRefactoringAndTestingStore((s) => s.analyze);
+
+  const handleAnalyze = () => {
+    docAnalyze(domain);
+    reqAnalyze(domain);
+    bugsAnalyze(domain);
+    testAnalyze(domain);
+  };
 
   return (
     <Box
@@ -130,34 +155,81 @@ function DomainCard({ domain, provided, snapshot }) {
             {domain.businessPurpose}
           </Text>
           <HStack justify="space-between" align="center">
-            <HStack gap={1.5}>
-              <Box
-                w="6px"
-                h="6px"
-                borderRadius="full"
-                bg={domain.hasAnalysis ? "green.400" : "gray.300"}
-                flexShrink={0}
-              />
-              <Text
-                fontSize="10px"
-                color={domain.hasAnalysis ? "green.600" : "gray.400"}
-                fontWeight="500"
-              >
-                {domain.hasAnalysis ? "Analyzed" : "Not analyzed"}
-              </Text>
+            <HStack gap={2}>
+              {[
+                { key: "documentation", label: "Docs" },
+                { key: "requirements", label: "Reqs" },
+                { key: "bugsSecurity", label: "Bugs" },
+                { key: "testing", label: "Tests" },
+              ].map(({ key, label }) => {
+                const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
+                  activeProgress.has(t),
+                );
+                return (
+                  <HStack key={key} gap={1} title={label}>
+                    <Box
+                      w="6px"
+                      h="6px"
+                      borderRadius="full"
+                      flexShrink={0}
+                      bg={
+                        isRunning
+                          ? "blue.400"
+                          : domain.sections?.[key]
+                            ? "green.400"
+                            : "gray.300"
+                      }
+                      style={
+                        isRunning
+                          ? {
+                              animation: "dotBounce 0.7s ease-in-out infinite",
+                            }
+                          : undefined
+                      }
+                    />
+                    <Text
+                      fontSize="9px"
+                      fontWeight="500"
+                      color={
+                        isRunning
+                          ? "blue.500"
+                          : domain.sections?.[key]
+                            ? "green.600"
+                            : "gray.400"
+                      }
+                    >
+                      {label}
+                    </Text>
+                  </HStack>
+                );
+              })}
             </HStack>
-            <Button
-              size="xs"
-              variant="outline"
-              colorPalette="blue"
-              borderRadius="md"
-              onClick={() => navigate(`/domains/${domain.id}`)}
-              fontSize="11px"
-              h="22px"
-              px={2.5}
-            >
-              View →
-            </Button>
+            <HStack gap={1.5}>
+              <Button
+                size="xs"
+                colorPalette="blue"
+                variant="subtle"
+                borderRadius="md"
+                onClick={handleAnalyze}
+                fontSize="11px"
+                h="22px"
+                px={2.5}
+              >
+                <Sparkles size={11} /> Analyze
+              </Button>
+              <Button
+                size="xs"
+                variant="outline"
+                colorPalette="blue"
+                borderRadius="md"
+                onClick={() => navigate(`/domains/${domain.id}`)}
+                fontSize="11px"
+                h="22px"
+                px={2.5}
+              >
+                View →
+              </Button>
+            </HStack>
           </HStack>
         </Box>
       </HStack>
@@ -327,16 +399,28 @@ export function ModulesSection() {
   } = useCodebaseStore();
 
   const domains = analysis?.domains || [];
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter domains by search query
+  const filteredDomains = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return domains;
+    return domains.filter(
+      (d) =>
+        d.name?.toLowerCase().includes(q) ||
+        d.businessPurpose?.toLowerCase().includes(q),
+    );
+  }, [domains, searchQuery]);
 
   // Group domains by priority
   const domainsByPriority = useMemo(() => {
     const groups = { P0: [], P1: [], P2: [], P3: [] };
-    domains.forEach((d) => {
+    filteredDomains.forEach((d) => {
       if (groups[d.priority]) groups[d.priority].push(d);
       else groups.P3.push(d);
     });
     return groups;
-  }, [domains]);
+  }, [filteredDomains]);
 
   useEffect(() => {
     if (!isEditingSummary) setEditedSummary(analysis?.summary || "");
@@ -517,6 +601,12 @@ export function ModulesSection() {
   // ── Domain board ─────────────────────────────────────────────────────────
   return (
     <Box p={6} maxW="1200px" mx="auto">
+      <style>{`
+        @keyframes dotBounce {
+          0%, 100% { transform: translateY(0); opacity: 1; }
+          50% { transform: translateY(-3px); opacity: 0.7; }
+        }
+      `}</style>
       <VStack align="stretch" gap={4}>
         {/* Re-analyzing banner */}
         {analyzingCodebase && (
@@ -635,25 +725,58 @@ export function ModulesSection() {
           )}
         </Box>
 
-        {/* Domain count hint */}
-        <HStack gap={2}>
-          <Text fontSize="sm" color="gray.500" fontWeight="500">
-            Found{" "}
-            <Text as="span" fontWeight="700" color="gray.800">
-              {domains.length}
-            </Text>{" "}
-            domains across{" "}
-            <Text as="span" fontWeight="700" color="gray.800">
-              {
-                PRIORITY_ORDER.filter((p) => domainsByPriority[p]?.length > 0)
-                  .length
-              }
-            </Text>{" "}
-            priority groups
-          </Text>
-          <Text fontSize="xs" color="gray.400">
-            — drag cards between groups to reprioritize
-          </Text>
+        {/* Domain count hint + search */}
+        <HStack justify="space-between" align="center">
+          <HStack gap={2}>
+            <Text fontSize="sm" color="gray.500" fontWeight="500">
+              Found{" "}
+              <Text as="span" fontWeight="700" color="gray.800">
+                {filteredDomains.length}
+              </Text>
+              {filteredDomains.length !== domains.length && (
+                <Text as="span" color="gray.400">
+                  {" "}
+                  of {domains.length}
+                </Text>
+              )}{" "}
+              domains across{" "}
+              <Text as="span" fontWeight="700" color="gray.800">
+                {
+                  PRIORITY_ORDER.filter((p) => domainsByPriority[p]?.length > 0)
+                    .length
+                }
+              </Text>{" "}
+              priority groups
+            </Text>
+            <Text fontSize="xs" color="gray.400">
+              — drag cards between groups to reprioritize
+            </Text>
+          </HStack>
+          <HStack gap={2}>
+            <Box position="relative">
+              <Box
+                position="absolute"
+                left={2.5}
+                top="50%"
+                transform="translateY(-50%)"
+                color="gray.400"
+                pointerEvents="none"
+                zIndex={1}
+              >
+                <Search size={13} />
+              </Box>
+              <Input
+                placeholder="Filter domains…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="xs"
+                w="200px"
+                pl={7}
+                borderRadius="md"
+                fontSize="xs"
+              />
+            </Box>
+          </HStack>
         </HStack>
 
         {/* Priority sections */}

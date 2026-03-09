@@ -18,7 +18,10 @@ import { useDomainDiagramsStore } from "../store/useDomainDiagramsStore";
 import { useDomainRequirementsStore } from "../store/useDomainRequirementsStore";
 import { useDomainBugsSecurityStore } from "../store/useDomainBugsSecurityStore";
 import { useDomainRefactoringAndTestingStore } from "../store/useDomainRefactoringAndTestingStore";
-import { useTaskProgressStore } from "../store/useTaskProgressStore";
+import {
+  useTaskProgressStore,
+  selectDomainProgress,
+} from "../store/useTaskProgressStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
 import { useImplementTestStore } from "../store/useImplementTestStore";
 import { useLogsStore } from "../store/useLogsStore";
@@ -48,7 +51,7 @@ export default function DomainDetailsPage() {
   const testStore = useDomainRefactoringAndTestingStore();
 
   // Task progress store
-  const { progressById } = useTaskProgressStore();
+  const { progressByTaskId } = useTaskProgressStore();
 
   // Domain editor store
   const {
@@ -111,20 +114,17 @@ export default function DomainDetailsPage() {
   const bugsSecurityError = bugsStore.errorById.get(domainId);
   const testingError = testStore.errorById.get(domainId);
 
-  // Task progress - filter by section type
-  const taskProgress = progressById.get(domainId);
+  // Task progress - derived per section from the flat progressByTaskId map.
+  const domainProgressMap = selectDomainProgress(progressByTaskId, domainId);
   const documentationProgress =
-    taskProgress?.type === TASK_TYPES.DOCUMENTATION ? taskProgress : null;
-  const diagramsProgress =
-    taskProgress?.type === TASK_TYPES.DIAGRAMS ? taskProgress : null;
+    domainProgressMap.get(TASK_TYPES.DOCUMENTATION) ?? null;
+  const diagramsProgress = domainProgressMap.get(TASK_TYPES.DIAGRAMS) ?? null;
   const requirementsProgress =
-    taskProgress?.type === TASK_TYPES.REQUIREMENTS ? taskProgress : null;
+    domainProgressMap.get(TASK_TYPES.REQUIREMENTS) ?? null;
   const bugsSecurityProgress =
-    taskProgress?.type === TASK_TYPES.BUGS_SECURITY ? taskProgress : null;
+    domainProgressMap.get(TASK_TYPES.BUGS_SECURITY) ?? null;
   const testingProgress =
-    taskProgress?.type === TASK_TYPES.REFACTORING_AND_TESTING
-      ? taskProgress
-      : null;
+    domainProgressMap.get(TASK_TYPES.REFACTORING_AND_TESTING) ?? null;
 
   // Logs data for each section
   const domainLogs = domainLogsBySection.get(domainId) || new Map();

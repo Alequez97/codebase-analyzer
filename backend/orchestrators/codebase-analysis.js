@@ -16,10 +16,20 @@ export async function getCodebaseAnalysis() {
   const domainIds = await domainsPersistence.listDomains();
   const domains = Array.isArray(analysis.domains) ? analysis.domains : [];
 
-  const enrichedDomains = domains.map((domain) => ({
-    ...domain,
-    hasAnalysis: domainIds.includes(domain.id),
-  }));
+  const enrichedDomains = await Promise.all(
+    domains.map(async (domain) => {
+      const hasAnalysis = domainIds.includes(domain.id);
+      const sections = hasAnalysis
+        ? await domainsPersistence.getDomainSectionsStatus(domain.id)
+        : {
+            documentation: false,
+            requirements: false,
+            bugsSecurity: false,
+            testing: false,
+          };
+      return { ...domain, hasAnalysis, sections };
+    }),
+  );
 
   return {
     ...analysis,

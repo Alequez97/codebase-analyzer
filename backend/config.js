@@ -81,63 +81,63 @@ const config = {
   tasks: {
     [TASK_TYPES.CODEBASE_ANALYSIS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DIAGRAMS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.REQUIREMENTS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.BUGS_SECURITY]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.REFACTORING_AND_TESTING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_3_CODEX,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.HIGH,
     },
     [TASK_TYPES.IMPLEMENT_FIX]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.IMPLEMENT_TEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_REFACTORING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -146,7 +146,7 @@ const config = {
     // Edit tasks (AI chat for editing domain sections)
     [TASK_TYPES.EDIT_DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_MINI,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 16000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
@@ -155,7 +155,7 @@ const config = {
     // Custom codebase task (floating agent chat)
     [TASK_TYPES.CUSTOM_CODEBASE_TASK]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -170,7 +170,7 @@ const config = {
   // Default agent config
   defaultAgentConfig: {
     agent: AGENTS.LLM_API,
-    model: MODELS.GPT_5_2,
+    model: MODELS.DEEPSEEK_REASONER,
     maxTokens: 16000,
     reasoningEffort: REASONING_EFFORT.MEDIUM,
   },
