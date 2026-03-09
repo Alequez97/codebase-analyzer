@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { tryReadJsonFile } from "./utils.js";
+import { tryReadJsonFile, appendRevision } from "./utils.js";
 
 /**
  * Read domain documentation section
@@ -57,19 +57,26 @@ export async function writeDomainDocumentation(domainId, data) {
   );
   await fs.mkdir(docDir, { recursive: true });
 
-  // Write content.md
+  // Write content.md only — metadata is managed via appendDocumentationRevision
   const contentPath = path.join(docDir, "content.md");
   await fs.writeFile(contentPath, data.content, "utf-8");
+}
 
-  // Write metadata.json (if provided)
-  if (data.metadata) {
-    const metadataPath = path.join(docDir, "metadata.json");
-    await fs.writeFile(
-      metadataPath,
-      JSON.stringify(data.metadata, null, 2),
-      "utf-8",
-    );
-  }
+/**
+ * Append a revision entry to the documentation metadata.json.
+ * @param {string} domainId - The domain ID
+ * @param {Object} revision - Revision entry (task or manual-save)
+ * @returns {Promise<Object>} Updated metadata { version, revisions }
+ */
+export async function appendDocumentationRevision(domainId, revision) {
+  const metadataPath = path.join(
+    config.paths.targetAnalysis,
+    "domains",
+    domainId,
+    SECTION_TYPES.DOCUMENTATION,
+    "metadata.json",
+  );
+  return appendRevision(metadataPath, revision);
 }
 
 /**

@@ -60,9 +60,17 @@ export class OpenAIClient extends BaseLLMClient {
     }
 
     try {
-      const response = await this.client.responses.create(requestParams);
+      const response = await this.client.responses.create(
+        requestParams,
+        options.signal ? { signal: options.signal } : undefined,
+      );
       return this.normalizeResponse(response);
     } catch (error) {
+      if (error.name === "AbortError" || options.signal?.aborted) {
+        const cancelled = new Error("Task cancelled");
+        cancelled.code = "TASK_CANCELLED";
+        throw cancelled;
+      }
       throw new Error(`OpenAI API error: ${error.message}`);
     }
   }
@@ -249,7 +257,11 @@ export class OpenAIClient extends BaseLLMClient {
    * Get maximum context size for OpenAI models
    */
   getMaxContextTokens() {
-    // GPT-5.2 and future models (assumed 128K if not recognized)
+    // GPT-5 mini has a 400K context window
+    if (this.model.includes("gpt-5-mini")) {
+      return 400000;
+    }
+    // GPT-5.2 and other GPT-5 models
     if (this.model.includes("gpt-5")) {
       return 128000;
     }

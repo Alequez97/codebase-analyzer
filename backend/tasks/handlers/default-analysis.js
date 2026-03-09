@@ -89,7 +89,7 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
 
     onIteration: (iteration, response) => {
       taskLogger.info(
-        `📥 Response - ${response.usage.inputTokens} in / ${response.usage.outputTokens} out (${response.stopReason})`,
+        `📥 [${iteration}/${agent.maxIterations}] Response - ${response.usage.inputTokens} in / ${response.usage.outputTokens} out (${response.stopReason})`,
         { component: "LLM-API" },
       );
 
@@ -103,7 +103,9 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
     },
 
     onToolCall: (toolName, args, result, error) => {
-      const filePath = args?.path || args?.file_path || "unknown";
+      const rawPath = args?.path || args?.file_path || "";
+      const filePath =
+        rawPath === "." ? "(project root)" : rawPath || "unknown";
       const startLine = args?.start_line;
       const endLine = args?.end_line;
 
@@ -117,6 +119,15 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
         toolDescription = `Listing directory ${filePath}`;
       } else if (toolName === "write_file") {
         toolDescription = `Writing ${filePath}`;
+      } else if (toolName === "replace_lines") {
+        toolDescription = `Editing ${filePath} (lines ${startLine}-${endLine})`;
+      } else if (toolName === "search_files") {
+        const pattern = args?.pattern || args?.query || "";
+        toolDescription = pattern
+          ? `Searching for "${pattern}"`
+          : "Searching files";
+      } else if (toolName === "execute_command") {
+        toolDescription = `Running: ${args?.command || "command"}`;
       }
 
       const logPrefix = error ? "❌" : "📖";
@@ -145,7 +156,8 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       if (
         response.stopReason === "end_turn" ||
         response.stopReason === "stop_sequence" ||
-        response.stopReason === "completed"
+        response.stopReason === "completed" ||
+        response.stopReason === "stop"
       ) {
         taskLogger.info("✅ Analysis complete", {
           component: "Analysis",

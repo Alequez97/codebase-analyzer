@@ -1,19 +1,34 @@
+import fs from "fs/promises";
+import path from "path";
+import config from "../../config.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { emitSocketEvent } from "../../utils/socket-emitter.js";
+import { appendDomainSectionChatMessage } from "../../utils/chat-history.js";
 
 /**
  * Handler for edit-documentation task
  * Defines how AI chat editing works for documentation
  * Only overrides what's different from default
+ *
+ * @param {Object} task
+ * @param {Object} taskLogger
+ * @param {Object} agent
+ * @param {Object} chatContext - Conversation context loaded from the session file
+ * @param {string} chatContext.initialMessage - The current user message to process
+ * @param {Array}  chatContext.priorMessages  - Prior turns for multi-turn context
  */
-export function editDocumentationHandler(task, taskLogger, agent) {
-  let messageCount = 0;
-
+export function editDocumentationHandler(
+  task,
+  taskLogger,
+  agent,
+  { initialMessage, priorMessages = [] } = {},
+) {
   return {
-    initialMessage: task.params.userMessage,
+    initialMessage,
+    priorMessages,
 
-    // Emit thinking status when starting
+    // Emit thinking indicator when the AI starts processing
     onProgress: (progress) => {
       if (
         progress.stage === PROGRESS_STAGES.PROCESSING &&
@@ -23,7 +38,10 @@ export function editDocumentationHandler(task, taskLogger, agent) {
           component: "EditDocumentation",
         });
 
-        emitSocketEvent(SOCKET_EVENTS.EDIT_DOCUMENTATION_THINKING, {
+        emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
+          // Use the stable session chatId, NOT task.id.
+          // The frontend routes socket events by this stable chatId.
+          chatId: task.params.chatId,
           taskId: task.id,
           domainId: task.params.domainId,
           sectionType: task.params.sectionType,
@@ -33,87 +51,64 @@ export function editDocumentationHandler(task, taskLogger, agent) {
       }
     },
 
-    // Stream each AI message to the client via socket
+    // Emit each AI text message as a chat message and persist it
     onMessage: (role, content) => {
       if (role === "assistant") {
-        messageCount++;
+        taskLogger.info(`📨 Sending AI chat message to client`, {
+          component: "EditDocumentation",
+          contentLength: content.length,
+        });
 
-        // Message 1 = Description, Message 2 = Content
-        const isDescription = messageCount === 1;
-        const socketEvent = isDescription
-          ? SOCKET_EVENTS.EDIT_DOCUMENTATION_DESCRIPTION
-          : SOCKET_EVENTS.EDIT_DOCUMENTATION_CONTENT;
-
-        taskLogger.info(
-          `📨 Sending AI ${isDescription ? "description" : "content"} to client`,
-          {
-            component: "EditDocumentation",
-            messageNumber: messageCount,
-            contentLength: content.length,
-          },
-        );
-
-        emitSocketEvent(socketEvent, {
+        emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
+          chatId: task.params.chatId,
           taskId: task.id,
           domainId: task.params.domainId,
           sectionType: task.params.sectionType,
           content,
           timestamp: new Date().toISOString(),
         });
-      }
-    },
 
-    shouldContinue: (response) => {
-      // After first message, prompt for the full updated content
-      if (messageCount === 1) {
-        taskLogger.info("📝 Requesting full updated content...", {
-          component: "EditDocumentation",
+        // Persist assistant reply to the session file on the backend.
+        // This is the authoritative persistence path — the frontend must NOT
+        // also call appendDomainSectionChatMessage for assistant messages.
+        appendDomainSectionChatMessage(
+          task.params.domainId,
+          task.params.sectionType,
+          { role: "assistant", content, chatId: task.params.chatId },
+        ).catch((err) => {
+          taskLogger.warn(`Failed to persist assistant message`, {
+            component: "EditDocumentation",
+            error: err.message,
+          });
         });
-
-        // Add user message to request the full content
-        agent.addUserMessage(
-          "Now provide the complete updated documentation content in full. Include all sections and details.",
-        );
-
-        return true; // Continue to get the second message
       }
-
-      // Stop after 2 messages (description + updated content)
-      if (messageCount >= 2) {
-        taskLogger.info("✅ Edit complete (2 messages received)", {
-          component: "EditDocumentation",
-          messagesStreamed: messageCount,
-        });
-        return false;
-      }
-
-      // If AI stops before first message, something went wrong
-      if (
-        messageCount === 0 &&
-        (response.stopReason === "end_turn" ||
-          response.stopReason === "stop_sequence" ||
-          response.stopReason === "completed")
-      ) {
-        taskLogger.warn("⚠️  AI stopped before providing response", {
-          component: "EditDocumentation",
-        });
-        return false;
-      }
-
-      return true;
     },
 
     postProcess: async (result, task, agent, taskLogger) => {
-      const metadata = agent.getMetadata();
-      taskLogger.info(`✅ Streamed ${messageCount} messages to client`, {
-        component: "EditDocumentation",
-        messagesStreamed: messageCount,
+      const outputPath = path.join(config.target.directory, task.outputFile);
+      const content = await fs.readFile(outputPath, "utf-8");
+
+      if (!content || content.length < 10) {
+        return {
+          success: false,
+          error: `AI did not write updated documentation to file`,
+        };
+      }
+
+      emitSocketEvent(SOCKET_EVENTS.DOCUMENTATION_UPDATED, {
+        chatId: task.params.chatId,
+        taskId: task.id,
+        domainId: task.params?.domainId,
+        content,
+        isEdit: true,
       });
 
-      return {
-        metadata,
-        messagesStreamed: messageCount,
-      };
+      taskLogger.info("✅ Updated documentation sent via socket", {
+        component: "EditDocumentation",
+        contentLength: content.length,
+      });
+
+      return { success: true };
     },
   };
 }

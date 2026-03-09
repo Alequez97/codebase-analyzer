@@ -6,32 +6,51 @@ import {
   Heading,
   HStack,
   IconButton,
+  SimpleGrid,
+  Spinner,
   Table,
   Text,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { Pencil, Save, X } from "lucide-react";
+import {
+  Bug,
+  Pencil,
+  Save,
+  ScanSearch,
+  Shield,
+  TestTube,
+  X,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "../ui/toaster";
-import { Alert } from "../ui/alert";
-import { Card } from "../ui/card";
-import { useConfigStore } from "../../store/useConfigStore";
 import { useCodebaseStore } from "../../store/useCodebaseStore";
+import { useLogsStore } from "../../store/useLogsStore";
 
 export function ModulesSection() {
   const navigate = useNavigate();
   const [isEditingSummary, setIsEditingSummary] = useState(false);
   const [editedSummary, setEditedSummary] = useState("");
   const [savingSummary, setSavingSummary] = useState(false);
-  const { config } = useConfigStore();
+  const { toggleDashboardLogs } = useLogsStore();
   const {
     analysis,
     analyzingCodebase,
-    pendingCodebaseTask,
     analyzeCodebase,
+    cancelCodebaseAnalysis,
     saveCodebaseSummary,
   } = useCodebaseStore();
+
+  const handleCancelReanalysis = async () => {
+    const result = await cancelCodebaseAnalysis();
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to cancel analysis",
+        description: result.error,
+        type: "error",
+      });
+    }
+  };
 
   const domains = analysis?.domains || [];
 
@@ -73,47 +92,188 @@ export function ModulesSection() {
   };
 
   return (
-    <Card.Root>
-      <Card.Header>
-        <HStack justify="space-between">
-          <Heading size="lg">
-            Code Domains{config?.target ? ` - ${config.target.name}` : ""}
-          </Heading>
-          <Button
-            colorPalette="blue"
-            onClick={analyzeCodebase}
-            loading={analyzingCodebase}
-            loadingText="Analyzing..."
-          >
-            {domains.length > 0 ? "Re-analyze Codebase" : "Analyze Codebase"}
-          </Button>
-        </HStack>
-      </Card.Header>
-      <Card.Body>
-        {analyzingCodebase && (
-          <Alert.Root status="info">
-            <Alert.Indicator />
-            <Alert.Title>Analysis in progress...</Alert.Title>
-            <Alert.Description>
-              {pendingCodebaseTask
-                ? `Task ID: ${pendingCodebaseTask.id} - Analyzing your codebase. This may take a few minutes.`
-                : "Analyzing your codebase. This may take a few minutes."}
-            </Alert.Description>
-          </Alert.Root>
-        )}
+    <>
+      {!analyzingCodebase && domains.length === 0 && (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          minH="calc(100vh - 52px)"
+          overflow="hidden"
+          bg="white"
+        >
+          <VStack gap={6} px={4} textAlign="center">
+            {/* Icon */}
+            <Box
+              p={3}
+              bg="blue.50"
+              borderRadius="full"
+              color="blue.500"
+              display="inline-flex"
+            >
+              <ScanSearch size={36} strokeWidth={1.5} />
+            </Box>
 
-        {!analyzingCodebase && domains.length === 0 && (
-          <Box textAlign="center" py={8}>
-            <Text color="gray.500" fontSize="lg">
-              No completed codebase analysis found. Click "Analyze Codebase" to
-              generate and load domains.
+            {/* Headline */}
+            <VStack gap={2}>
+              <Heading size="xl" color="gray.800" fontWeight="bold">
+                AI-Powered Code Analysis
+              </Heading>
+              <Text
+                fontSize="md"
+                color="gray.500"
+                maxW="520px"
+                lineHeight="tall"
+              >
+                Let AI automatically audit your codebase — discovering
+                functional domains, surfacing bugs, flagging security
+                vulnerabilities, and identifying missing test coverage.
+              </Text>
+            </VStack>
+
+            {/* Feature cards */}
+            <SimpleGrid columns={3} gap={4} w="full" maxW="640px">
+              <VStack
+                gap={2}
+                p={3}
+                bg="red.50"
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor="red.100"
+              >
+                <Box color="red.500">
+                  <Bug size={22} strokeWidth={1.5} />
+                </Box>
+                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
+                  Bug Detection
+                </Text>
+                <Text fontSize="xs" color="gray.500" textAlign="center">
+                  Logic errors, race conditions & edge cases
+                </Text>
+              </VStack>
+
+              <VStack
+                gap={2}
+                p={3}
+                bg="orange.50"
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor="orange.100"
+              >
+                <Box color="orange.500">
+                  <Shield size={22} strokeWidth={1.5} />
+                </Box>
+                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
+                  Security Scan
+                </Text>
+                <Text fontSize="xs" color="gray.500" textAlign="center">
+                  Injections, XSS, auth flaws & data exposure
+                </Text>
+              </VStack>
+
+              <VStack
+                gap={2}
+                p={3}
+                bg="green.50"
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor="green.100"
+              >
+                <Box color="green.500">
+                  <TestTube size={22} strokeWidth={1.5} />
+                </Box>
+                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
+                  Test Coverage
+                </Text>
+                <Text fontSize="xs" color="gray.500" textAlign="center">
+                  Missing tests, gaps & actionable suggestions
+                </Text>
+              </VStack>
+            </SimpleGrid>
+
+            {/* CTA button */}
+            <Button
+              size="lg"
+              colorPalette="blue"
+              px={8}
+              fontWeight="semibold"
+              borderRadius="xl"
+              onClick={analyzeCodebase}
+              shadow="md"
+              _hover={{ shadow: "lg", transform: "translateY(-1px)" }}
+              transition="all 0.15s ease"
+            >
+              <ScanSearch size={18} />
+              Analyze Codebase
+            </Button>
+
+            <Text fontSize="xs" color="gray.400">
+              Runs in the background — results appear automatically when
+              complete. Want to follow along?{" "}
+              <Text
+                as="span"
+                color="blue.400"
+                cursor="pointer"
+                textDecoration="underline"
+                _hover={{ color: "blue.500" }}
+                onClick={toggleDashboardLogs}
+              >
+                Open Logs
+              </Text>
+              .
             </Text>
-          </Box>
-        )}
+          </VStack>
+        </Box>
+      )}
 
-        {!analyzingCodebase && domains.length > 0 && (
+      {domains.length > 0 && (
+        <Box p={6}>
           <VStack align="stretch" gap={4}>
-            <Box p={4} bg="blue.50" borderRadius="md">
+            {analyzingCodebase ? (
+              <HStack
+                px={4}
+                py={3}
+                bg="blue.50"
+                borderRadius="lg"
+                borderWidth="1px"
+                borderColor="blue.100"
+                gap={3}
+              >
+                <Spinner size="xs" color="blue.500" />
+                <Text fontSize="sm" color="blue.700" flex="1">
+                  Re-analyzing codebase in the background…
+                </Text>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  colorPalette="blue"
+                  onClick={toggleDashboardLogs}
+                >
+                  View Logs
+                </Button>
+                <IconButton
+                  variant="ghost"
+                  size="xs"
+                  colorPalette="red"
+                  onClick={handleCancelReanalysis}
+                  aria-label="Cancel re-analysis"
+                >
+                  <X size={12} />
+                </IconButton>
+              </HStack>
+            ) : (
+              <HStack justify="flex-end">
+                <Button
+                  colorPalette="blue"
+                  variant="outline"
+                  size="sm"
+                  onClick={analyzeCodebase}
+                >
+                  Re-analyze Codebase
+                </Button>
+              </HStack>
+            )}
+            <Box p={4} bg="blue.50" borderRadius="md" mt={2}>
               <HStack justify="space-between" mb={2}>
                 <HStack>
                   <Heading size="sm" color="blue.800">
@@ -237,8 +397,8 @@ export function ModulesSection() {
               </Table.Body>
             </Table.Root>
           </VStack>
-        )}
-      </Card.Body>
-    </Card.Root>
+        </Box>
+      )}
+    </>
   );
 }

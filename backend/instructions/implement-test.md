@@ -300,7 +300,7 @@ describe("POST /api/endpoint", () => {
 
 1. Write the test file to **`{{TEST_FILE}}`** using `write_file`
 2. Run it with `execute_command` (e.g. `npx jest {{TEST_FILE}} --no-coverage`)
-3. If it passes — you are done. Stop.
+3. If it passes — write `# Done` to `{{PROGRESS_FILE}}`, then stop.
 4. If it fails — read the error, fix the file, re-run. Repeat up to 3 times.
 
 Generate the complete, runnable test code and write it now.

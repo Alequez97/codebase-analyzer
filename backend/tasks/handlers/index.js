@@ -5,7 +5,10 @@
 
 export { createTaskHandler } from "./factory.js";
 export { editDocumentationHandler } from "./edit-documentation.js";
+export { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 export { analyzeDocumentationHandler } from "./analyze-documentation.js";
 export { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";
 export { applyRefactoringHandler } from "./apply-refactoring.js";
+export { implementTestHandler } from "./implement-test.js";
+export { implementFixHandler } from "./implement-fix.js";
 export { defaultAnalysisHandler } from "./default-analysis.js";

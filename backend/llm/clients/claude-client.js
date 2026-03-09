@@ -72,9 +72,17 @@ export class ClaudeClient extends BaseLLMClient {
     }
 
     try {
-      const response = await this.client.messages.create(requestParams);
+      const response = await this.client.messages.create(
+        requestParams,
+        options.signal ? { signal: options.signal } : undefined,
+      );
       return this.normalizeResponse(response);
     } catch (error) {
+      if (error.name === "AbortError" || options.signal?.aborted) {
+        const cancelled = new Error("Task cancelled");
+        cancelled.code = "TASK_CANCELLED";
+        throw cancelled;
+      }
       throw new Error(`Claude API error: ${error.message}`);
     }
   }

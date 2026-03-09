@@ -6,23 +6,15 @@ import * as domainTestingPersistence from "../../persistence/domain-refactoring-
 import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
- * Handler for apply-test task
+ * Handler for implement-test task
  * Generates a new test file based on recommendations, then validates it runs without failures
  * Overrides post-processing to verify test file creation
  */
-export function applyTestHandler(task, taskLogger, agent) {
-  if (agent?.fileToolExecutor && task?.params?.testFile) {
-    agent.fileToolExecutor.setAllowedWritePaths([task.params.testFile]);
-    taskLogger.info("🔓 Enabled direct test file write path", {
-      component: "ApplyTest",
-      testFile: task.params.testFile,
-    });
-  }
-
+export function implementTestHandler(task, taskLogger, agent) {
   if (agent) {
     agent.enableCommandTools({ timeoutMs: 60_000 });
     taskLogger.info("🔧 Command execution tools enabled (test runner)", {
-      component: "ApplyTest",
+      component: "ImplementTest",
     });
   }
 
@@ -37,7 +29,7 @@ export function applyTestHandler(task, taskLogger, agent) {
         response.stopReason === "completed"
       ) {
         taskLogger.info("✅ Test generation and validation complete", {
-          component: "ApplyTest",
+          component: "ImplementTest",
         });
         emitTaskLog(task, {
           taskId: task.id,
@@ -51,7 +43,7 @@ export function applyTestHandler(task, taskLogger, agent) {
 
       if (response.stopReason === "max_tokens" && !response.toolCalls?.length) {
         taskLogger.warn("⚠️  Max tokens reached, requesting test file write", {
-          component: "ApplyTest",
+          component: "ImplementTest",
         });
         agent.addUserMessage(
           `You've hit the token limit. Please write the complete test file to ${task.params.testFile} now using the write_file tool.`,
@@ -74,7 +66,7 @@ export function applyTestHandler(task, taskLogger, agent) {
         await fs.access(testFilePath);
         testFileExists = true;
         taskLogger.info("✅ Test file created successfully", {
-          component: "ApplyTest",
+          component: "ImplementTest",
           testFile: task.params.testFile,
         });
         emitTaskLog(task, {
@@ -87,7 +79,7 @@ export function applyTestHandler(task, taskLogger, agent) {
       } catch {
         testFileExists = false;
         taskLogger.error("❌ Test file was not created", {
-          component: "ApplyTest",
+          component: "ImplementTest",
           expectedPath: testFilePath,
         });
         emitTaskLog(task, {
@@ -110,7 +102,7 @@ export function applyTestHandler(task, taskLogger, agent) {
       const stats = await fs.stat(testFilePath);
       if (stats.size === 0) {
         taskLogger.error("❌ Test file is empty", {
-          component: "ApplyTest",
+          component: "ImplementTest",
           testFile: task.params.testFile,
         });
         return {
@@ -120,7 +112,7 @@ export function applyTestHandler(task, taskLogger, agent) {
       }
 
       taskLogger.info(`✅ Test file verified (${stats.size} bytes)`, {
-        component: "ApplyTest",
+        component: "ImplementTest",
       });
 
       if (task.params?.domainId && task.params?.testId) {
@@ -136,7 +128,7 @@ export function applyTestHandler(task, taskLogger, agent) {
         } catch (error) {
           taskLogger.error("Failed to update existing tests list", {
             error,
-            component: "ApplyTest",
+            component: "ImplementTest",
             taskId: task.id,
           });
         }
@@ -153,7 +145,7 @@ export function applyTestHandler(task, taskLogger, agent) {
         } catch (error) {
           taskLogger.error("Failed to record completed testing action", {
             error,
-            component: "ApplyTest",
+            component: "ImplementTest",
             taskId: task.id,
           });
         }

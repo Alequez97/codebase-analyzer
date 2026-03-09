@@ -9,19 +9,19 @@ import {
 } from "./domain-documentation.js";
 import {
   readDomainRequirements,
-  readDomainRequirementsMetadata,
   writeDomainRequirements,
 } from "./domain-requirements.js";
 import {
   readDomainTesting,
-  readDomainTestingMetadata,
   writeDomainTesting,
 } from "./domain-refactoring-and-testing.js";
 import {
   readDomainBugsSecurity,
-  readDomainBugsSecurityMetadata,
   writeDomainBugsSecurity,
 } from "./domain-bugs-security.js";
+import { getDomainSectionMetadataPath } from "./domain-section-paths.js";
+import { tryReadJsonFile } from "./utils.js";
+import { readTask } from "./tasks.js";
 
 /**
  * Read a specific domain analysis (merged from four separate sections)
@@ -140,60 +140,44 @@ export async function writeDomain(domainId, data) {
 }
 
 /**
- * Read logs from a domain section JSON file
+ * Read logs for a domain section by resolving the last task revision.
+ * Reads the section's metadata.json, takes the last revision's taskId,
+ * looks up that task, and reads its log file.
  * @param {string} domainId - The domain ID
- * @param {string} section - Section type (documentation, requirements, testing, bugs-security)
+ * @param {string} section - Section type (documentation, requirements, refactoring-and-testing, bugs-security, diagrams)
  * @returns {Promise<string|null>} Logs content or null if not found
  */
 export async function readDomainSectionLogs(domainId, section) {
+  const metadataPath = getDomainSectionMetadataPath(domainId, section);
+
+  let metadata = null;
   try {
-    let sectionData = null;
-    let readSectionMetadata = null;
+    metadata = await tryReadJsonFile(metadataPath, `${section} metadata`);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
 
-    switch (section) {
-      case SECTION_TYPES.DOCUMENTATION:
-        sectionData = await readDomainDocumentation(domainId);
-        break;
-      case SECTION_TYPES.REQUIREMENTS:
-        sectionData = await readDomainRequirements(domainId);
-        readSectionMetadata = readDomainRequirementsMetadata;
-        break;
-      case SECTION_TYPES.REFACTORING_AND_TESTING:
-        sectionData = await readDomainTesting(domainId);
-        readSectionMetadata = readDomainTestingMetadata;
-        break;
-      case SECTION_TYPES.BUGS_SECURITY:
-        sectionData = await readDomainBugsSecurity(domainId);
-        readSectionMetadata = readDomainBugsSecurityMetadata;
-        break;
-      default:
-        return null;
-    }
+  if (!metadata?.revisions?.length) {
+    return null;
+  }
 
-    let logFilePath = sectionData?.metadata?.logFile || sectionData?.logFile;
+  const lastRevision = metadata.revisions[metadata.revisions.length - 1];
+  const taskId = lastRevision?.taskId;
+  if (!taskId) {
+    return null;
+  }
 
-    if (!logFilePath && readSectionMetadata) {
-      const sectionMetadata = await readSectionMetadata(domainId);
-      logFilePath = sectionMetadata?.logFile || null;
-    }
+  const task = await readTask(taskId);
+  if (!task?.logFile) {
+    return null;
+  }
 
-    if (!logFilePath) {
-      return null;
-    }
-
-    try {
-      const absoluteLogPath = path.join(
-        config.paths.targetAnalysis,
-        logFilePath,
-      );
-      const logContent = await fs.readFile(absoluteLogPath, "utf-8");
-      return logContent;
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        return null;
-      }
-      throw error;
-    }
+  try {
+    const absoluteLogPath = path.join(
+      config.paths.targetAnalysis,
+      task.logFile,
+    );
+    return await fs.readFile(absoluteLogPath, "utf-8");
   } catch (error) {
     if (error.code === "ENOENT") {
       return null;

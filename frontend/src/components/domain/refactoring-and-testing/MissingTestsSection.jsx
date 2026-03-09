@@ -1,16 +1,20 @@
-﻿import {
+import { useState } from "react";
+import {
   Badge,
   Box,
+  Button,
   Grid,
   HStack,
   Table,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { CheckCheck } from "lucide-react";
 import { Alert } from "../../ui/alert";
+import { Checkbox } from "../../ui/checkbox";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
-import { sortByPriority } from "./utils";
 import { TestTableRow } from "./TestTableRow";
+import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 
 const TEST_TYPES = [
   { key: "unit", label: "Unit", palette: "purple" },
@@ -18,13 +22,15 @@ const TEST_TYPES = [
   { key: "e2e", label: "E2E", palette: "green" },
 ];
 
+const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
+
 export function MissingTestsSection({
   missingTests,
   refactoringRecommendations = [],
-  applyingTests,
-  applyLogs,
-  onApplyTest,
-  onApplyTestEdits,
+  implementingTests,
+  implementLogs,
+  onImplementTest,
+  onImplementTestEdits,
   domainId,
 }) {
   const refactoringById = new Map(
@@ -83,11 +89,72 @@ export function MissingTestsSection({
       <Alert.Root status="success">
         <Alert.Indicator />
         <Alert.Description>
-          All critical tests are in place! 🎉
+          All critical tests are in place! ??
         </Alert.Description>
       </Alert.Root>
     );
   }
+
+  // Flatten all tests with type annotation, then sort: ready first, blocked last;
+  // within each group sort by priority.
+  const allTests = TEST_TYPES.flatMap(({ key, label, palette }) =>
+    (editedMissingTests[key] || []).map((test) => ({
+      test,
+      typeLabel: label,
+      typePalette: palette,
+    })),
+  );
+
+  const sortedTests = [...allTests].sort((a, b) => {
+    const aBlocked = a.test.blockedBy ? 1 : 0;
+    const bBlocked = b.test.blockedBy ? 1 : 0;
+    if (aBlocked !== bBlocked) return aBlocked - bBlocked;
+    return (
+      (PRIORITY_ORDER[a.test.priority] ?? 99) -
+      (PRIORITY_ORDER[b.test.priority] ?? 99)
+    );
+  });
+
+  const readyTests = sortedTests.filter(
+    ({ test }) =>
+      !test.blockedBy &&
+      test.actionStatus !== TESTING_ACTION_STATUS.COMPLETED &&
+      !implementingTests[test.id],
+  );
+
+  const readyTestIdSet = new Set(readyTests.map(({ test }) => test.id));
+
+  const [selectedTestIds, setSelectedTestIds] = useState(
+    () => new Set(readyTests.map(({ test }) => test.id)),
+  );
+
+  const validSelectedIds = new Set(
+    [...selectedTestIds].filter((id) => readyTestIdSet.has(id)),
+  );
+
+  const allReady =
+    readyTests.length > 0 &&
+    readyTests.every(({ test }) => validSelectedIds.has(test.id));
+  const someReady = readyTests.some(({ test }) =>
+    validSelectedIds.has(test.id),
+  );
+
+  const toggleSelectAll = () => {
+    if (allReady) {
+      setSelectedTestIds(new Set());
+    } else {
+      setSelectedTestIds(new Set(readyTests.map(({ test }) => test.id)));
+    }
+  };
+
+  const toggleSelectTest = (testId) => {
+    setSelectedTestIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(testId)) next.delete(testId);
+      else next.add(testId);
+      return next;
+    });
+  };
 
   return (
     <VStack align="stretch" gap={3}>
@@ -118,6 +185,24 @@ export function MissingTestsSection({
         })}
       </Grid>
 
+      {/* Implement toolbar */}
+      {readyTests.length > 0 && (
+        <HStack justify="flex-end">
+          <Button
+            size="sm"
+            colorPalette="green"
+            variant="solid"
+            disabled={validSelectedIds.size === 0}
+            onClick={() =>
+              [...validSelectedIds].forEach((id) => onImplementTest?.(id))
+            }
+          >
+            <CheckCheck size={14} />
+            Implement ({validSelectedIds.size})
+          </Button>
+        </HStack>
+      )}
+
       {/* Table */}
       <Box borderWidth="1px" borderRadius="lg" overflow="hidden" bg="white">
         <Table.Root size="sm" variant="outline">
@@ -133,38 +218,46 @@ export function MissingTestsSection({
               <Table.ColumnHeader width="140px" textAlign="center">
                 Actions
               </Table.ColumnHeader>
+              <Table.ColumnHeader width="50px" textAlign="center">
+                <Checkbox
+                  checked={
+                    allReady ? true : someReady ? "indeterminate" : false
+                  }
+                  onChange={toggleSelectAll}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {TEST_TYPES.map(({ key, label, palette }) =>
-              sortByPriority(editedMissingTests[key])?.map((test) => {
-                const refactoring = test.blockedBy
-                  ? refactoringById.get(test.blockedBy)
-                  : null;
-                const sourceFiles =
-                  test.sourceFiles ||
-                  (refactoring?.targetFile ? [refactoring.targetFile] : []);
-                return (
-                  <TestTableRow
-                    key={test.id}
-                    test={test}
-                    typeLabel={label}
-                    typePalette={palette}
-                    domainId={domainId}
-                    applyingTests={applyingTests}
-                    applyLogs={applyLogs}
-                    onApplyTest={onApplyTest}
-                    onApplyTestEdits={onApplyTestEdits}
-                    sourceFiles={sourceFiles}
-                    refactoringTargetFunction={refactoring?.targetFunction}
-                  />
-                );
-              }),
-            )}
+            {sortedTests.map(({ test, typeLabel, typePalette }) => {
+              const refactoring = test.blockedBy
+                ? refactoringById.get(test.blockedBy)
+                : null;
+              const sourceFiles =
+                test.sourceFiles ||
+                (refactoring?.targetFile ? [refactoring.targetFile] : []);
+              return (
+                <TestTableRow
+                  key={test.id}
+                  test={test}
+                  typeLabel={typeLabel}
+                  typePalette={typePalette}
+                  domainId={domainId}
+                  implementingTests={implementingTests}
+                  implementLogs={implementLogs}
+                  onImplementTest={onImplementTest}
+                  onImplementTestEdits={onImplementTestEdits}
+                  sourceFiles={sourceFiles}
+                  refactoringTargetFunction={refactoring?.targetFunction}
+                  isSelected={validSelectedIds.has(test.id)}
+                  onToggleSelect={toggleSelectTest}
+                />
+              );
+            })}
           </Table.Body>
         </Table.Root>
       </Box>
     </VStack>
   );
 }
-

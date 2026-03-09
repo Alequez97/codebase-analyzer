@@ -13,7 +13,7 @@ export function CodebaseAnalysisLogs() {
 
   return (
     <Card.Root>
-      <Card.Header>
+      <Card.Header pb={3}>
         <Heading size="md">Agent Logs</Heading>
       </Card.Header>
       <Card.Body p={0}>

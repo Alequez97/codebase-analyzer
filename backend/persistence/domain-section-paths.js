@@ -27,3 +27,11 @@ export function getDomainSectionMetadataPath(domainId, sectionId) {
 export function getDomainSectionFilePath(domainId, sectionId, fileName) {
   return path.join(getDomainSectionDir(domainId, sectionId), fileName);
 }
+
+/**
+ * Get the relative path to a section content file (relative to the target project root).
+ * Used when passing file paths to the LLM agent as tool arguments.
+ */
+export function getDomainSectionContentRelativePath(domainId, sectionId) {
+  return `${PERSISTENCE_FILES.ANALYSIS_ROOT_DIR}/domains/${domainId}/${sectionId}/${PERSISTENCE_FILES.CONTENT_MD}`;
+}

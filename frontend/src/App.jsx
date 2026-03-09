@@ -3,6 +3,7 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { Toaster } from "./components/ui/toaster";
+import { FloatingAgentChat } from "./components/FloatingChat";
 import Dashboard from "./pages/Dashboard";
 import DomainDetailsPage from "./pages/DomainDetailsPage";
 import { useSocketStore } from "./store/useSocketStore";
@@ -25,6 +26,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
+        <FloatingAgentChat />
       </BrowserRouter>
       <Toaster />
     </ChakraProvider>

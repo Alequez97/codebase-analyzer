@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Button, Container, HStack, VStack } from "@chakra-ui/react";
+import { Container, VStack } from "@chakra-ui/react";
+import { AnalyzingState } from "../components/dashboard/AnalyzingState";
 import { CodebaseAnalysisLogs } from "../components/dashboard/CodebaseAnalysisLogs";
-import { DashboardHeader } from "../components/dashboard/DashboardHeader";
 import { ModulesSection } from "../components/dashboard/ModulesSection";
 import { ErrorState, LoadingState } from "../components/dashboard/States";
 import { useCodebaseStore } from "../store/useCodebaseStore";
@@ -16,8 +16,7 @@ export default function Dashboard() {
   const { loading, error, analysis, analyzingCodebase } = useCodebaseStore();
 
   // Logs store (UI state for showing/hiding logs)
-  const { showDashboardLogs, toggleDashboardLogs, fetchCodebaseAnalysisLogs } =
-    useLogsStore();
+  const { showDashboardLogs, fetchCodebaseAnalysisLogs } = useLogsStore();
 
   // Fetch logs when showDashboardLogs changes
   useEffect(() => {
@@ -28,15 +27,6 @@ export default function Dashboard() {
     fetchCodebaseAnalysisLogs(analysis, false, analyzingCodebase);
   }, [showDashboardLogs, analysis?.taskId, analyzingCodebase]);
 
-  const handleToggleDashboardLogs = () => {
-    const shouldShowLogs = !showDashboardLogs;
-    toggleDashboardLogs();
-
-    if (shouldShowLogs) {
-      fetchCodebaseAnalysisLogs(analysis, false, analyzingCodebase);
-    }
-  };
-
   if (loading) {
     return <LoadingState />;
   }
@@ -45,22 +35,27 @@ export default function Dashboard() {
     return <ErrorState error={error} port={config?.config?.port} />;
   }
 
+  const domains = analysis?.domains || [];
+  const isHeroState = !analyzingCodebase && domains.length === 0;
+  const isAnalyzingEmptyState = analyzingCodebase && domains.length === 0;
+  const isFullScreenState =
+    (isHeroState || isAnalyzingEmptyState) && !showDashboardLogs;
+
   return (
-    <Container maxW="container.xl" py={8}>
-      <VStack gap={8} align="stretch">
-        <DashboardHeader />
-        <HStack justify="flex-end">
-          <Button
-            variant="outline"
-            colorPalette="gray"
-            onClick={handleToggleDashboardLogs}
-            size="sm"
-          >
-            {showDashboardLogs ? "Show codebase analysis" : "Show Logs"}
-          </Button>
-        </HStack>
-        {showDashboardLogs ? <CodebaseAnalysisLogs /> : <ModulesSection />}
-      </VStack>
-    </Container>
+    <>
+      {isFullScreenState ? (
+        isAnalyzingEmptyState ? (
+          <AnalyzingState />
+        ) : (
+          <ModulesSection />
+        )
+      ) : (
+        <Container maxW="container.xl" py={8}>
+          <VStack gap={8} align="stretch">
+            {showDashboardLogs ? <CodebaseAnalysisLogs /> : <ModulesSection />}
+          </VStack>
+        </Container>
+      )}
+    </>
   );
 }

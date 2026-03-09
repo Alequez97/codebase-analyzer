@@ -66,7 +66,11 @@ export class LLMAgent {
    *
    * @param {Object} config - Run configuration
    * @param {string} config.systemPrompt - System instructions
-   * @param {string} config.initialMessage - Initial user message
+   * @param {string} config.initialMessage - Current user message (the turn being processed)
+   * @param {Array}  config.priorMessages - Prior conversation turns to replay before initialMessage.
+   *                 Each entry: { role: 'user'|'assistant', content: string }.
+   *                 Injected between the system prompt and the current user message so the
+   *                 LLM has full multi-turn context without the caller needing to manage state.
    * @param {Function} config.onProgress - Progress callback (stage, message, data)
    * @param {Function} config.onToolCall - Tool call callback (toolName, args, result)
    * @param {Function} config.onIteration - Iteration callback (iteration, response)
@@ -79,16 +83,29 @@ export class LLMAgent {
     const {
       systemPrompt,
       initialMessage,
+      priorMessages = [],
       onProgress = () => {},
       onToolCall = () => {},
       onIteration = () => {},
       onMessage = () => {},
       onComplete = () => {},
       shouldContinue = null,
+      abortSignal = null,
     } = config;
 
     // Initialize conversation
     this.state.addSystemMessage(systemPrompt);
+
+    // Replay prior conversation turns so the LLM has multi-turn context
+    for (const msg of priorMessages) {
+      if (msg.role === "user") {
+        this.state.addUserMessage(msg.content);
+      } else if (msg.role === "assistant") {
+        this.state.addAssistantMessage(msg.content);
+      }
+    }
+
+    // Add the current user message
     this.state.addUserMessage(initialMessage);
 
     onProgress({
@@ -135,10 +152,18 @@ export class LLMAgent {
         });
       }
 
+      // Check for cancellation before making the (potentially long) LLM call
+      if (abortSignal?.aborted) {
+        const err = new Error("Task cancelled");
+        err.code = "TASK_CANCELLED";
+        throw err;
+      }
+
       // Send message to LLM
       const response = await this.client.sendMessage(this.state.getMessages(), {
         tools: this._getAvailableTools(),
         maxTokens: this.maxTokens,
+        signal: abortSignal,
       });
 
       // Anchor state token count with the real value from the API so that
@@ -172,7 +197,9 @@ export class LLMAgent {
 
       // Handle text response
       if (response.content && typeof response.content === "string") {
-        this.state.addAssistantMessage(response.content);
+        this.state.addAssistantMessage(response.content, {
+          reasoningContent: response.reasoningContent || null,
+        });
         onMessage("assistant", response.content);
       }
 
@@ -274,7 +301,7 @@ export class LLMAgent {
     toolCalls,
     { onToolCall, onProgress, iteration, reasoningContent = null },
   ) {
-    logger.info(`Executing ${toolCalls.length} tool call(s)`, {
+    logger.debug(`Executing ${toolCalls.length} tool call(s)`, {
       component: "LLMAgent",
       tools: toolCalls.map((tc) => tc.name).join(", "),
     });
@@ -292,8 +319,10 @@ export class LLMAgent {
 
     // Execute each tool
     for (const toolCall of toolCalls) {
+      const rawPath =
+        toolCall.arguments?.path || toolCall.arguments?.file_path || "";
       const filePath =
-        toolCall.arguments?.path || toolCall.arguments?.file_path || "unknown";
+        rawPath === "." ? "(project root)" : rawPath || "unknown";
       const startLine = toolCall.arguments?.start_line;
       const endLine = toolCall.arguments?.end_line;
 
@@ -308,7 +337,13 @@ export class LLMAgent {
       } else if (toolCall.name === "write_file") {
         toolDescription = `Writing ${filePath}`;
       } else if (toolCall.name === "replace_lines") {
-        toolDescription = `Editing ${filePath} lines ${startLine}-${endLine}`;
+        toolDescription = `Editing ${filePath} (lines ${startLine}-${endLine})`;
+      } else if (toolCall.name === "search_files") {
+        const pattern =
+          toolCall.arguments?.pattern || toolCall.arguments?.query || "";
+        toolDescription = pattern
+          ? `Searching for "${pattern}"`
+          : "Searching files";
       } else if (toolCall.name === "execute_command") {
         toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
       }

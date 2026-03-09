@@ -6,12 +6,15 @@ import {
   HStack,
   Icon,
   IconButton,
+  Spinner,
   Table,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { Checkbox } from "../../ui/checkbox";
 import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
+import { useImplementTestStore } from "../../../store/useImplementTestStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails } from "./TestCaseDetails";
 import { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
@@ -23,12 +26,13 @@ export function TestTableRow({
   typeLabel,
   typePalette,
   domainId,
-  applyingTests,
-  applyLogs,
-  onApplyTest,
-  onApplyTestEdits,
+  implementingTests,
+  onImplementTest,
+  onImplementTestEdits,
   sourceFiles = [],
   refactoringTargetFunction,
+  isSelected = false,
+  onToggleSelect,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const editorRef = useRef(null);
@@ -42,8 +46,13 @@ export function TestTableRow({
     clearEditingTest,
   } = useTestingEditorStore();
 
-  const isApplied = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-  const isApplying = !!applyingTests[test.id];
+  const implementProgressByTestId = useImplementTestStore(
+    (state) => state.implementProgressByTestId,
+  );
+  const implementProgress = implementProgressByTestId.get(test.id);
+
+  const isImplemented = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+  const isImplementing = !!implementingTests[test.id];
   const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
   const isBlocked = !!test.blockedBy;
 
@@ -55,27 +64,27 @@ export function TestTableRow({
   };
 
   const renderActionButton = () => {
-    if (isApplied && hasPendingEdits) {
+    if (isImplemented && hasPendingEdits) {
       return (
         <Button
           size="xs"
           colorPalette="yellow"
           variant="solid"
-          disabled={!!applyingTests[test.id]}
+          disabled={!!implementingTests[test.id]}
           onClick={(e) => {
             e.stopPropagation();
-            onApplyTestEdits?.(test.id);
+            onImplementTestEdits?.(test.id);
           }}
         >
-          Apply edits
+          Implement edits
         </Button>
       );
     }
 
-    if (isApplied) {
+    if (isImplemented) {
       return (
         <Button size="xs" colorPalette="green" variant="subtle" disabled>
-          Applied
+          Implemented
         </Button>
       );
     }
@@ -94,13 +103,13 @@ export function TestTableRow({
         colorPalette="green"
         onClick={(e) => {
           e.stopPropagation();
-          onApplyTest(test.id);
+          onImplementTest(test.id);
         }}
-        loading={!!applyingTests[test.id]}
-        loadingText="Applying"
+        loading={!!implementingTests[test.id]}
+        loadingText="Implementing"
       >
         <Check size={12} />
-        Apply
+        Implement
       </Button>
     );
   };
@@ -112,18 +121,18 @@ export function TestTableRow({
         bg={
           isBlocked
             ? "orange.50"
-            : isApplied
+            : isImplemented
               ? "green.50"
-              : isApplying
+              : isImplementing
                 ? "blue.50"
                 : "gray.50"
         }
         _hover={{
           bg: isBlocked
             ? "orange.100"
-            : isApplied
+            : isImplemented
               ? "green.100"
-              : isApplying
+              : isImplementing
                 ? "blue.100"
                 : "gray.100",
           cursor: "pointer",
@@ -160,77 +169,110 @@ export function TestTableRow({
             {test.reason && <InfoTooltip label={test.reason} />}
           </HStack>
         </Table.Cell>
-        <Table.Cell>
-          <Text
-            fontSize="xs"
-            fontFamily="mono"
-            color="gray.700"
-            wordBreak="break-all"
-          >
-            {test.suggestedTestFile}
-          </Text>
-        </Table.Cell>
-        <Table.Cell>
-          {isBlocked ? (
-            <Text
-              as="span"
-              fontSize="xs"
-              fontFamily="mono"
-              fontWeight="semibold"
-              color="orange.600"
-              cursor="pointer"
-              textDecoration="underline"
-              onClick={(e) => {
-                e.stopPropagation();
-                document.getElementById(test.blockedBy)?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-              }}
+        {isImplementing ? (
+          <Table.Cell colSpan={4}>
+            <HStack
+              gap={2}
+              px={3}
+              py={1}
+              bg="blue.100"
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="blue.200"
             >
-              {test.blockedBy}
-            </Text>
-          ) : null}
-        </Table.Cell>
-        <Table.Cell textAlign="center">
-          <HStack gap={1} justify="center">
-            {editingTestId === test.id ? (
-              <IconButton
+              <Spinner
                 size="xs"
-                variant="ghost"
-                colorPalette="red"
-                disabled={!!applyingTests[test.id]}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearEditingTest();
-                }}
-                title="Cancel editing"
+                color="blue.500"
+                borderWidth="2px"
+                flexShrink={0}
+              />
+              <Text fontSize="xs" fontWeight="medium" color="blue.700" truncate>
+                {implementProgress?.message || "AI is starting…"}
+              </Text>
+            </HStack>
+          </Table.Cell>
+        ) : (
+          <>
+            <Table.Cell>
+              <Text
+                fontSize="xs"
+                fontFamily="mono"
+                color="gray.700"
+                wordBreak="break-all"
               >
-                <X size={14} />
-              </IconButton>
-            ) : (
-              <IconButton
-                size="xs"
-                colorPalette="blue"
-                variant="ghost"
-                disabled={!!applyingTests[test.id]}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingTest(test.id, domainId);
-                }}
-                title="Edit test cases"
-              >
-                <Edit2 size={14} />
-              </IconButton>
-            )}
-            {renderActionButton()}
-          </HStack>
-        </Table.Cell>
+                {test.suggestedTestFile}
+              </Text>
+            </Table.Cell>
+            <Table.Cell>
+              {isBlocked ? (
+                <Text
+                  as="span"
+                  fontSize="xs"
+                  fontFamily="mono"
+                  fontWeight="semibold"
+                  color="orange.600"
+                  cursor="pointer"
+                  textDecoration="underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    document.getElementById(test.blockedBy)?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }}
+                >
+                  {test.blockedBy}
+                </Text>
+              ) : null}
+            </Table.Cell>
+            <Table.Cell textAlign="center">
+              <HStack gap={1} justify="center">
+                {editingTestId === test.id ? (
+                  <IconButton
+                    size="xs"
+                    variant="ghost"
+                    colorPalette="red"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearEditingTest();
+                    }}
+                    title="Cancel editing"
+                  >
+                    <X size={14} />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    size="xs"
+                    colorPalette="blue"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingTest(test.id, domainId);
+                    }}
+                    title="Edit test cases"
+                  >
+                    <Edit2 size={14} />
+                  </IconButton>
+                )}
+                {renderActionButton()}
+              </HStack>
+            </Table.Cell>
+            <Table.Cell textAlign="center" onClick={(e) => e.stopPropagation()}>
+              {!isBlocked && !isImplemented && !isImplementing && (
+                <Checkbox
+                  checked={isSelected}
+                  onChange={() => onToggleSelect?.(test.id)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+            </Table.Cell>
+          </>
+        )}
       </Table.Row>
 
       {isExpanded && (
         <Table.Row key={`${test.id}-details`}>
-          <Table.Cell colSpan={8} bg="gray.50" p={4}>
+          <Table.Cell colSpan={9} bg="gray.50" p={4}>
             {editingTestId === test.id ? (
               <TestCaseInlineEditorComponent
                 ref={editorRef}
@@ -309,27 +351,6 @@ export function TestTableRow({
                       ))}
                     </Box>
                   )}
-
-                {applyLogs?.[test.id] && (
-                  <Box borderWidth="1px" borderRadius="md" p={3}>
-                    <Text fontSize="xs" fontWeight="semibold" mb={2}>
-                      Apply Logs
-                    </Text>
-                    <Box
-                      bg="gray.900"
-                      color="green.300"
-                      p={3}
-                      borderRadius="sm"
-                      fontFamily="mono"
-                      fontSize="xs"
-                      maxH="240px"
-                      overflowY="auto"
-                      whiteSpace="pre-wrap"
-                    >
-                      {applyLogs[test.id]}
-                    </Box>
-                  </Box>
-                )}
               </VStack>
             )}
           </Table.Cell>

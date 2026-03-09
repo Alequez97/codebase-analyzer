@@ -118,6 +118,26 @@ export class FileToolExecutor {
     this.projectRoot = projectRoot;
     this.maxFileSize = 500 * 1024; // 500KB limit per file
     this.allowedWritePaths = new Set();
+    this.allowAnyWrite = false;
+    this.allowAnyRead = false;
+  }
+
+  /**
+   * Allow the agent to write/edit any file in the project root.
+   * Used for IMPLEMENT_FIX tasks where the fix may touch arbitrary source files.
+   * @param {boolean} allow
+   */
+  setAllowAnyWrite(allow) {
+    this.allowAnyWrite = allow;
+  }
+
+  /**
+   * Allow the agent to read any file in the project root, including .code-analysis/ outputs.
+   * Used for CUSTOM_CODEBASE_TASK where the agent needs full read access to understand the codebase.
+   * @param {boolean} allow
+   */
+  setAllowAnyRead(allow) {
+    this.allowAnyRead = allow;
   }
 
   /**
@@ -168,7 +188,7 @@ export class FileToolExecutor {
     const normalizedPath = relativePath.replace(/\\/g, "/");
     const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
 
-    if (!isExplicitlyAllowedPath) {
+    if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
       return `Error: replace_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
     }
 
@@ -233,8 +253,9 @@ export class FileToolExecutor {
     const isAnalysisPath = normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`);
     const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
 
-    // Security: by default only allow .code-analysis writes, with optional exact-path allowlist
-    if (!isAnalysisPath && !isExplicitlyAllowedPath) {
+    // Security: by default only allow .code-analysis writes, with optional exact-path allowlist.
+    // IMPLEMENT_FIX tasks set allowAnyWrite=true so the model can create/modify any source file.
+    if (!isAnalysisPath && !isExplicitlyAllowedPath && !this.allowAnyWrite) {
       return `Error: Can only write files to ${ANALYSIS_OUTPUT_DIR}/ directory for security reasons, unless the path is explicitly allowed by the task. Your path: ${relativePath}`;
     }
 
@@ -276,9 +297,17 @@ export class FileToolExecutor {
     }
 
     // Prevent reading output files in .code-analysis directory
-    // LLM should only read SOURCE CODE, not its own output
+    // LLM should only read SOURCE CODE, not its own output.
+    // Exception: paths explicitly added via setAllowedWritePaths() — edit tasks
+    // need to read the current content file before overwriting it.
     const normalizedPath = relativePath.replace(/\\/g, "/");
-    if (normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`)) {
+    const isExplicitlyAllowedReadPath =
+      this.allowedWritePaths.has(normalizedPath);
+    if (
+      normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`) &&
+      !isExplicitlyAllowedReadPath &&
+      !this.allowAnyRead
+    ) {
       return `Error: Cannot read files in ${ANALYSIS_OUTPUT_DIR} directory. This directory contains analysis outputs, not source code. Only read source code files from your codebase.`;
     }
 

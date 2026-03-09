@@ -120,9 +120,10 @@ export function createLLMAgent(agentConfig) {
 /**
  * Execute a task using the LLM API agent.
  * @param {Object} task - The task object
+ * @param {AbortSignal} [signal] - Optional cancellation signal
  * @returns {Promise<Object>} Execution result
  */
-export async function execute(task) {
+export async function execute(task, signal) {
   logger.info(`Executing LLM API task: ${task.type}`, {
     component: "LLM-API",
     taskId: task.id,
@@ -154,7 +155,7 @@ export async function execute(task) {
       { component: "LLM-API" },
     );
 
-    const result = await agent.run(taskHandler);
+    const result = await agent.run({ ...taskHandler, abortSignal: signal });
 
     // Post-process results
     const postProcessResult = await taskHandler.postProcess(
@@ -192,6 +193,18 @@ export async function execute(task) {
       ...postProcessResult,
     };
   } catch (error) {
+    // Clean cancellation — no failure logging, no moveToFailed
+    if (signal?.aborted || error.code === "TASK_CANCELLED") {
+      logStream.end();
+      await new Promise((resolve) => logStream.on("finish", resolve));
+      return {
+        success: false,
+        cancelled: true,
+        taskId: task.id,
+        logFile: task.logFile,
+      };
+    }
+
     // Log failure
     logTaskError(taskLogger, task, error);
     logStream.end();

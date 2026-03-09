@@ -9,6 +9,8 @@ export const useDomainBugsSecurityStore = create((set, get) => ({
   dataById: new Map(),
   loadingById: new Map(),
   errorById: new Map(),
+  // Maps findingId → { taskId, message, stage }
+  implementingFixById: new Map(),
 
   // Actions
   fetch: async (domainId) => {
@@ -118,7 +120,7 @@ export const useDomainBugsSecurityStore = create((set, get) => ({
     });
   },
 
-  applyFix: async (domainId, findingId) => {
+  implementFix: async (domainId, findingId) => {
     if (!domainId || !findingId) {
       toaster.create({
         title: "Invalid request",
@@ -128,27 +130,84 @@ export const useDomainBugsSecurityStore = create((set, get) => ({
       return { success: false, error: "Invalid request" };
     }
 
+    // Optimistically add entry without taskId yet
+    set((state) => {
+      const next = new Map(state.implementingFixById);
+      next.set(findingId, { taskId: null, message: null, stage: null });
+      return { implementingFixById: next };
+    });
+
     try {
-      await api.applyFindingFix(domainId, findingId, true);
+      const response = await api.implementFinding(domainId, findingId, true);
+      const taskId = response.data?.task?.id ?? null;
+
+      // Store the real taskId so TASK_PROGRESS events can find this entry
+      set((state) => {
+        const next = new Map(state.implementingFixById);
+        if (next.has(findingId)) {
+          next.set(findingId, { taskId, message: null, stage: null });
+        }
+        return { implementingFixById: next };
+      });
 
       toaster.create({
-        title: "Fix application started",
-        description: "Aider is applying the fix. Check logs for progress.",
+        title: "Fix queued",
+        description:
+          "AI is working on the fix — watch the logs for live progress.",
         type: "success",
       });
 
       return { success: true };
     } catch (err) {
-      const message = err?.response?.data?.error || "Failed to apply fix";
+      const message = err?.response?.data?.error || "Failed to implement fix";
+
+      // Queue failed — clear immediately
+      set((state) => {
+        const next = new Map(state.implementingFixById);
+        next.delete(findingId);
+        return { implementingFixById: next };
+      });
 
       toaster.create({
-        title: "Failed to apply fix",
+        title: "Failed to implement fix",
         description: message,
         type: "error",
       });
 
       return { success: false, error: message };
     }
+    // NOTE: on success the entry stays in implementingFixById.
+    // It is cleared by socket TASK_COMPLETED / TASK_FAILED events.
+  },
+
+  // Called by socket store on TASK_PROGRESS for IMPLEMENT_FIX
+  setImplementingFixProgress: (taskId, { message, stage }) => {
+    set((state) => {
+      const next = new Map(state.implementingFixById);
+      for (const [findingId, entry] of next) {
+        if (entry.taskId === taskId) {
+          next.set(findingId, { ...entry, message, stage });
+          break;
+        }
+      }
+      return { implementingFixById: next };
+    });
+  },
+
+  clearImplementingFix: (findingId) => {
+    set((state) => {
+      const next = new Map(state.implementingFixById);
+      next.delete(findingId);
+      return { implementingFixById: next };
+    });
+  },
+
+  invalidate: (domainId) => {
+    set((state) => {
+      const newDataMap = new Map(state.dataById);
+      newDataMap.delete(domainId);
+      return { dataById: newDataMap };
+    });
   },
 
   updateData: (domainId, data) => {
@@ -188,5 +247,6 @@ export const useDomainBugsSecurityStore = create((set, get) => ({
       dataById: new Map(),
       loadingById: new Map(),
       errorById: new Map(),
+      implementingFixById: new Map(),
     }),
 }));

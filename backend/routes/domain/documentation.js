@@ -1,5 +1,4 @@
 import express from "express";
-import { TASK_STATUS } from "../../constants/task-status.js";
 import * as domainDocumentationPersistence from "../../persistence/domain-documentation.js";
 import * as taskFactory from "../../tasks/factory/index.js";
 import * as logger from "../../utils/logger.js";
@@ -90,10 +89,6 @@ router.post("/:id/documentation/save", async (req, res) => {
 
     await domainDocumentationPersistence.writeDomainDocumentation(id, {
       content: documentation,
-      metadata: {
-        status: TASK_STATUS.COMPLETED,
-        lastModified: new Date().toISOString(),
-      },
     });
 
     res.json({

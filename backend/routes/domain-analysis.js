@@ -534,9 +534,13 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     const executeNow = req.body.executeNow !== false;
 
     // Create a task to apply the test
-    const task = await taskFactory.createApplyTestTask(id, testRecommendation, {
-      executeNow,
-    });
+    const task = await taskFactory.createImplementTestTask(
+      id,
+      testRecommendation,
+      {
+        executeNow,
+      },
+    );
 
     res.status(201).json({
       success: true,
@@ -548,7 +552,7 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
       `Error applying test ${req.params.testId} for domain ${req.params.id}`,
       { error, component: "API" },
     );
-    res.status(500).json({ error: "Failed to apply test" });
+    res.status(500).json({ error: "Failed to implement test" });
   }
 });
 
@@ -598,10 +602,10 @@ router.get("/:id/logs/:section", async (req, res) => {
 });
 
 /**
- * Apply a bug or security fix
+ * Implement (fix) a bug or security finding
  */
 router.post(
-  "/:id/bugs-security/findings/:findingId/apply",
+  "/:id/bugs-security/findings/:findingId/implement",
   async (req, res) => {
     try {
       const { id, findingId } = req.params;
@@ -631,22 +635,23 @@ router.post(
 
       const executeNow = req.body.executeNow !== false;
 
-      // Create a task to apply the fix using Aider
-      const task = await taskFactory.createApplyFixTask(id, finding, {
-        executeNow,
-      });
+      // Create a task to implement the fix using the LLM API
+      const task = await taskFactory.createImplementFixTask(
+        { domainId: id, finding },
+        { executeNow },
+      );
 
       res.status(201).json({
         success: true,
-        message: "Fix application task created",
+        message: "Fix implementation task created",
         task,
       });
     } catch (error) {
       logger.error(
-        `Error applying fix ${req.params.findingId} for domain ${req.params.id}`,
+        `Error implementing fix ${req.params.findingId} for domain ${req.params.id}`,
         { error, component: "API" },
       );
-      res.status(500).json({ error: "Failed to apply fix" });
+      res.status(500).json({ error: "Failed to implement fix" });
     }
   },
 );

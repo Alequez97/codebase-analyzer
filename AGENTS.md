@@ -21,7 +21,7 @@ A **beautiful web interface** where you can:
 1. **Analyze your codebase** - AI analyzes your project structure
 2. **View domains** - See organized breakdown of your code
 3. **Review findings** - Browse bugs, security issues, missing tests
-4. **Apply fixes** - One-click to apply AI-generated fixes
+4. **Implement fixes** - One-click to implement AI-generated fixes
 5. **Track progress** - See what's been fixed and what's pending
 
 ### The Flow (Minimal User Actions)
@@ -229,7 +229,18 @@ your-project/
       pending/                  # Queued analysis tasks
       completed/                # Finished tasks
     logs/                       # Agent execution logs
+    temp/                       # Transient task artifacts (deleted after task completes)
 ```
+
+### Temporary Files (`temp/` folder)
+
+Anything that exists only to support a running task — such as model progress-tracking files — is written to `.code-analysis/temp/` inside the analyzed project. This folder is used by the backend for transient artifacts.
+
+**Rules:**
+
+- **Always use relative paths** within `.code-analysis/` when the LLM agent needs to write files — the agent's `write_file` tool only accepts paths relative to the project root that start with `.code-analysis/`
+- **Temp files are cleaned up** after task completion — never persist them as analysis output
+- **Do not use `backend/temp/`** for files the LLM writes; that directory is only for backend-internal artifacts (instruction dumps, etc.) that the agent never touches directly
 
 ## User Workflow Example
 
@@ -265,9 +276,9 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - **Details**: User input not sanitized
 - **Fix**: AI-generated code using prepared statements
 
-### Step 5: Apply Fix
+### Step 5: Implement Fix
 
-**User clicks**: "Apply Fix" button**Backend does**: Applies the fix to `auth/login.js`**User sees**:
+**User clicks**: "Implement Fix" button**Backend does**: Applies the fix to `auth/login.js`**User sees**:
 
 - Success message
 - Code diff showing changes
@@ -307,7 +318,7 @@ Dashboard shows: "Click Analyze Codebase to begin"
 1. Make changes to your code
 2. Re-analyze affected domains
 3. See new issues (if any)
-4. Apply fixes
+4. Implement fixes
 5. Repeat
 
 ## Design Principles
@@ -648,3 +659,85 @@ Dashboard shows: "Click Analyze Codebase to begin"
 - Reuse the same mock JSON for related endpoints when possible (for example GET section data and POST analyze preview), unless the user explicitly asks for different payloads.
 - Keep mock file paths centralized and predictable under `.code-analysis-example` (for example `.code-analysis-example/domains/*.json`).
 - Do not use browser-side mocks for backend API behavior unless the user explicitly requests frontend-only mocking.
+
+### 12. **AI Task State — Real-Time Design Principles**
+
+These rules apply to any feature where the UI triggers an AI task and needs to reflect its progress.
+
+#### 12.1 **Always Reflect What the AI Is Doing**
+
+- **The UI must visually communicate the current AI action**, not just show a generic spinner
+- Show the live tool message emitted by the backend (e.g. _"Reading src/auth/login.ts"_, _"Editing src/auth/login.ts (lines 42–45)"_)
+- Static text like "Loading…" or "AI is working…" is **not acceptable** when the backend provides real-time progress events
+- Change the visual appearance of affected elements (e.g. blue background, border color change) to make it immediately obvious something is happening
+
+  ```jsx
+  // ❌ BAD: hardcoded static message
+  <Text>AI is implementing the fix…</Text>
+
+  // ✅ GOOD: live message from socket progress events
+  <Text>{implementingEntry?.message || "AI is starting…"}</Text>
+  ```
+
+#### 12.2 **Socket-Driven State — Never REST-Poll After a Task**
+
+- When a task completes, **update the store directly from the socket event payload** — do not call a REST endpoint to re-fetch data
+- REST is for initial data load; sockets are for real-time updates
+- The `TASK_COMPLETED` / `TASK_FAILED` events carry all the information needed (e.g. `params.findingId`, `params.domainId`) to update the store in-place
+
+  ```javascript
+  // ❌ BAD: re-fetching via REST after socket event
+  socket.on(SOCKET_EVENTS.TASK_COMPLETED, async ({ type, domainId }) => {
+    if (type === TASK_TYPES.IMPLEMENT_FIX) {
+      await useDomainBugsSecurityStore.getState().fetch(domainId); // pointless round-trip
+    }
+  });
+
+  // ✅ GOOD: update store in-place from socket payload
+  socket.on(SOCKET_EVENTS.TASK_COMPLETED, ({ type, domainId, params }) => {
+    if (type === TASK_TYPES.IMPLEMENT_FIX) {
+      store.clearImplementingFix(params.findingId);
+      store.updateFindingAction(domainId, params.findingId, "apply");
+    }
+  });
+  ```
+
+#### 12.3 **Track In-Flight Tasks With `taskId`, Not a Boolean/Set**
+
+- Use a `Map<findingId, { taskId, message, stage }>` (or equivalent) — not a plain `Set<id>` or `boolean`
+- The `taskId` is the correlation key that links incoming `TASK_PROGRESS` socket events to the correct UI element
+- Without `taskId`, progress messages cannot be routed to the right item when multiple tasks run concurrently
+- Capture `taskId` from the API response immediately after queuing the task:
+
+  ```javascript
+  const response = await api.implementFinding(domainId, findingId, true);
+  const taskId = response.data?.task?.id ?? null;
+  // store { taskId, message: null, stage: null } keyed by findingId
+  ```
+
+#### 12.4 **Never Clear AI Loading State in `finally`**
+
+- Do **not** use a `try/finally` block to clear a loading indicator after the API call returns
+- The API returns immediately after queuing the task — the AI is still running
+- The loading state must remain active until the `TASK_COMPLETED` or `TASK_FAILED` socket event arrives
+- Only clear on error **before** the task is queued (i.e. the API call itself failed):
+
+  ```javascript
+  // ❌ BAD: clears spinner as soon as the task is queued, not when it's done
+  } finally {
+    set((state) => { /* clear loading */ });
+  }
+
+  // ✅ GOOD: clear only on queue failure; socket handles the rest
+  } catch (err) {
+    clearLoadingState(); // task never started
+    return { success: false };
+  }
+  // loading stays active — cleared by TASK_COMPLETED / TASK_FAILED
+  ```
+
+#### 12.5 **Persist AI-Driven Actions in Backend Post-Processing**
+
+- When an AI task produces a side-effect that must be recorded (e.g. a fix being applied → `action: "apply"`), **write it inside `persistTaskRevision` in the task orchestrator**, not via a separate frontend API call
+- This guarantees the action is always persisted exactly once, even if the client disconnects
+- The frontend updates its own in-memory state from the socket event; the backend owns the durable record

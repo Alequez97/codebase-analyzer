@@ -2,49 +2,52 @@ import { create } from "zustand";
 import api from "../api";
 import { useDomainRefactoringAndTestingStore as useDomainTestingStore } from "./useDomainRefactoringAndTestingStore";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
+import { REFACTORING_STATUS } from "../constants/refactoring-status";
 
-export const useApplyTestStore = create((set, get) => ({
+export const useImplementTestStore = create((set, get) => ({
   // State
-  applyingTestsByDomainId: {},
-  applyTaskIdsByDomainId: {},
-  applyLogsByDomainId: {},
+  implementingTestsByDomainId: {},
+  implementTaskIdsByDomainId: {},
+  implementLogsByDomainId: {},
+  // Maps testId → { taskId, message, stage } for real-time progress display
+  implementProgressByTestId: new Map(),
   applyingRefactoringByDomainId: {},
   applyRefactoringTaskByDomainId: {},
   completedRefactoringByDomainId: {},
 
   // Actions
-  applyTest: async (domainId, testId) => {
+  implementTest: async (domainId, testId) => {
     if (!domainId || !testId) {
       return { success: false, error: "Invalid parameters" };
     }
 
     set((state) => ({
-      applyingTestsByDomainId: {
-        ...state.applyingTestsByDomainId,
+      implementingTestsByDomainId: {
+        ...state.implementingTestsByDomainId,
         [domainId]: {
-          ...(state.applyingTestsByDomainId[domainId] || {}),
+          ...(state.implementingTestsByDomainId[domainId] || {}),
           [testId]: true,
         },
       },
     }));
 
     try {
-      const response = await api.applyTest(domainId, testId);
+      const response = await api.implementTest(domainId, testId);
       const taskId = response.data?.task?.id;
-      const message = response.data?.message || "Test application task created";
+      const message = response.data?.message || "Test implementation started";
 
       set((state) => ({
-        applyTaskIdsByDomainId: {
-          ...state.applyTaskIdsByDomainId,
+        implementTaskIdsByDomainId: {
+          ...state.implementTaskIdsByDomainId,
           [domainId]: {
-            ...(state.applyTaskIdsByDomainId[domainId] || {}),
+            ...(state.implementTaskIdsByDomainId[domainId] || {}),
             [testId]: taskId,
           },
         },
-        applyLogsByDomainId: {
-          ...state.applyLogsByDomainId,
+        implementLogsByDomainId: {
+          ...state.implementLogsByDomainId,
           [domainId]: {
-            ...(state.applyLogsByDomainId[domainId] || {}),
+            ...(state.implementLogsByDomainId[domainId] || {}),
             [testId]: "",
           },
         },
@@ -52,13 +55,14 @@ export const useApplyTestStore = create((set, get) => ({
 
       return { success: true, message, taskId };
     } catch (err) {
-      const message = err?.response?.data?.message || "Failed to apply test";
+      const message =
+        err?.response?.data?.message || "Failed to implement test";
 
       set((state) => ({
-        applyingTestsByDomainId: {
-          ...state.applyingTestsByDomainId,
+        implementingTestsByDomainId: {
+          ...state.implementingTestsByDomainId,
           [domainId]: {
-            ...(state.applyingTestsByDomainId[domainId] || {}),
+            ...(state.implementingTestsByDomainId[domainId] || {}),
             [testId]: false,
           },
         },
@@ -68,20 +72,20 @@ export const useApplyTestStore = create((set, get) => ({
     }
   },
 
-  applyTestEdits: async (domainId, testId) => {
+  implementTestEdits: async (domainId, testId) => {
     if (!domainId || !testId) {
       return { success: false, error: "Invalid parameters" };
     }
 
     try {
-      const response = await api.applyTestEdits(domainId, testId);
+      const response = await api.implementTestEdits(domainId, testId);
       return {
         success: true,
-        message: response?.data?.message || "Test edits task created",
+        message: response?.data?.message || "Test edits implementation started",
       };
     } catch (err) {
       const message =
-        err?.response?.data?.message || "Failed to apply test edits";
+        err?.response?.data?.message || "Failed to implement test edits";
       return { success: false, error: message };
     }
   },
@@ -147,8 +151,14 @@ export const useApplyTestStore = create((set, get) => ({
       useTestingEditorStore
         .getState()
         .unblockTestsByRefactoring(domainId, refactoringId);
+      useDomainTestingStore
+        .getState()
+        .syncRefactoringStatus(
+          domainId,
+          refactoringId,
+          REFACTORING_STATUS.READY_FOR_REVIEW,
+        );
     }
-    useDomainTestingStore.getState().fetch(domainId);
   },
 
   markRefactoringCompleted: async (domainId, refactoringId) => {
@@ -174,14 +184,20 @@ export const useApplyTestStore = create((set, get) => ({
           [domainId]: null,
         },
       }));
-      useDomainTestingStore.getState().fetch(domainId);
+      useDomainTestingStore
+        .getState()
+        .syncRefactoringStatus(
+          domainId,
+          refactoringId,
+          REFACTORING_STATUS.COMPLETED,
+        );
       return { success: true };
     } catch (err) {
       return {
         success: false,
         error:
           err?.response?.data?.message ||
-          "Failed to mark refactoring as applied",
+          "Failed to mark refactoring as implemented",
       };
     }
   },
@@ -204,18 +220,18 @@ export const useApplyTestStore = create((set, get) => ({
     }));
   },
 
-  appendApplyLogByTaskId: (domainId, taskId, logText) => {
+  appendImplementLogByTaskId: (domainId, taskId, logText) => {
     if (!domainId || !taskId || !logText) return;
 
     set((state) => {
-      const taskIds = state.applyTaskIdsByDomainId[domainId] || {};
+      const taskIds = state.implementTaskIdsByDomainId[domainId] || {};
       const testId = Object.keys(taskIds).find((id) => taskIds[id] === taskId);
       if (!testId) return state;
 
-      const domainLogs = state.applyLogsByDomainId[domainId] || {};
+      const domainLogs = state.implementLogsByDomainId[domainId] || {};
       return {
-        applyLogsByDomainId: {
-          ...state.applyLogsByDomainId,
+        implementLogsByDomainId: {
+          ...state.implementLogsByDomainId,
           [domainId]: {
             ...domainLogs,
             [testId]: `${domainLogs[testId] || ""}${logText}`,
@@ -225,18 +241,45 @@ export const useApplyTestStore = create((set, get) => ({
     });
   },
 
-  completeApplyByTaskId: (domainId, taskId, params) => {
+  // Called by socket store on TASK_PROGRESS for IMPLEMENT_TEST
+  setImplementTestProgress: (taskId, { message, stage }) => {
+    if (!taskId) return;
+    const allTaskIds = get().implementTaskIdsByDomainId;
+    let foundTestId = null;
+    for (const domainTasks of Object.values(allTaskIds)) {
+      const testId = Object.keys(domainTasks || {}).find(
+        (id) => domainTasks[id] === taskId,
+      );
+      if (testId) {
+        foundTestId = testId;
+        break;
+      }
+    }
+    if (!foundTestId) return;
+    set((state) => {
+      const next = new Map(state.implementProgressByTestId);
+      next.set(foundTestId, { taskId, message, stage });
+      return { implementProgressByTestId: next };
+    });
+  },
+
+  completeImplementByTaskId: (domainId, taskId, params) => {
     if (!domainId || !taskId || !params?.testId) return;
 
-    set((state) => ({
-      applyingTestsByDomainId: {
-        ...state.applyingTestsByDomainId,
-        [domainId]: {
-          ...(state.applyingTestsByDomainId[domainId] || {}),
-          [params.testId]: false,
+    set((state) => {
+      const next = new Map(state.implementProgressByTestId);
+      next.delete(params.testId);
+      return {
+        implementProgressByTestId: next,
+        implementingTestsByDomainId: {
+          ...state.implementingTestsByDomainId,
+          [domainId]: {
+            ...(state.implementingTestsByDomainId[domainId] || {}),
+            [params.testId]: false,
+          },
         },
-      },
-    }));
+      };
+    });
 
     useDomainTestingStore.getState().syncTestApplied(domainId, {
       testId: params.testId,
@@ -254,19 +297,22 @@ export const useApplyTestStore = create((set, get) => ({
     });
   },
 
-  failApplyByTaskId: (domainId, taskId) => {
+  failImplementByTaskId: (domainId, taskId) => {
     if (!domainId || !taskId) return;
 
     set((state) => {
-      const taskIds = state.applyTaskIdsByDomainId[domainId] || {};
+      const taskIds = state.implementTaskIdsByDomainId[domainId] || {};
       const testId = Object.keys(taskIds).find((id) => taskIds[id] === taskId);
       if (!testId) return state;
 
+      const nextProgress = new Map(state.implementProgressByTestId);
+      nextProgress.delete(testId);
       return {
-        applyingTestsByDomainId: {
-          ...state.applyingTestsByDomainId,
+        implementProgressByTestId: nextProgress,
+        implementingTestsByDomainId: {
+          ...state.implementingTestsByDomainId,
           [domainId]: {
-            ...(state.applyingTestsByDomainId[domainId] || {}),
+            ...(state.implementingTestsByDomainId[domainId] || {}),
             [testId]: false,
           },
         },
@@ -276,9 +322,10 @@ export const useApplyTestStore = create((set, get) => ({
 
   reset: () =>
     set({
-      applyingTestsByDomainId: {},
-      applyTaskIdsByDomainId: {},
-      applyLogsByDomainId: {},
+      implementingTestsByDomainId: {},
+      implementTaskIdsByDomainId: {},
+      implementLogsByDomainId: {},
+      implementProgressByTestId: new Map(),
       applyingRefactoringByDomainId: {},
       applyRefactoringTaskByDomainId: {},
       completedRefactoringByDomainId: {},

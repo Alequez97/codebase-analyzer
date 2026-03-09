@@ -140,6 +140,24 @@ export const useCodebaseStore = create((set, get) => ({
     }
   },
 
+  cancelCodebaseAnalysis: async () => {
+    const { pendingCodebaseTask } = get();
+    if (!pendingCodebaseTask) {
+      set({ analyzingCodebase: false });
+      return { success: true };
+    }
+
+    try {
+      await api.deleteTask(pendingCodebaseTask.id);
+      set({ pendingCodebaseTask: null, analyzingCodebase: false });
+      return { success: true };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Failed to cancel analysis";
+      return { success: false, error: message };
+    }
+  },
+
   clearPendingCodebaseTask: () => {
     set({
       pendingCodebaseTask: null,

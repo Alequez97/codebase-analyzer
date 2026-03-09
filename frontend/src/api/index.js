@@ -10,6 +10,7 @@ export * from "./domain-bugs-security";
 export * from "./domain-refactoring-and-testing";
 export * from "./tasks";
 export * from "./domain-sections-chat";
+export * from "./codebase-chat";
 
 // Default export for backward compatibility (if needed)
 import * as status from "./status";
@@ -23,6 +24,7 @@ import * as domainBugsSecurity from "./domain-bugs-security";
 import * as domainTesting from "./domain-refactoring-and-testing";
 import * as tasks from "./tasks";
 import * as domainSectionsChat from "./domain-sections-chat";
+import * as codebaseChat from "./codebase-chat";
 
 export default {
   ...status,
@@ -36,4 +38,5 @@ export default {
   ...domainTesting,
   ...tasks,
   ...domainSectionsChat,
+  ...codebaseChat,
 };

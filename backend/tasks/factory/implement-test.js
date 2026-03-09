@@ -7,10 +7,14 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { SUPPORTED_TEST_TYPES } from "../../constants/test-types.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a task to apply a missing test
+ * Create a task to implement a missing test
  * Uses LLM API agent with autonomous file discovery
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
@@ -19,11 +23,11 @@ import * as logger from "../../utils/logger.js";
  * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createApplyTestTask(
+export async function createImplementTestTask(
   { domainId, testRecommendation },
   { executeNow = false } = {},
 ) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.APPLY_TEST);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.IMPLEMENT_TEST);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
@@ -42,7 +46,7 @@ export async function createApplyTestTask(
     .replace(/\/tests\/integration\//, "/")
     .replace(/\/tests\/unit\//, "/");
 
-  logger.debug("Creating apply-test task", {
+  logger.debug("Creating implement-test task", {
     component: "TaskFactory",
     testFile,
     sourceFile,
@@ -80,18 +84,20 @@ export async function createApplyTestTask(
     reason: testRecommendation.reason || "",
   };
 
+  const taskId = generateTaskId(TASK_TYPES.IMPLEMENT_TEST);
   const task = {
-    id: generateTaskId(TASK_TYPES.APPLY_TEST),
-    type: TASK_TYPES.APPLY_TEST,
+    id: taskId,
+    type: TASK_TYPES.IMPLEMENT_TEST,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params,
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.APPLY_TEST,
+    instructionFile: INSTRUCTION_FILES_PATHS.IMPLEMENT_TEST,
     outputFile: null, // No JSON output - agent creates test file directly using write_file tool
-    generateMetadata: true,
+    progressFile: getProgressFilePath(taskId),
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

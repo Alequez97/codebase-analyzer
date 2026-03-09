@@ -6,6 +6,10 @@ import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
@@ -79,8 +83,9 @@ export async function createApplyRefactoringTask(
     unblocks: refactoring.unblocks || [],
   };
 
+  const taskId = generateTaskId(TASK_TYPES.APPLY_REFACTORING);
   const task = {
-    id: generateTaskId(TASK_TYPES.APPLY_REFACTORING),
+    id: taskId,
     type: TASK_TYPES.APPLY_REFACTORING,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
@@ -88,9 +93,10 @@ export async function createApplyRefactoringTask(
     agentConfig,
     instructionFile: INSTRUCTION_FILES_PATHS.APPLY_REFACTORING,
     outputFile: null, // No JSON output - agent creates/modifies files directly
-    generateMetadata: true,
+    progressFile: getProgressFilePath(taskId),
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

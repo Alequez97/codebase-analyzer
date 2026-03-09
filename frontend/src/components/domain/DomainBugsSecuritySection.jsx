@@ -9,6 +9,7 @@ import {
   IconButton,
   Separator,
   Skeleton,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -21,7 +22,6 @@ import {
   FileCode,
   FileText,
   Lightbulb,
-  MessageSquare,
   Shield,
   Sparkles,
 } from "lucide-react";
@@ -81,13 +81,16 @@ export default function DomainBugsSecuritySection({
   logs = "",
   logsLoading = false,
   hasRequirements = false,
-  onOpenChat,
-  isChatOpen = false,
 }) {
   const updateBugsSecurityFindingAction = useDomainBugsSecurityStore(
     (state) => state.updateFindingAction,
   );
-  const applyFix = useDomainBugsSecurityStore((state) => state.applyFix);
+  const implementFix = useDomainBugsSecurityStore(
+    (state) => state.implementFix,
+  );
+  const implementingFixById = useDomainBugsSecurityStore(
+    (state) => state.implementingFixById,
+  );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);
   const [expandedFindings, setExpandedFindings] = useState(new Set());
@@ -126,6 +129,28 @@ export default function DomainBugsSecuritySection({
 
   const handleCancelAnalysis = () => {
     setShowAnalyzeDialog(false);
+  };
+
+  const handleOpenLocation = async (location) => {
+    if (!location?.file) {
+      return;
+    }
+
+    try {
+      await api.openFileInEditor(location.file, location.line, location.column);
+      toaster.create({
+        title: "Opened in VS Code",
+        type: "success",
+      });
+    } catch (error) {
+      toaster.create({
+        title: "Failed to open file",
+        description:
+          error?.response?.data?.message ||
+          "Make sure VS Code is installed and accessible via the 'code' command.",
+        type: "error",
+      });
+    }
   };
 
   const toggleFindingExpanded = (findingId) => {
@@ -185,8 +210,8 @@ export default function DomainBugsSecuritySection({
     }
   };
 
-  const handleApplyFix = async (findingId) => {
-    await applyFix(domainId, findingId);
+  const handleImplementFix = async (findingId) => {
+    await implementFix(domainId, findingId);
   };
 
   return (
@@ -265,18 +290,7 @@ export default function DomainBugsSecuritySection({
               )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-              {/* Show "Edit with AI" if findings exist, otherwise "Analyze" */}
-              {hasData && sortedFindings.length > 0 ? (
-                <Button
-                  size="sm"
-                  colorPalette="purple"
-                  variant={isChatOpen ? "solid" : "outline"}
-                  onClick={onOpenChat}
-                >
-                  <MessageSquare size={14} />
-                  Edit with AI
-                </Button>
-              ) : (
+              {!hasData && !showLogs && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -346,13 +360,23 @@ export default function DomainBugsSecuritySection({
                           const source = finding.location
                             ? `${finding.location.file}:${finding.location.line}`
                             : finding.source;
+                          const implementingEntry = implementingFixById.get(
+                            finding.id,
+                          );
+                          const isImplementing = !!implementingEntry;
 
                           return (
                             <Card.Root
                               key={finding.id}
                               size="sm"
                               borderLeftWidth="4px"
-                              borderLeftColor={`${SEVERITY_COLORS[normalizedSeverity] || "gray"}.500`}
+                              borderLeftColor={
+                                isImplementing
+                                  ? "blue.400"
+                                  : `${SEVERITY_COLORS[normalizedSeverity] || "gray"}.500`
+                              }
+                              bg={isImplementing ? "blue.50" : undefined}
+                              transition="background 0.3s ease, border-color 0.3s ease"
                             >
                               <Card.Body>
                                 <VStack align="stretch" gap={2}>
@@ -403,109 +427,148 @@ export default function DomainBugsSecuritySection({
                                       </Badge>
                                     </HStack>
                                     <HStack gap={2}>
-                                      {findingStatus ===
-                                        FINDING_STATUS.APPLIED && (
-                                        <Badge colorPalette="green" size="sm">
-                                          Applied
-                                        </Badge>
+                                      {isImplementing ? (
+                                        <HStack
+                                          gap={2}
+                                          px={3}
+                                          py={1}
+                                          bg="blue.100"
+                                          borderRadius="md"
+                                          borderWidth="1px"
+                                          borderColor="blue.200"
+                                        >
+                                          <Spinner
+                                            size="xs"
+                                            color="blue.500"
+                                            borderWidth="2px"
+                                          />
+                                          <Text
+                                            fontSize="xs"
+                                            fontWeight="medium"
+                                            color="blue.700"
+                                            maxW="380px"
+                                            truncate
+                                          >
+                                            {implementingEntry?.message ||
+                                              "AI is starting…"}
+                                          </Text>
+                                        </HStack>
+                                      ) : (
+                                        <>
+                                          {findingStatus ===
+                                            FINDING_STATUS.APPLIED && (
+                                            <Badge
+                                              colorPalette="green"
+                                              size="sm"
+                                            >
+                                              Applied
+                                            </Badge>
+                                          )}
+                                          {findingStatus ===
+                                            FINDING_STATUS.WONT_FIX && (
+                                            <Badge
+                                              colorPalette="gray"
+                                              size="sm"
+                                            >
+                                              Won't fix
+                                            </Badge>
+                                          )}
+                                          {findingStatus ===
+                                            FINDING_STATUS.FIXED_MANUALLY && (
+                                            <Badge
+                                              colorPalette="purple"
+                                              size="sm"
+                                            >
+                                              Fixed manually
+                                            </Badge>
+                                          )}
+                                          <Button
+                                            size="xs"
+                                            colorPalette="gray"
+                                            variant={
+                                              findingStatus ===
+                                              FINDING_STATUS.WONT_FIX
+                                                ? "solid"
+                                                : "outline"
+                                            }
+                                            disabled={
+                                              findingStatus ===
+                                              FINDING_STATUS.WONT_FIX
+                                            }
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSetFindingStatus(
+                                                finding.id,
+                                                FINDING_STATUS.WONT_FIX,
+                                              );
+                                            }}
+                                          >
+                                            Won't fix
+                                          </Button>
+                                          <Button
+                                            size="xs"
+                                            colorPalette="purple"
+                                            variant={
+                                              findingStatus ===
+                                              FINDING_STATUS.FIXED_MANUALLY
+                                                ? "solid"
+                                                : "outline"
+                                            }
+                                            disabled={
+                                              findingStatus ===
+                                              FINDING_STATUS.FIXED_MANUALLY
+                                            }
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSetFindingStatus(
+                                                finding.id,
+                                                FINDING_STATUS.FIXED_MANUALLY,
+                                              );
+                                            }}
+                                          >
+                                            Fixed manually
+                                          </Button>
+                                          <Button
+                                            size="xs"
+                                            colorPalette="blue"
+                                            variant="outline"
+                                            disabled={
+                                              findingStatus ===
+                                              FINDING_STATUS.APPLIED
+                                            }
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleImplementFix(finding.id);
+                                            }}
+                                          >
+                                            <Sparkles size={14} />
+                                            Implement Fix
+                                          </Button>
+                                          <Button
+                                            size="xs"
+                                            colorPalette="green"
+                                            variant={
+                                              findingStatus ===
+                                              FINDING_STATUS.APPLIED
+                                                ? "solid"
+                                                : "outline"
+                                            }
+                                            disabled={
+                                              findingStatus ===
+                                              FINDING_STATUS.APPLIED
+                                            }
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSetFindingStatus(
+                                                finding.id,
+                                                FINDING_STATUS.APPLIED,
+                                              );
+                                            }}
+                                          >
+                                            Mark Applied
+                                          </Button>
+                                        </>
                                       )}
-                                      {findingStatus ===
-                                        FINDING_STATUS.WONT_FIX && (
-                                        <Badge colorPalette="gray" size="sm">
-                                          Won't fix
-                                        </Badge>
-                                      )}
-                                      {findingStatus ===
-                                        FINDING_STATUS.FIXED_MANUALLY && (
-                                        <Badge colorPalette="purple" size="sm">
-                                          Fixed manually
-                                        </Badge>
-                                      )}
-                                      <Button
-                                        size="xs"
-                                        colorPalette="gray"
-                                        variant={
-                                          findingStatus ===
-                                          FINDING_STATUS.WONT_FIX
-                                            ? "solid"
-                                            : "outline"
-                                        }
-                                        disabled={
-                                          findingStatus ===
-                                          FINDING_STATUS.WONT_FIX
-                                        }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSetFindingStatus(
-                                            finding.id,
-                                            FINDING_STATUS.WONT_FIX,
-                                          );
-                                        }}
-                                      >
-                                        Won't fix
-                                      </Button>
-                                      <Button
-                                        size="xs"
-                                        colorPalette="purple"
-                                        variant={
-                                          findingStatus ===
-                                          FINDING_STATUS.FIXED_MANUALLY
-                                            ? "solid"
-                                            : "outline"
-                                        }
-                                        disabled={
-                                          findingStatus ===
-                                          FINDING_STATUS.FIXED_MANUALLY
-                                        }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSetFindingStatus(
-                                            finding.id,
-                                            FINDING_STATUS.FIXED_MANUALLY,
-                                          );
-                                        }}
-                                      >
-                                        Fixed manually
-                                      </Button>
-                                      <Button
-                                        size="xs"
-                                        colorPalette="blue"
-                                        variant="outline"
-                                        disabled={
-                                          findingStatus ===
-                                          FINDING_STATUS.APPLIED
-                                        }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleApplyFix(finding.id);
-                                        }}
-                                      >
-                                        <Sparkles size={14} />
-                                        Apply Fix
-                                      </Button>
-                                      <Button
-                                        size="xs"
-                                        colorPalette="green"
-                                        variant={
-                                          findingStatus ===
-                                          FINDING_STATUS.APPLIED
-                                            ? "solid"
-                                            : "outline"
-                                        }
-                                        disabled={
-                                          findingStatus ===
-                                          FINDING_STATUS.APPLIED
-                                        }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSetFindingStatus(
-                                            finding.id,
-                                            FINDING_STATUS.APPLIED,
-                                          );
-                                        }}
-                                      >
-                                        Mark Applied
-                                      </Button>
                                     </HStack>
                                   </HStack>
 
@@ -537,6 +600,13 @@ export default function DomainBugsSecuritySection({
                                             fontSize="sm"
                                             p={2}
                                             display="block"
+                                            cursor="pointer"
+                                            onClick={(event) => {
+                                              event.stopPropagation();
+                                              handleOpenLocation(
+                                                finding.location,
+                                              );
+                                            }}
                                           >
                                             {source}
                                           </Code>

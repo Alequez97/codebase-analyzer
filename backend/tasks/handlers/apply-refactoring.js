@@ -9,17 +9,6 @@ import { emitTaskLog } from "../../utils/socket-emitter.js";
  * Verifies the new service file was created and existing tests still pass
  */
 export function applyRefactoringHandler(task, taskLogger, agent) {
-  // Allow writing to the new service file and the target file
-  if (agent?.fileToolExecutor && task?.params?.newServiceFile) {
-    const allowedPaths = [task.params.newServiceFile, task.params.targetFile];
-    agent.fileToolExecutor.setAllowedWritePaths(allowedPaths);
-    taskLogger.info("🔓 Enabled refactoring file write paths", {
-      component: "ApplyRefactoring",
-      newServiceFile: task.params.newServiceFile,
-      targetFile: task.params.targetFile,
-    });
-  }
-
   // Enable command execution for running tests
   if (agent) {
     agent.enableCommandTools({ timeoutMs: 120_000 }); // Longer timeout for potentially running full test suite

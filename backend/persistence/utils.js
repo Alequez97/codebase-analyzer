@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import path from "path";
 import * as logger from "../utils/logger.js";
 
 /**
@@ -35,4 +36,29 @@ export async function tryReadJsonFile(filePath, identifier = "file") {
     // Re-throw other errors (like ENOENT) for caller to handle
     throw error;
   }
+}
+
+/**
+ * Append a revision entry to a section's metadata.json.
+ * The file is never overwritten — `version` increments and the new revision is pushed.
+ * @param {string} metadataPath - Absolute path to metadata.json
+ * @param {Object} revision - The revision entry to append
+ * @returns {Promise<Object>} Updated metadata { version, revisions }
+ */
+export async function appendRevision(metadataPath, revision) {
+  let existing = null;
+  try {
+    existing = await tryReadJsonFile(metadataPath, "section metadata");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+
+  const updated = {
+    version: (existing?.version || 0) + 1,
+    revisions: [...(existing?.revisions || []), revision],
+  };
+
+  await fs.mkdir(path.dirname(metadataPath), { recursive: true });
+  await fs.writeFile(metadataPath, JSON.stringify(updated, null, 2), "utf-8");
+  return updated;
 }

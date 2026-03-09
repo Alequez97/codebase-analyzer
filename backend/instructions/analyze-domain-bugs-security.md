@@ -72,7 +72,9 @@ Read `.code-analysis/domains/{{DOMAIN_ID}}/requirements/content.json` to underst
 2. Read requirements for context
 3. Identify bugs and security issues
 4. Save to `{{OUTPUT_FILE}}` using `write_file`
+5. Write `# Done` to `{{PROGRESS_FILE}}`
    {{else}}
-5. Identify bugs and security issues
-6. Save to `{{OUTPUT_FILE}}` using `write_file`
+6. Identify bugs and security issues
+7. Save to `{{OUTPUT_FILE}}` using `write_file`
+8. Write `# Done` to `{{PROGRESS_FILE}}`
    {{/if}}

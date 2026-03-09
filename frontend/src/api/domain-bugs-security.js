@@ -31,9 +31,9 @@ export const recordFindingAction = (
     },
   );
 
-export const applyFindingFix = (domainId, findingId, executeNow = true) =>
+export const implementFinding = (domainId, findingId, executeNow = true) =>
   client.post(
-    `/analysis/domain/${domainId}/bugs-security/findings/${findingId}/apply`,
+    `/analysis/domain/${domainId}/bugs-security/findings/${findingId}/implement`,
     {
       executeNow,
     },

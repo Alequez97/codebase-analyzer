@@ -4,6 +4,8 @@
  */
 
 import { TASK_TYPES } from "../constants/task-types.js";
+import { getDomainSectionContentRelativePath } from "../persistence/domain-section-paths.js";
+import { getProgressFileRelativePath } from "./task-progress.js";
 
 /**
  * Process a template string with variables
@@ -104,6 +106,7 @@ export async function buildRequirementsTemplateVariables(task) {
     USER_CONTEXT: userContext || "",
     INCLUDE_DOCUMENTATION: includeDocumentation ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -137,6 +140,7 @@ export async function buildBugsSecurityTemplateVariables(task) {
     FILES: files || [],
     INCLUDE_REQUIREMENTS: includeRequirements ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -169,6 +173,7 @@ export async function buildDocumentationTemplateVariables(task) {
     DOMAIN_NAME: domainName,
     FILES: files || [],
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -202,6 +207,7 @@ export async function buildTestingTemplateVariables(task) {
     FILES: files || [],
     INCLUDE_REQUIREMENTS: includeRequirements ? "true" : "",
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -242,6 +248,7 @@ export async function buildDiagramsTemplateVariables(task) {
     files: filesList,
     includeDocumentation: !!includeDocumentation,
     documentation,
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -256,15 +263,16 @@ export function buildCodebaseTemplateVariables(task) {
   return {
     CODEBASE_PATH: targetDirectory,
     OUTPUT_FILE: task.outputFile || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
 /**
- * Build variables object for apply-fix task template
+ * Build variables object for implement-fix task template
  * @param {Object} task - Task object
  * @returns {Object} Variables for template processing
  */
-export function buildApplyFixTemplateVariables(task) {
+export function buildImplementFixTemplateVariables(task) {
   const { params } = task;
 
   return {
@@ -283,6 +291,7 @@ export function buildApplyFixTemplateVariables(task) {
     FINDING_FILE: params.findingFile || "",
     FINDING_LINE: params.findingLine || "",
     FINDING_SNIPPET: params.findingSnippet || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -316,15 +325,16 @@ export function buildApplyRefactoringTemplateVariables(task) {
     EXTRACTED_FUNCTIONS: extractedFunctions,
     BENEFITS: params.benefits || [],
     UNBLOCKS: params.unblocks || [],
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
 /**
- * Build variables object for apply-test task template
+ * Build variables object for implement-test task template
  * @param {Object} task - Task object
  * @returns {Object} Variables for template processing
  */
-export function buildApplyTestTemplateVariables(task) {
+export function buildImplementTestTemplateVariables(task) {
   const { params } = task;
   const scenarios = params.scenarios || [];
   const scenarioTitles = scenarios
@@ -341,6 +351,7 @@ export function buildApplyTestTemplateVariables(task) {
     TEST_SCENARIOS: scenarioTitles,
     TEST_SCENARIOS_JSON: JSON.stringify(scenarios, null, 2),
     SOURCE_FILE: params.sourceFile || "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -350,7 +361,7 @@ export function buildApplyTestTemplateVariables(task) {
  * @returns {Object} Variables for template processing
  */
 export async function buildEditTemplateVariables(task) {
-  const { domainId, sectionType, currentContent } = task.params;
+  const { domainId, sectionType } = task.params;
 
   // Look up domain name from codebase analysis (if available)
   let domainName = domainId; // Fallback to ID
@@ -367,16 +378,21 @@ export async function buildEditTemplateVariables(task) {
     // Fallback to domainId if analysis not found
   }
 
+  const contentFile = getDomainSectionContentRelativePath(
+    domainId,
+    sectionType,
+  );
+
   return {
     SECTION_TYPE: sectionType,
     DOMAIN_NAME: domainName,
-    HAS_CONTENT: currentContent ? true : false,
-    CURRENT_CONTENT: currentContent || "",
+    CONTENT_FILE_PATH: contentFile,
     IS_DOCUMENTATION: sectionType === "documentation",
     IS_REQUIREMENTS: sectionType === "requirements",
     IS_DIAGRAMS: sectionType === "diagrams",
     IS_BUGS_SECURITY: sectionType === "bugs-security",
     IS_TESTING: sectionType === "testing",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
 
@@ -404,12 +420,17 @@ export async function buildTemplateVariables(task) {
       return await buildDiagramsTemplateVariables(task);
     case TASK_TYPES.CODEBASE_ANALYSIS:
       return buildCodebaseTemplateVariables(task);
-    case TASK_TYPES.APPLY_FIX:
-      return buildApplyFixTemplateVariables(task);
-    case TASK_TYPES.APPLY_TEST:
-      return buildApplyTestTemplateVariables(task);
+    case TASK_TYPES.IMPLEMENT_FIX:
+      return buildImplementFixTemplateVariables(task);
+    case TASK_TYPES.IMPLEMENT_TEST:
+      return buildImplementTestTemplateVariables(task);
     case TASK_TYPES.APPLY_REFACTORING:
       return buildApplyRefactoringTemplateVariables(task);
+    case TASK_TYPES.CUSTOM_CODEBASE_TASK:
+      return {
+        CODEBASE_PATH: task.params?.targetDirectory || "",
+        PROGRESS_FILE: getProgressFileRelativePath(task.id),
+      };
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

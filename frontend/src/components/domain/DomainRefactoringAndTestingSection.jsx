@@ -12,13 +12,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import {
-  ChevronDown,
-  ChevronRight,
-  MessageSquare,
-  Sparkles,
-  TestTube,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Sparkles, TestTube } from "lucide-react";
 import {
   ExistingTestsTable,
   MissingTestsSection,
@@ -35,11 +29,11 @@ export default function DomainRefactoringAndTestingSection({
   testing,
   loading,
   progress,
-  applyingTests,
-  applyLogs,
+  implementingTests,
+  implementLogs,
   onAnalyze,
-  onApplyTest,
-  onApplyTestEdits,
+  onImplementTest,
+  onImplementTestEdits,
   onApplyRefactoring,
   onMarkCompleted = null,
   applyingRefactoringId = null,
@@ -48,8 +42,6 @@ export default function DomainRefactoringAndTestingSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
-  onOpenChat,
-  isChatOpen = false,
 }) {
   const existingTestFiles = testing?.existingTests || [];
   const [isExpanded, setIsExpanded] = useState(false);
@@ -161,33 +153,18 @@ export default function DomainRefactoringAndTestingSection({
               )}
             </HStack>
             <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-              {!showLogs && (
-                <>
-                  {/* Show "Edit with AI" if testing data exists, otherwise "Analyze tests" */}
-                  {testing ? (
-                    <Button
-                      size="sm"
-                      colorPalette="purple"
-                      variant={isChatOpen ? "solid" : "outline"}
-                      onClick={onOpenChat}
-                    >
-                      <MessageSquare size={14} />
-                      Edit with AI
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      colorPalette="blue"
-                      variant="outline"
-                      onClick={handleAnalyzeClick}
-                      loading={loading}
-                      loadingText="Analyzing"
-                    >
-                      <Sparkles size={14} />
-                      Analyze refactoring & tests
-                    </Button>
-                  )}
-                </>
+              {!showLogs && !testing && (
+                <Button
+                  size="sm"
+                  colorPalette="blue"
+                  variant="outline"
+                  onClick={handleAnalyzeClick}
+                  loading={loading}
+                  loadingText="Analyzing"
+                >
+                  <Sparkles size={14} />
+                  Analyze refactoring & tests
+                </Button>
               )}
             </HStack>
           </HStack>
@@ -283,10 +260,10 @@ export default function DomainRefactoringAndTestingSection({
                       refactoringRecommendations={
                         testing.refactoringRecommendations || []
                       }
-                      applyingTests={applyingTests}
-                      applyLogs={applyLogs}
-                      onApplyTest={onApplyTest}
-                      onApplyTestEdits={onApplyTestEdits}
+                      implementingTests={implementingTests}
+                      implementLogs={implementLogs}
+                      onImplementTest={onImplementTest}
+                      onImplementTestEdits={onImplementTestEdits}
                     />
                   </Box>
                 </VStack>

@@ -4,6 +4,7 @@ export function StatusBar({
   connected,
   statusLoading,
   socketConnected,
+  leftContent = null,
   rightContent = null,
 }) {
   // Determine API status display
@@ -21,7 +22,7 @@ export function StatusBar({
 
   return (
     <HStack
-      justify="flex-end"
+      justify="space-between"
       px={8}
       py={2}
       borderBottom="1px"
@@ -29,25 +30,29 @@ export function StatusBar({
       bg="gray.50"
       gap={6}
     >
-      <HStack gap={2}>
-        <Text fontSize="sm" color="gray.600">
-          API:
-        </Text>
-        <Badge colorPalette={apiStatus.color} size="sm">
-          {apiStatus.text}
-        </Badge>
-      </HStack>
+      <HStack>{leftContent}</HStack>
 
-      <HStack gap={2}>
-        <Text fontSize="sm" color="gray.600">
-          Socket:
-        </Text>
-        <Badge colorPalette={socketConnected ? "green" : "yellow"} size="sm">
-          {socketConnected ? "Connected" : "Connecting..."}
-        </Badge>
-      </HStack>
+      <HStack gap={6}>
+        <HStack gap={2}>
+          <Text fontSize="sm" color="gray.600">
+            API:
+          </Text>
+          <Badge colorPalette={apiStatus.color} size="sm">
+            {apiStatus.text}
+          </Badge>
+        </HStack>
 
-      {rightContent}
+        <HStack gap={2}>
+          <Text fontSize="sm" color="gray.600">
+            Socket:
+          </Text>
+          <Badge colorPalette={socketConnected ? "green" : "yellow"} size="sm">
+            {socketConnected ? "Connected" : "Connecting..."}
+          </Badge>
+        </HStack>
+
+        {rightContent}
+      </HStack>
     </HStack>
   );
 }

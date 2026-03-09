@@ -237,7 +237,8 @@ Authentication secures the platform...
 1. Read all files using `read_file`
 2. Create comprehensive Markdown documentation with multiple Mermaid diagrams
 3. Save complete Markdown to `{{OUTPUT_FILE}}` using `write_file`
-4. Exit
+4. Write `# Done` to `{{PROGRESS_FILE}}`
+5. Exit
 
 ```
 

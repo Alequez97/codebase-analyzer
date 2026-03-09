@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
-import * as codebaseAnalysisPersistence from "./codebase-analysis.js";
+import { tryReadJsonFile } from "./utils.js";
 import * as tasksPersistence from "./tasks.js";
 
 function createHttpError(status, error, message) {
@@ -77,30 +77,47 @@ async function readLogContent(logFile) {
 }
 
 export async function readCodebaseAnalysisLogs() {
-  const analysis = await codebaseAnalysisPersistence.readCodebaseAnalysis();
-  if (!analysis) {
-    // Return empty result instead of 404 - no analysis yet is a valid state
-    return {
-      taskId: null,
-      logFile: null,
-      content: "",
-      source: "codebase-analysis",
-    };
+  const empty = {
+    taskId: null,
+    logFile: null,
+    content: "",
+    source: "codebase-analysis",
+  };
+
+  const metadataPath = path.join(
+    config.paths.targetAnalysis,
+    "analysis",
+    "metadata.json",
+  );
+
+  let metadata = null;
+  try {
+    metadata = await tryReadJsonFile(
+      metadataPath,
+      "codebase-analysis metadata",
+    );
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
   }
 
-  if (!analysis.logFile) {
-    // Return empty result - analysis exists but logs not available yet
-    return {
-      taskId: analysis.taskId || null,
-      logFile: null,
-      content: "",
-      source: "codebase-analysis",
-    };
+  if (!metadata?.revisions?.length) {
+    return empty;
   }
 
-  const logResult = await readLogContent(analysis.logFile);
+  const lastRevision = metadata.revisions[metadata.revisions.length - 1];
+  const taskId = lastRevision?.taskId;
+  if (!taskId) {
+    return empty;
+  }
+
+  const task = await tasksPersistence.readTask(taskId);
+  if (!task?.logFile) {
+    return { ...empty, taskId };
+  }
+
+  const logResult = await readLogContent(task.logFile);
   return {
-    taskId: analysis.taskId || null,
+    taskId,
     logFile: logResult.logFile,
     content: logResult.content,
     source: "codebase-analysis",

@@ -31,9 +31,10 @@ export async function detect() {
 /**
  * Execute a task using Aider
  * @param {Object} task - The task object
+ * @param {AbortSignal} [signal] - Optional cancellation signal
  * @returns {Promise<Object>} Execution result
  */
-export async function execute(task) {
+export async function execute(task, signal) {
   const isAvailable = await detect();
 
   if (!isAvailable) {
@@ -108,6 +109,7 @@ export async function execute(task) {
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
+    let cancelled = false;
     const stdoutLineBuffer = createLineBufferedStream((line) => {
       if (shouldMirrorAiderStreamLogs) {
         logger.info(line);
@@ -147,6 +149,22 @@ export async function execute(task) {
     // Close stdin immediately - we're using --message-file, no interaction needed
     if (aiderProcess.stdin) {
       aiderProcess.stdin.end();
+    }
+
+    // Kill the subprocess if cancellation is requested
+    if (signal) {
+      const abortHandler = () => {
+        cancelled = true;
+        aiderProcess.kill("SIGTERM");
+        logger.info(`Cancelled aider process for task ${task.id}`, {
+          component: "Aider",
+          taskId: task.id,
+        });
+      };
+      signal.addEventListener("abort", abortHandler, { once: true });
+      aiderProcess.on("close", () =>
+        signal.removeEventListener("abort", abortHandler),
+      );
     }
 
     aiderProcess.stdout.on("data", (data) => {
@@ -208,6 +226,16 @@ export async function execute(task) {
             component: "Aider",
           },
         );
+      }
+
+      if (cancelled) {
+        resolve({
+          success: false,
+          cancelled: true,
+          taskId: task.id,
+          logFile,
+        });
+        return;
       }
 
       const success = code === 0;

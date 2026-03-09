@@ -163,7 +163,7 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     const executeNow = req.body.executeNow !== false;
 
     // Create a task to apply the test
-    const task = await taskFactory.createApplyTestTask(
+    const task = await taskFactory.createImplementTestTask(
       { domainId: id, testRecommendation },
       { executeNow },
     );
@@ -177,7 +177,7 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
       }
 
       return res.status(500).json({
-        error: task.error || "Failed to apply test",
+        error: task.error || "Failed to implement test",
         code: task.code,
       });
     }
@@ -192,7 +192,7 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
       `Error applying test ${req.params.testId} for domain ${req.params.id}`,
       { error, component: "API" },
     );
-    res.status(500).json({ error: "Failed to apply test" });
+    res.status(500).json({ error: "Failed to implement test" });
   }
 });
 

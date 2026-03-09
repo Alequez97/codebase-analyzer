@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { tryReadJsonFile } from "./utils.js";
+import { tryReadJsonFile, appendRevision } from "./utils.js";
 import {
   getDomainSectionContentPath,
   getDomainSectionDir,
@@ -68,6 +68,20 @@ export async function writeDomainRequirements(domainId, data) {
       "utf-8",
     );
   }
+}
+
+/**
+ * Append a revision entry to the requirements metadata.json.
+ * @param {string} domainId - The domain ID
+ * @param {Object} revision - Revision entry (task or manual-save)
+ * @returns {Promise<Object>} Updated metadata { version, revisions }
+ */
+export async function appendRequirementsRevision(domainId, revision) {
+  const metadataPath = getDomainSectionMetadataPath(
+    domainId,
+    SECTION_TYPES.REQUIREMENTS,
+  );
+  return appendRevision(metadataPath, revision);
 }
 
 /**

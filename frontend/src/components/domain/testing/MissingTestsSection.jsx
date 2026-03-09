@@ -20,10 +20,10 @@ import { getPriorityColor, sortByPriority } from "./utils";
 
 export function MissingTestsSection({
   missingTests,
-  applyingTests,
-  applyLogs,
-  onApplyTest,
-  onApplyTestEdits,
+  implementingTests,
+  implementLogs,
+  onImplementTest,
+  onImplementTestEdits,
   domainId,
 }) {
   const [expandedTests, setExpandedTests] = useState(new Set());
@@ -100,28 +100,28 @@ export function MissingTestsSection({
     }
   };
 
-  const renderActionButton = (test, isApplied, hasPendingEdits) => {
-    if (isApplied && hasPendingEdits) {
+  const renderActionButton = (test, isImplemented, hasPendingEdits) => {
+    if (isImplemented && hasPendingEdits) {
       return (
         <Button
           size="xs"
           colorPalette="yellow"
           variant="solid"
-          disabled={!!applyingTests[test.id]}
+          disabled={!!implementingTests[test.id]}
           onClick={(e) => {
             e.stopPropagation();
-            onApplyTestEdits?.(test.id);
+            onImplementTestEdits?.(test.id);
           }}
         >
-          Apply edits
+          Implement edits
         </Button>
       );
     }
 
-    if (isApplied) {
+    if (isImplemented) {
       return (
         <Button size="xs" colorPalette="green" variant="subtle" disabled>
-          Applied
+          Implemented
         </Button>
       );
     }
@@ -132,13 +132,13 @@ export function MissingTestsSection({
         colorPalette="green"
         onClick={(e) => {
           e.stopPropagation();
-          onApplyTest(test.id);
+          onImplementTest(test.id);
         }}
-        loading={!!applyingTests[test.id]}
-        loadingText="Applying"
+        loading={!!implementingTests[test.id]}
+        loadingText="Implementing"
       >
         <Check size={12} />
-        Apply
+        Implement
       </Button>
     );
   };
@@ -239,9 +239,9 @@ export function MissingTestsSection({
             {/* Unit Tests */}
             {sortByPriority(editedMissingTests.unit)?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
-              const isApplied =
+              const isImplemented =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-              const isApplying = !!applyingTests[test.id];
+              const isImplementing = !!implementingTests[test.id];
               const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               const isBlocked = !!test.blockedBy;
               return (
@@ -250,18 +250,18 @@ export function MissingTestsSection({
                     bg={
                       isBlocked
                         ? "orange.50"
-                        : isApplied
+                        : isImplemented
                           ? "green.50"
-                          : isApplying
+                          : isImplementing
                             ? "blue.50"
                             : "gray.50"
                     }
                     _hover={{
                       bg: isBlocked
                         ? "orange.100"
-                        : isApplied
+                        : isImplemented
                           ? "green.100"
-                          : isApplying
+                          : isImplementing
                             ? "blue.100"
                             : "gray.100",
                       cursor: "pointer",
@@ -330,7 +330,7 @@ export function MissingTestsSection({
                             size="xs"
                             variant="ghost"
                             colorPalette="red"
-                            disabled={!!applyingTests[test.id]}
+                            disabled={!!implementingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearEditingTest();
@@ -344,7 +344,7 @@ export function MissingTestsSection({
                             size="xs"
                             colorPalette="blue"
                             variant="ghost"
-                            disabled={!!applyingTests[test.id]}
+                            disabled={!!implementingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingTest(test.id, domainId);
@@ -354,7 +354,7 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {renderActionButton(test, isApplied, hasPendingEdits)}
+                        {renderActionButton(test, isImplemented, hasPendingEdits)}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -404,7 +404,7 @@ export function MissingTestsSection({
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above
+                                  Please implement the recommended refactoring above
                                   before implementing this test.
                                 </Text>
                               </Box>
@@ -437,14 +437,14 @@ export function MissingTestsSection({
                                 </Box>
                               )}
 
-                            {applyLogs?.[test.id] && (
+                            {implementLogs?.[test.id] && (
                               <Box borderWidth="1px" borderRadius="md" p={3}>
                                 <Text
                                   fontSize="xs"
                                   fontWeight="semibold"
                                   mb={2}
                                 >
-                                  Apply Logs
+                                  Implementation Logs
                                 </Text>
                                 <Box
                                   bg="gray.900"
@@ -457,7 +457,7 @@ export function MissingTestsSection({
                                   overflowY="auto"
                                   whiteSpace="pre-wrap"
                                 >
-                                  {applyLogs[test.id]}
+                                  {implementLogs[test.id]}
                                 </Box>
                               </Box>
                             )}
@@ -473,9 +473,9 @@ export function MissingTestsSection({
             {/* Integration Tests */}
             {sortByPriority(editedMissingTests.integration)?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
-              const isApplied =
+              const isImplemented =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-              const isApplying = !!applyingTests[test.id];
+              const isImplementing = !!implementingTests[test.id];
               const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               const isBlocked = !!test.blockedBy;
               return (
@@ -484,18 +484,18 @@ export function MissingTestsSection({
                     bg={
                       isBlocked
                         ? "orange.50"
-                        : isApplied
+                        : isImplemented
                           ? "green.50"
-                          : isApplying
+                          : isImplementing
                             ? "blue.50"
                             : "gray.50"
                     }
                     _hover={{
                       bg: isBlocked
                         ? "orange.100"
-                        : isApplied
+                        : isImplemented
                           ? "green.100"
-                          : isApplying
+                          : isImplementing
                             ? "blue.100"
                             : "gray.100",
                       cursor: "pointer",
@@ -564,7 +564,7 @@ export function MissingTestsSection({
                             size="xs"
                             variant="ghost"
                             colorPalette="red"
-                            disabled={!!applyingTests[test.id]}
+                            disabled={!!implementingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearEditingTest();
@@ -578,7 +578,7 @@ export function MissingTestsSection({
                             size="xs"
                             colorPalette="blue"
                             variant="ghost"
-                            disabled={!!applyingTests[test.id]}
+                            disabled={!!implementingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingTest(test.id, domainId);
@@ -588,7 +588,7 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {renderActionButton(test, isApplied, hasPendingEdits)}
+                        {renderActionButton(test, isImplemented, hasPendingEdits)}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -638,7 +638,7 @@ export function MissingTestsSection({
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above
+                                  Please implement the recommended refactoring above
                                   before implementing this test.
                                 </Text>
                               </Box>
@@ -671,14 +671,14 @@ export function MissingTestsSection({
                                 </Box>
                               )}
 
-                            {applyLogs?.[test.id] && (
+                            {implementLogs?.[test.id] && (
                               <Box borderWidth="1px" borderRadius="md" p={3}>
                                 <Text
                                   fontSize="xs"
                                   fontWeight="semibold"
                                   mb={2}
                                 >
-                                  Apply Logs
+                                  Implementation Logs
                                 </Text>
                                 <Box
                                   bg="gray.900"
@@ -691,7 +691,7 @@ export function MissingTestsSection({
                                   overflowY="auto"
                                   whiteSpace="pre-wrap"
                                 >
-                                  {applyLogs[test.id]}
+                                  {implementLogs[test.id]}
                                 </Box>
                               </Box>
                             )}
@@ -707,9 +707,9 @@ export function MissingTestsSection({
             {/* E2E Tests */}
             {sortByPriority(editedMissingTests.e2e)?.map((test) => {
               const isExpanded = expandedTests.has(test.id);
-              const isApplied =
+              const isImplemented =
                 test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-              const isApplying = !!applyingTests[test.id];
+              const isImplementing = !!implementingTests[test.id];
               const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
               const isBlocked = !!test.blockedBy;
               return (
@@ -718,18 +718,18 @@ export function MissingTestsSection({
                     bg={
                       isBlocked
                         ? "orange.50"
-                        : isApplied
+                        : isImplemented
                           ? "green.50"
-                          : isApplying
+                          : isImplementing
                             ? "blue.50"
                             : "gray.50"
                     }
                     _hover={{
                       bg: isBlocked
                         ? "orange.100"
-                        : isApplied
+                        : isImplemented
                           ? "green.100"
-                          : isApplying
+                          : isImplementing
                             ? "blue.100"
                             : "gray.100",
                       cursor: "pointer",
@@ -798,7 +798,7 @@ export function MissingTestsSection({
                             size="xs"
                             variant="ghost"
                             colorPalette="red"
-                            disabled={!!applyingTests[test.id]}
+                            disabled={!!implementingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearEditingTest();
@@ -812,7 +812,7 @@ export function MissingTestsSection({
                             size="xs"
                             colorPalette="blue"
                             variant="ghost"
-                            disabled={!!applyingTests[test.id]}
+                            disabled={!!implementingTests[test.id]}
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingTest(test.id, domainId);
@@ -822,7 +822,7 @@ export function MissingTestsSection({
                             <Edit2 size={14} />
                           </IconButton>
                         )}
-                        {renderActionButton(test, isApplied, hasPendingEdits)}
+                        {renderActionButton(test, isImplemented, hasPendingEdits)}
                       </HStack>
                     </Table.Cell>
                   </Table.Row>
@@ -872,7 +872,7 @@ export function MissingTestsSection({
                                   </Text>
                                 </Text>
                                 <Text fontSize="xs" color="gray.600" mt={1}>
-                                  Please apply the recommended refactoring above
+                                  Please implement the recommended refactoring above
                                   before implementing this test.
                                 </Text>
                               </Box>
@@ -905,14 +905,14 @@ export function MissingTestsSection({
                                 </Box>
                               )}
 
-                            {applyLogs?.[test.id] && (
+                            {implementLogs?.[test.id] && (
                               <Box borderWidth="1px" borderRadius="md" p={3}>
                                 <Text
                                   fontSize="xs"
                                   fontWeight="semibold"
                                   mb={2}
                                 >
-                                  Apply Logs
+                                  Implementation Logs
                                 </Text>
                                 <Box
                                   bg="gray.900"
@@ -925,7 +925,7 @@ export function MissingTestsSection({
                                   overflowY="auto"
                                   whiteSpace="pre-wrap"
                                 >
-                                  {applyLogs[test.id]}
+                                  {implementLogs[test.id]}
                                 </Box>
                               </Box>
                             )}

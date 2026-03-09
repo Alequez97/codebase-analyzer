@@ -10,8 +10,8 @@ export const TASK_TYPES = {
   REQUIREMENTS: "analyze-requirements",
   BUGS_SECURITY: "analyze-bugs-security",
   REFACTORING_AND_TESTING: "analyze-refactoring-and-testing",
-  APPLY_FIX: "apply-fix",
-  APPLY_TEST: "apply-test",
+  IMPLEMENT_FIX: "implement-fix",
+  IMPLEMENT_TEST: "implement-test",
   APPLY_REFACTORING: "apply-refactoring",
 
   // Edit tasks
@@ -20,4 +20,7 @@ export const TASK_TYPES = {
   EDIT_REQUIREMENTS: "edit-requirements",
   EDIT_BUGS_SECURITY: "edit-bugs-security",
   EDIT_REFACTORING_AND_TESTING: "edit-refactoring-and-testing",
+
+  // Custom codebase task (floating agent chat)
+  CUSTOM_CODEBASE_TASK: "custom-codebase-task",
 };

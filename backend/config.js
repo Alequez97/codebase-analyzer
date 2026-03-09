@@ -95,21 +95,21 @@ const config = {
     },
     [TASK_TYPES.DIAGRAMS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET_4_6,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.REQUIREMENTS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET_4_6,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.BUGS_SECURITY]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET_4_6,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -121,23 +121,23 @@ const config = {
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.HIGH,
     },
-    [TASK_TYPES.APPLY_FIX]: {
-      agent: AGENTS.AIDER,
-      model: MODELS.CLAUDE_SONNET_4_6,
+    [TASK_TYPES.IMPLEMENT_FIX]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
-    [TASK_TYPES.APPLY_TEST]: {
+    [TASK_TYPES.IMPLEMENT_TEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET_4_6,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_REFACTORING]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.CLAUDE_SONNET_4_6,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -146,10 +146,19 @@ const config = {
     // Edit tasks (AI chat for editing domain sections)
     [TASK_TYPES.EDIT_DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.DEEPSEEK_REASONER,
+      model: MODELS.GPT_5_MINI,
       maxTokens: 16000,
-      maxIterations: 2, // Two iterations: description + content
+      maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
+    },
+
+    // Custom codebase task (floating agent chat)
+    [TASK_TYPES.CUSTOM_CODEBASE_TASK]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_2,
+      maxTokens: 64000,
+      maxIterations: 200,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
   },
 
@@ -171,6 +180,9 @@ const config = {
     // Analyzer tool root (where this code lives)
     analyzerRoot: path.join(__dirname, ".."),
 
+    // Temp folder for transient task artifacts (progress files, instruction dumps)
+    temp: path.join(__dirname, "temp"),
+
     // Target project paths
     targetRoot: targetDirectory,
     targetAnalysis: path.join(
@@ -191,12 +203,14 @@ const config = {
 
 // Ensure required directories exist
 const dirs = [
+  config.paths.temp,
   path.join(config.paths.targetAnalysis, "analysis"),
   path.join(config.paths.targetAnalysis, "domains"),
   path.join(config.paths.targetAnalysis, "tasks"),
   path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.PENDING),
   path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.COMPLETED),
   path.join(config.paths.targetAnalysis, "logs"),
+  path.join(config.paths.targetAnalysis, "temp"),
 ];
 
 dirs.forEach((dir) => {

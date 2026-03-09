@@ -6,10 +6,11 @@ export const INSTRUCTION_FILES_NAMES = {
   ANALYZE_DOMAIN_DIAGRAMS: "analyze-domain-diagrams.md",
   ANALYZE_DOMAIN_REFACTORING_AND_TESTING:
     "analyze-domain-refactoring-and-testing.md",
-  APPLY_FINDING_FIX: "apply-finding-fix.md",
-  APPLY_TEST: "apply-test.md",
+  IMPLEMENT_FINDING_FIX: "implement-finding-fix.md",
+  IMPLEMENT_TEST: "implement-test.md",
   APPLY_REFACTORING: "apply-refactoring.md",
-  EDIT_DOMAIN_SECTION: "edit-domain-section.md",
+  EDIT_DOCUMENTATION: "edit-documentation.md",
+  CUSTOM_CODEBASE_TASK: "custom-codebase-task.md",
 };
 
 export const INSTRUCTION_FILES_PATHS = {
@@ -23,8 +24,9 @@ export const INSTRUCTION_FILES_PATHS = {
   ANALYZE_DOMAIN_DIAGRAMS: "backend/instructions/analyze-domain-diagrams.md",
   ANALYZE_DOMAIN_REFACTORING_AND_TESTING:
     "backend/instructions/analyze-domain-refactoring-and-testing.md",
-  APPLY_FINDING_FIX: "backend/instructions/apply-finding-fix.md",
-  APPLY_TEST: "backend/instructions/apply-test.md",
+  IMPLEMENT_FINDING_FIX: "backend/instructions/implement-finding-fix.md",
+  IMPLEMENT_TEST: "backend/instructions/implement-test.md",
   APPLY_REFACTORING: "backend/instructions/apply-refactoring.md",
-  EDIT_DOMAIN_SECTION: "backend/instructions/edit-domain-section.md",
+  EDIT_DOCUMENTATION: "backend/instructions/edit-documentation.md",
+  CUSTOM_CODEBASE_TASK: "backend/instructions/custom-codebase-task.md",
 };

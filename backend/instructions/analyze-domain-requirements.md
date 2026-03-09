@@ -91,7 +91,9 @@ This is not optional — missing a required field in a test fixture causes the e
 2. Read documentation for context
 3. Extract requirements from code
 4. Save to `{{OUTPUT_FILE}}` using `write_file`
+5. Write `# Done` to `{{PROGRESS_FILE}}`
    {{else}}
-5. Extract requirements from code
-6. Save to `{{OUTPUT_FILE}}` using `write_file`
+6. Extract requirements from code
+7. Save to `{{OUTPUT_FILE}}` using `write_file`
+8. Write `# Done` to `{{PROGRESS_FILE}}`
    {{/if}}

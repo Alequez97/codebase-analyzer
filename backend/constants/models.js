@@ -5,6 +5,7 @@ export const MODELS = {
   // OpenAI models
   GPT_4: "gpt-4",
   GPT_4_TURBO: "gpt-4-turbo",
+  GPT_5_MINI: "gpt-5-mini",
   GPT_5_2: "gpt-5.2",
   GPT_5_3_CODEX: "gpt-5.3-codex",
 
@@ -26,6 +27,7 @@ export const MODELS = {
 export const MODEL_NAMES = {
   [MODELS.GPT_4]: "GPT-4",
   [MODELS.GPT_4_TURBO]: "GPT-4 Turbo",
+  [MODELS.GPT_5_MINI]: "GPT-5 mini",
   [MODELS.GPT_5_2]: "GPT-5.2",
   [MODELS.GPT_5_3_CODEX]: "GPT-5.3-Codex",
   [MODELS.CLAUDE_OPUS_4]: "Claude Opus 4",

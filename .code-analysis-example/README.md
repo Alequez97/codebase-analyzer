@@ -19,7 +19,7 @@ This folder demonstrates the expected output structure after running codebase an
 │       ├── testing/
 │       │   ├── content.json            # Testing analysis content
 │       │   ├── metadata.json           # Testing metadata
-│       │   └── actions.json            # Recorded apply-test actions
+│       │   └── actions.json            # Recorded implement-test actions
 │       ├── bugs-security/
 │       │   ├── content.json            # Bugs/security findings
 │       │   ├── metadata.json           # Bugs/security metadata

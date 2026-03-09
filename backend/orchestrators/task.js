@@ -2,6 +2,10 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import * as tasksPersistence from "../persistence/tasks.js";
+
+/** AbortControllers for in-flight tasks, keyed by taskId */
+const runningTaskControllers = new Map();
+import { appendRevision } from "../persistence/utils.js";
 import { getAgent } from "../agents/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
@@ -9,6 +13,8 @@ import { TASK_TYPES } from "../constants/task-types.js";
 import { TASK_STATUS } from "../constants/task-status.js";
 import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
+import { deleteProgressFile } from "../utils/task-progress.js";
+import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as logger from "../utils/logger.js";
 
 /**
@@ -29,173 +35,134 @@ export async function getTask(taskId) {
 }
 
 /**
- * Post-process analysis output files to add task metadata
+ * Post-process analysis output files to record a task revision in metadata.json.
+ * For JSON-output tasks the agent's content file is also rewritten (clean, no embedded metadata).
  * @param {Object} task - The task object
  */
-async function enhanceOutputWithTaskMetadata(task) {
+async function persistTaskRevision(task) {
+  // For IMPLEMENT_FIX tasks — record the fix as applied in the actions registry
+  if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
+    const { domainId, findingId } = task.params || {};
+    if (domainId && findingId) {
+      try {
+        await domainBugsSecurityPersistence.recordBugsSecurityFindingAction(
+          domainId,
+          { findingId, action: "apply" },
+        );
+        logger.debug(
+          `Recorded fix action for finding ${findingId} in domain ${domainId}`,
+          { component: "TaskOrchestrator", taskId: task.id },
+        );
+      } catch (error) {
+        logger.error(`Failed to record fix action for finding ${findingId}`, {
+          error,
+          component: "TaskOrchestrator",
+          taskId: task.id,
+        });
+      }
+    }
+    return;
+  }
+
   if (!task.outputFile) {
     return;
   }
 
-  // Skip enhancement for documentation tasks - they output .md files, not JSON
-  // Documentation metadata is generated programatically in the orchestrator
-  if (task.type === TASK_TYPES.DOCUMENTATION) {
-    return;
+  const outputPath = path.isAbsolute(task.outputFile)
+    ? task.outputFile
+    : path.join(config.target.directory, task.outputFile);
+  const metadataPath = path.join(
+    path.dirname(outputPath),
+    PERSISTENCE_FILES.METADATA_JSON,
+  );
+
+  // These task types produce markdown output, not JSON — skip the JSON rewrite.
+  const MARKDOWN_OUTPUT_TYPES = [
+    TASK_TYPES.DOCUMENTATION,
+    TASK_TYPES.EDIT_DOCUMENTATION,
+    TASK_TYPES.EDIT_REQUIREMENTS,
+    TASK_TYPES.EDIT_BUGS_SECURITY,
+    TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
+  ];
+
+  // For JSON output tasks — rewrite the content file cleanly (no embedded metadata).
+  if (!MARKDOWN_OUTPUT_TYPES.includes(task.type)) {
+    try {
+      let raw = "";
+      try {
+        raw = await fs.readFile(outputPath, "utf-8");
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+
+      if (raw && raw.trim()) {
+        let analysis;
+        try {
+          analysis = JSON.parse(raw);
+        } catch {
+          analysis = null;
+        }
+
+        if (
+          analysis &&
+          typeof analysis === "object" &&
+          !Array.isArray(analysis)
+        ) {
+          // Strip any previously embedded metadata field
+          delete analysis.metadata;
+
+          // Auto-calculate summary for bugs-security findings
+          if (
+            task.type === TASK_TYPES.BUGS_SECURITY &&
+            Array.isArray(analysis.findings)
+          ) {
+            const summary = {
+              critical: 0,
+              high: 0,
+              medium: 0,
+              low: 0,
+              total: analysis.findings.length,
+            };
+            analysis.findings.forEach(({ severity }) => {
+              const s = severity?.toLowerCase();
+              if (s === "critical") summary.critical++;
+              else if (s === "high") summary.high++;
+              else if (s === "medium") summary.medium++;
+              else if (s === "low") summary.low++;
+            });
+            analysis.summary = summary;
+          }
+
+          await fs.mkdir(path.dirname(outputPath), { recursive: true });
+          await fs.writeFile(
+            outputPath,
+            JSON.stringify(analysis, null, 2),
+            "utf-8",
+          );
+        }
+      }
+    } catch (error) {
+      logger.error(`Failed to rewrite JSON content for task`, {
+        error,
+        component: "TaskOrchestrator",
+        taskId: task.id,
+      });
+    }
   }
 
+  // Append a revision to metadata.json — never overwrite.
   try {
-    // Read the output file that was just created by the agent
-    const outputPath = path.isAbsolute(task.outputFile)
-      ? task.outputFile
-      : path.join(config.target.directory, task.outputFile);
-    const shouldGenerateMetadata = task.generateMetadata === true;
-    const metadataOutputPath = path.join(
-      path.dirname(outputPath),
-      PERSISTENCE_FILES.METADATA_JSON,
-    );
-    const usesSeparateMetadataFile = metadataOutputPath !== outputPath;
-    let content;
-    let analysis;
-
-    try {
-      content = await fs.readFile(outputPath, "utf-8");
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        logger.debug(
-          `Output file ${outputPath} does not exist, creating minimal metadata file`,
-          { component: "TaskOrchestrator", taskId: task.id },
-        );
-        content = "";
-      } else {
-        throw error;
-      }
-    }
-
-    // Handle empty or invalid files - create minimal structure with taskId
-    if (!content || content.trim() === "") {
-      logger.debug(
-        `Output file ${outputPath} is empty, creating minimal metadata structure`,
-        { component: "TaskOrchestrator", taskId: task.id },
-      );
-      analysis = {
-        taskId: task.id,
-        logFile: task.logFile || null,
-        status: "incomplete",
-        message: "Agent did not write analysis output. Check logs for details.",
-        analyzedAt: new Date().toISOString(),
-      };
-    } else {
-      try {
-        analysis = JSON.parse(content);
-      } catch {
-        logger.debug(
-          `Output file ${outputPath} contains invalid JSON, creating minimal metadata structure`,
-          { component: "TaskOrchestrator", taskId: task.id },
-        );
-        analysis = {
-          taskId: task.id,
-          logFile: task.logFile || null,
-          status: "invalid",
-          message: "Agent wrote invalid JSON output. Check logs for details.",
-          rawContent: content.substring(0, 500), // Include first 500 chars for debugging
-          analyzedAt: new Date().toISOString(),
-        };
-      }
-    }
-
-    const analyzedAt = new Date().toISOString();
-    const existingMetadata =
-      analysis &&
-      typeof analysis === "object" &&
-      !Array.isArray(analysis) &&
-      analysis.metadata &&
-      typeof analysis.metadata === "object"
-        ? { ...analysis.metadata }
-        : {};
-
-    if (
-      shouldGenerateMetadata &&
-      usesSeparateMetadataFile &&
-      analysis &&
-      typeof analysis === "object" &&
-      !Array.isArray(analysis)
-    ) {
-      delete analysis.metadata;
-    }
-
-    // Auto-calculate summary for bugs-security analysis if findings exist
-    if (
-      task.type === TASK_TYPES.BUGS_SECURITY &&
-      analysis.findings &&
-      Array.isArray(analysis.findings)
-    ) {
-      const summary = {
-        critical: 0,
-        high: 0,
-        medium: 0,
-        low: 0,
-        total: analysis.findings.length,
-      };
-
-      analysis.findings.forEach((finding) => {
-        const severity = finding.severity?.toLowerCase();
-        if (severity === "critical") summary.critical++;
-        else if (severity === "high") summary.high++;
-        else if (severity === "medium") summary.medium++;
-        else if (severity === "low") summary.low++;
-      });
-
-      analysis.summary = summary;
-    }
-
-    // Write back enhanced analysis content
-    await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(outputPath, JSON.stringify(analysis, null, 2), "utf-8");
-
-    if (shouldGenerateMetadata && usesSeparateMetadataFile) {
-      const taskMetadata = {
-        ...existingMetadata,
-        taskId: task.id,
-        logFile: task.logFile || null,
-        analyzedAt,
-        status: TASK_STATUS.COMPLETED,
-      };
-
-      await fs.mkdir(path.dirname(metadataOutputPath), { recursive: true });
-      await fs.writeFile(
-        metadataOutputPath,
-        JSON.stringify(taskMetadata, null, 2),
-        "utf-8",
-      );
-    } else if (
-      shouldGenerateMetadata &&
-      analysis &&
-      typeof analysis === "object" &&
-      !Array.isArray(analysis)
-    ) {
-      const taskMetadata = {
-        ...existingMetadata,
-        taskId: task.id,
-        logFile: task.logFile || null,
-        analyzedAt,
-        status: TASK_STATUS.COMPLETED,
-      };
-
-      analysis.metadata = taskMetadata;
-      await fs.writeFile(
-        outputPath,
-        JSON.stringify(analysis, null, 2),
-        "utf-8",
-      );
-    }
-
-    logger.debug(
-      `Enhanced ${outputPath} with task metadata (taskId: ${task.id})`,
-      { component: "TaskOrchestrator", taskId: task.id },
-    );
+    await appendRevision(metadataPath, {
+      taskId: task.id,
+      type: task.type,
+      completedAt: new Date().toISOString(),
+    });
+    logger.debug(`Appended revision to metadata for task ${task.id}`, {
+      component: "TaskOrchestrator",
+      taskId: task.id,
+    });
   } catch (error) {
-    // Log error but don't fail the task
-    logger.error(`Failed to enhance output with task metadata`, {
+    logger.error(`Failed to append metadata revision for task`, {
       error,
       component: "TaskOrchestrator",
       taskId: task.id,
@@ -229,6 +196,9 @@ export async function executeTask(taskId) {
     };
   }
 
+  const controller = new AbortController();
+  runningTaskControllers.set(taskId, controller);
+
   let result;
   try {
     const agentResult = await getAgent(task.agentConfig?.agent);
@@ -236,6 +206,9 @@ export async function executeTask(taskId) {
       const selectionError = agentResult.error || "Agent selection failed";
 
       await tasksPersistence.moveToFailed(taskId, selectionError);
+
+      // Clean up temporary progress file
+      await deleteProgressFile(taskId);
 
       emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
         taskId,
@@ -255,11 +228,21 @@ export async function executeTask(taskId) {
       };
     }
 
-    result = await agentResult.agent.execute(task);
+    result = await agentResult.agent.execute(task, controller.signal);
   } catch (error) {
+    // Task was cancelled — skip moveToFailed/TASK_FAILED since the task file
+    // was already removed by deleteTask() before the abort was triggered.
+    if (controller.signal.aborted) {
+      await deleteProgressFile(taskId);
+      return { success: false, cancelled: true, taskId };
+    }
+
     const executionError = error?.message || "Task execution failed";
 
     await tasksPersistence.moveToFailed(taskId, executionError);
+
+    // Clean up temporary progress file
+    await deleteProgressFile(taskId);
 
     emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
       taskId,
@@ -275,14 +258,19 @@ export async function executeTask(taskId) {
       taskId,
       logFile: task.logFile,
     };
+  } finally {
+    runningTaskControllers.delete(taskId);
   }
 
   if (result.success) {
-    // Enhance output file with task metadata (taskId, logFile, timestamp)
-    await enhanceOutputWithTaskMetadata(task);
+    // Rewrite content file cleanly and append revision to metadata.json
+    await persistTaskRevision(task);
 
     // Move task to completed
     await tasksPersistence.moveToCompleted(taskId);
+
+    // Clean up temporary progress file
+    await deleteProgressFile(taskId);
 
     // Emit event via socket
     emitSocketEvent(SOCKET_EVENTS.TASK_COMPLETED, {
@@ -293,11 +281,20 @@ export async function executeTask(taskId) {
       timestamp: new Date().toISOString(),
     });
   } else {
+    // Task was cleanly cancelled — file already removed, nothing to persist
+    if (result.cancelled) {
+      await deleteProgressFile(taskId);
+      return result;
+    }
+
     // Task failed - move to failed directory
     await tasksPersistence.moveToFailed(
       taskId,
       result.error || "Task execution failed",
     );
+
+    // Clean up temporary progress file
+    await deleteProgressFile(taskId);
 
     // Emit failure event
     emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
@@ -313,10 +310,20 @@ export async function executeTask(taskId) {
 }
 
 /**
- * Delete a task
+ * Delete a task and abort any running agent for it.
  * @param {string} taskId - The task ID
  */
 export async function deleteTask(taskId) {
+  // Abort the in-flight agent loop (if any) before removing the file.
+  const controller = runningTaskControllers.get(taskId);
+  if (controller) {
+    controller.abort();
+    runningTaskControllers.delete(taskId);
+    logger.info(`Aborted running agent for task ${taskId}`, {
+      component: "TaskOrchestrator",
+    });
+  }
+
   const result = await tasksPersistence.deleteTask(taskId);
 
   if (!result.success) {

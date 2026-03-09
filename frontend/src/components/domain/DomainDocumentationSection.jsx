@@ -17,7 +17,6 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
-  MessageSquare,
   Save,
   Sparkles,
   X,
@@ -41,8 +40,6 @@ export default function DomainDocumentationSection({
   showLogs = false,
   logs = "",
   logsLoading = false,
-  onOpenChat,
-  isChatOpen = false,
   pendingSuggestion,
   onApplyChanges,
   onDismissChanges,
@@ -83,8 +80,6 @@ export default function DomainDocumentationSection({
       ? editedDocumentation
       : documentation?.content || "";
 
-  const statusText = documentation?.metadata?.status || null;
-
   return (
     <Card.Root>
       <Card.Header py="4">
@@ -111,11 +106,6 @@ export default function DomainDocumentationSection({
               )}
             </IconButton>
             <Heading size="md">Documentation</Heading>
-            {statusText && (
-              <Badge colorPalette="green" size="sm">
-                {statusText}
-              </Badge>
-            )}
             {showLogs && (
               <Badge colorPalette="purple" size="sm">
                 Logs View
@@ -123,33 +113,18 @@ export default function DomainDocumentationSection({
             )}
           </HStack>
           <HStack onClick={(e) => e.stopPropagation()} alignItems="center">
-            {!isEditMode && !showLogs && (
-              <>
-                {/* Show "Edit with AI" if content exists, otherwise "Analyze" */}
-                {documentation ? (
-                  <Button
-                    size="sm"
-                    colorPalette="purple"
-                    variant={isChatOpen ? "solid" : "outline"}
-                    onClick={onOpenChat}
-                  >
-                    <MessageSquare size={14} />
-                    Edit with AI
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    colorPalette="blue"
-                    variant="outline"
-                    onClick={onAnalyze}
-                    loading={loading}
-                    loadingText="Analyzing"
-                  >
-                    <Sparkles size={14} />
-                    Analyze documentation
-                  </Button>
-                )}
-              </>
+            {!isEditMode && !showLogs && !documentation && (
+              <Button
+                size="sm"
+                colorPalette="blue"
+                variant="outline"
+                onClick={onAnalyze}
+                loading={loading}
+                loadingText="Analyzing"
+              >
+                <Sparkles size={14} />
+                Analyze documentation
+              </Button>
             )}
             {isEditMode && (
               <Button

@@ -5,10 +5,14 @@ import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
+import {
+  getProgressFilePath,
+  ensureProgressDirectory,
+} from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a task to apply a bug or security fix
+ * Create a task to implement (fix) a bug or security finding using the LLM API
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
  * @param {Object} params.finding - The finding object to fix
@@ -16,11 +20,11 @@ import * as logger from "../../utils/logger.js";
  * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createApplyFixTask(
+export async function createImplementFixTask(
   { domainId, finding },
   { executeNow = false } = {},
 ) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.APPLY_FIX);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.IMPLEMENT_FIX);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
@@ -64,18 +68,20 @@ export async function createApplyFixTask(
     findingSnippet: finding.location?.snippet || "",
   };
 
+  const taskId = generateTaskId(TASK_TYPES.IMPLEMENT_FIX);
   const task = {
-    id: generateTaskId(TASK_TYPES.APPLY_FIX),
-    type: TASK_TYPES.APPLY_FIX,
+    id: taskId,
+    type: TASK_TYPES.IMPLEMENT_FIX,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params,
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.APPLY_FINDING_FIX,
+    instructionFile: INSTRUCTION_FILES_PATHS.IMPLEMENT_FINDING_FIX,
     outputFile: null, // No JSON output needed - agent modifies source files directly
-    generateMetadata: true,
+    progressFile: getProgressFilePath(taskId),
   };
 
+  await ensureProgressDirectory(taskId);
   await tasksPersistence.writeTask(task);
 
   if (executeNow) {

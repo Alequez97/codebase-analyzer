@@ -45,9 +45,17 @@ export class DeepSeekClient extends BaseLLMClient {
     }
 
     try {
-      const response = await this.client.chat.completions.create(requestParams);
+      const response = await this.client.chat.completions.create(
+        requestParams,
+        options.signal ? { signal: options.signal } : undefined,
+      );
       return this.normalizeResponse(response);
     } catch (error) {
+      if (error.name === "AbortError" || options.signal?.aborted) {
+        const cancelled = new Error("Task cancelled");
+        cancelled.code = "TASK_CANCELLED";
+        throw cancelled;
+      }
       // If context length exceeded, parse actual token counts and retry with reduced max_tokens
       const contextMatch = error.message?.match(
         /maximum context length is (\d+) tokens.*?\((\d+) in the messages/s,
@@ -62,10 +70,17 @@ export class DeepSeekClient extends BaseLLMClient {
         ) {
           requestParams.max_tokens = reducedMaxTokens;
           try {
-            const retryResponse =
-              await this.client.chat.completions.create(requestParams);
+            const retryResponse = await this.client.chat.completions.create(
+              requestParams,
+              options.signal ? { signal: options.signal } : undefined,
+            );
             return this.normalizeResponse(retryResponse);
           } catch (retryError) {
+            if (retryError.name === "AbortError" || options.signal?.aborted) {
+              const cancelled = new Error("Task cancelled");
+              cancelled.code = "TASK_CANCELLED";
+              throw cancelled;
+            }
             throw new Error(`DeepSeek API error: ${retryError.message}`);
           }
         }

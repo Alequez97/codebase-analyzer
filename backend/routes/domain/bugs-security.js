@@ -137,10 +137,10 @@ router.post(
 );
 
 /**
- * Apply a bug or security fix
+ * Implement (fix) a bug or security finding
  */
 router.post(
-  "/:id/bugs-security/findings/:findingId/apply",
+  "/:id/bugs-security/findings/:findingId/implement",
   async (req, res) => {
     try {
       const { id, findingId } = req.params;
@@ -170,30 +170,30 @@ router.post(
 
       const executeNow = req.body.executeNow !== false;
 
-      // Create a task to apply the fix using Aider
-      const task = await taskFactory.createApplyFixTask(
+      // Create a task to implement the fix using the LLM API
+      const task = await taskFactory.createImplementFixTask(
         { domainId: id, finding },
         { executeNow },
       );
 
       if (task?.success === false) {
         return res.status(500).json({
-          error: task.error || "Failed to apply fix",
+          error: task.error || "Failed to implement fix",
           code: task.code,
         });
       }
 
       res.status(201).json({
         success: true,
-        message: "Fix application task created",
+        message: "Fix implementation task created",
         task,
       });
     } catch (error) {
       logger.error(
-        `Error applying fix ${req.params.findingId} for domain ${req.params.id}`,
+        `Error implementing fix ${req.params.findingId} for domain ${req.params.id}`,
         { error, component: "API" },
       );
-      res.status(500).json({ error: "Failed to apply fix" });
+      res.status(500).json({ error: "Failed to implement fix" });
     }
   },
 );
