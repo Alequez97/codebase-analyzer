@@ -122,14 +122,12 @@ export function analyzeRefactoringAndTestingHandler(task, taskLogger, agent) {
             const hasCaseShape =
               Array.isArray(checkItem?.input) &&
               checkItem.input.length > 0 &&
-              checkItem?.expectedOutput != null &&
-              typeof checkItem?.assertionType === "string" &&
-              checkItem.assertionType.length > 0;
+              checkItem?.expectedOutput != null;
 
             if (!hasCaseShape) {
               return {
                 success: false,
-                error: `Testing analysis schema invalid: check ${checkIndex} in ${missingTest.id}/${scenario.scenario} must include input[], expectedOutput, assertionType`,
+                error: `Testing analysis schema invalid: check ${checkIndex} in ${missingTest.id}/${scenario.scenario} must include input[], expectedOutput`,
               };
             }
           }

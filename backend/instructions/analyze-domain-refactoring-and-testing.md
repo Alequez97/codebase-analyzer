@@ -163,22 +163,63 @@ For each refactoring:
 
 ## Test Description Guidelines
 
+### One Test = One Subject Under Test
+
+**Group by what is being tested, not by scenario outcome.** When multiple scenarios (success, failure, edge cases) all test the **same endpoint or function**, they belong inside **one test entry** with multiple `scenarios[]` — not as separate test entries.
+
+❌ **WRONG — two test entries for the same endpoint:**
+
+```json
+{ "id": "TEST-101", "description": "POST /create-aircraft returns 400 when required fields are missing" },
+{ "id": "TEST-102", "description": "POST /create-aircraft returns 201 and creates linked records" }
+```
+
+✅ **CORRECT — one test entry with two scenarios:**
+
+```json
+{
+  "id": "TEST-101",
+  "description": "POST /create-aircraft creates aircraft and linked records, rejects invalid input",
+  "scenarios": [
+    {
+      "scenario": "Valid payload returns 201 and creates linked Permission and MaintenanceProgramRevision records",
+      "checks": [...]
+    },
+    {
+      "scenario": "Missing required fields return 400 with specific error details",
+      "checks": [...]
+    }
+  ]
+}
+```
+
+Create a **new test entry** only when the subject under test changes (different endpoint, different function, different domain concern).
+
+### Writing the `description` Field
+
+The `description` describes **the subject** (endpoint or function) and its overall purpose — not a single outcome.
+
 **Write specific, actionable descriptions** that explain WHAT is being tested and WHY it matters:
 
 - ❌ **Too vague**: "Aircraft status is updated and update_date is refreshed"
 - ✅ **Specific**: "updateAircraftStatus merges engine status by position without duplicating entries and refreshes timestamp"
 
-- ❌ **Too vague**: "Create aircraft with valid data"
-- ✅ **Specific**: "POST /aircraft returns 201 and creates linked Permission and MaintenanceProgramRevision records"
-
-- ❌ **Too vague**: "Test validation"
-- ✅ **Specific**: "POST /aircraft returns 400 with error details when required fields are missing"
+- ❌ **Scenario as description**: "POST /aircraft returns 400 with error details when required fields are missing"
+- ✅ **Subject as description**: "POST /aircraft validates required fields and creates linked Permission and MaintenanceProgramRevision records"
 
 Include:
 
 - The specific function/endpoint being tested
-- The key behavior or edge case
+- The range of behaviors covered (success + failure + edge cases, summarized)
 - Business impact when relevant (e.g., "prevents duplicate entries", "ensures data isolation")
+
+### Writing `scenario` Titles
+
+Each scenario title describes **one specific case** — outcome-focused phrasing is correct here:
+
+- ✅ "Valid payload returns 201 and creates linked Permission and MaintenanceProgramRevision records"
+- ✅ "Missing required fields return 400 with error details"
+- ✅ "Duplicate serial number returns 409 with conflict message"
 
 ## Suggested Test File Placement (Strict)
 
@@ -319,14 +360,14 @@ If the answer to all three is "no" or "nothing specific", **skip that test**.
 
 ### Good vs Bad Examples
 
-|     | Description                                                              | Why                                                         |
-| --- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
-| ❌  | `"Validate aircraft schema field requirements"`                          | Tests ORM validators — framework responsibility             |
-| ✅  | `"POST /aircraft returns 400 with error details when serial is missing"` | Tests API contract and user-facing behavior                 |
-| ❌  | `"Create aircraft with valid data"`                                      | Trivial CRUD, no business logic                             |
-| ✅  | `"Aircraft in maintenance cannot be assigned to flights"`                | Custom business rule with real safety consequences          |
-| ❌  | `"Test that registration field accepts valid format"`                    | Regex validations are tested by the validation library      |
-| ✅  | `"Utilization rate calculation with partial-month edge cases"`           | Complex calculation affecting billing and capacity planning |
+|     | Description                                                                                             | Why                                                           |
+| --- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| ❌  | `"Validate aircraft schema field requirements"`                                                         | Tests ORM validators — framework responsibility               |
+| ✅  | `"POST /aircraft validates input and creates linked Permission and MaintenanceProgramRevision records"` | One test covering both success and validation scenarios       |
+| ❌  | Two separate entries: `"POST /aircraft returns 400..."` and `"POST /aircraft returns 201..."`           | Same subject split into two tests — scenarios belong together |
+| ✅  | `"Aircraft in maintenance cannot be assigned to flights"`                                               | Custom business rule with real safety consequences            |
+| ❌  | `"Test that registration field accepts valid format"`                                                   | Regex validations are tested by the validation library        |
+| ✅  | `"Utilization rate calculation with partial-month edge cases"`                                          | Complex calculation affecting billing and capacity planning   |
 
 ## What to Analyze
 

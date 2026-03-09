@@ -78,6 +78,13 @@ const PRIORITY_CONFIG = {
   },
 };
 
+const DOMAIN_SECTIONS = [
+  { key: "documentation", label: "Docs" },
+  { key: "requirements", label: "Reqs" },
+  { key: "bugsSecurity", label: "Bugs" },
+  { key: "testing", label: "Tests" },
+];
+
 function DomainCard({ domain, provided, snapshot }) {
   const navigate = useNavigate();
   const progressByTaskId = useTaskProgressStore((s) => s.progressByTaskId);
@@ -87,11 +94,29 @@ function DomainCard({ domain, provided, snapshot }) {
   const bugsAnalyze = useDomainBugsSecurityStore((s) => s.analyze);
   const testAnalyze = useDomainRefactoringAndTestingStore((s) => s.analyze);
 
+  const sectionAnalyzers = {
+    documentation: docAnalyze,
+    requirements: reqAnalyze,
+    bugsSecurity: bugsAnalyze,
+    testing: testAnalyze,
+  };
+
+  const shouldShowAnalyzeButton = DOMAIN_SECTIONS.some(({ key }) => {
+    const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
+      activeProgress.has(t),
+    );
+    return !domain.sections?.[key] && !isRunning;
+  });
+
   const handleAnalyze = () => {
-    docAnalyze(domain);
-    reqAnalyze(domain);
-    bugsAnalyze(domain);
-    testAnalyze(domain);
+    DOMAIN_SECTIONS.forEach(({ key }) => {
+      const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
+        activeProgress.has(t),
+      );
+      if (!domain.sections?.[key] && !isRunning) {
+        sectionAnalyzers[key](domain);
+      }
+    });
   };
 
   return (
@@ -156,12 +181,7 @@ function DomainCard({ domain, provided, snapshot }) {
           </Text>
           <HStack justify="space-between" align="center">
             <HStack gap={2}>
-              {[
-                { key: "documentation", label: "Docs" },
-                { key: "requirements", label: "Reqs" },
-                { key: "bugsSecurity", label: "Bugs" },
-                { key: "testing", label: "Tests" },
-              ].map(({ key, label }) => {
+              {DOMAIN_SECTIONS.map(({ key, label }) => {
                 const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
                   activeProgress.has(t),
                 );
@@ -211,6 +231,7 @@ function DomainCard({ domain, provided, snapshot }) {
                 variant="subtle"
                 borderRadius="md"
                 onClick={handleAnalyze}
+                disabled={!shouldShowAnalyzeButton}
                 fontSize="11px"
                 h="22px"
                 px={2.5}
