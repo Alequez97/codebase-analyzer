@@ -8,3 +8,10 @@ export const openFileInEditor = (path, line, column) =>
     line,
     column,
   });
+
+export const getFileSnippet = (filePath, from, to) => {
+  const params = new URLSearchParams({ path: filePath });
+  if (from != null) params.append("from", from);
+  if (to != null) params.append("to", to);
+  return client.get(`/project/file-snippet?${params.toString()}`);
+};

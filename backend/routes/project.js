@@ -6,6 +6,7 @@ import { promisify } from "util";
 import config from "../config.js";
 import { getProjectFiles } from "../utils/file-scanner.js";
 import * as logger from "../utils/logger.js";
+import { readFileSnippet } from "../utils/file-snippet.js";
 
 const router = express.Router();
 const execAsync = promisify(exec);
@@ -104,6 +105,57 @@ router.post("/open-in-editor", async (req, res) => {
       message:
         "Make sure VS Code is installed and accessible via the 'code' command",
     });
+  }
+});
+
+/**
+ * Get a code snippet from a project file by line range
+ * GET /project/file-snippet?path=...&from=...&to=...
+ */
+router.get("/file-snippet", async (req, res) => {
+  try {
+    const rawPath = req.query.path;
+
+    if (!rawPath || typeof rawPath !== "string") {
+      return res.status(400).json({ error: "path is required" });
+    }
+
+    const targetRoot = path.resolve(config.paths.targetRoot);
+    const resolvedPath = path.isAbsolute(rawPath)
+      ? path.normalize(rawPath)
+      : path.resolve(targetRoot, rawPath);
+
+    if (
+      resolvedPath !== targetRoot &&
+      !resolvedPath.startsWith(`${targetRoot}${path.sep}`)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "path must be within target project" });
+    }
+
+    if (!fs.existsSync(resolvedPath)) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    const stats = fs.statSync(resolvedPath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ error: "path must point to a file" });
+    }
+
+    const rawFrom = parseInt(req.query.from, 10);
+    const rawTo = parseInt(req.query.to, 10);
+
+    const { snippet, language, from, to } = readFileSnippet(
+      resolvedPath,
+      rawFrom,
+      rawTo,
+    );
+
+    res.json({ snippet, language, file: rawPath, from, to });
+  } catch (error) {
+    logger.error("Error reading file snippet", { error, component: "API" });
+    res.status(500).json({ error: "Failed to read file" });
   }
 });
 

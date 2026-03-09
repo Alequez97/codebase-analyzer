@@ -19,6 +19,7 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronRight,
+  ExternalLink,
   FileCode,
   FileText,
   Lightbulb,
@@ -71,6 +72,33 @@ function sortFindingsBySeverity(findings = []) {
   });
 }
 
+/**
+ * Parses a source string like "path/to/file.js:42-58,77" into
+ * { filePath, from, to } for the first location.
+ */
+function parseSourceLocation(source) {
+  if (!source || typeof source !== "string") return null;
+  const firstRef = source.split(";")[0].trim();
+  const colonIdx = firstRef.lastIndexOf(":");
+  if (colonIdx === -1) return null;
+  const filePath = firstRef.slice(0, colonIdx).trim();
+  const lineSpec = firstRef.slice(colonIdx + 1).trim();
+  if (!filePath || !lineSpec) return null;
+  const firstRange = lineSpec.split(",")[0];
+  const dashIdx = firstRange.indexOf("-");
+  if (dashIdx !== -1) {
+    const from = parseInt(firstRange.slice(0, dashIdx), 10);
+    const to = parseInt(firstRange.slice(dashIdx + 1), 10);
+    if (Number.isFinite(from)) {
+      return { filePath, from, to: Number.isFinite(to) ? to : from };
+    }
+  } else {
+    const from = parseInt(firstRange, 10);
+    if (Number.isFinite(from)) return { filePath, from, to: from };
+  }
+  return null;
+}
+
 export default function DomainBugsSecuritySection({
   domainId,
   bugsSecurity,
@@ -94,6 +122,8 @@ export default function DomainBugsSecuritySection({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);
   const [expandedFindings, setExpandedFindings] = useState(new Set());
+  const [expandedSnippets, setExpandedSnippets] = useState(new Set());
+  const [snippetCache, setSnippetCache] = useState(new Map());
 
   const isAnalyzing = loading && !bugsSecurity;
   const hasData = !!bugsSecurity;
@@ -153,6 +183,46 @@ export default function DomainBugsSecuritySection({
     }
   };
 
+  const fetchSnippetForFinding = async (findingId, finding) => {
+    if (snippetCache.has(findingId)) return;
+    const sourceStr = finding.location
+      ? `${finding.location.file}:${finding.location.line}`
+      : finding.source;
+    const loc = parseSourceLocation(sourceStr);
+    if (!loc) return;
+    setSnippetCache((prev) =>
+      new Map(prev).set(findingId, {
+        loading: true,
+        snippet: null,
+        language: null,
+        from: loc.from,
+        to: loc.to,
+      }),
+    );
+    try {
+      const response = await api.getFileSnippet(loc.filePath, loc.from, loc.to);
+      setSnippetCache((prev) =>
+        new Map(prev).set(findingId, {
+          loading: false,
+          snippet: response.data.snippet,
+          language: response.data.language,
+          from: response.data.from,
+          to: response.data.to,
+        }),
+      );
+    } catch {
+      setSnippetCache((prev) =>
+        new Map(prev).set(findingId, {
+          loading: false,
+          snippet: null,
+          language: null,
+          from: null,
+          to: null,
+        }),
+      );
+    }
+  };
+
   const toggleFindingExpanded = (findingId) => {
     setExpandedFindings((prev) => {
       const next = new Set(prev);
@@ -160,6 +230,19 @@ export default function DomainBugsSecuritySection({
         next.delete(findingId);
       } else {
         next.add(findingId);
+      }
+      return next;
+    });
+  };
+
+  const toggleSnippet = (findingId, finding) => {
+    setExpandedSnippets((prev) => {
+      const next = new Set(prev);
+      if (next.has(findingId)) {
+        next.delete(findingId);
+      } else {
+        next.add(findingId);
+        fetchSnippetForFinding(findingId, finding);
       }
       return next;
     });
@@ -596,27 +679,98 @@ export default function DomainBugsSecuritySection({
                                               Location:
                                             </Text>
                                           </HStack>
-                                          <Code
-                                            fontSize="sm"
-                                            p={2}
-                                            display="block"
-                                            cursor="pointer"
-                                            onClick={(event) => {
-                                              event.stopPropagation();
-                                              handleOpenLocation(
-                                                finding.location,
+                                          <HStack gap={1}>
+                                            <Code
+                                              fontSize="sm"
+                                              p={2}
+                                              display="block"
+                                              flex={1}
+                                              cursor="pointer"
+                                              userSelect="none"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                toggleSnippet(
+                                                  finding.id,
+                                                  finding,
+                                                );
+                                              }}
+                                            >
+                                              <HStack gap={1}>
+                                                {expandedSnippets.has(
+                                                  finding.id,
+                                                ) ? (
+                                                  <ChevronDown size={12} />
+                                                ) : (
+                                                  <ChevronRight size={12} />
+                                                )}
+                                                <Text
+                                                  as="span"
+                                                  fontSize="sm"
+                                                  fontFamily="mono"
+                                                >
+                                                  {source}
+                                                </Text>
+                                              </HStack>
+                                            </Code>
+                                            {finding.location?.file && (
+                                              <IconButton
+                                                size="xs"
+                                                variant="ghost"
+                                                aria-label="Open in editor"
+                                                onClick={(event) => {
+                                                  event.stopPropagation();
+                                                  handleOpenLocation(
+                                                    finding.location,
+                                                  );
+                                                }}
+                                              >
+                                                <ExternalLink size={12} />
+                                              </IconButton>
+                                            )}
+                                          </HStack>
+                                          {expandedSnippets.has(finding.id) &&
+                                            (() => {
+                                              const cached = snippetCache.get(
+                                                finding.id,
                                               );
-                                            }}
-                                          >
-                                            {source}
-                                          </Code>
-                                          {finding.location?.snippet && (
-                                            <Box mt={2}>
-                                              <MarkdownRenderer
-                                                content={`\`\`\`javascript\n${finding.location.snippet}\n\`\`\``}
-                                              />
-                                            </Box>
-                                          )}
+                                              if (cached?.loading) {
+                                                return (
+                                                  <Box mt={2}>
+                                                    <Skeleton
+                                                      height="120px"
+                                                      borderRadius="md"
+                                                    />
+                                                  </Box>
+                                                );
+                                              }
+                                              if (cached?.snippet) {
+                                                return (
+                                                  <Box mt={2}>
+                                                    <Text
+                                                      fontSize="xs"
+                                                      color="gray.500"
+                                                      mb={1}
+                                                    >
+                                                      Lines {cached.from}–
+                                                      {cached.to}
+                                                    </Text>
+                                                    <MarkdownRenderer
+                                                      content={`\`\`\`${cached.language}\n${cached.snippet}\n\`\`\``}
+                                                    />
+                                                  </Box>
+                                                );
+                                              }
+                                              if (finding.location?.snippet) {
+                                                return (
+                                                  <Box mt={2}>
+                                                    <MarkdownRenderer
+                                                      content={`\`\`\`javascript\n${finding.location.snippet}\n\`\`\``}
+                                                    />
+                                                  </Box>
+                                                );
+                                              }
+                                              return null;
+                                            })()}
                                         </Box>
                                       )}
 
@@ -672,18 +826,19 @@ export default function DomainBugsSecuritySection({
                                         </Box>
                                       )}
 
-                                      {(finding.fixExample ||
-                                        finding.suggestedFix) && (
+                                      {finding.suggestedFix && (
                                         <Box>
-                                          <Text
-                                            fontSize="sm"
-                                            fontWeight="semibold"
-                                            mb={1}
-                                          >
-                                            Fix Example:
-                                          </Text>
+                                          <HStack gap={1} mb={1}>
+                                            <Lightbulb size={14} />
+                                            <Text
+                                              fontSize="sm"
+                                              fontWeight="semibold"
+                                            >
+                                              Suggested Fix:
+                                            </Text>
+                                          </HStack>
                                           <MarkdownRenderer
-                                            content={`\`\`\`javascript\n${finding.fixExample || finding.suggestedFix}\n\`\`\``}
+                                            content={`\`\`\`javascript\n${finding.suggestedFix}\n\`\`\``}
                                           />
                                         </Box>
                                       )}
