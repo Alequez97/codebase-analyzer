@@ -65,6 +65,32 @@ export async function updateDomainFiles(domainId, files) {
 }
 
 /**
+ * Update a domain's priority in codebase analysis
+ * @param {string} domainId - Domain ID
+ * @param {string} priority - New priority (P0|P1|P2|P3)
+ * @returns {Promise<Object|null>} Updated domain or null if not found
+ */
+export async function updateDomainPriority(domainId, priority) {
+  const analysis = await readCodebaseAnalysis();
+
+  if (!analysis || !analysis.domains) {
+    return null;
+  }
+
+  const domainIndex = analysis.domains.findIndex((d) => d.id === domainId);
+
+  if (domainIndex === -1) {
+    return null;
+  }
+
+  analysis.domains[domainIndex].priority = priority;
+
+  await writeCodebaseAnalysis(analysis);
+
+  return analysis.domains[domainIndex];
+}
+
+/**
  * Update platform summary in codebase analysis
  * @param {string} summary - Platform summary text
  * @returns {Promise<Object|null>} Updated analysis or null if file not found

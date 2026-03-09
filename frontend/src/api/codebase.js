@@ -16,3 +16,6 @@ export const saveCodebaseSummary = (summary) =>
 
 export const getCodebaseAnalysisLogs = () =>
   client.get("/logs/codebase-analysis");
+
+export const updateDomainPriority = (domainId, priority) =>
+  client.patch(`/analysis/codebase/domains/${domainId}/priority`, { priority });

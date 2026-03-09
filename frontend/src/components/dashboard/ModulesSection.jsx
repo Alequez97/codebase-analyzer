@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -6,15 +6,16 @@ import {
   Heading,
   HStack,
   IconButton,
-  SimpleGrid,
   Spinner,
-  Table,
   Text,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
 import {
   Bug,
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
   Pencil,
   Save,
   ScanSearch,
@@ -22,16 +23,299 @@ import {
   TestTube,
   X,
 } from "lucide-react";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "../ui/toaster";
 import { useCodebaseStore } from "../../store/useCodebaseStore";
 import { useLogsStore } from "../../store/useLogsStore";
 
-export function ModulesSection() {
+const PRIORITY_CONFIG = {
+  P0: {
+    label: "Critical",
+    color: "#991b1b",
+    bg: "#fff5f5",
+    headerBorder: "#f9c6c6",
+    dot: "#ef4444",
+    badgePalette: "red",
+  },
+  P1: {
+    label: "High",
+    color: "#9a3412",
+    bg: "#fff8f2",
+    headerBorder: "#fddcb5",
+    dot: "#f97316",
+    badgePalette: "orange",
+  },
+  P2: {
+    label: "Medium",
+    color: "#854d0e",
+    bg: "#fefce8",
+    headerBorder: "#fde68a",
+    dot: "#eab308",
+    badgePalette: "yellow",
+  },
+  P3: {
+    label: "Low",
+    color: "#4b5563",
+    bg: "#f9fafb",
+    headerBorder: "#e5e7eb",
+    dot: "#9ca3af",
+    badgePalette: "gray",
+  },
+};
+
+const PRIORITY_ORDER = ["P0", "P1", "P2", "P3"];
+
+function DomainCard({ domain, provided, snapshot }) {
   const navigate = useNavigate();
+
+  return (
+    <Box
+      ref={provided.innerRef}
+      {...provided.draggableProps}
+      bg={snapshot.isDragging ? "blue.50" : "white"}
+      borderWidth="1.5px"
+      borderColor={
+        snapshot.isDragging
+          ? "blue.300"
+          : domain.hasAnalysis
+            ? "green.200"
+            : "gray.200"
+      }
+      borderLeftWidth={domain.hasAnalysis ? "3px" : "1.5px"}
+      borderLeftColor={domain.hasAnalysis ? "green.400" : "gray.200"}
+      borderRadius="lg"
+      boxShadow={
+        snapshot.isDragging
+          ? "0 8px 24px rgba(59,130,246,.25)"
+          : "0 1px 3px rgba(0,0,0,.06)"
+      }
+      transition="box-shadow 0.15s, border-color 0.15s"
+      _hover={{
+        boxShadow: "0 3px 10px rgba(0,0,0,.1)",
+        borderColor: "gray.300",
+      }}
+      overflow="hidden"
+    >
+      <HStack align="stretch" gap={0}>
+        {/* Drag handle */}
+        <Box
+          {...provided.dragHandleProps}
+          px={2}
+          display="flex"
+          alignItems="center"
+          color="gray.300"
+          _hover={{ color: "gray.500", bg: "gray.50" }}
+          cursor="grab"
+          borderRightWidth="1px"
+          borderRightColor="gray.100"
+          flexShrink={0}
+        >
+          <GripVertical size={14} />
+        </Box>
+
+        {/* Card body */}
+        <Box p={3} flex="1" minW={0}>
+          <Text
+            fontWeight="700"
+            fontSize="sm"
+            color="gray.800"
+            lineHeight="short"
+            mb={1}
+            noOfLines={1}
+          >
+            {domain.name}
+          </Text>
+          <Text fontSize="xs" color="gray.500" lineHeight="tall" mb={2}>
+            {domain.businessPurpose}
+          </Text>
+          <HStack justify="space-between" align="center">
+            <HStack gap={1.5}>
+              <Box
+                w="6px"
+                h="6px"
+                borderRadius="full"
+                bg={domain.hasAnalysis ? "green.400" : "gray.300"}
+                flexShrink={0}
+              />
+              <Text
+                fontSize="10px"
+                color={domain.hasAnalysis ? "green.600" : "gray.400"}
+                fontWeight="500"
+              >
+                {domain.hasAnalysis ? "Analyzed" : "Not analyzed"}
+              </Text>
+            </HStack>
+            <Button
+              size="xs"
+              variant="outline"
+              colorPalette="blue"
+              borderRadius="md"
+              onClick={() => navigate(`/domains/${domain.id}`)}
+              fontSize="11px"
+              h="22px"
+              px={2.5}
+            >
+              View →
+            </Button>
+          </HStack>
+        </Box>
+      </HStack>
+    </Box>
+  );
+}
+
+function PrioritySection({ priority, domains, isExpanded, onToggle }) {
+  const cfg = PRIORITY_CONFIG[priority];
+
+  return (
+    <Droppable droppableId={priority}>
+      {(provided, snapshot) => (
+        <Box
+          borderWidth="1.5px"
+          borderColor={snapshot.isDraggingOver ? "blue.300" : cfg.headerBorder}
+          borderRadius="xl"
+          overflow="hidden"
+          transition="border-color 0.15s"
+          boxShadow={
+            snapshot.isDraggingOver ? "0 0 0 3px rgba(59,130,246,.15)" : "none"
+          }
+        >
+          {/* Section header */}
+          <HStack
+            px={4}
+            py={3}
+            bg={snapshot.isDraggingOver ? "#f0f6ff" : cfg.bg}
+            borderBottomWidth={isExpanded ? "1px" : "0"}
+            borderBottomColor={cfg.headerBorder}
+            cursor="pointer"
+            onClick={onToggle}
+            _hover={{ filter: "brightness(0.97)" }}
+            transition="background 0.15s"
+            gap={3}
+            userSelect="none"
+          >
+            <Box
+              w="10px"
+              h="10px"
+              borderRadius="full"
+              bg={cfg.dot}
+              flexShrink={0}
+            />
+            <Text fontWeight="700" fontSize="sm" color={cfg.color} flex="1">
+              {priority} · {cfg.label}
+            </Text>
+            <HStack gap={2}>
+              <Badge
+                fontSize="10px"
+                fontWeight="700"
+                colorPalette={cfg.badgePalette}
+                borderRadius="full"
+                px={2}
+              >
+                {domains.length}
+              </Badge>
+              <Box color="gray.400">
+                {isExpanded ? (
+                  <ChevronDown size={14} />
+                ) : (
+                  <ChevronRight size={14} />
+                )}
+              </Box>
+            </HStack>
+          </HStack>
+
+          {/* Drop zone — always rendered for DnD to work */}
+          <Box ref={provided.innerRef} {...provided.droppableProps}>
+            {isExpanded ? (
+              <Box
+                px={3}
+                pt={3}
+                pb={1}
+                bg="white"
+                display="grid"
+                gridTemplateColumns="repeat(3, 1fr)"
+                gap={3}
+              >
+                {domains.length === 0 ? (
+                  <Box
+                    gridColumn="1 / -1"
+                    py={6}
+                    textAlign="center"
+                    color="gray.400"
+                    fontSize="xs"
+                    fontStyle="italic"
+                    borderWidth="2px"
+                    borderStyle="dashed"
+                    borderColor={
+                      snapshot.isDraggingOver ? "blue.300" : "gray.200"
+                    }
+                    borderRadius="lg"
+                    mb={2}
+                    bg={snapshot.isDraggingOver ? "blue.50" : "transparent"}
+                    transition="all 0.15s"
+                  >
+                    {snapshot.isDraggingOver
+                      ? `Drop here → assign ${priority}`
+                      : "No domains in this group yet"}
+                  </Box>
+                ) : (
+                  domains.map((domain, index) => (
+                    <Draggable
+                      key={domain.id}
+                      draggableId={domain.id}
+                      index={index}
+                    >
+                      {(dp, ds) => (
+                        <DomainCard
+                          domain={domain}
+                          provided={dp}
+                          snapshot={ds}
+                        />
+                      )}
+                    </Draggable>
+                  ))
+                )}
+                {provided.placeholder}
+              </Box>
+            ) : (
+              /* Collapsed — small drop hint area */
+              <Box
+                px={3}
+                py={snapshot.isDraggingOver ? 3 : 0}
+                bg={snapshot.isDraggingOver ? "blue.50" : "transparent"}
+                minH={snapshot.isDraggingOver ? "56px" : "0px"}
+                transition="all 0.15s"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                {snapshot.isDraggingOver && (
+                  <Text fontSize="xs" color="blue.500" fontWeight="600">
+                    Drop here → assign {priority}
+                  </Text>
+                )}
+                {provided.placeholder}
+              </Box>
+            )}
+          </Box>
+        </Box>
+      )}
+    </Droppable>
+  );
+}
+
+export function ModulesSection() {
   const [isEditingSummary, setIsEditingSummary] = useState(false);
   const [editedSummary, setEditedSummary] = useState("");
   const [savingSummary, setSavingSummary] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    P0: true,
+    P1: true,
+    P2: false,
+    P3: false,
+  });
+
   const { toggleDashboardLogs } = useLogsStore();
   const {
     analysis,
@@ -39,25 +323,23 @@ export function ModulesSection() {
     analyzeCodebase,
     cancelCodebaseAnalysis,
     saveCodebaseSummary,
+    updateDomainPriority,
   } = useCodebaseStore();
-
-  const handleCancelReanalysis = async () => {
-    const result = await cancelCodebaseAnalysis();
-    if (!result.success) {
-      toaster.create({
-        title: "Failed to cancel analysis",
-        description: result.error,
-        type: "error",
-      });
-    }
-  };
 
   const domains = analysis?.domains || [];
 
+  // Group domains by priority
+  const domainsByPriority = useMemo(() => {
+    const groups = { P0: [], P1: [], P2: [], P3: [] };
+    domains.forEach((d) => {
+      if (groups[d.priority]) groups[d.priority].push(d);
+      else groups.P3.push(d);
+    });
+    return groups;
+  }, [domains]);
+
   useEffect(() => {
-    if (!isEditingSummary) {
-      setEditedSummary(analysis?.summary || "");
-    }
+    if (!isEditingSummary) setEditedSummary(analysis?.summary || "");
   }, [analysis?.summary, isEditingSummary]);
 
   const handleEnterSummaryEdit = () => {
@@ -76,14 +358,10 @@ export function ModulesSection() {
     setSavingSummary(false);
 
     if (result.success) {
-      toaster.create({
-        title: "Platform description saved successfully",
-        type: "success",
-      });
+      toaster.create({ title: "Platform description saved", type: "success" });
       setIsEditingSummary(false);
       return;
     }
-
     toaster.create({
       title: "Failed to save platform description",
       description: result.error,
@@ -91,314 +369,308 @@ export function ModulesSection() {
     });
   };
 
-  return (
-    <>
-      {!analyzingCodebase && domains.length === 0 && (
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          minH="calc(100vh - 52px)"
-          overflow="hidden"
-          bg="white"
-        >
-          <VStack gap={6} px={4} textAlign="center">
-            {/* Icon */}
-            <Box
-              p={3}
-              bg="blue.50"
-              borderRadius="full"
-              color="blue.500"
-              display="inline-flex"
-            >
-              <ScanSearch size={36} strokeWidth={1.5} />
-            </Box>
+  const handleCancelReanalysis = async () => {
+    const result = await cancelCodebaseAnalysis();
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to cancel analysis",
+        description: result.error,
+        type: "error",
+      });
+    }
+  };
 
-            {/* Headline */}
-            <VStack gap={2}>
-              <Heading size="xl" color="gray.800" fontWeight="bold">
-                AI-Powered Code Analysis
-              </Heading>
-              <Text
-                fontSize="md"
-                color="gray.500"
-                maxW="520px"
-                lineHeight="tall"
-              >
-                Let AI automatically audit your codebase — discovering
-                functional domains, surfacing bugs, flagging security
-                vulnerabilities, and identifying missing test coverage.
-              </Text>
-            </VStack>
+  const toggleSection = (priority) =>
+    setExpandedSections((prev) => ({ ...prev, [priority]: !prev[priority] }));
 
-            {/* Feature cards */}
-            <SimpleGrid columns={3} gap={4} w="full" maxW="640px">
-              <VStack
-                gap={2}
-                p={3}
-                bg="red.50"
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor="red.100"
-              >
-                <Box color="red.500">
-                  <Bug size={22} strokeWidth={1.5} />
-                </Box>
-                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
-                  Bug Detection
-                </Text>
-                <Text fontSize="xs" color="gray.500" textAlign="center">
-                  Logic errors, race conditions & edge cases
-                </Text>
-              </VStack>
+  const handleDragEnd = async ({ source, destination, draggableId }) => {
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId) return;
 
-              <VStack
-                gap={2}
-                p={3}
-                bg="orange.50"
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor="orange.100"
-              >
-                <Box color="orange.500">
-                  <Shield size={22} strokeWidth={1.5} />
-                </Box>
-                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
-                  Security Scan
-                </Text>
-                <Text fontSize="xs" color="gray.500" textAlign="center">
-                  Injections, XSS, auth flaws & data exposure
-                </Text>
-              </VStack>
+    const newPriority = destination.droppableId;
 
-              <VStack
-                gap={2}
-                p={3}
-                bg="green.50"
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor="green.100"
-              >
-                <Box color="green.500">
-                  <TestTube size={22} strokeWidth={1.5} />
-                </Box>
-                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
-                  Test Coverage
-                </Text>
-                <Text fontSize="xs" color="gray.500" textAlign="center">
-                  Missing tests, gaps & actionable suggestions
-                </Text>
-              </VStack>
-            </SimpleGrid>
+    // Auto-expand destination so the card is immediately visible
+    setExpandedSections((prev) => ({ ...prev, [newPriority]: true }));
 
-            {/* CTA button */}
-            <Button
-              size="lg"
-              colorPalette="blue"
-              px={8}
-              fontWeight="semibold"
-              borderRadius="xl"
-              onClick={analyzeCodebase}
-              shadow="md"
-              _hover={{ shadow: "lg", transform: "translateY(-1px)" }}
-              transition="all 0.15s ease"
-            >
-              <ScanSearch size={18} />
-              Analyze Codebase
-            </Button>
+    const res = await updateDomainPriority(draggableId, newPriority);
+    if (!res.success) {
+      toaster.create({
+        title: "Failed to update priority",
+        description: res.error,
+        type: "error",
+      });
+    }
+  };
 
-            <Text fontSize="xs" color="gray.400">
-              Runs in the background — results appear automatically when
-              complete. Want to follow along?{" "}
-              <Text
-                as="span"
-                color="blue.400"
-                cursor="pointer"
-                textDecoration="underline"
-                _hover={{ color: "blue.500" }}
-                onClick={toggleDashboardLogs}
-              >
-                Open Logs
-              </Text>
-              .
+  // ── Empty state ──────────────────────────────────────────────────────────
+  if (!analyzingCodebase && domains.length === 0) {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minH="calc(100vh - 52px)"
+        bg="white"
+      >
+        <VStack gap={6} px={4} textAlign="center">
+          <Box
+            p={3}
+            bg="blue.50"
+            borderRadius="full"
+            color="blue.500"
+            display="inline-flex"
+          >
+            <ScanSearch size={36} strokeWidth={1.5} />
+          </Box>
+          <VStack gap={2}>
+            <Heading size="xl" color="gray.800" fontWeight="bold">
+              AI-Powered Code Analysis
+            </Heading>
+            <Text fontSize="md" color="gray.500" maxW="520px" lineHeight="tall">
+              Let AI automatically audit your codebase — discovering functional
+              domains, surfacing bugs, flagging security vulnerabilities, and
+              identifying missing test coverage.
             </Text>
           </VStack>
-        </Box>
-      )}
-
-      {domains.length > 0 && (
-        <Box p={6}>
-          <VStack align="stretch" gap={4}>
-            {analyzingCodebase ? (
-              <HStack
-                px={4}
-                py={3}
-                bg="blue.50"
-                borderRadius="lg"
+          <HStack gap={4} w="full" maxW="640px" justify="center">
+            {[
+              {
+                bg: "red.50",
+                border: "red.100",
+                iconColor: "red.500",
+                Icon: Bug,
+                label: "Bug Detection",
+                desc: "Logic errors, race conditions & edge cases",
+              },
+              {
+                bg: "orange.50",
+                border: "orange.100",
+                iconColor: "orange.500",
+                Icon: Shield,
+                label: "Security Scan",
+                desc: "Injections, XSS, auth flaws & data exposure",
+              },
+              {
+                bg: "green.50",
+                border: "green.100",
+                iconColor: "green.500",
+                Icon: TestTube,
+                label: "Test Coverage",
+                desc: "Missing tests, gaps & actionable suggestions",
+              },
+            ].map(({ bg, border, iconColor, Icon, label, desc }) => (
+              <VStack
+                key={label}
+                gap={2}
+                p={3}
+                flex="1"
+                bg={bg}
+                borderRadius="xl"
                 borderWidth="1px"
-                borderColor="blue.100"
-                gap={3}
+                borderColor={border}
               >
-                <Spinner size="xs" color="blue.500" />
-                <Text fontSize="sm" color="blue.700" flex="1">
-                  Re-analyzing codebase in the background…
+                <Box color={iconColor}>
+                  <Icon size={22} strokeWidth={1.5} />
+                </Box>
+                <Text fontWeight="semibold" color="gray.700" fontSize="sm">
+                  {label}
                 </Text>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  colorPalette="blue"
-                  onClick={toggleDashboardLogs}
-                >
-                  View Logs
-                </Button>
+                <Text fontSize="xs" color="gray.500" textAlign="center">
+                  {desc}
+                </Text>
+              </VStack>
+            ))}
+          </HStack>
+          <Button
+            size="lg"
+            colorPalette="blue"
+            px={8}
+            fontWeight="semibold"
+            borderRadius="xl"
+            onClick={analyzeCodebase}
+            shadow="md"
+            _hover={{ shadow: "lg", transform: "translateY(-1px)" }}
+            transition="all 0.15s ease"
+          >
+            <ScanSearch size={18} /> Analyze Codebase
+          </Button>
+          <Text fontSize="xs" color="gray.400">
+            Runs in the background — results appear automatically when complete.
+            Want to follow along?{" "}
+            <Text
+              as="span"
+              color="blue.400"
+              cursor="pointer"
+              textDecoration="underline"
+              _hover={{ color: "blue.500" }}
+              onClick={toggleDashboardLogs}
+            >
+              Open Logs
+            </Text>
+            .
+          </Text>
+        </VStack>
+      </Box>
+    );
+  }
+
+  // ── Domain board ─────────────────────────────────────────────────────────
+  return (
+    <Box p={6} maxW="1200px" mx="auto">
+      <VStack align="stretch" gap={4}>
+        {/* Re-analyzing banner */}
+        {analyzingCodebase && (
+          <HStack
+            px={4}
+            py={3}
+            bg="blue.50"
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor="blue.100"
+            gap={3}
+          >
+            <Spinner size="xs" color="blue.500" />
+            <Text fontSize="sm" color="blue.700" flex="1">
+              Re-analyzing codebase in the background…
+            </Text>
+            <Button
+              variant="ghost"
+              size="xs"
+              colorPalette="blue"
+              onClick={toggleDashboardLogs}
+            >
+              View Logs
+            </Button>
+            <IconButton
+              variant="ghost"
+              size="xs"
+              colorPalette="red"
+              onClick={handleCancelReanalysis}
+              aria-label="Cancel re-analysis"
+            >
+              <X size={12} />
+            </IconButton>
+          </HStack>
+        )}
+
+        {/* Platform description */}
+        <Box
+          p={4}
+          bg="blue.50"
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor="blue.100"
+        >
+          <HStack justify="space-between" mb={2}>
+            <HStack gap={1}>
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                letterSpacing="wider"
+                textTransform="uppercase"
+                color="blue.700"
+              >
+                Platform Description
+              </Text>
+              {!isEditingSummary && (
                 <IconButton
-                  variant="ghost"
                   size="xs"
-                  colorPalette="red"
-                  onClick={handleCancelReanalysis}
-                  aria-label="Cancel re-analysis"
+                  variant="ghost"
+                  colorPalette="blue"
+                  onClick={handleEnterSummaryEdit}
+                  title="Edit"
                 >
-                  <X size={12} />
+                  <Pencil size={13} />
                 </IconButton>
-              </HStack>
-            ) : (
-              <HStack justify="flex-end">
+              )}
+              {isEditingSummary && (
+                <IconButton
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="gray"
+                  onClick={handleCancelSummaryEdit}
+                  title="Cancel"
+                >
+                  <X size={13} />
+                </IconButton>
+              )}
+            </HStack>
+            <HStack gap={2}>
+              {isEditingSummary && (
+                <Button
+                  size="xs"
+                  colorPalette="green"
+                  onClick={handleSaveSummary}
+                  loading={savingSummary}
+                >
+                  <Save size={12} /> Save
+                </Button>
+              )}
+              {!isEditingSummary && !analyzingCodebase && (
                 <Button
                   colorPalette="blue"
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   onClick={analyzeCodebase}
                 >
                   Re-analyze Codebase
                 </Button>
-              </HStack>
-            )}
-            <Box p={4} bg="blue.50" borderRadius="md" mt={2}>
-              <HStack justify="space-between" mb={2}>
-                <HStack>
-                  <Heading size="sm" color="blue.800">
-                    Platform Description
-                  </Heading>
-                  {!isEditingSummary && (
-                    <IconButton
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleEnterSummaryEdit}
-                      title="Edit platform description"
-                    >
-                      <Pencil size={16} />
-                    </IconButton>
-                  )}
-                  {isEditingSummary && (
-                    <IconButton
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleCancelSummaryEdit}
-                      title="Cancel editing"
-                    >
-                      <X size={16} />
-                    </IconButton>
-                  )}
-                </HStack>
-                {isEditingSummary && (
-                  <Button
-                    size="sm"
-                    colorPalette="green"
-                    onClick={handleSaveSummary}
-                    loading={savingSummary}
-                  >
-                    <Save size={14} />
-                    Save
-                  </Button>
-                )}
-              </HStack>
-              {isEditingSummary ? (
-                <Textarea
-                  value={editedSummary}
-                  onChange={(e) => setEditedSummary(e.target.value)}
-                  rows={5}
-                  fontSize="sm"
-                  placeholder="Describe what this platform does..."
-                />
-              ) : (
-                <Text fontSize="sm" color="gray.700">
-                  {analysis?.summary ||
-                    "No platform summary available yet. Run codebase analysis to generate it."}
-                </Text>
               )}
-            </Box>
-
-            <HStack justify="space-between">
-              <Text color="gray.600">
-                Found {domains.length} domain{domains.length !== 1 ? "s" : ""}
-              </Text>
             </HStack>
-
-            <Table.Root size="sm" variant="outline">
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>Domain</Table.ColumnHeader>
-                  <Table.ColumnHeader>Description</Table.ColumnHeader>
-                  <Table.ColumnHeader>Status</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">
-                    Actions
-                  </Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {domains.map((domain) => {
-                  return (
-                    <Table.Row key={domain.id}>
-                      <Table.Cell>
-                        <VStack align="start" gap={1}>
-                          <HStack>
-                            <Text fontWeight="semibold">{domain.name}</Text>
-                            <Badge
-                              colorPalette={
-                                domain.priority === "P0"
-                                  ? "red"
-                                  : domain.priority === "P1"
-                                    ? "orange"
-                                    : domain.priority === "P2"
-                                      ? "yellow"
-                                      : "gray"
-                              }
-                            >
-                              {domain.priority}
-                            </Badge>
-                          </HStack>
-                        </VStack>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Text color="gray.700">{domain.businessPurpose}</Text>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Badge
-                          colorPalette={domain.hasAnalysis ? "green" : "gray"}
-                        >
-                          {domain.hasAnalysis ? "Analyzed" : "Not analyzed"}
-                        </Badge>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <HStack justify="flex-end">
-                          <Button
-                            size="sm"
-                            colorPalette="blue"
-                            variant="outline"
-                            onClick={() => navigate(`/domains/${domain.id}`)}
-                          >
-                            View details
-                          </Button>
-                        </HStack>
-                      </Table.Cell>
-                    </Table.Row>
-                  );
-                })}
-              </Table.Body>
-            </Table.Root>
-          </VStack>
+          </HStack>
+          {isEditingSummary ? (
+            <Textarea
+              value={editedSummary}
+              onChange={(e) => setEditedSummary(e.target.value)}
+              rows={4}
+              fontSize="sm"
+              placeholder="Describe what this platform does…"
+              bg="white"
+            />
+          ) : (
+            <Text fontSize="sm" color="gray.700" lineHeight="tall">
+              {analysis?.summary ||
+                "No platform summary available yet. Run codebase analysis to generate it."}
+            </Text>
+          )}
         </Box>
-      )}
-    </>
+
+        {/* Domain count hint */}
+        <HStack gap={2}>
+          <Text fontSize="sm" color="gray.500" fontWeight="500">
+            Found{" "}
+            <Text as="span" fontWeight="700" color="gray.800">
+              {domains.length}
+            </Text>{" "}
+            domains across{" "}
+            <Text as="span" fontWeight="700" color="gray.800">
+              {
+                PRIORITY_ORDER.filter((p) => domainsByPriority[p]?.length > 0)
+                  .length
+              }
+            </Text>{" "}
+            priority groups
+          </Text>
+          <Text fontSize="xs" color="gray.400">
+            — drag cards between groups to reprioritize
+          </Text>
+        </HStack>
+
+        {/* Priority sections */}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <VStack align="stretch" gap={3}>
+            {PRIORITY_ORDER.map((priority) => (
+              <PrioritySection
+                key={priority}
+                priority={priority}
+                domains={domainsByPriority[priority] || []}
+                isExpanded={expandedSections[priority]}
+                onToggle={() => toggleSection(priority)}
+              />
+            ))}
+          </VStack>
+        </DragDropContext>
+      </VStack>
+    </Box>
   );
 }

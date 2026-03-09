@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Domain List — Wireframe Options</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #f0ede8;
+        color: #2a2a2a;
+        padding: 40px 32px;
+      }
+
+      h1 {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 48px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      h1::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #ccc;
+      }
+
+      /* ─── OPTION WRAPPER ─── */
+      .option {
+        margin-bottom: 72px;
+      }
+      .option-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 10px;
+      }
+      .option-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 6px;
+      }
+      .option-desc {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 24px;
+        max-width: 640px;
+        line-height: 1.6;
+      }
+
+      /* ─── WIREFRAME SHELL ─── */
+      .wireframe {
+        background: #fff;
+        border: 1.5px solid #c8c3bb;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow:
+          0 2px 12px rgba(0, 0, 0, 0.07),
+          0 0 0 1px rgba(0, 0, 0, 0.03);
+      }
+
+      /* ─── TOP BAR / NAV ─── */
+      .nav-bar {
+        background: #1e1e2e;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .nav-logo {
+        width: 28px;
+        height: 28px;
+        background: #4f6ef7;
+        border-radius: 6px;
+        flex-shrink: 0;
+      }
+      .nav-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e8e8f0;
+        flex: 1;
+      }
+      .nav-pill {
+        font-size: 11px;
+        background: #2e2e42;
+        color: #9090b0;
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+
+      /* ─── TOP BANNER (re-analyze + description) ─── */
+      .banner {
+        background: #eef3ff;
+        border-bottom: 1px solid #d5e0ff;
+        padding: 14px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .banner-body {
+        flex: 1;
+      }
+      .banner-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #4f6ef7;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .banner-text {
+        font-size: 12px;
+        color: #445;
+        line-height: 1.55;
+      }
+      .banner-text em {
+        font-style: normal;
+        font-weight: 600;
+        color: #222;
+      }
+      .banner-edit-btn {
+        width: 22px;
+        height: 22px;
+        background: transparent;
+        border: 1px solid #aabbff;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4f6ef7;
+        cursor: pointer;
+        font-size: 11px;
+        margin-top: 2px;
+        flex-shrink: 0;
+      }
+      .re-analyze-btn {
+        padding: 6px 14px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #fff;
+        border: 1.5px solid #4f6ef7;
+        border-radius: 6px;
+        color: #4f6ef7;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        align-self: center;
+      }
+
+      /* ─── SHARED CARD ─── */
+      .domain-card {
+        background: #fff;
+        border: 1.5px solid #e2e2e8;
+        border-radius: 8px;
+        padding: 12px 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: box-shadow 0.15s;
+        cursor: grab;
+        position: relative;
+      }
+      .domain-card:hover {
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+        border-color: #c0c0d0;
+      }
+      .domain-card.analyzed {
+        border-left: 3px solid #22c55e;
+      }
+      .card-drag-handle {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        color: #ccc;
+        font-size: 11px;
+        line-height: 1;
+        letter-spacing: 1px;
+      }
+      .card-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1a1a2e;
+        padding-right: 16px;
+      }
+      .card-desc {
+        font-size: 11px;
+        color: #777;
+        line-height: 1.45;
+      }
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 2px;
+      }
+      .status-dot {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        color: #999;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ccc;
+      }
+      .dot.analyzed {
+        background: #22c55e;
+      }
+      .status-dot.analyzed {
+        color: #16a34a;
+      }
+      .view-btn {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 9px;
+        background: transparent;
+        border: 1px solid #d0d0e0;
+        border-radius: 5px;
+        color: #4f6ef7;
+        cursor: pointer;
+      }
+      .view-btn:hover {
+        background: #f0f3ff;
+      }
+
+      /* ─── BADGE ─── */
+      .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 7px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      .p0 {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+      .p1 {
+        background: #ffedd5;
+        color: #c2410c;
+      }
+      .p2 {
+        background: #fef9c3;
+        color: #854d0e;
+      }
+      .p3 {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      /* ════════════════════════════════════
+       OPTION A — KANBAN COLUMNS
+       ════════════════════════════════════ */
+      .kanban-body {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        min-height: 460px;
+      }
+      .kanban-col {
+        flex: 1;
+        min-width: 0;
+        border-right: 1px solid #ebebef;
+        display: flex;
+        flex-direction: column;
+      }
+      .kanban-col:last-child {
+        border-right: none;
+      }
+      .col-header {
+        padding: 12px 14px 10px;
+        border-bottom: 1px solid #ebebef;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .col-header-p0 {
+        background: #fff5f5;
+      }
+      .col-header-p1 {
+        background: #fff8f2;
+      }
+      .col-header-p2 {
+        background: #fefce8;
+      }
+      .col-header-p3 {
+        background: #fafafa;
+      }
+
+      .col-title {
+        font-size: 12px;
+        font-weight: 700;
+        flex: 1;
+      }
+      .col-count {
+        font-size: 10px;
+        font-weight: 700;
+        background: rgba(0, 0, 0, 0.07);
+        border-radius: 20px;
+        padding: 1px 7px;
+        color: #555;
+      }
+      .col-body {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+      }
+
+      /* drag-over hint */
+      .drop-hint {
+        border: 2px dashed #c8d4ff;
+        border-radius: 8px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: #a0aec0;
+        background: #f7f9ff;
+      }
+
+      /* ════════════════════════════════════
+       OPTION B — VERTICAL SECTIONS
+       ════════════════════════════════════ */
+      .vertical-body {
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .section-block {
+        border: 1.5px solid #e2e2e8;
+        border-radius: 9px;
+        overflow: hidden;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 14px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .section-header-p0 {
+        background: #fff5f5;
+        border-bottom: 1px solid #f9c6c6;
+      }
+      .section-header-p1 {
+        background: #fff8f2;
+        border-bottom: 1px solid #fddcb5;
+      }
+      .section-header-p2 {
+        background: #fefce8;
+        border-bottom: 1px solid #fde68a;
+      }
+      .section-header-p3 {
+        background: #fafafa;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        flex: 1;
+      }
+      .section-count {
+        font-size: 11px;
+        color: #888;
+        font-weight: 600;
+      }
+      .chevron {
+        font-size: 11px;
+        color: #aaa;
+      }
+      .section-grid {
+        padding: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        background: #fdfdfd;
+      }
+      .section-grid.collapsed {
+        display: none;
+      }
+      .collapsed-placeholder {
+        padding: 12px 16px;
+        font-size: 11px;
+        color: #bbb;
+        background: #fafafa;
+        border-top: 1px dashed #e8e8ee;
+        text-align: center;
+      }
+
+      /* section drag-over highlight */
+      .section-block.drag-over .section-header {
+        outline: 2px dashed #a5b4fc;
+        outline-offset: -2px;
+      }
+
+      /* ─── ANNOTATIONS ─── */
+      .annotation {
+        font-size: 11px;
+        color: #999;
+        text-align: center;
+        margin-top: 12px;
+        font-style: italic;
+      }
+      .pros-cons {
+        display: flex;
+        gap: 16px;
+        margin-top: 14px;
+        font-size: 12px;
+      }
+      .pro {
+        color: #16a34a;
+      }
+      .con {
+        color: #dc2626;
+      }
+      .bullet::before {
+        content: "• ";
+      }
+
+      .tag {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        margin-bottom: 16px;
+      }
+      .recommended-tag {
+        display: inline-block;
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 9px;
+        border-radius: 20px;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dashboard Redesign — Domain List Wireframes</h1>
+
+    <!-- ══════════════════════════════════════════════════════
+       OPTION A
+       ══════════════════════════════════════════════════════ -->
+    <div class="option">
+      <div class="option-label">Option A</div>
+      <div class="option-title">Kanban Board — Priority Columns</div>
+      <div class="option-desc">
+        Four columns, one per priority. Cards live in columns and can be dragged
+        horizontally to reassign priority. Best when domain counts are roughly
+        balanced.
+      </div>
+
+      <div class="tag">Drag: left/right between columns</div>
+
+      <div class="wireframe">
+        <!-- nav -->
+        <div class="nav-bar">
+          <div class="nav-logo"></div>
+          <div class="nav-title">Codebase Analyzer</div>
+          <div class="nav-pill">Dashboard</div>
+          <div class="nav-pill">Logs</div>
+        </div>
+
+        <!-- banner -->
+        <div class="banner">
+          <div class="banner-body">
+            <div class="banner-label">
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <rect x="2" y="2" width="12" height="12" rx="2" />
+              </svg>
+              Platform Description
+            </div>
+            <div class="banner-text">
+              This monorepo contains a <em>Node/Express/Mongoose</em> backend
+              and a <em>React (Chakra UI)</em> frontend for a multi-module
+              platform that combines <em>aviation maintenance management</em>,
+              work orders, inventory, AD/SB compliance, with a
+              <em>tax-filing workflow</em> and multi-provider payments.
+            </div>
+          </div>
+          <div class="banner-edit-btn">✎</div>
+          <div class="re-analyze-btn">Re-analyze Codebase</div>
+        </div>
+
+        <!-- kanban -->
+        <div class="kanban-body">
+          <!-- P0 -->
+          <div class="kanban-col">
+            <div class="col-header col-header-p0">
+              <span style="color: #dc2626">●</span>
+              <span class="col-title" style="color: #991b1b"
+                >P0 · Critical</span
+              >
+              <span class="col-count">13</span>
+            </div>
+            <div class="col-body">
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">API Server Bootstrap</div>
+                <div class="card-desc">
+                  Bootstraps HTTP API, connects to MongoDB, configures
+                  middleware.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Auth &amp; Account Security</div>
+                <div class="card-desc">
+                  Signup / login, OTP, JWT issuance, IP validation.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card analyzed">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Payments &amp; Billing</div>
+                <div class="card-desc">
+                  Stripe, PayPal, Mollie, Razorpay — payment history.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot analyzed">
+                    <span class="dot analyzed"></span>Analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <!-- drop hint simulating many more -->
+              <div
+                style="
+                  font-size: 10px;
+                  text-align: center;
+                  color: #bbb;
+                  padding: 4px 0;
+                "
+              >
+                + 10 more cards
+              </div>
+              <div class="drop-hint">Drop here to make P0</div>
+            </div>
+          </div>
+
+          <!-- P1 -->
+          <div class="kanban-col">
+            <div class="col-header col-header-p1">
+              <span style="color: #ea580c">●</span>
+              <span class="col-title" style="color: #9a3412">P1 · High</span>
+              <span class="col-count">4</span>
+            </div>
+            <div class="col-body">
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Aircraft Program Templates</div>
+                <div class="card-desc">
+                  Aircraft-type program templates with revisions and tasks.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Due List &amp; Planning</div>
+                <div class="card-desc">
+                  Generates filtered due lists with configurable thresholds.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="drop-hint">Drop here to make P1</div>
+            </div>
+          </div>
+
+          <!-- P2 -->
+          <div class="kanban-col">
+            <div class="col-header col-header-p2">
+              <span style="color: #ca8a04">●</span>
+              <span class="col-title" style="color: #92400e">P2 · Medium</span>
+              <span class="col-count">6</span>
+            </div>
+            <div class="col-body">
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Notifications System</div>
+                <div class="card-desc">
+                  Real-time socket events, email &amp; push notifications.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div
+                style="
+                  font-size: 10px;
+                  text-align: center;
+                  color: #bbb;
+                  padding: 4px 0;
+                "
+              >
+                + 5 more cards
+              </div>
+              <div class="drop-hint">Drop here to make P2</div>
+            </div>
+          </div>
+
+          <!-- P3 -->
+          <div class="kanban-col">
+            <div class="col-header col-header-p3">
+              <span style="color: #9ca3af">●</span>
+              <span class="col-title" style="color: #4b5563">P3 · Low</span>
+              <span class="col-count">3</span>
+            </div>
+            <div class="col-body">
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">UI Component Library</div>
+                <div class="card-desc">
+                  Shared Chakra UI component wrappers and theme config.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div
+                style="
+                  font-size: 10px;
+                  text-align: center;
+                  color: #bbb;
+                  padding: 4px 0;
+                "
+              >
+                + 2 more cards
+              </div>
+              <div class="drop-hint">Drop here to make P3</div>
+            </div>
+          </div>
+        </div>
+        <!-- /kanban-body -->
+      </div>
+      <!-- /wireframe -->
+
+      <div class="annotation">
+        ↔ Drag a card between columns to reassign its priority
+      </div>
+      <div class="pros-cons">
+        <div>
+          <div class="bullet pro">Great for balanced domain counts</div>
+          <div class="bullet pro">Drag gesture is natural and obvious</div>
+        </div>
+        <div>
+          <div class="bullet con">
+            P0 column becomes very tall (13 cards) while P3 is nearly empty
+          </div>
+          <div class="bullet con">
+            Requires horizontal scroll on narrow screens
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+       OPTION B
+       ══════════════════════════════════════════════════════ -->
+    <div class="option">
+      <div class="option-label">
+        Option B <span class="recommended-tag">★ Recommended</span>
+      </div>
+      <div class="option-title">
+        Vertical Sections — Collapsible Priority Groups
+      </div>
+      <div class="option-desc">
+        Stacked sections, one per priority, each containing a 3-column card
+        grid. Lower-priority sections start collapsed. Drag a card onto a
+        section header to move it into that priority group.
+      </div>
+
+      <div class="tag">Drag: drop card onto section header to reprioritize</div>
+
+      <div class="wireframe">
+        <!-- nav -->
+        <div class="nav-bar">
+          <div class="nav-logo"></div>
+          <div class="nav-title">Codebase Analyzer</div>
+          <div class="nav-pill">Dashboard</div>
+          <div class="nav-pill">Logs</div>
+        </div>
+
+        <!-- banner -->
+        <div class="banner">
+          <div class="banner-body">
+            <div class="banner-label">
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <rect x="2" y="2" width="12" height="12" rx="2" />
+              </svg>
+              Platform Description
+            </div>
+            <div class="banner-text">
+              This monorepo contains a <em>Node/Express/Mongoose</em> backend
+              and a <em>React (Chakra UI)</em> frontend for a multi-module
+              platform that combines <em>aviation maintenance management</em>,
+              work orders, inventory, AD/SB compliance, with a
+              <em>tax-filing workflow</em> and multi-provider payments.
+            </div>
+          </div>
+          <div class="banner-edit-btn">✎</div>
+          <div class="re-analyze-btn">Re-analyze Codebase</div>
+        </div>
+
+        <!-- vertical sections -->
+        <div class="vertical-body">
+          <!-- P0 (expanded) -->
+          <div class="section-block">
+            <div class="section-header section-header-p0">
+              <span style="font-size: 14px">🔴</span>
+              <span class="section-title" style="color: #991b1b"
+                >P0 · Critical</span
+              >
+              <span class="section-count">13 domains</span>
+              <span class="chevron">▲</span>
+            </div>
+            <div class="section-grid">
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">API Server Bootstrap</div>
+                <div class="card-desc">
+                  Bootstraps HTTP API, connects to MongoDB, configures
+                  middleware.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Auth &amp; Account Security</div>
+                <div class="card-desc">
+                  Signup / login, OTP, JWT issuance, IP validation.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card analyzed">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Payments &amp; Billing</div>
+                <div class="card-desc">
+                  Stripe, PayPal, Mollie, Razorpay — payment history linked to
+                  tax files.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot analyzed">
+                    <span class="dot analyzed"></span>Analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Authorization &amp; Permissions</div>
+                <div class="card-desc">
+                  Resource-scoped permission models and middleware.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Work Orders Management</div>
+                <div class="card-desc">
+                  Creates work orders with lifecycle transitions and task sync.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Flight Logs &amp; Utilization</div>
+                <div class="card-desc">
+                  Records flight logs, updates aircraft utilization with
+                  re-propagation.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Taxfile Workflow</div>
+                <div class="card-desc">
+                  Manages taxfile creation, accountant assignment, final upload
+                  to S3.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Company Management</div>
+                <div class="card-desc">
+                  Manages companies, user associations, active company
+                  selection.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Parts Inventory &amp; Warehouses</div>
+                <div class="card-desc">
+                  Tracks parts, inventories, warehouse locations with bulk
+                  operations.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P1 (expanded) -->
+          <div class="section-block">
+            <div class="section-header section-header-p1">
+              <span style="font-size: 14px">🟠</span>
+              <span class="section-title" style="color: #9a3412"
+                >P1 · High</span
+              >
+              <span class="section-count">4 domains</span>
+              <span class="chevron">▲</span>
+            </div>
+            <div class="section-grid">
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Aircraft Program Templates</div>
+                <div class="card-desc">
+                  Aircraft-type program templates with revisions and tasks.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Due List &amp; Planning</div>
+                <div class="card-desc">
+                  Generates filtered due lists based on configurable thresholds.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+              <div class="domain-card">
+                <span class="card-drag-handle">⠿</span>
+                <div class="card-name">Discrepancy Management</div>
+                <div class="card-desc">
+                  Manages aircraft discrepancies with CRUD and planning linkage.
+                </div>
+                <div class="card-footer">
+                  <div class="status-dot">
+                    <span class="dot"></span>Not analyzed
+                  </div>
+                  <button class="view-btn">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- P2 (collapsed) -->
+          <div class="section-block">
+            <div class="section-header section-header-p2">
+              <span style="font-size: 14px">🟡</span>
+              <span class="section-title" style="color: #92400e"
+                >P2 · Medium</span
+              >
+              <span class="section-count">6 domains</span>
+              <span class="chevron">▼</span>
+            </div>
+            <div class="collapsed-placeholder">
+              Click to expand 6 medium-priority domains
+            </div>
+          </div>
+
+          <!-- P3 (collapsed) -->
+          <div class="section-block">
+            <div class="section-header section-header-p3">
+              <span style="font-size: 14px">⚪</span>
+              <span class="section-title" style="color: #4b5563">P3 · Low</span>
+              <span class="section-count">3 domains</span>
+              <span class="chevron">▼</span>
+            </div>
+            <div class="collapsed-placeholder">
+              Click to expand 3 low-priority domains
+            </div>
+          </div>
+        </div>
+        <!-- /vertical-body -->
+      </div>
+      <!-- /wireframe -->
+
+      <div class="annotation">
+        ↕ Drag a card and drop it onto a section header to reassign priority ·
+        click section header to collapse/expand
+      </div>
+      <div class="pros-cons">
+        <div>
+          <div class="bullet pro">
+            Fits all 26 domains naturally in a 3-col grid
+          </div>
+          <div class="bullet pro">
+            No horizontal scroll — works on any screen width
+          </div>
+          <div class="bullet pro">
+            P2/P3 collapse keeps page short by default
+          </div>
+          <div class="bullet pro">Priority grouping is immediately obvious</div>
+        </div>
+        <div>
+          <div class="bullet con">
+            Drag target (section header) less obvious than a column
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

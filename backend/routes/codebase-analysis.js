@@ -78,6 +78,39 @@ router.get("/full", async (req, res) => {
 });
 
 /**
+ * Update a domain's priority
+ */
+router.patch("/domains/:id/priority", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { priority } = req.body;
+
+    const VALID = ["P0", "P1", "P2", "P3"];
+    if (!priority || !VALID.includes(priority)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "priority must be one of: P0, P1, P2, P3",
+      });
+    }
+
+    const updatedDomain =
+      await codebaseAnalysisPersistence.updateDomainPriority(id, priority);
+
+    if (!updatedDomain) {
+      return res.status(404).json({
+        error: "Domain not found",
+        message: `No domain found with id: ${id}`,
+      });
+    }
+
+    res.json({ success: true, domain: updatedDomain });
+  } catch (error) {
+    logger.error("Error updating domain priority", { error, component: "API" });
+    res.status(500).json({ error: "Failed to update domain priority" });
+  }
+});
+
+/**
  * Save edited platform summary
  */
 router.post("/summary/save", async (req, res) => {

@@ -112,6 +112,32 @@ export const useCodebaseStore = create((set, get) => ({
     }
   },
 
+  updateDomainPriority: async (domainId, priority) => {
+    // Optimistically update local state
+    set((state) => {
+      if (!state.analysis) return state;
+      return {
+        analysis: {
+          ...state.analysis,
+          domains: state.analysis.domains.map((d) =>
+            d.id === domainId ? { ...d, priority } : d,
+          ),
+        },
+      };
+    });
+
+    try {
+      await api.updateDomainPriority(domainId, priority);
+      return { success: true };
+    } catch (err) {
+      // Revert on failure by re-fetching
+      get().fetchAnalysis();
+      const message =
+        err?.response?.data?.message || "Failed to update priority";
+      return { success: false, error: message };
+    }
+  },
+
   saveCodebaseSummary: async (summary) => {
     if (typeof summary !== "string") {
       return { success: false, error: "Summary must be a string" };
