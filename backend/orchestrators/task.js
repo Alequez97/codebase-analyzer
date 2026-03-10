@@ -209,8 +209,7 @@ export async function executeTask(taskId) {
 
       await tasksPersistence.moveToFailed(taskId, selectionError);
 
-      // Clean up temporary progress file
-      await deleteProgressFile(taskId);
+      // Keep progress file for debugging failed tasks
 
       emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
         taskId,
@@ -243,8 +242,7 @@ export async function executeTask(taskId) {
 
     await tasksPersistence.moveToFailed(taskId, executionError);
 
-    // Clean up temporary progress file
-    await deleteProgressFile(taskId);
+    // Keep progress file for debugging failed tasks
 
     emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {
       taskId,
@@ -295,8 +293,7 @@ export async function executeTask(taskId) {
       result.error || "Task execution failed",
     );
 
-    // Clean up temporary progress file
-    await deleteProgressFile(taskId);
+    // Keep progress file for debugging failed tasks
 
     // Emit failure event
     emitSocketEvent(SOCKET_EVENTS.TASK_FAILED, {

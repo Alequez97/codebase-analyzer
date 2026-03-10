@@ -7,7 +7,7 @@ import * as logger from "./logger.js";
 /**
  * Get the relative path (from project root) for a task's progress file.
  * Uses .code-analysis/temp/ so the LLM agent can write to it (only .code-analysis/ is writable).
- * These files are temporary — only needed during task execution, deleted on completion.
+ * These files are deleted on successful completion or cancellation, but KEPT on failure for debugging.
  * @param {string} taskId
  * @returns {string}
  */
@@ -47,7 +47,8 @@ export async function ensureProgressDirectory(taskId) {
 }
 
 /**
- * Delete the progress file for a task (cleanup after completion)
+ * Delete the progress file for a task (cleanup after success or cancellation).
+ * Progress files are KEPT when tasks fail to aid debugging.
  * @param {string} taskId
  * @returns {Promise<void>}
  */
