@@ -278,16 +278,18 @@ E2E tests drive a **real browser** against the running application. They test co
 
 ### Step 0: Read Domain Source Files
 
-The following files belong to this domain. **Read them before writing a single locator.** Your goal is to discover real element roles, aria-labels, `data-testid` attributes, button names, and form field labels that exist in the actual UI:
+The following files belong to this domain. **Read them before writing any test code.** Your goal is to understand the UI structure and identify every element you will need to interact with or assert on — so you can add `data-testid` attributes to them:
 
 {{#each DOMAIN_FILES}}
 
 - `{{this}}`
   {{/each}}
 
-For each file that looks like a UI component (`.jsx`, `.tsx`, `.vue`, `.svelte`), use `read_file` to inspect it. Note every `aria-label`, `role`, `data-testid`, button text, and form label you find — these are the locators you must use in the test.
+For each file that looks like a UI component (`.jsx`, `.tsx`, `.vue`, `.svelte`), use `read_file` to inspect it.
 
-If you cannot find a reliable selector for an element needed by a scenario, **add a `data-testid` attribute** to the source component using `write_file` or `replace_lines`, then use `getByTestId()` in the test. You have write access to all project files.
+**Always add `data-testid` attributes** to every element you need to interact with or assert on — buttons, inputs, selects, containers, status messages, error alerts, table rows, etc. Use `replace_lines` to add them to the source component before writing any test code. Then use `getByTestId()` exclusively in the test. You have write access to all project files.
+
+Naming convention: `kebab-case`, descriptive, scoped to the feature (e.g. `aircraft-registration-input`, `load-utilization-btn`, `monthly-hours-value`, `utilization-chart`).
 
 {{/if}}
 
@@ -306,7 +308,7 @@ Read 1-2 existing e2e test files to understand:
 
 - Import style: `import { test, expect } from "@playwright/test"`
 - How navigation works (`page.goto`, `page.click`)
-- How elements are located (prefer `getByRole`, `getByLabel`, `getByTestId` over CSS selectors)
+- How elements are located (you will use `getByTestId` exclusively — note how existing tests find elements)
 - Whether `test.beforeEach` is used for shared setup (e.g. login)
 
 Also check `package.json` to confirm `@playwright/test` is installed.
@@ -349,58 +351,55 @@ Rules:
 
 Map scenario checks to Playwright actions:
 
-| `field: "step"` value   | Playwright action                                             |
-| ----------------------- | ------------------------------------------------------------- |
-| `"navigate to X"`       | `await page.goto("/path")`                                    |
-| `"click X button"`      | `await page.getByRole("button", { name: "X" }).click()`       |
-| `"fill field X with Y"` | `await page.getByLabel("X").fill("Y")`                        |
-| `"select option X"`     | `await page.getByRole("combobox").selectOption("X")`          |
-| `"submit form"`         | `await page.getByRole("button", { name: /submit/i }).click()` |
+| `field: "step"` value   | Playwright action                                      |
+| ----------------------- | ------------------------------------------------------ |
+| `"navigate to X"`       | `await page.goto("/path")`                             |
+| `"click X button"`      | `await page.getByTestId("x-btn").click()`              |
+| `"fill field X with Y"` | `await page.getByTestId("x-input").fill("Y")`          |
+| `"select option X"`     | `await page.getByTestId("x-select").selectOption("X")` |
+| `"submit form"`         | `await page.getByTestId("submit-btn").click()`         |
 
 Map `expectedOutput` to assertions:
 
-| expected         | assertion                                                     |
-| ---------------- | ------------------------------------------------------------- |
-| element visible  | `await expect(page.getByText("...")).toBeVisible()`           |
-| URL changed      | `await expect(page).toHaveURL(/pattern/)`                     |
-| success toast    | `await expect(page.getByRole("status")).toContainText("...")` |
-| validation error | `await expect(page.getByRole("alert")).toContainText("...")`  |
+| expected         | assertion                                                              |
+| ---------------- | ---------------------------------------------------------------------- |
+| element visible  | `await expect(page.getByTestId("...")).toBeVisible()`                  |
+| URL changed      | `await expect(page).toHaveURL(/pattern/)`                              |
+| success toast    | `await expect(page.getByTestId("success-toast")).toContainText("...")` |
+| validation error | `await expect(page.getByTestId("error-alert")).toContainText("...")`   |
 
 ```javascript
 import { test, expect } from "@playwright/test";
 
 test.describe("Feature Name", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/some-feature");
   });
 
   test("user can complete the main workflow", async ({ page }) => {
     // Arrange
-    await page.goto("/some-feature");
+    await expect(page.getByTestId("engine-hours-input")).toBeVisible();
 
     // Act
-    await page.getByRole("button", { name: "Open Form" }).click();
-    await page.getByLabel("Engine Hours").fill("151.0");
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByTestId("engine-hours-input").fill("151.0");
+    await page.getByTestId("save-btn").click();
 
     // Assert
-    await expect(page.getByRole("status")).toContainText(
+    await expect(page.getByTestId("success-toast")).toContainText(
       "Updated successfully",
     );
     await expect(page.getByTestId("engine-hours-display")).toHaveText("151.0");
   });
 
   test("shows validation error for invalid input", async ({ page }) => {
-    // Arrange
-    await page.goto("/some-feature");
-    await page.getByRole("button", { name: "Open Form" }).click();
-
     // Act
-    await page.getByLabel("Engine Hours").fill("-1");
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByTestId("engine-hours-input").fill("-1");
+    await page.getByTestId("save-btn").click();
 
     // Assert
-    await expect(page.getByRole("alert")).toContainText("must be positive");
+    await expect(page.getByTestId("error-alert")).toContainText(
+      "must be positive",
+    );
   });
 });
 ```
