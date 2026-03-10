@@ -26,6 +26,8 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { EmptyState } from "../ui/empty-state";
 import { toaster } from "../ui/toaster";
@@ -712,21 +714,37 @@ export default function DomainBugsSecuritySection({
                                                 </Text>
                                               </HStack>
                                             </Code>
-                                            {finding.location?.file && (
-                                              <IconButton
-                                                size="xs"
-                                                variant="ghost"
-                                                aria-label="Open in editor"
-                                                onClick={(event) => {
-                                                  event.stopPropagation();
-                                                  handleOpenLocation(
-                                                    finding.location,
-                                                  );
-                                                }}
-                                              >
-                                                <ExternalLink size={12} />
-                                              </IconButton>
-                                            )}
+                                            {(() => {
+                                              const loc = finding.location?.file
+                                                ? finding.location
+                                                : (() => {
+                                                    const parsed =
+                                                      parseSourceLocation(
+                                                        source,
+                                                      );
+                                                    return parsed
+                                                      ? {
+                                                          file: parsed.filePath,
+                                                          line: parsed.from,
+                                                        }
+                                                      : null;
+                                                  })();
+                                              return loc ? (
+                                                <Button
+                                                  size="xs"
+                                                  variant="outline"
+                                                  colorPalette="blue"
+                                                  flexShrink={0}
+                                                  onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    handleOpenLocation(loc);
+                                                  }}
+                                                >
+                                                  <ExternalLink size={12} />
+                                                  Open in editor
+                                                </Button>
+                                              ) : null;
+                                            })()}
                                           </HStack>
                                           {expandedSnippets.has(finding.id) &&
                                             (() => {
@@ -754,9 +772,38 @@ export default function DomainBugsSecuritySection({
                                                       Lines {cached.from}–
                                                       {cached.to}
                                                     </Text>
-                                                    <MarkdownRenderer
-                                                      content={`\`\`\`${cached.language}\n${cached.snippet}\n\`\`\``}
-                                                    />
+                                                    <Box
+                                                      borderRadius="md"
+                                                      overflow="hidden"
+                                                    >
+                                                      <SyntaxHighlighter
+                                                        language={
+                                                          cached.language ||
+                                                          "javascript"
+                                                        }
+                                                        style={vscDarkPlus}
+                                                        customStyle={{
+                                                          margin: 0,
+                                                          borderRadius: "6px",
+                                                          fontSize: "14px",
+                                                        }}
+                                                        showLineNumbers={true}
+                                                        startingLineNumber={
+                                                          cached.from
+                                                        }
+                                                        lineNumberStyle={{
+                                                          minWidth: "3em",
+                                                          paddingRight: "1em",
+                                                          color: "#858585",
+                                                          textAlign: "right",
+                                                        }}
+                                                      >
+                                                        {cached.snippet.replace(
+                                                          /\n$/,
+                                                          "",
+                                                        )}
+                                                      </SyntaxHighlighter>
+                                                    </Box>
                                                   </Box>
                                                 );
                                               }

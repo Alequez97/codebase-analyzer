@@ -1,5 +1,8 @@
-import { Badge, Table, Text } from "@chakra-ui/react";
+import { Badge, Button, HStack, Table, Text } from "@chakra-ui/react";
+import { ExternalLink } from "lucide-react";
 import { Alert } from "../../ui/alert";
+import { toaster } from "../../ui/toaster";
+import api from "../../../api";
 
 export function ExistingTestsTable({ testFiles }) {
   const normalizedTestFiles = (testFiles || [])
@@ -40,9 +43,37 @@ export function ExistingTestsTable({ testFiles }) {
         {normalizedTestFiles.map((test) => (
           <Table.Row key={test.filePath}>
             <Table.Cell>
-              <Text fontSize="sm" fontFamily="mono">
-                {test.filePath}
-              </Text>
+              <HStack gap={2}>
+                <Text fontSize="sm" fontFamily="mono">
+                  {test.filePath}
+                </Text>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  colorPalette="blue"
+                  flexShrink={0}
+                  onClick={async () => {
+                    try {
+                      await api.openFileInEditor(test.filePath);
+                      toaster.create({
+                        title: "Opened in VS Code",
+                        type: "success",
+                      });
+                    } catch (error) {
+                      toaster.create({
+                        title: "Failed to open file",
+                        description:
+                          error?.response?.data?.message ||
+                          "Make sure VS Code is accessible via the 'code' command.",
+                        type: "error",
+                      });
+                    }
+                  }}
+                >
+                  <ExternalLink size={12} />
+                  Open in editor
+                </Button>
+              </HStack>
             </Table.Cell>
             <Table.Cell>
               <Badge

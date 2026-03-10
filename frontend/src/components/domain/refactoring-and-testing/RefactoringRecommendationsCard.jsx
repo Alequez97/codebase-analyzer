@@ -10,9 +10,11 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { AlertTriangle, CheckCircle, Code2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Code2, ExternalLink } from "lucide-react";
 import { Card } from "../../ui/card";
 import { Alert } from "../../ui/alert";
+import { toaster } from "../../ui/toaster";
+import api from "../../../api";
 import { kebabCaseToDisplayName } from "../../../utils/domain-utils";
 import { REFACTORING_STATUS } from "../../../constants/refactoring-status";
 
@@ -167,15 +169,48 @@ function RefactoringCardBody({ refactoring }) {
         <Text fontSize="sm" fontWeight="medium" mb={1}>
           📁 Target:
         </Text>
-        <Code fontSize="xs" display="block" p={2} borderRadius="md">
-          {refactoring.targetFile}
-          {refactoring.targetFunction && ` → ${refactoring.targetFunction}()`}
-          {refactoring.startLine && (
-            <Text as="span" color="gray.500" ml={2}>
-              (lines {refactoring.startLine}-{refactoring.endLine})
-            </Text>
+        <HStack gap={2} align="center">
+          <Code fontSize="xs" display="block" p={2} borderRadius="md" flex={1}>
+            {refactoring.targetFile}
+            {refactoring.targetFunction && ` → ${refactoring.targetFunction}()`}
+            {refactoring.startLine && (
+              <Text as="span" color="gray.500" ml={2}>
+                (lines {refactoring.startLine}-{refactoring.endLine})
+              </Text>
+            )}
+          </Code>
+          {refactoring.targetFile && (
+            <Button
+              size="xs"
+              variant="outline"
+              colorPalette="blue"
+              flexShrink={0}
+              onClick={async () => {
+                try {
+                  await api.openFileInEditor(
+                    refactoring.targetFile,
+                    refactoring.startLine,
+                  );
+                  toaster.create({
+                    title: "Opened in VS Code",
+                    type: "success",
+                  });
+                } catch (error) {
+                  toaster.create({
+                    title: "Failed to open file",
+                    description:
+                      error?.response?.data?.message ||
+                      "Make sure VS Code is accessible via the 'code' command.",
+                    type: "error",
+                  });
+                }
+              }}
+            >
+              <ExternalLink size={12} />
+              Open in editor
+            </Button>
           )}
-        </Code>
+        </HStack>
       </Box>
 
       {/* Extraction plan */}
