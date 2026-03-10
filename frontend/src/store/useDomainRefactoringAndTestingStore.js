@@ -10,6 +10,20 @@ export const useDomainRefactoringAndTestingStore = create((set, get) => ({
   loadingById: new Map(),
   errorById: new Map(),
 
+  // Tracks tests that were just changed by an AI chat edit so the UI can
+  // flash-highlight the affected rows.  Map<testId, "added" | "modified" | "removed">
+  // Populated on REFACTORING_AND_TESTING_UPDATED (isEdit:true) and auto-cleared
+  // after a short timeout in useSocketStore.
+  recentlyChangedTests: new Map(),
+
+  setRecentlyChangedTests: (changes) => {
+    set({ recentlyChangedTests: new Map(changes) });
+  },
+
+  clearRecentlyChangedTests: () => {
+    set({ recentlyChangedTests: new Map() });
+  },
+
   // Actions
   fetch: async (domainId, force = false) => {
     if (!domainId) return null;

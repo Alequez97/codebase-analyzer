@@ -14,7 +14,37 @@ import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
 import { useRefactoringAndTestingStore } from "./useRefactoringAndTestingStore";
+import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 import { useAgentChatStore } from "./useAgentChatStore";
+
+/** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
+function computeTestChanges(oldMissingTests, newMissingTests) {
+  const changes = new Map();
+  const types = ["unit", "integration", "e2e"];
+
+  const oldById = new Map();
+  types.forEach((type) =>
+    (oldMissingTests?.[type] || []).forEach((t) => oldById.set(t.id, t)),
+  );
+
+  const newById = new Map();
+  types.forEach((type) =>
+    (newMissingTests?.[type] || []).forEach((t) => newById.set(t.id, t)),
+  );
+
+  for (const [id] of newById) if (!oldById.has(id)) changes.set(id, "added");
+
+  for (const [id] of oldById) if (!newById.has(id)) changes.set(id, "removed");
+
+  for (const [id, newTest] of newById)
+    if (
+      oldById.has(id) &&
+      JSON.stringify(oldById.get(id)) !== JSON.stringify(newTest)
+    )
+      changes.set(id, "modified");
+
+  return changes;
+}
 
 const SOCKET_URL = window.location.origin;
 
@@ -442,6 +472,48 @@ export const useSocketStore = create((set, get) => ({
             .updateData(domainId, { content, metadata: null });
           useDomainDocumentationStore.getState().setLoading(domainId, false);
           useDomainEditorStore.getState().initializeEditorsForDomain(domainId);
+        }
+      },
+    );
+
+    // Refactoring & testing section updated (analysis or AI chat edit)
+    socket.on(
+      SOCKET_EVENTS.REFACTORING_AND_TESTING_UPDATED,
+      ({ domainId, content, isEdit, chatId }) => {
+        if (!domainId || !content) return;
+
+        if (isEdit) {
+          // AI chat edit — apply immediately, highlight changed rows
+          const testingStore = useDomainTestingStore.getState();
+          const currentData = testingStore.dataById.get(domainId);
+          const changes = computeTestChanges(
+            currentData?.missingTests,
+            content?.missingTests,
+          );
+
+          // Write new data directly into both stores
+          testingStore.updateData(domainId, content);
+          useTestingEditorStore
+            .getState()
+            .setEditedMissingTests(domainId, content?.missingTests);
+
+          // Flash highlights for changed rows, auto-clear after 4 s
+          if (changes.size > 0) {
+            testingStore.setRecentlyChangedTests(changes);
+            setTimeout(() => testingStore.clearRecentlyChangedTests(), 4000);
+          }
+
+          // Mark chat turn as complete
+          if (chatId) {
+            useAgentChatStore.getState().setChatState(chatId, {
+              isWorking: false,
+              isThinking: false,
+              isAwaitingResponse: false,
+            });
+          }
+        } else {
+          // Fresh analysis result — update store directly (no highlight needed)
+          useDomainTestingStore.getState().updateData(domainId, content);
         }
       },
     );

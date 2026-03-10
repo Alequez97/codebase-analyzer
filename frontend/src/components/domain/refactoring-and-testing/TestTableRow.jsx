@@ -16,6 +16,7 @@ import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
 import { useRefactoringAndTestingStore } from "../../../store/useRefactoringAndTestingStore";
 import { useAgentChatStore } from "../../../store/useAgentChatStore";
+import { useDomainRefactoringAndTestingStore } from "../../../store/useDomainRefactoringAndTestingStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails } from "./TestCaseDetails";
 import { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
@@ -48,6 +49,10 @@ export function TestTableRow({
   } = useTestingEditorStore();
 
   const { openChatForTest } = useAgentChatStore();
+
+  const recentChangeType = useDomainRefactoringAndTestingStore(
+    (state) => state.recentlyChangedTests.get(test.id) ?? null,
+  );
 
   const implementProgressByTestId = useRefactoringAndTestingStore(
     (state) => state.implementProgressByTestId,
@@ -122,25 +127,43 @@ export function TestTableRow({
       <Table.Row
         id={test.id}
         bg={
-          isBlocked
-            ? "orange.50"
-            : isImplemented
-              ? "green.50"
-              : isImplementing
-                ? "blue.50"
-                : "gray.50"
+          recentChangeType === "added"
+            ? "green.100"
+            : recentChangeType === "modified"
+              ? "yellow.100"
+              : isBlocked
+                ? "orange.50"
+                : isImplemented
+                  ? "green.50"
+                  : isImplementing
+                    ? "blue.50"
+                    : "gray.50"
         }
         _hover={{
-          bg: isBlocked
-            ? "orange.100"
-            : isImplemented
-              ? "green.100"
-              : isImplementing
-                ? "blue.100"
-                : "gray.100",
+          bg:
+            recentChangeType === "added"
+              ? "green.200"
+              : recentChangeType === "modified"
+                ? "yellow.200"
+                : isBlocked
+                  ? "orange.100"
+                  : isImplemented
+                    ? "green.100"
+                    : isImplementing
+                      ? "blue.100"
+                      : "gray.100",
           cursor: "pointer",
         }}
         onClick={() => setIsExpanded((prev) => !prev)}
+        outline={recentChangeType ? "2px solid" : undefined}
+        outlineColor={
+          recentChangeType === "added"
+            ? "green.400"
+            : recentChangeType === "modified"
+              ? "yellow.400"
+              : undefined
+        }
+        transition="background 0.3s, outline-color 0.3s"
       >
         <Table.Cell>
           <Icon size="sm" color="gray.500">
@@ -152,21 +175,33 @@ export function TestTableRow({
           </Icon>
         </Table.Cell>
         <Table.Cell>
-          <Text
-            fontSize="xs"
-            fontFamily="mono"
-            fontWeight="medium"
-            cursor="pointer"
-            color="blue.600"
-            _hover={{ textDecoration: "underline", color: "blue.700" }}
-            title={`Open chat for ${test.id}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              openChatForTest(domainId, test.id);
-            }}
-          >
-            {test.id}
-          </Text>
+          <HStack gap={1} align="center">
+            <Text
+              fontSize="xs"
+              fontFamily="mono"
+              fontWeight="medium"
+              cursor="pointer"
+              color="blue.600"
+              _hover={{ textDecoration: "underline", color: "blue.700" }}
+              title={`Open chat for ${test.id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                openChatForTest(domainId, test.id);
+              }}
+            >
+              {test.id}
+            </Text>
+            {recentChangeType === "added" && (
+              <Badge colorPalette="green" size="xs" variant="solid">
+                NEW
+              </Badge>
+            )}
+            {recentChangeType === "modified" && (
+              <Badge colorPalette="yellow" size="xs" variant="solid">
+                EDITED
+              </Badge>
+            )}
+          </HStack>
         </Table.Cell>
         <Table.Cell>
           <Badge colorPalette={typePalette} size="sm">

@@ -81,7 +81,7 @@ const config = {
   tasks: {
     [TASK_TYPES.CODEBASE_ANALYSIS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_MINI,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -102,7 +102,7 @@ const config = {
     },
     [TASK_TYPES.REQUIREMENTS]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_MINI,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -147,7 +147,35 @@ const config = {
     [TASK_TYPES.EDIT_DOCUMENTATION]: {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
-      maxTokens: 16000,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.LOW,
+    },
+    [TASK_TYPES.EDIT_DIAGRAMS]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_MINI,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.LOW,
+    },
+    [TASK_TYPES.EDIT_REQUIREMENTS]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_MINI,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.LOW,
+    },
+    [TASK_TYPES.EDIT_BUGS_SECURITY]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_MINI,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.LOW,
+    },
+    [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_MINI,
+      maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
