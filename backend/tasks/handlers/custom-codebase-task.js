@@ -7,7 +7,6 @@ import {
 import { appendChatMessage } from "../../utils/chat-history.js";
 import {
   ensureProgressDirectory,
-  appendProgressNote,
   markProgressComplete,
 } from "../../utils/task-progress.js";
 
@@ -114,31 +113,6 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
               component: "CustomCodebaseTask",
             }),
         );
-
-        // Detect conflict signals from AI
-        if (
-          content.includes("⚠️ CONFLICT DETECTED") ||
-          content.toLowerCase().includes("option a") ||
-          content.toLowerCase().includes("option b")
-        ) {
-          emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_CONFLICT_DETECTED, {
-            taskId,
-            domainId,
-            content,
-            timestamp: new Date().toISOString(),
-          });
-
-          emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_AWAITING_RESPONSE, {
-            taskId,
-            domainId,
-            timestamp: new Date().toISOString(),
-          });
-
-          await appendProgressNote(
-            taskId,
-            "Conflict detected - awaiting user response",
-          ).catch(() => {});
-        }
       }
     },
 

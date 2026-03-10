@@ -63,34 +63,30 @@ For each affected domain, check `.code-analysis/domains/{domainId}.json` for exi
 
 If a conflict is found between the user's request and an existing requirement:
 
-1. **Stop execution** - do NOT make any changes yet
-2. **Report the conflict clearly**:
+1. **Document the conflict** in the progress file
+2. **Proceed with the user's request** - the user's explicit instruction takes precedence
+3. **Update affected requirements** to reflect the new implementation
+4. **Report what you changed clearly**:
 
    ```
-   ⚠️ CONFLICT DETECTED
+   ℹ️ Requirement Updated
 
-   Your request conflicts with an existing requirement:
+   Your request conflicted with an existing requirement:
    - **Requirement**: {requirementId} in domain '{domainName}'
-   - **Existing**: {existing requirement description}
-   - **Your request**: {what user asked for}
+   - **Previous**: {old requirement description}
+   - **Updated to**: {new requirement description per user request}
 
-   What should I do?
-   - **Option A**: {implement user's request and update the requirement}
-   - **Option B**: {follow the existing requirement instead}
-
-   Please respond with "A" or "B".
+   I proceeded with your requested change and updated the requirement accordingly.
    ```
-
-3. **Wait** for user response before continuing
 
 ### Step 4: Execute Changes
 
-After conflict resolution (or if no conflicts found):
+Implement the user's requested changes:
 
 1. Apply code changes (check off progress file items as you go)
 2. Update/create test files
 3. Update documentation files
-4. Update requirements if user approved override (Option A)
+4. Update requirements when they conflict with the user's request
 5. Update progress file to mark each step complete
 
 ### Step 5: Report Results
@@ -142,10 +138,11 @@ Started: {timestamp}
 
 ## Important Rules
 
-- **Never make silent requirement violations** - Always surface conflicts
+- **User instructions take precedence** - If requirements conflict with the user's request, update the requirements to match
+- **Document all conflicts** - Note any requirement updates in the progress file and final report
 - **Always update related tests** when changing code behavior
 - **Always update documentation** when changing functionality
 - **Mark progress** in the progress file as you complete each step
 - **Be specific** about file paths and line numbers in your reports
-- If the task is ambiguous, ask for clarification before proceeding
+- **Be autonomous** - Make reasonable decisions and proceed with the task; don't wait for user input
 - When unsure about scope, err on the side of asking rather than assuming
