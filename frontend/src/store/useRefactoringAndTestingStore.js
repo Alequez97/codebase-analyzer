@@ -4,7 +4,7 @@ import { useDomainRefactoringAndTestingStore as useDomainTestingStore } from "./
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 import { REFACTORING_STATUS } from "../constants/refactoring-status";
 
-export const useImplementTestStore = create((set, get) => ({
+export const useRefactoringAndTestingStore = create((set, get) => ({
   // State
   implementingTestsByDomainId: {},
   implementTaskIdsByDomainId: {},
@@ -14,6 +14,8 @@ export const useImplementTestStore = create((set, get) => ({
   applyingRefactoringByDomainId: {},
   applyRefactoringTaskByDomainId: {},
   completedRefactoringByDomainId: {},
+  // Maps domainId → { taskId, message, stage } for real-time refactoring progress
+  applyRefactoringProgressByDomainId: new Map(),
 
   // Actions
   implementTest: async (domainId, testId) => {
@@ -130,6 +132,15 @@ export const useImplementTestStore = create((set, get) => ({
     }
   },
 
+  setApplyRefactoringProgress: (domainId, { taskId, message, stage }) => {
+    if (!domainId) return;
+    set((state) => {
+      const next = new Map(state.applyRefactoringProgressByDomainId);
+      next.set(domainId, { taskId, message, stage });
+      return { applyRefactoringProgressByDomainId: next };
+    });
+  },
+
   completeApplyRefactoring: (domainId) => {
     if (!domainId) return;
     const refactoringId = get().applyingRefactoringByDomainId[domainId];
@@ -146,6 +157,11 @@ export const useImplementTestStore = create((set, get) => ({
         ...state.completedRefactoringByDomainId,
         [domainId]: refactoringId || null,
       },
+      applyRefactoringProgressByDomainId: (() => {
+        const next = new Map(state.applyRefactoringProgressByDomainId);
+        next.delete(domainId);
+        return next;
+      })(),
     }));
     if (refactoringId) {
       useTestingEditorStore
@@ -217,6 +233,11 @@ export const useImplementTestStore = create((set, get) => ({
         ...state.completedRefactoringByDomainId,
         [domainId]: null,
       },
+      applyRefactoringProgressByDomainId: (() => {
+        const next = new Map(state.applyRefactoringProgressByDomainId);
+        next.delete(domainId);
+        return next;
+      })(),
     }));
   },
 
@@ -329,5 +350,6 @@ export const useImplementTestStore = create((set, get) => ({
       applyingRefactoringByDomainId: {},
       applyRefactoringTaskByDomainId: {},
       completedRefactoringByDomainId: {},
+      applyRefactoringProgressByDomainId: new Map(),
     }),
 }));

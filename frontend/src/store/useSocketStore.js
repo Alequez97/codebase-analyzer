@@ -13,7 +13,7 @@ import { useDomainRefactoringAndTestingStore as useDomainTestingStore } from "./
 import { useTaskProgressStore } from "./useTaskProgressStore";
 import { useDomainEditorStore } from "./useDomainEditorStore";
 import { useLogsStore } from "./useLogsStore";
-import { useImplementTestStore } from "./useImplementTestStore";
+import { useRefactoringAndTestingStore } from "./useRefactoringAndTestingStore";
 import { useAgentChatStore } from "./useAgentChatStore";
 
 const SOCKET_URL = window.location.origin;
@@ -97,11 +97,13 @@ export const useSocketStore = create((set, get) => ({
         useDomainTestingStore.getState().setLoading(domainId, false);
         await useDomainTestingStore.getState().fetch(domainId);
       } else if (type === TASK_TYPES.IMPLEMENT_TEST && domainId) {
-        useImplementTestStore
+        useRefactoringAndTestingStore
           .getState()
           .completeImplementByTaskId(domainId, data.taskId, data.params);
       } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
-        useImplementTestStore.getState().completeApplyRefactoring(domainId);
+        useRefactoringAndTestingStore
+          .getState()
+          .completeApplyRefactoring(domainId);
       } else if (type === TASK_TYPES.IMPLEMENT_FIX && domainId) {
         const findingId = data.params?.findingId;
         const store = useDomainBugsSecurityStore.getState();
@@ -167,9 +169,13 @@ export const useSocketStore = create((set, get) => ({
             .getState()
             .setImplementingFixProgress(taskId, { message, stage });
         } else if (type === TASK_TYPES.IMPLEMENT_TEST) {
-          useImplementTestStore
+          useRefactoringAndTestingStore
             .getState()
             .setImplementTestProgress(taskId, { message, stage });
+        } else if (type === TASK_TYPES.APPLY_REFACTORING) {
+          useRefactoringAndTestingStore
+            .getState()
+            .setApplyRefactoringProgress(domainId, { taskId, message, stage });
         } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
           const chatStore = useAgentChatStore.getState();
           if (chatStore.currentTaskId === taskId) {
@@ -220,11 +226,11 @@ export const useSocketStore = create((set, get) => ({
           error || "Refactoring & testing analysis failed",
         );
       } else if (type === TASK_TYPES.IMPLEMENT_TEST && domainId) {
-        useImplementTestStore
+        useRefactoringAndTestingStore
           .getState()
           .failImplementByTaskId(domainId, data.taskId);
       } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
-        useImplementTestStore.getState().failApplyRefactoring(domainId);
+        useRefactoringAndTestingStore.getState().failApplyRefactoring(domainId);
       } else if (type === TASK_TYPES.IMPLEMENT_FIX && domainId) {
         const findingId = data.params?.findingId;
         if (findingId) {
@@ -263,7 +269,7 @@ export const useSocketStore = create((set, get) => ({
         }
 
         if (type === TASK_TYPES.IMPLEMENT_TEST && taskId) {
-          useImplementTestStore
+          useRefactoringAndTestingStore
             .getState()
             .appendImplementLogByTaskId(domainId, taskId, log);
         }

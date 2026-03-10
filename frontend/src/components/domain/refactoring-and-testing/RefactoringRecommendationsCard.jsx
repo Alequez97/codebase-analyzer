@@ -24,6 +24,7 @@ export function RefactoringRecommendationsCard({
   onMarkCompleted,
   applyingRefactoringId = null,
   completedRefactoringId = null,
+  applyRefactoringProgress = null,
 }) {
   if (!refactorings || refactorings.length === 0) {
     return (
@@ -84,6 +85,11 @@ export function RefactoringRecommendationsCard({
               onApply={onApplyRefactoring}
               isApplying={applyingRefactoringId === refactoring.id}
               isJustCompleted={completedRefactoringId === refactoring.id}
+              progressMessage={
+                applyingRefactoringId === refactoring.id
+                  ? (applyRefactoringProgress?.message ?? null)
+                  : null
+              }
             />
           ))}
         </VStack>
@@ -308,6 +314,7 @@ function RefactoringCard({
   onApply,
   isApplying,
   isJustCompleted,
+  progressMessage = null,
 }) {
   return (
     <Card.Root
@@ -335,7 +342,7 @@ function RefactoringCard({
                   <Badge colorPalette="blue" variant="subtle">
                     <HStack gap={1}>
                       <Spinner size="xs" />
-                      <Text>Task running</Text>
+                      <Text>{progressMessage || "AI is starting…"}</Text>
                     </HStack>
                   </Badge>
                 )}

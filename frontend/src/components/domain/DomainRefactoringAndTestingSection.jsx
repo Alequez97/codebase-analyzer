@@ -38,6 +38,7 @@ export default function DomainRefactoringAndTestingSection({
   onMarkCompleted = null,
   applyingRefactoringId = null,
   completedRefactoringId = null,
+  applyRefactoringProgress = null,
   hasRequirements = false,
   showLogs = false,
   logs = "",
@@ -214,6 +215,7 @@ export default function DomainRefactoringAndTestingSection({
                           onMarkCompleted={onMarkCompleted}
                           applyingRefactoringId={applyingRefactoringId}
                           completedRefactoringId={completedRefactoringId}
+                          applyRefactoringProgress={applyRefactoringProgress}
                         />
                       </Box>
                     )}

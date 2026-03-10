@@ -23,7 +23,7 @@ import {
   selectDomainProgress,
 } from "../store/useTaskProgressStore";
 import { useDomainEditorStore } from "../store/useDomainEditorStore";
-import { useImplementTestStore } from "../store/useImplementTestStore";
+import { useRefactoringAndTestingStore } from "../store/useRefactoringAndTestingStore";
 import { useLogsStore } from "../store/useLogsStore";
 import { useAgentChatStore } from "../store/useAgentChatStore";
 
@@ -81,7 +81,8 @@ export default function DomainDetailsPage() {
     completedRefactoringByDomainId,
     applyRefactoring,
     markRefactoringCompleted,
-  } = useImplementTestStore();
+    applyRefactoringProgressByDomainId,
+  } = useRefactoringAndTestingStore();
 
   // Logs store
   const {
@@ -175,6 +176,8 @@ export default function DomainDetailsPage() {
   const implementLogs = implementLogsByDomainId[domainId] || {};
   const applyingRefactoringId =
     applyingRefactoringByDomainId?.[domainId] || null;
+  const applyRefactoringProgress =
+    applyRefactoringProgressByDomainId?.get(domainId) || null;
   const completedRefactoringId =
     completedRefactoringByDomainId?.[domainId] || null;
 
@@ -518,6 +521,7 @@ export default function DomainDetailsPage() {
               onMarkCompleted={handleMarkRefactoringCompleted}
               applyingRefactoringId={applyingRefactoringId}
               completedRefactoringId={completedRefactoringId}
+              applyRefactoringProgress={applyRefactoringProgress}
               showLogs={showDomainLogs}
               logs={testingLogs}
               logsLoading={testingLogsLoading}

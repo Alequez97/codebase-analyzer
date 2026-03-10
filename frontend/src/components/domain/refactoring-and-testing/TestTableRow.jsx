@@ -14,7 +14,7 @@ import {
 import { Checkbox } from "../../ui/checkbox";
 import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
-import { useImplementTestStore } from "../../../store/useImplementTestStore";
+import { useRefactoringAndTestingStore } from "../../../store/useRefactoringAndTestingStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails } from "./TestCaseDetails";
 import { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
@@ -46,7 +46,7 @@ export function TestTableRow({
     clearEditingTest,
   } = useTestingEditorStore();
 
-  const implementProgressByTestId = useImplementTestStore(
+  const implementProgressByTestId = useRefactoringAndTestingStore(
     (state) => state.implementProgressByTestId,
   );
   const implementProgress = implementProgressByTestId.get(test.id);
