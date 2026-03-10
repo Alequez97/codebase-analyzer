@@ -56,10 +56,9 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
  * Configure all file-access permissions on the agent's fileToolExecutor for the given task.
  * This is the single source of truth for what the agent is allowed to read and write.
  *
- * - IMPLEMENT_FIX / IMPLEMENT_TEST : full project write access (may touch arbitrary source files)
- * - CUSTOM_CODEBASE_TASK           : full project read + write access
- * - Edit tasks                     : task.outputFile only
- * - APPLY_REFACTORING              : newServiceFile + targetFile
+ * - IMPLEMENT_FIX / IMPLEMENT_TEST / APPLY_REFACTORING : full project write access
+ * - CUSTOM_CODEBASE_TASK                               : full project read + write access
+ * - Edit tasks                                         : task.outputFile only
  * - Everything else                : empty list (analysis tasks only write to .code-analysis/,
  *                                    which is always permitted by the write gate)
  */
@@ -74,7 +73,8 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
 
   if (
     task.type === TASK_TYPES.IMPLEMENT_FIX ||
-    task.type === TASK_TYPES.IMPLEMENT_TEST
+    task.type === TASK_TYPES.IMPLEMENT_TEST ||
+    task.type === TASK_TYPES.APPLY_REFACTORING
   ) {
     fileToolExecutor.setAllowAnyWrite(true);
     taskLogger.info(`🔓 Full project write access granted (${task.type})`, {
@@ -97,11 +97,6 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
 
   if (EDIT_TASK_TYPES.includes(task.type)) {
     allowedPaths = task.outputFile ? [task.outputFile] : [];
-  } else if (task.type === TASK_TYPES.APPLY_REFACTORING) {
-    allowedPaths = [
-      task.params?.newServiceFile,
-      task.params?.targetFile,
-    ].filter(Boolean);
   }
 
   fileToolExecutor.setAllowedWritePaths(allowedPaths);
