@@ -108,6 +108,53 @@ export const FILE_TOOLS = [
     },
     required: ["path", "start_line", "end_line", "new_content"],
   },
+  {
+    name: "insert_lines",
+    description:
+      "Insert new lines at a specific position in an existing file without replacing any existing content. The path must be in the task's explicitly allowed write paths. Use read_file first to see the line numbers, then call this tool to insert content before or after a specific line. This is ideal for adding new functions, imports, or code blocks.",
+    parameters: {
+      path: {
+        type: "string",
+        description:
+          "Relative path to the source file from project root (e.g., 'src/utils/helpers.js'). Must be an explicitly allowed path.",
+      },
+      position: {
+        type: "string",
+        description:
+          "Where to insert: 'before' inserts before the line_number, 'after' inserts after the line_number, 'start' inserts at file start, 'end' appends at file end.",
+        enum: ["before", "after", "start", "end"],
+      },
+      line_number: {
+        type: "number",
+        description:
+          "1-based line number for 'before' or 'after' positions. Ignored for 'start' and 'end'.",
+      },
+      content: {
+        type: "string",
+        description:
+          "The content to insert. Will be added as new lines without removing existing content.",
+      },
+    },
+    required: ["path", "position", "content"],
+  },
+  {
+    name: "rename_file",
+    description:
+      "Rename or move a file within the project. Both old and new paths must be in the task's explicitly allowed write paths. Use this to restructure code, fix file naming, or relocate files to appropriate directories.",
+    parameters: {
+      old_path: {
+        type: "string",
+        description:
+          "Current relative path to the file from project root (e.g., 'src/old-name.js'). Must be an explicitly allowed path.",
+      },
+      new_path: {
+        type: "string",
+        description:
+          "New relative path for the file from project root (e.g., 'src/utils/new-name.js'). Must be an explicitly allowed path.",
+      },
+    },
+    required: ["old_path", "new_path"],
+  },
 ];
 
 /**
@@ -175,6 +222,15 @@ export class FileToolExecutor {
           args.end_line,
           args.new_content,
         );
+      case "insert_lines":
+        return await this.insertLines(
+          args.path,
+          args.position,
+          args.line_number,
+          args.content,
+        );
+      case "rename_file":
+        return await this.renameFile(args.old_path, args.new_path);
       default:
         throw new Error(`Unknown tool: ${toolName}`);
     }
@@ -495,5 +551,168 @@ export class FileToolExecutor {
       .replace(/\?/g, ".");
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(filename);
+  }
+
+  /**
+   * Insert lines at a specific position in a file without replacing existing content
+   * @private
+   */
+  async insertLines(relativePath, position, lineNumber, content) {
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+
+    if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
+      return `Error: insert_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+    }
+
+    const fullPath = path.join(this.projectRoot, relativePath);
+
+    const resolvedPath = path.resolve(fullPath);
+    const resolvedRoot = path.resolve(this.projectRoot);
+    if (!resolvedPath.startsWith(resolvedRoot)) {
+      throw new Error("Access denied: path outside project root");
+    }
+
+    let currentContent;
+    try {
+      currentContent = await fs.readFile(fullPath, "utf-8");
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return `Error: File not found: ${relativePath}. Cannot insert into a file that does not exist. Use write_file to create it first.`;
+      }
+      return `Error reading file: ${error.message}`;
+    }
+
+    const lines = currentContent.split("\n");
+    const totalLines = lines.length;
+
+    // Prepare content to insert
+    const insertLines = content.split("\n");
+    // Remove trailing empty element if content ends with newline
+    if (
+      insertLines.length > 0 &&
+      insertLines[insertLines.length - 1] === "" &&
+      content.endsWith("\n")
+    ) {
+      insertLines.pop();
+    }
+
+    let newLines;
+    let insertPosition;
+
+    switch (position) {
+      case "start":
+        newLines = [...insertLines, ...lines];
+        insertPosition = 1;
+        break;
+
+      case "end":
+        newLines = [...lines, ...insertLines];
+        insertPosition = totalLines + 1;
+        break;
+
+      case "before":
+        if (!lineNumber || lineNumber < 1 || lineNumber > totalLines) {
+          return `Error: line_number ${lineNumber} is out of range for 'before' position. File has ${totalLines} lines (1-based).`;
+        }
+        newLines = [
+          ...lines.slice(0, lineNumber - 1),
+          ...insertLines,
+          ...lines.slice(lineNumber - 1),
+        ];
+        insertPosition = lineNumber;
+        break;
+
+      case "after":
+        if (!lineNumber || lineNumber < 1 || lineNumber > totalLines) {
+          return `Error: line_number ${lineNumber} is out of range for 'after' position. File has ${totalLines} lines (1-based).`;
+        }
+        newLines = [
+          ...lines.slice(0, lineNumber),
+          ...insertLines,
+          ...lines.slice(lineNumber),
+        ];
+        insertPosition = lineNumber + 1;
+        break;
+
+      default:
+        return `Error: Invalid position "${position}". Must be one of: start, end, before, after.`;
+    }
+
+    try {
+      await fs.writeFile(fullPath, newLines.join("\n"), "utf-8");
+      return `Success: Inserted ${insertLines.length} lines at position '${position}'${lineNumber ? ` (line ${lineNumber})` : ""} in ${relativePath}. Total lines now: ${newLines.length}.`;
+    } catch (error) {
+      return `Error writing file: ${error.message}`;
+    }
+  }
+
+  /**
+   * Rename or move a file within the project
+   * @private
+   */
+  async renameFile(oldRelativePath, newRelativePath) {
+    const normalizedOldPath = oldRelativePath.replace(/\\/g, "/");
+    const normalizedNewPath = newRelativePath.replace(/\\/g, "/");
+
+    const isOldPathAllowed = this.allowedWritePaths.has(normalizedOldPath);
+    const isNewPathAllowed = this.allowedWritePaths.has(normalizedNewPath);
+
+    if (!isOldPathAllowed && !this.allowAnyWrite) {
+      return `Error: rename_file source path "${oldRelativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+    }
+
+    if (!isNewPathAllowed && !this.allowAnyWrite) {
+      return `Error: rename_file destination path "${newRelativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+    }
+
+    const oldFullPath = path.join(this.projectRoot, oldRelativePath);
+    const newFullPath = path.join(this.projectRoot, newRelativePath);
+
+    // Security: ensure both paths are within project root
+    const resolvedOldPath = path.resolve(oldFullPath);
+    const resolvedNewPath = path.resolve(newFullPath);
+    const resolvedRoot = path.resolve(this.projectRoot);
+
+    if (!resolvedOldPath.startsWith(resolvedRoot)) {
+      throw new Error("Access denied: old path outside project root");
+    }
+    if (!resolvedNewPath.startsWith(resolvedRoot)) {
+      throw new Error("Access denied: new path outside project root");
+    }
+
+    // Check if source exists
+    try {
+      await fs.access(oldFullPath);
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return `Error: Source file not found: ${oldRelativePath}`;
+      }
+      return `Error accessing source file: ${error.message}`;
+    }
+
+    // Check if destination already exists
+    try {
+      await fs.access(newFullPath);
+      return `Error: Destination file already exists: ${newRelativePath}. Cannot overwrite with rename.`;
+    } catch (error) {
+      // File doesn't exist - this is what we want
+      if (error.code !== "ENOENT") {
+        return `Error checking destination: ${error.message}`;
+      }
+    }
+
+    try {
+      // Create destination directory if it doesn't exist
+      const newDirPath = path.dirname(newFullPath);
+      await fs.mkdir(newDirPath, { recursive: true });
+
+      // Rename the file
+      await fs.rename(oldFullPath, newFullPath);
+
+      return `Success: Renamed "${oldRelativePath}" to "${newRelativePath}"`;
+    } catch (error) {
+      return `Error renaming file: ${error.message}`;
+    }
   }
 }

@@ -12,6 +12,9 @@ Your job is to generate a complete, working test file, write it, **run it to ver
 - **`list_directory`**: List directory contents (find test files, configs)
 - **`search_files`**: Find files by pattern across the project
 - **`write_file`**: Write the generated test file (REQUIRED)
+- **`insert_lines`**: Insert new lines at a specific position (useful for adding `data-testid` attributes to components)
+- **`replace_lines`**: Replace lines in existing files (useful for adding `data-testid` attributes to components)
+- **`rename_file`**: Rename or move files (useful if test file naming needs correction)
 - **`execute_command`**: Run the test to verify it passes (REQUIRED after writing)
 
 ## Objective
@@ -287,7 +290,7 @@ The following files belong to this domain. **Read them before writing any test c
 
 For each file that looks like a UI component (`.jsx`, `.tsx`, `.vue`, `.svelte`), use `read_file` to inspect it.
 
-**Always add `data-testid` attributes** to every element you need to interact with or assert on — buttons, inputs, selects, containers, status messages, error alerts, table rows, etc. Use `replace_lines` to add them to the source component before writing any test code. Then use `getByTestId()` exclusively in the test. You have write access to all project files.
+**Always add `data-testid` attributes** to every element you need to interact with or assert on — buttons, inputs, selects, containers, status messages, error alerts, table rows, etc. Use `insert_lines` or `replace_lines` to add them to the source component before writing any test code. Then use `getByTestId()` exclusively in the test. You have write access to all project files.
 
 Naming convention: `kebab-case`, descriptive, scoped to the feature (e.g. `aircraft-registration-input`, `load-utilization-btn`, `monthly-hours-value`, `utilization-chart`).
 

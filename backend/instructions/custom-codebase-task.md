@@ -18,6 +18,26 @@ You will receive a task with:
 - `taskId` - Unique task identifier
 - `projectRoot` - Root directory of the project (working directory)
 
+## Available Tools
+
+You have full access to these file manipulation tools:
+
+- **`read_file`**: Read file contents — every line is prefixed with its 1-based line number
+- **`list_directory`**: List directory contents
+- **`search_files`**: Find files matching a pattern
+- **`write_file`**: Write a new file anywhere in the project
+- **`replace_lines`**: Replace a range of lines in an existing file by line numbers
+- **`insert_lines`**: Insert new lines at a specific position (before/after a line, or at start/end)
+- **`rename_file`**: Rename or move a file within the project
+- **`execute_command`**: Run commands (test runners, package installation)
+
+**When to use each tool:**
+
+- Use `insert_lines` for adding new functions, imports, or code blocks without modifying existing code
+- Use `replace_lines` for modifying existing code segments
+- Use `rename_file` when reorganizing code structure or fixing file names
+- Use `write_file` only for creating brand new files
+
 ## Execution Plan
 
 ### Step 1: Create Progress File

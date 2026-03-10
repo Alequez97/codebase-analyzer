@@ -15,16 +15,20 @@ Your job is to apply the refactoring recommendation by:
 
 You have access to these tools:
 
-- **`read_file`**: Read file contents — every line is prefixed with its 1-based line number (e.g. `  42: code here`). Use these numbers when calling `replace_lines`.
+- **`read_file`**: Read file contents — every line is prefixed with its 1-based line number (e.g. `  42: code here`). Use these numbers when calling `replace_lines` or `insert_lines`.
 - **`list_directory`**: List directory contents
 - **`write_file`**: Write a brand new file (e.g., the new service file)
 - **`replace_lines`**: Replace a range of lines in an **existing** file by line numbers — use this for all modifications to existing source files. Call `read_file` first to identify the exact line range, then call `replace_lines` with `start_line`, `end_line`, and `new_content`.
+- **`insert_lines`**: Insert new lines at a specific position without replacing existing content. Use `position: 'before'|'after'|'start'|'end'` to specify where to insert. Perfect for adding new functions, imports, or code blocks.
+- **`rename_file`**: Rename or move a file within the project. Use this to restructure code organization or fix file naming.
 - **`execute_command`**: Run tests to validate your changes
 
 **Rules**:
 
 - Use `write_file` only for creating new files.
-- Use `replace_lines` for all edits to existing source files.
+- Use `insert_lines` when adding new functions, imports, or code blocks without modifying existing lines.
+- Use `replace_lines` for modifying existing code.
+- Use `rename_file` when refactoring involves moving code to better-named or better-located files.
 
 ## Objective
 
@@ -116,14 +120,14 @@ Create `{{NEW_SERVICE_FILE}}` with:
 
 ### Step 4: Update the Target File
 
-Use `replace_lines` to modify `{{TARGET_FILE}}` (do **not** rewrite the whole file with `write_file`):
+Use `insert_lines` and `replace_lines` to modify `{{TARGET_FILE}}` (do **not** rewrite the whole file with `write_file`):
 
-1. **Add the import** — call `read_file` on `{{TARGET_FILE}}`, find the line number of the first existing import, then call `replace_lines` with `start_line` and `end_line` set to that same line and `new_content` set to the new import line followed by the original line.
+1. **Add the import** — call `read_file` on `{{TARGET_FILE}}`, find the line number of the last existing import, then call `insert_lines` with `position: 'after'` and that line number to add the new import.
 2. **Replace extracted logic** — call `read_file` again (line numbers may shift after step 1), identify the exact start and end lines of the function body that needs to change, then call `replace_lines` with the slimmed-down version that delegates to the new service.
 
 **Important**:
 
-- Always call `read_file` immediately before each `replace_lines` call — line numbers shift after every edit
+- Always call `read_file` immediately before each `insert_lines` or `replace_lines` call — line numbers shift after every edit
 - Do not change the function signature of `{{TARGET_FUNCTION}}`
 - Do not change how errors are handled at the HTTP layer
 - Ensure the refactored code is shorter and more readable
