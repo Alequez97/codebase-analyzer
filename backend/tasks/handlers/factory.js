@@ -11,6 +11,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { editDocumentationHandler } from "./edit-documentation.js";
+import { createEditSectionHandler } from "./edit-section.js";
 import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { analyzeDocumentationHandler } from "./analyze-documentation.js";
 import { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";
@@ -19,14 +20,38 @@ import { applyRefactoringHandler } from "./apply-refactoring.js";
 import { implementFixHandler } from "./implement-fix.js";
 import { defaultAnalysisHandler } from "./default-analysis.js";
 
+import { SOCKET_EVENTS } from "../../constants/socket-events.js";
+
 /**
- * Create task handler configuration for a given task
- * Merges default handler with task-specific overrides
- * @param {Object} task - The task object
- * @param {Object} taskLogger - Task-specific logger instance
- * @param {Object} agent - LLM agent instance
- * @returns {Promise<Object>} Handler configuration with all callbacks and systemPrompt
+ * Map of edit task types to their createEditSectionHandler options
  */
+const EDIT_SECTION_HANDLER_OPTIONS = {
+  [TASK_TYPES.EDIT_DIAGRAMS]: {
+    componentName: "EditDiagrams",
+    contentUpdatedEvent: SOCKET_EVENTS.DIAGRAMS_UPDATED,
+    isJsonOutput: true,
+    sectionLabel: "diagrams",
+  },
+  [TASK_TYPES.EDIT_REQUIREMENTS]: {
+    componentName: "EditRequirements",
+    contentUpdatedEvent: SOCKET_EVENTS.REQUIREMENTS_UPDATED,
+    isJsonOutput: true,
+    sectionLabel: "requirements",
+  },
+  [TASK_TYPES.EDIT_BUGS_SECURITY]: {
+    componentName: "EditBugsSecurity",
+    contentUpdatedEvent: SOCKET_EVENTS.BUGS_SECURITY_UPDATED,
+    isJsonOutput: true,
+    sectionLabel: "bugs & security",
+  },
+  [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: {
+    componentName: "EditRefactoringAndTesting",
+    contentUpdatedEvent: SOCKET_EVENTS.REFACTORING_AND_TESTING_UPDATED,
+    isJsonOutput: true,
+    sectionLabel: "refactoring & testing",
+  },
+};
+
 /**
  * Resolve the file paths this task is allowed to read and write.
  * Centralises all file-access rules in one place instead of scattering
@@ -152,6 +177,34 @@ export async function createTaskHandler(task, taskLogger, agent) {
       initialMessage,
       priorMessages,
     });
+  } else if (
+    task.type === TASK_TYPES.EDIT_DIAGRAMS ||
+    task.type === TASK_TYPES.EDIT_REQUIREMENTS ||
+    task.type === TASK_TYPES.EDIT_BUGS_SECURITY ||
+    task.type === TASK_TYPES.EDIT_REFACTORING_AND_TESTING
+  ) {
+    const chatHistory = await loadDomainSectionChatHistory(
+      task.params.domainId,
+      task.params.sectionType,
+      task.params.chatId,
+    );
+    const messages = (chatHistory?.messages || []).filter(
+      (m) => m.role === "user" || m.role === "assistant",
+    );
+    const initialMessage =
+      messages.at(-1)?.content || "Please help with this section.";
+    const priorMessages = messages.slice(0, -1).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    overrides = createEditSectionHandler(
+      task,
+      taskLogger,
+      agent,
+      { initialMessage, priorMessages },
+      EDIT_SECTION_HANDLER_OPTIONS[task.type],
+    );
   } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
     overrides = customCodebaseTaskHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DOCUMENTATION) {

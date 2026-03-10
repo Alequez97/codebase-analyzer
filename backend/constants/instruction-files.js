@@ -10,6 +10,10 @@ export const INSTRUCTION_FILES_NAMES = {
   IMPLEMENT_TEST: "implement-test.md",
   APPLY_REFACTORING: "apply-refactoring.md",
   EDIT_DOCUMENTATION: "edit-documentation.md",
+  EDIT_DIAGRAMS: "edit-diagrams.md",
+  EDIT_REQUIREMENTS: "edit-requirements.md",
+  EDIT_BUGS_SECURITY: "edit-bugs-security.md",
+  EDIT_REFACTORING_AND_TESTING: "edit-refactoring-and-testing.md",
   CUSTOM_CODEBASE_TASK: "custom-codebase-task.md",
 };
 
@@ -28,5 +32,10 @@ export const INSTRUCTION_FILES_PATHS = {
   IMPLEMENT_TEST: "backend/instructions/implement-test.md",
   APPLY_REFACTORING: "backend/instructions/apply-refactoring.md",
   EDIT_DOCUMENTATION: "backend/instructions/edit-documentation.md",
+  EDIT_DIAGRAMS: "backend/instructions/edit-diagrams.md",
+  EDIT_REQUIREMENTS: "backend/instructions/edit-requirements.md",
+  EDIT_BUGS_SECURITY: "backend/instructions/edit-bugs-security.md",
+  EDIT_REFACTORING_AND_TESTING:
+    "backend/instructions/edit-refactoring-and-testing.md",
   CUSTOM_CODEBASE_TASK: "backend/instructions/custom-codebase-task.md",
 };

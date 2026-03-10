@@ -5,6 +5,7 @@
 
 export { createTaskHandler } from "./factory.js";
 export { editDocumentationHandler } from "./edit-documentation.js";
+export { createEditSectionHandler } from "./edit-section.js";
 export { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 export { analyzeDocumentationHandler } from "./analyze-documentation.js";
 export { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";

@@ -17,6 +17,10 @@ export { createApplyRefactoringTask } from "./apply-refactoring.js";
 
 // Edit tasks (AI chat)
 export { createEditDocumentationTask } from "./edit-documentation.js";
+export { createEditDiagramsTask } from "./edit-diagrams.js";
+export { createEditRequirementsTask } from "./edit-requirements.js";
+export { createEditBugsSecurityTask } from "./edit-bugs-security.js";
+export { createEditRefactoringAndTestingTask } from "./edit-refactoring-and-testing.js";
 
 // Custom codebase task (floating agent chat)
 export { createCustomCodebaseTask } from "./custom-codebase-task.js";

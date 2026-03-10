@@ -4,7 +4,10 @@
  */
 
 import { TASK_TYPES } from "../constants/task-types.js";
-import { getDomainSectionContentRelativePath } from "../persistence/domain-section-paths.js";
+import {
+  getDomainSectionContentMdRelativePath,
+  getDomainSectionContentJsonRelativePath,
+} from "../persistence/domain-section-paths.js";
 import { getProgressFileRelativePath } from "./task-progress.js";
 
 /**
@@ -378,15 +381,16 @@ export async function buildEditTemplateVariables(task) {
     // Fallback to domainId if analysis not found
   }
 
-  const contentFile = getDomainSectionContentRelativePath(
-    domainId,
-    sectionType,
-  );
+  // Pick the right relative-path helper based on whether this section outputs JSON or markdown.
+  const isJsonSection = task.outputFile?.endsWith(".json") ?? false;
+  const contentFile = isJsonSection
+    ? getDomainSectionContentJsonRelativePath(domainId, sectionType)
+    : getDomainSectionContentMdRelativePath(domainId, sectionType);
 
   return {
     SECTION_TYPE: sectionType,
     DOMAIN_NAME: domainName,
-    CONTENT_FILE_PATH: contentFile,
+    CONTENT_FILE_PATH: task.outputFile ?? contentFile,
     IS_DOCUMENTATION: sectionType === "documentation",
     IS_REQUIREMENTS: sectionType === "requirements",
     IS_DIAGRAMS: sectionType === "diagrams",

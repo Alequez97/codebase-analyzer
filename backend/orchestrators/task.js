@@ -76,17 +76,19 @@ async function persistTaskRevision(task) {
     PERSISTENCE_FILES.METADATA_JSON,
   );
 
-  // These task types produce markdown output, not JSON — skip the JSON rewrite.
-  const MARKDOWN_OUTPUT_TYPES = [
+  // These task types produce markdown or directly-written JSON — skip the server-side JSON rewrite.
+  // Edit tasks let the LLM write the file cleanly; no server-side mutation is needed.
+  const SKIP_JSON_REWRITE_TYPES = [
     TASK_TYPES.DOCUMENTATION,
     TASK_TYPES.EDIT_DOCUMENTATION,
+    TASK_TYPES.EDIT_DIAGRAMS,
     TASK_TYPES.EDIT_REQUIREMENTS,
     TASK_TYPES.EDIT_BUGS_SECURITY,
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
   ];
 
   // For JSON output tasks — rewrite the content file cleanly (no embedded metadata).
-  if (!MARKDOWN_OUTPUT_TYPES.includes(task.type)) {
+  if (!SKIP_JSON_REWRITE_TYPES.includes(task.type)) {
     try {
       let raw = "";
       try {

@@ -29,9 +29,17 @@ export function getDomainSectionFilePath(domainId, sectionId, fileName) {
 }
 
 /**
- * Get the relative path to a section content file (relative to the target project root).
+ * Get the relative path to a section content.md file (relative to the target project root).
  * Used when passing file paths to the LLM agent as tool arguments.
  */
-export function getDomainSectionContentRelativePath(domainId, sectionId) {
+export function getDomainSectionContentMdRelativePath(domainId, sectionId) {
   return `${PERSISTENCE_FILES.ANALYSIS_ROOT_DIR}/domains/${domainId}/${sectionId}/${PERSISTENCE_FILES.CONTENT_MD}`;
+}
+
+/**
+ * Get the relative path to a section content.json file (relative to the target project root).
+ * Used when passing file paths to the LLM agent as tool arguments.
+ */
+export function getDomainSectionContentJsonRelativePath(domainId, sectionId) {
+  return `${PERSISTENCE_FILES.ANALYSIS_ROOT_DIR}/domains/${domainId}/${sectionId}/${PERSISTENCE_FILES.CONTENT_JSON}`;
 }

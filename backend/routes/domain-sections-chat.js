@@ -1,7 +1,13 @@
 import express from "express";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { createEditDocumentationTask } from "../tasks/factory/index.js";
+import {
+  createEditDocumentationTask,
+  createEditDiagramsTask,
+  createEditRequirementsTask,
+  createEditBugsSecurityTask,
+  createEditRefactoringAndTestingTask,
+} from "../tasks/factory/index.js";
 import {
   loadDomainSectionChatHistory,
   appendDomainSectionChatMessage,
@@ -156,12 +162,30 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
       });
     }
 
+    // Map section type to its factory function
+    const SECTION_TASK_FACTORIES = {
+      [SECTION_TYPES.DOCUMENTATION]: createEditDocumentationTask,
+      [SECTION_TYPES.DIAGRAMS]: createEditDiagramsTask,
+      [SECTION_TYPES.REQUIREMENTS]: createEditRequirementsTask,
+      [SECTION_TYPES.BUGS_SECURITY]: createEditBugsSecurityTask,
+      [SECTION_TYPES.REFACTORING_AND_TESTING]:
+        createEditRefactoringAndTestingTask,
+    };
+
     // Create and execute edit task based on section type
+    const createTask = SECTION_TASK_FACTORIES[sectionType];
+    // Validate section type (already checked above, but be safe)
+    if (!createTask) {
+      return res.status(501).json({
+        error: "Not implemented",
+        message: `Editing ${sectionType} is not yet supported`,
+      });
+    }
+
     let task;
-    if (sectionType === SECTION_TYPES.DOCUMENTATION) {
+    {
       // 1. Create the task (not yet running) so we know the taskId.
-      //    chatId comes from the frontend — it is the stable session ID.
-      task = await createEditDocumentationTask(
+      task = await createTask(
         { domainId, chatId: requestChatId },
         { executeNow: false },
       );
@@ -174,8 +198,6 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
       }
 
       // 2. Persist the user message to the session chat file.
-      //    The execution handler will load this (plus any prior history) at
-      //    runtime, so task params stay free of chat content.
       await appendDomainSectionChatMessage(domainId, sectionType, {
         role: "user",
         content: message,
@@ -189,12 +211,6 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
           error: err,
           component: "Chat-API",
         });
-      });
-    } else {
-      // For other section types, return not implemented for now
-      return res.status(501).json({
-        error: "Not implemented",
-        message: `Editing ${sectionType} is not yet supported`,
       });
     }
 
