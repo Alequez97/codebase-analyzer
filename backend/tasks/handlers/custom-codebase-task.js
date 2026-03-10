@@ -189,5 +189,13 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         timestamp: new Date().toISOString(),
       });
     },
+
+    /**
+     * Custom tasks don't produce an output file — post-processing is a no-op.
+     * This prevents the default handler from trying to validate task.outputFile (which is undefined).
+     */
+    postProcess: async () => {
+      return { success: true };
+    },
   };
 }
