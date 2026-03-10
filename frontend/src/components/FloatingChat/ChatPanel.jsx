@@ -116,6 +116,8 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
     currentChatIdByKey,
     messagesByChatId,
     chatStateById,
+    pendingInputPrefill,
+    clearPendingInputPrefill,
     selectTaskType,
     backToSelector,
     sendMessage,
@@ -157,6 +159,17 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
   useEffect(() => {
     setInputValue("");
   }, [selectedTaskType]);
+
+  // Consume a pending prefill message seeded by openChatForTest.
+  // Runs after selectedTaskType is set so the input area is visible.
+  useEffect(() => {
+    if (selectedTaskType && pendingInputPrefill) {
+      setInputValue(pendingInputPrefill);
+      clearPendingInputPrefill();
+      // Give the textarea a tick to mount/unmount before focusing
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+  }, [selectedTaskType, pendingInputPrefill]);
 
   const handleSelectTask = (taskType, prefillPrompt = null) => {
     selectTaskType(taskType);

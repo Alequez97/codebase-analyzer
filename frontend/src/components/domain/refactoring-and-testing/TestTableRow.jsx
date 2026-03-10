@@ -15,6 +15,7 @@ import { Checkbox } from "../../ui/checkbox";
 import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
 import { useRefactoringAndTestingStore } from "../../../store/useRefactoringAndTestingStore";
+import { useAgentChatStore } from "../../../store/useAgentChatStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails } from "./TestCaseDetails";
 import { TestCaseInlineEditorComponent } from "./TestCaseInlineEditor";
@@ -45,6 +46,8 @@ export function TestTableRow({
     setEditingTest,
     clearEditingTest,
   } = useTestingEditorStore();
+
+  const { openChatForTest } = useAgentChatStore();
 
   const implementProgressByTestId = useRefactoringAndTestingStore(
     (state) => state.implementProgressByTestId,
@@ -149,7 +152,19 @@ export function TestTableRow({
           </Icon>
         </Table.Cell>
         <Table.Cell>
-          <Text fontSize="xs" fontFamily="mono" fontWeight="medium">
+          <Text
+            fontSize="xs"
+            fontFamily="mono"
+            fontWeight="medium"
+            cursor="pointer"
+            color="blue.600"
+            _hover={{ textDecoration: "underline", color: "blue.700" }}
+            title={`Open chat for ${test.id}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              openChatForTest(domainId, test.id);
+            }}
+          >
             {test.id}
           </Text>
         </Table.Cell>

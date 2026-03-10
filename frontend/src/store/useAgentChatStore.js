@@ -37,6 +37,10 @@ export const useAgentChatStore = create((set, get) => ({
   // Domain context (auto-populated from route params)
   domainId: null,
 
+  // Pre-filled input message — consumed once by ChatPanel after the task type is selected.
+  // Set via openChatForTest to seed the input with e.g. "Update TEST-001".
+  pendingInputPrefill: null,
+
   // Currently active taskId for the running AI turn (ephemeral — changes each message).
   // Used only for task cancellation. Do NOT use for message keying or socket routing.
   // The stable session identifier is stored in currentChatIdByKey.
@@ -84,6 +88,25 @@ export const useAgentChatStore = create((set, get) => ({
       currentTaskId: null,
     });
   },
+
+  /**
+   * Open the chat panel pre-focused on the Testing section and pre-fill the
+   * input with "Update <testId>".
+   *
+   * Called when the user clicks a test ID badge in the test table.
+   */
+  openChatForTest: async (domainId, testId) => {
+    set({
+      isOpen: true,
+      domainId,
+      selectedTaskType: null,
+      currentTaskId: null,
+      pendingInputPrefill: `Update ${testId}`,
+    });
+    await get().selectTaskType(SECTION_TYPES.REFACTORING_AND_TESTING);
+  },
+
+  clearPendingInputPrefill: () => set({ pendingInputPrefill: null }),
 
   closeChat: () => set({ isOpen: false }),
 
