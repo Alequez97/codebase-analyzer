@@ -4,16 +4,15 @@
 
 **DO NOT ASK QUESTIONS. DO NOT WAIT FOR INPUT. COMPLETE THE TASK AND EXIT.**
 
-Your job is to generate the missing test file, write it, **run it to verify it passes**, and fix any failures before finishing.
+Your job is to generate a complete, working test file, write it, **run it to verify it passes**, and fix any failures before finishing.
 
 ## Available Tools
 
-You have access to these tools:
-
-- **`read_file`**: Read file contents (use this to examine source files and example tests)
-- **`list_directory`**: List directory contents (use to find test files)
-- **`write_file`**: Write the generated test file (REQUIRED - use this to save the test)
-- **`execute_command`**: Run the test suite to validate your test file passes (REQUIRED - must be used after writing the test)
+- **`read_file`**: Read file contents (examine source files and example tests)
+- **`list_directory`**: List directory contents (find test files, configs)
+- **`search_files`**: Find files by pattern across the project
+- **`write_file`**: Write the generated test file (REQUIRED)
+- **`execute_command`**: Run the test to verify it passes (REQUIRED after writing)
 
 ## Objective
 
@@ -33,6 +32,12 @@ Generate a complete, working test file based on the test recommendation. The tes
 - **Test Type**: `{{TEST_TYPE}}`
 - **Test Description**: `{{TEST_DESCRIPTION}}`
 - **Source File**: `{{SOURCE_FILE}}`
+  {{#if IS_E2E}}
+- **App Base URL**: `{{E2E_BASE_URL}}` — use this as `baseURL` in the Playwright config and in all `page.goto()` calls
+  {{/if}}
+  {{#if IS_E2E_WITH_AUTH}}
+- **Auth credentials**: username `{{E2E_AUTH_USERNAME}}` / password `{{E2E_AUTH_PASSWORD}}` — use these to log in before running tests that require authentication
+  {{/if}}
 - **Scenario Titles**:
   {{#each TEST_SCENARIOS}}
   - {{this}}
@@ -44,211 +49,153 @@ Generate a complete, working test file based on the test recommendation. The tes
 {{TEST_SCENARIOS_JSON}}
 ```
 
-## Task Workflow
+---
 
-**Follow these steps EXACTLY**:
+{{#if IS_UNIT}}
+
+## Unit Test Workflow
 
 ### Step 1: Read the Source File
 
-Use `read_file` to read `{{SOURCE_FILE}}` to understand:
+Use `read_file` to read `{{SOURCE_FILE}}` and understand:
 
-- What functions/classes/routes it exports
+- What functions/classes it exports
 - What logic needs to be tested
-- What dependencies it uses
+- What external dependencies it uses (database, HTTP, filesystem, etc.)
 - What error cases exist
 
-### Step 2: Find Example Test Files
+### Step 2: Find Existing Unit Tests
 
-Use `list_directory` to explore directories like:
+Use `search_files` or `list_directory` to find co-located test files near `{{SOURCE_FILE}}`:
 
-- `tests/`
-- `test/`
-- `__tests__/`
-- `backend/tests/`
-- `src/tests/`
+- Look for `*.test.js`, `*.test.ts` next to the source file
+- Also check parent directories for shared test utilities
 
-Look for files matching patterns:
+Read 1-2 example test files to capture the testing framework (Jest, Vitest, etc.), import style, mocking patterns, and assertion style.
 
-- `*.test.js`, `*.test.ts`
-- `*.spec.js`, `*.spec.ts`
+Also check `package.json` to confirm the test runner and available packages.
 
-**For integration tests**: Prioritize files in `integration/` or `e2e/` directories
-**For unit tests**: Prioritize files NOT in `integration/` or `e2e/` directories
+### Step 3: Install Missing Dependencies (if needed)
 
-### Step 3: Study Example Test Files
+If a required package is absent from `package.json`:
 
-Use `read_file` to read 1-2 example test files to understand:
+```
+npm install <package> --save-dev
+```
 
-- What testing framework is used (Jest, Vitest, Mocha, etc.)
-- How tests are structured (describe blocks, test/it blocks)
-- How imports are written
-- How mocking is done
-- What assertion style is used
+### Step 4: Write the Unit Test File
 
-Also read `package.json` (and workspace package files if relevant) to:
+Create a test that:
 
-- Confirm which test framework and assertion libraries are available
-- Check whether required packages for the test type are present (e.g. `mongodb-memory-server`, `supertest`, `nock` for integration tests)
-
-### Step 3b: Install Missing Dependencies
-
-If `package.json` is missing required packages for your test, install them before writing the test:
-
-- Use `execute_command` with e.g. `npm install mongodb-memory-server --save-dev` or `npm install supertest --save-dev`
-- If `package.json` has no `test` script, add one with `npm pkg set scripts.test="jest"` (or the appropriate runner)
-- Only install packages that are genuinely absent from `package.json` — do not reinstall what is already there
-- If `node_modules` does not exist at all, run `npm install` first
-
-### Step 4: Generate the Test File
-
-Create a complete test file that:
-
-- Follows the same framework and patterns as the examples
-- Covers ALL scenarios and checks from `TEST_SCENARIOS_JSON` above
-- Uses proper AAA pattern (Arrange, Act, Assert)
-- Includes all necessary imports
-- Is ready to run with `npm test`
-
-### Step 5: Write the Test File
-
-**CRITICAL**: Use `write_file` to save the generated test to: **`{{TEST_FILE}}`**
-
-This is MANDATORY - the task is not complete until you write the file.
-
-### Step 6: Run the Tests
-
-After writing the file, use `execute_command` to run the test and verify it passes.
-
-Choose the most targeted command that exercises only your new test file, for example:
-
-- **Jest / Vitest**: `npx jest {{TEST_FILE}} --no-coverage` or `npx vitest run {{TEST_FILE}}`
-- **Mocha**: `npx mocha {{TEST_FILE}}`
-- **Pytest**: `pytest {{TEST_FILE}}`
-- If you are unsure of the runner, check `package.json` → `scripts.test` and adapt accordingly.
-
-**If the tests PASS** (exit code 0): the task is complete — stop here.
-
-### Step 7: Fix Failures and Re-run
-
-If the tests FAIL:
-
-1. Read the error output carefully — identify the root cause (import path wrong, wrong assertion, missing mock, etc.)
-2. Use `write_file` to overwrite `{{TEST_FILE}}` with the corrected test code
-3. Use `execute_command` again to re-run the tests
-4. Repeat until all tests pass or you have exhausted reasonable fixes (max 3 fix iterations)
-
-**Common failure causes**:
-
-- Wrong import path → check the source file's actual location with `list_directory`
-- Missing dependency → read `package.json` and adjust mocking strategy
-- Incorrect mock → read the source file again to understand the actual API shape
-- Wrong assertion value → run the code mentally and adjust the expectation
-
-### What to Include in the Generated Test
-
-1. **Imports**
-   - Testing framework imports (describe, test, expect, etc.)
-   - Source file imports (the code being tested)
-   - Mocking utilities if needed (jest.mock, vi.mock, etc.)
-   - Required dependencies
-
-2. **Test Structure**
-   - `describe` block for the module/function being tested
-   - `test` or `it` blocks for each scenario
-   - Proper setup (`beforeEach`) and teardown (`afterEach`) if needed
-   - **AAA Pattern**: Each test MUST follow the Arrange, Act, Assert pattern with comments:
-     ```javascript
-     test("description", () => {
-       // Arrange - Setup test data and dependencies
-       // Act - Execute the code being tested
-       // Assert - Verify the results
-     });
-     ```
-   - For tests that throw errors, use `// Act & Assert` when the act and assert are combined
-
-3. **Test Scenarios**
-
-- Cover ALL scenarios and checks listed in `TEST_SCENARIOS_JSON`
-  - Add additional edge cases that make sense
-  - Test both success and failure paths
-
-4. **Assertions**
-   - Use appropriate matchers (toBe, toEqual, toThrow, etc.)
-   - Test the actual behavior, not implementation details
-   - Clear assertion messages when helpful
-
-5. **Mocking** (if needed)
-   - Mock external dependencies (database, APIs, file system)
-   - Mock timers if testing time-based logic
-   - Provide mock data that's realistic
-
-## Integration Test Constraints
-
-When `TEST_TYPE` is `integration` or the target file path is under `integration/`:
-
-1. Use a real database — if the project uses MongoDB, spin up `mongodb-memory-server` for the test suite and seed required data in `beforeEach`/`afterAll`
-2. Use the real exported app (e.g. `app`, `server`) with `supertest` for HTTP assertions — do not replace it with a hand-rolled test harness
-3. Use real middleware (auth, validation, etc.) — generate valid tokens/sessions as needed instead of mocking middleware
-4. Only stub genuine external I/O boundaries that cannot be run locally: third-party HTTP APIs (mock with `nock`), cloud storage (e.g. AWS S3), email/SMS services
-5. Clean up database state after each test to keep tests isolated
-6. Follow any existing integration test conventions already present in the project
-
-## Testing Framework Examples
-
-### For Jest/Vitest
+- Imports only the specific functions being tested from `{{SOURCE_FILE}}`
+- Mocks **all** external dependencies (database, HTTP clients, filesystem) — never hit real external services
+- Covers **every scenario** in `TEST_SCENARIOS_JSON` with a dedicated `test()` block
+- Uses `beforeEach` to reset mocks between tests
+- Follows the AAA pattern strictly
 
 ```javascript
-import { describe, test, expect, beforeEach, vi } from "vitest"; // or from '@jest/globals'
-import { functionToTest } from "./sourceFile";
+import { describe, test, expect, beforeEach, vi } from "vitest"; // or jest
+import { functionToTest } from "{{SOURCE_FILE}}";
+
+vi.mock("../db", () => ({ query: vi.fn() }));
 
 describe("functionToTest", () => {
   beforeEach(() => {
-    // Setup before each test
     vi.clearAllMocks();
   });
 
-  test("should do something when given valid input", () => {
+  test("returns expected value for valid input", () => {
     // Arrange
-    const input = "valid input";
+    const input = "valid";
 
     // Act
     const result = functionToTest(input);
 
     // Assert
-    expect(result).toBe("expected output");
+    expect(result).toBe("expected");
   });
 
-  test("should throw error when given invalid input", () => {
+  test("throws when given null input", () => {
     // Arrange
-    const invalidInput = null;
+    const invalid = null;
 
     // Act & Assert
-    expect(() => functionToTest(invalidInput)).toThrow(
-      "Expected error message",
-    );
-  });
-
-  test("should handle edge case", () => {
-    // Arrange
-    const emptyInput = "";
-
-    // Act
-    const result = functionToTest(emptyInput);
-
-    // Assert
-    expect(result).toBe("default value");
+    expect(() => functionToTest(invalid)).toThrow("Expected error message");
   });
 });
 ```
 
-### For Integration Tests (MongoDB + supertest)
+### Step 5: Write the File
+
+Use `write_file` to save the test to **`{{TEST_FILE}}`**. This step is **mandatory**.
+
+### Step 6: Run and Verify
+
+```
+npx jest {{TEST_FILE}} --no-coverage
+# or
+npx vitest run {{TEST_FILE}}
+```
+
+### Step 7: Fix Failures and Re-run (up to 3 iterations)
+
+1. Read the error carefully to identify root cause
+2. Fix with `write_file` (overwrite `{{TEST_FILE}}`)
+3. Re-run with `execute_command`
+
+Common failure causes: wrong import path, missing mock, wrong assertion value, wrong framework import.
+{{/if}}
+
+{{#if IS_INTEGRATION}}
+
+## Integration Test Workflow
+
+Integration tests use the **real application** (real routes, real middleware, real database). Only mock genuine external I/O that cannot run locally (third-party HTTP APIs, cloud storage, email/SMS).
+
+### Step 1: Read the Source File
+
+Use `read_file` to read `{{SOURCE_FILE}}` and understand:
+
+- What API routes or services it exposes
+- What database models and collections it uses
+- What middleware (auth, validation) is involved
+- What external service calls are made (and need mocking)
+
+### Step 2: Find Existing Integration Tests
+
+Use `search_files` or `list_directory` to find tests under `backend/tests/integration/` (or `backend/tests/`).
+
+Read 1-2 example integration tests to understand how the app is imported, how the database is set up, how auth tokens are generated, and how `supertest` is used.
+
+Also check `package.json` for available packages (`supertest`, `mongodb-memory-server`, `nock`, etc.).
+
+### Step 3: Install Missing Dependencies (if needed)
+
+```
+npm install supertest --save-dev
+npm install mongodb-memory-server --save-dev  # if using MongoDB
+npm install nock --save-dev                   # if mocking outbound HTTP
+```
+
+If `package.json` has no `test` script: `npm pkg set scripts.test="jest"`
+
+### Step 4: Write the Integration Test File
+
+Rules:
+
+1. **Use the real exported app** — import `app` (or `server`) and use `supertest` for HTTP assertions
+2. **Use a real in-memory database** — spin up `mongodb-memory-server` (MongoDB), SQLite, or equivalent
+3. **Use real middleware** — generate valid tokens/sessions rather than mocking auth middleware
+4. **Only mock external I/O** — use `nock` for outbound third-party HTTP, mock cloud storage and email services
+5. **Clean up state** between tests — drop/truncate data in `beforeEach` or `afterEach`
+6. **Verify side effects** — check database state and emitted events, not just response body
 
 ```javascript
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import request from "supertest";
-import app from "../../app";
-import User from "../../models/user";
+import app from "../../app.js";
+import MyModel from "../../models/my-model.js";
 
 let mongod;
 
@@ -267,40 +214,214 @@ describe("POST /api/endpoint", () => {
     await mongoose.connection.dropDatabase();
   });
 
-  test("should create resource with valid data", async () => {
+  test("valid payload returns 201 and persists data", async () => {
     // Arrange
-    const validData = { name: "Test", value: 123 };
+    const payload = { name: "Test", value: 42 };
 
     // Act
     const response = await request(app)
       .post("/api/endpoint")
-      .send(validData)
+      .send(payload)
       .expect(201);
 
     // Assert
-    expect(response.body).toMatchObject({ name: "Test", value: 123 });
+    expect(response.body).toMatchObject({ name: "Test", value: 42 });
     const saved = await MyModel.findById(response.body._id);
     expect(saved).not.toBeNull();
+    expect(saved.value).toBe(42);
+  });
+
+  test("missing required fields return 400 with error details", async () => {
+    // Arrange
+    const invalidPayload = {};
+
+    // Act
+    const response = await request(app)
+      .post("/api/endpoint")
+      .send(invalidPayload)
+      .expect(400);
+
+    // Assert
+    expect(response.body).toHaveProperty("error");
   });
 });
 ```
 
+### Step 5: Write the File
+
+Use `write_file` to save the test to **`{{TEST_FILE}}`**. This step is **mandatory**.
+
+### Step 6: Run and Verify
+
+```
+npx jest {{TEST_FILE}} --no-coverage
+# or
+npx vitest run {{TEST_FILE}}
+```
+
+### Step 7: Fix Failures and Re-run (up to 3 iterations)
+
+1. Read the error output to identify the root cause
+2. Fix the file with `write_file`
+3. Re-run with `execute_command`
+
+Common failure causes: app not exported correctly, auth token invalid, database not connected before assertions, missing `nock` intercept.
+{{/if}}
+
+{{#if IS_E2E}}
+
+## E2E Test Workflow (Playwright)
+
+E2E tests drive a **real browser** against the running application. They test complete user journeys through the UI — clicks, form inputs, navigation, visual assertions. Use `@playwright/test` — never Jest/Vitest mocks.
+
+### Step 1: Discover the Playwright Setup
+
+Use `list_directory` and `search_files` to find:
+
+- `playwright.config.js` or `playwright.config.ts` in the project root or `frontend/`
+- Existing e2e tests under `frontend/tests/e2e/` or `e2e/`
+
+Read the Playwright config to find: `baseURL`, configured browsers, any global setup or `storageState` for authentication.
+
+### Step 2: Study Existing E2E Tests
+
+Read 1-2 existing e2e test files to understand:
+
+- Import style: `import { test, expect } from "@playwright/test"`
+- How navigation works (`page.goto`, `page.click`)
+- How elements are located (prefer `getByRole`, `getByLabel`, `getByTestId` over CSS selectors)
+- Whether `test.beforeEach` is used for shared setup (e.g. login)
+
+Also check `package.json` to confirm `@playwright/test` is installed.
+
+### Step 3: Install Missing Dependencies (if needed)
+
+If `@playwright/test` is absent:
+
+```
+npm install @playwright/test --save-dev
+npx playwright install chromium
+```
+
+If no `playwright.config.js` exists yet, create a minimal one at the project root:
+
+```javascript
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./frontend/tests/e2e",
+  use: {
+    baseURL: "{{E2E_BASE_URL}}",
+    headless: true,
+  },
+});
+```
+
+### Step 4: Write the E2E Test File
+
+Rules:
+
+1. **Import from `@playwright/test`** — use `test` and `expect` from Playwright only
+2. **Semantic locators first** — prefer `getByRole`, `getByLabel`, `getByText`, `getByTestId` over `locator("css")` or XPath
+3. **No manual waits** — rely on Playwright's built-in auto-waiting; never use `waitForTimeout`
+4. **Assert on real UI state** — `toBeVisible()`, `toHaveText()`, `toHaveURL()`, `toContainText()`
+5. **Cover every scenario** from `TEST_SCENARIOS_JSON` — map each `step` input to a Playwright action, each `expectedOutput` to an `expect()` assertion
+6. **Group with `test.describe`** and share setup in `test.beforeEach`
+
+Map scenario checks to Playwright actions:
+
+| `field: "step"` value   | Playwright action                                             |
+| ----------------------- | ------------------------------------------------------------- |
+| `"navigate to X"`       | `await page.goto("/path")`                                    |
+| `"click X button"`      | `await page.getByRole("button", { name: "X" }).click()`       |
+| `"fill field X with Y"` | `await page.getByLabel("X").fill("Y")`                        |
+| `"select option X"`     | `await page.getByRole("combobox").selectOption("X")`          |
+| `"submit form"`         | `await page.getByRole("button", { name: /submit/i }).click()` |
+
+Map `expectedOutput` to assertions:
+
+| expected         | assertion                                                     |
+| ---------------- | ------------------------------------------------------------- |
+| element visible  | `await expect(page.getByText("...")).toBeVisible()`           |
+| URL changed      | `await expect(page).toHaveURL(/pattern/)`                     |
+| success toast    | `await expect(page.getByRole("status")).toContainText("...")` |
+| validation error | `await expect(page.getByRole("alert")).toContainText("...")`  |
+
+```javascript
+import { test, expect } from "@playwright/test";
+
+test.describe("Feature Name", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+  });
+
+  test("user can complete the main workflow", async ({ page }) => {
+    // Arrange
+    await page.goto("/some-feature");
+
+    // Act
+    await page.getByRole("button", { name: "Open Form" }).click();
+    await page.getByLabel("Engine Hours").fill("151.0");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    // Assert
+    await expect(page.getByRole("status")).toContainText(
+      "Updated successfully",
+    );
+    await expect(page.getByTestId("engine-hours-display")).toHaveText("151.0");
+  });
+
+  test("shows validation error for invalid input", async ({ page }) => {
+    // Arrange
+    await page.goto("/some-feature");
+    await page.getByRole("button", { name: "Open Form" }).click();
+
+    // Act
+    await page.getByLabel("Engine Hours").fill("-1");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    // Assert
+    await expect(page.getByRole("alert")).toContainText("must be positive");
+  });
+});
+```
+
+### Step 5: Write the File
+
+Use `write_file` to save the test to **`{{TEST_FILE}}`**. This step is **mandatory**.
+
+### Step 6: Run and Verify
+
+```
+npx playwright test {{TEST_FILE}}
+```
+
+> **Note**: The dev server must be running (`npm run dev`). If the Playwright config has a `webServer` option, it will start automatically.
+
+### Step 7: Fix Failures and Re-run (up to 3 iterations)
+
+1. Read the Playwright error — it will name the exact locator that failed or show the timeout
+2. Fix with `write_file`
+3. Re-run with `execute_command`
+
+Common failure causes: element not found (switch to `getByRole`/`getByLabel`), wrong `baseURL` (re-read Playwright config), test depends on app state (add `beforeEach` setup), dev server not running.
+{{/if}}
+
+---
+
 ## Critical Requirements
 
 1. Follow the AAA pattern with `// Arrange`, `// Act`, `// Assert` comments in every test
-2. Cover all scenarios listed in `TEST_SCENARIOS`
-3. Match the testing framework and patterns found in the existing test files
+2. Cover **all scenarios** in `TEST_SCENARIOS_JSON` — no scenario may be skipped
+3. Match the testing framework and patterns found in existing test files
 4. Include all necessary imports and setup
-5. Write the file content directly using `write_file` — no prose descriptions, no markdown code blocks
-6. Run the test with `execute_command` after writing — the task is only complete when tests pass
+5. **Write the file using `write_file`** — no prose descriptions, no markdown code blocks
+6. **Run the test with `execute_command`** after writing — task is only complete when tests pass
 7. Fix and re-run if tests fail (up to 3 iterations)
-8. For integration tests: use the real database (spin up `mongodb-memory-server` if the project uses MongoDB — install it first if absent), use the real exported app, and use `supertest` for HTTP assertions — do not mock the database layer or application models
 
 ## Final Step
 
 1. Write the test file to **`{{TEST_FILE}}`** using `write_file`
-2. Run it with `execute_command` (e.g. `npx jest {{TEST_FILE}} --no-coverage`)
-3. If it passes — write `# Done` to `{{PROGRESS_FILE}}`, then stop.
+2. Run it with `execute_command`
+3. If it passes — write `# Done` to `{{PROGRESS_FILE}}`, then stop
 4. If it fails — read the error, fix the file, re-run. Repeat up to 3 times.
-
-Generate the complete, runnable test code and write it now.

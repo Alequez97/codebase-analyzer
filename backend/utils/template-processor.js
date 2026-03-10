@@ -344,12 +344,22 @@ export function buildImplementTestTemplateVariables(task) {
     .map((item) => item?.scenario)
     .filter((item) => typeof item === "string" && item.trim().length > 0);
 
+  const testType = params.testType || "";
+
   return {
     CODEBASE_PATH: params.targetDirectory || "",
     DOMAIN_ID: params.domainId || "",
     TEST_ID: params.testId || "",
     TEST_FILE: params.testFile || "",
-    TEST_TYPE: params.testType || "",
+    TEST_TYPE: testType,
+    IS_UNIT: testType === "unit" ? "true" : "",
+    IS_INTEGRATION: testType === "integration" ? "true" : "",
+    IS_E2E: testType === "e2e" ? "true" : "",
+    IS_E2E_WITH_AUTH:
+      testType === "e2e" && !!params.e2eAuthUsername ? "true" : "",
+    E2E_BASE_URL: params.e2eBaseUrl || "http://localhost:5173",
+    E2E_AUTH_USERNAME: params.e2eAuthUsername || "",
+    E2E_AUTH_PASSWORD: params.e2eAuthPassword || "",
     TEST_DESCRIPTION: params.testDescription || "",
     TEST_SCENARIOS: scenarioTitles,
     TEST_SCENARIOS_JSON: JSON.stringify(scenarios, null, 2),

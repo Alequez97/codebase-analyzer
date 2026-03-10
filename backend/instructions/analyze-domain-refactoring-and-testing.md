@@ -404,11 +404,12 @@ If the answer to all three is "no" or "nothing specific", **skip that test**.
    - **Error scenarios** in API workflows (network failures, database errors, timeouts)
    - **Side effects**: Verify database state, notifications sent, logs written
 
-4. **Missing E2E Tests**
+4. **Missing E2E Tests** (Playwright)
    - **Critical user journeys** that modify important state
    - **Multi-step business processes**
    - **Security-sensitive workflows** (admin actions, permissions)
    - **Payment or financial operations**
+   - E2E tests are implemented with **Playwright** (`@playwright/test`) — describe user actions as natural-language steps (e.g. `"click Save button"`, `"fill Engine Hours field with 151"`) that map directly to Playwright locator calls
 
 ## Quality Rules for Suggested Tests
 

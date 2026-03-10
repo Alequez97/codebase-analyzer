@@ -1,5 +1,6 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
+import { readE2EConfig } from "../../persistence/e2e-config.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
@@ -69,6 +70,7 @@ export async function createImplementTestTask(
 
   // Build parameters for template replacement
   // The LLM agent will use read_file and list_directory tools to discover files autonomously
+  const e2eConfig = testType === "e2e" ? await readE2EConfig() : null;
   const params = {
     domainId,
     targetDirectory: config.target.directory,
@@ -78,6 +80,9 @@ export async function createImplementTestTask(
     testDescription: testRecommendation.description || "",
     scenarios,
     sourceFile: sourceFile,
+    e2eBaseUrl: e2eConfig?.baseUrl || "",
+    e2eAuthUsername: e2eConfig?.auth?.username || "",
+    e2eAuthPassword: e2eConfig?.auth?.password || "",
     priority: testRecommendation.priority || "P2",
     category: testRecommendation.category || "unknown",
     relatedRequirement: testRecommendation.relatedRequirement || null,

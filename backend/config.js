@@ -211,6 +211,7 @@ const dirs = [
   path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.COMPLETED),
   path.join(config.paths.targetAnalysis, "logs"),
   path.join(config.paths.targetAnalysis, "temp"),
+  path.join(config.paths.targetAnalysis, "config"),
 ];
 
 dirs.forEach((dir) => {

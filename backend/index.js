@@ -17,6 +17,7 @@ import {
   logsRoutes,
   domainSectionsChatRoutes,
   codebaseChatRoutes,
+  e2eConfigRoutes,
 } from "./routes/index.js";
 
 // Domain routes (modular structure)
@@ -80,6 +81,7 @@ app.use("/api/analysis/domain", domainRoutes.refactoringAndTestingRoutes);
 
 app.use("/api/tasks", tasksRoutes);
 app.use("/api/logs", logsRoutes);
+app.use("/api/e2e-config", e2eConfigRoutes);
 app.use("/api", domainSectionsChatRoutes);
 app.use("/api", codebaseChatRoutes);
 

@@ -11,6 +11,7 @@ export * from "./domain-refactoring-and-testing";
 export * from "./tasks";
 export * from "./domain-sections-chat";
 export * from "./codebase-chat";
+export * from "./e2e-config";
 
 // Default export for backward compatibility (if needed)
 import * as status from "./status";
@@ -25,6 +26,7 @@ import * as domainTesting from "./domain-refactoring-and-testing";
 import * as tasks from "./tasks";
 import * as domainSectionsChat from "./domain-sections-chat";
 import * as codebaseChat from "./codebase-chat";
+import * as e2eConfig from "./e2e-config";
 
 export default {
   ...status,
@@ -39,4 +41,5 @@ export default {
   ...tasks,
   ...domainSectionsChat,
   ...codebaseChat,
+  ...e2eConfig,
 };

@@ -1,8 +1,45 @@
-import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import {
+  Badge,
+  Box,
+  Button,
+  HStack,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useConfigStore } from "../../store/useConfigStore";
+import { useE2EConfigStore } from "../../store/useE2EConfigStore";
 
 export function ConfigurationPanel() {
   const { config, configLoading } = useConfigStore();
+  const {
+    config: e2eConfig,
+    loading: e2eLoading,
+    saving,
+    fetchConfig,
+    saveConfig,
+  } = useE2EConfigStore();
+
+  const [baseUrl, setBaseUrl] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
+  useEffect(() => {
+    if (e2eConfig) {
+      setBaseUrl(e2eConfig.baseUrl || "");
+      setUsername(e2eConfig.auth?.username || "");
+      setPassword(e2eConfig.auth?.password || "");
+    }
+  }, [e2eConfig]);
+
+  const handleSaveE2EConfig = () => {
+    saveConfig({ baseUrl, auth: { username, password } });
+  };
 
   const getToolAvailability = (toolId) => {
     if (configLoading) return "loading";
@@ -129,6 +166,70 @@ export function ConfigurationPanel() {
               </VStack>
             </Box>
           ))}
+        </VStack>
+      </Box>
+
+      <Box>
+        <Text fontWeight="bold" mb={1}>
+          E2E Test Settings
+        </Text>
+        <Text fontSize="sm" color="gray.600" mb={3}>
+          Used when implementing e2e tests for the analyzed project
+        </Text>
+        <VStack align="stretch" gap={3}>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1}>
+              App Base URL
+            </Text>
+            <Input
+              size="sm"
+              fontFamily="mono"
+              placeholder="http://localhost:5173"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              disabled={e2eLoading}
+            />
+          </Box>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1}>
+              Login Username{" "}
+              <Text as="span" color="gray.400">
+                (optional)
+              </Text>
+            </Text>
+            <Input
+              size="sm"
+              placeholder="admin@example.com"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={e2eLoading}
+            />
+          </Box>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1}>
+              Login Password{" "}
+              <Text as="span" color="gray.400">
+                (optional)
+              </Text>
+            </Text>
+            <Input
+              size="sm"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={e2eLoading}
+            />
+          </Box>
+          <Button
+            size="sm"
+            colorPalette="blue"
+            alignSelf="flex-start"
+            loading={saving}
+            onClick={handleSaveE2EConfig}
+          >
+            Save E2E Settings
+          </Button>
         </VStack>
       </Box>
     </VStack>
