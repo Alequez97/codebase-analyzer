@@ -53,17 +53,17 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
 };
 
 /**
- * Resolve the file paths this task is allowed to read and write.
- * Centralises all file-access rules in one place instead of scattering
- * setAllowedWritePaths() calls across individual handlers.
+ * Configure all file-access permissions on the agent's fileToolExecutor for the given task.
+ * This is the single source of truth for what the agent is allowed to read and write.
  *
- * - Edit tasks  : task.outputFile (a .code-analysis path that must also be readable)
- * - Implement test : task.params.testFile (source file to create/overwrite)
- * - Apply refactoring : task.params.newServiceFile + task.params.targetFile
- * - Everything else : empty list (analysis tasks only write .code-analysis paths,
- *                     which are always allowed by the write gate)
+ * - IMPLEMENT_FIX / IMPLEMENT_TEST : full project write access (may touch arbitrary source files)
+ * - CUSTOM_CODEBASE_TASK           : full project read + write access
+ * - Edit tasks                     : task.outputFile only
+ * - APPLY_REFACTORING              : newServiceFile + targetFile
+ * - Everything else                : empty list (analysis tasks only write to .code-analysis/,
+ *                                    which is always permitted by the write gate)
  */
-function resolveAllowedWritePaths(task) {
+function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   const EDIT_TASK_TYPES = [
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
@@ -72,56 +72,51 @@ function resolveAllowedWritePaths(task) {
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
   ];
 
-  if (EDIT_TASK_TYPES.includes(task.type)) {
-    // Edit tasks need to read the current content then overwrite it.
-    return task.outputFile ? [task.outputFile] : [];
+  if (
+    task.type === TASK_TYPES.IMPLEMENT_FIX ||
+    task.type === TASK_TYPES.IMPLEMENT_TEST
+  ) {
+    fileToolExecutor.setAllowAnyWrite(true);
+    taskLogger.info(`🔓 Full project write access granted (${task.type})`, {
+      component: "TaskHandler",
+    });
+    return;
   }
 
-  if (task.type === TASK_TYPES.IMPLEMENT_TEST) {
-    return task.params?.testFile ? [task.params.testFile] : [];
-  }
-
-  if (task.type === TASK_TYPES.APPLY_REFACTORING) {
-    return [task.params?.newServiceFile, task.params?.targetFile].filter(
-      Boolean,
+  if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+    fileToolExecutor.setAllowAnyWrite(true);
+    fileToolExecutor.setAllowAnyRead(true);
+    taskLogger.info(
+      "🔓 Full project read+write access granted (CUSTOM_CODEBASE_TASK)",
+      { component: "TaskHandler" },
     );
+    return;
   }
 
-  if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
-    return task.params?.files?.length ? task.params.files : [];
+  let allowedPaths = [];
+
+  if (EDIT_TASK_TYPES.includes(task.type)) {
+    allowedPaths = task.outputFile ? [task.outputFile] : [];
+  } else if (task.type === TASK_TYPES.APPLY_REFACTORING) {
+    allowedPaths = [
+      task.params?.newServiceFile,
+      task.params?.targetFile,
+    ].filter(Boolean);
   }
 
-  return [];
+  fileToolExecutor.setAllowedWritePaths(allowedPaths);
+
+  if (allowedPaths.length > 0) {
+    taskLogger.info(`🔓 Allowed file paths: ${allowedPaths.join(", ")}`, {
+      component: "TaskHandler",
+    });
+  }
 }
 
 export async function createTaskHandler(task, taskLogger, agent) {
   // Configure file-access permissions for this task type (single source of truth).
   if (agent?.fileToolExecutor) {
-    const allowedPaths = resolveAllowedWritePaths(task);
-    agent.fileToolExecutor.setAllowedWritePaths(allowedPaths);
-
-    // IMPLEMENT_FIX tasks need unrestricted write access — a fix may require
-    // creating new files or modifying files beyond the single findingFile.
-    // CUSTOM_CODEBASE_TASK needs full read+write access to operate across the entire project.
-    if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
-      agent.fileToolExecutor.setAllowAnyWrite(true);
-      taskLogger.info("🔓 Full project write access granted (IMPLEMENT_FIX)", {
-        component: "TaskHandler",
-      });
-    } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
-      agent.fileToolExecutor.setAllowAnyWrite(true);
-      agent.fileToolExecutor.setAllowAnyRead(true);
-      taskLogger.info(
-        "🔓 Full project read+write access granted (CUSTOM_CODEBASE_TASK)",
-        {
-          component: "TaskHandler",
-        },
-      );
-    } else if (allowedPaths.length > 0) {
-      taskLogger.info(`🔓 Allowed file paths: ${allowedPaths.join(", ")}`, {
-        component: "TaskHandler",
-      });
-    }
+    setTaskFileAccess(agent.fileToolExecutor, task, taskLogger);
   }
 
   // Load task-specific instructions
