@@ -339,13 +339,13 @@ export default defineConfig({
 Rules:
 
 1. **Import from `@playwright/test`** — use `test` and `expect` from Playwright only
-2. **Semantic locators first** — prefer `getByRole`, `getByLabel`, `getByText`, `getByTestId` over `locator("css")` or XPath
+2. **`getByTestId()` exclusively** — every element interaction and assertion must use `getByTestId()`. Never use `getByRole`, `getByLabel`, `getByText`, CSS selectors, or XPath. Add `data-testid` attributes in Step 0 before writing any test code.
 3. **No manual waits** — rely on Playwright's built-in auto-waiting; never use `waitForTimeout`
 4. **Assert on real UI state** — `toBeVisible()`, `toHaveText()`, `toHaveURL()`, `toContainText()`
 5. **Cover every scenario** from `TEST_SCENARIOS_JSON` — map each `step` input to a Playwright action, each `expectedOutput` to an `expect()` assertion
 6. **Group with `test.describe`** and share setup in `test.beforeEach`
 7. **NEVER use `page.setContent()`** — always navigate to the real app with `page.goto("/path")`. Tests that inject fake HTML are invalid.
-8. **Use only locators found in the actual source files** you read in Step 0 — never guess element names
+8. **Use only `data-testid` values you added yourself** in Step 0 — never guess or invent testid strings
 
 Map scenario checks to Playwright actions:
 

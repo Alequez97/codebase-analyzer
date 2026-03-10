@@ -130,7 +130,7 @@ const config = {
     },
     [TASK_TYPES.IMPLEMENT_TEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_MINI,
+      model: MODELS.DEEPSEEK_REASONER,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
