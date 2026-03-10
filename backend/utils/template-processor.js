@@ -364,6 +364,7 @@ export function buildImplementTestTemplateVariables(task) {
     TEST_SCENARIOS: scenarioTitles,
     TEST_SCENARIOS_JSON: JSON.stringify(scenarios, null, 2),
     SOURCE_FILE: params.sourceFile || "",
+    DOMAIN_FILES: params.domainFiles || [],
     PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }

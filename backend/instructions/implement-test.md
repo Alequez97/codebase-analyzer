@@ -274,6 +274,23 @@ Common failure causes: app not exported correctly, auth token invalid, database 
 
 E2E tests drive a **real browser** against the running application. They test complete user journeys through the UI — clicks, form inputs, navigation, visual assertions. Use `@playwright/test` — never Jest/Vitest mocks.
 
+{{#if DOMAIN_FILES}}
+
+### Step 0: Read Domain Source Files
+
+The following files belong to this domain. **Read them before writing a single locator.** Your goal is to discover real element roles, aria-labels, `data-testid` attributes, button names, and form field labels that exist in the actual UI:
+
+{{#each DOMAIN_FILES}}
+
+- `{{this}}`
+  {{/each}}
+
+For each file that looks like a UI component (`.jsx`, `.tsx`, `.vue`, `.svelte`), use `read_file` to inspect it. Note every `aria-label`, `role`, `data-testid`, button text, and form label you find — these are the locators you must use in the test.
+
+If you cannot find a reliable selector for an element needed by a scenario, **add a `data-testid` attribute** to the source component using `write_file` or `replace_lines`, then use `getByTestId()` in the test. You have write access to all project files.
+
+{{/if}}
+
 ### Step 1: Discover the Playwright Setup
 
 Use `list_directory` and `search_files` to find:
@@ -327,6 +344,8 @@ Rules:
 4. **Assert on real UI state** — `toBeVisible()`, `toHaveText()`, `toHaveURL()`, `toContainText()`
 5. **Cover every scenario** from `TEST_SCENARIOS_JSON` — map each `step` input to a Playwright action, each `expectedOutput` to an `expect()` assertion
 6. **Group with `test.describe`** and share setup in `test.beforeEach`
+7. **NEVER use `page.setContent()`** — always navigate to the real app with `page.goto("/path")`. Tests that inject fake HTML are invalid.
+8. **Use only locators found in the actual source files** you read in Step 0 — never guess element names
 
 Map scenario checks to Playwright actions:
 

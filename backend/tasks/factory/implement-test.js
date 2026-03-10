@@ -25,7 +25,7 @@ import * as logger from "../../utils/logger.js";
  * @returns {Promise<Object>} The created task
  */
 export async function createImplementTestTask(
-  { domainId, testRecommendation },
+  { domainId, testRecommendation, domainFiles = [] },
   { executeNow = false } = {},
 ) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.IMPLEMENT_TEST);
@@ -87,6 +87,7 @@ export async function createImplementTestTask(
     category: testRecommendation.category || "unknown",
     relatedRequirement: testRecommendation.relatedRequirement || null,
     reason: testRecommendation.reason || "",
+    domainFiles: domainFiles || [],
   };
 
   const taskId = generateTaskId(TASK_TYPES.IMPLEMENT_TEST);

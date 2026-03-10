@@ -1,5 +1,6 @@
 import express from "express";
 import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
+import * as codebaseAnalysisPersistence from "../../persistence/codebase-analysis.js";
 import * as taskFactory from "../../tasks/factory/index.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TEST_TYPES } from "../../constants/test-types.js";
@@ -162,9 +163,15 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
 
     const executeNow = req.body.executeNow !== false;
 
+    // Look up domain files so the model knows which source files to read
+    const codebaseAnalysis =
+      await codebaseAnalysisPersistence.readCodebaseAnalysis();
+    const domain = codebaseAnalysis?.domains?.find((d) => d.id === id);
+    const domainFiles = domain?.files || [];
+
     // Create a task to apply the test
     const task = await taskFactory.createImplementTestTask(
-      { domainId: id, testRecommendation },
+      { domainId: id, testRecommendation, domainFiles },
       { executeNow },
     );
 
