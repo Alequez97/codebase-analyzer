@@ -164,9 +164,6 @@ export const useRefactoringAndTestingStore = create((set, get) => ({
       })(),
     }));
     if (refactoringId) {
-      useTestingEditorStore
-        .getState()
-        .unblockTestsByRefactoring(domainId, refactoringId);
       useDomainTestingStore
         .getState()
         .syncRefactoringStatus(

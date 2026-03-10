@@ -125,10 +125,37 @@ export const useDomainRefactoringAndTestingStore = create((set, get) => ({
           )
         : [];
 
+      let missingTests = currentData.missingTests;
+
+      if (status === REFACTORING_STATUS.COMPLETED) {
+        const completedRefactoring = refactorings.find(
+          (r) => r.id === refactoringId,
+        );
+        const unblockedTestIds = Array.isArray(completedRefactoring?.unblocks)
+          ? completedRefactoring.unblocks
+          : [];
+
+        if (unblockedTestIds.length > 0) {
+          const unblockInList = (list = []) =>
+            list.map((t) => {
+              if (!unblockedTestIds.includes(t.id)) return t;
+              const { blockedBy: _blockedBy, ...rest } = t;
+              return rest;
+            });
+
+          missingTests = {
+            unit: unblockInList(currentData.missingTests?.unit),
+            integration: unblockInList(currentData.missingTests?.integration),
+            e2e: unblockInList(currentData.missingTests?.e2e),
+          };
+        }
+      }
+
       const newDataMap = new Map(state.dataById);
       newDataMap.set(domainId, {
         ...currentData,
         refactoringRecommendations: refactorings,
+        missingTests,
       });
 
       return { dataById: newDataMap };

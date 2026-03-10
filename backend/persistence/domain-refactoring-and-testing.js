@@ -279,9 +279,32 @@ export async function recordRefactoringCompleted(domainId, input) {
     completedAt: input.timestamp || new Date().toISOString(),
   };
 
+  // Unblock all tests that were blocked by this refactoring
+  const unblockedTestIds = Array.isArray(refactorings[index].unblocks)
+    ? refactorings[index].unblocks
+    : [];
+
+  const unblockInList = (list = []) =>
+    list.map((t) => {
+      if (!unblockedTestIds.includes(t.id)) return t;
+      const { blockedBy: _blockedBy, ...rest } = t;
+      return rest;
+    });
+
+  const existingMissingTests = existing.missingTests || {};
+  const updatedMissingTests =
+    unblockedTestIds.length > 0
+      ? {
+          unit: unblockInList(existingMissingTests.unit),
+          integration: unblockInList(existingMissingTests.integration),
+          e2e: unblockInList(existingMissingTests.e2e),
+        }
+      : existingMissingTests;
+
   const updatedData = {
     ...existing,
     refactoringRecommendations: refactorings,
+    missingTests: updatedMissingTests,
   };
 
   await writeDomainTesting(domainId, updatedData);
