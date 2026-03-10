@@ -1,0 +1,1715 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat-Based Test Edit — Wireframe</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f7f8fa;
+        --surface: #ffffff;
+        --border: #e2e6ea;
+        --border-strong: #c8cdd4;
+        --text: #1a1d23;
+        --text-soft: #6b7280;
+        --text-muted: #9ca3af;
+        --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+        --green-bg: #dcfce7;
+        --green-bg-h: #bbf7d0;
+        --green-border: #4ade80;
+        --green-badge: #16a34a;
+        --yellow-bg: #fef9c3;
+        --yellow-bg-h: #fef08a;
+        --yellow-border: #facc15;
+        --yellow-badge: #ca8a04;
+        --blue-bg: #dbeafe;
+        --blue-text: #1d4ed8;
+        --orange-bg: #ffedd5;
+        --orange-text: #ea580c;
+        --gray-bg: #f3f4f6;
+        --gray-bg-h: #e5e7eb;
+        --purple-badge: #7c3aed;
+        --red-badge: #dc2626;
+
+        --chat-width: 360px;
+        --radius: 6px;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-lg:
+          0 10px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.07);
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 13px;
+        background: var(--bg);
+        color: var(--text);
+        padding: 0;
+        line-height: 1.5;
+      }
+
+      /* ── SCENE CONTAINER ── */
+      .scene-wrapper {
+        padding: 28px 32px;
+        display: none;
+        flex-direction: column;
+        gap: 20px;
+        min-height: 100vh;
+      }
+      .scene-wrapper.active {
+        display: flex;
+      }
+
+      /* ── NAV ── */
+      .nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #1a1d23;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0;
+        z-index: 100;
+        padding: 0 16px;
+        height: 44px;
+      }
+      .nav-title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-right: 20px;
+      }
+      .nav-btn {
+        border: none;
+        background: none;
+        color: #9ca3af;
+        padding: 0 14px;
+        height: 44px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        white-space: nowrap;
+      }
+      .nav-btn:hover {
+        color: #fff;
+      }
+      .nav-btn.active {
+        color: #fff;
+        border-bottom-color: #60a5fa;
+      }
+      .nav-spacer {
+        flex: 1;
+      }
+      .nav-note {
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      body {
+        padding-top: 44px;
+      }
+
+      /* ── SECTION LABEL ── */
+      .scene-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .scene-label h2 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .scene-label p {
+        font-size: 12px;
+        color: var(--text-soft);
+      }
+      .step-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #1a1d23;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      /* ── ANNOTATION ── */
+      .annotation {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-left: 3px solid #f59e0b;
+        border-radius: var(--radius);
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #92400e;
+        display: flex;
+        gap: 6px;
+        align-items: flex-start;
+      }
+      .annotation b {
+        font-weight: 700;
+      }
+
+      /* ── PANEL / CARD ── */
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .panel-header {
+        padding: 10px 14px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .panel-title {
+        font-size: 12px;
+        font-weight: 650;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* ── TABLE ── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 8px 10px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        white-space: nowrap;
+      }
+      td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr.row-normal td {
+        background: var(--gray-bg);
+      }
+      tr.row-normal:hover td {
+        background: var(--gray-bg-h);
+      }
+      tr.row-implemented td {
+        background: #f0fdf4;
+      }
+      tr.row-blocked td {
+        background: var(--orange-bg);
+      }
+      tr.row-implementing td {
+        background: var(--blue-bg);
+      }
+
+      /* highlight states */
+      tr.row-added td {
+        background: var(--green-bg);
+        transition: background 0.3s;
+      }
+      tr.row-added:hover td {
+        background: var(--green-bg-h);
+      }
+      tr.row-modified td {
+        background: var(--yellow-bg);
+        transition: background 0.3s;
+      }
+      tr.row-modified:hover td {
+        background: var(--yellow-bg-h);
+      }
+
+      /* outline on highlighted rows — applied via wrapper box */
+      .highlighted-row-wrapper {
+        position: relative;
+      }
+      tr.row-added {
+        outline: 2px solid var(--green-border);
+      }
+      tr.row-modified {
+        outline: 2px solid var(--yellow-border);
+      }
+
+      /* ── BADGE ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .badge-green {
+        background: #bbf7d0;
+        color: #166534;
+      }
+      .badge-yellow {
+        background: #fef08a;
+        color: #854d0e;
+      }
+      .badge-blue {
+        background: #bfdbfe;
+        color: #1e40af;
+      }
+      .badge-purple {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+      .badge-orange {
+        background: #fed7aa;
+        color: #9a3412;
+      }
+      .badge-gray {
+        background: #e5e7eb;
+        color: #374151;
+      }
+      .badge-red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      /* status badges */
+      .badge-NEW {
+        background: var(--green-badge);
+        color: #fff;
+      }
+      .badge-EDITED {
+        background: var(--yellow-badge);
+        color: #fff;
+      }
+
+      /* ── MONO ID ── */
+      .test-id {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--blue-text);
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .test-id:hover {
+        text-decoration: underline;
+      }
+      .test-id-wrap {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      /* ── ACTION BTN ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: none;
+        border-radius: 4px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .btn-implement {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .btn-implementing {
+        background: var(--blue-bg);
+        color: var(--blue-text);
+      }
+      .btn-implemented {
+        background: #f0fdf4;
+        color: #166534;
+        opacity: 0.7;
+      }
+      .btn-blocked {
+        background: var(--orange-bg);
+        color: var(--orange-text);
+        opacity: 0.7;
+      }
+      .btn-edit-edits {
+        background: var(--yellow-bg);
+        color: #854d0e;
+      }
+
+      /* ── SPLIT LAYOUT ── */
+      .split {
+        display: grid;
+        grid-template-columns: 1fr var(--chat-width);
+        gap: 14px;
+        align-items: start;
+      }
+
+      /* ── CHAT PANEL ── */
+      .chat-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+        height: 480px;
+      }
+      .chat-header {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg);
+        flex-shrink: 0;
+      }
+      .chat-section-tabs {
+        display: flex;
+        gap: 2px;
+      }
+      .chat-tab {
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-soft);
+        border: 1px solid transparent;
+      }
+      .chat-tab.active {
+        background: var(--blue-bg);
+        color: var(--blue-text);
+        border-color: #93c5fd;
+      }
+      .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .chat-bubble {
+        max-width: 90%;
+        padding: 8px 11px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .bubble-user {
+        align-self: flex-end;
+        background: var(--blue-text);
+        color: #fff;
+        border-bottom-right-radius: 2px;
+      }
+      .bubble-ai {
+        align-self: flex-start;
+        background: var(--gray-bg);
+        color: var(--text);
+        border-bottom-left-radius: 2px;
+        border: 1px solid var(--border);
+      }
+      .bubble-thinking {
+        align-self: flex-start;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-style: italic;
+      }
+      .dots {
+        display: flex;
+        gap: 3px;
+      }
+      .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        animation: bounce 0.9s infinite;
+      }
+      .dot:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .dot:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-4px);
+        }
+      }
+      .chat-input-row {
+        padding: 10px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .chat-input {
+        flex: 1;
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-size: 12px;
+        outline: none;
+        background: var(--bg);
+        color: var(--text);
+        resize: none;
+        font-family: inherit;
+      }
+      .chat-input:focus {
+        border-color: #60a5fa;
+      }
+      .chat-send {
+        background: var(--blue-text);
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .chat-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 16px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 2px 4px;
+      }
+      .chat-close:hover {
+        color: var(--text);
+      }
+
+      /* ── HIGHLIGHT CALLOUTS ── */
+      .callout-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .callout {
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        border: 1px solid;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .callout-green {
+        background: var(--green-bg);
+        border-color: var(--green-border);
+      }
+      .callout-yellow {
+        background: var(--yellow-bg);
+        border-color: var(--yellow-border);
+      }
+      .callout-blue {
+        background: var(--blue-bg);
+        border-color: #93c5fd;
+      }
+      .callout-gray {
+        background: var(--gray-bg);
+        border-color: var(--border-strong);
+      }
+      .callout-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .callout-green .callout-title {
+        color: #166534;
+      }
+      .callout-yellow .callout-title {
+        color: #854d0e;
+      }
+      .callout-blue .callout-title {
+        color: var(--blue-text);
+      }
+      .callout-gray .callout-title {
+        color: var(--text-soft);
+      }
+      .callout-body {
+        font-size: 12px;
+        color: var(--text-soft);
+        line-height: 1.5;
+      }
+
+      /* ── TIMER BAR ── */
+      .timer-bar-wrap {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .timer-bar {
+        height: 100%;
+        border-radius: 2px;
+        background: var(--green-badge);
+      }
+      .timer-bar-yellow {
+        background: var(--yellow-badge);
+      }
+
+      /* ── SCROLL INDICATOR ── */
+      .scroll-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: #eff6ff;
+        border: 1px dashed #93c5fd;
+        border-radius: var(--radius);
+        font-size: 11px;
+        color: var(--blue-text);
+      }
+
+      /* ── LEGEND ── */
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+      .legend-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        border: 1px solid var(--border-strong);
+      }
+
+      /* ── FADE DEMO ── */
+      .fade-stages {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+      }
+      .fade-stage {
+        flex: 1;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .fade-stage-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 5px 10px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        color: var(--text-soft);
+      }
+      .fade-stage-row {
+        padding: 8px 10px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s;
+      }
+
+      /* ── ARROW ── */
+      .arrow {
+        font-size: 18px;
+        color: var(--text-muted);
+        padding-top: 24px;
+        flex-shrink: 0;
+        align-self: center;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 4px 0;
+      }
+
+      /* ── COMMENT CHIP ── */
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 99px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--blue-text);
+      }
+
+      /* ── SPINNER ── */
+      .spinner {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border: 2px solid #bfdbfe;
+        border-top-color: var(--blue-text);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .text-muted {
+        color: var(--text-muted);
+      }
+      .text-soft {
+        color: var(--text-soft);
+      }
+      .font-mono {
+        font-family: var(--mono);
+      }
+      .text-xs {
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav class="nav">
+      <span class="nav-title">Wireframe</span>
+      <button class="nav-btn active" onclick="show(0, this)">
+        1 · Idle table
+      </button>
+      <button class="nav-btn" onclick="show(1, this)">2 · Click test ID</button>
+      <button class="nav-btn" onclick="show(2, this)">3 · AI thinking</button>
+      <button class="nav-btn" onclick="show(3, this)">4 · Update lands</button>
+      <button class="nav-btn" onclick="show(4, this)">
+        5 · Fade out (4 s)
+      </button>
+      <button class="nav-btn" onclick="show(5, this)">
+        6 · States reference
+      </button>
+      <span class="nav-spacer"></span>
+      <span class="nav-note">Chat-based test edit · visual feedback</span>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SCENE 0 — Idle table
+════════════════════════════════════════════════════════════ -->
+    <div class="scene-wrapper active" id="scene-0">
+      <div class="scene-label">
+        <span class="step-pill">1</span>
+        <div>
+          <h2>Idle state — Missing Tests table</h2>
+          <p>
+            Normal rendering before any chat interaction. Test IDs are clickable
+            links.
+          </p>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <span>💡</span>
+        <span
+          ><b>Test IDs</b> in the ID column are blue clickable links. Clicking
+          one will open the chat panel and pre-fill the message with
+          <code>Update &lt;TEST-ID&gt;</code>. No highlight colour is active in
+          this state.</span
+        >
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Missing Tests</span>
+          <div class="legend">
+            <span class="legend-item"
+              ><span
+                class="legend-swatch"
+                style="background: #f0fdf4; border-color: #86efac"
+              ></span
+              >Implemented</span
+            >
+            <span class="legend-item"
+              ><span
+                class="legend-swatch"
+                style="background: #ffedd5; border-color: #fdba74"
+              ></span
+              >Blocked</span
+            >
+            <span class="legend-item"
+              ><span
+                class="legend-swatch"
+                style="background: #f3f4f6; border-color: #d1d5db"
+              ></span
+              >Ready</span
+            >
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20px"></th>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Priority</th>
+              <th>Description</th>
+              <th>File</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-normal">
+              <td>▶</td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id">TEST-001</span></span
+                >
+              </td>
+              <td><span class="badge badge-purple">Unit</span></td>
+              <td><span class="badge badge-red">P0</span></td>
+              <td>Input validation: empty payload returns 400</td>
+              <td class="font-mono text-xs text-muted">auth/login.test.ts</td>
+              <td><button class="btn btn-implement">✓ Implement</button></td>
+            </tr>
+            <tr class="row-normal">
+              <td>▶</td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id">TEST-002</span></span
+                >
+              </td>
+              <td><span class="badge badge-purple">Unit</span></td>
+              <td><span class="badge badge-orange">P1</span></td>
+              <td>Rate-limit triggers after 5 failed attempts</td>
+              <td class="font-mono text-xs text-muted">auth/login.test.ts</td>
+              <td><button class="btn btn-implement">✓ Implement</button></td>
+            </tr>
+            <tr class="row-implemented">
+              <td>▶</td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id">TEST-003</span></span
+                >
+              </td>
+              <td><span class="badge badge-blue">Integration</span></td>
+              <td><span class="badge badge-orange">P1</span></td>
+              <td>JWT refresh rotates token on each call</td>
+              <td class="font-mono text-xs text-muted">auth/token.test.ts</td>
+              <td>
+                <button class="btn btn-implemented" disabled>
+                  Implemented
+                </button>
+              </td>
+            </tr>
+            <tr class="row-blocked">
+              <td>▶</td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id">TEST-004</span></span
+                >
+              </td>
+              <td><span class="badge badge-green">E2E</span></td>
+              <td><span class="badge badge-gray">P2</span></td>
+              <td>Full login flow with 2FA enabled</td>
+              <td class="font-mono text-xs text-muted">e2e/auth.spec.ts</td>
+              <td><button class="btn btn-blocked" disabled>Blocked</button></td>
+            </tr>
+            <tr class="row-normal">
+              <td>▶</td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id">TEST-005</span></span
+                >
+              </td>
+              <td><span class="badge badge-purple">Unit</span></td>
+              <td><span class="badge badge-gray">P2</span></td>
+              <td>Password hash uses bcrypt with cost ≥ 12</td>
+              <td class="font-mono text-xs text-muted">auth/hash.test.ts</td>
+              <td><button class="btn btn-implement">✓ Implement</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SCENE 1 — Chat opens after clicking test ID
+════════════════════════════════════════════════════════════ -->
+    <div class="scene-wrapper" id="scene-1">
+      <div class="scene-label">
+        <span class="step-pill">2</span>
+        <div>
+          <h2>User clicks a Test ID</h2>
+          <p>
+            Chat panel slides in. Testing tab is auto-selected. Input is
+            pre-filled with <code>Update TEST-001</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <span>💡</span>
+        <span>
+          <b>openChatForTest(domainId, test.id)</b> is called on click. The chat
+          store auto-selects the <b>Testing</b> section tab and sets the input
+          value to <code>Update TEST-001</code>. The user can edit the message
+          before sending or just hit Send.
+        </span>
+      </div>
+
+      <div class="split">
+        <!-- Table (narrower) -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Missing Tests</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 20px"></th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Pri</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="row-normal"
+                style="background: #eff6ff; outline: 2px solid #93c5fd"
+              >
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap">
+                    <span class="test-id" style="text-decoration: underline"
+                      >TEST-001</span
+                    >
+                    <span class="chip">chat open</span>
+                  </span>
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-red">P0</span></td>
+                <td>Input validation: empty payload returns 400</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+              <tr class="row-normal">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-002</span></span
+                  >
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-orange">P1</span></td>
+                <td>Rate-limit triggers after 5 failed attempts</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+              <tr class="row-implemented">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-003</span></span
+                  >
+                </td>
+                <td><span class="badge badge-blue">Integr.</span></td>
+                <td><span class="badge badge-orange">P1</span></td>
+                <td>JWT refresh rotates token on each call</td>
+                <td>
+                  <button class="btn btn-implemented" disabled>
+                    Implemented
+                  </button>
+                </td>
+              </tr>
+              <tr class="row-normal">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-005</span></span
+                  >
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-gray">P2</span></td>
+                <td>Password hash uses bcrypt with cost ≥ 12</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Chat panel -->
+        <div class="chat-panel">
+          <div class="chat-header">
+            <div class="chat-section-tabs">
+              <div class="chat-tab">Documentation</div>
+              <div class="chat-tab">Requirements</div>
+              <div class="chat-tab active">Testing</div>
+              <div class="chat-tab">Bugs</div>
+            </div>
+            <button class="chat-close">✕</button>
+          </div>
+          <div class="chat-body">
+            <div
+              class="text-muted text-xs"
+              style="text-align: center; padding: 20px 0"
+            >
+              No messages yet. Send your first message below.
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-input" rows="2">Update TEST-001</textarea>
+            <button class="chat-send">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SCENE 2 — AI thinking
+════════════════════════════════════════════════════════════ -->
+    <div class="scene-wrapper" id="scene-2">
+      <div class="scene-label">
+        <span class="step-pill">3</span>
+        <div>
+          <h2>User sends message — AI is thinking</h2>
+          <p>User message appears, then thinking indicator. Input is locked.</p>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <span>💡</span>
+        <span>
+          <code>CHAT_MESSAGE { thinking: true }</code> socket event arrives
+          first. The typed bubble is immediately added client-side on send.
+          Input is disabled while TASK is in-flight.
+        </span>
+      </div>
+
+      <div class="split">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Missing Tests</span>
+            <span class="chip"
+              ><span class="spinner"></span>&nbsp;AI editing…</span
+            >
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 20px"></th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Pri</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-normal" style="background: #eff6ff">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap">
+                    <span class="test-id">TEST-001</span>
+                  </span>
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-red">P0</span></td>
+                <td>Input validation: empty payload returns 400</td>
+                <td>
+                  <button
+                    class="btn btn-implement"
+                    disabled
+                    style="opacity: 0.5"
+                  >
+                    ✓ Implement
+                  </button>
+                </td>
+              </tr>
+              <tr class="row-normal">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-002</span></span
+                  >
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-orange">P1</span></td>
+                <td>Rate-limit triggers after 5 failed attempts</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+              <tr class="row-implemented">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-003</span></span
+                  >
+                </td>
+                <td><span class="badge badge-blue">Integr.</span></td>
+                <td><span class="badge badge-orange">P1</span></td>
+                <td>JWT refresh rotates token on each call</td>
+                <td>
+                  <button class="btn btn-implemented" disabled>
+                    Implemented
+                  </button>
+                </td>
+              </tr>
+              <tr class="row-normal">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-005</span></span
+                  >
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-gray">P2</span></td>
+                <td>Password hash uses bcrypt with cost ≥ 12</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="chat-panel">
+          <div class="chat-header">
+            <div class="chat-section-tabs">
+              <div class="chat-tab">Documentation</div>
+              <div class="chat-tab">Requirements</div>
+              <div class="chat-tab active">Testing</div>
+              <div class="chat-tab">Bugs</div>
+            </div>
+            <button class="chat-close">✕</button>
+          </div>
+          <div class="chat-body">
+            <div class="chat-bubble bubble-user">Update TEST-001</div>
+            <div class="bubble-thinking">
+              <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+              AI is thinking…
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-input" rows="2" disabled style="opacity: 0.5">
+Update TEST-001</textarea
+            >
+            <button class="chat-send" disabled style="opacity: 0.5">
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SCENE 3 — Update lands
+════════════════════════════════════════════════════════════ -->
+    <div class="scene-wrapper" id="scene-3">
+      <div class="scene-label">
+        <span class="step-pill">4</span>
+        <div>
+          <h2>REFACTORING_AND_TESTING_UPDATED arrives</h2>
+          <p>
+            Changed rows highlight immediately. AI response appears in chat.
+            Timer starts (4 s).
+          </p>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <span>💡</span>
+        <span>
+          Socket store diffs <code>oldMissingTests</code> vs
+          <code>newMissingTests</code> → stores
+          <code
+            >recentlyChangedTests: Map&lt;testId, "added"|"modified"&gt;</code
+          >
+          on the domain store. Both
+          <code>useDomainRefactoringAndTestingStore</code> and
+          <code>useRefactoringAndTestingEditorStore</code> are updated.
+          <b>Modified row</b> gets yellow highlight + EDITED badge.
+          <b>New row</b> gets green + NEW badge.
+        </span>
+      </div>
+
+      <div class="split">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Missing Tests</span>
+            <div style="display: flex; gap: 6px; align-items: center">
+              <span class="badge badge-NEW" style="font-size: 10px"
+                >1 edited</span
+              >
+              <span
+                class="badge badge-green badge-NEW"
+                style="font-size: 10px; background: #16a34a"
+                >1 new</span
+              >
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 20px"></th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Pri</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Modified row -->
+              <tr class="row-modified">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap">
+                    <span class="test-id">TEST-001</span>
+                    <span
+                      class="badge"
+                      style="
+                        background: var(--yellow-badge);
+                        color: #fff;
+                        font-size: 10px;
+                      "
+                      >EDITED</span
+                    >
+                  </span>
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-red">P0</span></td>
+                <td>
+                  Input validation: empty payload <b>and null body</b> returns
+                  400
+                </td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+              <tr class="row-normal">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-002</span></span
+                  >
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-orange">P1</span></td>
+                <td>Rate-limit triggers after 5 failed attempts</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+              <tr class="row-implemented">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-003</span></span
+                  >
+                </td>
+                <td><span class="badge badge-blue">Integr.</span></td>
+                <td><span class="badge badge-orange">P1</span></td>
+                <td>JWT refresh rotates token on each call</td>
+                <td>
+                  <button class="btn btn-implemented" disabled>
+                    Implemented
+                  </button>
+                </td>
+              </tr>
+              <tr class="row-normal">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap"
+                    ><span class="test-id">TEST-005</span></span
+                  >
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-gray">P2</span></td>
+                <td>Password hash uses bcrypt with cost ≥ 12</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+              <!-- Added row -->
+              <tr class="row-added">
+                <td>▶</td>
+                <td>
+                  <span class="test-id-wrap">
+                    <span class="test-id">TEST-006</span>
+                    <span
+                      class="badge"
+                      style="background: #16a34a; color: #fff; font-size: 10px"
+                      >NEW</span
+                    >
+                  </span>
+                </td>
+                <td><span class="badge badge-purple">Unit</span></td>
+                <td><span class="badge badge-red">P0</span></td>
+                <td>Input validation: malformed JSON body returns 400</td>
+                <td><button class="btn btn-implement">✓ Implement</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Scroll indicator (would auto-scroll to first changed row) -->
+          <div style="padding: 8px 10px; border-top: 1px solid var(--border)">
+            <div class="scroll-indicator">
+              ↕ Auto-scrolled to first changed row (TEST-001)
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-panel">
+          <div class="chat-header">
+            <div class="chat-section-tabs">
+              <div class="chat-tab">Documentation</div>
+              <div class="chat-tab">Requirements</div>
+              <div class="chat-tab active">Testing</div>
+              <div class="chat-tab">Bugs</div>
+            </div>
+            <button class="chat-close">✕</button>
+          </div>
+          <div class="chat-body">
+            <div class="chat-bubble bubble-user">Update TEST-001</div>
+            <div class="chat-bubble bubble-ai">
+              Done! I updated <b>TEST-001</b>: expanded the description to cover
+              both empty payload and null body cases, since both should return
+              400.<br /><br />
+              I also added <b>TEST-006</b> for malformed JSON — it was a natural
+              gap alongside the empty-body case.
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <textarea
+              class="chat-input"
+              rows="2"
+              placeholder="Continue the conversation…"
+            ></textarea>
+            <button class="chat-send">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SCENE 4 — Fade out after 4 s
+════════════════════════════════════════════════════════════ -->
+    <div class="scene-wrapper" id="scene-4">
+      <div class="scene-label">
+        <span class="step-pill">5</span>
+        <div>
+          <h2>4 seconds later — highlights fade</h2>
+          <p>
+            <code>clearRecentlyChangedTests()</code> fires. CSS transition fades
+            rows back to their base colour.
+          </p>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <span>💡</span>
+        <span>
+          The <code>transition="background 0.3s, outline-color 0.3s"</code> on
+          <code>&lt;Table.Row&gt;</code> makes the colour change smooth. When
+          the Map is cleared the row has no <code>recentChangeType</code>
+          so it renders its default colour, fading naturally via CSS.
+        </span>
+      </div>
+
+      <!-- fade progression -->
+      <div class="fade-stages">
+        <div class="fade-stage">
+          <div class="fade-stage-label">T=0 s · update lands</div>
+          <div
+            class="fade-stage-row"
+            style="
+              background: var(--yellow-bg);
+              outline: 2px solid var(--yellow-border);
+            "
+          >
+            <span
+              class="test-id"
+              style="font-family: var(--mono); font-size: 11px"
+              >TEST-001</span
+            >
+            <span
+              class="badge"
+              style="
+                background: var(--yellow-badge);
+                color: #fff;
+                font-size: 10px;
+              "
+              >EDITED</span
+            >
+            <span class="text-muted text-xs">…description</span>
+          </div>
+          <div
+            class="fade-stage-row"
+            style="
+              background: var(--green-bg);
+              outline: 2px solid var(--green-border);
+            "
+          >
+            <span
+              class="test-id"
+              style="font-family: var(--mono); font-size: 11px"
+              >TEST-006</span
+            >
+            <span
+              class="badge"
+              style="background: #16a34a; color: #fff; font-size: 10px"
+              >NEW</span
+            >
+            <span class="text-muted text-xs">…description</span>
+          </div>
+          <div style="padding: 8px 10px">
+            <div class="timer-bar-wrap">
+              <div class="timer-bar timer-bar-yellow" style="width: 100%"></div>
+            </div>
+            <div class="text-muted text-xs" style="margin-top: 3px">
+              4.0 s remaining
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="fade-stage">
+          <div class="fade-stage-label">T=2 s · still highlighted</div>
+          <div class="fade-stage-row" style="background: var(--yellow-bg)">
+            <span
+              class="test-id"
+              style="font-family: var(--mono); font-size: 11px"
+              >TEST-001</span
+            >
+            <span
+              class="badge"
+              style="
+                background: var(--yellow-badge);
+                color: #fff;
+                font-size: 10px;
+              "
+              >EDITED</span
+            >
+            <span class="text-muted text-xs">…description</span>
+          </div>
+          <div class="fade-stage-row" style="background: var(--green-bg)">
+            <span
+              class="test-id"
+              style="font-family: var(--mono); font-size: 11px"
+              >TEST-006</span
+            >
+            <span
+              class="badge"
+              style="background: #16a34a; color: #fff; font-size: 10px"
+              >NEW</span
+            >
+            <span class="text-muted text-xs">…description</span>
+          </div>
+          <div style="padding: 8px 10px">
+            <div class="timer-bar-wrap">
+              <div class="timer-bar timer-bar-yellow" style="width: 50%"></div>
+            </div>
+            <div class="text-muted text-xs" style="margin-top: 3px">
+              2.0 s remaining
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="fade-stage">
+          <div class="fade-stage-label">T=4 s · map cleared → CSS fades</div>
+          <div
+            class="fade-stage-row"
+            style="background: var(--gray-bg); transition: background 0.3s"
+          >
+            <span
+              class="test-id"
+              style="font-family: var(--mono); font-size: 11px"
+              >TEST-001</span
+            >
+            <span class="text-muted text-xs">…description (no badge)</span>
+          </div>
+          <div
+            class="fade-stage-row"
+            style="background: var(--gray-bg); transition: background 0.3s"
+          >
+            <span
+              class="test-id"
+              style="font-family: var(--mono); font-size: 11px"
+              >TEST-006</span
+            >
+            <span class="text-muted text-xs">…description (no badge)</span>
+          </div>
+          <div style="padding: 8px 10px">
+            <div class="timer-bar-wrap">
+              <div class="timer-bar" style="width: 0%"></div>
+            </div>
+            <div class="text-muted text-xs" style="margin-top: 3px">
+              cleared
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap">
+        <div class="callout callout-blue">
+          <div class="callout-title">What clears the highlight</div>
+          <div class="callout-body">
+            <code
+              >setTimeout(() => testingStore.clearRecentlyChangedTests(),
+              4000)</code
+            >
+            in the socket store. No component involvement — purely store state.
+          </div>
+        </div>
+        <div class="callout callout-gray">
+          <div class="callout-title">What drives the CSS fade</div>
+          <div class="callout-body">
+            <code>transition="background 0.3s, outline-color 0.3s"</code> on
+            <code>&lt;Table.Row&gt;</code>. When
+            <code>recentChangeType</code> becomes null the computed bg changes
+            and Chakra's transition takes over.
+          </div>
+        </div>
+        <div class="callout callout-yellow">
+          <div class="callout-title">Next chat turn resets timer</div>
+          <div class="callout-body">
+            If the user sends another message, a new
+            <code>REFACTORING_AND_TESTING_UPDATED</code> arrives, overwriting
+            <code>recentlyChangedTests</code> and resetting the 4 s window.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SCENE 5 — States reference
+════════════════════════════════════════════════════════════ -->
+    <div class="scene-wrapper" id="scene-5">
+      <div class="scene-label">
+        <span class="step-pill">6</span>
+        <div>
+          <h2>All row states — reference</h2>
+          <p>Combined view of every possible row colour + badge combination.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Row state reference</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>Row BG</th>
+              <th>Hover BG</th>
+              <th>Outline</th>
+              <th>ID badge</th>
+              <th>Action Button</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-added">
+              <td><b>AI: Added</b></td>
+              <td class="font-mono text-xs">green.100</td>
+              <td class="font-mono text-xs">green.200</td>
+              <td class="font-mono text-xs">green.400</td>
+              <td>
+                <span class="badge" style="background: #16a34a; color: #fff"
+                  >NEW</span
+                >
+              </td>
+              <td><button class="btn btn-implement">✓ Implement</button></td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id font-mono text-xs">TEST-006</span
+                  ><span
+                    class="badge"
+                    style="background: #16a34a; color: #fff; font-size: 10px"
+                    >NEW</span
+                  ></span
+                >
+              </td>
+            </tr>
+            <tr class="row-modified">
+              <td><b>AI: Modified</b></td>
+              <td class="font-mono text-xs">yellow.100</td>
+              <td class="font-mono text-xs">yellow.200</td>
+              <td class="font-mono text-xs">yellow.400</td>
+              <td>
+                <span
+                  class="badge"
+                  style="background: var(--yellow-badge); color: #fff"
+                  >EDITED</span
+                >
+              </td>
+              <td><button class="btn btn-implement">✓ Implement</button></td>
+              <td>
+                <span class="test-id-wrap"
+                  ><span class="test-id font-mono text-xs">TEST-001</span
+                  ><span
+                    class="badge"
+                    style="
+                      background: var(--yellow-badge);
+                      color: #fff;
+                      font-size: 10px;
+                    "
+                    >EDITED</span
+                  ></span
+                >
+              </td>
+            </tr>
+            <tr class="row-implementing">
+              <td><b>Implementing</b></td>
+              <td class="font-mono text-xs">blue.50</td>
+              <td class="font-mono text-xs">blue.100</td>
+              <td class="text-muted text-xs">none</td>
+              <td class="text-muted text-xs">none</td>
+              <td>
+                <button class="btn btn-implementing">
+                  <span class="spinner"></span> Implementing…
+                </button>
+              </td>
+              <td><span class="test-id font-mono text-xs">TEST-002</span></td>
+            </tr>
+            <tr class="row-implemented">
+              <td><b>Implemented</b></td>
+              <td class="font-mono text-xs">green.50</td>
+              <td class="font-mono text-xs">green.100</td>
+              <td class="text-muted text-xs">none</td>
+              <td class="text-muted text-xs">none</td>
+              <td>
+                <button class="btn btn-implemented" disabled>
+                  Implemented
+                </button>
+              </td>
+              <td><span class="test-id font-mono text-xs">TEST-003</span></td>
+            </tr>
+            <tr class="row-implemented" style="background: #fffbeb">
+              <td><b>Impl. + pending edits</b></td>
+              <td class="font-mono text-xs">yellow.50</td>
+              <td class="font-mono text-xs">yellow.100</td>
+              <td class="text-muted text-xs">none</td>
+              <td class="text-muted text-xs">none</td>
+              <td>
+                <button class="btn btn-edit-edits">Implement edits</button>
+              </td>
+              <td><span class="test-id font-mono text-xs">TEST-003</span></td>
+            </tr>
+            <tr class="row-blocked">
+              <td><b>Blocked</b></td>
+              <td class="font-mono text-xs">orange.50</td>
+              <td class="font-mono text-xs">orange.100</td>
+              <td class="text-muted text-xs">none</td>
+              <td class="text-muted text-xs">none</td>
+              <td><button class="btn btn-blocked" disabled>Blocked</button></td>
+              <td><span class="test-id font-mono text-xs">TEST-004</span></td>
+            </tr>
+            <tr class="row-normal">
+              <td><b>Default / ready</b></td>
+              <td class="font-mono text-xs">gray.50</td>
+              <td class="font-mono text-xs">gray.100</td>
+              <td class="text-muted text-xs">none</td>
+              <td class="text-muted text-xs">none</td>
+              <td><button class="btn btn-implement">✓ Implement</button></td>
+              <td><span class="test-id font-mono text-xs">TEST-005</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout-grid">
+        <div class="callout callout-green">
+          <div class="callout-title">Added (AI-generated new test)</div>
+          <div class="callout-body">
+            Triggered when a test ID appears in
+            <code>newMissingTests</code> that wasn't in
+            <code>oldMissingTests</code>. Green highlight + <b>NEW</b> badge.
+            Clears after 4 s.
+          </div>
+        </div>
+        <div class="callout callout-yellow">
+          <div class="callout-title">Modified (AI edited existing test)</div>
+          <div class="callout-body">
+            Triggered when a test ID exists in both old and new but its content
+            differs. Yellow highlight + <b>EDITED</b> badge. Clears after 4 s.
+          </div>
+        </div>
+        <div class="callout callout-blue">
+          <div class="callout-title">Implementing (task in flight)</div>
+          <div class="callout-body">
+            Active while <code>implementingTests[test.id]</code> is truthy. Blue
+            tint, spinner in the action button. Persists until task completes.
+          </div>
+        </div>
+        <div class="callout callout-gray">
+          <div class="callout-title">Priority order matters</div>
+          <div class="callout-body">
+            AI-highlight states (<i>added</i>, <i>modified</i>) take precedence
+            over <i>blocked</i>, <i>implemented</i>, and <i>default</i> in the
+            bg ternary chain.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function show(idx, btn) {
+        document
+          .querySelectorAll(".scene-wrapper")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById("scene-" + idx).classList.add("active");
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+      }
+    </script>
+  </body>
+</html>

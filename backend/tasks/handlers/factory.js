@@ -102,9 +102,15 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   fileToolExecutor.setAllowedWritePaths(allowedPaths);
 
   if (allowedPaths.length > 0) {
-    taskLogger.info(`🔓 Allowed file paths: ${allowedPaths.join(", ")}`, {
-      component: "TaskHandler",
-    });
+    taskLogger.info(
+      `🔓 Write access restricted to output file only (edit task): ${allowedPaths.join(", ")}`,
+      { component: "TaskHandler" },
+    );
+  } else {
+    taskLogger.info(
+      `🔒 No explicit write paths set — analysis task writes only to .code-analysis/ (enforced by write gate)`,
+      { component: "TaskHandler" },
+    );
   }
 }
 
