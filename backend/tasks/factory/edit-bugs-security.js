@@ -25,10 +25,13 @@ import * as logger from "../../utils/logger.js";
  * @returns {Promise<Object>} The created task
  */
 export async function createEditBugsSecurityTask(
-  { domainId, chatId },
+  { domainId, chatId, model = null },
   { executeNow = false } = {},
 ) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.EDIT_BUGS_SECURITY);
+  const agentConfigResult = getAgentConfig(
+    TASK_TYPES.EDIT_BUGS_SECURITY,
+    model,
+  );
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

@@ -27,7 +27,11 @@ import {
 import MarkdownRenderer from "../MarkdownRenderer";
 import { TaskSelector } from "./TaskSelector";
 import { ChatSessionsList } from "./ChatSessionsList";
+import { ModelSelector } from "./ModelSelector";
+import { AgentOverridesPopover } from "./AgentOverridesPopover";
 import { useAgentChatStore } from "../../store/useAgentChatStore";
+import { useConfigStore } from "../../store/useConfigStore";
+import { MODEL_LABELS } from "../../constants/models";
 import { SECTION_TYPES } from "../../constants/section-types";
 import { TASK_TYPES } from "../../constants/task-types";
 
@@ -118,6 +122,8 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
     chatStateById,
     pendingInputPrefill,
     clearPendingInputPrefill,
+    agentsOverrides,
+    setAgentsOverrides,
     selectTaskType,
     backToSelector,
     sendMessage,
@@ -149,6 +155,12 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+
+  const { config } = useConfigStore();
+  const defaultModelId = config?.taskModels?.[selectedTaskType] ?? null;
+  const defaultModelLabel = defaultModelId
+    ? (MODEL_LABELS[defaultModelId] ?? null)
+    : null;
 
   // Auto-scroll when new messages arrive
   useEffect(() => {
@@ -366,7 +378,20 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
       {/* Input area */}
       {selectedTaskType && !showSessionsList && (
         <Box px={3} py={3} borderTop="1px solid" borderColor="gray.200">
-          <HStack gap={2} align="flex-end">
+          <HStack gap={1} mb={2}>
+            <ModelSelector
+              value={agentsOverrides.model}
+              onChange={(model) =>
+                setAgentsOverrides({ ...agentsOverrides, model })
+              }
+              defaultLabel={defaultModelLabel}
+            />
+            <AgentOverridesPopover
+              overrides={agentsOverrides}
+              onChange={setAgentsOverrides}
+            />
+          </HStack>
+          <HStack gap={2} align="center">
             <Textarea
               ref={textareaRef}
               value={inputValue}

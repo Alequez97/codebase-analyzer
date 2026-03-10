@@ -28,9 +28,10 @@ const AGENTS = {
 /**
  * Get agent configuration for a specific task type
  * @param {string} taskType - The task type from TASK_TYPES
+ * @param {string|null} [modelOverride] - Optional model ID to override the configured default
  * @returns {{success: boolean, agentConfig?: Object, error?: string, code?: string}}
  */
-export function getAgentConfig(taskType) {
+export function getAgentConfig(taskType, modelOverride = null) {
   const taskConfig = config.tasks[taskType];
 
   if (!taskConfig) {
@@ -45,7 +46,7 @@ export function getAgentConfig(taskType) {
     success: true,
     agentConfig: {
       agent: taskConfig.agent,
-      model: taskConfig.model,
+      model: modelOverride || taskConfig.model,
       maxTokens: taskConfig.maxTokens,
       maxIterations: taskConfig.maxIterations || 30,
       reasoningEffort: taskConfig.reasoningEffort,

@@ -25,10 +25,10 @@ import * as logger from "../../utils/logger.js";
  * @returns {Promise<Object>} The created task
  */
 export async function createEditDiagramsTask(
-  { domainId, chatId },
+  { domainId, chatId, model = null },
   { executeNow = false } = {},
 ) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.EDIT_DIAGRAMS);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.EDIT_DIAGRAMS, model);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

@@ -338,7 +338,7 @@ export const useSocketStore = create((set, get) => ({
       ({ taskId, content, role }) => {
         const chatStore = useAgentChatStore.getState();
         if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
-          chatStore.setAiThinking(false);
+          // Don't clear isThinking - let it stay visible until task completes
           chatStore.addMessage({ role: role || "assistant", content });
         }
       },
@@ -383,7 +383,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.CUSTOM_TASK_CONFLICT_DETECTED, ({ taskId }) => {
       const chatStore = useAgentChatStore.getState();
       if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
-        chatStore.setAiThinking(false);
+        // Don't clear isThinking - keep progress visible
         // isAwaitingResponse will be set by CUSTOM_TASK_AWAITING_RESPONSE
       }
     });

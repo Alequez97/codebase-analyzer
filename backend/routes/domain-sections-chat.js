@@ -128,7 +128,13 @@ router.delete(
 router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
   try {
     const { domainId, sectionType } = req.params;
-    const { message, context, chatId: requestChatId } = req.body;
+    const {
+      message,
+      context,
+      chatId: requestChatId,
+      agentsOverrides = null,
+    } = req.body;
+    const model = agentsOverrides?.model || null;
 
     logger.info(
       `AI chat request for domain ${domainId}, section ${sectionType}`,
@@ -186,7 +192,7 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
     {
       // 1. Create the task (not yet running) so we know the taskId.
       task = await createTask(
-        { domainId, chatId: requestChatId },
+        { domainId, chatId: requestChatId, model },
         { executeNow: false },
       );
 

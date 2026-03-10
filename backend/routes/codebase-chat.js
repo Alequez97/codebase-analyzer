@@ -12,12 +12,19 @@ const router = express.Router();
  */
 router.post("/chat/codebase", async (req, res) => {
   try {
-    const { userInstruction, domainId = null, history = [] } = req.body;
+    const {
+      userInstruction,
+      domainId = null,
+      history = [],
+      agentsOverrides = null,
+    } = req.body;
+    const model = agentsOverrides?.model || null;
 
     logger.info("Custom codebase chat request received", {
       component: "Chat-API",
       instructionLength: userInstruction?.length,
       domainId,
+      model: model || "default",
     });
 
     if (
@@ -32,7 +39,7 @@ router.post("/chat/codebase", async (req, res) => {
     }
 
     const task = await createCustomCodebaseTask(
-      { userInstruction: userInstruction.trim(), domainId, history },
+      { userInstruction: userInstruction.trim(), domainId, history, model },
       { executeNow: true },
     );
 

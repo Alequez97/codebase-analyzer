@@ -22,10 +22,13 @@ import * as logger from "../../utils/logger.js";
  * @returns {Promise<Object>} The created task
  */
 export async function createCustomCodebaseTask(
-  { userInstruction, domainId = null, history = [] },
+  { userInstruction, domainId = null, history = [], model = null },
   { executeNow = false } = {},
 ) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.CUSTOM_CODEBASE_TASK);
+  const agentConfigResult = getAgentConfig(
+    TASK_TYPES.CUSTOM_CODEBASE_TASK,
+    model,
+  );
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

@@ -6,11 +6,13 @@ export const chatWithAI = ({
   message,
   chatId,
   context,
+  agentsOverrides = null,
 }) =>
   client.post(`/chat/domain/${domainId}/${sectionType}`, {
     message,
     chatId,
     context,
+    agentsOverrides,
   });
 
 export const getDomainSectionChatHistory = (

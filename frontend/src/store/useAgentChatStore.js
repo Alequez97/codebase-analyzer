@@ -34,6 +34,15 @@ export const useAgentChatStore = create((set, get) => ({
   //                     "bugs-security" | "refactoring-and-testing" | TASK_TYPES.CUSTOM_CODEBASE_TASK
   selectedTaskType: null,
 
+  // Agent parameter overrides. All fields null = use server defaults.
+  // model: null means use the default model from server config for this task type.
+  agentsOverrides: {
+    model: null,
+    maxTokens: null,
+    reasoningEffort: null,
+    temperature: null,
+  },
+
   // Domain context (auto-populated from route params)
   domainId: null,
 
@@ -107,6 +116,8 @@ export const useAgentChatStore = create((set, get) => ({
   },
 
   clearPendingInputPrefill: () => set({ pendingInputPrefill: null }),
+
+  setAgentsOverrides: (overrides) => set({ agentsOverrides: overrides }),
 
   closeChat: () => set({ isOpen: false }),
 
@@ -311,6 +322,7 @@ export const useAgentChatStore = create((set, get) => ({
           userInstruction: userMessage.trim(),
           domainId,
           history,
+          agentsOverrides: get().agentsOverrides,
         });
         const taskId = result.data?.taskId;
         if (taskId) {
@@ -329,6 +341,7 @@ export const useAgentChatStore = create((set, get) => ({
           message: userMessage.trim(),
           chatId, // stable session UUID
           context: sectionContext,
+          agentsOverrides: get().agentsOverrides,
         });
 
         const taskId = result.data?.taskId;

@@ -25,11 +25,12 @@ import * as logger from "../../utils/logger.js";
  * @returns {Promise<Object>} The created task
  */
 export async function createEditRefactoringAndTestingTask(
-  { domainId, chatId },
+  { domainId, chatId, model = null },
   { executeNow = false } = {},
 ) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
+    model,
   );
   if (!agentConfigResult.success) {
     return agentConfigResult;

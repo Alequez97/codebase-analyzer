@@ -183,7 +183,7 @@ const config = {
     // Custom codebase task (floating agent chat)
     [TASK_TYPES.CUSTOM_CODEBASE_TASK]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.DEEPSEEK_REASONER,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,

@@ -10,6 +10,14 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const agents = await detectAvailableAgents();
 
+  // Build a task-type → model-id map so the frontend can show the default model label
+  const taskModels = Object.fromEntries(
+    Object.entries(config.tasks).map(([taskType, cfg]) => [
+      taskType,
+      cfg.model,
+    ]),
+  );
+
   res.json({
     status: "ok",
     timestamp: new Date().toISOString(),
@@ -20,6 +28,7 @@ router.get("/", async (req, res) => {
     config: {
       port: config.port,
     },
+    taskModels,
     agents,
   });
 });
