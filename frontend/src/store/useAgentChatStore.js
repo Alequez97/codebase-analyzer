@@ -375,6 +375,51 @@ export const useAgentChatStore = create((set, get) => ({
     }
   },
 
+  /**
+   * Retry the last user message. Called when a task fails and the user wants to retry.
+   * Removes the error message and resends the last user message.
+   */
+  retryLastMessage: async () => {
+    const { selectedTaskType, domainId } = get();
+    const sectionKey =
+      selectedTaskType !== TASK_TYPES.CUSTOM_CODEBASE_TASK
+        ? get()._sectionKey(domainId, selectedTaskType)
+        : null;
+    const chatId = sectionKey
+      ? get().currentChatIdByKey.get(sectionKey) || null
+      : get().currentTaskId;
+
+    if (!chatId) return;
+
+    const messages = get()._getMessages(chatId);
+    if (messages.length < 2) return; // Need at least a user message and error
+
+    // Find the last user message
+    let lastUserMessage = null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") {
+        lastUserMessage = messages[i].content;
+        break;
+      }
+    }
+
+    if (!lastUserMessage) return;
+
+    // Remove error message(s) from the end
+    const newMessages = messages.filter(
+      (msg, idx) =>
+        !(
+          idx >= messages.length - 5 &&
+          msg.role === "assistant" &&
+          msg.isError
+        ),
+    );
+    get()._setMessages(chatId, newMessages);
+
+    // Re-send the last user message
+    await get().sendMessage(lastUserMessage);
+  },
+
   // ── Per-chat state ────────────────────────────────────────────────────────
 
   setChatState: (chatId, patch) => {

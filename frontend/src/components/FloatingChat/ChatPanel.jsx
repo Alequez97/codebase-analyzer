@@ -152,6 +152,14 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
   const aiProgressMessage = chatState.message ?? null;
   const aiProgressStage = chatState.stage ?? null;
 
+  // Check if the last message is an error
+  const lastMessage =
+    messages.length > 0 ? messages[messages.length - 1] : null;
+  const hasError =
+    lastMessage &&
+    lastMessage.role === "assistant" &&
+    lastMessage.isError === true;
+
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -195,6 +203,10 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
     const msg = inputValue.trim();
     setInputValue("");
     await sendMessage(msg);
+  };
+
+  const handleRetry = async () => {
+    await useAgentChatStore.getState().retryLastMessage();
   };
 
   const handleKeyDown = (e) => {
@@ -332,6 +344,19 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
                 message={aiProgressMessage}
                 stage={aiProgressStage}
               />
+            )}
+            {hasError && !isAiWorking && (
+              <Box px={3} py={2}>
+                <Button
+                  size="sm"
+                  colorScheme="blue"
+                  variant="outline"
+                  onClick={handleRetry}
+                  leftIcon={<Send size={14} />}
+                >
+                  Retry last message
+                </Button>
+              </Box>
             )}
             <div ref={messagesEndRef} />
           </VStack>
@@ -533,7 +558,17 @@ function MessageBubble({ message }) {
         borderTopRightRadius={isUser ? "sm" : "xl"}
         borderTopLeftRadius={isUser ? "xl" : "sm"}
         fontSize="sm"
+        border={message.isError ? "1px solid" : "none"}
+        borderColor={message.isError ? "red.200" : "transparent"}
       >
+        {message.isError && (
+          <HStack gap={1} mb={1}>
+            <AlertTriangle size={13} color="var(--chakra-colors-red-500)" />
+            <Text fontSize="xs" fontWeight="semibold" color="red.700">
+              Task Failed
+            </Text>
+          </HStack>
+        )}
         {isUser ? (
           <Text fontSize="sm" whiteSpace="pre-wrap">
             {message.content}

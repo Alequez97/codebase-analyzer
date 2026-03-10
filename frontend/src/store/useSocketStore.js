@@ -283,6 +283,22 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
+      } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+        // Handle custom codebase task failures
+        const chatStore = useAgentChatStore.getState();
+        const chatId = chatStore.currentTaskId || taskId;
+        if (chatId) {
+          chatStore.setChatState(chatId, {
+            isThinking: false,
+            isWorking: false,
+            isAwaitingResponse: false,
+          });
+          chatStore.addMessage({
+            role: "assistant",
+            content: `❌ Task failed: ${error || "An unexpected error occurred."}`,
+            isError: true,
+          });
+        }
       }
     });
 
