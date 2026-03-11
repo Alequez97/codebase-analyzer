@@ -13,7 +13,28 @@ import * as logger from "../utils/logger.js";
 const router = express.Router();
 
 /**
- * Get all pending tasks
+ * Get tasks with optional filters
+ * Query params: dateFrom, dateTo, status (comma-separated)
+ */
+router.get("/", async (req, res) => {
+  try {
+    const { dateFrom, dateTo, status } = req.query;
+    const filters = {};
+
+    if (dateFrom) filters.dateFrom = dateFrom;
+    if (dateTo) filters.dateTo = dateTo;
+    if (status) filters.status = status.split(",").map((s) => s.trim());
+
+    const tasks = await taskOrchestrator.getTasks(filters);
+    res.json({ tasks });
+  } catch (error) {
+    logger.error("Error reading tasks", { error, component: "API" });
+    res.status(500).json({ error: "Failed to read tasks" });
+  }
+});
+
+/**
+ * Get all pending tasks (legacy endpoint)
  */
 router.get("/pending", async (req, res) => {
   try {

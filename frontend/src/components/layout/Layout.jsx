@@ -1,8 +1,16 @@
-import { Box, Button, HStack, Spinner, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Separator,
+  Spinner,
+  Text,
+} from "@chakra-ui/react";
 import { FileText } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ConfigurationDialog } from "../dashboard/ConfigurationDialog";
 import { StatusBar } from "../dashboard/StatusBar";
+import { TasksStatusPill } from "./TasksStatusPill";
 import { useConfigStore } from "../../store/useConfigStore";
 import { useLogsStore } from "../../store/useLogsStore";
 import { useSocketStore } from "../../store/useSocketStore";
@@ -63,6 +71,8 @@ export function Layout({ children }) {
           }
           rightContent={
             <HStack gap={2}>
+              <TasksStatusPill />
+              <Separator orientation="vertical" height="4" />
               <Button
                 size="sm"
                 variant={showLogs ? "solid" : "ghost"}

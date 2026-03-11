@@ -72,6 +72,14 @@ export const useSocketStore = create((set, get) => ({
     // Connection status
     socket.on("connect", () => {
       set({ socketConnected: true });
+      // Load recent tasks (last 24h) from backend on initial/reconnect
+      useTaskProgressStore
+        .getState()
+        .loadTasks()
+        .then(() => {
+          // Sync codebase task state after tasks are loaded
+          useCodebaseStore.getState().syncCodebaseTaskFromProgress();
+        });
     });
 
     socket.on("disconnect", () => {
@@ -101,9 +109,11 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_COMPLETED, async (data) => {
       const { type, domainId, taskId } = data;
 
-      // Clear progress indicator for this task
+      // Transition task to completed status (shows in Completed section)
       if (taskId) {
-        useTaskProgressStore.getState().clearProgress(taskId);
+        useTaskProgressStore
+          .getState()
+          .setCompleted({ id: taskId, type, domainId });
       }
 
       // Handle different task types
@@ -166,6 +176,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_PROGRESS, (data) => {
       const { taskId, domainId, type, stage, message } = data;
       if (domainId) {
+        // setProgress transitions the entry to 'running' (covers pending → running)
         useTaskProgressStore.getState().setProgress(taskId, {
           domainId,
           type,
@@ -224,9 +235,11 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_FAILED, (data) => {
       const { type, domainId, taskId, error } = data;
 
-      // Clear progress indicator for this task
+      // Mark task as failed in the progress map (keeps it visible until dismissed)
       if (taskId) {
-        useTaskProgressStore.getState().clearProgress(taskId);
+        useTaskProgressStore
+          .getState()
+          .setFailed({ id: taskId, type, domainId, error });
       }
 
       // Handle different task types

@@ -120,6 +120,43 @@ export async function listRunning() {
 }
 
 /**
+ * List tasks with optional filters (date range, status)
+ * @param {Object} filters - Filter options
+ * @param {string} [filters.dateFrom] - ISO date string (inclusive)
+ * @param {string} [filters.dateTo] - ISO date string (inclusive)
+ * @param {string[]} [filters.status] - Array of status values to include (e.g., ['pending', 'running', 'failed'])
+ * @returns {Promise<Object[]>}
+ */
+export async function listTasks(filters = {}) {
+  const { dateFrom, dateTo, status } = filters;
+
+  // Determine which folders to search based on status filter
+  const foldersToSearch =
+    status && status.length > 0
+      ? status.map((s) => TASK_FOLDERS[s.toUpperCase()])
+      : Object.values(TASK_FOLDERS);
+
+  // Fetch from all relevant folders
+  const allTasks = await Promise.all(
+    foldersToSearch.map((folder) => listTasksInFolder(folder)),
+  );
+  let tasks = allTasks.flat();
+
+  // Apply date filters if provided
+  if (dateFrom) {
+    const fromDate = new Date(dateFrom);
+    tasks = tasks.filter((task) => new Date(task.createdAt) >= fromDate);
+  }
+  if (dateTo) {
+    const toDate = new Date(dateTo);
+    tasks = tasks.filter((task) => new Date(task.createdAt) <= toDate);
+  }
+
+  // Sort by createdAt (newest first for UI display)
+  return tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+/**
  * Move task from pending to running (claimed by the queue processor)
  * @param {string} taskId - The task ID
  * @returns {Promise<Object>} The running task

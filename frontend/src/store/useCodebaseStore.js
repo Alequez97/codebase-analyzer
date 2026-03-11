@@ -2,6 +2,7 @@ import { create } from "zustand";
 import api from "../api";
 import { sortDomainsByPriority } from "../utils/domain-utils";
 import { TASK_TYPES } from "../constants/task-types";
+import { useTaskProgressStore } from "./useTaskProgressStore";
 
 export const useCodebaseStore = create((set, get) => ({
   // State
@@ -18,6 +19,33 @@ export const useCodebaseStore = create((set, get) => ({
 
   setPendingCodebaseTask: (task) =>
     set({ pendingCodebaseTask: task, analyzingCodebase: !!task }),
+
+  // Sync codebase task state from task progress store (called on reload/reconnect)
+  syncCodebaseTaskFromProgress: () => {
+    const progressByTaskId = useTaskProgressStore.getState().progressByTaskId;
+    const codebaseTaskEntry = Array.from(progressByTaskId.entries()).find(
+      ([, entry]) =>
+        entry.type === TASK_TYPES.CODEBASE_ANALYSIS &&
+        (entry.status === "pending" || entry.status === "running"),
+    );
+
+    if (codebaseTaskEntry) {
+      const [taskId, entry] = codebaseTaskEntry;
+      set({
+        pendingCodebaseTask: {
+          id: taskId,
+          type: entry.type,
+          status: entry.status,
+        },
+        analyzingCodebase: true,
+      });
+    } else {
+      set({
+        pendingCodebaseTask: null,
+        analyzingCodebase: false,
+      });
+    }
+  },
 
   setLoading: (loading) => set({ loading }),
 
@@ -45,8 +73,6 @@ export const useCodebaseStore = create((set, get) => ({
         loading: false,
       });
 
-      await get().fetchPendingTasks();
-
       return analysisData;
     } catch (err) {
       if (err?.response?.status === 404) {
@@ -55,40 +81,12 @@ export const useCodebaseStore = create((set, get) => ({
           loading: false,
         });
 
-        await get().fetchPendingTasks();
-
         return null;
       }
 
       const message = err?.response?.data?.message || "Failed to load analysis";
       set({ error: message, loading: false });
       return null;
-    }
-  },
-
-  fetchPendingTasks: async () => {
-    try {
-      const response = await api.getPendingTasks();
-      const tasks = response.data?.tasks || [];
-
-      if (!Array.isArray(tasks)) {
-        return [];
-      }
-
-      const codebaseTask = tasks.find(
-        (task) => task.type === TASK_TYPES.CODEBASE_ANALYSIS,
-      );
-
-      if (codebaseTask) {
-        set({
-          pendingCodebaseTask: codebaseTask,
-          analyzingCodebase: true,
-        });
-      }
-
-      return tasks;
-    } catch {
-      return [];
     }
   },
 

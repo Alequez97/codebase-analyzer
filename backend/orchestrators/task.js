@@ -26,6 +26,15 @@ export async function getPendingTasks() {
 }
 
 /**
+ * Get tasks with optional filters
+ * @param {Object} filters - Filter options
+ * @returns {Promise<Array>} Array of tasks
+ */
+export async function getTasks(filters = {}) {
+  return tasksPersistence.listTasks(filters);
+}
+
+/**
  * Get a specific task by ID
  * @param {string} taskId - The task ID
  * @returns {Promise<Object|null>} Task object or null if not found
