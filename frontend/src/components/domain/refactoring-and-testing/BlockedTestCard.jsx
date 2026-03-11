@@ -6,11 +6,11 @@ export function BlockedTestCard({ blockedBy }) {
       borderWidth="1px"
       borderRadius="md"
       p={3}
-      bg="orange.50"
-      borderColor="orange.300"
+      bg="gray.100"
+      borderColor="gray.400"
     >
       <HStack mb={2}>
-        <Badge colorPalette="orange" size="sm" variant="solid">
+        <Badge colorPalette="gray" size="sm" variant="solid">
           🔒 BLOCKED
         </Badge>
         <Text fontSize="xs" fontWeight="semibold">
@@ -23,7 +23,7 @@ export function BlockedTestCard({ blockedBy }) {
           as="span"
           fontFamily="mono"
           fontWeight="semibold"
-          color="orange.600"
+          color="gray.700"
           cursor="pointer"
           textDecoration="underline"
           onClick={() =>

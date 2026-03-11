@@ -1199,3 +1199,68 @@ describe("FileToolExecutor - Read, Search & Rename Tests", () => {
     });
   });
 });
+
+describe("FileToolExecutor - executeTool", () => {
+  let executor;
+  let tempDir;
+
+  beforeEach(async () => {
+    tempDir = path.join(os.tmpdir(), `file-tools-exec-test-${Date.now()}`);
+    await fs.mkdir(tempDir, { recursive: true });
+    await fs.mkdir(path.join(tempDir, "src"), { recursive: true });
+    await fs.mkdir(path.join(tempDir, ".code-analysis"), { recursive: true });
+    await fs.writeFile(
+      path.join(tempDir, "src", "app.js"),
+      "line one\nline two\nline three\n",
+    );
+    executor = new FileToolExecutor(tempDir);
+  });
+
+  afterEach(async () => {
+    await fs.rm(tempDir, { recursive: true, force: true });
+  });
+
+  test("read_file returns numbered file content as string", async () => {
+    // Arrange / Act
+    const result = await executor.executeTool("read_file", {
+      path: "src/app.js",
+    });
+
+    // Assert
+    expect(typeof result).toBe("string");
+    expect(result).toContain("1: line one");
+    expect(result).toContain("2: line two");
+  });
+
+  test("write_file returns success message as string", async () => {
+    // Arrange / Act
+    const result = await executor.executeTool("write_file", {
+      path: ".code-analysis/out.json",
+      content: '{"ok":true}',
+    });
+
+    // Assert
+    expect(typeof result).toBe("string");
+    expect(result).toContain(".code-analysis/out.json");
+  });
+
+  test("read_file on missing file returns error message as string", async () => {
+    // Arrange / Act
+    const result = await executor.executeTool("read_file", {
+      path: "src/missing.js",
+    });
+
+    // Assert
+    expect(typeof result).toBe("string");
+    expect(result).toContain("not found");
+  });
+
+  test("unknown tool returns error message as string", async () => {
+    // Arrange / Act
+    const result = await executor.executeTool("nonexistent_tool", {});
+
+    // Assert
+    expect(typeof result).toBe("string");
+    expect(result).toContain("Unknown tool");
+  });
+});

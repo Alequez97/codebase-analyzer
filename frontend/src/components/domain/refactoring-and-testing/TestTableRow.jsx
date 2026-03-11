@@ -11,7 +11,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Checkbox } from "../../ui/checkbox";
 import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
 import { useRefactoringAndTestingStore } from "../../../store/useRefactoringAndTestingStore";
@@ -33,8 +32,6 @@ export function TestTableRow({
   onImplementTestEdits,
   sourceFiles = [],
   refactoringTargetFunction,
-  isSelected = false,
-  onToggleSelect,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const editorRef = useRef(null);
@@ -99,7 +96,7 @@ export function TestTableRow({
 
     if (isBlocked) {
       return (
-        <Button size="xs" colorPalette="orange" variant="subtle" disabled>
+        <Button size="xs" colorPalette="gray" variant="subtle" disabled>
           Blocked
         </Button>
       );
@@ -132,7 +129,7 @@ export function TestTableRow({
             : recentChangeType === "modified"
               ? "yellow.100"
               : isBlocked
-                ? "orange.50"
+                ? "gray.100"
                 : isImplemented
                   ? "green.50"
                   : isImplementing
@@ -146,7 +143,7 @@ export function TestTableRow({
               : recentChangeType === "modified"
                 ? "yellow.200"
                 : isBlocked
-                  ? "orange.100"
+                  ? "gray.200"
                   : isImplemented
                     ? "green.100"
                     : isImplementing
@@ -260,7 +257,7 @@ export function TestTableRow({
                   fontSize="xs"
                   fontFamily="mono"
                   fontWeight="semibold"
-                  color="orange.600"
+                  color="gray.700"
                   cursor="pointer"
                   textDecoration="underline"
                   onClick={(e) => {
@@ -307,22 +304,13 @@ export function TestTableRow({
                 {renderActionButton()}
               </HStack>
             </Table.Cell>
-            <Table.Cell textAlign="center" onClick={(e) => e.stopPropagation()}>
-              {!isBlocked && !isImplemented && !isImplementing && (
-                <Checkbox
-                  checked={isSelected}
-                  onChange={() => onToggleSelect?.(test.id)}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              )}
-            </Table.Cell>
           </>
         )}
       </Table.Row>
 
       {isExpanded && (
         <Table.Row key={`${test.id}-details`}>
-          <Table.Cell colSpan={9} bg="gray.50" p={4}>
+          <Table.Cell colSpan={8} bg="gray.50" p={4}>
             {editingTestId === test.id ? (
               <TestCaseInlineEditorComponent
                 ref={editorRef}

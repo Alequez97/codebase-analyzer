@@ -335,6 +335,41 @@ export default function DomainDetailsPage() {
     }
   };
 
+  const handleImplementBatchTests = async (testIds) => {
+    if (!Array.isArray(testIds) || testIds.length === 0) {
+      return { success: false, error: "No tests selected" };
+    }
+
+    const results = await Promise.all(
+      testIds.map((testId) => implementTest(domainId, testId)),
+    );
+
+    const succeededCount = results.filter((result) => result.success).length;
+    const failedCount = results.length - succeededCount;
+
+    if (succeededCount > 0) {
+      toaster.create({
+        title:
+          succeededCount === 1
+            ? "1 test implementation started"
+            : `${succeededCount} test implementations started`,
+        description:
+          failedCount > 0 ? `${failedCount} failed to queue` : undefined,
+        type: failedCount > 0 ? "error" : "success",
+      });
+
+      return { success: true, succeededCount, failedCount };
+    }
+
+    toaster.create({
+      title: "Failed to implement selected tests",
+      description: "No selected tests could be queued",
+      type: "error",
+    });
+
+    return { success: false, error: "No selected tests could be queued" };
+  };
+
   const handleImplementTestEdits = async (testId) => {
     const result = await implementTestEdits(domainId, testId);
 
@@ -516,6 +551,7 @@ export default function DomainDetailsPage() {
                 domain && testStore.analyze(domain, includeRequirements)
               }
               onImplementTest={handleImplementTest}
+              onImplementBatchTests={handleImplementBatchTests}
               onImplementTestEdits={handleImplementTestEdits}
               onApplyRefactoring={handleApplyRefactoring}
               onMarkCompleted={handleMarkRefactoringCompleted}

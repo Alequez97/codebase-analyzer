@@ -6,4 +6,6 @@ export { MissingTestsSection } from "./MissingTestsSection";
 export { TestTableRow } from "./TestTableRow";
 export { BlockedTestCard } from "./BlockedTestCard";
 export { RefactoringRecommendationsCard } from "./RefactoringRecommendationsCard";
+export { TestTypeAccordion } from "./TestTypeAccordion";
+export { DiffLegend } from "./DiffLegend";
 export * from "./utils";

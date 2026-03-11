@@ -228,69 +228,57 @@ export class FileToolExecutor {
   }
 
   /**
-   * Convert structured result to string for LLM consumption
-   * @private
-   */
-  _formatForLLM(result) {
-    if (typeof result === "string") return result;
-    if (result.success) {
-      return result.data?.content || result.message;
-    }
-    return result.message;
-  }
-
-  /**
-   * Execute a tool call and return structured result
+   * Execute a tool call and return string result for LLM consumption.
    * @param {string} toolName - Name of the tool to execute
    * @param {Object} args - Tool arguments
-   * @returns {Promise<Object>} Structured result object {success, message, data?, error?}
+   * @returns {Promise<string>} String result of tool execution
    */
-  async executeToolStructured(toolName, args) {
+  async executeTool(toolName, args) {
+    let result;
     switch (toolName) {
       case "read_file":
-        return await this.readFile(args.path);
+        result = await this.readFile(args.path);
+        break;
       case "list_directory":
-        return await this.listDirectory(args.path, args.recursive);
+        result = await this.listDirectory(args.path, args.recursive);
+        break;
       case "search_files":
-        return await this.searchFiles(args.pattern, args.directory);
+        result = await this.searchFiles(args.pattern, args.directory);
+        break;
       case "write_file":
-        return await this.writeFile(args.path, args.content);
+        result = await this.writeFile(args.path, args.content);
+        break;
       case "replace_lines":
-        return await this.replaceLines(
+        result = await this.replaceLines(
           args.path,
           args.start_line,
           args.end_line,
           args.new_content,
         );
+        break;
       case "insert_lines":
-        return await this.insertLines(
+        result = await this.insertLines(
           args.path,
           args.position,
           args.line_number,
           args.content,
         );
+        break;
       case "rename_file":
-        return await this.renameFile(args.old_path, args.new_path);
+        result = await this.renameFile(args.old_path, args.new_path);
+        break;
       default:
-        return this._error(
+        result = this._error(
           `Unknown tool: ${toolName}`,
           TOOL_ERROR_CODES.UNKNOWN_TOOL,
           TOOL_ERROR_TYPES.INTERNAL,
           { toolName },
         );
     }
-  }
-
-  /**
-   * Execute a tool call and return string result (for LLM consumption)
-   * Converts structured results to strings that LLMs can read.
-   * @param {string} toolName - Name of the tool to execute
-   * @param {Object} args - Tool arguments
-   * @returns {Promise<string>} String result of tool execution
-   */
-  async executeTool(toolName, args) {
-    const structuredResult = await this.executeToolStructured(toolName, args);
-    return this._formatForLLM(structuredResult);
+    if (result.success) {
+      return result?.content || result.data?.content || result.message;
+    }
+    return result.message;
   }
 
   /**
@@ -609,10 +597,10 @@ export class FileToolExecutor {
       return this._success(
         `Listed ${relativePath} (${entries.length} entries)`,
         {
+          content: listing,
           path: relativePath,
           recursive,
           entries: entries.length,
-          listing,
         },
       );
     } catch (error) {
@@ -716,6 +704,7 @@ export class FileToolExecutor {
         : `Found ${matches.length} files matching "${pattern}"`;
 
     return this._success(message, {
+      content: matches.length > 0 ? matches.join("\n") : message,
       pattern,
       directory,
       matches,

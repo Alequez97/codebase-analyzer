@@ -17,6 +17,7 @@ import {
   ExistingTestsTable,
   MissingTestsSection,
   RefactoringRecommendationsCard,
+  DiffLegend,
 } from "./refactoring-and-testing";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
@@ -33,6 +34,7 @@ export default function DomainRefactoringAndTestingSection({
   implementLogs,
   onAnalyze,
   onImplementTest,
+  onImplementBatchTests,
   onImplementTestEdits,
   onApplyRefactoring,
   onMarkCompleted = null,
@@ -244,7 +246,7 @@ export default function DomainRefactoringAndTestingSection({
                       {testing.summary && (
                         <HStack gap={2} fontSize="sm">
                           {testing.summary.blockedTests > 0 && (
-                            <Badge colorPalette="orange">
+                            <Badge colorPalette="gray">
                               {testing.summary.blockedTests} blocked
                             </Badge>
                           )}
@@ -256,6 +258,11 @@ export default function DomainRefactoringAndTestingSection({
                         </HStack>
                       )}
                     </HStack>
+
+                    <Box mb={4}>
+                      <DiffLegend />
+                    </Box>
+
                     <MissingTestsSection
                       domainId={domainId}
                       missingTests={testing.missingTests}
@@ -265,6 +272,7 @@ export default function DomainRefactoringAndTestingSection({
                       implementingTests={implementingTests}
                       implementLogs={implementLogs}
                       onImplementTest={onImplementTest}
+                      onImplementBatchTests={onImplementBatchTests}
                       onImplementTestEdits={onImplementTestEdits}
                     />
                   </Box>
