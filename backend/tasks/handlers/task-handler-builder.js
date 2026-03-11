@@ -4,7 +4,7 @@
  */
 
 import { TASK_TYPES } from "../../constants/task-types.js";
-import { loadInstructionForTask } from "../../utils/instruction-loader.js";
+import { loadSystemInstructionForTask } from "../../utils/system-instruction-loader.js";
 import { loadDomainSectionChatHistory } from "../../utils/chat-history.js";
 import * as logger from "../../utils/logger.js";
 import fs from "fs/promises";
@@ -19,6 +19,7 @@ import { implementTestHandler } from "./implement-test.js";
 import { applyRefactoringHandler } from "./apply-refactoring.js";
 import { implementFixHandler } from "./implement-fix.js";
 import { defaultAnalysisHandler } from "./default-analysis.js";
+import { reviewChangesHandler } from "./review-changes.js";
 
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 
@@ -83,11 +84,14 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     return;
   }
 
-  if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+  if (
+    task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
+    task.type === TASK_TYPES.REVIEW_CHANGES
+  ) {
     fileToolExecutor.setAllowAnyWrite(true);
     fileToolExecutor.setAllowAnyRead(true);
     taskLogger.info(
-      "🔓 Full project read+write access granted (CUSTOM_CODEBASE_TASK)",
+      `🔓 Full project read+write access granted (${task.type})`,
       { component: "TaskHandler" },
     );
     return;
@@ -120,15 +124,15 @@ export async function createTaskHandler(task, taskLogger, agent) {
     setTaskFileAccess(agent.fileToolExecutor, task, taskLogger);
   }
 
-  // Load task-specific instructions
-  const instructions = await loadInstructionForTask(task);
+  // Load task-specific system instructions
+  const instructions = await loadSystemInstructionForTask(task);
   taskLogger.info(`📝 Instructions loaded (${instructions.length} chars)`, {
     component: "TaskHandler",
   });
 
   // Dump processed instruction to temp folder for debugging
   try {
-    const dumpDir = path.join(config.paths.temp, "instructions");
+    const dumpDir = path.join(config.paths.temp, "system-instructions");
     await fs.mkdir(dumpDir, { recursive: true });
     await fs.writeFile(
       path.join(dumpDir, `${task.id}.md`),
@@ -203,6 +207,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
     );
   } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
     overrides = customCodebaseTaskHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
+    overrides = reviewChangesHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DOCUMENTATION) {
     overrides = analyzeDocumentationHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REFACTORING_AND_TESTING) {

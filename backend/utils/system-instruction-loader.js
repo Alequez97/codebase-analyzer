@@ -1,12 +1,12 @@
 /**
- * Instruction Template Loader
- * Loads and processes instruction templates for LLM prompts
+ * System Instruction Loader
+ * Loads and processes system instruction templates for LLM prompts
  */
 
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
-import { INSTRUCTION_FILES_NAMES } from "../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_NAMES } from "../constants/system-instructions.js";
 import {
   processTemplate,
   buildTemplateVariables,
@@ -19,11 +19,14 @@ import {
  * @param {Object} variables - Variables to replace in template
  * @returns {Promise<string>} Processed instruction template
  */
-export async function loadInstructionTemplate(templateName, variables = {}) {
-  // If it's an absolute path, use it directly, otherwise join with instructions path
+export async function loadSystemInstructionTemplate(
+  templateName,
+  variables = {},
+) {
+  // If it's an absolute path, use it directly, otherwise join with system-instructions path
   const instructionPath = path.isAbsolute(templateName)
     ? templateName
-    : path.join(config.paths.instructions, templateName);
+    : path.join(config.paths.systemInstructions, templateName);
 
   const instructionTemplate = await fs.readFile(instructionPath, "utf-8");
   return processTemplate(instructionTemplate, variables);
@@ -31,16 +34,16 @@ export async function loadInstructionTemplate(templateName, variables = {}) {
 
 /**
  * Load and process instruction template for a task
- * @param {Object} task - Task object with instructionFile path
- * @returns {Promise<string>} Processed instruction template
+ * @param {Object} task - Task object with systemInstructionFile path
+ * @returns {Promise<string>} Processed system instruction template
  */
-export async function loadInstructionForTask(task) {
+export async function loadSystemInstructionForTask(task) {
   const instructionPath = path.join(
     config.paths.analyzerRoot,
-    task.instructionFile,
+    task.systemInstructionFile,
   );
   const variables = await buildTemplateVariables(task);
-  return loadInstructionTemplate(instructionPath, variables);
+  return loadSystemInstructionTemplate(instructionPath, variables);
 }
 
 /**
@@ -50,8 +53,8 @@ export async function loadInstructionForTask(task) {
  */
 export async function loadDocumentationInstruction(task) {
   const variables = await buildTemplateVariables(task);
-  return loadInstructionTemplate(
-    INSTRUCTION_FILES_NAMES.ANALYZE_DOMAIN_DOCUMENTATION,
+  return loadSystemInstructionTemplate(
+    SYSTEM_INSTRUCTION_NAMES.ANALYZE_DOMAIN_DOCUMENTATION,
     variables,
   );
 }

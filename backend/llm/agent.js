@@ -1,5 +1,9 @@
 import { FileToolExecutor, FILE_TOOLS } from "./tools/file-tools.js";
 import { CommandToolExecutor, COMMAND_TOOLS } from "./tools/command-tools.js";
+import {
+  DelegationToolExecutor,
+  DELEGATION_TOOLS,
+} from "./tools/delegation-tools.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 
@@ -29,6 +33,7 @@ export class LLMAgent {
     this.maxTokens = options.maxTokens || client.config?.maxTokens || 4096;
     this.fileToolExecutor = new FileToolExecutor(this.workingDirectory);
     this.commandToolExecutor = null; // Enabled per-task via enableCommandTools()
+    this.delegationToolExecutor = null; // Enabled per-task via enableDelegationTools()
     this.conversationLog = [];
   }
 
@@ -52,13 +57,34 @@ export class LLMAgent {
   }
 
   /**
+   * Enable task-delegation tools for this agent session.
+   * Must be called before run() to take effect.
+   *
+   * @param {string} parentTaskId - ID of the current task (embedded in synthetic chatIds)
+   * @param {Object<string, Function>} queueFunctions - Map of task-type → queue function
+   */
+  enableDelegationTools(parentTaskId, queueFunctions) {
+    this.delegationToolExecutor = new DelegationToolExecutor(
+      this.workingDirectory,
+      parentTaskId,
+      queueFunctions,
+    );
+    logger.info("Delegation tools enabled for agent session", {
+      component: "LLMAgent",
+      parentTaskId,
+      delegatableTypes: Object.keys(queueFunctions),
+    });
+  }
+
+  /**
    * Get the full list of tools available in this session
    * @private
    */
   _getAvailableTools() {
-    return this.commandToolExecutor
-      ? [...FILE_TOOLS, ...COMMAND_TOOLS]
-      : FILE_TOOLS;
+    const tools = [...FILE_TOOLS];
+    if (this.commandToolExecutor) tools.push(...COMMAND_TOOLS);
+    if (this.delegationToolExecutor) tools.push(...DELEGATION_TOOLS);
+    return tools;
   }
 
   /**
@@ -346,6 +372,10 @@ export class LLMAgent {
           : "Searching files";
       } else if (toolCall.name === "execute_command") {
         toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
+      } else if (toolCall.name === "delegate_task") {
+        const delType = toolCall.arguments?.type || "task";
+        const delDomain = toolCall.arguments?.domainId || "unknown";
+        toolDescription = `Delegating ${delType} for domain '${delDomain}'`;
       }
 
       logger.debug(`Executing tool: ${toolDescription}`, {
@@ -362,17 +392,30 @@ export class LLMAgent {
 
       try {
         // Route to the appropriate executor based on tool name
+        const isDelegationTool =
+          this.delegationToolExecutor &&
+          DELEGATION_TOOLS.some((t) => t.name === toolCall.name);
         const isCommandTool =
+          !isDelegationTool &&
           this.commandToolExecutor &&
           COMMAND_TOOLS.some((t) => t.name === toolCall.name);
-        const executor = isCommandTool
-          ? this.commandToolExecutor
-          : this.fileToolExecutor;
 
-        const result = await executor.executeTool(
-          toolCall.name,
-          toolCall.arguments,
-        );
+        let result;
+        if (isDelegationTool) {
+          const delegationResult = await this.delegationToolExecutor.execute(
+            toolCall.name,
+            toolCall.arguments,
+          );
+          result = JSON.stringify(delegationResult, null, 2);
+        } else {
+          const executor = isCommandTool
+            ? this.commandToolExecutor
+            : this.fileToolExecutor;
+          result = await executor.executeTool(
+            toolCall.name,
+            toolCall.arguments,
+          );
+        }
 
         this.state.addToolResult(toolCall.id, toolCall.name, result);
 

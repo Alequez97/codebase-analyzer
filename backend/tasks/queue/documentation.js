@@ -1,7 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentMarkdownOutputPath,
@@ -42,7 +42,7 @@ export async function queueAnalyzeDocumentationTask({ domainId, files }) {
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_DOCUMENTATION,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.ANALYZE_DOMAIN_DOCUMENTATION,
     outputFile: getDomainSectionContentMarkdownOutputPath(
       domainId,
       DOMAIN_SECTION_IDS.DOCUMENTATION,

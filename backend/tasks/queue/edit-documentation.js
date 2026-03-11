@@ -1,6 +1,6 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentMarkdownOutputPath,
@@ -24,12 +24,14 @@ import * as logger from "../../utils/logger.js";
  *
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
+ * @param {string} [params.delegatedByTaskId] - ID of the parent task that delegated this one (omit for human-initiated tasks)
  * @returns {Promise<Object>} The created task
  */
 export async function queueEditDocumentationTask({
   domainId,
   chatId,
   model = null,
+  delegatedByTaskId = null,
 }) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.EDIT_DOCUMENTATION,
@@ -54,9 +56,10 @@ export async function queueEditDocumentationTask({
       // It identifies the chat history file and the socket channel.
       // It is NOT the taskId — a new task is created for every user message.
       chatId,
+      ...(delegatedByTaskId && { delegatedByTaskId }),
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DOCUMENTATION,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.EDIT_DOCUMENTATION,
     outputFile: getDomainSectionContentMarkdownOutputPath(
       domainId,
       DOMAIN_SECTION_IDS.DOCUMENTATION,

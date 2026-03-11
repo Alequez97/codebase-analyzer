@@ -219,7 +219,7 @@ const config = {
     ),
 
     // Analyzer internal paths
-    instructions: path.join(__dirname, "instructions"),
+    systemInstructions: path.join(__dirname, "system-instructions"),
   },
 
   // File watching

@@ -3,7 +3,7 @@
  * Exports all task-specific handler functions
  */
 
-export { createTaskHandler } from "./factory.js";
+export { createTaskHandler } from "./task-handler-builder.js";
 export { editDocumentationHandler } from "./edit-documentation.js";
 export { createEditSectionHandler } from "./edit-section.js";
 export { customCodebaseTaskHandler } from "./custom-codebase-task.js";

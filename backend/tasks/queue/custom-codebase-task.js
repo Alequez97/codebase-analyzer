@@ -1,6 +1,6 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -47,7 +47,7 @@ export async function queueCustomCodebaseTask({
       history,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.CUSTOM_CODEBASE_TASK,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.CUSTOM_CODEBASE_TASK,
     // Results streamed via socket - no single output file
     progressFile: getProgressFilePath(taskId),
   };

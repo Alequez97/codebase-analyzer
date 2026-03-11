@@ -1,6 +1,6 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentJsonOutputPath,
@@ -20,12 +20,14 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params
  * @param {string} params.domainId
  * @param {string} params.chatId  - Stable session UUID from the frontend
+ * @param {string} [params.delegatedByTaskId] - ID of the parent task that delegated this one
  * @returns {Promise<Object>} The created task
  */
 export async function queueEditBugsSecurityTask({
   domainId,
   chatId,
   model = null,
+  delegatedByTaskId = null,
 }) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.EDIT_BUGS_SECURITY,
@@ -47,9 +49,10 @@ export async function queueEditBugsSecurityTask({
       domainId,
       sectionType: "bugs-security",
       chatId,
+      ...(delegatedByTaskId && { delegatedByTaskId }),
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_BUGS_SECURITY,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.EDIT_BUGS_SECURITY,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
       DOMAIN_SECTION_IDS.BUGS_SECURITY,

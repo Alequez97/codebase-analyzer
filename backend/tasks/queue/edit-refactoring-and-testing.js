@@ -1,6 +1,6 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentJsonOutputPath,
@@ -20,12 +20,14 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params
  * @param {string} params.domainId
  * @param {string} params.chatId  - Stable session UUID from the frontend
+ * @param {string} [params.delegatedByTaskId] - ID of the parent task that delegated this one
  * @returns {Promise<Object>} The created task
  */
 export async function queueEditRefactoringAndTestingTask({
   domainId,
   chatId,
   model = null,
+  delegatedByTaskId = null,
 }) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
@@ -47,9 +49,10 @@ export async function queueEditRefactoringAndTestingTask({
       domainId,
       sectionType: "refactoring-and-testing",
       chatId,
+      ...(delegatedByTaskId && { delegatedByTaskId }),
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_REFACTORING_AND_TESTING,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.EDIT_REFACTORING_AND_TESTING,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
       DOMAIN_SECTION_IDS.REFACTORING_AND_TESTING,

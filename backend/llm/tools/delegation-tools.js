@@ -1,0 +1,284 @@
+import fs from "fs/promises";
+import path from "path";
+import { randomBytes } from "crypto";
+import * as logger from "../../utils/logger.js";
+
+/**
+ * Task types that can be targeted by delegate_task.
+ * Only edit-* types are supported — they accept a user instruction via chat
+ * history, making delegation transparent to the handler layer.
+ */
+export const DELEGATABLE_TASK_TYPES = [
+  "edit-documentation",
+  "edit-diagrams",
+  "edit-requirements",
+  "edit-bugs-security",
+  "edit-refactoring-and-testing",
+];
+
+/**
+ * Maps a delegatable task type to its section type string,
+ * which is used when writing the synthetic chat-history file.
+ */
+const SECTION_TYPE_BY_TASK_TYPE = {
+  "edit-documentation": "documentation",
+  "edit-diagrams": "diagrams",
+  "edit-requirements": "requirements",
+  "edit-bugs-security": "bugs-security",
+  "edit-refactoring-and-testing": "refactoring-and-testing",
+};
+
+/**
+ * Tool definitions for LLM — task delegation
+ */
+export const DELEGATION_TOOLS = [
+  {
+    name: "delegate_task",
+    description: `Queue a follow-up task for a specialized agent based on your findings.
+
+How to use:
+  1. Use write_file to create a delegation request file under .code-analysis/temp/delegation-requests/ describing exactly what the delegated agent should do and why (include relevant context from your analysis).
+  2. Call delegate_task with the path to that file, the target task type, and the domain ID.
+
+The delegation request file content becomes the user message for the delegated agent — treat it like a detailed chat message.`,
+    parameters: {
+      type: {
+        type: "string",
+        enum: DELEGATABLE_TASK_TYPES,
+        description: "The type of specialized agent to delegate to.",
+      },
+      domainId: {
+        type: "string",
+        description: "The domain ID to run the delegated task against.",
+      },
+      requestFile: {
+        type: "string",
+        description:
+          "Relative path (from project root) to the delegation request file you wrote. Must be under .code-analysis/temp/. The file content becomes the delegated agent's user message.",
+      },
+    },
+    required: ["type", "domainId", "requestFile"],
+  },
+];
+
+/**
+ * Executor for delegation tools.
+ *
+ * Reads an instruction file written by the parent agent, creates a synthetic
+ * chat-history session so the target edit handler can load it unchanged, then
+ * calls the appropriate queue function to enqueue the child task.
+ *
+ * @example
+ * const executor = new DelegationToolExecutor(projectRoot, parentTaskId, {
+ *   "edit-documentation": queueEditDocumentationTask,
+ *   "edit-diagrams": queueEditDiagramsTask,
+ *   // ...
+ * });
+ * const result = await executor.execute("delegate_task", {
+ *   type: "edit-documentation",
+ *   domainId: "match-scoring",
+ *   requestFile: ".code-analysis/temp/delegation-requests/doc-update-xyz.md",
+ * });
+ */
+export class DelegationToolExecutor {
+  /**
+   * @param {string} projectRoot - Absolute path to the analysed project root
+   * @param {string} parentTaskId - ID of the running task that is delegating
+   * @param {Object<string, Function>} queueFunctions
+   *   Map of task type string → queue function, e.g.
+   *   { "edit-documentation": queueEditDocumentationTask, ... }
+   */
+  constructor(projectRoot, parentTaskId, queueFunctions) {
+    this.projectRoot = projectRoot;
+    this.parentTaskId = parentTaskId;
+    this.queueFunctions = queueFunctions;
+  }
+
+  /**
+   * Dispatch a tool call by name.
+   * @param {string} toolName
+   * @param {Object} args
+   * @returns {Promise<Object>} { success, data } | { success: false, error }
+   */
+  async execute(toolName, args) {
+    if (toolName === "delegate_task") {
+      return this._delegateTask(args);
+    }
+    return {
+      success: false,
+      error: { message: `Unknown delegation tool: ${toolName}` },
+    };
+  }
+
+  // ─── Private ───────────────────────────────────────────────────────────────
+
+  async _delegateTask({ type, domainId, requestFile } = {}) {
+    // Validate required args
+    if (!type || !domainId || !requestFile) {
+      return {
+        success: false,
+        error: {
+          message: "type, domainId, and requestFile are all required",
+        },
+      };
+    }
+
+    // Validate task type
+    if (!DELEGATABLE_TASK_TYPES.includes(type)) {
+      return {
+        success: false,
+        error: {
+          code: "UNSUPPORTED_TYPE",
+          message: `Unsupported delegation type: ${type}. Must be one of: ${DELEGATABLE_TASK_TYPES.join(", ")}`,
+        },
+      };
+    }
+
+    // Validate queue function is registered before reading the file
+    const queueFn = this.queueFunctions[type];
+    if (!queueFn) {
+      return {
+        success: false,
+        error: {
+          code: "UNSUPPORTED_TYPE",
+          message: `No queue function registered for delegation type: ${type}`,
+        },
+      };
+    }
+
+    // Security: requestFile must live under .code-analysis/temp/
+    const normalized = path.normalize(requestFile).replace(/\\/g, "/");
+    if (!normalized.startsWith(".code-analysis/temp/")) {
+      return {
+        success: false,
+        error: {
+          code: "ACCESS_DENIED",
+          message:
+            "requestFile must be under .code-analysis/temp/ (e.g. .code-analysis/temp/delegation-requests/my-request.md)",
+        },
+      };
+    }
+
+    // Read delegation request file
+    const absPath = path.join(this.projectRoot, requestFile);
+    let requestContent;
+    try {
+      requestContent = await fs.readFile(absPath, "utf-8");
+    } catch {
+      return {
+        success: false,
+        error: {
+          code: "FILE_NOT_FOUND",
+          message: `Could not read delegation request file: ${requestFile}`,
+        },
+      };
+    }
+
+    if (!requestContent.trim()) {
+      return {
+        success: false,
+        error: {
+          code: "EMPTY_INSTRUCTION",
+          message: `Delegation request file is empty: ${requestFile}`,
+        },
+      };
+    }
+
+    const sectionType = SECTION_TYPE_BY_TASK_TYPE[type];
+
+    // Generate a unique synthetic chatId for this delegation.
+    // Format: delegated-{parentTaskId}-{6-hex} — stable prefix makes it
+    // easy to identify delegated sessions in chat-history files.
+    const syntheticChatId = `delegated-${this.parentTaskId}-${randomBytes(3).toString("hex")}`;
+
+    // Write a synthetic chat-history file so the edit handler loads the
+    // delegation request as a first user message — zero changes to handler code.
+    await this._writeSyntheticChatHistory({
+      domainId,
+      sectionType,
+      chatId: syntheticChatId,
+      content: requestContent,
+    });
+
+    logger.info("Delegating task", {
+      component: "DelegationTools",
+      type,
+      domainId,
+      parentTaskId: this.parentTaskId,
+      syntheticChatId,
+    });
+
+    // Queue the delegated task
+    const task = await queueFn({
+      domainId,
+      chatId: syntheticChatId,
+      delegatedByTaskId: this.parentTaskId,
+    });
+
+    if (task?.success === false) {
+      return {
+        success: false,
+        error: {
+          message: task.error || "Failed to queue delegated task",
+          code: task.code,
+        },
+      };
+    }
+
+    logger.info("Delegated task queued", {
+      component: "DelegationTools",
+      taskId: task.id,
+      type: task.type,
+      domainId,
+    });
+
+    return {
+      success: true,
+      data: {
+        taskId: task.id,
+        type: task.type,
+        domainId,
+        message: `Queued ${type} task for domain '${domainId}' (taskId: ${task.id})`,
+      },
+    };
+  }
+
+  /**
+   * Write a minimal domain-section chat-history file whose sole message is
+   * the delegation request content. The edit handler reads this file and uses
+   * the last message as the "current user turn" — making delegation transparent.
+   */
+  async _writeSyntheticChatHistory({ domainId, sectionType, chatId, content }) {
+    const chatHistoryDir = path.join(
+      this.projectRoot,
+      ".code-analysis",
+      "tasks",
+      "chat-history",
+    );
+    await fs.mkdir(chatHistoryDir, { recursive: true });
+
+    const fileName = `domain-${domainId}-${sectionType}-${chatId}.json`;
+    const filePath = path.join(chatHistoryDir, fileName);
+
+    const now = new Date().toISOString();
+    const history = {
+      domainId,
+      sectionType,
+      chatId,
+      delegated: true,
+      delegatedByTaskId: this.parentTaskId,
+      createdAt: now,
+      lastMessageAt: now,
+      messages: [
+        {
+          id: 1,
+          role: "user",
+          content,
+          timestamp: now,
+        },
+      ],
+    };
+
+    await fs.writeFile(filePath, JSON.stringify(history, null, 2), "utf-8");
+  }
+}

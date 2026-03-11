@@ -1,7 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentJsonOutputPath,
@@ -51,7 +51,7 @@ export async function queueAnalyzeRequirementsTask({
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_REQUIREMENTS,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.ANALYZE_DOMAIN_REQUIREMENTS,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
       DOMAIN_SECTION_IDS.REQUIREMENTS,

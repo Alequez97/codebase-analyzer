@@ -24,3 +24,6 @@ export { queueEditRefactoringAndTestingTask } from "./edit-refactoring-and-testi
 
 // Custom codebase task (floating agent chat)
 export { queueCustomCodebaseTask } from "./custom-codebase-task.js";
+
+// Review changes task (AI orchestrator — diffs git, delegates edit-* tasks)
+export { queueReviewChangesTask } from "./review-changes.js";

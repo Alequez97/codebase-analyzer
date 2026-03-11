@@ -2,7 +2,7 @@ import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { readE2EConfig } from "../../persistence/e2e-config.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
@@ -97,7 +97,7 @@ export async function queueImplementTestTask({
     createdAt: new Date().toISOString(),
     params,
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.IMPLEMENT_TEST,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.IMPLEMENT_TEST,
     outputFile: null, // No JSON output - agent creates test file directly using write_file tool
     progressFile: getProgressFilePath(taskId),
   };

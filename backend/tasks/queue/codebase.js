@@ -1,7 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import { getCodebaseAnalysisOutputPath } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
@@ -34,7 +34,7 @@ export async function queueCodebaseAnalysisTask() {
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_FULL_CODEBASE,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.ANALYZE_FULL_CODEBASE,
     outputFile: getCodebaseAnalysisOutputPath(),
     progressFile: getProgressFilePath(taskId),
   };

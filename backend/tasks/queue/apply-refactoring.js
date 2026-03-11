@@ -1,7 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
@@ -86,7 +86,7 @@ export async function queueApplyRefactoringTask({ domainId, refactoring }) {
     createdAt: new Date().toISOString(),
     params,
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.APPLY_REFACTORING,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.APPLY_REFACTORING,
     outputFile: null, // No JSON output - agent creates/modifies files directly
     progressFile: getProgressFilePath(taskId),
   };

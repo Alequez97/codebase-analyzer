@@ -5,7 +5,7 @@ import path from "path";
 import config from "../config.js";
 import { emitTaskLog } from "../utils/socket-emitter.js";
 import * as logger from "../utils/logger.js";
-import { loadInstructionForTask } from "../utils/instruction-loader.js";
+import { loadSystemInstructionForTask } from "../utils/system-instruction-loader.js";
 import { getProviderFromModel } from "../utils/model-utils.js";
 import { getApiKeyForProvider } from "../utils/api-keys.js";
 import { createLineBufferedStream } from "../utils/line-buffered-stream.js";
@@ -41,8 +41,8 @@ export async function execute(task, signal) {
     throw new Error("Aider is not installed or not in PATH");
   }
 
-  // Load and process instruction template
-  const instructionContent = await loadInstructionForTask(task);
+  // Load and process system instruction template
+  const instructionContent = await loadSystemInstructionForTask(task);
 
   // Create a temporary instruction file with replaced variables
   const tempInstructionPath = path.join(

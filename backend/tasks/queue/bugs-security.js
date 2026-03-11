@@ -1,7 +1,7 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
-import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
+import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentJsonOutputPath,
@@ -48,7 +48,7 @@ export async function queueAnalyzeBugsSecurityTask({
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_BUGS_SECURITY,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.ANALYZE_DOMAIN_BUGS_SECURITY,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
       DOMAIN_SECTION_IDS.BUGS_SECURITY,
