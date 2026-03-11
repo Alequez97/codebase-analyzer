@@ -94,6 +94,18 @@ function DomainCard({ domain, provided, snapshot }) {
   const bugsAnalyze = useDomainBugsSecurityStore((s) => s.analyze);
   const testAnalyze = useDomainRefactoringAndTestingStore((s) => s.analyze);
 
+  const docDataById = useDomainDocumentationStore((s) => s.dataById);
+  const reqDataById = useDomainRequirementsStore((s) => s.dataById);
+  const bugsDataById = useDomainBugsSecurityStore((s) => s.dataById);
+  const testDataById = useDomainRefactoringAndTestingStore((s) => s.dataById);
+
+  const sectionData = {
+    documentation: docDataById,
+    requirements: reqDataById,
+    bugsSecurity: bugsDataById,
+    testing: testDataById,
+  };
+
   const sectionAnalyzers = {
     documentation: docAnalyze,
     requirements: reqAnalyze,
@@ -105,7 +117,7 @@ function DomainCard({ domain, provided, snapshot }) {
     const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
       activeProgress.has(t),
     );
-    return !domain.sections?.[key] && !isRunning;
+    return !sectionData[key]?.has(domain.id) && !isRunning;
   });
 
   const handleAnalyze = () => {
@@ -113,7 +125,7 @@ function DomainCard({ domain, provided, snapshot }) {
       const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
         activeProgress.has(t),
       );
-      if (!domain.sections?.[key] && !isRunning) {
+      if (!sectionData[key]?.has(domain.id) && !isRunning) {
         sectionAnalyzers[key](domain);
       }
     });
@@ -195,7 +207,7 @@ function DomainCard({ domain, provided, snapshot }) {
                       bg={
                         isRunning
                           ? "blue.400"
-                          : domain.sections?.[key]
+                          : sectionData[key]?.has(domain.id)
                             ? "green.400"
                             : "gray.300"
                       }
@@ -213,7 +225,7 @@ function DomainCard({ domain, provided, snapshot }) {
                       color={
                         isRunning
                           ? "blue.500"
-                          : domain.sections?.[key]
+                          : sectionData[key]?.has(domain.id)
                             ? "green.600"
                             : "gray.400"
                       }
