@@ -292,7 +292,7 @@ function PendingTaskRow({ taskId, entry }) {
 
 function FailedTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
-  const { dismissFailed } = useTaskProgressStore();
+  const { dismissFailed, progressByTaskId } = useTaskProgressStore();
 
   return (
     <HStack
@@ -320,6 +320,10 @@ function FailedTaskRow({ taskId, entry }) {
             {entry.error}
           </Text>
         )}
+        <DelegatedByBadge
+          delegatedByTaskId={entry.delegatedByTaskId}
+          progressByTaskId={progressByTaskId}
+        />
       </Box>
 
       <Button
@@ -338,7 +342,7 @@ function FailedTaskRow({ taskId, entry }) {
 
 function CompletedTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
-  const { clearProgress } = useTaskProgressStore();
+  const { clearProgress, progressByTaskId } = useTaskProgressStore();
 
   return (
     <HStack
@@ -364,6 +368,10 @@ function CompletedTaskRow({ taskId, entry }) {
         <Text fontSize="11px" color="green.600" mt="3px">
           Completed
         </Text>
+        <DelegatedByBadge
+          delegatedByTaskId={entry.delegatedByTaskId}
+          progressByTaskId={progressByTaskId}
+        />
       </Box>
 
       <Button

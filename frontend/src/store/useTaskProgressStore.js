@@ -90,6 +90,7 @@ export const useTaskProgressStore = create((set, get) => ({
         stage: null,
         message: null,
         error: null,
+        delegatedByTaskId: existing.delegatedByTaskId ?? null,
       });
       return { progressByTaskId: next };
     });
@@ -128,6 +129,7 @@ export const useTaskProgressStore = create((set, get) => ({
             error: task.error,
             stage: existing?.stage,
             message: existing?.message,
+            delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
           });
         }
         return { progressByTaskId: next };
