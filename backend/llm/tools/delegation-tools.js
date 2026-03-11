@@ -184,6 +184,9 @@ export class DelegationToolExecutor {
       };
     }
 
+    // Consume and discard — the file is only needed to pass instructions here
+    fs.unlink(absPath).catch(() => {});
+
     const sectionType = SECTION_TYPE_BY_TASK_TYPE[type];
 
     // Generate a unique synthetic chatId for this delegation.

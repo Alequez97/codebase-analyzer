@@ -4,7 +4,10 @@ import config from "../../config.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { emitSocketEvent } from "../../utils/socket-emitter.js";
-import { appendDomainSectionChatMessage } from "../../utils/chat-history.js";
+import {
+  appendDomainSectionChatMessage,
+  deleteDomainSectionChatHistory,
+} from "../../utils/chat-history.js";
 
 /**
  * Handler for edit-documentation task
@@ -107,6 +110,15 @@ export function editDocumentationHandler(
         component: "EditDocumentation",
         contentLength: content.length,
       });
+
+      // Clean up the synthetic chat history file created by the delegation layer
+      if (task.params.delegatedByTaskId) {
+        await deleteDomainSectionChatHistory(
+          task.params.domainId,
+          task.params.sectionType,
+          task.params.chatId,
+        );
+      }
 
       return { success: true };
     },

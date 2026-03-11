@@ -32,7 +32,16 @@ export function reviewChangesHandler(task, taskLogger, agent) {
   const { baseBranch = null, domainIds = null } = task.params || {};
 
   if (agent) {
-    agent.enableCommandTools({ timeoutMs: 60_000 });
+    agent.enableCommandTools({
+      timeoutMs: 60_000,
+      additionalAllowedPrefixes: [
+        "git diff",
+        "git log",
+        "git status",
+        "git show",
+        "git branch",
+      ],
+    });
     agent.enableDelegationTools(taskId, REVIEW_CHANGES_QUEUE_FUNCTIONS);
 
     taskLogger.info("🔧 Command + delegation tools enabled", {
