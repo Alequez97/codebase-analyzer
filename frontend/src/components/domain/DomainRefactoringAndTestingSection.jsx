@@ -14,10 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDown, ChevronRight, Sparkles, TestTube } from "lucide-react";
 import {
-  ExistingTestsTable,
   MissingTestsSection,
   RefactoringRecommendationsCard,
-  DiffLegend,
 } from "./refactoring-and-testing";
 import { Card } from "../ui/card";
 import { EmptyState } from "../ui/empty-state";
@@ -46,7 +44,6 @@ export default function DomainRefactoringAndTestingSection({
   logs = "",
   logsLoading = false,
 }) {
-  const existingTestFiles = testing?.existingTests || [];
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAnalyzeDialog, setShowAnalyzeDialog] = useState(false);
 
@@ -227,21 +224,11 @@ export default function DomainRefactoringAndTestingSection({
                       <Separator />
                     )}
 
-                  {/* Existing Tests */}
-                  <Box>
-                    <Text fontWeight="semibold" mb={3} fontSize="md">
-                      Existing Test Files
-                    </Text>
-                    <ExistingTestsTable testFiles={existingTestFiles} />
-                  </Box>
-
-                  <Separator />
-
                   {/* Missing Tests */}
                   <Box>
                     <HStack justify="space-between" mb={4}>
                       <Text fontWeight="semibold" fontSize="md">
-                        Missing Tests
+                        Tests
                       </Text>
                       {testing.summary && (
                         <HStack gap={2} fontSize="sm">
@@ -258,10 +245,6 @@ export default function DomainRefactoringAndTestingSection({
                         </HStack>
                       )}
                     </HStack>
-
-                    <Box mb={4}>
-                      <DiffLegend />
-                    </Box>
 
                     <MissingTestsSection
                       domainId={domainId}

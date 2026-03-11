@@ -1,25 +1,25 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Badge,
   Box,
   Button,
   HStack,
   Icon,
-  IconButton,
   Spinner,
   Table,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { Checkbox } from "../../ui/checkbox";
-import { Check, ChevronDown, ChevronRight, Edit2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { Alert } from "../../ui/alert";
+import { toaster } from "../../ui/toaster";
+import api from "../../../api";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "../../../store/useRefactoringAndTestingEditorStore";
 import { useDomainRefactoringAndTestingStore } from "../../../store/useDomainRefactoringAndTestingStore";
 import { useRefactoringAndTestingStore } from "../../../store/useRefactoringAndTestingStore";
 import { TESTING_ACTION_STATUS } from "../../../constants/testing-actions";
 import { TestCaseDetails } from "../refactoring-and-testing/TestCaseDetails";
-import { TestCaseInlineEditorComponent } from "../refactoring-and-testing/TestCaseInlineEditor";
 import { TestTypeAccordion } from "../refactoring-and-testing/TestTypeAccordion";
 import {
   getPriorityColor,
@@ -30,27 +30,18 @@ export function MissingTestsSection({
   missingTests,
   implementingTests,
   implementLogs,
-  onImplementTest,
   onImplementBatchTests,
-  onImplementTestEdits,
   domainId,
 }) {
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [selectedTestIds, setSelectedTestIds] = useState(new Set());
   const [hasCustomizedSelection, setHasCustomizedSelection] = useState(false);
   const [isBatchImplementing, setIsBatchImplementing] = useState(false);
-  const editorRef = useRef(null);
+  const [filterImplemented, setFilterImplemented] = useState(true);
+  const [filterMissing, setFilterMissing] = useState(true);
 
-  const {
-    editingTestId,
-    setEditedMissingTests,
-    getEditedMissingTests,
-    updateTestInMissingTests,
-    markPendingEditedTest,
-    hasPendingEditedTest,
-    setEditingTest,
-    clearEditingTest,
-  } = useTestingEditorStore();
+  const { setEditedMissingTests, getEditedMissingTests } =
+    useTestingEditorStore();
 
   const recentlyChangedTests = useDomainRefactoringAndTestingStore(
     (state) => state.recentlyChangedTests,
@@ -149,6 +140,15 @@ export function MissingTestsSection({
     });
   }, [hasCustomizedSelection, editedMissingTests, implementingTests]);
 
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedTestIds(new Set(selectableTestIds));
+    } else {
+      setSelectedTestIds(new Set());
+    }
+    setHasCustomizedSelection(true);
+  };
+
   const toggleExpand = (testId) => {
     setExpandedTests((prev) => {
       const newSet = new Set(prev);
@@ -207,65 +207,6 @@ export function MissingTestsSection({
     setHasCustomizedSelection(true);
   };
 
-  const handleSaveTestCases = (updatedTest, previousTest) => {
-    updateTestInMissingTests(domainId, updatedTest);
-
-    if (previousTest?.actionStatus === TESTING_ACTION_STATUS.COMPLETED) {
-      markPendingEditedTest(domainId, updatedTest.id);
-    }
-  };
-
-  const renderActionButton = (test, isImplemented, hasPendingEdits) => {
-    if (isImplemented && hasPendingEdits) {
-      return (
-        <Button
-          size="xs"
-          colorPalette="yellow"
-          variant="solid"
-          disabled={!!implementingTests[test.id]}
-          onClick={(e) => {
-            e.stopPropagation();
-            onImplementTestEdits?.(test.id);
-          }}
-        >
-          Implement edits
-        </Button>
-      );
-    }
-
-    if (isImplemented) {
-      return (
-        <Button size="xs" colorPalette="green" variant="subtle" disabled>
-          Implemented
-        </Button>
-      );
-    }
-
-    if (test.blockedBy) {
-      return (
-        <Button size="xs" colorPalette="gray" variant="subtle" disabled>
-          Blocked
-        </Button>
-      );
-    }
-
-    return (
-      <Button
-        size="xs"
-        colorPalette="green"
-        onClick={(e) => {
-          e.stopPropagation();
-          onImplementTest(test.id);
-        }}
-        loading={!!implementingTests[test.id]}
-        loadingText="Implementing"
-      >
-        <Check size={12} />
-        Implement
-      </Button>
-    );
-  };
-
   // Determine group-level change type for a test type
   const getGroupChangeType = (tests = []) => {
     if (!tests || tests.length === 0) return null;
@@ -288,12 +229,11 @@ export function MissingTestsSection({
   };
 
   // Render a single test row
-  const renderTestRow = (test, typeLabel, typePalette) => {
+  const renderTestRow = (test) => {
     const isExpanded = expandedTests.has(test.id);
     const isImplemented = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
     const isImplementing = !!implementingTests[test.id];
     const implementProgress = implementProgressByTestId.get(test.id);
-    const hasPendingEdits = hasPendingEditedTest(domainId, test.id);
     const isBlocked = !!test.blockedBy;
     const isSelectable = isSelectableTest(test);
     const isSelected = effectiveSelectedTestIds.has(test.id);
@@ -311,7 +251,7 @@ export function MissingTestsSection({
                 : recentChangeType === "removed"
                   ? "red.100"
                   : isBlocked
-                    ? "gray.100"
+                    ? "gray.50"
                     : isImplemented
                       ? "green.50"
                       : isImplementing
@@ -327,7 +267,7 @@ export function MissingTestsSection({
                   : recentChangeType === "removed"
                     ? "red.200"
                     : isBlocked
-                      ? "gray.200"
+                      ? "gray.100"
                       : isImplemented
                         ? "green.100"
                         : isImplementing
@@ -400,14 +340,19 @@ export function MissingTestsSection({
           ) : (
             <>
               <Table.Cell>
-                <Text
-                  fontSize="xs"
-                  fontFamily="mono"
-                  color="gray.700"
-                  wordBreak="break-all"
-                >
-                  {test.suggestedTestFile}
-                </Text>
+                {isImplemented ? (
+                  <Badge colorPalette="green" size="xs" variant="subtle">
+                    Implemented
+                  </Badge>
+                ) : isBlocked ? (
+                  <Badge colorPalette="gray" size="xs" variant="subtle">
+                    Blocked
+                  </Badge>
+                ) : (
+                  <Badge colorPalette="orange" size="xs" variant="subtle">
+                    Missing
+                  </Badge>
+                )}
               </Table.Cell>
               <Table.Cell>
                 {recentChangeType && (
@@ -425,151 +370,157 @@ export function MissingTestsSection({
                     {recentChangeType === "added"
                       ? "+ New"
                       : recentChangeType === "modified"
-                        ? "✎ Modified"
-                        : "− Deleted"}
+                        ? "\u270e Modified"
+                        : "\u2212 Deleted"}
                   </Badge>
                 )}
               </Table.Cell>
-              <Table.Cell textAlign="center">
-                <HStack gap={1} justify="center">
-                  {editingTestId === test.id ? (
-                    <IconButton
-                      size="xs"
-                      variant="ghost"
-                      colorPalette="red"
-                      disabled={!!implementingTests[test.id]}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        clearEditingTest();
-                      }}
-                      title="Cancel editing"
-                    >
-                      <X size={14} />
-                    </IconButton>
-                  ) : (
-                    <IconButton
-                      size="xs"
-                      colorPalette="blue"
-                      variant="ghost"
-                      disabled={!!implementingTests[test.id]}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingTest(test.id, domainId);
-                      }}
-                      title="Edit test cases"
-                    >
-                      <Edit2 size={14} />
-                    </IconButton>
-                  )}
-                  {renderActionButton(test, isImplemented, hasPendingEdits)}
-                </HStack>
+              <Table.Cell
+                onClick={(e) => e.stopPropagation()}
+                textAlign="center"
+              >
+                {isSelectable ? (
+                  <Box
+                    display="inline-flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Checkbox
+                      aria-label={`Select ${test.id}`}
+                      checked={isSelected}
+                      colorPalette="green"
+                      onCheckedChange={(event) =>
+                        toggleTestSelection(test.id, event.checked)
+                      }
+                    />
+                  </Box>
+                ) : null}
               </Table.Cell>
             </>
           )}
-          <Table.Cell onClick={(e) => e.stopPropagation()} textAlign="center">
-            {isSelectable ? (
-              <Box
-                display="inline-flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Checkbox
-                  aria-label={`Select ${test.id}`}
-                  checked={isSelected}
-                  colorPalette="green"
-                  onCheckedChange={(event) =>
-                    toggleTestSelection(test.id, event.checked)
-                  }
-                />
-              </Box>
-            ) : null}
-          </Table.Cell>
         </Table.Row>
         {isExpanded && (
           <Table.Row key={`${test.id}-details`}>
-            <Table.Cell colSpan={8} bg="gray.50" p={4}>
-              {editingTestId === test.id ? (
-                <TestCaseInlineEditorComponent
-                  ref={editorRef}
-                  test={test}
-                  onSave={(updatedTest) => {
-                    handleSaveTestCases(updatedTest, test);
-                    clearEditingTest();
-                  }}
-                  onCancel={() => clearEditingTest()}
-                />
-              ) : (
-                <VStack align="stretch" gap={3}>
-                  {test.blockedBy && (
-                    <Box
-                      borderWidth="1px"
-                      borderRadius="md"
-                      p={3}
-                      bg="gray.100"
-                      borderColor="gray.400"
+            <Table.Cell colSpan={7} bg="gray.50" p={4}>
+              <VStack align="stretch" gap={3}>
+                {test.blockedBy && (
+                  <Box
+                    borderWidth="1px"
+                    borderRadius="md"
+                    p={3}
+                    bg="gray.100"
+                    borderColor="gray.400"
+                  >
+                    <HStack mb={2}>
+                      <Badge colorPalette="gray" size="sm" variant="solid">
+                        🔒 BLOCKED
+                      </Badge>
+                      <Text fontSize="xs" fontWeight="semibold">
+                        Requires refactoring before implementation
+                      </Text>
+                    </HStack>
+                    <Text fontSize="xs" color="gray.700">
+                      ⚠️ Blocked by{" "}
+                      <Text as="span" fontFamily="mono" fontWeight="semibold">
+                        {test.blockedBy}
+                      </Text>
+                    </Text>
+                    <Text fontSize="xs" color="gray.600" mt={1}>
+                      Please implement the recommended refactoring above before
+                      implementing this test.
+                    </Text>
+                  </Box>
+                )}
+
+                {test.suggestedTestFile && (
+                  <Box>
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      color="gray.500"
+                      mb={1}
                     >
-                      <HStack mb={2}>
-                        <Badge colorPalette="gray" size="sm" variant="solid">
-                          🔒 BLOCKED
-                        </Badge>
-                        <Text fontSize="xs" fontWeight="semibold">
-                          Requires refactoring before implementation
-                        </Text>
-                      </HStack>
-                      <Text fontSize="xs" color="gray.700">
-                        ⚠️ Blocked by{" "}
-                        <Text as="span" fontFamily="mono" fontWeight="semibold">
-                          {test.blockedBy}
-                        </Text>
+                      {isImplemented ? "Test file" : "Suggested test file"}
+                    </Text>
+                    <HStack gap={2}>
+                      <Text
+                        fontSize="xs"
+                        fontFamily="mono"
+                        color="gray.700"
+                        wordBreak="break-all"
+                      >
+                        {test.suggestedTestFile}
                       </Text>
-                      <Text fontSize="xs" color="gray.600" mt={1}>
-                        Please implement the recommended refactoring above
-                        before implementing this test.
-                      </Text>
-                    </Box>
-                  )}
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        colorPalette="blue"
+                        flexShrink={0}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await api.openFileInEditor(test.suggestedTestFile);
+                            toaster.create({
+                              title: "Opened in VS Code",
+                              type: "success",
+                            });
+                          } catch (error) {
+                            toaster.create({
+                              title: "Failed to open file",
+                              description:
+                                error?.response?.data?.message ||
+                                "Make sure VS Code is accessible via the 'code' command.",
+                              type: "error",
+                            });
+                          }
+                        }}
+                      >
+                        <ExternalLink size={12} />
+                        Open in editor
+                      </Button>
+                    </HStack>
+                  </Box>
+                )}
 
-                  {test.scenarios ? (
-                    <TestCaseDetails scenarios={test.scenarios} />
-                  ) : null}
+                {test.scenarios ? (
+                  <TestCaseDetails scenarios={test.scenarios} />
+                ) : null}
 
-                  {Array.isArray(test.actionHistory) &&
-                    test.actionHistory.length > 0 && (
-                      <Box borderWidth="1px" borderRadius="md" p={3}>
-                        <Text fontSize="xs" fontWeight="semibold" mb={2}>
-                          Action History
-                        </Text>
-                        {test.actionHistory.map((action) => (
-                          <Text key={action.id} fontSize="xs" color="gray.700">
-                            {action.action} • {action.status} •{" "}
-                            {action.timestamp}
-                          </Text>
-                        ))}
-                      </Box>
-                    )}
-
-                  {implementLogs?.[test.id] && (
+                {Array.isArray(test.actionHistory) &&
+                  test.actionHistory.length > 0 && (
                     <Box borderWidth="1px" borderRadius="md" p={3}>
                       <Text fontSize="xs" fontWeight="semibold" mb={2}>
-                        Implementation Logs
+                        Action History
                       </Text>
-                      <Box
-                        bg="gray.900"
-                        color="green.300"
-                        p={3}
-                        borderRadius="sm"
-                        fontFamily="mono"
-                        fontSize="xs"
-                        maxH="240px"
-                        overflowY="auto"
-                        whiteSpace="pre-wrap"
-                      >
-                        {implementLogs[test.id]}
-                      </Box>
+                      {test.actionHistory.map((action) => (
+                        <Text key={action.id} fontSize="xs" color="gray.700">
+                          {action.action} • {action.status} • {action.timestamp}
+                        </Text>
+                      ))}
                     </Box>
                   )}
-                </VStack>
-              )}
+
+                {implementLogs?.[test.id] && (
+                  <Box borderWidth="1px" borderRadius="md" p={3}>
+                    <Text fontSize="xs" fontWeight="semibold" mb={2}>
+                      Implementation Logs
+                    </Text>
+                    <Box
+                      bg="gray.900"
+                      color="green.300"
+                      p={3}
+                      borderRadius="sm"
+                      fontFamily="mono"
+                      fontSize="xs"
+                      maxH="240px"
+                      overflowY="auto"
+                      whiteSpace="pre-wrap"
+                    >
+                      {implementLogs[test.id]}
+                    </Box>
+                  </Box>
+                )}
+              </VStack>
             </Table.Cell>
           </Table.Row>
         )}
@@ -593,32 +544,80 @@ export function MissingTestsSection({
     );
   }
 
-  const unitTests = sortByPriority(editedMissingTests.unit || []);
-  const integrationTests = sortByPriority(editedMissingTests.integration || []);
-  const e2eTests = sortByPriority(editedMissingTests.e2e || []);
+  const unitTests = sortByPriority(
+    (editedMissingTests.unit || []).filter((test) => {
+      const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+      return impl ? filterImplemented : filterMissing;
+    }),
+  );
+  const integrationTests = sortByPriority(
+    (editedMissingTests.integration || []).filter((test) => {
+      const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+      return impl ? filterImplemented : filterMissing;
+    }),
+  );
+  const e2eTests = sortByPriority(
+    (editedMissingTests.e2e || []).filter((test) => {
+      const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+      return impl ? filterImplemented : filterMissing;
+    }),
+  );
   const selectedReadyCount = allTests.filter(
     (test) => effectiveSelectedTestIds.has(test.id) && isSelectableTest(test),
   ).length;
+  const allSelectableSelected =
+    selectableTestIds.size > 0 &&
+    [...selectableTestIds].every((id) => effectiveSelectedTestIds.has(id));
+  const someSelectableSelected = [...selectableTestIds].some((id) =>
+    effectiveSelectedTestIds.has(id),
+  );
 
   return (
     <VStack align="stretch" gap={3}>
-      <HStack justify="space-between" align="center">
-        <Text fontSize="sm" color="gray.600">
-          {selectedReadyCount > 0
-            ? `${selectedReadyCount} selected`
-            : "Select tests to batch implement"}
-        </Text>
-        <Button
-          size="sm"
-          colorPalette="green"
-          onClick={handleBatchImplement}
-          disabled={selectedReadyCount === 0 || !onImplementBatchTests}
-          loading={isBatchImplementing}
-          loadingText="Queueing"
-        >
-          <Check size={14} />
-          Implement selected
-        </Button>
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
+        <HStack gap={4}>
+          <Checkbox
+            checked={filterImplemented}
+            onCheckedChange={(e) => setFilterImplemented(e.checked)}
+            colorPalette="green"
+            size="sm"
+          >
+            Implemented
+          </Checkbox>
+          <Checkbox
+            checked={filterMissing}
+            onCheckedChange={(e) => setFilterMissing(e.checked)}
+            colorPalette="orange"
+            size="sm"
+          >
+            Missing
+          </Checkbox>
+        </HStack>
+        <HStack gap={3}>
+          <Checkbox
+            checked={allSelectableSelected}
+            indeterminate={someSelectableSelected && !allSelectableSelected}
+            onCheckedChange={(e) => handleSelectAll(e.checked)}
+            colorPalette="green"
+            size="sm"
+            disabled={selectableTestIds.size === 0}
+          >
+            Select all
+          </Checkbox>
+          <Button
+            size="sm"
+            colorPalette="green"
+            onClick={handleBatchImplement}
+            disabled={selectedReadyCount === 0 || !onImplementBatchTests}
+            loading={isBatchImplementing}
+            loadingText="Queueing"
+          >
+            <Check size={14} />
+            {selectedReadyCount > 0
+              ? `Implement (${selectedReadyCount})`
+              : "Implement selected"}
+          </Button>
+        </HStack>
       </HStack>
 
       {/* Unit Tests Accordion */}
@@ -638,16 +637,13 @@ export function MissingTestsSection({
                   <Table.ColumnHeader width="80px">ID</Table.ColumnHeader>
                   <Table.ColumnHeader width="80px">Priority</Table.ColumnHeader>
                   <Table.ColumnHeader>Description</Table.ColumnHeader>
-                  <Table.ColumnHeader>Suggested File</Table.ColumnHeader>
+                  <Table.ColumnHeader width="100px">Status</Table.ColumnHeader>
                   <Table.ColumnHeader width="80px">Change</Table.ColumnHeader>
-                  <Table.ColumnHeader width="140px" textAlign="center">
-                    Actions
-                  </Table.ColumnHeader>
                   <Table.ColumnHeader width="44px"></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {unitTests.map((test) => renderTestRow(test, "Unit", "purple"))}
+                {unitTests.map((test) => renderTestRow(test))}
               </Table.Body>
             </Table.Root>
           </Box>
@@ -671,18 +667,13 @@ export function MissingTestsSection({
                   <Table.ColumnHeader width="80px">ID</Table.ColumnHeader>
                   <Table.ColumnHeader width="80px">Priority</Table.ColumnHeader>
                   <Table.ColumnHeader>Description</Table.ColumnHeader>
-                  <Table.ColumnHeader>Suggested File</Table.ColumnHeader>
+                  <Table.ColumnHeader width="100px">Status</Table.ColumnHeader>
                   <Table.ColumnHeader width="80px">Change</Table.ColumnHeader>
-                  <Table.ColumnHeader width="140px" textAlign="center">
-                    Actions
-                  </Table.ColumnHeader>
                   <Table.ColumnHeader width="44px"></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {integrationTests.map((test) =>
-                  renderTestRow(test, "Integration", "blue"),
-                )}
+                {integrationTests.map((test) => renderTestRow(test))}
               </Table.Body>
             </Table.Root>
           </Box>
@@ -706,16 +697,13 @@ export function MissingTestsSection({
                   <Table.ColumnHeader width="80px">ID</Table.ColumnHeader>
                   <Table.ColumnHeader width="80px">Priority</Table.ColumnHeader>
                   <Table.ColumnHeader>Description</Table.ColumnHeader>
-                  <Table.ColumnHeader>Suggested File</Table.ColumnHeader>
+                  <Table.ColumnHeader width="100px">Status</Table.ColumnHeader>
                   <Table.ColumnHeader width="80px">Change</Table.ColumnHeader>
-                  <Table.ColumnHeader width="140px" textAlign="center">
-                    Actions
-                  </Table.ColumnHeader>
                   <Table.ColumnHeader width="44px"></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {e2eTests.map((test) => renderTestRow(test, "E2E", "green"))}
+                {e2eTests.map((test) => renderTestRow(test))}
               </Table.Body>
             </Table.Root>
           </Box>
