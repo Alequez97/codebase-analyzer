@@ -741,3 +741,49 @@ These rules apply to any feature where the UI triggers an AI task and needs to r
 - When an AI task produces a side-effect that must be recorded (e.g. a fix being applied → `action: "apply"`), **write it inside `persistTaskRevision` in the task orchestrator**, not via a separate frontend API call
 - This guarantees the action is always persisted exactly once, even if the client disconnects
 - The frontend updates its own in-memory state from the socket event; the backend owns the durable record
+
+### 13. **Unit Testing Best Practices**
+
+- **Testing framework**: Use [Vitest](https://vitest.dev/) for all backend and frontend unit tests
+- **Test structure**: Tests live in `backend/tests/` mirroring the source structure (e.g., `backend/tests/tools/file-tools.test.js` tests `backend/llm/tools/file-tools.js`)
+- **Arrange-Act-Assert pattern**: All tests MUST use the AAA pattern with clear comment sections:
+
+  ```javascript
+  test("allows writing to .code-analysis directory by default", async () => {
+    // Arrange
+    const outputPath = ".code-analysis/output.json";
+    const content = '{"success": true}';
+
+    // Act
+    const result = await executor.writeFile(outputPath, content);
+
+    // Assert
+    expect(result).toContain("Success");
+    expect(writtenContent).toBe(content);
+  });
+  ```
+
+- **Test organization**:
+  - Group related tests with `describe()` blocks
+  - Use descriptive test names that document expected behavior
+  - Test one thing per test (single assertion concept)
+- **Test isolation**:
+  - Use `beforeEach()` to create fresh test fixtures
+  - Use `afterEach()` to clean up temp files/directories
+  - Avoid test interdependencies
+  - Each test should be runnable in isolation
+- **Security-first testing**:
+  - Every security check MUST have a failing test case
+  - Test path traversal protection extensively
+  - Test permission boundaries thoroughly
+- **Real vs mocked dependencies**:
+  - Use real temp directories for file system tests (not mocks)
+  - Mock only when necessary (external APIs, network calls)
+  - Prefer testing actual behavior over mocked behavior
+- **Coverage goals**:
+  - Aim for 100% line and branch coverage on critical modules (file-tools, security-sensitive code)
+  - All error paths must be tested
+- **Running tests**:
+  - `npm test` - run in watch mode (development)
+  - `npm run test:run` - run once (CI mode)
+  - `npm run test:coverage` - with coverage report

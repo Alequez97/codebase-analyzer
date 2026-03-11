@@ -3,6 +3,10 @@ import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { PERSISTENCE_FILES } from "../../constants/persistence-files.js";
+import {
+  TOOL_ERROR_CODES,
+  TOOL_ERROR_TYPES,
+} from "../../constants/tool-error-codes.js";
 
 const execAsync = promisify(exec);
 
@@ -204,12 +208,44 @@ export class FileToolExecutor {
   }
 
   /**
-   * Execute a tool call
+   * Create a success result
+   * @private
+   */
+  _success(message, data = {}) {
+    return { success: true, message, data };
+  }
+
+  /**
+   * Create an error result
+   * @private
+   */
+  _error(message, code, type = TOOL_ERROR_TYPES.VALIDATION, details = {}) {
+    return {
+      success: false,
+      message,
+      error: { code, type, ...details },
+    };
+  }
+
+  /**
+   * Convert structured result to string for LLM consumption
+   * @private
+   */
+  _formatForLLM(result) {
+    if (typeof result === "string") return result;
+    if (result.success) {
+      return result.data?.content || result.message;
+    }
+    return result.message;
+  }
+
+  /**
+   * Execute a tool call and return structured result
    * @param {string} toolName - Name of the tool to execute
    * @param {Object} args - Tool arguments
-   * @returns {Promise<string>} Result of tool execution
+   * @returns {Promise<Object>} Structured result object {success, message, data?, error?}
    */
-  async executeTool(toolName, args) {
+  async executeToolStructured(toolName, args) {
     switch (toolName) {
       case "read_file":
         return await this.readFile(args.path);
@@ -236,28 +272,66 @@ export class FileToolExecutor {
       case "rename_file":
         return await this.renameFile(args.old_path, args.new_path);
       default:
-        throw new Error(`Unknown tool: ${toolName}`);
+        return this._error(
+          `Unknown tool: ${toolName}`,
+          TOOL_ERROR_CODES.UNKNOWN_TOOL,
+          TOOL_ERROR_TYPES.INTERNAL,
+          { toolName },
+        );
     }
   }
 
   /**
-   * Replace a range of lines in a file (only allowed on explicitly allowed paths)
+   * Execute a tool call and return string result (for LLM consumption)
+   * Converts structured results to strings that LLMs can read.
+   * @param {string} toolName - Name of the tool to execute
+   * @param {Object} args - Tool arguments
+   * @returns {Promise<string>} String result of tool execution
+   */
+  async executeTool(toolName, args) {
+    const structuredResult = await this.executeToolStructured(toolName, args);
+    return this._formatForLLM(structuredResult);
+  }
+
+  /**
+   * Replace a range of lines in a file
    * @private
    */
   async replaceLines(relativePath, startLine, endLine, newContent) {
-    const normalizedPath = relativePath.replace(/\\/g, "/");
-    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
-
-    if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
-      return `Error: replace_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+    // Security: Reject absolute paths immediately
+    if (path.isAbsolute(relativePath)) {
+      return this._error(
+        "Access denied: absolute paths are not allowed",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     const fullPath = path.join(this.projectRoot, relativePath);
 
+    // Security: Check path traversal FIRST (most critical)
     const resolvedPath = path.resolve(fullPath);
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: path outside project root");
+      return this._error(
+        "Access denied: path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
+    }
+
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+
+    if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
+      return this._error(
+        `replace_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list.`,
+        TOOL_ERROR_CODES.PERMISSION_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     let currentContent;
@@ -265,23 +339,42 @@ export class FileToolExecutor {
       currentContent = await fs.readFile(fullPath, "utf-8");
     } catch (error) {
       if (error.code === "ENOENT") {
-        return `Error: File not found: ${relativePath}. Cannot edit a file that does not exist. Use write_file to create it first.`;
+        return this._error(
+          `File not found: ${relativePath}. Cannot edit a file that does not exist.`,
+          TOOL_ERROR_CODES.FILE_NOT_FOUND,
+          TOOL_ERROR_TYPES.FILESYSTEM,
+          { path: relativePath },
+        );
       }
-      return `Error reading file: ${error.message}`;
+      return this._error(
+        `Error reading file: ${error.message}`,
+        TOOL_ERROR_CODES.READ_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
 
     const lines = currentContent.split("\n");
     const totalLines = lines.length;
 
     if (startLine < 1 || startLine > totalLines) {
-      return `Error: start_line ${startLine} is out of range. File has ${totalLines} lines (1-based).`;
+      return this._error(
+        `start_line ${startLine} is out of range. File has ${totalLines} lines (1-based).`,
+        TOOL_ERROR_CODES.INVALID_LINE_RANGE,
+        TOOL_ERROR_TYPES.VALIDATION,
+        { startLine, totalLines },
+      );
     }
     if (endLine < startLine || endLine > totalLines) {
-      return `Error: end_line ${endLine} is out of range. Must be >= start_line (${startLine}) and <= ${totalLines}.`;
+      return this._error(
+        `end_line ${endLine} is out of range. Must be >= start_line (${startLine}) and <= ${totalLines}.`,
+        TOOL_ERROR_CODES.INVALID_LINE_RANGE,
+        TOOL_ERROR_TYPES.VALIDATION,
+        { startLine, endLine, totalLines },
+      );
     }
 
     const replacementLines = newContent === "" ? [] : newContent.split("\n");
-    // Remove trailing empty element caused by a trailing newline in newContent
     if (
       replacementLines.length > 0 &&
       replacementLines[replacementLines.length - 1] === "" &&
@@ -298,47 +391,87 @@ export class FileToolExecutor {
       await fs.writeFile(fullPath, newLines.join("\n"), "utf-8");
       const removedCount = endLine - startLine + 1;
       const addedCount = replacementLines.length;
-      return `Success: Replaced lines ${startLine}-${endLine} in ${relativePath} (removed ${removedCount} lines, inserted ${addedCount} lines)`;
+      return this._success(
+        `Replaced lines ${startLine}-${endLine} in ${relativePath} (removed ${removedCount} lines, inserted ${addedCount} lines)`,
+        {
+          path: relativePath,
+          startLine,
+          endLine,
+          linesRemoved: removedCount,
+          linesInserted: addedCount,
+        },
+      );
     } catch (error) {
-      return `Error writing file: ${error.message}`;
+      return this._error(
+        `Error writing file: ${error.message}`,
+        TOOL_ERROR_CODES.WRITE_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
   }
 
   /**
-   * Write file content (only allowed in .code-analysis directory)
+   * Write file content
    * @private
    */
   async writeFile(relativePath, content) {
-    const normalizedPath = relativePath.replace(/\\/g, "/");
-    const isAnalysisPath = normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`);
-    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
-
-    // Security: by default only allow .code-analysis writes, with optional exact-path allowlist.
-    // IMPLEMENT_FIX tasks set allowAnyWrite=true so the model can create/modify any source file.
-    if (!isAnalysisPath && !isExplicitlyAllowedPath && !this.allowAnyWrite) {
-      return `Error: Can only write files to ${ANALYSIS_OUTPUT_DIR}/ directory for security reasons, unless the path is explicitly allowed by the task. Your path: ${relativePath}`;
+    // Security: Reject absolute paths immediately
+    if (path.isAbsolute(relativePath)) {
+      return this._error(
+        "Access denied: absolute paths are not allowed",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     const fullPath = path.join(this.projectRoot, relativePath);
 
-    // Security: ensure path is within project root
+    // Security: Check path traversal FIRST (most critical)
     const resolvedPath = path.resolve(fullPath);
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: path outside project root");
+      return this._error(
+        "Access denied: path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
+    }
+
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+    const isAnalysisPath = normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`);
+    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+
+    if (!isAnalysisPath && !isExplicitlyAllowedPath && !this.allowAnyWrite) {
+      return this._error(
+        `Can only write files to ${ANALYSIS_OUTPUT_DIR}/ directory for security reasons, unless the path is explicitly allowed by the task.`,
+        TOOL_ERROR_CODES.PERMISSION_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     try {
-      // Create directory if it doesn't exist
       const dirPath = path.dirname(fullPath);
       await fs.mkdir(dirPath, { recursive: true });
-
-      // Write file
       await fs.writeFile(fullPath, content, "utf-8");
 
-      return `Success: File written to ${relativePath} (${content.length} bytes)`;
+      return this._success(
+        `File written to ${relativePath} (${content.length} bytes)`,
+        {
+          path: relativePath,
+          bytesWritten: content.length,
+        },
+      );
     } catch (error) {
-      return `Error writing file: ${error.message}`;
+      return this._error(
+        `Error writing file: ${error.message}`,
+        TOOL_ERROR_CODES.WRITE_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
   }
 
@@ -347,19 +480,29 @@ export class FileToolExecutor {
    * @private
    */
   async readFile(relativePath) {
+    // Security: Reject absolute paths immediately
+    if (path.isAbsolute(relativePath)) {
+      return this._error(
+        "Access denied: absolute paths are not allowed",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
+    }
+
     const fullPath = path.join(this.projectRoot, relativePath);
 
-    // Security: ensure path is within project root
     const resolvedPath = path.resolve(fullPath);
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: path outside project root");
+      return this._error(
+        "Access denied: path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
-    // Prevent reading output files in .code-analysis directory
-    // LLM should only read SOURCE CODE, not its own output.
-    // Exception: paths explicitly added via setAllowedWritePaths() — edit tasks
-    // need to read the current content file before overwriting it.
     const normalizedPath = relativePath.replace(/\\/g, "/");
     const isExplicitlyAllowedReadPath =
       this.allowedWritePaths.has(normalizedPath);
@@ -368,18 +511,33 @@ export class FileToolExecutor {
       !isExplicitlyAllowedReadPath &&
       !this.allowAnyRead
     ) {
-      return `Error: Cannot read files in ${ANALYSIS_OUTPUT_DIR} directory. This directory contains analysis outputs, not source code. Only read source code files from your codebase.`;
+      return this._error(
+        `Cannot read files in ${ANALYSIS_OUTPUT_DIR} directory. This directory contains analysis outputs, not source code.`,
+        TOOL_ERROR_CODES.READ_PROTECTED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     try {
       const stats = await fs.stat(fullPath);
 
       if (!stats.isFile()) {
-        return `Error: ${relativePath} is not a file`;
+        return this._error(
+          `${relativePath} is not a file`,
+          TOOL_ERROR_CODES.NOT_A_FILE,
+          TOOL_ERROR_TYPES.VALIDATION,
+          { path: relativePath },
+        );
       }
 
       if (stats.size > this.maxFileSize) {
-        return `Error: File too large (${Math.round(stats.size / 1024)}KB). Maximum size is ${this.maxFileSize / 1024}KB`;
+        return this._error(
+          `File too large (${Math.round(stats.size / 1024)}KB). Maximum size is ${this.maxFileSize / 1024}KB`,
+          TOOL_ERROR_CODES.FILE_TOO_LARGE,
+          TOOL_ERROR_TYPES.VALIDATION,
+          { path: relativePath, sizeKB: Math.round(stats.size / 1024) },
+        );
       }
 
       const content = await fs.readFile(fullPath, "utf-8");
@@ -388,12 +546,28 @@ export class FileToolExecutor {
       const numbered = lines
         .map((line, i) => `${String(i + 1).padStart(width, " ")}: ${line}`)
         .join("\n");
-      return numbered;
+
+      return this._success(`Read ${relativePath} (${lines.length} lines)`, {
+        content: numbered,
+        path: relativePath,
+        lines: lines.length,
+        sizeBytes: stats.size,
+      });
     } catch (error) {
       if (error.code === "ENOENT") {
-        return `Error: File not found: ${relativePath}`;
+        return this._error(
+          `File not found: ${relativePath}`,
+          TOOL_ERROR_CODES.FILE_NOT_FOUND,
+          TOOL_ERROR_TYPES.FILESYSTEM,
+          { path: relativePath },
+        );
       }
-      throw error;
+      return this._error(
+        `Error reading file: ${error.message}`,
+        TOOL_ERROR_CODES.READ_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
   }
 
@@ -408,25 +582,54 @@ export class FileToolExecutor {
     const resolvedPath = path.resolve(fullPath);
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: path outside project root");
+      return this._error(
+        "Access denied: path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     try {
       const stats = await fs.stat(fullPath);
       if (!stats.isDirectory()) {
-        return `Error: ${relativePath} is not a directory`;
+        return this._error(
+          `${relativePath} is not a directory`,
+          TOOL_ERROR_CODES.NOT_A_DIRECTORY,
+          TOOL_ERROR_TYPES.VALIDATION,
+          { path: relativePath },
+        );
       }
 
-      if (recursive) {
-        return await this._listRecursive(fullPath, relativePath);
-      } else {
-        return await this._listFlat(fullPath, relativePath);
-      }
+      const listing = recursive
+        ? await this._listRecursive(fullPath, relativePath)
+        : await this._listFlat(fullPath, relativePath);
+
+      const entries = listing.split("\n").filter((line) => line.trim());
+      return this._success(
+        `Listed ${relativePath} (${entries.length} entries)`,
+        {
+          path: relativePath,
+          recursive,
+          entries: entries.length,
+          listing,
+        },
+      );
     } catch (error) {
       if (error.code === "ENOENT") {
-        return `Error: Directory not found: ${relativePath}`;
+        return this._error(
+          `Directory not found: ${relativePath}`,
+          TOOL_ERROR_CODES.FILE_NOT_FOUND,
+          TOOL_ERROR_TYPES.FILESYSTEM,
+          { path: relativePath },
+        );
       }
-      throw error;
+      return this._error(
+        `Error listing directory: ${error.message}`,
+        TOOL_ERROR_CODES.READ_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
   }
 
@@ -441,7 +644,7 @@ export class FileToolExecutor {
       return entry.isDirectory() ? `${entry.name}/` : entry.name;
     });
 
-    return `Contents of ${relativePath}:\n${items.join("\n")}`;
+    return items.join("\n");
   }
 
   /**
@@ -496,17 +699,28 @@ export class FileToolExecutor {
     const resolvedPath = path.resolve(startPath);
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: path outside project root");
+      return this._error(
+        "Access denied: path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { directory },
+      );
     }
 
     const matches = [];
     await this._searchRecursive(startPath, pattern, matches, directory);
 
-    if (matches.length === 0) {
-      return `No files found matching pattern: ${pattern}`;
-    }
+    const message =
+      matches.length === 0
+        ? `No files found matching pattern: ${pattern}`
+        : `Found ${matches.length} files matching "${pattern}"`;
 
-    return `Files matching "${pattern}":\n${matches.join("\n")}`;
+    return this._success(message, {
+      pattern,
+      directory,
+      matches,
+      count: matches.length,
+    });
   }
 
   /**
@@ -566,7 +780,12 @@ export class FileToolExecutor {
     const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
 
     if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
-      return `Error: insert_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+      return this._error(
+        `insert_lines can only modify explicitly allowed paths. "${relativePath}" is not in the allowed list.`,
+        TOOL_ERROR_CODES.PERMISSION_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     const fullPath = path.join(this.projectRoot, relativePath);
@@ -574,7 +793,12 @@ export class FileToolExecutor {
     const resolvedPath = path.resolve(fullPath);
     const resolvedRoot = path.resolve(this.projectRoot);
     if (!resolvedPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: path outside project root");
+      return this._error(
+        "Access denied: path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: relativePath },
+      );
     }
 
     let currentContent;
@@ -582,9 +806,19 @@ export class FileToolExecutor {
       currentContent = await fs.readFile(fullPath, "utf-8");
     } catch (error) {
       if (error.code === "ENOENT") {
-        return `Error: File not found: ${relativePath}. Cannot insert into a file that does not exist. Use write_file to create it first.`;
+        return this._error(
+          `File not found: ${relativePath}. Cannot insert into a file that does not exist.`,
+          TOOL_ERROR_CODES.FILE_NOT_FOUND,
+          TOOL_ERROR_TYPES.FILESYSTEM,
+          { path: relativePath },
+        );
       }
-      return `Error reading file: ${error.message}`;
+      return this._error(
+        `Error reading file: ${error.message}`,
+        TOOL_ERROR_CODES.READ_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
 
     const lines = currentContent.split("\n");
@@ -617,7 +851,12 @@ export class FileToolExecutor {
 
       case "before":
         if (!lineNumber || lineNumber < 1 || lineNumber > totalLines) {
-          return `Error: line_number ${lineNumber} is out of range for 'before' position. File has ${totalLines} lines (1-based).`;
+          return this._error(
+            `line_number ${lineNumber} is out of range for 'before' position. File has ${totalLines} lines (1-based).`,
+            TOOL_ERROR_CODES.INVALID_LINE_RANGE,
+            TOOL_ERROR_TYPES.VALIDATION,
+            { lineNumber, totalLines, position },
+          );
         }
         newLines = [
           ...lines.slice(0, lineNumber - 1),
@@ -629,7 +868,12 @@ export class FileToolExecutor {
 
       case "after":
         if (!lineNumber || lineNumber < 1 || lineNumber > totalLines) {
-          return `Error: line_number ${lineNumber} is out of range for 'after' position. File has ${totalLines} lines (1-based).`;
+          return this._error(
+            `line_number ${lineNumber} is out of range for 'after' position. File has ${totalLines} lines (1-based).`,
+            TOOL_ERROR_CODES.INVALID_LINE_RANGE,
+            TOOL_ERROR_TYPES.VALIDATION,
+            { lineNumber, totalLines, position },
+          );
         }
         newLines = [
           ...lines.slice(0, lineNumber),
@@ -640,14 +884,33 @@ export class FileToolExecutor {
         break;
 
       default:
-        return `Error: Invalid position "${position}". Must be one of: start, end, before, after.`;
+        return this._error(
+          `Invalid position "${position}". Must be one of: start, end, before, after.`,
+          TOOL_ERROR_CODES.INVALID_POSITION,
+          TOOL_ERROR_TYPES.VALIDATION,
+          { position },
+        );
     }
 
     try {
       await fs.writeFile(fullPath, newLines.join("\n"), "utf-8");
-      return `Success: Inserted ${insertLines.length} lines at position '${position}'${lineNumber ? ` (line ${lineNumber})` : ""} in ${relativePath}. Total lines now: ${newLines.length}.`;
+      return this._success(
+        `Inserted ${insertLines.length} lines at position '${position}'${lineNumber ? ` (line ${lineNumber})` : ""} in ${relativePath}`,
+        {
+          path: relativePath,
+          position,
+          lineNumber: insertPosition,
+          linesInserted: insertLines.length,
+          totalLines: newLines.length,
+        },
+      );
     } catch (error) {
-      return `Error writing file: ${error.message}`;
+      return this._error(
+        `Error writing file: ${error.message}`,
+        TOOL_ERROR_CODES.WRITE_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: relativePath, originalError: error.message },
+      );
     }
   }
 
@@ -663,11 +926,21 @@ export class FileToolExecutor {
     const isNewPathAllowed = this.allowedWritePaths.has(normalizedNewPath);
 
     if (!isOldPathAllowed && !this.allowAnyWrite) {
-      return `Error: rename_file source path "${oldRelativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+      return this._error(
+        `rename_file source path "${oldRelativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`,
+        TOOL_ERROR_CODES.PERMISSION_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: oldRelativePath },
+      );
     }
 
     if (!isNewPathAllowed && !this.allowAnyWrite) {
-      return `Error: rename_file destination path "${newRelativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`;
+      return this._error(
+        `rename_file destination path "${newRelativePath}" is not in the allowed list. Ensure the task handler has granted access to this path.`,
+        TOOL_ERROR_CODES.PERMISSION_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: newRelativePath },
+      );
     }
 
     const oldFullPath = path.join(this.projectRoot, oldRelativePath);
@@ -679,10 +952,20 @@ export class FileToolExecutor {
     const resolvedRoot = path.resolve(this.projectRoot);
 
     if (!resolvedOldPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: old path outside project root");
+      return this._error(
+        "Access denied: old path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: oldRelativePath },
+      );
     }
     if (!resolvedNewPath.startsWith(resolvedRoot)) {
-      throw new Error("Access denied: new path outside project root");
+      return this._error(
+        "Access denied: new path outside project root",
+        TOOL_ERROR_CODES.ACCESS_DENIED,
+        TOOL_ERROR_TYPES.SECURITY,
+        { path: newRelativePath },
+      );
     }
 
     // Check if source exists
@@ -690,19 +973,39 @@ export class FileToolExecutor {
       await fs.access(oldFullPath);
     } catch (error) {
       if (error.code === "ENOENT") {
-        return `Error: Source file not found: ${oldRelativePath}`;
+        return this._error(
+          `Source file not found: ${oldRelativePath}`,
+          TOOL_ERROR_CODES.FILE_NOT_FOUND,
+          TOOL_ERROR_TYPES.FILESYSTEM,
+          { path: oldRelativePath },
+        );
       }
-      return `Error accessing source file: ${error.message}`;
+      return this._error(
+        `Error accessing source file: ${error.message}`,
+        TOOL_ERROR_CODES.READ_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: oldRelativePath, originalError: error.message },
+      );
     }
 
     // Check if destination already exists
     try {
       await fs.access(newFullPath);
-      return `Error: Destination file already exists: ${newRelativePath}. Cannot overwrite with rename.`;
+      return this._error(
+        `Destination file already exists: ${newRelativePath}. Cannot overwrite with rename.`,
+        TOOL_ERROR_CODES.FILE_EXISTS,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        { path: newRelativePath },
+      );
     } catch (error) {
       // File doesn't exist - this is what we want
       if (error.code !== "ENOENT") {
-        return `Error checking destination: ${error.message}`;
+        return this._error(
+          `Error checking destination: ${error.message}`,
+          TOOL_ERROR_CODES.READ_ERROR,
+          TOOL_ERROR_TYPES.FILESYSTEM,
+          { path: newRelativePath, originalError: error.message },
+        );
       }
     }
 
@@ -731,10 +1034,26 @@ export class FileToolExecutor {
         await fs.rename(oldFullPath, newFullPath);
       }
 
-      const method = usedGitMv ? "(git mv)" : "(fs rename)";
-      return `Success: Renamed "${oldRelativePath}" to "${newRelativePath}" ${method}`;
+      const method = usedGitMv ? "git mv" : "fs rename";
+      return this._success(
+        `Renamed "${oldRelativePath}" to "${newRelativePath}" (${method})`,
+        {
+          oldPath: oldRelativePath,
+          newPath: newRelativePath,
+          method,
+        },
+      );
     } catch (error) {
-      return `Error renaming file: ${error.message}`;
+      return this._error(
+        `Error renaming file: ${error.message}`,
+        TOOL_ERROR_CODES.WRITE_ERROR,
+        TOOL_ERROR_TYPES.FILESYSTEM,
+        {
+          oldPath: oldRelativePath,
+          newPath: newRelativePath,
+          originalError: error.message,
+        },
+      );
     }
   }
 }
