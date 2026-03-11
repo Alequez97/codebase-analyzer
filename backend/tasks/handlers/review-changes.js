@@ -106,5 +106,8 @@ export function reviewChangesHandler(task, taskLogger, agent) {
         log: `[${toolName}] ${result?.slice?.(0, 200) ?? ""}`,
       });
     },
+
+    // Results flow via delegated tasks — no single output file to post-process
+    postProcess: async () => {},
   };
 }
