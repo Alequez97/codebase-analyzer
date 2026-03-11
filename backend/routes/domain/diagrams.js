@@ -85,11 +85,11 @@ router.post("/:id/analyze/diagrams", async (req, res) => {
       });
     }
 
-    const executeNow = req.body.executeNow !== false;
-    const task = await taskFactory.createAnalyzeDiagramsTask(
-      { domainId: id, files, includeDocumentation },
-      { executeNow },
-    );
+    const task = await taskFactory.createAnalyzeDiagramsTask({
+      domainId: id,
+      files,
+      includeDocumentation,
+    });
 
     if (task?.success === false) {
       return res.status(500).json({

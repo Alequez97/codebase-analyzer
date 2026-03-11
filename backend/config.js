@@ -236,6 +236,7 @@ const dirs = [
   path.join(config.paths.targetAnalysis, "domains"),
   path.join(config.paths.targetAnalysis, "tasks"),
   path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.PENDING),
+  path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.RUNNING),
   path.join(config.paths.targetAnalysis, "tasks", TASK_FOLDERS.COMPLETED),
   path.join(config.paths.targetAnalysis, "logs"),
   path.join(config.paths.targetAnalysis, "temp"),

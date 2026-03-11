@@ -7,7 +7,7 @@ import { TASK_STATUS, TASK_FOLDERS } from "../constants/task-status.js";
 import * as logger from "../utils/logger.js";
 
 /**
- * Read a task from pending or completed
+ * Read a task from any folder (pending, running, completed, or failed)
  * @param {string} taskId - The task ID
  * @returns {Promise<Object|null>} Task object or null if not found
  */
@@ -17,6 +17,12 @@ export async function readTask(taskId) {
       config.paths.targetAnalysis,
       "tasks",
       TASK_FOLDERS.PENDING,
+      `${taskId}.json`,
+    ),
+    path.join(
+      config.paths.targetAnalysis,
+      "tasks",
+      TASK_FOLDERS.RUNNING,
       `${taskId}.json`,
     ),
     path.join(
@@ -50,10 +56,15 @@ export async function readTask(taskId) {
 }
 
 /**
- * Write task to pending directory
+ * Enqueue task by writing it to the pending directory.
+ * Also stamps the deterministic logFile path so no later in-flight update is needed.
  * @param {Object} task - The task object
  */
-export async function writeTask(task) {
+export async function enqueueTask(task) {
+  // Stamp logFile once at queue time — it's deterministic and carries through all folder moves.
+  if (!task.logFile) {
+    task.logFile = `logs/${task.id}.log`;
+  }
   const filePath = path.join(
     config.paths.targetAnalysis,
     "tasks",
@@ -64,16 +75,13 @@ export async function writeTask(task) {
 }
 
 /**
- * List all pending tasks
- * @returns {Promise<Object[]>} Array of pending task objects
+ * Read all JSON task files from a given folder, sorted oldest-first.
+ * @param {string} folder - TASK_FOLDERS constant
+ * @returns {Promise<Object[]>}
  */
-export async function listPending() {
+async function listTasksInFolder(folder) {
   try {
-    const tasksDir = path.join(
-      config.paths.targetAnalysis,
-      "tasks",
-      TASK_FOLDERS.PENDING,
-    );
+    const tasksDir = path.join(config.paths.targetAnalysis, "tasks", folder);
     const files = await fs.readdir(tasksDir);
 
     const tasks = await Promise.all(
@@ -85,7 +93,8 @@ export async function listPending() {
         }),
     );
 
-    return tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // Oldest first (FIFO for queue processing)
+    return tasks.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   } catch (error) {
     if (error.code === "ENOENT") {
       return [];
@@ -95,15 +104,62 @@ export async function listPending() {
 }
 
 /**
- * Move task from pending to completed
- * @param {string} taskId - The task ID
- * @returns {Promise<Object>} The completed task
+ * List all pending tasks (oldest-first, ready to be picked up by the queue processor)
+ * @returns {Promise<Object[]>}
  */
-export async function moveToCompleted(taskId) {
+export async function listPending() {
+  return listTasksInFolder(TASK_FOLDERS.PENDING);
+}
+
+/**
+ * List all currently running tasks
+ * @returns {Promise<Object[]>}
+ */
+export async function listRunning() {
+  return listTasksInFolder(TASK_FOLDERS.RUNNING);
+}
+
+/**
+ * Move task from pending to running (claimed by the queue processor)
+ * @param {string} taskId - The task ID
+ * @returns {Promise<Object>} The running task
+ */
+export async function moveToRunning(taskId) {
   const pendingPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
     TASK_FOLDERS.PENDING,
+    `${taskId}.json`,
+  );
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
+
+  const content = await fs.readFile(pendingPath, "utf-8");
+  const task = JSON.parse(content);
+  task.status = TASK_STATUS.RUNNING;
+  task.startedAt = new Date().toISOString();
+
+  await fs.mkdir(path.dirname(runningPath), { recursive: true });
+  await fs.writeFile(runningPath, JSON.stringify(task, null, 2), "utf-8");
+  await fs.unlink(pendingPath);
+
+  return task;
+}
+
+/**
+ * Move task from running to completed
+ * @param {string} taskId - The task ID
+ * @returns {Promise<Object>} The completed task
+ */
+export async function moveToCompleted(taskId) {
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
     `${taskId}.json`,
   );
   const completedPath = path.join(
@@ -113,24 +169,30 @@ export async function moveToCompleted(taskId) {
     `${taskId}.json`,
   );
 
-  const content = await fs.readFile(pendingPath, "utf-8");
+  const content = await fs.readFile(runningPath, "utf-8");
   const task = JSON.parse(content);
   task.status = TASK_STATUS.COMPLETED;
   task.completedAt = new Date().toISOString();
 
   await fs.writeFile(completedPath, JSON.stringify(task, null, 2), "utf-8");
-  await fs.unlink(pendingPath);
+  await fs.unlink(runningPath);
 
   return task;
 }
 
 /**
- * Move task from pending to failed
+ * Move task to failed. Checks running/ first, then pending/ (for pre-execution failures).
  * @param {string} taskId - The task ID
  * @param {string} error - Error message
  * @returns {Promise<Object>} The failed task
  */
 export async function moveToFailed(taskId, error) {
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
   const pendingPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
@@ -144,18 +206,54 @@ export async function moveToFailed(taskId, error) {
     `${taskId}.json`,
   );
 
-  // Ensure failed directory exists
-  const failedDir = path.dirname(failedPath);
-  await fs.mkdir(failedDir, { recursive: true });
+  await fs.mkdir(path.dirname(failedPath), { recursive: true });
 
-  const content = await fs.readFile(pendingPath, "utf-8");
+  // Try running/ first (normal case), fall back to pending/ (agent selection failure)
+  let sourcePath = runningPath;
+  try {
+    await fs.access(runningPath);
+  } catch {
+    sourcePath = pendingPath;
+  }
+
+  const content = await fs.readFile(sourcePath, "utf-8");
   const task = JSON.parse(content);
   task.status = TASK_STATUS.FAILED;
   task.failedAt = new Date().toISOString();
   task.error = error || "Task execution failed";
 
   await fs.writeFile(failedPath, JSON.stringify(task, null, 2), "utf-8");
-  await fs.unlink(pendingPath);
+  await fs.unlink(sourcePath);
+
+  return task;
+}
+
+/**
+ * Move a stuck running task back to pending (used on server restart)
+ * @param {string} taskId - The task ID
+ * @returns {Promise<Object>} The re-queued task
+ */
+export async function requeueRunningTask(taskId) {
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
+  const pendingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.PENDING,
+    `${taskId}.json`,
+  );
+
+  const content = await fs.readFile(runningPath, "utf-8");
+  const task = JSON.parse(content);
+  task.status = TASK_STATUS.PENDING;
+  delete task.startedAt;
+
+  await fs.writeFile(pendingPath, JSON.stringify(task, null, 2), "utf-8");
+  await fs.unlink(runningPath);
 
   return task;
 }
@@ -173,6 +271,12 @@ export async function deleteTask(taskId) {
     TASK_FOLDERS.PENDING,
     `${taskId}.json`,
   );
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
   const completedPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
@@ -188,7 +292,7 @@ export async function deleteTask(taskId) {
 
   // First read the task to get log file path
   let task = null;
-  const paths = [pendingPath, completedPath, failedPath];
+  const paths = [pendingPath, runningPath, completedPath, failedPath];
 
   for (const taskPath of paths) {
     try {
@@ -218,7 +322,7 @@ export async function deleteTask(taskId) {
     }
   }
 
-  // Delete task file (try all locations)
+  // Delete task file (try all locations, including running/)
   let deleted = false;
   for (const taskPath of paths) {
     try {

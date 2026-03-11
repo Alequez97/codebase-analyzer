@@ -65,11 +65,11 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
       });
     }
 
-    const executeNow = req.body.executeNow !== false;
-    const task = await taskFactory.createAnalyzeBugsSecurityTask(
-      { domainId: id, files, includeRequirements },
-      { executeNow },
-    );
+    const task = await taskFactory.createAnalyzeBugsSecurityTask({
+      domainId: id,
+      files,
+      includeRequirements,
+    });
 
     if (task?.success === false) {
       return res.status(500).json({
@@ -168,13 +168,11 @@ router.post(
         });
       }
 
-      const executeNow = req.body.executeNow !== false;
-
       // Create a task to implement the fix using the LLM API
-      const task = await taskFactory.createImplementFixTask(
-        { domainId: id, finding },
-        { executeNow },
-      );
+      const task = await taskFactory.createImplementFixTask({
+        domainId: id,
+        finding,
+      });
 
       if (task?.success === false) {
         return res.status(500).json({

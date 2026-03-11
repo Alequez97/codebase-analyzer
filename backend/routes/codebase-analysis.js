@@ -35,9 +35,7 @@ router.get("/", async (req, res) => {
  */
 router.post("/request", async (req, res) => {
   try {
-    const executeNow = req.body.executeNow !== false; // Default to true
-
-    const task = await createFullCodebaseAnalysisTask({ executeNow });
+    const task = await createFullCodebaseAnalysisTask();
 
     if (task?.success === false) {
       return res.status(500).json({

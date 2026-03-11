@@ -17,14 +17,14 @@ import * as logger from "../../utils/logger.js";
  * @param {string} params.userInstruction - User's requested operation
  * @param {string} [params.domainId] - Optional current domain context
  * @param {Array} [params.history] - Conversation history
- * @param {Object} options - Task options
- * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createCustomCodebaseTask(
-  { userInstruction, domainId = null, history = [], model = null },
-  { executeNow = false } = {},
-) {
+export async function createCustomCodebaseTask({
+  userInstruction,
+  domainId = null,
+  history = [],
+  model = null,
+}) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.CUSTOM_CODEBASE_TASK,
     model,
@@ -59,17 +59,7 @@ export async function createCustomCodebaseTask(
   });
 
   await ensureProgressDirectory(taskId);
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    const { executeTask } = await import("../../orchestrators/task.js");
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskFactory",
-      });
-    });
-  }
+  await tasksPersistence.enqueueTask(task);
 
   return task;
 }

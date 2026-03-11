@@ -99,13 +99,6 @@ export async function execute(task, signal) {
   const fsSync = await import("fs");
   const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
 
-  // Update task with log file path (relative to .code-analysis/)
-  task.logFile = `logs/${task.id}.log`;
-
-  // Import task persistence to save logFile reference
-  const { writeTask } = await import("../persistence/tasks.js");
-  await writeTask(task);
-
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";

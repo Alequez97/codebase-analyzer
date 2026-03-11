@@ -20,14 +20,13 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params
  * @param {string} params.domainId
  * @param {string} params.chatId  - Stable session UUID from the frontend
- * @param {Object} options
- * @param {boolean} options.executeNow
  * @returns {Promise<Object>} The created task
  */
-export async function createEditRequirementsTask(
-  { domainId, chatId, model = null },
-  { executeNow = false } = {},
-) {
+export async function createEditRequirementsTask({
+  domainId,
+  chatId,
+  model = null,
+}) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.EDIT_REQUIREMENTS, model);
   if (!agentConfigResult.success) {
     return agentConfigResult;
@@ -56,17 +55,7 @@ export async function createEditRequirementsTask(
   };
 
   await ensureProgressDirectory(taskId);
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    const { executeTask } = await import("../../orchestrators/task.js");
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskFactory",
-      });
-    });
-  }
+  await tasksPersistence.enqueueTask(task);
 
   return task;
 }

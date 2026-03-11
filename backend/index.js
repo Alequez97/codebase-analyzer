@@ -3,7 +3,8 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import config from "./config.js";
-import * as taskOrchestrator from "./orchestrators/task.js";
+import { recoverOrphanedTasks } from "./orchestrators/task.js";
+import { startQueueProcessor } from "./orchestrators/queue-processor.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 import * as logger from "./utils/logger.js";
 import { initSocketEmitter } from "./utils/socket-emitter.js";
@@ -127,6 +128,9 @@ httpServer.listen(config.port, async () => {
   logger.info("WebSocket ready for real-time updates");
   logger.info("");
 
-  // Restart any pending tasks from previous session
-  await taskOrchestrator.restartPendingTasks();
+  // Recover any tasks that were running when the server last crashed
+  await recoverOrphanedTasks();
+
+  // Start the queue processor — picks up recovered + any pre-existing pending tasks
+  startQueueProcessor();
 });

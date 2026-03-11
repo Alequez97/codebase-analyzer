@@ -38,10 +38,12 @@ router.post("/chat/codebase", async (req, res) => {
       });
     }
 
-    const task = await createCustomCodebaseTask(
-      { userInstruction: userInstruction.trim(), domainId, history, model },
-      { executeNow: true },
-    );
+    const task = await createCustomCodebaseTask({
+      userInstruction: userInstruction.trim(),
+      domainId,
+      history,
+      model,
+    });
 
     if (task?.success === false) {
       return res.status(500).json({
@@ -50,7 +52,7 @@ router.post("/chat/codebase", async (req, res) => {
       });
     }
 
-    logger.info(`Custom codebase task created and executing: ${task.id}`, {
+    logger.info(`Custom codebase task created and queued: ${task.id}`, {
       component: "Chat-API",
       taskId: task.id,
     });

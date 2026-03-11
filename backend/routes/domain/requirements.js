@@ -46,16 +46,12 @@ router.post("/:id/analyze/requirements", async (req, res) => {
       });
     }
 
-    const executeNow = req.body.executeNow !== false;
-    const task = await taskFactory.createAnalyzeRequirementsTask(
-      {
-        domainId: id,
-        files,
-        userContext: userContext || "",
-        includeDocumentation,
-      },
-      { executeNow },
-    );
+    const task = await taskFactory.createAnalyzeRequirementsTask({
+      domainId: id,
+      files,
+      userContext: userContext || "",
+      includeDocumentation,
+    });
 
     if (task?.success === false) {
       return res.status(500).json({

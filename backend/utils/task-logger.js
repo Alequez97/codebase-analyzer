@@ -59,10 +59,6 @@ export async function setupTaskLogger(task) {
   await fs.mkdir(logDir, { recursive: true });
   const logFile = path.join(logDir, `${task.id}.log`);
 
-  task.logFile = `logs/${task.id}.log`;
-  const { writeTask } = await import("../persistence/tasks.js");
-  await writeTask(task);
-
   const fsSync = await import("fs");
   const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
   const taskLogger = logger.createLogger([logStream]);

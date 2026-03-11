@@ -22,14 +22,14 @@ import * as logger from "../../utils/logger.js";
  * @param {string[]} params.files - Files in the domain
  * @param {string} params.userContext - Optional user-provided context
  * @param {boolean} params.includeDocumentation - Whether to include documentation in analysis
- * @param {Object} options - Task options
- * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeRequirementsTask(
-  { domainId, files, userContext = "", includeDocumentation = false },
-  { executeNow = false } = {},
-) {
+export async function createAnalyzeRequirementsTask({
+  domainId,
+  files,
+  userContext = "",
+  includeDocumentation = false,
+}) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.REQUIREMENTS);
   if (!agentConfigResult.success) {
     return agentConfigResult;
@@ -60,18 +60,7 @@ export async function createAnalyzeRequirementsTask(
   };
 
   await ensureProgressDirectory(taskId);
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    // Import dynamically to avoid circular dependency
-    const { executeTask } = await import("../../orchestrators/task.js");
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskFactory",
-      });
-    });
-  }
+  await tasksPersistence.enqueueTask(task);
 
   return task;
 }

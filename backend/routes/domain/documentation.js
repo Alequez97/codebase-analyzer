@@ -47,11 +47,10 @@ router.post("/:id/analyze/documentation", async (req, res) => {
       });
     }
 
-    const executeNow = req.body.executeNow !== false;
-    const task = await taskFactory.createAnalyzeDocumentationTask(
-      { domainId: id, files },
-      { executeNow },
-    );
+    const task = await taskFactory.createAnalyzeDocumentationTask({
+      domainId: id,
+      files,
+    });
 
     if (task?.success === false) {
       return res.status(500).json({

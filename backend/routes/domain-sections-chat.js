@@ -190,11 +190,8 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
 
     let task;
     {
-      // 1. Create the task (not yet running) so we know the taskId.
-      task = await createTask(
-        { domainId, chatId: requestChatId, model },
-        { executeNow: false },
-      );
+      // 1. Create the task — the queue processor will pick it up automatically.
+      task = await createTask({ domainId, chatId: requestChatId, model });
 
       if (task?.success === false) {
         return res.status(500).json({
@@ -209,18 +206,9 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
         content: message,
         chatId: requestChatId,
       });
-
-      // 3. Execute asynchronously — response arrives via socket events
-      const { executeTask } = await import("../orchestrators/task.js");
-      executeTask(task.id).catch((err) => {
-        logger.error(`Failed to execute edit task ${task.id}`, {
-          error: err,
-          component: "Chat-API",
-        });
-      });
     }
 
-    logger.info(`Edit task created and executing: ${task.id}`, {
+    logger.info(`Edit task created and queued: ${task.id}`, {
       component: "Chat-API",
       taskId: task.id,
       sectionType,

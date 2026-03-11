@@ -21,14 +21,13 @@ import * as logger from "../../utils/logger.js";
  * @param {string} params.domainId - The domain ID
  * @param {string[]} params.files - Files in the domain
  * @param {boolean} params.includeDocumentation - Whether to include documentation in analysis
- * @param {Object} options - Task options
- * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeDiagramsTask(
-  { domainId, files, includeDocumentation = true },
-  { executeNow = false } = {},
-) {
+export async function createAnalyzeDiagramsTask({
+  domainId,
+  files,
+  includeDocumentation = true,
+}) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.DIAGRAMS);
   if (!agentConfigResult.success) {
     return agentConfigResult;
@@ -58,18 +57,7 @@ export async function createAnalyzeDiagramsTask(
   };
 
   await ensureProgressDirectory(taskId);
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    // Import dynamically to avoid circular dependency
-    const { executeTask } = await import("../../orchestrators/task.js");
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskFactory",
-      });
-    });
-  }
+  await tasksPersistence.enqueueTask(task);
 
   return task;
 }

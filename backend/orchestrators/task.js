@@ -173,7 +173,8 @@ async function persistTaskRevision(task) {
 }
 
 /**
- * Execute a task using the configured agent
+ * Execute a task using the configured agent.
+ * Called by the queue processor after it picks a pending task.
  * @param {string} taskId - The task ID
  * @returns {Promise<Object>} Execution result
  */
@@ -189,13 +190,21 @@ export async function executeTask(taskId) {
     };
   }
 
-  if (task.status !== TASK_STATUS.PENDING) {
+  if (
+    task.status !== TASK_STATUS.PENDING &&
+    task.status !== TASK_STATUS.RUNNING
+  ) {
     return {
       success: false,
       code: TASK_ERROR_CODES.INVALID_STATUS,
       error: `Task ${taskId} is not pending (status: ${task.status})`,
       taskId,
     };
+  }
+
+  // Move to running only if still pending (queue processor may have already claimed it)
+  if (task.status === TASK_STATUS.PENDING) {
+    await tasksPersistence.moveToRunning(taskId);
   }
 
   const controller = new AbortController();
@@ -333,71 +342,48 @@ export async function deleteTask(taskId) {
 }
 
 /**
- * Restart all pending tasks (called on server startup)
- * @returns {Promise<Object>} Result with count of restarted tasks
+ * Recover orphaned tasks on server startup.
+ * Tasks stuck in running/ (from a previous crash) are moved back to pending/
+ * so the queue processor can pick them up.
+ * @returns {Promise<Object>} Result with count of recovered tasks
  */
-export async function restartPendingTasks() {
+export async function recoverOrphanedTasks() {
   try {
-    const pendingTasks = await getPendingTasks();
+    const runningTasks = await tasksPersistence.listRunning();
 
-    if (pendingTasks.length === 0) {
-      logger.info("No pending tasks to restart", {
+    if (runningTasks.length === 0) {
+      logger.info("No orphaned running tasks to recover", {
         component: "TaskOrchestrator",
       });
-      return { restarted: 0, tasks: [] };
+      return { recovered: 0, tasks: [] };
     }
 
-    logger.info(`Restarting ${pendingTasks.length} pending task(s)`, {
+    logger.info(`Recovering ${runningTasks.length} orphaned running task(s)`, {
       component: "TaskOrchestrator",
     });
 
-    const restartedTasks = [];
-
-    for (const task of pendingTasks) {
+    const recoveredIds = [];
+    for (const task of runningTasks) {
       try {
-        logger.info(`Restarting task: ${task.id} (type: ${task.type})`, {
+        await tasksPersistence.requeueRunningTask(task.id);
+        logger.info(`Recovered task: ${task.id} (type: ${task.type})`, {
           component: "TaskOrchestrator",
         });
-
-        // Execute task asynchronously
-        executeTask(task.id)
-          .then((executionResult) => {
-            if (!executionResult.success) {
-              logger.error(`Failed to restart task ${task.id}`, {
-                error: executionResult.error,
-                component: "TaskOrchestrator",
-              });
-            }
-          })
-          .catch((err) => {
-            logger.error(`Failed to restart task ${task.id}`, {
-              error: err,
-              component: "TaskOrchestrator",
-            });
-          });
-
-        restartedTasks.push(task.id);
+        recoveredIds.push(task.id);
       } catch (error) {
-        logger.error(`Error restarting task ${task.id}`, {
+        logger.error(`Failed to recover task ${task.id}`, {
           error,
           component: "TaskOrchestrator",
         });
       }
     }
 
-    logger.info(`Successfully restarted ${restartedTasks.length} task(s)`, {
-      component: "TaskOrchestrator",
-    });
-
-    return {
-      restarted: restartedTasks.length,
-      tasks: restartedTasks,
-    };
+    return { recovered: recoveredIds.length, tasks: recoveredIds };
   } catch (error) {
-    logger.error("Failed to restart pending tasks", {
+    logger.error("Failed to recover orphaned tasks", {
       error,
       component: "TaskOrchestrator",
     });
-    return { restarted: 0, tasks: [], error: error.message };
+    return { recovered: 0, tasks: [], error: error.message };
   }
 }

@@ -95,11 +95,11 @@ router.post(
         });
       }
 
-      const executeNow = req.body.executeNow !== false;
-      const task = await taskFactory.createAnalyzeRefactoringAndTestingTask(
-        { domainId: id, files, includeRequirements },
-        { executeNow },
-      );
+      const task = await taskFactory.createAnalyzeRefactoringAndTestingTask({
+        domainId: id,
+        files,
+        includeRequirements,
+      });
 
       if (task?.success === false) {
         return res.status(500).json({
@@ -161,8 +161,6 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
       });
     }
 
-    const executeNow = req.body.executeNow !== false;
-
     // Look up domain files so the model knows which source files to read
     const codebaseAnalysis =
       await codebaseAnalysisPersistence.readCodebaseAnalysis();
@@ -170,10 +168,11 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     const domainFiles = domain?.files || [];
 
     // Create a task to apply the test
-    const task = await taskFactory.createImplementTestTask(
-      { domainId: id, testRecommendation, domainFiles },
-      { executeNow },
-    );
+    const task = await taskFactory.createImplementTestTask({
+      domainId: id,
+      testRecommendation,
+      domainFiles,
+    });
 
     if (task?.success === false) {
       if (task.code === TASK_ERROR_CODES.INVALID_INPUT) {
@@ -269,12 +268,10 @@ router.post("/:id/refactorings/:refactoringId/apply", async (req, res) => {
       });
     }
 
-    const executeNow = req.body.executeNow !== false;
-
-    const task = await taskFactory.createApplyRefactoringTask(
-      { domainId: id, refactoring },
-      { executeNow },
-    );
+    const task = await taskFactory.createApplyRefactoringTask({
+      domainId: id,
+      refactoring,
+    });
 
     if (task?.success === false) {
       if (task.code === TASK_ERROR_CODES.INVALID_INPUT) {

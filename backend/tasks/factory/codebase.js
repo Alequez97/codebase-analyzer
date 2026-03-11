@@ -14,13 +14,9 @@ import * as logger from "../../utils/logger.js";
 
 /**
  * Create a full codebase analysis task
- * @param {Object} options - Task options
- * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createFullCodebaseAnalysisTask({
-  executeNow = false,
-} = {}) {
+export async function createFullCodebaseAnalysisTask() {
   const agentConfigResult = getAgentConfig(TASK_TYPES.CODEBASE_ANALYSIS);
   if (!agentConfigResult.success) {
     return agentConfigResult;
@@ -44,18 +40,7 @@ export async function createFullCodebaseAnalysisTask({
   };
 
   await ensureProgressDirectory(taskId);
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    // Import dynamically to avoid circular dependency
-    const { executeTask } = await import("../../orchestrators/task.js");
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskFactory",
-      });
-    });
-  }
+  await tasksPersistence.enqueueTask(task);
 
   return task;
 }

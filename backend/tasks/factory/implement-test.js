@@ -20,14 +20,13 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
  * @param {Object} params.testRecommendation - The test recommendation object
- * @param {Object} options - Task options
- * @param {boolean} options.executeNow - Whether to execute immediately
  * @returns {Promise<Object>} The created task
  */
-export async function createImplementTestTask(
-  { domainId, testRecommendation, domainFiles = [] },
-  { executeNow = false } = {},
-) {
+export async function createImplementTestTask({
+  domainId,
+  testRecommendation,
+  domainFiles = [],
+}) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.IMPLEMENT_TEST);
   if (!agentConfigResult.success) {
     return agentConfigResult;
@@ -104,18 +103,7 @@ export async function createImplementTestTask(
   };
 
   await ensureProgressDirectory(taskId);
-  await tasksPersistence.writeTask(task);
-
-  if (executeNow) {
-    // Import dynamically to avoid circular dependency
-    const { executeTask } = await import("../../orchestrators/task.js");
-    executeTask(task.id).catch((err) => {
-      logger.error(`Failed to execute task ${task.id}`, {
-        error: err,
-        component: "TaskFactory",
-      });
-    });
-  }
+  await tasksPersistence.enqueueTask(task);
 
   return task;
 }
