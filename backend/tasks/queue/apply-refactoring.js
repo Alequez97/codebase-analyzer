@@ -20,7 +20,7 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params.refactoring - The refactoring recommendation object
  * @returns {Promise<Object>} The created task
  */
-export async function createApplyRefactoringTask({ domainId, refactoring }) {
+export async function queueApplyRefactoringTask({ domainId, refactoring }) {
   if (!refactoring?.id) {
     return {
       success: false,
@@ -54,7 +54,7 @@ export async function createApplyRefactoringTask({ domainId, refactoring }) {
   const agentConfig = agentConfigResult.agentConfig;
 
   logger.debug("Creating apply-refactoring task", {
-    component: "TaskFactory",
+    component: "TaskQueue",
     refactoringId: refactoring.id,
     targetFile: refactoring.targetFile,
     newServiceFile: refactoring.extractionPlan.newServiceFile,

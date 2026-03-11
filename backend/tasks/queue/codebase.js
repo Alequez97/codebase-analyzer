@@ -2,10 +2,7 @@ import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
-import {
-  DOMAIN_SECTION_IDS,
-  getDomainSectionContentMarkdownOutputPath,
-} from "../../constants/task-output-paths.js";
+import { getCodebaseAnalysisOutputPath } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
@@ -16,37 +13,29 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a domain documentation analysis task
- * @param {Object} params - Task parameters
- * @param {string} params.domainId - The domain ID
- * @param {string[]} params.files - Files in the domain
+ * Create a full codebase analysis task
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeDocumentationTask({ domainId, files }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.DOCUMENTATION);
+export async function queueCodebaseAnalysisTask() {
+  const agentConfigResult = getAgentConfig(TASK_TYPES.CODEBASE_ANALYSIS);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
   const agentConfig = agentConfigResult.agentConfig;
 
-  const taskId = generateTaskId(TASK_TYPES.DOCUMENTATION);
+  const taskId = generateTaskId(TASK_TYPES.CODEBASE_ANALYSIS);
   const task = {
     id: taskId,
-    type: TASK_TYPES.DOCUMENTATION,
+    type: TASK_TYPES.CODEBASE_ANALYSIS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
-      domainId,
-      files,
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_DOCUMENTATION,
-    outputFile: getDomainSectionContentMarkdownOutputPath(
-      domainId,
-      DOMAIN_SECTION_IDS.DOCUMENTATION,
-    ),
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_FULL_CODEBASE,
+    outputFile: getCodebaseAnalysisOutputPath(),
     progressFile: getProgressFilePath(taskId),
   };
 

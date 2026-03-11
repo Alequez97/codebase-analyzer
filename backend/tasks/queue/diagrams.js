@@ -4,7 +4,7 @@ import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import {
   DOMAIN_SECTION_IDS,
-  getDomainSectionContentJsonOutputPath,
+  getDomainSectionMetadataOutputPath,
 } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
@@ -16,45 +16,42 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a domain requirements analysis task
+ * Create a domain diagrams analysis task
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
  * @param {string[]} params.files - Files in the domain
- * @param {string} params.userContext - Optional user-provided context
  * @param {boolean} params.includeDocumentation - Whether to include documentation in analysis
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeRequirementsTask({
+export async function queueAnalyzeDiagramsTask({
   domainId,
   files,
-  userContext = "",
-  includeDocumentation = false,
+  includeDocumentation = true,
 }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.REQUIREMENTS);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.DIAGRAMS);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
   const agentConfig = agentConfigResult.agentConfig;
 
-  const taskId = generateTaskId(TASK_TYPES.REQUIREMENTS);
+  const taskId = generateTaskId(TASK_TYPES.DIAGRAMS);
   const task = {
     id: taskId,
-    type: TASK_TYPES.REQUIREMENTS,
+    type: TASK_TYPES.DIAGRAMS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
       domainId,
       files,
-      userContext,
       includeDocumentation: !!includeDocumentation,
       targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_REQUIREMENTS,
-    outputFile: getDomainSectionContentJsonOutputPath(
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_DIAGRAMS,
+    outputFile: getDomainSectionMetadataOutputPath(
       domainId,
-      DOMAIN_SECTION_IDS.REQUIREMENTS,
+      DOMAIN_SECTION_IDS.DIAGRAMS,
     ),
     progressFile: getProgressFilePath(taskId),
   };

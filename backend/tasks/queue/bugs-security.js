@@ -1,9 +1,10 @@
+import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import {
   DOMAIN_SECTION_IDS,
-  getDomainSectionContentMarkdownOutputPath,
+  getDomainSectionContentJsonOutputPath,
 } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
@@ -15,51 +16,42 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a documentation edit task (AI chat)
- *
- * Conversation history and the user message are persisted separately in the
- * per-session chat history file (domain-{domainId}-documentation-{taskId}.json)
- * and are loaded at execution time.  Task params intentionally contain only
- * the minimal routing data needed to identify the task — NOT the chat content.
- *
+ * Create a domain bugs & security analysis task
  * @param {Object} params - Task parameters
  * @param {string} params.domainId - The domain ID
+ * @param {string[]} params.files - Files in the domain
+ * @param {boolean} params.includeRequirements - Whether to include requirements in analysis
  * @returns {Promise<Object>} The created task
  */
-export async function createEditDocumentationTask({
+export async function queueAnalyzeBugsSecurityTask({
   domainId,
-  chatId,
-  model = null,
+  files,
+  includeRequirements = false,
 }) {
-  const agentConfigResult = getAgentConfig(
-    TASK_TYPES.EDIT_DOCUMENTATION,
-    model,
-  );
+  const agentConfigResult = getAgentConfig(TASK_TYPES.BUGS_SECURITY);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
   const agentConfig = agentConfigResult.agentConfig;
 
-  const taskId = generateTaskId(TASK_TYPES.EDIT_DOCUMENTATION);
+  const taskId = generateTaskId(TASK_TYPES.BUGS_SECURITY);
   const task = {
     id: taskId,
-    type: TASK_TYPES.EDIT_DOCUMENTATION,
+    type: TASK_TYPES.BUGS_SECURITY,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
       domainId,
-      sectionType: "documentation",
-      // chatId is the stable session ID supplied by the frontend.
-      // It identifies the chat history file and the socket channel.
-      // It is NOT the taskId — a new task is created for every user message.
-      chatId,
+      files,
+      includeRequirements: !!includeRequirements,
+      targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DOCUMENTATION,
-    outputFile: getDomainSectionContentMarkdownOutputPath(
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_BUGS_SECURITY,
+    outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
-      DOMAIN_SECTION_IDS.DOCUMENTATION,
+      DOMAIN_SECTION_IDS.BUGS_SECURITY,
     ),
     progressFile: getProgressFilePath(taskId),
   };

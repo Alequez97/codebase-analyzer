@@ -1,3 +1,4 @@
+import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
@@ -15,44 +16,45 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a refactoring & testing edit task (AI chat)
- *
- * @param {Object} params
- * @param {string} params.domainId
- * @param {string} params.chatId  - Stable session UUID from the frontend
+ * Create a domain requirements analysis task
+ * @param {Object} params - Task parameters
+ * @param {string} params.domainId - The domain ID
+ * @param {string[]} params.files - Files in the domain
+ * @param {string} params.userContext - Optional user-provided context
+ * @param {boolean} params.includeDocumentation - Whether to include documentation in analysis
  * @returns {Promise<Object>} The created task
  */
-export async function createEditRefactoringAndTestingTask({
+export async function queueAnalyzeRequirementsTask({
   domainId,
-  chatId,
-  model = null,
+  files,
+  userContext = "",
+  includeDocumentation = false,
 }) {
-  const agentConfigResult = getAgentConfig(
-    TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
-    model,
-  );
+  const agentConfigResult = getAgentConfig(TASK_TYPES.REQUIREMENTS);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
   const agentConfig = agentConfigResult.agentConfig;
 
-  const taskId = generateTaskId(TASK_TYPES.EDIT_REFACTORING_AND_TESTING);
+  const taskId = generateTaskId(TASK_TYPES.REQUIREMENTS);
   const task = {
     id: taskId,
-    type: TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
+    type: TASK_TYPES.REQUIREMENTS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
       domainId,
-      sectionType: "refactoring-and-testing",
-      chatId,
+      files,
+      userContext,
+      includeDocumentation: !!includeDocumentation,
+      targetDirectory: config.target.directory,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_REFACTORING_AND_TESTING,
+    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_REQUIREMENTS,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
-      DOMAIN_SECTION_IDS.REFACTORING_AND_TESTING,
+      DOMAIN_SECTION_IDS.REQUIREMENTS,
     ),
     progressFile: getProgressFilePath(taskId),
   };

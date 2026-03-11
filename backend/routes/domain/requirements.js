@@ -1,6 +1,6 @@
 import express from "express";
 import * as domainRequirementsPersistence from "../../persistence/domain-requirements.js";
-import * as taskFactory from "../../tasks/factory/index.js";
+import * as taskQueue from "../../tasks/queue/index.js";
 import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
@@ -46,7 +46,7 @@ router.post("/:id/analyze/requirements", async (req, res) => {
       });
     }
 
-    const task = await taskFactory.createAnalyzeRequirementsTask({
+    const task = await taskQueue.queueAnalyzeRequirementsTask({
       domainId: id,
       files,
       userContext: userContext || "",

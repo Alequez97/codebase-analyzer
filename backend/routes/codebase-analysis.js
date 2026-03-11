@@ -1,7 +1,7 @@
 import express from "express";
 import * as codebaseAnalysisOrchestrator from "../orchestrators/codebase-analysis.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import { createFullCodebaseAnalysisTask } from "../tasks/factory/index.js";
+import { queueCodebaseAnalysisTask } from "../tasks/queue/index.js";
 import * as logger from "../utils/logger.js";
 
 const router = express.Router();
@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
  */
 router.post("/request", async (req, res) => {
   try {
-    const task = await createFullCodebaseAnalysisTask();
+    const task = await queueCodebaseAnalysisTask();
 
     if (task?.success === false) {
       return res.status(500).json({

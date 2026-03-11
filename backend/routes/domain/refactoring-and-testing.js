@@ -1,7 +1,7 @@
 import express from "express";
 import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
 import * as codebaseAnalysisPersistence from "../../persistence/codebase-analysis.js";
-import * as taskFactory from "../../tasks/factory/index.js";
+import * as taskQueue from "../../tasks/queue/index.js";
 import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
 import { TEST_TYPES } from "../../constants/test-types.js";
 import { SECTION_TYPES } from "../../constants/section-types.js";
@@ -95,7 +95,7 @@ router.post(
         });
       }
 
-      const task = await taskFactory.createAnalyzeRefactoringAndTestingTask({
+      const task = await taskQueue.queueAnalyzeRefactoringAndTestingTask({
         domainId: id,
         files,
         includeRequirements,
@@ -168,7 +168,7 @@ router.post("/:id/tests/:testId/apply", async (req, res) => {
     const domainFiles = domain?.files || [];
 
     // Create a task to apply the test
-    const task = await taskFactory.createImplementTestTask({
+    const task = await taskQueue.queueImplementTestTask({
       domainId: id,
       testRecommendation,
       domainFiles,
@@ -268,7 +268,7 @@ router.post("/:id/refactorings/:refactoringId/apply", async (req, res) => {
       });
     }
 
-    const task = await taskFactory.createApplyRefactoringTask({
+    const task = await taskQueue.queueApplyRefactoringTask({
       domainId: id,
       refactoring,
     });

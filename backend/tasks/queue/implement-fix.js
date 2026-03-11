@@ -18,7 +18,7 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params.finding - The finding object to fix
  * @returns {Promise<Object>} The created task
  */
-export async function createImplementFixTask({ domainId, finding }) {
+export async function queueImplementFixTask({ domainId, finding }) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.IMPLEMENT_FIX);
   if (!agentConfigResult.success) {
     return agentConfigResult;

@@ -1,6 +1,6 @@
 import express from "express";
 import * as domainBugsSecurityPersistence from "../../persistence/domain-bugs-security.js";
-import * as taskFactory from "../../tasks/factory/index.js";
+import * as taskQueue from "../../tasks/queue/index.js";
 import * as logger from "../../utils/logger.js";
 
 const router = express.Router();
@@ -65,7 +65,7 @@ router.post("/:id/analyze/bugs-security", async (req, res) => {
       });
     }
 
-    const task = await taskFactory.createAnalyzeBugsSecurityTask({
+    const task = await taskQueue.queueAnalyzeBugsSecurityTask({
       domainId: id,
       files,
       includeRequirements,
@@ -169,7 +169,7 @@ router.post(
       }
 
       // Create a task to implement the fix using the LLM API
-      const task = await taskFactory.createImplementFixTask({
+      const task = await taskQueue.queueImplementFixTask({
         domainId: id,
         finding,
       });

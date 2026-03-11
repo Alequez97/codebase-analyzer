@@ -1,13 +1,10 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
-import {
-  DOMAIN_SECTION_IDS,
-  getDomainSectionContentJsonOutputPath,
-} from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
+import { initChatHistory } from "../../utils/chat-history.js";
 import {
   getProgressFilePath,
   ensureProgressDirectory,
@@ -15,20 +12,21 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a bugs & security edit task (AI chat)
- *
- * @param {Object} params
- * @param {string} params.domainId
- * @param {string} params.chatId  - Stable session UUID from the frontend
+ * Create a custom codebase task (floating agent chat)
+ * @param {Object} params - Task parameters
+ * @param {string} params.userInstruction - User's requested operation
+ * @param {string} [params.domainId] - Optional current domain context
+ * @param {Array} [params.history] - Conversation history
  * @returns {Promise<Object>} The created task
  */
-export async function createEditBugsSecurityTask({
-  domainId,
-  chatId,
+export async function queueCustomCodebaseTask({
+  userInstruction,
+  domainId = null,
+  history = [],
   model = null,
 }) {
   const agentConfigResult = getAgentConfig(
-    TASK_TYPES.EDIT_BUGS_SECURITY,
+    TASK_TYPES.CUSTOM_CODEBASE_TASK,
     model,
   );
   if (!agentConfigResult.success) {
@@ -36,26 +34,29 @@ export async function createEditBugsSecurityTask({
   }
 
   const agentConfig = agentConfigResult.agentConfig;
+  const taskId = generateTaskId(TASK_TYPES.CUSTOM_CODEBASE_TASK);
 
-  const taskId = generateTaskId(TASK_TYPES.EDIT_BUGS_SECURITY);
   const task = {
     id: taskId,
-    type: TASK_TYPES.EDIT_BUGS_SECURITY,
+    type: TASK_TYPES.CUSTOM_CODEBASE_TASK,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
+      userInstruction,
       domainId,
-      sectionType: "bugs-security",
-      chatId,
+      history,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_BUGS_SECURITY,
-    outputFile: getDomainSectionContentJsonOutputPath(
-      domainId,
-      DOMAIN_SECTION_IDS.BUGS_SECURITY,
-    ),
+    instructionFile: INSTRUCTION_FILES_PATHS.CUSTOM_CODEBASE_TASK,
+    // Results streamed via socket - no single output file
     progressFile: getProgressFilePath(taskId),
   };
+
+  // Initialize supporting files
+  await initChatHistory(taskId, {
+    taskType: TASK_TYPES.CUSTOM_CODEBASE_TASK,
+    domainId,
+  });
 
   await ensureProgressDirectory(taskId);
   await tasksPersistence.enqueueTask(task);

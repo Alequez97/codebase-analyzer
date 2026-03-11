@@ -22,7 +22,7 @@ import * as logger from "../../utils/logger.js";
  * @param {Object} params.testRecommendation - The test recommendation object
  * @returns {Promise<Object>} The created task
  */
-export async function createImplementTestTask({
+export async function queueImplementTestTask({
   domainId,
   testRecommendation,
   domainFiles = [],
@@ -47,7 +47,7 @@ export async function createImplementTestTask({
     .replace(/\/tests\/unit\//, "/");
 
   logger.debug("Creating implement-test task", {
-    component: "TaskFactory",
+    component: "TaskQueue",
     testFile,
     sourceFile,
     testType: testRecommendation.testType,

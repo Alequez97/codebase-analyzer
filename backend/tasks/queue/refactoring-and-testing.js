@@ -23,7 +23,7 @@ import * as logger from "../../utils/logger.js";
  * @param {boolean} params.includeRequirements - Whether to include requirements in analysis
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeRefactoringAndTestingTask({
+export async function queueAnalyzeRefactoringAndTestingTask({
   domainId,
   files,
   includeRequirements = false,

@@ -1,10 +1,9 @@
-import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
 import {
   DOMAIN_SECTION_IDS,
-  getDomainSectionMetadataOutputPath,
+  getDomainSectionContentJsonOutputPath,
 } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
@@ -16,42 +15,44 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a domain diagrams analysis task
- * @param {Object} params - Task parameters
- * @param {string} params.domainId - The domain ID
- * @param {string[]} params.files - Files in the domain
- * @param {boolean} params.includeDocumentation - Whether to include documentation in analysis
+ * Create a bugs & security edit task (AI chat)
+ *
+ * @param {Object} params
+ * @param {string} params.domainId
+ * @param {string} params.chatId  - Stable session UUID from the frontend
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeDiagramsTask({
+export async function queueEditBugsSecurityTask({
   domainId,
-  files,
-  includeDocumentation = true,
+  chatId,
+  model = null,
 }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.DIAGRAMS);
+  const agentConfigResult = getAgentConfig(
+    TASK_TYPES.EDIT_BUGS_SECURITY,
+    model,
+  );
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
   const agentConfig = agentConfigResult.agentConfig;
 
-  const taskId = generateTaskId(TASK_TYPES.DIAGRAMS);
+  const taskId = generateTaskId(TASK_TYPES.EDIT_BUGS_SECURITY);
   const task = {
     id: taskId,
-    type: TASK_TYPES.DIAGRAMS,
+    type: TASK_TYPES.EDIT_BUGS_SECURITY,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
       domainId,
-      files,
-      includeDocumentation: !!includeDocumentation,
-      targetDirectory: config.target.directory,
+      sectionType: "bugs-security",
+      chatId,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_DIAGRAMS,
-    outputFile: getDomainSectionMetadataOutputPath(
+    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_BUGS_SECURITY,
+    outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
-      DOMAIN_SECTION_IDS.DIAGRAMS,
+      DOMAIN_SECTION_IDS.BUGS_SECURITY,
     ),
     progressFile: getProgressFilePath(taskId),
   };

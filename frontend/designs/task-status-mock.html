@@ -304,6 +304,79 @@
         color: #b91c1c;
       }
 
+      /* ── Review Changes Section ── */
+      .review-changes-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 12px 16px;
+        border-bottom: 2px solid #e0f2fe;
+      }
+      .review-heading {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin-bottom: 8px;
+      }
+      .branch-selector-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .branch-info {
+        font-size: 11px;
+        color: #0369a1;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .branch-label {
+        font-size: 11px;
+        color: #0369a1;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .branch-select {
+        flex: 1;
+        padding: 5px 8px;
+        border: 1px solid #bae6fd;
+        border-radius: 6px;
+        font-size: 11px;
+        background: white;
+        color: #0c4a6e;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .branch-select:hover {
+        border-color: #7dd3fc;
+      }
+      .branch-select:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+      }
+      .btn-review {
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        border: none;
+        background: #0ea5e9;
+        color: white;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .btn-review:hover {
+        background: #0284c7;
+        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
+      }
+      .btn-review:active {
+        transform: translateY(1px);
+      }
+
       .task-row {
         display: flex;
         align-items: flex-start;
@@ -524,6 +597,25 @@
               <button class="btn-clear">Clear failed</button>
             </div>
 
+            <!-- REVIEW CHANGES SECTION -->
+            <div class="review-changes-section">
+              <div class="review-heading">🌿 Review Changes</div>
+              <div class="branch-selector-row">
+                <span class="branch-info">
+                  Current: <strong>feature/new-scoring</strong>
+                </span>
+              </div>
+              <div class="branch-selector-row" style="margin-top: 6px">
+                <span class="branch-label">Compare against:</span>
+                <select class="branch-select">
+                  <option selected>main</option>
+                  <option>develop</option>
+                  <option>staging</option>
+                </select>
+                <button class="btn-review">Analyze</button>
+              </div>
+            </div>
+
             <!-- RUNNING -->
             <div class="popover-section">
               <div class="section-heading running">
@@ -720,6 +812,25 @@
             <button class="btn-clear">Clear failed</button>
           </div>
 
+          <!-- REVIEW CHANGES SECTION -->
+          <div class="review-changes-section">
+            <div class="review-heading">🌿 Review Changes</div>
+            <div class="branch-selector-row">
+              <span class="branch-info">
+                Current: <strong>feature/new-scoring</strong>
+              </span>
+            </div>
+            <div class="branch-selector-row" style="margin-top: 6px">
+              <span class="branch-label">Compare against:</span>
+              <select class="branch-select">
+                <option selected>main</option>
+                <option>develop</option>
+                <option>staging</option>
+              </select>
+              <button class="btn-review">Analyze</button>
+            </div>
+          </div>
+
           <div class="popover-section">
             <div class="section-heading running">
               <span
@@ -794,6 +905,173 @@
                 </div>
               </div>
               <button class="task-action dismiss">Dismiss</button>
+            </div>
+          </div>
+
+          <div class="popover-footer">
+            <button class="btn-link">View full task logs →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+       META-TASK EXAMPLE: Review Changes Running
+  ════════════════════════════════════════════ -->
+      <div class="demo-section-title" style="margin-top: 60px">
+        Meta-Task Flow: Review Changes Creating Child Tasks
+      </div>
+      <div style="position: relative; width: 380px">
+        <div
+          class="popover"
+          style="
+            display: block;
+            position: static;
+            margin-top: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          "
+        >
+          <div class="popover-header">
+            <span class="popover-title">Tasks</span>
+            <button class="btn-clear">Clear failed</button>
+          </div>
+
+          <!-- Review section - disabled while task runs -->
+          <div class="review-changes-section" style="opacity: 0.5">
+            <div class="review-heading">🌿 Review Changes</div>
+            <div class="branch-selector-row">
+              <span class="branch-info">
+                Current: <strong>feature/new-scoring</strong>
+              </span>
+            </div>
+            <div class="branch-selector-row" style="margin-top: 6px">
+              <span class="branch-label">Compare against:</span>
+              <select class="branch-select" disabled>
+                <option selected>main</option>
+              </select>
+              <button
+                class="btn-review"
+                disabled
+                style="opacity: 0.5; cursor: not-allowed"
+              >
+                Analyzing...
+              </button>
+            </div>
+          </div>
+
+          <!-- META-TASK RUNNING -->
+          <div class="popover-section">
+            <div class="section-heading running">
+              <span
+                class="spinner"
+                style="border-color: #1d4ed8; border-top-color: transparent"
+              ></span>
+              Running
+              <span class="count">1</span>
+            </div>
+
+            <div class="task-row">
+              <div class="task-icon running"><span class="spinner"></span></div>
+              <div class="task-body">
+                <div class="task-name">
+                  🔍 Review Changes: main → feature/new-scoring
+                </div>
+                <div class="task-section">Meta-Task</div>
+                <div class="task-message">
+                  Analyzing git diff (12 files changed)...
+                </div>
+                <div class="progress-track">
+                  <div class="progress-bar"></div>
+                </div>
+              </div>
+              <button class="task-action cancel">Cancel</button>
+            </div>
+          </div>
+
+          <!-- CHILD TASKS BEING CREATED -->
+          <div class="popover-section">
+            <div class="section-heading">
+              ↑ Queued by Agent
+              <span class="count">5</span>
+            </div>
+
+            <div class="task-row" style="background: #f0fdf4">
+              <div
+                class="task-icon pending"
+                style="background: #dcfce7; color: #15803d"
+              >
+                ↑
+              </div>
+              <div class="task-body">
+                <div class="task-name">Match Scoring Engine</div>
+                <div class="task-section">Documentation</div>
+                <div class="task-message" style="color: #15803d">
+                  Created by agent: implementation files changed
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row" style="background: #f0fdf4">
+              <div
+                class="task-icon pending"
+                style="background: #dcfce7; color: #15803d"
+              >
+                ↑
+              </div>
+              <div class="task-body">
+                <div class="task-name">Match Scoring Engine</div>
+                <div class="task-section">Requirements</div>
+                <div class="task-message" style="color: #15803d">
+                  Created by agent: business logic changed
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row" style="background: #f0fdf4">
+              <div
+                class="task-icon pending"
+                style="background: #dcfce7; color: #15803d"
+              >
+                ↑
+              </div>
+              <div class="task-body">
+                <div class="task-name">Match Scoring Engine</div>
+                <div class="task-section">Testing</div>
+                <div class="task-message" style="color: #15803d">
+                  Created by agent: new code paths need coverage
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row" style="background: #f0fdf4">
+              <div
+                class="task-icon pending"
+                style="background: #dcfce7; color: #15803d"
+              >
+                ↑
+              </div>
+              <div class="task-body">
+                <div class="task-name">Authentication System</div>
+                <div class="task-section">Documentation</div>
+                <div class="task-message" style="color: #15803d">
+                  Created by agent: auth middleware updated
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row" style="background: #f0fdf4">
+              <div
+                class="task-icon pending"
+                style="background: #dcfce7; color: #15803d"
+              >
+                ↑
+              </div>
+              <div class="task-body">
+                <div class="task-name">Authentication System</div>
+                <div class="task-section">Bugs &amp; Security</div>
+                <div class="task-message" style="color: #15803d">
+                  Created by agent: security-sensitive files changed
+                </div>
+              </div>
             </div>
           </div>
 

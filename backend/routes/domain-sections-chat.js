@@ -2,12 +2,12 @@ import express from "express";
 import * as logger from "../utils/logger.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
 import {
-  createEditDocumentationTask,
-  createEditDiagramsTask,
-  createEditRequirementsTask,
-  createEditBugsSecurityTask,
-  createEditRefactoringAndTestingTask,
-} from "../tasks/factory/index.js";
+  queueEditDocumentationTask,
+  queueEditDiagramsTask,
+  queueEditRequirementsTask,
+  queueEditBugsSecurityTask,
+  queueEditRefactoringAndTestingTask,
+} from "../tasks/queue/index.js";
 import {
   loadDomainSectionChatHistory,
   appendDomainSectionChatMessage,
@@ -168,20 +168,20 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
       });
     }
 
-    // Map section type to its factory function
+    // Map section type to its queue function
     const SECTION_TASK_FACTORIES = {
-      [SECTION_TYPES.DOCUMENTATION]: createEditDocumentationTask,
-      [SECTION_TYPES.DIAGRAMS]: createEditDiagramsTask,
-      [SECTION_TYPES.REQUIREMENTS]: createEditRequirementsTask,
-      [SECTION_TYPES.BUGS_SECURITY]: createEditBugsSecurityTask,
+      [SECTION_TYPES.DOCUMENTATION]: queueEditDocumentationTask,
+      [SECTION_TYPES.DIAGRAMS]: queueEditDiagramsTask,
+      [SECTION_TYPES.REQUIREMENTS]: queueEditRequirementsTask,
+      [SECTION_TYPES.BUGS_SECURITY]: queueEditBugsSecurityTask,
       [SECTION_TYPES.REFACTORING_AND_TESTING]:
-        createEditRefactoringAndTestingTask,
+        queueEditRefactoringAndTestingTask,
     };
 
-    // Create and execute edit task based on section type
-    const createTask = SECTION_TASK_FACTORIES[sectionType];
+    // Queue edit task based on section type
+    const queueTask = SECTION_TASK_FACTORIES[sectionType];
     // Validate section type (already checked above, but be safe)
-    if (!createTask) {
+    if (!queueTask) {
       return res.status(501).json({
         error: "Not implemented",
         message: `Editing ${sectionType} is not yet supported`,
@@ -190,12 +190,12 @@ router.post("/chat/domain/:domainId/:sectionType", async (req, res) => {
 
     let task;
     {
-      // 1. Create the task — the queue processor will pick it up automatically.
-      task = await createTask({ domainId, chatId: requestChatId, model });
+      // 1. Queue the task — the queue processor will pick it up automatically.
+      task = await queueTask({ domainId, chatId: requestChatId, model });
 
       if (task?.success === false) {
         return res.status(500).json({
-          error: task.error || "Failed to create edit task",
+          error: task.error || "Failed to queue edit task",
           code: task.code,
         });
       }

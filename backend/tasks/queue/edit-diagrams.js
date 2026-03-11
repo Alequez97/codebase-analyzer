@@ -1,4 +1,3 @@
-import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import { getAgentConfig } from "../../agents/index.js";
 import { INSTRUCTION_FILES_PATHS } from "../../constants/instruction-files.js";
@@ -16,42 +15,41 @@ import {
 import * as logger from "../../utils/logger.js";
 
 /**
- * Create a domain bugs & security analysis task
- * @param {Object} params - Task parameters
- * @param {string} params.domainId - The domain ID
- * @param {string[]} params.files - Files in the domain
- * @param {boolean} params.includeRequirements - Whether to include requirements in analysis
+ * Create a diagrams edit task (AI chat)
+ *
+ * @param {Object} params
+ * @param {string} params.domainId
+ * @param {string} params.chatId  - Stable session UUID from the frontend
  * @returns {Promise<Object>} The created task
  */
-export async function createAnalyzeBugsSecurityTask({
+export async function queueEditDiagramsTask({
   domainId,
-  files,
-  includeRequirements = false,
+  chatId,
+  model = null,
 }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.BUGS_SECURITY);
+  const agentConfigResult = getAgentConfig(TASK_TYPES.EDIT_DIAGRAMS, model);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
   const agentConfig = agentConfigResult.agentConfig;
 
-  const taskId = generateTaskId(TASK_TYPES.BUGS_SECURITY);
+  const taskId = generateTaskId(TASK_TYPES.EDIT_DIAGRAMS);
   const task = {
     id: taskId,
-    type: TASK_TYPES.BUGS_SECURITY,
+    type: TASK_TYPES.EDIT_DIAGRAMS,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
       domainId,
-      files,
-      includeRequirements: !!includeRequirements,
-      targetDirectory: config.target.directory,
+      sectionType: "diagrams",
+      chatId,
     },
     agentConfig,
-    instructionFile: INSTRUCTION_FILES_PATHS.ANALYZE_DOMAIN_BUGS_SECURITY,
+    instructionFile: INSTRUCTION_FILES_PATHS.EDIT_DIAGRAMS,
     outputFile: getDomainSectionContentJsonOutputPath(
       domainId,
-      DOMAIN_SECTION_IDS.BUGS_SECURITY,
+      DOMAIN_SECTION_IDS.DIAGRAMS,
     ),
     progressFile: getProgressFilePath(taskId),
   };

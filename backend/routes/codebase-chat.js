@@ -1,6 +1,6 @@
 import express from "express";
 import * as logger from "../utils/logger.js";
-import { createCustomCodebaseTask } from "../tasks/factory/index.js";
+import { queueCustomCodebaseTask } from "../tasks/queue/index.js";
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.post("/chat/codebase", async (req, res) => {
       });
     }
 
-    const task = await createCustomCodebaseTask({
+    const task = await queueCustomCodebaseTask({
       userInstruction: userInstruction.trim(),
       domainId,
       history,
