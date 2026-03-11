@@ -109,6 +109,41 @@ router.post("/open-in-editor", async (req, res) => {
 });
 
 /**
+ * Get the list of local git branches in the target project
+ * GET /project/branches
+ */
+router.get("/branches", async (req, res) => {
+  try {
+    const [listResult, currentResult] = await Promise.allSettled([
+      execAsync("git branch --format=%(refname:short)", {
+        cwd: config.target.directory,
+      }),
+      execAsync("git rev-parse --abbrev-ref HEAD", {
+        cwd: config.target.directory,
+      }),
+    ]);
+
+    const branches =
+      listResult.status === "fulfilled"
+        ? listResult.value.stdout
+            .split("\n")
+            .map((b) => b.trim())
+            .filter(Boolean)
+        : [];
+
+    const currentBranch =
+      currentResult.status === "fulfilled"
+        ? currentResult.value.stdout.trim()
+        : null;
+
+    res.json({ branches, currentBranch });
+  } catch (error) {
+    logger.warn("Failed to list git branches", { error, component: "API" });
+    res.json({ branches: [], currentBranch: null });
+  }
+});
+
+/**
  * Get a code snippet from a project file by line range
  * GET /project/file-snippet?path=...&from=...&to=...
  */

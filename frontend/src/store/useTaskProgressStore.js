@@ -28,6 +28,27 @@ export const useTaskProgressStore = create((set, get) => ({
    */
   loadingTasks: true,
 
+  // ── Pending ───────────────────────────────────────────────────────────────
+  // Inserts a new task entry in 'pending' status (from TASK_QUEUED socket event).
+  // Does NOT overwrite an entry that is already running (e.g. race with TASK_PROGRESS).
+  setPending: (taskId, { domainId, type, delegatedByTaskId }) => {
+    set((state) => {
+      const existing = state.progressByTaskId.get(taskId);
+      if (existing?.status === "running") return state; // already running, skip
+      const next = new Map(state.progressByTaskId);
+      next.set(taskId, {
+        domainId,
+        type,
+        status: "pending",
+        delegatedByTaskId: delegatedByTaskId ?? null,
+        stage: null,
+        message: null,
+        error: null,
+      });
+      return { progressByTaskId: next };
+    });
+  },
+
   // ── Running ──────────────────────────────────────────────────────────────
   // Upserts entry and transitions it to 'running' (also covers pending → running)
   setProgress: (taskId, { domainId, type, stage, message }) => {

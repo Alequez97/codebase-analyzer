@@ -4,8 +4,8 @@ import {
   Box,
   Button,
   HStack,
+  NativeSelect,
   Popover,
-  Separator,
   Spinner,
   Text,
   VStack,
@@ -13,7 +13,10 @@ import {
 import { ChevronDown, X, Check } from "lucide-react";
 import { useCodebaseStore } from "../../store/useCodebaseStore";
 import { useTaskProgressStore } from "../../store/useTaskProgressStore";
+import { useGitBranchesStore } from "../../store/useGitBranchesStore";
+import { useLogsStore } from "../../store/useLogsStore";
 import api from "../../api";
+import { reviewChanges } from "../../api/review-changes";
 import { TASK_TYPES } from "../../constants/task-types";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -34,11 +37,21 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.EDIT_BUGS_SECURITY]: "Edit Bugs & Security",
   [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
   [TASK_TYPES.CUSTOM_CODEBASE_TASK]: "Custom Task",
+  [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
 };
 
 function taskLabel(type) {
   return TASK_TYPE_LABELS[type] ?? type;
 }
+
+const TASK_TYPE_LABELS_SHORT = {
+  [TASK_TYPES.EDIT_DOCUMENTATION]: "Edit Docs",
+  [TASK_TYPES.EDIT_DIAGRAMS]: "Edit Diagrams",
+  [TASK_TYPES.EDIT_REQUIREMENTS]: "Edit Requirements",
+  [TASK_TYPES.EDIT_BUGS_SECURITY]: "Edit Bugs & Security",
+  [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
+  [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
+};
 
 function useDomainName(domainId) {
   const analysis = useCodebaseStore((s) => s.analysis);
@@ -48,31 +61,105 @@ function useDomainName(domainId) {
   return domain?.name ?? domainId;
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Section heading ───────────────────────────────────────────────────────────
 
-function SectionHeading({ children }) {
+function SectionHeading({ hasBorderTop = false, children }) {
+  return (
+    <HStack
+      px={4}
+      pt="10px"
+      pb="6px"
+      gap={1.5}
+      borderTop={hasBorderTop ? "1px solid" : undefined}
+      borderColor="gray.100"
+    >
+      {children}
+    </HStack>
+  );
+}
+
+function SectionLabel({ color = "gray.400", children }) {
   return (
     <Text
-      px={3}
-      pt={2}
-      pb={1}
-      fontSize="10px"
+      fontSize="11px"
       fontWeight="700"
       textTransform="uppercase"
       letterSpacing="wider"
-      color="gray.500"
+      color={color}
+      lineHeight={1}
     >
       {children}
     </Text>
   );
 }
 
-function RunningTaskRow({ taskId, entry }) {
+function SectionCount({ bg = "gray.100", color = "gray.500", children }) {
+  return (
+    <Box
+      px="6px"
+      py="1px"
+      borderRadius="full"
+      bg={bg}
+      fontSize="10px"
+      fontWeight="700"
+      color={color}
+      lineHeight="16px"
+    >
+      {children}
+    </Box>
+  );
+}
+
+// ── Shared task icon ──────────────────────────────────────────────────────────
+
+function TaskIcon({ bg, children }) {
+  return (
+    <Box
+      w="28px"
+      h="28px"
+      borderRadius="md"
+      bg={bg}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexShrink={0}
+      mt="1px"
+    >
+      {children}
+    </Box>
+  );
+}
+
+// When a task has a domain: domain name is the primary title and task type is the
+// subtitle. When there's no domain (e.g. review-changes), the task label is the
+// primary title and there is no subtitle.
+function useTaskTitles(entry) {
   const domainName = useDomainName(entry.domainId);
+  return {
+    primary: domainName ?? taskLabel(entry.type),
+    subtitle: domainName ? taskLabel(entry.type) : null,
+  };
+}
+
+function DelegatedByBadge({ delegatedByTaskId, progressByTaskId }) {
+  if (!delegatedByTaskId) return null;
+  const origin = progressByTaskId.get(delegatedByTaskId);
+  const originLabel = origin
+    ? (TASK_TYPE_LABELS_SHORT[origin.type] ?? origin.type)
+    : "Review Changes";
+  return (
+    <Text fontSize="10px" color="blue.400" mt="2px">
+      ↳ delegated by {originLabel}
+    </Text>
+  );
+}
+
+function RunningTaskRow({ taskId, entry }) {
+  const { primary, subtitle } = useTaskTitles(entry);
+  const { progressByTaskId } = useTaskProgressStore();
   const { clearProgress } = useTaskProgressStore();
 
   const handleCancel = async () => {
-    // Optimistically remove from map; TASK_FAILED socket will also fire
     clearProgress(taskId);
     try {
       await api.cancelTask(taskId);
@@ -82,42 +169,37 @@ function RunningTaskRow({ taskId, entry }) {
   };
 
   return (
-    <HStack px={3} py={2} gap={2} align="flex-start" _hover={{ bg: "gray.50" }}>
-      <Box
-        w="26px"
-        h="26px"
-        borderRadius="md"
-        bg="blue.50"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        flexShrink={0}
-        mt="1px"
-      >
+    <HStack
+      px={4}
+      py="8px"
+      gap={2.5}
+      align="flex-start"
+      _hover={{ bg: "gray.50" }}
+    >
+      <TaskIcon bg="blue.50">
         <Spinner size="xs" color="blue.500" />
-      </Box>
+      </TaskIcon>
 
       <Box flex={1} minW={0}>
-        {domainName && (
-          <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
-            {domainName}
+        <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
+          {primary}
+        </Text>
+        {subtitle && (
+          <Text fontSize="11px" color="gray.500" mt="1px">
+            {subtitle}
           </Text>
         )}
-        <Text fontSize="11px" color="gray.500">
-          {taskLabel(entry.type)}
-        </Text>
         {entry.message && (
           <Text
             fontSize="11px"
             color="gray.600"
             fontStyle="italic"
             truncate
-            mt="2px"
+            mt="3px"
           >
             {entry.message}
           </Text>
         )}
-        {/* animated progress bar */}
         <Box
           mt="5px"
           h="2px"
@@ -150,11 +232,10 @@ function RunningTaskRow({ taskId, entry }) {
 }
 
 function PendingTaskRow({ taskId, entry }) {
-  const domainName = useDomainName(entry.domainId);
-  const { clearProgress } = useTaskProgressStore();
+  const { primary, subtitle } = useTaskTitles(entry);
+  const { clearProgress, progressByTaskId } = useTaskProgressStore();
 
   const handleDelete = async () => {
-    // Optimistically remove; backend will also clean up
     clearProgress(taskId);
     try {
       await api.deleteTask(taskId);
@@ -164,35 +245,35 @@ function PendingTaskRow({ taskId, entry }) {
   };
 
   return (
-    <HStack px={3} py={2} gap={2} align="flex-start" _hover={{ bg: "gray.50" }}>
-      <Box
-        w="26px"
-        h="26px"
-        borderRadius="md"
-        bg="gray.100"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        flexShrink={0}
-        mt="1px"
-      >
-        <Text fontSize="11px" color="gray.500" fontWeight="bold">
+    <HStack
+      px={4}
+      py="8px"
+      gap={2.5}
+      align="flex-start"
+      _hover={{ bg: "gray.50" }}
+    >
+      <TaskIcon bg="gray.100">
+        <Text fontSize="12px" color="gray.500" fontWeight="bold" lineHeight={1}>
           ↑
         </Text>
-      </Box>
+      </TaskIcon>
 
       <Box flex={1} minW={0}>
-        {domainName && (
-          <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
-            {domainName}
+        <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
+          {primary}
+        </Text>
+        {subtitle && (
+          <Text fontSize="11px" color="gray.500" mt="1px">
+            {subtitle}
           </Text>
         )}
-        <Text fontSize="11px" color="gray.500">
-          {taskLabel(entry.type)}
-        </Text>
-        <Text fontSize="11px" color="gray.400" mt="2px">
+        <Text fontSize="11px" color="gray.400" mt="3px">
           Queued — waiting for a free slot
         </Text>
+        <DelegatedByBadge
+          delegatedByTaskId={entry.delegatedByTaskId}
+          progressByTaskId={progressByTaskId}
+        />
       </Box>
 
       <Button
@@ -210,36 +291,32 @@ function PendingTaskRow({ taskId, entry }) {
 }
 
 function FailedTaskRow({ taskId, entry }) {
-  const domainName = useDomainName(entry.domainId);
+  const { primary, subtitle } = useTaskTitles(entry);
   const { dismissFailed } = useTaskProgressStore();
 
   return (
-    <HStack px={3} py={2} gap={2} align="flex-start" _hover={{ bg: "gray.50" }}>
-      <Box
-        w="26px"
-        h="26px"
-        borderRadius="md"
-        bg="red.50"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        flexShrink={0}
-        mt="1px"
-      >
+    <HStack
+      px={4}
+      py="8px"
+      gap={2.5}
+      align="flex-start"
+      _hover={{ bg: "gray.50" }}
+    >
+      <TaskIcon bg="red.50">
         <X size={12} color="var(--chakra-colors-red-500)" />
-      </Box>
+      </TaskIcon>
 
       <Box flex={1} minW={0}>
-        {domainName && (
-          <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
-            {domainName}
+        <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
+          {primary}
+        </Text>
+        {subtitle && (
+          <Text fontSize="11px" color="gray.500" mt="1px">
+            {subtitle}
           </Text>
         )}
-        <Text fontSize="11px" color="gray.500">
-          {taskLabel(entry.type)}
-        </Text>
         {entry.error && (
-          <Text fontSize="11px" color="red.500" mt="2px" truncate>
+          <Text fontSize="11px" color="red.500" mt="3px" truncate>
             {entry.error}
           </Text>
         )}
@@ -260,35 +337,31 @@ function FailedTaskRow({ taskId, entry }) {
 }
 
 function CompletedTaskRow({ taskId, entry }) {
-  const domainName = useDomainName(entry.domainId);
+  const { primary, subtitle } = useTaskTitles(entry);
   const { clearProgress } = useTaskProgressStore();
 
   return (
-    <HStack px={3} py={2} gap={2} align="flex-start" _hover={{ bg: "gray.50" }}>
-      <Box
-        w="26px"
-        h="26px"
-        borderRadius="md"
-        bg="green.50"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        flexShrink={0}
-        mt="1px"
-      >
+    <HStack
+      px={4}
+      py="8px"
+      gap={2.5}
+      align="flex-start"
+      _hover={{ bg: "gray.50" }}
+    >
+      <TaskIcon bg="green.50">
         <Check size={12} color="var(--chakra-colors-green-600)" />
-      </Box>
+      </TaskIcon>
 
       <Box flex={1} minW={0}>
-        {domainName && (
-          <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
-            {domainName}
+        <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
+          {primary}
+        </Text>
+        {subtitle && (
+          <Text fontSize="11px" color="gray.500" mt="1px">
+            {subtitle}
           </Text>
         )}
-        <Text fontSize="11px" color="gray.500">
-          {taskLabel(entry.type)}
-        </Text>
-        <Text fontSize="11px" color="green.600" mt="2px">
+        <Text fontSize="11px" color="green.600" mt="3px">
           Completed
         </Text>
       </Box>
@@ -312,14 +385,39 @@ function CompletedTaskRow({ taskId, entry }) {
 export function TasksStatusPill() {
   const { progressByTaskId, loadingTasks, clearAllFailed } =
     useTaskProgressStore();
+  const { toggleDashboardLogs } = useLogsStore();
+  const { baseBranch, setBaseBranch, branches, currentBranch, fetchBranches } =
+    useGitBranchesStore();
 
-  // Filter checkboxes state
-  const [showRunning, setShowRunning] = useState(true);
-  const [showPending, setShowPending] = useState(true);
-  const [showFailed, setShowFailed] = useState(true);
-  const [showCompleted, setShowCompleted] = useState(true);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // useState is fine here — purely local UI state
+  const [isOpen, setIsOpen] = useState(false);
 
   const allEntries = Array.from(progressByTaskId.entries());
+
+  const isReviewRunning = allEntries.some(
+    ([, e]) =>
+      e.type === TASK_TYPES.REVIEW_CHANGES &&
+      (e.status === "running" || e.status === "pending"),
+  );
+
+  const handleStartReview = async () => {
+    setIsSubmittingReview(true);
+    try {
+      await reviewChanges({ baseBranch });
+    } catch {
+      // task errors surface via socket
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const handlePopoverOpen = (open) => {
+    setIsOpen(open);
+    if (open) fetchBranches();
+  };
+
   const runningEntries = allEntries.filter(([, e]) => e.status === "running");
   const pendingEntries = allEntries.filter(([, e]) => e.status === "pending");
   const failedEntries = allEntries.filter(([, e]) => e.status === "failed");
@@ -331,27 +429,18 @@ export function TasksStatusPill() {
   const pendingCount = pendingEntries.length;
   const failedCount = failedEntries.length;
   const completedCount = completedEntries.length;
+  const totalCount = runningCount + pendingCount + failedCount + completedCount;
 
-  // Hide pill entirely when no tasks at all AND not loading
-  if (
-    !loadingTasks &&
-    runningCount === 0 &&
-    pendingCount === 0 &&
-    failedCount === 0 &&
-    completedCount === 0
-  )
-    return null;
+  if (!loadingTasks && totalCount === 0) return null;
 
   const hasFailed = failedCount > 0;
   const hasRunning = runningCount > 0;
 
-  // Pill colour: red > blue > gray
   const pillColorPalette = hasFailed ? "red" : hasRunning ? "blue" : "gray";
   const pillVariant = hasFailed || hasRunning ? "subtle" : "outline";
 
   return (
     <>
-      {/* Keyframe for the running progress bar */}
       <style>{`
         @keyframes ca-progress {
           0%   { transform: translateX(-150%); }
@@ -359,7 +448,11 @@ export function TasksStatusPill() {
         }
       `}</style>
 
-      <Popover.Root positioning={{ placement: "bottom-end" }}>
+      <Popover.Root
+        positioning={{ placement: "bottom-end" }}
+        open={isOpen}
+        onOpenChange={(e) => handlePopoverOpen(e.open)}
+      >
         <Popover.Trigger asChild>
           <Button
             size="sm"
@@ -373,6 +466,15 @@ export function TasksStatusPill() {
             {!loadingTasks && hasRunning && <Spinner size="xs" />}
             {!loadingTasks && hasRunning && (
               <Text fontSize="xs">{runningCount} running</Text>
+            )}
+            {!loadingTasks && hasRunning && hasFailed && (
+              <Box
+                w="1px"
+                h="12px"
+                bg="currentColor"
+                opacity={0.25}
+                flexShrink={0}
+              />
             )}
             {!loadingTasks && hasFailed && (
               <Badge colorPalette="red" size="sm" variant="solid">
@@ -395,155 +497,121 @@ export function TasksStatusPill() {
 
         <Popover.Positioner>
           <Popover.Content
-            width="360px"
+            width="380px"
             p={0}
-            boxShadow="lg"
+            boxShadow="0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)"
             border="1px solid"
             borderColor="gray.200"
             borderRadius="xl"
             overflow="hidden"
           >
             {/* Header */}
-            <VStack gap={0} align="stretch">
-              <HStack
-                px={3}
-                py={2}
-                justify="space-between"
-                borderBottom="1px solid"
-                borderColor="gray.100"
-              >
-                <Text fontSize="13px" fontWeight="700" color="gray.800">
-                  Tasks
+            <HStack
+              px={4}
+              py="10px"
+              justify="space-between"
+              borderBottom="1px solid"
+              borderColor="gray.100"
+            >
+              <Text fontSize="13px" fontWeight="700" color="gray.900">
+                Tasks
+              </Text>
+              {hasFailed && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="gray"
+                  fontSize="11px"
+                  onClick={clearAllFailed}
+                >
+                  Clear failed
+                </Button>
+              )}
+            </HStack>
+
+            {/* Review Changes */}
+            <Box
+              px={4}
+              py={3}
+              style={{
+                background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+              }}
+              borderBottom="2px solid"
+              borderColor="blue.100"
+              opacity={isReviewRunning ? 0.55 : 1}
+              pointerEvents={isReviewRunning ? "none" : "auto"}
+            >
+              <HStack justify="space-between" mb={2} align="baseline">
+                <Text fontSize="12px" fontWeight="700" color="blue.900">
+                  🌿 Review Changes
                 </Text>
-                {hasFailed && (
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    colorPalette="gray"
-                    onClick={clearAllFailed}
-                  >
-                    Clear failed
-                  </Button>
+                {currentBranch && (
+                  <Text fontSize="11px" color="blue.600">
+                    Current:{" "}
+                    <Text as="span" fontWeight="600">
+                      {currentBranch}
+                    </Text>
+                  </Text>
                 )}
               </HStack>
-
-              {/* Filter checkboxes */}
-              <HStack
-                px={3}
-                py={2}
-                gap={3}
-                flexWrap="wrap"
-                borderBottom="1px solid"
-                borderColor="gray.100"
-                bg="gray.50"
-              >
-                {runningCount > 0 && (
-                  <HStack
-                    gap={1.5}
-                    fontSize="11px"
-                    cursor="pointer"
-                    onClick={() => setShowRunning(!showRunning)}
+              <HStack gap={2}>
+                <Text
+                  fontSize="11px"
+                  color="blue.700"
+                  fontWeight="600"
+                  flexShrink={0}
+                  whiteSpace="nowrap"
+                >
+                  Compare against:
+                </Text>
+                <NativeSelect.Root size="xs" flex={1}>
+                  <NativeSelect.Field
+                    value={baseBranch}
+                    onChange={(e) => setBaseBranch(e.target.value)}
+                    borderColor="blue.200"
+                    bg="white"
+                    color="blue.900"
+                    _focus={{
+                      borderColor: "#0ea5e9",
+                      boxShadow: "0 0 0 2px rgba(14,165,233,0.12)",
+                    }}
                   >
-                    <Box
-                      w="14px"
-                      h="14px"
-                      borderRadius="sm"
-                      border="1px solid"
-                      borderColor="gray.300"
-                      bg={showRunning ? "blue.500" : "white"}
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      {showRunning && <Check size={10} color="white" />}
-                    </Box>
-                    <Text color="gray.700">Running ({runningCount})</Text>
-                  </HStack>
-                )}
-                {pendingCount > 0 && (
-                  <HStack
-                    gap={1.5}
-                    fontSize="11px"
-                    cursor="pointer"
-                    onClick={() => setShowPending(!showPending)}
-                  >
-                    <Box
-                      w="14px"
-                      h="14px"
-                      borderRadius="sm"
-                      border="1px solid"
-                      borderColor="gray.300"
-                      bg={showPending ? "blue.500" : "white"}
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      {showPending && <Check size={10} color="white" />}
-                    </Box>
-                    <Text color="gray.700">Pending ({pendingCount})</Text>
-                  </HStack>
-                )}
-                {failedCount > 0 && (
-                  <HStack
-                    gap={1.5}
-                    fontSize="11px"
-                    cursor="pointer"
-                    onClick={() => setShowFailed(!showFailed)}
-                  >
-                    <Box
-                      w="14px"
-                      h="14px"
-                      borderRadius="sm"
-                      border="1px solid"
-                      borderColor="gray.300"
-                      bg={showFailed ? "blue.500" : "white"}
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      {showFailed && <Check size={10} color="white" />}
-                    </Box>
-                    <Text color="gray.700">Failed ({failedCount})</Text>
-                  </HStack>
-                )}
-                {completedCount > 0 && (
-                  <HStack
-                    gap={1.5}
-                    fontSize="11px"
-                    cursor="pointer"
-                    onClick={() => setShowCompleted(!showCompleted)}
-                  >
-                    <Box
-                      w="14px"
-                      h="14px"
-                      borderRadius="sm"
-                      border="1px solid"
-                      borderColor="gray.300"
-                      bg={showCompleted ? "blue.500" : "white"}
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      {showCompleted && <Check size={10} color="white" />}
-                    </Box>
-                    <Text color="gray.700">Completed ({completedCount})</Text>
-                  </HStack>
-                )}
+                    {branches.length === 0 ? (
+                      <option value={baseBranch}>{baseBranch}</option>
+                    ) : (
+                      branches.map((b) => (
+                        <option key={b} value={b}>
+                          {b}
+                        </option>
+                      ))
+                    )}
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
+                <Button
+                  size="xs"
+                  colorPalette="blue"
+                  loading={isSubmittingReview}
+                  loadingText="Analyzing…"
+                  onClick={handleStartReview}
+                  flexShrink={0}
+                  fontWeight="600"
+                >
+                  Analyze
+                </Button>
               </HStack>
-            </VStack>
+            </Box>
 
-            <VStack gap={0} align="stretch" maxH="420px" overflowY="auto">
-              {/* Running */}
-              {showRunning && runningCount > 0 && (
+            {/* Task lists */}
+            <VStack gap={0} align="stretch" maxH="400px" overflowY="auto">
+              {runningCount > 0 && (
                 <Box>
                   <SectionHeading>
-                    <HStack gap={1.5} as="span" display="inline-flex">
-                      <Spinner size="xs" color="blue.500" as="span" />
-                      <span>Running</span>
-                      <Badge colorPalette="blue" size="sm" variant="subtle">
-                        {runningCount}
-                      </Badge>
-                    </HStack>
+                    <Spinner size="xs" color="blue.400" />
+                    <SectionLabel color="blue.500">Running</SectionLabel>
+                    <SectionCount bg="blue.50" color="blue.700">
+                      {runningCount}
+                    </SectionCount>
                   </SectionHeading>
                   {runningEntries.map(([taskId, entry]) => (
                     <RunningTaskRow
@@ -555,81 +623,84 @@ export function TasksStatusPill() {
                 </Box>
               )}
 
-              {/* Pending */}
-              {showPending && pendingCount > 0 && (
-                <>
-                  {showRunning && runningCount > 0 && <Separator />}
-                  <Box>
-                    <SectionHeading>
-                      <HStack gap={1.5} as="span" display="inline-flex">
-                        <span>↑ Pending</span>
-                        <Badge colorPalette="gray" size="sm" variant="subtle">
-                          {pendingCount}
-                        </Badge>
-                      </HStack>
-                    </SectionHeading>
-                    {pendingEntries.map(([taskId, entry]) => (
-                      <PendingTaskRow
-                        key={taskId}
-                        taskId={taskId}
-                        entry={entry}
-                      />
-                    ))}
-                  </Box>
-                </>
+              {pendingCount > 0 && (
+                <Box>
+                  <SectionHeading hasBorderTop={runningCount > 0}>
+                    <SectionLabel>↑ Pending</SectionLabel>
+                    <SectionCount>{pendingCount}</SectionCount>
+                  </SectionHeading>
+                  {pendingEntries.map(([taskId, entry]) => (
+                    <PendingTaskRow
+                      key={taskId}
+                      taskId={taskId}
+                      entry={entry}
+                    />
+                  ))}
+                </Box>
               )}
 
-              {/* Failed */}
-              {showFailed && failedCount > 0 && (
-                <>
-                  {((showRunning && runningCount > 0) ||
-                    (showPending && pendingCount > 0)) && <Separator />}
-                  <Box>
-                    <SectionHeading>
-                      <HStack gap={1.5} as="span" display="inline-flex">
-                        <span>✕ Failed</span>
-                        <Badge colorPalette="red" size="sm" variant="subtle">
-                          {failedCount}
-                        </Badge>
-                      </HStack>
-                    </SectionHeading>
-                    {failedEntries.map(([taskId, entry]) => (
-                      <FailedTaskRow
-                        key={taskId}
-                        taskId={taskId}
-                        entry={entry}
-                      />
-                    ))}
-                  </Box>
-                </>
+              {failedCount > 0 && (
+                <Box>
+                  <SectionHeading
+                    hasBorderTop={runningCount > 0 || pendingCount > 0}
+                  >
+                    <SectionLabel color="red.400">✕ Failed</SectionLabel>
+                    <SectionCount bg="red.50" color="red.600">
+                      {failedCount}
+                    </SectionCount>
+                  </SectionHeading>
+                  {failedEntries.map(([taskId, entry]) => (
+                    <FailedTaskRow key={taskId} taskId={taskId} entry={entry} />
+                  ))}
+                </Box>
               )}
 
-              {/* Completed */}
-              {showCompleted && completedCount > 0 && (
-                <>
-                  {((showRunning && runningCount > 0) ||
-                    (showPending && pendingCount > 0) ||
-                    (showFailed && failedCount > 0)) && <Separator />}
-                  <Box>
-                    <SectionHeading>
-                      <HStack gap={1.5} as="span" display="inline-flex">
-                        <span>✓ Completed</span>
-                        <Badge colorPalette="green" size="sm" variant="subtle">
-                          {completedCount}
-                        </Badge>
-                      </HStack>
-                    </SectionHeading>
-                    {completedEntries.map(([taskId, entry]) => (
-                      <CompletedTaskRow
-                        key={taskId}
-                        taskId={taskId}
-                        entry={entry}
-                      />
-                    ))}
-                  </Box>
-                </>
+              {completedCount > 0 && (
+                <Box>
+                  <SectionHeading
+                    hasBorderTop={
+                      runningCount > 0 || pendingCount > 0 || failedCount > 0
+                    }
+                  >
+                    <SectionLabel color="green.500">✓ Completed</SectionLabel>
+                    <SectionCount bg="green.50" color="green.700">
+                      {completedCount}
+                    </SectionCount>
+                  </SectionHeading>
+                  {completedEntries.map(([taskId, entry]) => (
+                    <CompletedTaskRow
+                      key={taskId}
+                      taskId={taskId}
+                      entry={entry}
+                    />
+                  ))}
+                </Box>
               )}
             </VStack>
+
+            {/* Footer */}
+            <Box
+              px={4}
+              py="10px"
+              borderTop="1px solid"
+              borderColor="gray.100"
+              textAlign="center"
+            >
+              <Text
+                as="button"
+                fontSize="11px"
+                color="gray.400"
+                _hover={{ color: "gray.600" }}
+                textDecoration="underline"
+                textDecorationOffset="2px"
+                cursor="pointer"
+                bg="none"
+                border="none"
+                onClick={toggleDashboardLogs}
+              >
+                View full task logs →
+              </Text>
+            </Box>
           </Popover.Content>
         </Popover.Positioner>
       </Popover.Root>

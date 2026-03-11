@@ -113,11 +113,17 @@ function DomainCard({ domain, provided, snapshot }) {
     testing: testAnalyze,
   };
 
+  // A section is considered analyzed if either the in-memory store has data for it
+  // (fetched this session) OR the backend already reported it as analyzed in domain.sections
+  // (persisted on disk, accurate after page reload).
+  const isSectionAnalyzed = (key) =>
+    sectionData[key]?.has(domain.id) || !!domain.sections?.[key];
+
   const shouldShowAnalyzeButton = DOMAIN_SECTIONS.some(({ key }) => {
     const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
       activeProgress.has(t),
     );
-    return !sectionData[key]?.has(domain.id) && !isRunning;
+    return !isSectionAnalyzed(key) && !isRunning;
   });
 
   const handleAnalyze = () => {
@@ -125,7 +131,7 @@ function DomainCard({ domain, provided, snapshot }) {
       const isRunning = GROUPED_TASK_TYPES[key]?.some((t) =>
         activeProgress.has(t),
       );
-      if (!sectionData[key]?.has(domain.id) && !isRunning) {
+      if (!isSectionAnalyzed(key) && !isRunning) {
         sectionAnalyzers[key](domain);
       }
     });
@@ -207,7 +213,7 @@ function DomainCard({ domain, provided, snapshot }) {
                       bg={
                         isRunning
                           ? "blue.400"
-                          : sectionData[key]?.has(domain.id)
+                          : isSectionAnalyzed(key)
                             ? "green.400"
                             : "gray.300"
                       }
@@ -225,7 +231,7 @@ function DomainCard({ domain, provided, snapshot }) {
                       color={
                         isRunning
                           ? "blue.500"
-                          : sectionData[key]?.has(domain.id)
+                          : isSectionAnalyzed(key)
                             ? "green.600"
                             : "gray.400"
                       }

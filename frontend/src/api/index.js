@@ -12,6 +12,7 @@ export * from "./tasks";
 export * from "./domain-sections-chat";
 export * from "./codebase-chat";
 export * from "./e2e-config";
+export * from "./review-changes";
 
 // Default export for backward compatibility (if needed)
 import * as status from "./status";
@@ -27,6 +28,7 @@ import * as tasks from "./tasks";
 import * as domainSectionsChat from "./domain-sections-chat";
 import * as codebaseChat from "./codebase-chat";
 import * as e2eConfig from "./e2e-config";
+import * as reviewChanges from "./review-changes";
 
 export default {
   ...status,
@@ -42,4 +44,5 @@ export default {
   ...domainSectionsChat,
   ...codebaseChat,
   ...e2eConfig,
+  ...reviewChanges,
 };

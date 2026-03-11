@@ -446,6 +446,11 @@ export async function buildTemplateVariables(task) {
         CODEBASE_PATH: task.params?.targetDirectory || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };
+    case TASK_TYPES.REVIEW_CHANGES:
+      return {
+        CODEBASE_PATH: task.params?.targetDirectory || "",
+        PROGRESS_FILE: getProgressFileRelativePath(task.id),
+      };
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

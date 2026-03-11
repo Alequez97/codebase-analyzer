@@ -32,6 +32,8 @@ export function getLogEventForTaskType(taskType) {
       SOCKET_EVENTS.LOG_EDIT_REFACTORING_AND_TESTING,
     // Custom codebase task (floating agent chat)
     [TASK_TYPES.CUSTOM_CODEBASE_TASK]: SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK,
+    // Review changes task
+    [TASK_TYPES.REVIEW_CHANGES]: SOCKET_EVENTS.LOG_REVIEW_CHANGES,
   };
 
   const event = eventMap[taskType];

@@ -105,6 +105,18 @@ export const useSocketStore = create((set, get) => ({
       useCodebaseStore.getState().setAnalyzingCodebase(false);
     });
 
+    // Task queued event — fires for every task regardless of who triggered it
+    socket.on(SOCKET_EVENTS.TASK_QUEUED, (data) => {
+      const { taskId, type, domainId, delegatedByTaskId } = data;
+      if (taskId) {
+        useTaskProgressStore.getState().setPending(taskId, {
+          domainId,
+          type,
+          delegatedByTaskId,
+        });
+      }
+    });
+
     // Task completion events - handle all task types by checking type property
     socket.on(SOCKET_EVENTS.TASK_COMPLETED, async (data) => {
       const { type, domainId, taskId } = data;
@@ -175,15 +187,17 @@ export const useSocketStore = create((set, get) => ({
     // Task progress events
     socket.on(SOCKET_EVENTS.TASK_PROGRESS, (data) => {
       const { taskId, domainId, type, stage, message } = data;
-      if (domainId) {
-        // setProgress transitions the entry to 'running' (covers pending → running)
-        useTaskProgressStore.getState().setProgress(taskId, {
-          domainId,
-          type,
-          stage,
-          message,
-        });
 
+      // Always transition the task entry to 'running' — even for tasks without a domainId
+      // (e.g. review-changes, custom-codebase-task) so the UI shows the correct status.
+      useTaskProgressStore.getState().setProgress(taskId, {
+        domainId: domainId ?? null,
+        type,
+        stage,
+        message,
+      });
+
+      if (domainId) {
         // Ensure loading state remains true during progress
         if (type === TASK_TYPES.DOCUMENTATION) {
           const store = useDomainDocumentationStore.getState();
@@ -351,6 +365,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_EDIT_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_REFACTORING_AND_TESTING, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_REVIEW_CHANGES, handleLogEvent);
 
     // ── Custom codebase task events (floating agent chat) ───────────────────
 

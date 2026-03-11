@@ -9,6 +9,7 @@ export const SOCKET_EVENTS = {
   DISCONNECT: "disconnect",
 
   // Task events
+  TASK_QUEUED: "task:queued",
   TASK_COMPLETED: "task:completed",
   TASK_FAILED: "task:failed",
   TASK_PROGRESS: "task:progress",
@@ -51,4 +52,7 @@ export const SOCKET_EVENTS = {
   CUSTOM_TASK_FAILED: "custom-task:failed",
   CUSTOM_TASK_MESSAGE: "custom-task:message",
   LOG_CUSTOM_CODEBASE_TASK: "log:custom-codebase-task",
+
+  // Review changes task log
+  LOG_REVIEW_CHANGES: "log:review-changes",
 };

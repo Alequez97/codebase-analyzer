@@ -23,7 +23,7 @@ If a `baseBranch` was specified in your task context, replace `HEAD` with that b
 
 ### Step 2 — Read the existing domain analysis
 
-Read `.code-analysis/codebase-analysis.json` to get the full list of domains and their descriptions.
+Read `.code-analysis/analysis/codebase-analysis.json` to get the full list of domains and their descriptions.
 
 For each domain that appears affected by the diff, read the relevant section files under `.code-analysis/domains/` to understand the current state of the analysis.
 

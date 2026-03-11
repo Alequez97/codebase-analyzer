@@ -188,6 +188,15 @@ const config = {
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
+
+    // Review changes task
+    [TASK_TYPES.REVIEW_CHANGES]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_2,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
   },
 
   // Aider-specific configuration (when agent is AGENTS.AIDER)

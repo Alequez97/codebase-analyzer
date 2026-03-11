@@ -23,4 +23,7 @@ export const TASK_TYPES = {
 
   // Custom codebase task (floating agent chat)
   CUSTOM_CODEBASE_TASK: "custom-codebase-task",
+
+  // Review git diff and delegate targeted edits
+  REVIEW_CHANGES: "review-changes",
 };

@@ -5,6 +5,8 @@ import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { tryReadJsonFile } from "./utils.js";
 import { TASK_STATUS, TASK_FOLDERS } from "../constants/task-status.js";
 import * as logger from "../utils/logger.js";
+import { SOCKET_EVENTS } from "../constants/socket-events.js";
+import { emitSocketEvent } from "../utils/socket-emitter.js";
 
 /**
  * Read a task from any folder (pending, running, completed, or failed)
@@ -72,6 +74,14 @@ export async function enqueueTask(task) {
     `${task.id}.json`,
   );
   await fs.writeFile(filePath, JSON.stringify(task, null, 2), "utf-8");
+
+  emitSocketEvent(SOCKET_EVENTS.TASK_QUEUED, {
+    taskId: task.id,
+    type: task.type,
+    domainId: task.params?.domainId,
+    delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
+    timestamp: new Date().toISOString(),
+  });
 }
 
 /**
