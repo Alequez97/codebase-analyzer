@@ -39,6 +39,7 @@ export function MissingTestsSection({
   const [isBatchImplementing, setIsBatchImplementing] = useState(false);
   const [filterImplemented, setFilterImplemented] = useState(true);
   const [filterMissing, setFilterMissing] = useState(true);
+  const [filterBlocked, setFilterBlocked] = useState(true);
 
   const { setEditedMissingTests, getEditedMissingTests } =
     useTestingEditorStore();
@@ -544,23 +545,32 @@ export function MissingTestsSection({
     );
   }
 
+  const filterTest = (test) => {
+    const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
+    const blocked = !!test.blockedBy;
+    if (impl) return filterImplemented;
+    if (blocked) return filterBlocked;
+    return filterMissing;
+  };
+
+  const implementedCount = allTests.filter(
+    (t) => t.actionStatus === TESTING_ACTION_STATUS.COMPLETED,
+  ).length;
+  const blockedCount = allTests.filter(
+    (t) => !!t.blockedBy && t.actionStatus !== TESTING_ACTION_STATUS.COMPLETED,
+  ).length;
+  const missingCount = allTests.filter(
+    (t) => !t.blockedBy && t.actionStatus !== TESTING_ACTION_STATUS.COMPLETED,
+  ).length;
+
   const unitTests = sortByPriority(
-    (editedMissingTests.unit || []).filter((test) => {
-      const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-      return impl ? filterImplemented : filterMissing;
-    }),
+    (editedMissingTests.unit || []).filter(filterTest),
   );
   const integrationTests = sortByPriority(
-    (editedMissingTests.integration || []).filter((test) => {
-      const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-      return impl ? filterImplemented : filterMissing;
-    }),
+    (editedMissingTests.integration || []).filter(filterTest),
   );
   const e2eTests = sortByPriority(
-    (editedMissingTests.e2e || []).filter((test) => {
-      const impl = test.actionStatus === TESTING_ACTION_STATUS.COMPLETED;
-      return impl ? filterImplemented : filterMissing;
-    }),
+    (editedMissingTests.e2e || []).filter(filterTest),
   );
   const selectedReadyCount = allTests.filter(
     (test) => effectiveSelectedTestIds.has(test.id) && isSelectableTest(test),
@@ -582,7 +592,7 @@ export function MissingTestsSection({
             colorPalette="green"
             size="sm"
           >
-            Implemented
+            Implemented ({implementedCount})
           </Checkbox>
           <Checkbox
             checked={filterMissing}
@@ -590,7 +600,15 @@ export function MissingTestsSection({
             colorPalette="orange"
             size="sm"
           >
-            Missing
+            Missing ({missingCount})
+          </Checkbox>
+          <Checkbox
+            checked={filterBlocked}
+            onCheckedChange={(e) => setFilterBlocked(e.checked)}
+            colorPalette="gray"
+            size="sm"
+          >
+            Blocked ({blockedCount})
           </Checkbox>
         </HStack>
         <HStack gap={3}>
