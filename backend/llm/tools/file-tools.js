@@ -1,6 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
+import { exec } from "child_process";
+import { promisify } from "util";
 import { PERSISTENCE_FILES } from "../../constants/persistence-files.js";
+
+const execAsync = promisify(exec);
 
 /**
  * Constants
@@ -707,10 +711,28 @@ export class FileToolExecutor {
       const newDirPath = path.dirname(newFullPath);
       await fs.mkdir(newDirPath, { recursive: true });
 
-      // Rename the file
-      await fs.rename(oldFullPath, newFullPath);
+      // Try to use git mv if this is a git repository
+      // This ensures git tracks the rename properly, even if content changes
+      let usedGitMv = false;
+      try {
+        // Check if we're in a git repository
+        await execAsync("git rev-parse --git-dir", {
+          cwd: this.projectRoot,
+        });
 
-      return `Success: Renamed "${oldRelativePath}" to "${newRelativePath}"`;
+        // Use git mv for better rename tracking
+        await execAsync(
+          `git mv "${oldRelativePath.replace(/"/g, '\\"')}" "${newRelativePath.replace(/"/g, '\\"')}"`,
+          { cwd: this.projectRoot },
+        );
+        usedGitMv = true;
+      } catch (gitError) {
+        // Not a git repo or git command failed - use fs.rename as fallback
+        await fs.rename(oldFullPath, newFullPath);
+      }
+
+      const method = usedGitMv ? "(git mv)" : "(fs rename)";
+      return `Success: Renamed "${oldRelativePath}" to "${newRelativePath}" ${method}`;
     } catch (error) {
       return `Error renaming file: ${error.message}`;
     }
