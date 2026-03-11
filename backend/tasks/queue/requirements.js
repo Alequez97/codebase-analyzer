@@ -10,7 +10,7 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
 import {
-  getProgressFilePath,
+  getProgressFileRelativePath,
   ensureProgressDirectory,
 } from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
@@ -56,7 +56,7 @@ export async function queueAnalyzeRequirementsTask({
       domainId,
       DOMAIN_SECTION_IDS.REQUIREMENTS,
     ),
-    progressFile: getProgressFilePath(taskId),
+    progressFile: getProgressFileRelativePath(taskId),
   };
 
   await ensureProgressDirectory(taskId);

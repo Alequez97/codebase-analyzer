@@ -6,7 +6,7 @@ import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
 import { initChatHistory } from "../../utils/chat-history.js";
 import {
-  getProgressFilePath,
+  getProgressFileRelativePath,
   ensureProgressDirectory,
 } from "../../utils/task-progress.js";
 import * as logger from "../../utils/logger.js";
@@ -49,7 +49,7 @@ export async function queueCustomCodebaseTask({
     agentConfig,
     systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.CUSTOM_CODEBASE_TASK,
     // Results streamed via socket - no single output file
-    progressFile: getProgressFilePath(taskId),
+    progressFile: getProgressFileRelativePath(taskId),
   };
 
   // Initialize supporting files

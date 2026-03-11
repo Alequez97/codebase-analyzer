@@ -5,7 +5,7 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { generateTaskId } from "../utils.js";
 import {
-  getProgressFilePath,
+  getProgressFileRelativePath,
   ensureProgressDirectory,
 } from "../../utils/task-progress.js";
 
@@ -47,7 +47,7 @@ export async function queueReviewChangesTask({
     agentConfig,
     systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.REVIEW_CHANGES,
     // Results flow via delegated tasks — no single output file
-    progressFile: getProgressFilePath(taskId),
+    progressFile: getProgressFileRelativePath(taskId),
   };
 
   await ensureProgressDirectory(taskId);

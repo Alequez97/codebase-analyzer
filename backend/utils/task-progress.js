@@ -20,7 +20,7 @@ export function getProgressFileRelativePath(taskId) {
  * @param {string} taskId
  * @returns {string}
  */
-export function getProgressFilePath(taskId) {
+function getProgressFilePath(taskId) {
   return path.join(
     config.paths.targetAnalysis,
     "temp",
