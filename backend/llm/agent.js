@@ -90,34 +90,35 @@ export class LLMAgent {
   /**
    * Run a conversation with the LLM
    *
-   * @param {Object} config - Run configuration
-   * @param {string} config.systemPrompt - System instructions
-   * @param {string} config.initialMessage - Current user message (the turn being processed)
-   * @param {Array}  config.priorMessages - Prior conversation turns to replay before initialMessage.
-   *                 Each entry: { role: 'user'|'assistant', content: string }.
-   *                 Injected between the system prompt and the current user message so the
-   *                 LLM has full multi-turn context without the caller needing to manage state.
-   * @param {Function} config.onProgress - Progress callback (stage, message, data)
-   * @param {Function} config.onToolCall - Tool call callback (toolName, args, result)
-   * @param {Function} config.onIteration - Iteration callback (iteration, response)
-   * @param {Function} config.onMessage - Message callback (role, content)
-   * @param {Function} config.onComplete - Completion callback (stopReason, iterations)
-   * @param {Function} config.shouldContinue - Custom continuation logic (response, iteration) => boolean
+   * @param {Object} handler - Task handler with configuration and callbacks
+   * @param {string} handler.systemPrompt - System instructions
+   * @param {string} handler.initialMessage - Current user message
+   * @param {Array}  handler.priorMessages - Prior conversation turns
+   * @param {Function} handler.onStart - Start callback
+   * @param {Function} handler.onProgress - Progress callback
+   * @param {Function} handler.onToolCall - Tool call callback
+   * @param {Function} handler.onIteration - Iteration callback
+   * @param {Function} handler.onMessage - Message callback
+   * @param {Function} handler.onCompaction - Compaction callback
+   * @param {Function} handler.onComplete - Completion callback
+   * @param {Function} handler.shouldContinue - Custom continuation logic
+   * @param {AbortSignal} [abortSignal] - Optional abort signal
    * @returns {Promise<Object>} Result with metadata and conversation log
    */
-  async run(config) {
+  async run(handler, abortSignal = null) {
     const {
       systemPrompt,
       initialMessage,
       priorMessages = [],
+      onStart = () => {},
       onProgress = () => {},
       onToolCall = () => {},
       onIteration = () => {},
       onMessage = () => {},
-      onComplete = () => {},
+      onCompaction = () => {},
+      onComplete = async () => {},
       shouldContinue = null,
-      abortSignal = null,
-    } = config;
+    } = handler;
 
     // Initialize conversation
     this.state.addSystemMessage(systemPrompt);
@@ -134,10 +135,8 @@ export class LLMAgent {
     // Add the current user message
     this.state.addUserMessage(initialMessage);
 
-    onProgress({
-      stage: PROGRESS_STAGES.INITIALIZING,
-      message: "Starting conversation...",
-    });
+    // Call onStart before the first iteration
+    onStart();
 
     let iterationCount = 0;
     let stopReason = null;
@@ -161,21 +160,14 @@ export class LLMAgent {
         logger.info("Context needs compaction, summarizing conversation...", {
           component: "LLMAgent",
         });
-        onProgress({
-          stage: PROGRESS_STAGES.COMPACTING,
-          message: "Compacting context...",
-        });
+        onCompaction("start");
         await this.state.compact(this.client);
         const tokensAfterCompaction = this.state.getTokenCount();
         logger.info(
           `🗜️  Compaction complete. Tokens after: ~${tokensAfterCompaction}`,
           { component: "LLMAgent" },
         );
-        onProgress({
-          stage: PROGRESS_STAGES.COMPACTING,
-          message: `Compaction complete. Tokens after: ~${tokensAfterCompaction}`,
-          tokensAfterCompaction,
-        });
+        onCompaction("complete", tokensAfterCompaction);
       }
 
       // Check for cancellation before making the (potentially long) LLM call
@@ -240,19 +232,6 @@ export class LLMAgent {
         continue; // Continue conversation after tool execution
       }
 
-      // No tool calls - AI is likely finishing up
-      if (
-        response.stopReason === "end_turn" ||
-        response.stopReason === "stop_sequence" ||
-        response.stopReason === "completed"
-      ) {
-        onProgress({
-          stage: PROGRESS_STAGES.COMPLETING,
-          message: "AI analysis complete",
-          iteration: iterationCount,
-        });
-      }
-
       // Check stop conditions
       stopReason = response.stopReason;
 
@@ -302,7 +281,7 @@ export class LLMAgent {
       { input: 0, output: 0 },
     );
 
-    const result = {
+    let result = {
       success: true,
       iterations: iterationCount,
       stopReason,
@@ -314,7 +293,11 @@ export class LLMAgent {
       conversationLog: this.conversationLog,
     };
 
-    onComplete(result);
+    // Call onComplete for validation, logging, socket events, etc.
+    const onCompleteResult = await onComplete(result);
+    if (onCompleteResult) {
+      result = { ...result, ...onCompleteResult };
+    }
 
     return result;
   }

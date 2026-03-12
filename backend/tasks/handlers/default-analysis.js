@@ -14,76 +14,45 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
     initialMessage: "Begin the analysis as specified in the instructions.",
 
     onProgress: (progress) => {
-      if (progress.iteration) {
-        taskLogger.info(
-          `🔄 Iteration ${progress.iteration}/${agent.maxIterations}`,
-          { component: "LLM-API" },
+      if (progress.stage) {
+        emitTaskProgress(task, progress.stage, progress.message);
+      }
+    },
+
+    onCompaction: (phase, tokensAfter) => {
+      if (phase === "start") {
+        taskLogger.info("🗜️  Compacting chat history...", {
+          component: "LLM-API",
+        });
+        emitTaskProgress(
+          task,
+          PROGRESS_STAGES.COMPACTING,
+          "Compacting chat history...",
         );
         emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `\n${"-".repeat(80)}\n[Iteration ${progress.iteration}/${agent.maxIterations}] ${progress.message || "Processing"}\n${"-".repeat(80)}\n`,
+          log: `\n🗜️  [Compacting] Summarizing conversation...\n`,
         });
-      }
-
-      if (
-        progress.compacting ||
-        progress.stage === PROGRESS_STAGES.COMPACTING
-      ) {
-        if (progress.tokensAfterCompaction != null) {
-          taskLogger.info(
-            `🗜️  Compaction complete. Tokens after: ~${progress.tokensAfterCompaction}`,
-            { component: "LLM-API" },
-          );
-          emitTaskProgress(
-            task,
-            PROGRESS_STAGES.COMPACTING,
-            `Compaction complete. Tokens after: ~${progress.tokensAfterCompaction}`,
-          );
-          emitTaskLog(task, {
-            taskId: task.id,
-            domainId: task.params?.domainId,
-            type: task.type,
-            stream: "stdout",
-            log: `🗜️  [Compacting] Done. Tokens after: ~${progress.tokensAfterCompaction}\n`,
-          });
-        } else {
-          taskLogger.info("🗜️  Compacting chat history...", {
-            component: "LLM-API",
-          });
-          emitTaskProgress(
-            task,
-            PROGRESS_STAGES.COMPACTING,
-            "Compacting chat history...",
-          );
-          emitTaskLog(task, {
-            taskId: task.id,
-            domainId: task.params?.domainId,
-            type: task.type,
-            stream: "stdout",
-            log: `\n🗜️  [Compacting] Summarizing conversation...\n`,
-          });
-        }
-        return;
-      }
-
-      if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`, { component: "LLM-API" });
-        emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
+      } else if (phase === "complete") {
+        taskLogger.info(
+          `🗜️  Compaction complete. Tokens after: ~${tokensAfter}`,
+          { component: "LLM-API" },
+        );
+        emitTaskProgress(
+          task,
+          PROGRESS_STAGES.COMPACTING,
+          `Compaction complete. Tokens after: ~${tokensAfter}`,
+        );
         emitTaskLog(task, {
           taskId: task.id,
           domainId: task.params?.domainId,
           type: task.type,
           stream: "stdout",
-          log: `  ⚡ ${progress.message}\n`,
+          log: `🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`,
         });
-        return;
-      }
-
-      if (progress.stage) {
-        emitTaskProgress(task, progress.stage, progress.message);
       }
     },
 
@@ -185,7 +154,7 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       return true;
     },
 
-    postProcess: async (result, task, agent, taskLogger) => {
+    onComplete: async (_result) => {
       const outputPath = path.join(config.target.directory, task.outputFile);
 
       // Check if output file was created

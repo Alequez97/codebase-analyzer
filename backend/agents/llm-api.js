@@ -155,27 +155,17 @@ export async function execute(task, signal) {
       { component: "LLM-API" },
     );
 
-    const result = await agent.run({ ...taskHandler, abortSignal: signal });
+    const result = await agent.run(taskHandler, signal);
 
-    // Post-process results
-    const postProcessResult = await taskHandler.postProcess(
-      result,
-      task,
-      agent,
-      taskLogger,
-    );
-
-    if (postProcessResult?.success === false) {
-      const postProcessError =
-        postProcessResult.error || "Task post-processing failed";
-
-      logTaskError(taskLogger, task, new Error(postProcessError));
+    if (result.success === false) {
+      const error = result.error || "Task failed";
+      logTaskError(taskLogger, task, new Error(error));
       logStream.end();
       await new Promise((resolve) => logStream.on("finish", resolve));
 
       return {
         success: false,
-        error: postProcessError,
+        error,
         taskId: task.id,
         logFile: task.logFile,
       };
@@ -187,10 +177,9 @@ export async function execute(task, signal) {
     await new Promise((resolve) => logStream.on("finish", resolve));
 
     return {
-      success: true,
+      ...result,
       taskId: task.id,
       logFile: task.logFile,
-      ...postProcessResult,
     };
   } catch (error) {
     // Clean cancellation — no failure logging, no moveToFailed

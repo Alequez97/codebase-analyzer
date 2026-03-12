@@ -52,7 +52,7 @@ export function implementFixHandler(task, taskLogger, agent) {
       return true;
     },
 
-    postProcess: async (result, task, _agent, taskLogger) => {
+    onComplete: async (_result) => {
       if (!findingFile) {
         // No specific file to verify — trust the agent completed successfully
         taskLogger.info("✅ Fix task complete (no target file to verify)", {

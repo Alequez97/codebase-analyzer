@@ -53,7 +53,7 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
       return true;
     },
 
-    postProcess: async (result, task, agent, taskLogger) => {
+    onComplete: async (_result) => {
       const newServiceFilePath = path.join(
         config.target.directory,
         task.params.newServiceFile,

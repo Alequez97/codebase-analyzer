@@ -31,27 +31,25 @@ export function editDocumentationHandler(
     initialMessage,
     priorMessages,
 
-    // Emit thinking indicator when the AI starts processing
-    onProgress: (progress) => {
-      if (
-        progress.stage === PROGRESS_STAGES.PROCESSING &&
-        progress.iteration === 1
-      ) {
-        taskLogger.info("🤔 AI is thinking...", {
-          component: "EditDocumentation",
-        });
+    onStart: () => {
+      taskLogger.info("🤔 AI is thinking...", {
+        component: "EditDocumentation",
+      });
 
-        emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
-          // Use the stable session chatId, NOT task.id.
-          // The frontend routes socket events by this stable chatId.
-          chatId: task.params.chatId,
-          taskId: task.id,
-          domainId: task.params.domainId,
-          sectionType: task.params.sectionType,
-          thinking: true,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
+        // Use the stable session chatId, NOT task.id.
+        // The frontend routes socket events by this stable chatId.
+        chatId: task.params.chatId,
+        taskId: task.id,
+        domainId: task.params.domainId,
+        sectionType: task.params.sectionType,
+        thinking: true,
+        timestamp: new Date().toISOString(),
+      });
+    },
+
+    onProgress: () => {
+      // No progress-specific logic needed
     },
 
     // Emit each AI text message as a chat message and persist it
@@ -87,7 +85,7 @@ export function editDocumentationHandler(
       }
     },
 
-    postProcess: async (result, task, agent, taskLogger) => {
+    onComplete: async (_result) => {
       const outputPath = path.join(config.target.directory, task.outputFile);
       const content = await fs.readFile(outputPath, "utf-8");
 

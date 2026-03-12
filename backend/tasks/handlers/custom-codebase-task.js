@@ -22,49 +22,32 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
   return {
     initialMessage: task.params.userInstruction,
 
+    onStart: () => {
+      // Ensure progress directory exists — the model creates the file itself
+      ensureProgressDirectory(taskId).catch((err) =>
+        taskLogger.warn(
+          `Failed to prepare progress directory: ${err.message}`,
+          {
+            component: "CustomCodebaseTask",
+          },
+        ),
+      );
+
+      taskLogger.info("🤔 AI is thinking...", {
+        component: "CustomCodebaseTask",
+      });
+
+      emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_THINKING, {
+        taskId,
+        domainId,
+        thinking: true,
+        timestamp: new Date().toISOString(),
+      });
+
+      emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, "Thinking…");
+    },
+
     onProgress: (progress) => {
-      if (
-        progress.stage === PROGRESS_STAGES.PROCESSING &&
-        progress.iteration === 1
-      ) {
-        // Ensure progress directory exists — the model creates the file itself
-        ensureProgressDirectory(taskId).catch((err) =>
-          taskLogger.warn(
-            `Failed to prepare progress directory: ${err.message}`,
-            {
-              component: "CustomCodebaseTask",
-            },
-          ),
-        );
-
-        taskLogger.info("🤔 AI is thinking...", {
-          component: "CustomCodebaseTask",
-        });
-
-        emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_THINKING, {
-          taskId,
-          domainId,
-          thinking: true,
-          timestamp: new Date().toISOString(),
-        });
-
-        emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, "Thinking…");
-        return;
-      }
-
-      if (
-        progress.compacting ||
-        progress.stage === PROGRESS_STAGES.COMPACTING
-      ) {
-        const msg =
-          progress.tokensAfterCompaction != null
-            ? `Compaction complete. Tokens after: ~${progress.tokensAfterCompaction}`
-            : "Compacting chat history…";
-        taskLogger.info(`🗜️  ${msg}`, { component: "CustomCodebaseTask" });
-        emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
-        return;
-      }
-
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
         taskLogger.info(`  ⚡ ${progress.message}`, {
           component: "CustomCodebaseTask",
@@ -85,6 +68,15 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         });
         emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, msg);
       }
+    },
+
+    onCompaction: (phase, tokensAfter) => {
+      const msg =
+        phase === "complete"
+          ? `Compaction complete. Tokens after: ~${tokensAfter}`
+          : "Compacting chat history…";
+      taskLogger.info(`🗜️  ${msg}`, { component: "CustomCodebaseTask" });
+      emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
     },
 
     onMessage: async (role, content) => {
@@ -144,31 +136,28 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
       }
     },
 
-    onComplete: async (stopReason, iterations) => {
+    /**
+     * Custom tasks don't produce an output file — just log completion and emit events.
+     */
+    onComplete: async (result) => {
       taskLogger.info(
-        `✅ Custom task complete after ${iterations} iterations`,
+        `✅ Custom task complete after ${result.iterations} iterations`,
         {
           component: "CustomCodebaseTask",
-          stopReason,
+          stopReason: result.stopReason,
         },
       );
 
-      await markProgressComplete(taskId).catch(() => {});
+      markProgressComplete(taskId).catch(() => {});
 
       emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_COMPLETED, {
         taskId,
         domainId,
         messagesStreamed: messageCount,
-        iterations,
+        iterations: result.iterations,
         timestamp: new Date().toISOString(),
       });
-    },
 
-    /**
-     * Custom tasks don't produce an output file — post-processing is a no-op.
-     * This prevents the default handler from trying to validate task.outputFile (which is undefined).
-     */
-    postProcess: async () => {
       return { success: true };
     },
   };

@@ -42,7 +42,7 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
       return true;
     },
 
-    postProcess: async (result, task, agent, taskLogger) => {
+    onComplete: async (_result) => {
       const outputPath = path.join(config.target.directory, task.outputFile);
       const content = await fs.readFile(outputPath, "utf-8");
 

@@ -54,7 +54,7 @@ export function implementTestHandler(task, taskLogger, agent) {
       return true;
     },
 
-    postProcess: async (result, task, agent, taskLogger) => {
+    onComplete: async (_result) => {
       const testFilePath = path.join(
         config.target.directory,
         task.params.testFile,

@@ -63,35 +63,14 @@ export function reviewChangesHandler(task, taskLogger, agent) {
   return {
     initialMessage,
 
+    onStart: () => {
+      taskLogger.info("🔍 Reviewing changes…", {
+        component: "ReviewChanges",
+      });
+      emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, "Reviewing changes…");
+    },
+
     onProgress: (progress) => {
-      if (
-        progress.stage === PROGRESS_STAGES.PROCESSING &&
-        progress.iteration === 1
-      ) {
-        taskLogger.info("🔍 Reviewing changes…", {
-          component: "ReviewChanges",
-        });
-        emitTaskProgress(
-          task,
-          PROGRESS_STAGES.PROCESSING,
-          "Reviewing changes…",
-        );
-        return;
-      }
-
-      if (
-        progress.compacting ||
-        progress.stage === PROGRESS_STAGES.COMPACTING
-      ) {
-        const msg =
-          progress.tokensAfterCompaction != null
-            ? `Compaction complete. Tokens after: ~${progress.tokensAfterCompaction}`
-            : "Compacting context…";
-        taskLogger.info(`🗜️  ${msg}`, { component: "ReviewChanges" });
-        emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
-        return;
-      }
-
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
         taskLogger.info(`  ⚡ ${progress.message}`, {
           component: "ReviewChanges",
@@ -107,6 +86,15 @@ export function reviewChangesHandler(task, taskLogger, agent) {
       }
     },
 
+    onCompaction: (phase, tokensAfter) => {
+      const msg =
+        phase === "complete"
+          ? `Compaction complete. Tokens after: ~${tokensAfter}`
+          : "Compacting context…";
+      taskLogger.info(`🗜️  ${msg}`, { component: "ReviewChanges" });
+      emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
+    },
+
     onToolCall: (toolName, args, result) => {
       emitTaskLog(task, {
         taskId,
@@ -116,7 +104,7 @@ export function reviewChangesHandler(task, taskLogger, agent) {
       });
     },
 
-    // Results flow via delegated tasks — no single output file to post-process
-    postProcess: async () => {},
+    // Results flow via delegated tasks — no validation needed
+    onComplete: async () => ({ success: true }),
   };
 }

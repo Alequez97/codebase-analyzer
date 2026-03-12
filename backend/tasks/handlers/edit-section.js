@@ -45,22 +45,21 @@ export function createEditSectionHandler(
     initialMessage,
     priorMessages,
 
-    onProgress: (progress) => {
-      if (
-        progress.stage === PROGRESS_STAGES.PROCESSING &&
-        progress.iteration === 1
-      ) {
-        taskLogger.info("🤔 AI is thinking...", { component: componentName });
+    onStart: () => {
+      taskLogger.info("🤔 AI is thinking...", { component: componentName });
 
-        emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
-          chatId: task.params.chatId,
-          taskId: task.id,
-          domainId: task.params.domainId,
-          sectionType: task.params.sectionType,
-          thinking: true,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
+        chatId: task.params.chatId,
+        taskId: task.id,
+        domainId: task.params.domainId,
+        sectionType: task.params.sectionType,
+        thinking: true,
+        timestamp: new Date().toISOString(),
+      });
+    },
+
+    onProgress: () => {
+      // No progress-specific logic needed
     },
 
     onMessage: (role, content) => {
@@ -92,7 +91,7 @@ export function createEditSectionHandler(
       }
     },
 
-    postProcess: async (result, task, agent, taskLogger) => {
+    onComplete: async (_result) => {
       const outputPath = path.join(config.target.directory, task.outputFile);
       let raw;
       try {
