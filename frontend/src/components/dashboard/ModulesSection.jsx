@@ -13,9 +13,20 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import {
+  DialogActionTrigger,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "../ui/dialog";
+import {
   Bug,
   ChevronDown,
   ChevronRight,
+  FileEdit,
   GripVertical,
   Pencil,
   Save,
@@ -420,6 +431,9 @@ export function ModulesSection() {
   const [isEditingSummary, setIsEditingSummary] = useState(false);
   const [editedSummary, setEditedSummary] = useState("");
   const [savingSummary, setSavingSummary] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editInstructions, setEditInstructions] = useState("");
+  const [submittingEdit, setSubmittingEdit] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     P0: true,
     P1: true,
@@ -434,6 +448,7 @@ export function ModulesSection() {
     analyzeCodebase,
     cancelCodebaseAnalysis,
     saveCodebaseSummary,
+    editCodebaseAnalysisStructure,
     updateDomainPriority,
   } = useCodebaseStore();
 
@@ -501,6 +516,48 @@ export function ModulesSection() {
         type: "error",
       });
     }
+  };
+
+  const handleOpenEditDialog = () => {
+    setEditInstructions("");
+    setShowEditDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setShowEditDialog(false);
+    setEditInstructions("");
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!editInstructions.trim()) {
+      toaster.create({
+        title: "Instructions required",
+        description: "Please provide instructions for what to change",
+        type: "error",
+      });
+      return;
+    }
+
+    setSubmittingEdit(true);
+    const result = await editCodebaseAnalysisStructure(editInstructions);
+    setSubmittingEdit(false);
+
+    if (result.success) {
+      toaster.create({
+        title: "Analysis update started",
+        description: "AI is updating the codebase analysis structure",
+        type: "success",
+      });
+      handleCloseEditDialog();
+      toggleDashboardLogs(); // Open logs to show progress
+      return;
+    }
+
+    toaster.create({
+      title: "Failed to start update",
+      description: result.error,
+      type: "error",
+    });
   };
 
   const toggleSection = (priority) =>
@@ -735,16 +792,6 @@ export function ModulesSection() {
                   <Save size={12} /> Save
                 </Button>
               )}
-              {!isEditingSummary && !analyzingCodebase && (
-                <Button
-                  colorPalette="blue"
-                  variant="outline"
-                  size="xs"
-                  onClick={analyzeCodebase}
-                >
-                  Re-analyze Codebase
-                </Button>
-              )}
             </HStack>
           </HStack>
           {isEditingSummary ? (
@@ -815,6 +862,15 @@ export function ModulesSection() {
                 fontSize="xs"
               />
             </Box>
+            <Button
+              size="xs"
+              variant="outline"
+              colorPalette="blue"
+              onClick={handleOpenEditDialog}
+              title="Edit codebase analysis structure"
+            >
+              <FileEdit size={12} /> Edit Structure
+            </Button>
           </HStack>
         </HStack>
 
@@ -833,6 +889,76 @@ export function ModulesSection() {
           </VStack>
         </DragDropContext>
       </VStack>
+
+      {/* Edit Codebase Analysis Dialog */}
+      <DialogRoot
+        open={showEditDialog}
+        onOpenChange={(e) => !submittingEdit && setShowEditDialog(e.open)}
+        size="lg"
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Codebase Analysis Structure</DialogTitle>
+            <DialogCloseTrigger disabled={submittingEdit} />
+          </DialogHeader>
+          <DialogBody pb={6}>
+            <VStack align="stretch" gap={3}>
+              <Text fontSize="sm" color="gray.600">
+                Describe what you want to change about the codebase analysis
+                structure:
+              </Text>
+              <VStack align="stretch" gap={2}>
+                <Text fontSize="xs" color="gray.500" fontWeight="500">
+                  Examples:
+                </Text>
+                <Box
+                  bg="gray.50"
+                  p={3}
+                  borderRadius="md"
+                  fontSize="xs"
+                  color="gray.600"
+                  lineHeight="tall"
+                >
+                  • "Add src/api/gateway.ts to the api-layer domain"
+                  <br />
+                  • "Remove the old-auth domain as it's been deleted"
+                  <br />
+                  • "Create a new domain called 'notification-service' with
+                  files: src/services/email.ts, src/services/sms.ts"
+                  <br />• "Move src/utils/validation.ts from shared-utils to
+                  auth domain"
+                </Box>
+              </VStack>
+              <Textarea
+                value={editInstructions}
+                onChange={(e) => setEditInstructions(e.target.value)}
+                placeholder="Enter your instructions here..."
+                rows={6}
+                fontSize="sm"
+                disabled={submittingEdit}
+              />
+            </VStack>
+          </DialogBody>
+          <DialogFooter>
+            <DialogActionTrigger asChild>
+              <Button
+                variant="outline"
+                onClick={handleCloseEditDialog}
+                disabled={submittingEdit}
+              >
+                Cancel
+              </Button>
+            </DialogActionTrigger>
+            <Button
+              colorPalette="blue"
+              onClick={handleSubmitEdit}
+              loading={submittingEdit}
+            >
+              Submit Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </Box>
   );
 }

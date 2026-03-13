@@ -31,6 +31,7 @@ export const SOCKET_EVENTS = {
   LOG_EDIT_REQUIREMENTS: "log:edit-requirements",
   LOG_EDIT_BUGS_SECURITY: "log:edit-bugs-security",
   LOG_EDIT_REFACTORING_AND_TESTING: "log:edit-refactoring-and-testing",
+  LOG_EDIT_CODEBASE_ANALYSIS: "log:edit-codebase-analysis",
 
   // Section analysis/edit results pushed directly via socket
   // isEdit: true when triggered by AI chat, false for fresh analysis

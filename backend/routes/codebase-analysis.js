@@ -1,7 +1,10 @@
 import express from "express";
 import * as codebaseAnalysisOrchestrator from "../orchestrators/codebase-analysis.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
-import { queueCodebaseAnalysisTask } from "../tasks/queue/index.js";
+import {
+  queueCodebaseAnalysisTask,
+  queueEditCodebaseAnalysisTask,
+} from "../tasks/queue/index.js";
 import * as logger from "../utils/logger.js";
 
 const router = express.Router();
@@ -143,6 +146,62 @@ router.post("/summary/save", async (req, res) => {
       component: "API",
     });
     res.status(500).json({ error: "Failed to save platform summary" });
+  }
+});
+
+/**
+ * Edit codebase analysis structure (AI task)
+ * POST /codebase-analysis/edit
+ *
+ * Use this to request AI-driven updates to codebase-analysis.json:
+ * - Add or remove domains
+ * - Update file-to-domain mappings
+ * - Update analyzedFiles list
+ *
+ * Body: { instructions: string, agentsOverrides?: { model?: string } }
+ */
+router.post("/edit", async (req, res) => {
+  try {
+    const { instructions, agentsOverrides = null } = req.body;
+    const model = agentsOverrides?.model || null;
+
+    if (
+      !instructions ||
+      typeof instructions !== "string" ||
+      !instructions.trim()
+    ) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "instructions string is required",
+      });
+    }
+
+    const task = await queueEditCodebaseAnalysisTask({
+      model,
+      requestInstructions: instructions.trim(),
+    });
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to create edit codebase analysis task",
+        code: task.code,
+      });
+    }
+
+    logger.info(`Edit codebase analysis task created: ${task.id}`, {
+      component: "API",
+      taskId: task.id,
+    });
+
+    res.status(201).json(task);
+  } catch (error) {
+    logger.error("Error creating edit codebase analysis task", {
+      error,
+      component: "API",
+    });
+    res
+      .status(500)
+      .json({ error: "Failed to create edit codebase analysis task" });
   }
 });
 

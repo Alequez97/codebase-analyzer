@@ -9,6 +9,7 @@ export const SYSTEM_INSTRUCTION_NAMES = {
   IMPLEMENT_FINDING_FIX: "implement-finding-fix.md",
   IMPLEMENT_TEST: "implement-test.md",
   APPLY_REFACTORING: "apply-refactoring.md",
+  EDIT_CODEBASE_ANALYSIS: "edit-codebase-analysis.md",
   EDIT_DOCUMENTATION: "edit-documentation.md",
   EDIT_DIAGRAMS: "edit-diagrams.md",
   EDIT_REQUIREMENTS: "edit-requirements.md",
@@ -33,6 +34,8 @@ export const SYSTEM_INSTRUCTION_PATHS = {
   IMPLEMENT_FINDING_FIX: "backend/system-instructions/implement-finding-fix.md",
   IMPLEMENT_TEST: "backend/system-instructions/implement-test.md",
   APPLY_REFACTORING: "backend/system-instructions/apply-refactoring.md",
+  EDIT_CODEBASE_ANALYSIS:
+    "backend/system-instructions/edit-codebase-analysis.md",
   EDIT_DOCUMENTATION: "backend/system-instructions/edit-documentation.md",
   EDIT_DIAGRAMS: "backend/system-instructions/edit-diagrams.md",
   EDIT_REQUIREMENTS: "backend/system-instructions/edit-requirements.md",

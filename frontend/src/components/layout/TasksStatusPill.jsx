@@ -31,6 +31,7 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.IMPLEMENT_FIX]: "Implement Fix",
   [TASK_TYPES.IMPLEMENT_TEST]: "Implement Test",
   [TASK_TYPES.APPLY_REFACTORING]: "Apply Refactoring",
+  [TASK_TYPES.EDIT_CODEBASE_ANALYSIS]: "Edit Codebase Analysis",
   [TASK_TYPES.EDIT_DOCUMENTATION]: "Edit Docs",
   [TASK_TYPES.EDIT_DIAGRAMS]: "Edit Diagrams",
   [TASK_TYPES.EDIT_REQUIREMENTS]: "Edit Requirements",
@@ -45,6 +46,7 @@ function taskLabel(type) {
 }
 
 const TASK_TYPE_LABELS_SHORT = {
+  [TASK_TYPES.EDIT_CODEBASE_ANALYSIS]: "Edit Codebase",
   [TASK_TYPES.EDIT_DOCUMENTATION]: "Edit Docs",
   [TASK_TYPES.EDIT_DIAGRAMS]: "Edit Diagrams",
   [TASK_TYPES.EDIT_REQUIREMENTS]: "Edit Requirements",
@@ -439,8 +441,6 @@ export function TasksStatusPill() {
   const completedCount = completedEntries.length;
   const totalCount = runningCount + pendingCount + failedCount + completedCount;
 
-  if (!loadingTasks && totalCount === 0) return null;
-
   const hasFailed = failedCount > 0;
   const hasRunning = runningCount > 0;
 
@@ -499,6 +499,9 @@ export function TasksStatusPill() {
               completedCount > 0 && (
                 <Text fontSize="xs">✓ {completedCount} completed</Text>
               )}
+            {!loadingTasks && totalCount === 0 && (
+              <Text fontSize="xs">No recent tasks</Text>
+            )}
             <ChevronDown size={12} />
           </Button>
         </Popover.Trigger>

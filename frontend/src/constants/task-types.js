@@ -15,6 +15,7 @@ export const TASK_TYPES = {
   APPLY_REFACTORING: "apply-refactoring",
 
   // Edit tasks
+  EDIT_CODEBASE_ANALYSIS: "edit-codebase-analysis",
   EDIT_DOCUMENTATION: "edit-documentation",
   EDIT_DIAGRAMS: "edit-diagrams",
   EDIT_REQUIREMENTS: "edit-requirements",

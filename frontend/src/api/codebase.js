@@ -14,6 +14,9 @@ export const getFullCodebaseAnalysis = () =>
 export const saveCodebaseSummary = (summary) =>
   client.post("/analysis/codebase/summary/save", { summary });
 
+export const editCodebaseAnalysis = (instructions, agentsOverrides = null) =>
+  client.post("/analysis/codebase/edit", { instructions, agentsOverrides });
+
 export const getCodebaseAnalysisLogs = () =>
   client.get("/logs/codebase-analysis");
 

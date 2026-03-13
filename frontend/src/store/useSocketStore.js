@@ -132,6 +132,14 @@ export const useSocketStore = create((set, get) => ({
       if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
         useCodebaseStore.getState().clearPendingCodebaseTask();
         await useCodebaseStore.getState().fetchAnalysis();
+      } else if (type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {
+        // Refetch codebase analysis to reflect structural changes
+        await useCodebaseStore.getState().fetchAnalysis();
+        toaster.create({
+          title: "Codebase analysis updated",
+          description: "The structure has been updated successfully.",
+          type: "success",
+        });
       } else if (type === TASK_TYPES.DOCUMENTATION && domainId) {
         useDomainDocumentationStore.getState().setLoading(domainId, false);
         // Content is pushed directly via DOCUMENTATION_UPDATED socket event
@@ -364,6 +372,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_EDIT_REQUIREMENTS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_BUGS_SECURITY, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_EDIT_REFACTORING_AND_TESTING, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_EDIT_CODEBASE_ANALYSIS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REVIEW_CHANGES, handleLogEvent);
 

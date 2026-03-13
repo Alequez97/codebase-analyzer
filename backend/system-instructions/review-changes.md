@@ -29,7 +29,32 @@ For each domain that appears affected by the diff, read the relevant section fil
 
 ---
 
-### Step 3 — Identify what needs updating
+### Step 3 — Check if codebase structure changed
+
+Before delegating domain section updates, check if the git diff shows structural changes that affect codebase-analysis.json:
+
+| Change Type                | When to Delegate                                                    |
+| -------------------------- | ------------------------------------------------------------------- |
+| **New files added**        | Files that should be tracked in `analyzedFiles` were added          |
+| **Files removed**          | Files tracked in `analyzedFiles` were deleted                       |
+| **New domain discovered**  | New functional area emerged that warrants its own domain entry      |
+| **Files moved to domain**  | Files moved between domains, requiring updates to domain file lists |
+| **Domain no longer valid** | All files in a domain were deleted or merged into other domains     |
+
+If any of these apply, delegate to `edit-codebase-analysis`:
+
+1. Write a request file under `.code-analysis/temp/delegation-requests/codebase-structure-update.md` explaining what changed
+2. Call `delegate_task` with:
+   ```json
+   {
+     "type": "edit-codebase-analysis",
+     "requestFile": ".code-analysis/temp/delegation-requests/codebase-structure-update.md"
+   }
+   ```
+
+---
+
+### Step 4 — Identify domain section updates
 
 For each affected domain, decide which section(s) need updating:
 
@@ -45,7 +70,7 @@ Only delegate sections that genuinely need updating — don't create unnecessary
 
 ---
 
-### Step 4 — Delegate updates
+### Step 5 — Delegate domain section updates
 
 For each (domain, section) pair that needs updating:
 
@@ -73,10 +98,11 @@ For each (domain, section) pair that needs updating:
 
 ## Rules
 
-- **Be selective** — only delegate when changes in the diff directly affect a domain section's accuracy.
+- **Be selective** — only delegate when changes in the diff directly affect analysis accuracy.
 - **Be specific** — request files should be focused. Vague requests produce vague updates.
-- **One delegation per section** — do not delegate the same (domain, section) pair twice.
-- **Temp files only** — request files must go under `.code-analysis/temp/delegation-requests/`. Never write to `.code-analysis/domains/` directly.
+- **One delegation per section** — do not delegate the same (domain, section) or (codebase-analysis) pair twice.
+- **Temp files only** — request files must go under `.code-analysis/temp/delegation-requests/`.
+- **Never write analysis files directly** — all updates must go through delegation (edit-\* tasks).
 - **No hallucination** — base all decisions on the actual diff output. Do not invent changes.
 
 ---
@@ -89,7 +115,9 @@ After all delegations are queued, respond with a brief summary:
 ## Review Summary
 
 **Changed files**: X
-**Affected domains**: domain-a, domain-b
+**Codebase structure**: Delegated update (added 3 files, removed 1 obsolete domain)
+**Delegated tasks**:
+  - codebase-analysis (structure update): domain-a, domain-b
 **Delegated tasks**:
   - domain-a / documentation
   - domain-b / bugs-security

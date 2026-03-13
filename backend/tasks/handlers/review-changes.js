@@ -1,6 +1,7 @@
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 import {
+  queueEditCodebaseAnalysisTask,
   queueEditDocumentationTask,
   queueEditDiagramsTask,
   queueEditRequirementsTask,
@@ -13,6 +14,7 @@ import {
  * The orchestrating agent uses delegate_task to hand off to any of these.
  */
 const REVIEW_CHANGES_QUEUE_FUNCTIONS = {
+  "edit-codebase-analysis": queueEditCodebaseAnalysisTask,
   "edit-documentation": queueEditDocumentationTask,
   "edit-diagrams": queueEditDiagramsTask,
   "edit-requirements": queueEditRequirementsTask,

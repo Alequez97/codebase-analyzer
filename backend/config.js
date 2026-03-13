@@ -179,6 +179,13 @@ const config = {
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
+    [TASK_TYPES.EDIT_CODEBASE_ANALYSIS]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_MINI,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.LOW,
+    },
 
     // Custom codebase task (floating agent chat)
     [TASK_TYPES.CUSTOM_CODEBASE_TASK]: {

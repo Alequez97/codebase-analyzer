@@ -11,6 +11,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { editDocumentationHandler } from "./edit-documentation.js";
+import { editCodebaseAnalysisHandler } from "./edit-codebase-analysis.js";
 import { createEditSectionHandler } from "./edit-section.js";
 import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { analyzeDocumentationHandler } from "./analyze-documentation.js";
@@ -59,12 +60,15 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
  *
  * - IMPLEMENT_FIX / IMPLEMENT_TEST / APPLY_REFACTORING : full project write access
  * - CUSTOM_CODEBASE_TASK                               : full project read + write access
+ * - REVIEW_CHANGES                                     : full project read access only
+ *                                                        (delegates edit tasks, writes only to .code-analysis/temp/)
  * - Edit tasks                                         : task.outputFile only
  * - Everything else                : empty list (analysis tasks only write to .code-analysis/,
  *                                    which is always permitted by the write gate)
  */
 function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   const EDIT_TASK_TYPES = [
+    TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
     TASK_TYPES.EDIT_REQUIREMENTS,
@@ -88,12 +92,17 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
     task.type === TASK_TYPES.REVIEW_CHANGES
   ) {
-    fileToolExecutor.setAllowAnyWrite(true);
+    if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+      fileToolExecutor.setAllowAnyWrite(true);
+    }
     fileToolExecutor.setAllowAnyRead(true);
-    taskLogger.info(
-      `🔓 Full project read+write access granted (${task.type})`,
-      { component: "TaskHandler" },
-    );
+    const access =
+      task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK
+        ? "read+write"
+        : "read-only";
+    taskLogger.info(`🔓 Full project ${access} access granted (${task.type})`, {
+      component: "TaskHandler",
+    });
     return;
   }
 
@@ -262,6 +271,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = customCodebaseTaskHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {
+    overrides = editCodebaseAnalysisHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DOCUMENTATION) {
     overrides = analyzeDocumentationHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REFACTORING_AND_TESTING) {

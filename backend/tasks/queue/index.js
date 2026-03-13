@@ -16,6 +16,7 @@ export { queueImplementTestTask } from "./implement-test.js";
 export { queueApplyRefactoringTask } from "./apply-refactoring.js";
 
 // Edit tasks (AI chat)
+export { queueEditCodebaseAnalysisTask } from "./edit-codebase-analysis.js";
 export { queueEditDocumentationTask } from "./edit-documentation.js";
 export { queueEditDiagramsTask } from "./edit-diagrams.js";
 export { queueEditRequirementsTask } from "./edit-requirements.js";

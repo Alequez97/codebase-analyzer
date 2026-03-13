@@ -164,6 +164,27 @@ export const useCodebaseStore = create((set, get) => ({
     }
   },
 
+  editCodebaseAnalysisStructure: async (instructions, agentsOverrides) => {
+    if (typeof instructions !== "string" || !instructions.trim()) {
+      return { success: false, error: "Instructions are required" };
+    }
+
+    try {
+      const response = await api.editCodebaseAnalysis(
+        instructions,
+        agentsOverrides,
+      );
+      const task = response.data;
+
+      return { success: true, data: task };
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        "Failed to start codebase analysis edit";
+      return { success: false, error: message };
+    }
+  },
+
   cancelCodebaseAnalysis: async () => {
     const { pendingCodebaseTask } = get();
     if (!pendingCodebaseTask) {
