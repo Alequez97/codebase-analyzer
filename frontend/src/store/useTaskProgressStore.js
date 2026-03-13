@@ -160,6 +160,25 @@ export const useTaskProgressStore = create((set, get) => ({
     });
   },
 
+  // ── Canceled ──────────────────────────────────────────────────────────────
+  // Upserts entry with status 'canceled' (clears stage/message/error)
+  setCanceled: ({ id, type, domainId }) => {
+    set((state) => {
+      const next = new Map(state.progressByTaskId);
+      const existing = next.get(id) ?? {};
+      next.set(id, {
+        ...existing,
+        domainId: domainId ?? existing.domainId,
+        type: type ?? existing.type,
+        status: "canceled",
+        stage: null,
+        message: null,
+        error: null,
+      });
+      return { progressByTaskId: next };
+    });
+  },
+
   dismissFailed: (taskId) => {
     set((state) => {
       const next = new Map(state.progressByTaskId);

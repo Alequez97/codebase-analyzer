@@ -9,7 +9,7 @@ import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
 
 /**
- * Read a task from any folder (pending, running, completed, or failed)
+ * Read a task from any folder (pending, running, completed, failed, or canceled)
  * @param {string} taskId - The task ID
  * @returns {Promise<Object|null>} Task object or null if not found
  */
@@ -37,6 +37,12 @@ export async function readTask(taskId) {
       config.paths.targetAnalysis,
       "tasks",
       TASK_FOLDERS.FAILED,
+      `${taskId}.json`,
+    ),
+    path.join(
+      config.paths.targetAnalysis,
+      "tasks",
+      TASK_FOLDERS.CANCELED,
       `${taskId}.json`,
     ),
   ];
@@ -134,7 +140,7 @@ export async function listRunning() {
  * @param {Object} filters - Filter options
  * @param {string} [filters.dateFrom] - ISO date string (inclusive)
  * @param {string} [filters.dateTo] - ISO date string (inclusive)
- * @param {string[]} [filters.status] - Array of status values to include (e.g., ['pending', 'running', 'failed'])
+ * @param {string[]} [filters.status] - Array of status values to include (e.g., ['pending', 'running', 'failed', 'canceled', 'completed'])
  * @returns {Promise<Object[]>}
  */
 export async function listTasks(filters = {}) {
@@ -276,6 +282,75 @@ export async function moveToFailed(taskId, error) {
 }
 
 /**
+ * Move task to canceled (user-initiated cancellation)
+ * @param {string} taskId - The task ID
+ * @returns {Promise<{success: boolean, code?: string, error?: string, task?: Object}>}
+ */
+export async function moveToCanceled(taskId) {
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
+  const pendingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.PENDING,
+    `${taskId}.json`,
+  );
+  const canceledPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.CANCELED,
+    `${taskId}.json`,
+  );
+
+  // Find the task in running or pending
+  let sourcePath = null;
+  let task = null;
+
+  for (const taskPath of [runningPath, pendingPath]) {
+    try {
+      const content = await fs.readFile(taskPath, "utf-8");
+      task = JSON.parse(content);
+      sourcePath = taskPath;
+      break;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+
+  if (!task) {
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.NOT_FOUND,
+      error: `Task ${taskId} not found or cannot be canceled`,
+    };
+  }
+
+  // Update task status
+  task.status = TASK_STATUS.CANCELED;
+  task.canceledAt = new Date().toISOString();
+
+  // Write to canceled folder
+  await fs.mkdir(path.dirname(canceledPath), { recursive: true });
+  await fs.writeFile(canceledPath, JSON.stringify(task, null, 2), "utf-8");
+
+  // Delete from source folder
+  await fs.unlink(sourcePath);
+
+  emitSocketEvent(SOCKET_EVENTS.TASK_CANCELED, {
+    taskId: task.id,
+    type: task.type,
+    domainId: task.params?.domainId,
+    timestamp: new Date().toISOString(),
+  });
+
+  return { success: true, task };
+}
+
+/**
  * Move a stuck running task back to pending (used on server restart)
  * @param {string} taskId - The task ID
  * @returns {Promise<Object>} The re-queued task
@@ -306,7 +381,119 @@ export async function requeueRunningTask(taskId) {
 }
 
 /**
- * Delete a task from pending, completed, or failed
+ * Restart a failed, pending, or canceled task by moving it back to pending
+ * @param {string} taskId - The task ID
+ * @returns {Promise<{success: boolean, code?: string, error?: string, task?: Object}>}
+ */
+export async function restartTask(taskId) {
+  const pendingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.PENDING,
+    `${taskId}.json`,
+  );
+  const failedPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.FAILED,
+    `${taskId}.json`,
+  );
+  const canceledPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.CANCELED,
+    `${taskId}.json`,
+  );
+  const completedPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.COMPLETED,
+    `${taskId}.json`,
+  );
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
+
+  // Check if task is running
+  try {
+    await fs.access(runningPath);
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.INVALID_STATUS,
+      error: "Cannot restart a task that is currently running",
+    };
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+
+  // Check if task is completed
+  try {
+    await fs.access(completedPath);
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.INVALID_STATUS,
+      error: "Cannot restart a completed task",
+    };
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+
+  // Try to find task in pending, failed, or canceled
+  let sourcePath = null;
+  let task = null;
+
+  for (const taskPath of [pendingPath, failedPath, canceledPath]) {
+    try {
+      const content = await fs.readFile(taskPath, "utf-8");
+      task = JSON.parse(content);
+      sourcePath = taskPath;
+      break;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+
+  if (!task) {
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.NOT_FOUND,
+      error: `Task ${taskId} not found or cannot be restarted`,
+    };
+  }
+
+  // Reset task to pending status
+  task.status = TASK_STATUS.PENDING;
+  delete task.startedAt;
+  delete task.completedAt;
+  delete task.failedAt;
+  delete task.canceledAt;
+  delete task.error;
+
+  // Write back to pending folder
+  await fs.mkdir(path.dirname(pendingPath), { recursive: true });
+  await fs.writeFile(pendingPath, JSON.stringify(task, null, 2), "utf-8");
+
+  // Delete from source folder if different
+  if (sourcePath !== pendingPath) {
+    await fs.unlink(sourcePath);
+  }
+
+  emitSocketEvent(SOCKET_EVENTS.TASK_RESTARTED, {
+    taskId: task.id,
+    type: task.type,
+    domainId: task.params?.domainId,
+    delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
+    timestamp: new Date().toISOString(),
+  });
+
+  return { success: true, task };
+}
+
+/**
+ * Delete a task from pending, running, or failed (not completed)
  * Also deletes associated log file if it exists
  * @param {string} taskId - The task ID
  * @returns {Promise<{success: boolean, code?: string, error?: string}>}
@@ -336,10 +523,28 @@ export async function deleteTask(taskId) {
     TASK_FOLDERS.FAILED,
     `${taskId}.json`,
   );
+  const canceledPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.CANCELED,
+    `${taskId}.json`,
+  );
+
+  // Check if task is completed - prevent deletion
+  try {
+    await fs.access(completedPath);
+    return {
+      success: false,
+      code: TASK_ERROR_CODES.INVALID_STATUS,
+      error: "Cannot delete a completed task",
+    };
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
 
   // First read the task to get log file path
   let task = null;
-  const paths = [pendingPath, runningPath, completedPath, failedPath];
+  const paths = [pendingPath, runningPath, failedPath, canceledPath];
 
   for (const taskPath of paths) {
     try {
@@ -369,7 +574,7 @@ export async function deleteTask(taskId) {
     }
   }
 
-  // Delete task file (try all locations, including running/)
+  // Delete task file (try pending, running, failed, and canceled)
   let deleted = false;
   for (const taskPath of paths) {
     try {
@@ -387,7 +592,7 @@ export async function deleteTask(taskId) {
     return {
       success: false,
       code: TASK_ERROR_CODES.NOT_FOUND,
-      error: `Task ${taskId} not found in any location`,
+      error: `Task ${taskId} not found or already completed`,
     };
   }
 

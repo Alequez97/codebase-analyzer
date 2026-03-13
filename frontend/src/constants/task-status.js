@@ -1,6 +1,9 @@
 /**
  * Task status constants
+ * Used to identify the current state of analysis tasks
+ * Must match backend constants in backend/constants/task-status.js
  */
+
 export const TASK_STATUS = {
   PENDING: "pending",
   RUNNING: "running",

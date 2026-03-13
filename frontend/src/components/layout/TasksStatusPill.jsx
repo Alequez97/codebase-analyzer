@@ -10,11 +10,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ChevronDown, X, Check } from "lucide-react";
+import { ChevronDown, X, Check, RotateCw, Trash2 } from "lucide-react";
 import { useCodebaseStore } from "../../store/useCodebaseStore";
 import { useTaskProgressStore } from "../../store/useTaskProgressStore";
 import { useGitBranchesStore } from "../../store/useGitBranchesStore";
 import { useLogsStore } from "../../store/useLogsStore";
+import { toaster } from "../ui/toaster";
 import api from "../../api";
 import { reviewChanges } from "../../api/review-changes";
 import { TASK_TYPES } from "../../constants/task-types";
@@ -221,13 +222,15 @@ function RunningTaskRow({ taskId, entry }) {
 
       <Button
         size="xs"
-        variant="outline"
+        variant="ghost"
         colorPalette="gray"
+        px={2}
         flexShrink={0}
         mt="2px"
         onClick={handleCancel}
+        title="Cancel task"
       >
-        Cancel
+        <X size={14} />
       </Button>
     </HStack>
   );
@@ -238,11 +241,20 @@ function PendingTaskRow({ taskId, entry }) {
   const { clearProgress, progressByTaskId } = useTaskProgressStore();
 
   const handleDelete = async () => {
-    clearProgress(taskId);
     try {
       await api.deleteTask(taskId);
-    } catch {
-      // ignore
+      clearProgress(taskId);
+      toaster.create({
+        title: "Task deleted",
+        type: "success",
+      });
+    } catch (error) {
+      const message = error.response?.data?.error || "Failed to delete task";
+      toaster.create({
+        title: "Failed to delete task",
+        description: message,
+        type: "error",
+      });
     }
   };
 
@@ -280,13 +292,15 @@ function PendingTaskRow({ taskId, entry }) {
 
       <Button
         size="xs"
-        variant="outline"
-        colorPalette="gray"
+        variant="ghost"
+        colorPalette="red"
+        px={2}
         flexShrink={0}
         mt="2px"
         onClick={handleDelete}
+        title="Delete task"
       >
-        Delete
+        <Trash2 size={14} />
       </Button>
     </HStack>
   );
@@ -295,6 +309,43 @@ function PendingTaskRow({ taskId, entry }) {
 function FailedTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
   const { dismissFailed, progressByTaskId } = useTaskProgressStore();
+
+  const handleRestart = async () => {
+    try {
+      await api.restartTask(taskId);
+      dismissFailed(taskId);
+      toaster.create({
+        title: "Task restarted",
+        description: "Task moved back to pending queue",
+        type: "success",
+      });
+    } catch (error) {
+      const message = error.response?.data?.error || "Failed to restart task";
+      toaster.create({
+        title: "Failed to restart task",
+        description: message,
+        type: "error",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await api.deleteTask(taskId);
+      dismissFailed(taskId);
+      toaster.create({
+        title: "Task deleted",
+        type: "success",
+      });
+    } catch (error) {
+      const message = error.response?.data?.error || "Failed to delete task";
+      toaster.create({
+        title: "Failed to delete task",
+        description: message,
+        type: "error",
+      });
+    }
+  };
 
   return (
     <HStack
@@ -328,16 +379,132 @@ function FailedTaskRow({ taskId, entry }) {
         />
       </Box>
 
-      <Button
-        size="xs"
-        variant="outline"
-        colorPalette="red"
-        flexShrink={0}
-        mt="2px"
-        onClick={() => dismissFailed(taskId)}
-      >
-        Dismiss
-      </Button>
+      <HStack gap={1} flexShrink={0} mt="2px">
+        <Button
+          size="xs"
+          variant="ghost"
+          colorPalette="blue"
+          px={2}
+          onClick={handleRestart}
+          title="Restart task"
+        >
+          <RotateCw size={14} />
+        </Button>
+        <Button
+          size="xs"
+          variant="ghost"
+          colorPalette="red"
+          px={2}
+          onClick={handleDelete}
+          title="Delete task"
+        >
+          <Trash2 size={14} />
+        </Button>
+      </HStack>
+    </HStack>
+  );
+}
+
+function CanceledTaskRow({ taskId, entry }) {
+  const { primary, subtitle } = useTaskTitles(entry);
+  const { dismissFailed, progressByTaskId } = useTaskProgressStore();
+
+  const handleRestart = async () => {
+    try {
+      await api.restartTask(taskId);
+      dismissFailed(taskId);
+      toaster.create({
+        title: "Task restarted",
+        description: "Task moved back to pending queue",
+        type: "success",
+      });
+    } catch (error) {
+      const message = error.response?.data?.error || "Failed to restart task";
+      toaster.create({
+        title: "Failed to restart task",
+        description: message,
+        type: "error",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await api.deleteTask(taskId);
+      dismissFailed(taskId);
+      toaster.create({
+        title: "Task deleted",
+        type: "success",
+      });
+    } catch (error) {
+      const message = error.response?.data?.error || "Failed to delete task";
+      toaster.create({
+        title: "Failed to delete task",
+        description: message,
+        type: "error",
+      });
+    }
+  };
+
+  return (
+    <HStack
+      px={4}
+      py="8px"
+      gap={2.5}
+      align="flex-start"
+      _hover={{ bg: "gray.50" }}
+    >
+      <TaskIcon bg="orange.50">
+        <Text
+          fontSize="12px"
+          color="orange.500"
+          fontWeight="bold"
+          lineHeight={1}
+        >
+          ∅
+        </Text>
+      </TaskIcon>
+
+      <Box flex={1} minW={0}>
+        <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
+          {primary}
+        </Text>
+        {subtitle && (
+          <Text fontSize="11px" color="gray.500" mt="1px">
+            {subtitle}
+          </Text>
+        )}
+        <Text fontSize="11px" color="orange.500" mt="3px">
+          Canceled
+        </Text>
+        <DelegatedByBadge
+          delegatedByTaskId={entry.delegatedByTaskId}
+          progressByTaskId={progressByTaskId}
+        />
+      </Box>
+
+      <HStack gap={1} flexShrink={0} mt="2px">
+        <Button
+          size="xs"
+          variant="ghost"
+          colorPalette="blue"
+          px={2}
+          onClick={handleRestart}
+          title="Restart task"
+        >
+          <RotateCw size={14} />
+        </Button>
+        <Button
+          size="xs"
+          variant="ghost"
+          colorPalette="red"
+          px={2}
+          onClick={handleDelete}
+          title="Delete task"
+        >
+          <Trash2 size={14} />
+        </Button>
+      </HStack>
     </HStack>
   );
 }
@@ -431,6 +598,7 @@ export function TasksStatusPill() {
   const runningEntries = allEntries.filter(([, e]) => e.status === "running");
   const pendingEntries = allEntries.filter(([, e]) => e.status === "pending");
   const failedEntries = allEntries.filter(([, e]) => e.status === "failed");
+  const canceledEntries = allEntries.filter(([, e]) => e.status === "canceled");
   const completedEntries = allEntries.filter(
     ([, e]) => e.status === "completed",
   );
@@ -438,8 +606,10 @@ export function TasksStatusPill() {
   const runningCount = runningEntries.length;
   const pendingCount = pendingEntries.length;
   const failedCount = failedEntries.length;
+  const canceledCount = canceledEntries.length;
   const completedCount = completedEntries.length;
-  const totalCount = runningCount + pendingCount + failedCount + completedCount;
+  const totalCount =
+    runningCount + pendingCount + failedCount + canceledCount + completedCount;
 
   const hasFailed = failedCount > 0;
   const hasRunning = runningCount > 0;
@@ -492,6 +662,14 @@ export function TasksStatusPill() {
             {!loadingTasks && !hasRunning && !hasFailed && pendingCount > 0 && (
               <Text fontSize="xs">↑ {pendingCount} queued</Text>
             )}
+            {!loadingTasks &&
+              !hasRunning &&
+              !hasFailed &&
+              pendingCount === 0 &&
+              canceledCount > 0 &&
+              completedCount === 0 && (
+                <Text fontSize="xs">∅ {canceledCount} canceled</Text>
+              )}
             {!loadingTasks &&
               !hasRunning &&
               !hasFailed &&
@@ -666,11 +844,36 @@ export function TasksStatusPill() {
                 </Box>
               )}
 
-              {completedCount > 0 && (
+              {canceledCount > 0 && (
                 <Box>
                   <SectionHeading
                     hasBorderTop={
                       runningCount > 0 || pendingCount > 0 || failedCount > 0
+                    }
+                  >
+                    <SectionLabel color="orange.400">∅ Canceled</SectionLabel>
+                    <SectionCount bg="orange.50" color="orange.600">
+                      {canceledCount}
+                    </SectionCount>
+                  </SectionHeading>
+                  {canceledEntries.map(([taskId, entry]) => (
+                    <CanceledTaskRow
+                      key={taskId}
+                      taskId={taskId}
+                      entry={entry}
+                    />
+                  ))}
+                </Box>
+              )}
+
+              {completedCount > 0 && (
+                <Box>
+                  <SectionHeading
+                    hasBorderTop={
+                      runningCount > 0 ||
+                      pendingCount > 0 ||
+                      failedCount > 0 ||
+                      canceledCount > 0
                     }
                   >
                     <SectionLabel color="green.500">✓ Completed</SectionLabel>

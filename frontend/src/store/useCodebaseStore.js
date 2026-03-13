@@ -193,7 +193,7 @@ export const useCodebaseStore = create((set, get) => ({
     }
 
     try {
-      await api.deleteTask(pendingCodebaseTask.id);
+      await api.cancelTask(pendingCodebaseTask.id);
       set({ pendingCodebaseTask: null, analyzingCodebase: false });
       return { success: true };
     } catch (err) {

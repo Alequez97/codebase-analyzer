@@ -328,6 +328,7 @@ export async function executeTask(taskId) {
 
 /**
  * Delete a task and abort any running agent for it.
+ * Cannot delete completed tasks.
  * @param {string} taskId - The task ID
  */
 export async function deleteTask(taskId) {
@@ -348,6 +349,56 @@ export async function deleteTask(taskId) {
   }
 
   return { success: true };
+}
+
+/**
+ * Cancel a task and abort any running agent for it.
+ * Moves task to canceled folder instead of deleting.
+ * @param {string} taskId - The task ID
+ * @returns {Promise<{success: boolean, code?: string, error?: string, task?: Object}>}
+ */
+export async function cancelTask(taskId) {
+  // Abort the in-flight agent loop (if any) before moving the file.
+  const controller = runningTaskControllers.get(taskId);
+  if (controller) {
+    controller.abort();
+    runningTaskControllers.delete(taskId);
+    logger.info(`Aborted running agent for task ${taskId}`, {
+      component: "TaskOrchestrator",
+    });
+  }
+
+  const result = await tasksPersistence.moveToCanceled(taskId);
+
+  if (!result.success) {
+    return result;
+  }
+
+  logger.info(`Task ${taskId} canceled by user`, {
+    component: "TaskOrchestrator",
+  });
+
+  return { success: true, task: result.task };
+}
+
+/**
+ * Restart a failed, pending, or canceled task by moving it back to pending.
+ * Cannot restart running or completed tasks.
+ * @param {string} taskId - The task ID
+ * @returns {Promise<{success: boolean, code?: string, error?: string, task?: Object}>}
+ */
+export async function restartTask(taskId) {
+  const result = await tasksPersistence.restartTask(taskId);
+
+  if (!result.success) {
+    return result;
+  }
+
+  logger.info(`Task ${taskId} restarted and moved back to pending`, {
+    component: "TaskOrchestrator",
+  });
+
+  return { success: true, task: result.task };
 }
 
 /**

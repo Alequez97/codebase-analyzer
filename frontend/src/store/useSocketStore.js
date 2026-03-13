@@ -337,6 +337,44 @@ export const useSocketStore = create((set, get) => ({
       }
     });
 
+    // Task cancellation events
+    socket.on(SOCKET_EVENTS.TASK_CANCELED, (data) => {
+      const { type, domainId, taskId } = data;
+
+      // Mark task as canceled in the progress map
+      if (taskId) {
+        useTaskProgressStore
+          .getState()
+          .setCanceled({ id: taskId, type, domainId });
+      }
+
+      // Handle different task types
+      if (type === TASK_TYPES.CODEBASE_ANALYSIS) {
+        useCodebaseStore.getState().clearPendingCodebaseTask();
+      } else if (type === TASK_TYPES.DOCUMENTATION && domainId) {
+        useDomainDocumentationStore.getState().setLoading(domainId, false);
+      } else if (type === TASK_TYPES.DIAGRAMS && domainId) {
+        useDomainDiagramsStore.getState().setLoading(domainId, false);
+      } else if (type === TASK_TYPES.REQUIREMENTS && domainId) {
+        useDomainRequirementsStore.getState().setLoading(domainId, false);
+      } else if (type === TASK_TYPES.BUGS_SECURITY && domainId) {
+        useDomainBugsSecurityStore.getState().setLoading(domainId, false);
+      } else if (type === TASK_TYPES.REFACTORING_AND_TESTING && domainId) {
+        useDomainTestingStore.getState().setLoading(domainId, false);
+      } else if (type === TASK_TYPES.IMPLEMENT_TEST && domainId) {
+        useRefactoringAndTestingStore
+          .getState()
+          .failImplementByTaskId(domainId, data.taskId);
+      } else if (type === TASK_TYPES.APPLY_REFACTORING && domainId) {
+        useRefactoringAndTestingStore.getState().failApplyRefactoring(domainId);
+      } else if (type === TASK_TYPES.IMPLEMENT_FIX && domainId) {
+        const findingId = data.params?.findingId;
+        if (findingId) {
+          useDomainBugsSecurityStore.getState().clearImplementingFix(findingId);
+        }
+      }
+    });
+
     // Log events - stream logs to logs store
     const handleLogEvent = ({ type, log, domainId, taskId }) => {
       // Add to codebase analysis logs (visible in dashboard)

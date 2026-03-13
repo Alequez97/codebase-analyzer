@@ -1,6 +1,7 @@
 import express from "express";
 import * as taskOrchestrator from "../orchestrators/task.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
+import { TASK_TYPES } from "../constants/task-types.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
 import {
@@ -87,10 +88,14 @@ router.post("/:id/cancel", async (req, res) => {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    // Mark the task as failed with a cancellation message
-    const result = await taskOrchestrator.deleteTask(id);
+    // Cancel the task (moves to canceled folder)
+    const result = await taskOrchestrator.cancelTask(id);
 
     if (!result.success) {
+      if (result.code === TASK_ERROR_CODES.NOT_FOUND) {
+        return res.status(404).json({ error: result.error });
+      }
+
       return res
         .status(500)
         .json({ error: result.error || "Failed to cancel task" });
@@ -98,11 +103,14 @@ router.post("/:id/cancel", async (req, res) => {
 
     logger.info(`Task ${id} cancelled by user`, { component: "API" });
 
-    emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_CANCELLED, {
-      taskId: id,
-      domainId: task.params?.domainId || null,
-      timestamp: new Date().toISOString(),
-    });
+    // For custom codebase tasks, emit additional event for chat UI
+    if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+      emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_CANCELLED, {
+        taskId: id,
+        domainId: task.params?.domainId || null,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     res.json({ success: true, message: "Task cancelled" });
   } catch (error) {
@@ -111,6 +119,45 @@ router.post("/:id/cancel", async (req, res) => {
       component: "API",
     });
     res.status(500).json({ error: "Failed to cancel task" });
+  }
+});
+
+/**
+ * Restart a failed or pending task
+ * POST /tasks/:id/restart
+ */
+router.post("/:id/restart", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await taskOrchestrator.restartTask(id);
+
+    if (!result.success) {
+      if (result.code === TASK_ERROR_CODES.NOT_FOUND) {
+        return res.status(404).json({ error: result.error });
+      }
+
+      if (result.code === TASK_ERROR_CODES.INVALID_STATUS) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      return res
+        .status(500)
+        .json({ error: result.error || "Failed to restart task" });
+    }
+
+    logger.info(`Task ${id} restarted by user`, { component: "API" });
+
+    res.json({
+      success: true,
+      message: "Task restarted and moved to pending queue",
+      task: result.task,
+    });
+  } catch (error) {
+    logger.error(`Error restarting task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to restart task" });
   }
 });
 

@@ -12,6 +12,8 @@ export const SOCKET_EVENTS = {
   TASK_QUEUED: "task:queued",
   TASK_COMPLETED: "task:completed",
   TASK_FAILED: "task:failed",
+  TASK_CANCELED: "task:canceled",
+  TASK_RESTARTED: "task:restarted",
   TASK_PROGRESS: "task:progress",
 
   // Task-specific logs
