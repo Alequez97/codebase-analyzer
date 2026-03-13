@@ -559,8 +559,16 @@ function CompletedTaskRow({ taskId, entry }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+const TIME_FILTER_OPTIONS = [
+  { value: "1", label: "Last hour" },
+  { value: "24", label: "Last 24 hours" },
+  { value: "168", label: "Last 7 days" },
+  { value: "720", label: "Last 30 days" },
+  { value: "all", label: "All time" },
+];
+
 export function TasksStatusPill() {
-  const { progressByTaskId, loadingTasks, clearAllFailed } =
+  const { progressByTaskId, loadingTasks, timeFilter, setTimeFilter } =
     useTaskProgressStore();
   const { toggleDashboardLogs } = useLogsStore();
   const { baseBranch, setBaseBranch, branches, currentBranch, fetchBranches } =
@@ -705,17 +713,27 @@ export function TasksStatusPill() {
               <Text fontSize="13px" fontWeight="700" color="gray.900">
                 Tasks
               </Text>
-              {hasFailed && (
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  colorPalette="gray"
+              <NativeSelect.Root size="xs" width="auto" minWidth="120px">
+                <NativeSelect.Field
+                  value={timeFilter}
+                  onChange={(e) => setTimeFilter(e.target.value)}
                   fontSize="11px"
-                  onClick={clearAllFailed}
+                  color="gray.600"
+                  borderColor="gray.200"
+                  _hover={{ borderColor: "gray.300" }}
+                  _focus={{
+                    borderColor: "blue.400",
+                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                  }}
                 >
-                  Clear failed
-                </Button>
-              )}
+                  {TIME_FILTER_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
             </HStack>
 
             {/* Review Changes */}
