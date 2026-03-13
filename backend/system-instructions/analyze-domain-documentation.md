@@ -39,6 +39,21 @@ Create Markdown documentation with these sections:
 
 **Use Mermaid diagrams extensively.** One diagram replaces paragraphs of text.
 
+## ⛔ Mermaid Compatibility Rules (Read Before Writing Any Diagram)
+
+These mistakes cause parse failures in the documentation renderer:
+
+| ❌ Invalid                                     | ✅ Valid                                             |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| `loop For each watch`                          | `loop per_watch` + `%% For each watch` comment below |
+| `loop Notifications`                           | `loop per_notification`                              |
+| `note for Node "text"`                         | `%% text` inside block, or explain in Markdown prose |
+| `note for Node "text"` in flowchart            | Remove entirely; flowcharts don't support notes      |
+| Nested `alt/else/alt` with missing outer `end` | Count every opened block and add a matching `end`    |
+| `note over A,B` inside a loop or alt block     | Move `note over` outside the loop/alt block          |
+
+**Nesting checklist:** Before finalising a sequence diagram, count all `alt`/`loop`/`opt`/`par`/`rect` openings and verify there is a matching `end` for each one.
+
 ## Mermaid Diagram Examples
 
 **Use these patterns for correct Mermaid syntax:**
@@ -127,8 +142,11 @@ sequenceDiagram
 
 - Simple Note text - avoid `<`, `>`, `=>`, semicolons
 - Use descriptive words instead of operators
-- Place Notes outside loops when possible
+- Place Notes outside loops and alt blocks when possible
 - `alt`/`else` for conditionals, `loop` for iterations
+- ❌ **Loop/alt/opt labels must be single identifiers — no spaces.** `loop per_watch` ✅ — `loop For each watch` ❌. Put the human description in a `%%` comment on the next line.
+- ❌ **Every `alt`, `loop`, `opt`, `par`, `rect` block must have its own matching `end`.** When nesting (e.g. `alt` inside `else` inside `alt`), count the `end` keywords — one per opened block. A missing `end` on the outer block is the most common cause of autonumber/note parse errors at the end of the diagram.
+- ❌ **Never use `note for X "text"`** in sequence diagrams. Use `note over A,B: text` or `note right of A: text`, or move the note outside the mermaid block entirely.
 
 ### State Diagram (with nested states)
 
@@ -183,8 +201,6 @@ classDiagram
   User --> Session : "creates"
   User --> Permission : "has many"
   Session --> User : "belongs to"
-
-  note for User "Each user can have multiple active sessions"
 ```
 
 **Key points:**
@@ -192,6 +208,7 @@ classDiagram
 - Relationships: `-->` (association), `--|>` (inheritance)
 - Labels on relationships: `Class1 --> Class2 : "label"`
 - Visibility: `+` public, `-` private, `#` protected
+- ❌ **Never use `note for X "text"`** — it is NOT valid in flowcharts or class diagrams in most Mermaid versions and causes parse errors. Use `%% comment` inside the block or explain in surrounding Markdown prose instead.
 
 ## Example Output
 
