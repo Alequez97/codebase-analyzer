@@ -490,18 +490,21 @@ export const useSocketStore = create((set, get) => ({
         if (!domainId) return;
 
         if (isEdit) {
-          // AI chat edit — show diff view in the section chat
+          // AI chat edit — show diff view only when content actually changed
           const currentDocumentation = useDomainDocumentationStore
             .getState()
             .dataById.get(domainId);
           const oldContent = currentDocumentation?.content || "";
+          const newContent = content || "";
 
           const agentChatStore = useAgentChatStore.getState();
-          agentChatStore.setPendingSuggestion(domainId, "documentation", {
-            oldContent,
-            newContent: content || "",
-            chatId,
-          });
+          if (newContent !== oldContent) {
+            agentChatStore.setPendingSuggestion(domainId, "documentation", {
+              oldContent,
+              newContent,
+              chatId,
+            });
+          }
           if (chatId) {
             agentChatStore.setChatState(chatId, {
               isWorking: false,
