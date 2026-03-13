@@ -12,6 +12,24 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_OUTPUT_LENGTH = 8_000;
 
 /**
+ * Shell metacharacters that, if present in a command, indicate an injection
+ * attempt.  Since spawn runs with `shell: true`, every one of these can be
+ * used to chain or redirect additional commands.
+ *
+ *   ;       command separator
+ *   &&      conditional AND chaining
+ *   ||      conditional OR chaining
+ *   |       pipe  (LLM receives full output so pipes are unnecessary)
+ *   >  >>   stdout/stderr redirection
+ *   <       stdin redirection
+ *   `       backtick sub-shell
+ *   $(      sub-shell substitution
+ *   ${      variable expansion
+ *   \n \r   newline-injected commands
+ */
+const SHELL_INJECTION_PATTERN = /[;&|><`$\n\r]/;
+
+/**
  * Prefixes of commands that are safe to execute.
  * Includes test-runner commands and package installation commands.
  */
@@ -185,10 +203,16 @@ export class CommandToolExecutor {
   }
 
   /**
-   * Check whether a command starts with a known-safe prefix
+   * Check whether a command starts with a known-safe prefix and contains no
+   * shell metacharacters that could be used for command injection.
    * @private
    */
   _isSafeCommand(command) {
+    // Block shell injection via metacharacters regardless of prefix.
+    // The spawn call uses shell:true, so all of these are dangerous.
+    if (SHELL_INJECTION_PATTERN.test(command)) {
+      return false;
+    }
     const lower = command.toLowerCase();
     return this.allowedPrefixes.some((prefix) =>
       lower.startsWith(prefix.toLowerCase()),
