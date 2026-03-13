@@ -79,12 +79,12 @@ export const COMMAND_TOOLS = [
   {
     name: "execute_command",
     description:
-      "Execute a command in the project root directory. Use this to install missing test dependencies (e.g., 'npm install mongodb-memory-server --save-dev'), configure package.json scripts (e.g., 'npm pkg set scripts.test=jest'), or run tests after writing a test file (e.g., 'npx jest path/to/test.js'). Only installation, configuration, and test-runner commands are allowed.",
+      "Execute a safe command in the project root directory. Supported commands: (1) Git commands for context: 'git diff', 'git log', 'git status', 'git show', 'git blame', 'git branch'. (2) Package/test commands: install dependencies (e.g., 'npm install mongodb-memory-server --save-dev'), configure package.json (e.g., 'npm pkg set scripts.test=jest'), or run tests (e.g., 'npx jest path/to/test.js'). Use git commands to understand what changed, file history, and current state. Use package commands to set up and run tests.",
     parameters: {
       command: {
         type: "string",
         description:
-          "The test command to run in the project root (e.g. 'npx jest src/auth/login.test.js --no-coverage').",
+          "The command to run in the project root (e.g., 'git diff HEAD~1', 'npx jest src/auth/login.test.js --no-coverage', 'npm install --save-dev').",
       },
     },
     required: ["command"],
@@ -137,7 +137,7 @@ export class CommandToolExecutor {
 
     if (!this._isSafeCommand(trimmed)) {
       const allowed = this.allowedPrefixes.join(", ");
-      return `Error: Command not allowed for security reasons. Only test-runner commands are permitted. Allowed prefixes: ${allowed}`;
+      return `Error: Command not allowed for security reasons. Only safe commands are permitted (git, package managers, test runners). Allowed prefixes: ${allowed}`;
     }
 
     logger.info(`Executing command: ${trimmed}`, {

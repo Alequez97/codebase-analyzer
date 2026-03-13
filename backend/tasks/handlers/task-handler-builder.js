@@ -118,10 +118,63 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   }
 }
 
+/**
+ * Enable git command tools for tasks that benefit from version control context.
+ * Git commands are read-only, safe, and help agents understand:
+ * - What changed recently (git diff, git log)
+ * - File history and blame
+ * - Current branch and status
+ *
+ * @param {LLMAgent} agent - The agent instance
+ * @param {Object} task - The task object
+ * @param {Object} taskLogger - Logger instance
+ */
+function enableGitCommandsIfUseful(agent, task, taskLogger) {
+  // Tasks that benefit from git context
+  const GIT_ENABLED_TASK_TYPES = [
+    TASK_TYPES.IMPLEMENT_FIX,
+    TASK_TYPES.IMPLEMENT_TEST,
+    TASK_TYPES.APPLY_REFACTORING,
+    TASK_TYPES.REVIEW_CHANGES,
+    TASK_TYPES.CUSTOM_CODEBASE_TASK,
+    TASK_TYPES.EDIT_DOCUMENTATION,
+    TASK_TYPES.EDIT_DIAGRAMS,
+    TASK_TYPES.EDIT_REQUIREMENTS,
+    TASK_TYPES.EDIT_BUGS_SECURITY,
+    TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
+  ];
+
+  if (!GIT_ENABLED_TASK_TYPES.includes(task.type)) {
+    return; // Skip for pure analysis tasks
+  }
+
+  // Enable git commands (read-only, safe)
+  agent.enableCommandTools({
+    timeoutMs: 60_000,
+    additionalAllowedPrefixes: [
+      "git diff",
+      "git log",
+      "git status",
+      "git show",
+      "git branch",
+      "git blame",
+    ],
+  });
+
+  taskLogger.info("🔧 Git command tools enabled", {
+    component: "TaskHandler",
+  });
+}
+
 export async function createTaskHandler(task, taskLogger, agent) {
   // Configure file-access permissions for this task type (single source of truth).
   if (agent?.fileToolExecutor) {
     setTaskFileAccess(agent.fileToolExecutor, task, taskLogger);
+  }
+
+  // Enable git commands for tasks that benefit from version control context
+  if (agent) {
+    enableGitCommandsIfUseful(agent, task, taskLogger);
   }
 
   // Load task-specific system instructions
