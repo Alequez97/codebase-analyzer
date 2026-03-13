@@ -25,6 +25,47 @@ function formatValue(value) {
   return String(value);
 }
 
+/**
+ * Determines the color scheme for the expected output based on status code
+ * @param {*} expectedOutput - The expected output value (can be object, string, etc.)
+ * @returns {{ bg: string, color: string }} - Chakra UI color tokens
+ */
+function getExpectedOutputColors(expectedOutput) {
+  // Try to extract status code from the expected output
+  let statusCode = null;
+
+  if (typeof expectedOutput === "object" && expectedOutput !== null) {
+    statusCode = expectedOutput.statusCode;
+  } else if (typeof expectedOutput === "string") {
+    try {
+      const parsed = JSON.parse(expectedOutput);
+      statusCode = parsed.statusCode;
+    } catch {
+      // Not JSON, ignore
+    }
+  }
+
+  // If no status code found, default to green (success)
+  if (statusCode === null || statusCode === undefined) {
+    return { bg: "green.50", color: "green.800" };
+  }
+
+  // Color based on HTTP status code ranges
+  if (statusCode >= 200 && statusCode < 300) {
+    // 2xx Success
+    return { bg: "green.50", color: "green.800" };
+  } else if (statusCode >= 400 && statusCode < 500) {
+    // 4xx Client Error
+    return { bg: "orange.50", color: "orange.800" };
+  } else if (statusCode >= 500 && statusCode < 600) {
+    // 5xx Server Error
+    return { bg: "red.50", color: "red.800" };
+  } else {
+    // Other status codes (1xx, 3xx, etc.)
+    return { bg: "blue.50", color: "blue.800" };
+  }
+}
+
 export function TestCaseDetails({ scenarios }) {
   const [activeTab, setActiveTab] = useState(0);
   const scenarioList = scenarios || [];
@@ -151,8 +192,14 @@ export function TestCaseDetails({ scenarios }) {
                         <Code
                           fontSize="xs"
                           p={2}
-                          bg="green.50"
-                          color="green.800"
+                          bg={
+                            getExpectedOutputColors(testCaseItem.expectedOutput)
+                              .bg
+                          }
+                          color={
+                            getExpectedOutputColors(testCaseItem.expectedOutput)
+                              .color
+                          }
                           borderRadius="sm"
                           display="block"
                           whiteSpace="pre-wrap"
