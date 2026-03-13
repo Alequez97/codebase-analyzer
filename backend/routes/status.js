@@ -1,6 +1,6 @@
 import express from "express";
 import config from "../config.js";
-import { detectAvailableAgents } from "../agents/index.js";
+import { detectAvailableAgents } from "../tasks/executors/index.js";
 
 const router = express.Router();
 

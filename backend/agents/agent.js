@@ -1,9 +1,12 @@
-import { FileToolExecutor, FILE_TOOLS } from "./tools/file-tools.js";
-import { CommandToolExecutor, COMMAND_TOOLS } from "./tools/command-tools.js";
+import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
+import {
+  CommandToolExecutor,
+  COMMAND_TOOLS,
+} from "../llm/tools/command-tools.js";
 import {
   DelegationToolExecutor,
   DELEGATION_TOOLS,
-} from "./tools/delegation-tools.js";
+} from "../llm/tools/delegation-tools.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 

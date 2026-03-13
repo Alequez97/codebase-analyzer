@@ -1,8 +1,8 @@
 import * as llmApi from "./llm-api.js";
 import * as aider from "./aider.js";
-import config from "../config.js";
-import { AGENT_ERROR_CODES } from "../constants/agent-error-codes.js";
-import { AGENTS as AGENT_TYPES } from "../constants/agents.js";
+import config from "../../config.js";
+import { AGENT_ERROR_CODES } from "../../constants/agent-error-codes.js";
+import { AGENTS as AGENT_TYPES } from "../../constants/agents.js";
 
 /**
  * Available AI agents

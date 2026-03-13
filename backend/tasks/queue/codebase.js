@@ -1,6 +1,6 @@
 import config from "../../config.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
-import { getAgentConfig } from "../../agents/index.js";
+import { getAgentConfig } from "../executors/index.js";
 import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import { getCodebaseAnalysisOutputPath } from "../../constants/task-output-paths.js";
 import { TASK_TYPES } from "../../constants/task-types.js";

@@ -1,5 +1,5 @@
 import * as tasksPersistence from "../../persistence/tasks.js";
-import { getAgentConfig } from "../../agents/index.js";
+import { getAgentConfig } from "../executors/index.js";
 import { SYSTEM_INSTRUCTION_PATHS } from "../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,

@@ -1,21 +1,21 @@
-import config from "../config.js";
-import { ClaudeClient } from "../llm/clients/claude-client.js";
-import { OpenAIClient } from "../llm/clients/openai-client.js";
-import { DeepSeekClient } from "../llm/clients/deepseek-client.js";
-import { ChatState } from "../llm/state/chat-state.js";
-import { OpenAIChatState } from "../llm/state/openai-chat-state.js";
-import { LLMAgent } from "../llm/agent.js";
-import { PROGRESS_STAGES } from "../constants/progress-stages.js";
-import { emitTaskProgress } from "../utils/socket-emitter.js";
-import * as logger from "../utils/logger.js";
+import config from "../../config.js";
+import { ClaudeClient } from "../../llm/clients/claude-client.js";
+import { OpenAIClient } from "../../llm/clients/openai-client.js";
+import { DeepSeekClient } from "../../llm/clients/deepseek-client.js";
+import { ChatState } from "../../llm/state/chat-state.js";
+import { OpenAIChatState } from "../../llm/state/openai-chat-state.js";
+import { LLMAgent } from "../../agents/agent.js";
+import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
+import { emitTaskProgress } from "../../utils/socket-emitter.js";
+import * as logger from "../../utils/logger.js";
 import {
   setupTaskLogger,
   logTaskHeader,
   logTaskSuccess,
   logTaskError,
-} from "../utils/task-logger.js";
-import { getProviderFromModel } from "../utils/model-utils.js";
-import { createTaskHandler } from "../tasks/handlers/index.js";
+} from "../../utils/task-logger.js";
+import { getProviderFromModel } from "../../utils/model-utils.js";
+import { createTaskHandler } from "../handlers/index.js";
 
 /**
  * Detect if the LLM API agent is available.
