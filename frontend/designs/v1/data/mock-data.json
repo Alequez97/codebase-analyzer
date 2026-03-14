@@ -1,0 +1,57 @@
+{
+  "systemStatus": {
+    "api": "connected",
+    "socket": "connected",
+    "totalTasks": 5,
+    "runningTasks": 2,
+    "completedTasks": 2,
+    "failedTasks": 1
+  },
+  "taskStatusList": [
+    {
+      "id": "analyze-codebase",
+      "name": "Analyze Codebase",
+      "status": "completed",
+      "progress": 100,
+      "startTime": "2024-01-15T10:00:00Z",
+      "endTime": "2024-01-15T10:05:00Z",
+      "error": null
+    },
+    {
+      "id": "analyze-auth-domain",
+      "name": "Analyze Authentication Domain",
+      "status": "running",
+      "progress": 65,
+      "startTime": "2024-01-15T10:05:00Z",
+      "endTime": null,
+      "error": null
+    },
+    {
+      "id": "analyze-payment-domain",
+      "name": "Analyze Payment Domain",
+      "status": "running",
+      "progress": 30,
+      "startTime": "2024-01-15T10:05:00Z",
+      "endTime": null,
+      "error": null
+    },
+    {
+      "id": "analyze-user-domain",
+      "name": "Analyze User Management Domain",
+      "status": "pending",
+      "progress": 0,
+      "startTime": null,
+      "endTime": null,
+      "error": null
+    },
+    {
+      "id": "generate-report",
+      "name": "Generate Security Report",
+      "status": "failed",
+      "progress": 0,
+      "startTime": "2024-01-15T10:10:00Z",
+      "endTime": "2024-01-15T10:12:00Z",
+      "error": "Connection timeout"
+    }
+  ]
+}
