@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codebase Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       Reset & Base
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #09090b;
+      background: #ffffff;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { cursor: pointer; font-family: inherit; }
+    input  { font-family: inherit; }
+
+    /* ─────────────────────────────────────────
+       Navbar
+    ───────────────────────────────────────── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fafafa;
+      border-bottom: 1px solid #e4e4e7;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 0;
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Logo / project button */
+    .btn-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 0 6px;
+      height: 32px;
+      color: #3f3f46;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .btn-logo:hover { background: #f4f4f5; }
+
+    /* Generic nav text button */
+    .nav-text-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 0 14px;
+      height: 36px;
+      font-size: 14px;
+      color: #27272a;
+    }
+    .nav-text-btn:hover { background: #f4f4f5; }
+
+    /* Status group */
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #52525b;
+    }
+    .status-item .lbl { color: #71717a; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f0fdf4;
+      color: #116932;
+      border-radius: 9999px;
+      padding: 1px 7px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+    .status-badge .dot {
+      width: 6px; height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Tasks pill button */
+    .tasks-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      padding: 0 10px;
+      height: 32px;
+      font-size: 12px;
+      color: #27272a;
+    }
+    .tasks-pill:hover { background: #f4f4f5; }
+    .tasks-pill svg { color: #71717a; }
+    .check-mark { color: #16a34a; font-size: 12px; font-weight: 700; }
+
+    /* Icon-only button */
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      width: 36px; height: 36px;
+      color: #71717a;
+    }
+    .icon-btn:hover { background: #f4f4f5; color: #27272a; }
+
+    /* ─────────────────────────────────────────
+       Main Content
+    ───────────────────────────────────────── */
+    .main {
+      padding: 20px 32px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── Platform Description Box ── */
+    .desc-box {
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .desc-heading {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+    .desc-heading-text {
+      font-size: 10px;
+      font-weight: 700;
+      color: #52525b;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+    .edit-inline-btn {
+      background: none;
+      border: none;
+      padding: 2px;
+      border-radius: 3px;
+      color: #93c5fd;
+      display: flex;
+      align-items: center;
+    }
+    .edit-inline-btn:hover { color: #3b82f6; }
+    .desc-body {
+      font-size: 13px;
+      color: #1e3a5f;
+      line-height: 1.65;
+    }
+    .desc-body .hl { color: #2563eb; }
+
+    /* ── Domains Bar ── */
+    .domains-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 32px;
+    }
+    .domains-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: #27272a;
+      flex-wrap: wrap;
+    }
+    .domains-bar-left strong { font-weight: 600; }
+    .domains-bar-left .muted {
+      color: #71717a;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .domains-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .filter-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .filter-icon {
+      position: absolute;
+      left: 8px;
+      color: #a1a1aa;
+      pointer-events: none;
+      display: flex;
+    }
+    .filter-input {
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      padding: 0 8px 0 28px;
+      font-size: 12px;
+      height: 32px;
+      width: 200px;
+      background: #fff;
+      color: #27272a;
+      outline: none;
+    }
+    .filter-input::placeholder { color: #a1a1aa; }
+    .filter-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px #dbeafe; }
+
+    .btn-edit-structure {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid #3b82f6;
+      border-radius: 4px;
+      padding: 0 10px;
+      height: 32px;
+      font-size: 12px;
+      color: #173da6;
+      white-space: nowrap;
+    }
+    .btn-edit-structure:hover { background: #eff6ff; }
+
+    /* ── Priority Groups ── */
+    .groups-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .priority-group {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .priority-group.p0 { border: 1px solid #f9c6c6; }
+    .priority-group.p1 { border: 1px solid #fddcb5; }
+    .priority-group.p2 { border: 1px solid #fde68a; }
+    .priority-group.p3 { border: 1px solid #e5e7eb; }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      user-select: none;
+    }
+    .p0 .group-header { background: #fff5f5; }
+    .p1 .group-header { background: #fff8f2; }
+    .p2 .group-header { background: #fefce8; }
+    .p3 .group-header { background: #f9fafb; }
+
+    .group-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .priority-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .p0 .priority-dot { background: #ef4444; }
+    .p1 .priority-dot { background: #f97316; }
+    .p2 .priority-dot { background: #eab308; }
+    .p3 .priority-dot { background: #9ca3af; }
+
+    .priority-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #27272a;
+    }
+    .priority-sep { color: #d4d4d8; }
+    .priority-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .p0 .priority-name { color: #991b1b; }
+    .p1 .priority-name { color: #9a3412; }
+    .p2 .priority-name { color: #854d0e; }
+    .p3 .priority-name { color: #4b5563; }
+
+    .group-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .count-badge {
+      border-radius: 9999px;
+      padding: 1px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 18px;
+    }
+    .p0 .count-badge { background: #fee2e2; color: #991919; }
+    .p1 .count-badge { background: #ffedd5; color: #9a3412; }
+    .p2 .count-badge { background: #fef9c3; color: #854d0e; }
+    .p3 .count-badge { background: #f3f4f6; color: #4b5563; }
+
+    .group-chevron {
+      display: flex;
+      align-items: center;
+      color: #a1a1aa;
+      transition: transform 0.15s ease;
+    }
+    .priority-group.collapsed .group-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .group-body {
+      background: #ffffff;
+    }
+    .priority-group.collapsed .group-body {
+      display: none;
+    }
+
+    /* ── Cards Grid ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 12px 12px 8px;
+    }
+
+    /* ── Domain Card ── */
+    .domain-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 3px 0px;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      transition: border-color 0.12s, box-shadow 0.12s;
+      min-height: 120px;
+    }
+    .domain-card:hover {
+      border-color: #c7d2fe;
+      box-shadow: rgba(0, 0, 0, 0.09) 0px 2px 8px 0px;
+    }
+
+    .drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      flex-shrink: 0;
+      cursor: grab;
+      color: #d4d4d8;
+      padding: 0 4px;
+    }
+    .drag-handle:hover { color: #a1a1aa; }
+    .drag-dots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5px;
+    }
+    .drag-dots span {
+      width: 3px; height: 3px;
+      background: currentColor;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .card-body {
+      flex: 1;
+      padding: 12px 12px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #27272a;
+      line-height: 1.4;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: #71717a;
+      line-height: 1.65;
+      flex: 1;
+    }
+    .card-desc .hl { color: #2563eb; }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+      gap: 8px;
+    }
+
+    .card-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #a1a1aa;
+    }
+    .tag-dot {
+      width: 6px; height: 6px;
+      background: #d4d4d8;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .btn-analyze {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 0 10px;
+      height: 26px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .btn-analyze:hover { background: #1d4ed8; }
+
+    .btn-view {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      padding: 0 10px;
+      height: 26px;
+      font-size: 12px;
+      color: #27272a;
+      white-space: nowrap;
+    }
+    .btn-view:hover { background: #f4f4f5; }
+
+    /* ─────────────────────────────────────────
+       SVG helpers
+    ───────────────────────────────────────── */
+    .icon { display: inline-flex; align-items: center; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       Navbar
+  ══════════════════════════════════════ -->
+  <header class="navbar">
+    <div class="navbar-left">
+      <!-- Project logo button -->
+      <button class="btn-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        codebase-analyzer
+      </button>
+
+      <!-- Design nav link -->
+      <button class="nav-text-btn" style="font-size:13px; padding:0 10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        Design
+      </button>
+    </div>
+
+    <div class="navbar-right">
+      <!-- API + Socket status -->
+      <div class="status-group">
+        <div class="status-item">
+          <span class="lbl">API:</span>
+          <span class="status-badge"><span class="dot"></span>Connected</span>
+        </div>
+        <div class="status-item">
+          <span class="lbl">Socket:</span>
+          <span class="status-badge"><span class="dot"></span>Connected</span>
+        </div>
+      </div>
+
+      <!-- Tasks pill -->
+      <button class="tasks-pill">
+        <span class="check-mark">✓</span>
+        1 completed
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      <!-- Logs -->
+      <button class="nav-text-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Logs
+      </button>
+
+      <!-- Settings gear -->
+      <button class="icon-btn" title="Open settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════
+       Main
+  ══════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Platform Description -->
+    <div class="desc-box">
+      <div class="desc-heading">
+        <span class="desc-heading-text">Platform Description</span>
+        <button class="edit-inline-btn" title="Edit">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+      <p class="desc-body">
+        Codebase Analyzer is a CLI-launched web application for AI-assisted code audits of a target repository.
+        It runs an <span class="hl">Express + Socket.IO backend</span> and a <span class="hl">React dashboard</span>
+        to generate, review, and iteratively refine per-domain documentation, diagrams, requirements,
+        <span class="hl">bugs/security findings</span>, and refactoring/testing recommendations.
+        All analysis artifacts, task state, logs, and chat history are persisted into the target project's
+        <span class="hl">.code-analysis/</span> directory.
+      </p>
+    </div>
+
+    <!-- Domains Bar -->
+    <div class="domains-bar">
+      <div class="domains-bar-left">
+        Found <strong>&nbsp;18&nbsp;</strong> domains across <strong>&nbsp;4&nbsp;</strong> priority groups
+        <span class="muted">— drag cards between groups to reprioritize</span>
+      </div>
+      <div class="domains-bar-right">
+        <div class="filter-wrap">
+          <span class="filter-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input class="filter-input" type="text" placeholder="Filter domains…" />
+        </div>
+        <button class="btn-edit-structure">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit Structure
+        </button>
+      </div>
+    </div>
+
+    <!-- Priority Groups -->
+    <div class="groups-stack" id="groups-root"></div>
+
+  </main>
+
+  <script>
+    /* ══════════════════════════════════════════
+       Data
+    ══════════════════════════════════════════ */
+    const GROUPS = [
+      {
+        id: "p0", label: "P0", name: "Critical", count: 7,
+        domains: [
+          { title: "CLI Launcher",
+            desc: "Starts the backend (and optional frontend) against a target project directory with auto-selected ports." },
+          { title: "Backend API & WebSocket Server",
+            desc: "Serves REST APIs and real-time Socket.IO events for analysis workflows, task status, and UI updates." },
+          { title: "Task Queue & Orchestration",
+            desc: "Queues, executes, retries, cancels, and recovers analysis and implementation tasks using a filesystem-backed queue." },
+          { title: "Codebase Analysis Generation",
+            desc: "Generates and serves the top-level codebase analysis (summary + discovered domains) for the target project." },
+          { title: "Domain Analysis Sections (Docs/Diagrams/Requirements/Bugs/Testing)",
+            desc: "Runs per-domain analyses to produce section outputs and enables fetching/saving those artifacts via APIs." },
+          { title: "Artifact Persistence & Revision Tracking",
+            desc: "Persists analysis outputs and metadata (revisions, logs linkage, section paths) into the target project's .code-analysis structure." },
+          { title: "LLM Provider Integration",
+            desc: "Selects LLM providers/models per task type and executes multi-turn tool-using agent runs." }
+        ]
+      },
+      {
+        id: "p1", label: "P1", name: "High", count: 8,
+        domains: [
+          { title: "LLM Tools (File/Command/Delegation)",
+            desc: "Provides safe file operations, safe command execution, and task delegation tools to LLM agents." },
+          { title: "Chat & Section Editing Workflows",
+            desc: "Supports persistent per-domain/section chat sessions and AI-driven edit tasks for analysis sections." },
+          { title: "Custom Codebase Chat (Floating Agent)",
+            desc: "Allows users to run freeform AI tasks across the target repo with socket-streamed progress and optional domain context." },
+          { title: "Review Changes Orchestration",
+            desc: "Diffs git changes and delegates targeted edit tasks to keep analysis artifacts consistent with code changes." },
+          { title: "Implementation Workflows (Fixes/Tests/Refactors)",
+            desc: "Queues and validates AI-applied code changes for fixes, test implementations, and refactoring applications." },
+          { title: "Logs, Progress, and Observability",
+            desc: "Captures and serves task logs and progress updates to the UI and persists them for later inspection." },
+          { title: "Frontend Dashboard & Domain UI",
+            desc: "Presents the codebase summary and domains, supports prioritization, and provides per-domain section views and editors." },
+          { title: "Frontend API Client & State Management",
+            desc: "Coordinates API calls, caching, and UI state using Axios wrappers and Zustand stores." }
+        ]
+      },
+      {
+        id: "p2", label: "P2", name: "Medium", count: 1,
+        collapsed: true,
+        domains: [
+          { title: "Design System & Prototype",
+            desc: "Manages design tokens, screen prototypes, and the design version gallery." }
+        ]
+      },
+      {
+        id: "p3", label: "P3", name: "Low", count: 2,
+        collapsed: true,
+        domains: [
+          { title: "Documentation & Guides",
+            desc: "Contains project documentation, architectural guides, and onboarding materials." },
+          { title: "Configuration & Tooling",
+            desc: "ESLint, Vite config, package manifests, and other build/dev tooling." }
+        ]
+      }
+    ];
+
+    /* ══════════════════════════════════════════
+       SVG Icons
+    ══════════════════════════════════════════ */
+    const SPARKLE_SVG = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2 L13.5 9 L20 12 L13.5 15 L12 22 L10.5 15 L4 12 L10.5 9 Z"/>
+      </svg>`;
+
+    const CHEVRON_SVG = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>`;
+
+    /* ══════════════════════════════════════════
+       Render Helpers
+    ══════════════════════════════════════════ */
+    function dragHandleHTML() {
+      return `
+        <div class="drag-handle">
+          <div class="drag-dots">
+            <span></span><span></span>
+            <span></span><span></span>
+            <span></span><span></span>
+          </div>
+        </div>`;
+    }
+
+    function cardTagsHTML() {
+      return ['Docs', 'Reqs', 'Bugs', 'Tests'].map(t =>
+        `<span class="card-tag"><span class="tag-dot"></span>${t}</span>`
+      ).join('');
+    }
+
+    function domainCardHTML(domain) {
+      return `
+        <div class="domain-card">
+          ${dragHandleHTML()}
+          <div class="card-body">
+            <div class="card-title">${domain.title}</div>
+            <div class="card-desc">${domain.desc}</div>
+            <div class="card-footer">
+              <div class="card-tags">${cardTagsHTML()}</div>
+              <div class="card-actions">
+                <button class="btn-analyze">${SPARKLE_SVG} Analyze</button>
+                <button class="btn-view">View →</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function groupHTML(group) {
+      const collapsedClass = group.collapsed ? ' collapsed' : '';
+      const domainsHTML = group.domains.map(domainCardHTML).join('');
+
+      return `
+        <div class="priority-group ${group.id}${collapsedClass}" data-group="${group.id}">
+          <div class="group-header" onclick="toggleGroup('${group.id}')">
+            <div class="group-header-left">
+              <div class="priority-dot"></div>
+              <span class="priority-label">${group.label}</span>
+              <span class="priority-sep"> · </span>
+              <span class="priority-name">${group.name}</span>
+            </div>
+            <div class="group-header-right">
+              <span class="count-badge">${group.count}</span>
+              <span class="group-chevron">${CHEVRON_SVG}</span>
+            </div>
+          </div>
+          <div class="group-body">
+            <div class="cards-grid">${domainsHTML}</div>
+          </div>
+        </div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       Mount
+    ══════════════════════════════════════════ */
+    document.getElementById('groups-root').innerHTML =
+      GROUPS.map(groupHTML).join('');
+
+    /* ══════════════════════════════════════════
+       Interactions
+    ══════════════════════════════════════════ */
+    function toggleGroup(id) {
+      const el = document.querySelector(`.priority-group[data-group="${id}"]`);
+      if (el) el.classList.toggle('collapsed');
+    }
+
+    // Filter domains
+    document.querySelector('.filter-input').addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      document.querySelectorAll('.domain-card').forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const desc  = card.querySelector('.card-desc').textContent.toLowerCase();
+        card.style.display = (!q || title.includes(q) || desc.includes(q)) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
