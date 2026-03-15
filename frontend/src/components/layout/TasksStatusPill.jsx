@@ -308,12 +308,13 @@ function PendingTaskRow({ taskId, entry }) {
 
 function FailedTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
-  const { dismissFailed, progressByTaskId } = useTaskProgressStore();
+  const { dismissFailed, markPendingRestart, progressByTaskId } =
+    useTaskProgressStore();
 
   const handleRestart = async () => {
     try {
       await api.restartTask(taskId);
-      dismissFailed(taskId);
+      markPendingRestart(taskId);
       toaster.create({
         title: "Task restarted",
         description: "Task moved back to pending queue",
@@ -407,12 +408,13 @@ function FailedTaskRow({ taskId, entry }) {
 
 function CanceledTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
-  const { dismissFailed, progressByTaskId } = useTaskProgressStore();
+  const { dismissFailed, markPendingRestart, progressByTaskId } =
+    useTaskProgressStore();
 
   const handleRestart = async () => {
     try {
       await api.restartTask(taskId);
-      dismissFailed(taskId);
+      markPendingRestart(taskId);
       toaster.create({
         title: "Task restarted",
         description: "Task moved back to pending queue",

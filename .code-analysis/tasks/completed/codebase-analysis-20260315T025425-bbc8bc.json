@@ -1,0 +1,22 @@
+{
+  "id": "codebase-analysis-20260315T025425-bbc8bc",
+  "type": "codebase-analysis",
+  "status": "completed",
+  "createdAt": "2026-03-15T02:54:25.230Z",
+  "params": {
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5.2",
+    "maxTokens": 64000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/analyze-full-codebase.md",
+  "outputFile": ".code-analysis/analysis/codebase-analysis.json",
+  "progressFile": ".code-analysis/temp/progress/codebase-analysis-20260315T025425-bbc8bc.md",
+  "logFile": "logs/codebase-analysis-20260315T025425-bbc8bc.log",
+  "startedAt": "2026-03-15T02:59:50.178Z",
+  "completedAt": "2026-03-15T03:04:14.538Z"
+}

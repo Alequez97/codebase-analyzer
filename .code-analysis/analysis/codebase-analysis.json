@@ -1,0 +1,310 @@
+{
+  "timestamp": "2026-03-15T02:54:25.000Z",
+  "summary": "Codebase Analyzer is a CLI-launched web application for AI-assisted code audits of a target repository. It runs an Express + Socket.IO backend and a React dashboard to generate, review, and iteratively refine per-domain documentation, diagrams, requirements, bugs/security findings, and refactoring/testing recommendations. All analysis artifacts, task state, logs, and chat history are persisted into the target project’s .code-analysis/ directory.",
+  "domains": [
+    {
+      "id": "cli-launcher",
+      "name": "CLI Launcher",
+      "businessPurpose": "Starts the backend (and optional frontend) against a target project directory with auto-selected ports.",
+      "files": [
+        "bin/code-analyzer.js",
+        "package.json",
+        "README.md",
+        "backend/config.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "backend-api-and-websocket",
+      "name": "Backend API & WebSocket Server",
+      "businessPurpose": "Serves REST APIs and real-time Socket.IO events for analysis workflows, task status, and UI updates.",
+      "files": [
+        "backend/index.js",
+        "backend/routes/index.js",
+        "backend/routes/status.js",
+        "backend/utils/socket-emitter.js",
+        "backend/constants/socket-events.js",
+        "backend/utils/logger.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "task-queue-and-orchestration",
+      "name": "Task Queue & Orchestration",
+      "businessPurpose": "Queues, executes, retries, cancels, and recovers analysis and implementation tasks using a filesystem-backed queue.",
+      "files": [
+        "backend/orchestrators/queue-processor.js",
+        "backend/orchestrators/task.js",
+        "backend/persistence/tasks.js",
+        "backend/routes/tasks.js",
+        "backend/utils/task-progress.js",
+        "backend/utils/task-logger.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "codebase-analysis-generation",
+      "name": "Codebase Analysis Generation",
+      "businessPurpose": "Generates and serves the top-level codebase analysis (summary + discovered domains) for the target project.",
+      "files": [
+        "backend/routes/codebase-analysis.js",
+        "backend/orchestrators/codebase-analysis.js",
+        "backend/persistence/codebase-analysis.js",
+        "backend/tasks/queue/codebase.js",
+        "backend/tasks/handlers/edit-codebase-analysis.js",
+        "backend/system-instructions/analyze-full-codebase.md"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "domain-analysis-sections",
+      "name": "Domain Analysis Sections (Docs/Diagrams/Requirements/Bugs/Testing)",
+      "businessPurpose": "Runs per-domain analyses to produce section outputs and enables fetching/saving those artifacts via APIs.",
+      "files": [
+        "backend/routes/domain/core.js",
+        "backend/routes/domain/documentation.js",
+        "backend/routes/domain/diagrams.js",
+        "backend/routes/domain/requirements.js",
+        "backend/routes/domain/bugs-security.js",
+        "backend/routes/domain/refactoring-and-testing.js",
+        "backend/persistence/domain-aggregate.js",
+        "backend/constants/section-types.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "domain-artifact-persistence-and-revisions",
+      "name": "Artifact Persistence & Revision Tracking",
+      "businessPurpose": "Persists analysis outputs and metadata (revisions, logs linkage, section paths) into the target project’s .code-analysis structure.",
+      "files": [
+        "backend/persistence/domain-section-paths.js",
+        "backend/persistence/utils.js",
+        "backend/persistence/domain-documentation.js",
+        "backend/persistence/domain-diagrams.js",
+        "backend/persistence/domain-requirements.js",
+        "backend/persistence/domain-bugs-security.js",
+        "backend/persistence/domain-refactoring-and-testing.js",
+        "backend/constants/persistence-files.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "llm-provider-integration",
+      "name": "LLM Provider Integration",
+      "businessPurpose": "Selects LLM providers/models per task type and executes multi-turn tool-using agent runs.",
+      "files": [
+        "backend/tasks/executors/llm-api.js",
+        "backend/llm/clients/openai-client.js",
+        "backend/llm/clients/claude-client.js",
+        "backend/llm/clients/deepseek-client.js",
+        "backend/llm/state/chat-state.js",
+        "backend/llm/state/openai-chat-state.js",
+        "backend/utils/model-utils.js",
+        "backend/constants/models.js"
+      ],
+      "priority": "P0",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "llm-tools-file-command-and-delegation",
+      "name": "LLM Tools (File/Command/Delegation)",
+      "businessPurpose": "Provides safe file operations, safe command execution, and task delegation tools to LLM agents.",
+      "files": [
+        "backend/llm/tools/file-tools.js",
+        "backend/llm/tools/command-tools.js",
+        "backend/llm/tools/delegation-tools.js",
+        "backend/agents/agent.js",
+        "backend/constants/tool-error-codes.js",
+        "backend/tests/tools/file-tools.test.js",
+        "backend/tests/tools/command-tools.test.js",
+        "backend/tests/tools/delegation-tools.test.js"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "chat-and-edit-workflows",
+      "name": "Chat & Section Editing Workflows",
+      "businessPurpose": "Supports persistent per-domain/section chat sessions and AI-driven edit tasks for analysis sections.",
+      "files": [
+        "backend/routes/domain-sections-chat.js",
+        "backend/utils/chat-history.js",
+        "backend/tasks/queue/edit-documentation.js",
+        "backend/tasks/handlers/edit-documentation.js",
+        "backend/tasks/handlers/edit-section.js",
+        "backend/system-instructions/edit-domain-section.md",
+        "frontend/src/store/useAgentChatStore.js",
+        "frontend/src/components/FloatingChat/ChatPanel.jsx"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "custom-codebase-chat-and-actions",
+      "name": "Custom Codebase Chat (Floating Agent)",
+      "businessPurpose": "Allows users to run freeform AI tasks across the target repo with socket-streamed progress and optional domain context.",
+      "files": [
+        "backend/routes/codebase-chat.js",
+        "backend/tasks/queue/custom-codebase-task.js",
+        "backend/tasks/handlers/custom-codebase-task.js",
+        "backend/system-instructions/custom-codebase-task.md",
+        "frontend/src/components/FloatingChat/FloatingAgentChat.jsx",
+        "frontend/src/components/FloatingChat/TaskSelector.jsx",
+        "frontend/src/components/FloatingChat/ModelSelector.jsx",
+        "frontend/src/store/useAgentChatStore.js"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "review-changes-orchestration",
+      "name": "Review Changes Orchestration",
+      "businessPurpose": "Diffs git changes and delegates targeted edit tasks to keep analysis artifacts consistent with code changes.",
+      "files": [
+        "backend/routes/review-changes.js",
+        "backend/tasks/queue/review-changes.js",
+        "backend/tasks/handlers/review-changes.js",
+        "backend/system-instructions/review-changes.md",
+        "frontend/src/api/review-changes.js",
+        "frontend/src/store/useGitBranchesStore.js",
+        "frontend/src/components/layout/TasksStatusPill.jsx"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "implementation-workflows-fixes-tests-refactors",
+      "name": "Implementation Workflows (Fixes/Tests/Refactors)",
+      "businessPurpose": "Queues and validates AI-applied code changes for fixes, test implementations, and refactoring applications.",
+      "files": [
+        "backend/routes/domain/bugs-security.js",
+        "backend/routes/domain/refactoring-and-testing.js",
+        "backend/tasks/queue/implement-fix.js",
+        "backend/tasks/handlers/implement-fix.js",
+        "backend/tasks/queue/implement-test.js",
+        "backend/tasks/handlers/implement-test.js",
+        "backend/tasks/queue/apply-refactoring.js",
+        "backend/tasks/handlers/apply-refactoring.js"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "project-utilities-and-editor-integration",
+      "name": "Project Utilities & Editor Integration",
+      "businessPurpose": "Provides helper APIs for scanning files, fetching snippets, listing git branches, and opening files in VS Code.",
+      "files": [
+        "backend/routes/project.js",
+        "backend/utils/file-scanner.js",
+        "backend/utils/file-snippet.js",
+        "backend/routes/domain/diagrams.js",
+        "frontend/src/api/project.js",
+        "frontend/src/store/useProjectFilesStore.js"
+      ],
+      "priority": "P2",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "logs-and-observability",
+      "name": "Logs, Progress, and Observability",
+      "businessPurpose": "Captures and serves task logs and progress updates to the UI and persists them for later inspection.",
+      "files": [
+        "backend/routes/logs.js",
+        "backend/persistence/logs.js",
+        "backend/utils/task-logger.js",
+        "backend/utils/logger.js",
+        "frontend/src/store/useLogsStore.js",
+        "frontend/src/components/dashboard/CodebaseAnalysisLogs.jsx",
+        "frontend/src/store/useTaskProgressStore.js",
+        "frontend/src/store/useSocketStore.js"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "frontend-dashboard-and-domain-ui",
+      "name": "Frontend Dashboard & Domain UI",
+      "businessPurpose": "Presents the codebase summary and domains, supports prioritization, and provides per-domain section views and editors.",
+      "files": [
+        "frontend/src/App.jsx",
+        "frontend/src/pages/Dashboard.jsx",
+        "frontend/src/pages/DomainDetailsPage.jsx",
+        "frontend/src/components/dashboard/ModulesSection.jsx",
+        "frontend/src/components/domain/DomainHeader.jsx",
+        "frontend/src/components/domain/DomainDocumentationSection.jsx",
+        "frontend/src/components/domain/DomainBugsSecuritySection.jsx",
+        "frontend/src/components/domain/DomainRefactoringAndTestingSection.jsx"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "frontend-api-client-and-state-management",
+      "name": "Frontend API Client & State Management",
+      "businessPurpose": "Coordinates API calls, caching, and UI state using Axios wrappers and Zustand stores.",
+      "files": [
+        "frontend/src/api/client.js",
+        "frontend/src/api/index.js",
+        "frontend/src/store/useCodebaseStore.js",
+        "frontend/src/store/useDomainEditorStore.js",
+        "frontend/src/store/useDomainDocumentationStore.js",
+        "frontend/src/store/useDomainBugsSecurityStore.js",
+        "frontend/src/store/useDomainRefactoringAndTestingStore.js",
+        "frontend/src/store/useSocketStore.js"
+      ],
+      "priority": "P1",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "design-preview",
+      "name": "Design Preview",
+      "businessPurpose": "Serves generated HTML prototypes/components from .code-analysis/design and exposes a manifest for the UI preview page.",
+      "files": [
+        "backend/routes/design.js",
+        "backend/index.js",
+        "frontend/src/pages/DesignPage.jsx",
+        "frontend/src/App.jsx"
+      ],
+      "priority": "P3",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    },
+    {
+      "id": "e2e-test-configuration",
+      "name": "E2E Test Configuration",
+      "businessPurpose": "Stores and edits e2e testing configuration used when generating or running end-to-end tests for the target project.",
+      "files": [
+        "backend/routes/e2e-config.js",
+        "backend/persistence/e2e-config.js",
+        "frontend/src/api/e2e-config.js",
+        "frontend/src/store/useE2EConfigStore.js",
+        "frontend/src/components/dashboard/ConfigurationPanel.jsx"
+      ],
+      "priority": "P3",
+      "testCoverage": "none",
+      "hasAnalysis": false
+    }
+  ]
+}

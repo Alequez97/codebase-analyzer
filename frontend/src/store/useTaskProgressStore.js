@@ -204,6 +204,24 @@ export const useTaskProgressStore = create((set, get) => ({
     });
   },
 
+  // Immediately mark a failed/canceled task as pending (after restart).
+  // Keeps the entry visible so isReviewRunning / running checks stay correct
+  // until the TASK_QUEUED socket event confirms the new state.
+  markPendingRestart: (taskId) => {
+    set((state) => {
+      const next = new Map(state.progressByTaskId);
+      const existing = next.get(taskId) ?? {};
+      next.set(taskId, {
+        ...existing,
+        status: "pending",
+        stage: null,
+        message: null,
+        error: null,
+      });
+      return { progressByTaskId: next };
+    });
+  },
+
   clearAllFailed: () => {
     set((state) => {
       const next = new Map(state.progressByTaskId);

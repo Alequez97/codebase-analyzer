@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domain Card — Component</title>
+  <style>
+    :root {
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --gray-50:  #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-300: #93c5fd;
+      --blue-400: #60a5fa; --blue-500: #3b82f6; --blue-600: #2563eb;
+      --green-200: #bbf7d0; --green-400: #4ade80; --green-600: #16a34a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      background: #f0f2f5;
+      color: var(--gray-800);
+      padding: 40px;
+    }
+
+    /* ── Page title ──────────────────────────────────────────────────────── */
+    .page-title { font-size: 20px; font-weight: 800; color: var(--gray-700); margin-bottom: 6px; }
+    .page-sub { font-size: 13px; color: var(--gray-400); margin-bottom: 40px; }
+
+    /* ── State section ───────────────────────────────────────────────────── */
+    .state-block { margin-bottom: 40px; }
+    .state-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--gray-400);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .state-label::after {
+      content: ""; flex: 1; height: 1px; background: var(--gray-200);
+    }
+
+    /* ── Card ────────────────────────────────────────────────────────────── */
+    .domain-card {
+      display: flex; align-items: stretch;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      background: white;
+      max-width: 380px;
+      transition: box-shadow .12s, border-color .12s;
+    }
+    .domain-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.1); border-color: var(--gray-300); }
+
+    /* Analyzed state */
+    .domain-card.analyzed {
+      border-color: var(--green-200);
+      border-left: 3px solid var(--green-400);
+    }
+
+    /* Running state */
+    .domain-card.running {
+      border-color: var(--blue-300);
+      border-left: 3px solid var(--blue-400);
+    }
+
+    /* Dragging state */
+    .domain-card.dragging {
+      border-color: var(--blue-300);
+      box-shadow: 0 8px 24px rgba(59,130,246,.25);
+      background: #eff6ff;
+    }
+
+    /* ── Drag handle ─────────────────────────────────────────────────────── */
+    .drag-handle {
+      padding: 0 8px;
+      display: flex; align-items: center;
+      color: var(--gray-300);
+      border-right: 1px solid var(--gray-100);
+      flex-shrink: 0;
+      cursor: grab;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .drag-handle:hover { color: var(--gray-500); background: var(--gray-50); }
+
+    /* ── Card body ───────────────────────────────────────────────────────── */
+    .card-body { padding: 12px; flex: 1; min-width: 0; }
+
+    .domain-name {
+      font-size: 13px; font-weight: 700; color: var(--gray-800);
+      line-height: 1.3; margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .domain-purpose {
+      font-size: 11px; color: var(--gray-500); line-height: 1.55;
+      margin-bottom: 10px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+
+    /* Section dots */
+    .section-dots { display: flex; align-items: center; gap: 8px; }
+    .dot-group { display: flex; align-items: center; gap: 3px; }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot-gray  { background: var(--gray-300); }
+    .dot-green { background: var(--green-400); }
+    .dot-blue  { background: var(--blue-400); animation: bounce .7s ease-in-out infinite; }
+    .dot-lbl { font-size: 9px; font-weight: 500; }
+    .dot-lbl-gray  { color: var(--gray-400); }
+    .dot-lbl-green { color: var(--green-600); }
+    .dot-lbl-blue  { color: var(--blue-500); }
+
+    @keyframes bounce {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.7); }
+    }
+
+    /* Buttons */
+    .card-btns { display: flex; align-items: center; gap: 6px; }
+    .btn-analyze {
+      display: inline-flex; align-items: center; gap: 3px;
+      height: 22px; padding: 0 10px;
+      border-radius: 6px; border: none; cursor: pointer;
+      font-family: inherit; font-size: 11px; font-weight: 600;
+      color: var(--blue-500); background: var(--blue-50);
+    }
+    .btn-analyze:hover { background: var(--blue-100); }
+    .btn-view {
+      display: inline-flex; align-items: center; gap: 3px;
+      height: 22px; padding: 0 10px;
+      border-radius: 6px; border: 1px solid #bfdbfe; cursor: pointer;
+      font-family: inherit; font-size: 11px; font-weight: 600;
+      color: var(--blue-500); background: white;
+    }
+    .btn-view:hover { background: var(--blue-50); }
+    .btn-running {
+      display: inline-flex; align-items: center; gap: 3px;
+      height: 22px; padding: 0 10px;
+      border-radius: 6px; border: 1px solid var(--blue-100);
+      font-family: inherit; font-size: 11px; font-weight: 600;
+      color: var(--blue-600); background: var(--blue-50);
+    }
+    .spinner {
+      width: 8px; height: 8px;
+      border: 1.5px solid var(--blue-100); border-top-color: var(--blue-400);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── State annotation ────────────────────────────────────────────────── */
+    .annotation {
+      margin-top: 10px; font-size: 11px; color: var(--gray-400);
+      padding-left: 4px;
+    }
+    .annotation code {
+      background: var(--gray-100); border-radius: 3px;
+      padding: 1px 4px; font-family: monospace; font-size: 10px;
+      color: var(--gray-600);
+    }
+
+    /* ── 3-column grid preview ───────────────────────────────────────────── */
+    .grid-preview {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; max-width: 1200px;
+    }
+    .grid-preview .domain-card { max-width: unset; }
+  </style>
+</head>
+<body>
+
+<div class="page-title">Domain Card</div>
+<div class="page-sub">All visual states • used in the domain grid inside each Priority section</div>
+
+<!-- STATE 1: Not analyzed ─────────────────────────────────────────────── -->
+<div class="state-block">
+  <div class="state-label">Not analyzed — default</div>
+  <div class="domain-card">
+    <div class="drag-handle">⠿</div>
+    <div class="card-body">
+      <div class="domain-name">Parts Inventory</div>
+      <div class="domain-purpose">Spare parts catalog, stock-level tracking, warehouse location, and reorder automation workflows.</div>
+      <div class="card-footer">
+        <div class="section-dots">
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Docs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Reqs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Bugs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Tests</span></div>
+        </div>
+        <div class="card-btns">
+          <button class="btn-analyze">✨ Analyze</button>
+          <button class="btn-view">View →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="annotation">All dots gray · <code>domain.hasAnalysis = false</code> · <code>domain.sections = {}</code></div>
+</div>
+
+<!-- STATE 2: Partially analyzed ─────────────────────────────────────── -->
+<div class="state-block">
+  <div class="state-label">Partially analyzed — green left border</div>
+  <div class="domain-card analyzed">
+    <div class="drag-handle">⠿</div>
+    <div class="card-body">
+      <div class="domain-name">Work Orders</div>
+      <div class="domain-purpose">Maintenance work order creation, assignment, and lifecycle management for field technicians.</div>
+      <div class="card-footer">
+        <div class="section-dots">
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Docs</span></div>
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Reqs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Bugs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Tests</span></div>
+        </div>
+        <div class="card-btns">
+          <button class="btn-analyze">✨ Analyze</button>
+          <button class="btn-view">View →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="annotation"><code>domain.hasAnalysis = true</code> · 2 of 4 sections done · Analyze button still visible for remaining sections</div>
+</div>
+
+<!-- STATE 3: Fully analyzed ─────────────────────────────────────────── -->
+<div class="state-block">
+  <div class="state-label">Fully analyzed — no Analyze button</div>
+  <div class="domain-card analyzed">
+    <div class="drag-handle">⠿</div>
+    <div class="card-body">
+      <div class="domain-name">Payment Processing</div>
+      <div class="domain-purpose">Stripe integration, invoice generation, refund workflows, and transaction audit logging for all plans.</div>
+      <div class="card-footer">
+        <div class="section-dots">
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Docs</span></div>
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Reqs</span></div>
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Bugs</span></div>
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Tests</span></div>
+        </div>
+        <div class="card-btns">
+          <button class="btn-view">View →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="annotation">All 4 dots green · <code>shouldShowAnalyzeButton = false</code> · only View button rendered</div>
+</div>
+
+<!-- STATE 4: Running (AI analyzing) ─────────────────────────────────── -->
+<div class="state-block">
+  <div class="state-label">Running — blue left border, animated dot, spinner button</div>
+  <div class="domain-card running">
+    <div class="drag-handle">⠿</div>
+    <div class="card-body">
+      <div class="domain-name">User Authentication</div>
+      <div class="domain-purpose">JWT token management, login/logout flows, OAuth providers, and session persistence across client types.</div>
+      <div class="card-footer">
+        <div class="section-dots">
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Docs</span></div>
+          <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Reqs</span></div>
+          <div class="dot-group"><div class="dot dot-blue"></div><span class="dot-lbl dot-lbl-blue">Bugs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Tests</span></div>
+        </div>
+        <div class="card-btns">
+          <button class="btn-running"><div class="spinner"></div> Running</button>
+          <button class="btn-view">View →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="annotation">Bugs dot animated blue · <code>activeProgress.has(TASK_TYPES.BUGS_SECURITY) = true</code> · Analyze button replaced by Running indicator</div>
+</div>
+
+<!-- STATE 5: Dragging ────────────────────────────────────────────────── -->
+<div class="state-block">
+  <div class="state-label">Dragging — blue tint, elevated shadow</div>
+  <div class="domain-card dragging">
+    <div class="drag-handle" style="color:var(--blue-400)">⠿</div>
+    <div class="card-body">
+      <div class="domain-name">Aircraft Management</div>
+      <div class="domain-purpose">Fleet registration, airworthiness tracking, maintenance schedules, and compliance reporting.</div>
+      <div class="card-footer">
+        <div class="section-dots">
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Docs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Reqs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Bugs</span></div>
+          <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Tests</span></div>
+        </div>
+        <div class="card-btns">
+          <button class="btn-analyze">✨ Analyze</button>
+          <button class="btn-view">View →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="annotation"><code>snapshot.isDragging = true</code> · bg <code>#eff6ff</code>, border <code>blue.300</code>, elevated shadow</div>
+</div>
+
+<!-- GRID PREVIEW ────────────────────────────────────────────────────── -->
+<div class="state-block">
+  <div class="state-label">Grid layout — 3 columns as rendered inside a Priority section</div>
+  <div class="grid-preview">
+
+    <div class="domain-card analyzed">
+      <div class="drag-handle">⠿</div>
+      <div class="card-body">
+        <div class="domain-name">User Authentication</div>
+        <div class="domain-purpose">JWT tokens, login/logout, OAuth, session persistence.</div>
+        <div class="card-footer">
+          <div class="section-dots">
+            <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Docs</span></div>
+            <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Reqs</span></div>
+            <div class="dot-group"><div class="dot dot-blue"></div><span class="dot-lbl dot-lbl-blue">Bugs</span></div>
+            <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Tests</span></div>
+          </div>
+          <div class="card-btns">
+            <button class="btn-running"><div class="spinner"></div> Running</button>
+            <button class="btn-view">View →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="domain-card analyzed">
+      <div class="drag-handle">⠿</div>
+      <div class="card-body">
+        <div class="domain-name">Payment Processing</div>
+        <div class="domain-purpose">Stripe, invoices, refunds, audit logging.</div>
+        <div class="card-footer">
+          <div class="section-dots">
+            <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Docs</span></div>
+            <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Reqs</span></div>
+            <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Bugs</span></div>
+            <div class="dot-group"><div class="dot dot-green"></div><span class="dot-lbl dot-lbl-green">Tests</span></div>
+          </div>
+          <div class="card-btns">
+            <button class="btn-view">View →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="domain-card">
+      <div class="drag-handle">⠿</div>
+      <div class="card-body">
+        <div class="domain-name">Aircraft Management</div>
+        <div class="domain-purpose">Fleet, airworthiness, maintenance, compliance.</div>
+        <div class="card-footer">
+          <div class="section-dots">
+            <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Docs</span></div>
+            <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Reqs</span></div>
+            <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Bugs</span></div>
+            <div class="dot-group"><div class="dot dot-gray"></div><span class="dot-lbl dot-lbl-gray">Tests</span></div>
+          </div>
+          <div class="card-btns">
+            <button class="btn-analyze">✨ Analyze</button>
+            <button class="btn-view">View →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

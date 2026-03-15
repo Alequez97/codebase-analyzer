@@ -1,0 +1,12 @@
+{
+  "id": "analyze-codebase-20260212T133407-f44c30",
+  "type": "codebase-analysis",
+  "status": "completed",
+  "createdAt": "2026-02-12T13:34:07.732Z",
+  "params": {
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\avia-manager-root\\avia-manager"
+  },
+  "instructionFile": "backend/instructions/analyze-full-codebase.md",
+  "outputFile": ".code-analysis/codebase-analysis.json",
+  "completedAt": "2026-02-12T13:34:17.908Z"
+}
