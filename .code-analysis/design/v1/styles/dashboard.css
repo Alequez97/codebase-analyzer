@@ -1,0 +1,130 @@
+/* ─────────────────────────────────────────
+   Main Layout
+───────────────────────────────────────── */
+
+.main {
+  padding: 20px 32px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Platform Description Box ── */
+.desc-box {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.desc-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.desc-heading-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: #52525b;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.edit-inline-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  border-radius: 3px;
+  color: #93c5fd;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.edit-inline-btn:hover { color: #3b82f6; }
+
+.desc-body {
+  font-size: 13px;
+  color: #1e3a5f;
+  line-height: 1.65;
+}
+.desc-body .hl { color: #2563eb; }
+
+/* ── Domains Bar ── */
+.domains-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+}
+
+.domains-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #27272a;
+  flex-wrap: wrap;
+}
+.domains-bar-left strong { font-weight: 600; }
+.domains-bar-left .muted {
+  color: #71717a;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.domains-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.filter-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.filter-icon {
+  position: absolute;
+  left: 8px;
+  color: #a1a1aa;
+  pointer-events: none;
+  display: flex;
+}
+.filter-input {
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  padding: 0 8px 0 28px;
+  font-size: 12px;
+  height: 32px;
+  width: 200px;
+  background: #fff;
+  color: #27272a;
+  outline: none;
+  font-family: inherit;
+}
+.filter-input::placeholder { color: #a1a1aa; }
+.filter-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #dbeafe;
+}
+
+.btn-edit-structure {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  padding: 0 10px;
+  height: 32px;
+  font-size: 12px;
+  color: #173da6;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-edit-structure:hover { background: #eff6ff; }

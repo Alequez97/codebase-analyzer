@@ -7,6 +7,156 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Design system foundation -->
+  <link rel="stylesheet" href="./styles/base.css" />
+
+  <!-- Layout & page-level styles -->
+  <link rel="stylesheet" href="./styles/navbar.css" />
+  <link rel="stylesheet" href="./styles/dashboard.css" />
+  <link rel="stylesheet" href="./styles/priority-groups.css" />
+  <link rel="stylesheet" href="./styles/domain-cards.css" />
+
+  <!-- Component styles -->
+  <link rel="stylesheet" href="./components/header.css" />
+  <link rel="stylesheet" href="./components/tasks-status.css" />
+
+  <style>
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #09090b;
+      background: #ffffff;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { cursor: pointer; font-family: inherit; }
+    input  { font-family: inherit; }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       Navbar
+  ══════════════════════════════════════ -->
+  <header class="navbar">
+    <div class="navbar-left">
+      <button class="btn-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        codebase-analyzer
+      </button>
+
+      <button class="nav-text-btn" style="font-size:13px; padding:0 10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        Design
+      </button>
+    </div>
+
+    <div class="navbar-right">
+      <div class="status-group">
+        <div class="status-item">
+          <span class="lbl">API:</span>
+          <span class="status-badge"><span class="dot"></span>Connected</span>
+        </div>
+        <div class="status-item">
+          <span class="lbl">Socket:</span>
+          <span class="status-badge"><span class="dot"></span>Connected</span>
+        </div>
+      </div>
+
+      <button class="tasks-pill">
+        <span class="check-mark">✓</span>
+        1 completed
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      <button class="nav-text-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Logs
+      </button>
+
+      <button class="icon-btn" title="Open settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════
+       Main
+  ══════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Platform Description -->
+    <div class="desc-box">
+      <div class="desc-heading">
+        <span class="desc-heading-text">Platform Description</span>
+        <button class="edit-inline-btn" title="Edit">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+      <p class="desc-body">
+        Codebase Analyzer is a CLI-launched web application for AI-assisted code audits of a target repository.
+        It runs an <span class="hl">Express + Socket.IO backend</span> and a <span class="hl">React dashboard</span>
+        to generate, review, and iteratively refine per-domain documentation, diagrams, requirements,
+        <span class="hl">bugs/security findings</span>, and refactoring/testing recommendations.
+        All analysis artifacts, task state, logs, and chat history are persisted into the target project's
+        <span class="hl">.code-analysis/</span> directory.
+      </p>
+    </div>
+
+    <!-- Domains Bar -->
+    <div class="domains-bar">
+      <div class="domains-bar-left">
+        Found <strong>&nbsp;18&nbsp;</strong> domains across <strong>&nbsp;4&nbsp;</strong> priority groups
+        <span class="muted">— drag cards between groups to reprioritize</span>
+      </div>
+      <div class="domains-bar-right">
+        <div class="filter-wrap">
+          <span class="filter-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input class="filter-input" type="text" placeholder="Filter domains…" />
+        </div>
+        <button class="btn-edit-structure">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit Structure
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain Board (rendered by domain-board.js) -->
+    <div class="groups-stack" id="groups-root"></div>
+
+  </main>
+
+  <!-- Components -->
+  <script src="./components/domain-board.js"></script>
+
+</body>
+</html>
   <style>
     /* ─────────────────────────────────────────
        Reset & Base
