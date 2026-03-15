@@ -4,16 +4,20 @@ import {
   Button,
   Grid,
   HStack,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { CompetitorLogo } from "./CompetitorLogo";
 import { CompetitorFeaturesCard } from "./CompetitorFeaturesCard";
 import { CompetitorMissingFeaturesCard } from "./CompetitorMissingFeaturesCard";
 import { CompetitorPricingPlans } from "./CompetitorPricingPlans";
 import { CompetitorStrengthsWeaknesses } from "./CompetitorStrengthsWeaknesses";
 import { CompetitorCompanyInfo } from "./CompetitorCompanyInfo";
+import { CompetitorSourcesCard } from "./CompetitorSourcesCard";
 
 function StatCard({ label, value }) {
   return (
@@ -48,9 +52,54 @@ function normalizeUrl(url) {
 }
 
 export function CompetitorDetails({ competitor, onBack }) {
+  const loadCompetitorDetails = useMarketResearchStore(
+    (s) => s.loadCompetitorDetails,
+  );
   const { details } = competitor;
 
-  if (!details) return null;
+  useEffect(() => {
+    if (!details) {
+      loadCompetitorDetails(competitor.id);
+    }
+  }, [competitor.id, details, loadCompetitorDetails]);
+
+  if (!details) {
+    return (
+      <VStack align="stretch" gap={5}>
+        <Button
+          variant="ghost"
+          size="sm"
+          alignSelf="start"
+          fontSize="12px"
+          fontWeight="600"
+          color="#64748b"
+          px={2}
+          h="30px"
+          _hover={{ bg: "#f1f5f9", color: "#0f172a" }}
+          onClick={onBack}
+        >
+          <ArrowLeft size={13} style={{ marginRight: "6px" }} />
+          Competitors
+        </Button>
+        <Box
+          bg="white"
+          borderRadius="12px"
+          borderWidth="1px"
+          borderColor="#e2e8f0"
+          p={8}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={3}
+        >
+          <Spinner size="sm" color="#6366f1" />
+          <Text fontSize="13px" color="#64748b">
+            Loading {competitor.name} profile…
+          </Text>
+        </Box>
+      </VStack>
+    );
+  }
 
   return (
     <VStack align="stretch" gap={5}>
@@ -181,12 +230,17 @@ export function CompetitorDetails({ competitor, onBack }) {
         />
       </Grid>
 
-      <CompetitorPricingPlans pricingPlans={details.pricingPlans} />
+      <CompetitorPricingPlans
+        pricingPlans={details.pricingPlans}
+        pricingEvidence={details.sources?.pricingEvidence}
+      />
 
       <CompetitorStrengthsWeaknesses
         strengths={details.strengths}
         weaknesses={details.weaknesses}
       />
+
+      <CompetitorSourcesCard sources={details.sources} />
 
       <CompetitorCompanyInfo details={details} competitor={competitor} />
     </VStack>

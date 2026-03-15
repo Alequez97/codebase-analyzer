@@ -3,10 +3,202 @@ import path from "path";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
-import { emitTaskProgress, emitSocketEvent } from "../../utils/socket-emitter.js";
+import {
+  emitTaskProgress,
+  emitSocketEvent,
+} from "../../utils/socket-emitter.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
+import * as marketResearchPersistence from "../../persistence/market-research.js";
 import config from "../../config.js";
 import * as logger from "../../utils/logger.js";
+
+const GAP_PATTERNS = [
+  {
+    label: "Pricing transparency",
+    regex:
+      /pricing|price|billing|subscription|tier|plan|quote|paywall|fee/i,
+    detail:
+      "Buyers need clearer pricing, simpler packaging, or recurring plans that reduce purchase friction.",
+  },
+  {
+    label: "Scheduling and workflow",
+    regex:
+      /scheduling|schedule|calendar|booking|recurring|availability|workflow/i,
+    detail:
+      "Teams can win by making booking, repeat sessions, and operational workflows much easier.",
+  },
+  {
+    label: "Matching and discovery",
+    regex:
+      /matching|matchmaking|discovery|search|recommend|algorithm|profile-driven/i,
+    detail:
+      "There is room for better matching, ranking, and personalized discovery instead of noisy profile browsing.",
+  },
+  {
+    label: "Trust and verification",
+    regex:
+      /trust|verification|verified|credential|quality|vetting|guarantee|transparency|proof/i,
+    detail:
+      "The market still lacks stronger trust signals, quality guarantees, and verification for both sides.",
+  },
+  {
+    label: "Native live tooling",
+    regex:
+      /live|in-browser|video|voice|recording|whiteboard|stream|replay/i,
+    detail:
+      "A more native session experience can reduce reliance on external tools and improve retention.",
+  },
+  {
+    label: "Progress tracking and analytics",
+    regex:
+      /analytics|tracking|dashboard|progress|curriculum|learning path|certification|outcome/i,
+    detail:
+      "Customers want measurable outcomes, progress visibility, and better analytics after each session.",
+  },
+  {
+    label: "B2B and ecosystem expansion",
+    regex:
+      /b2b|enterprise|team|school|org|organization|publisher|api|integration/i,
+    detail:
+      "Several players under-serve teams, partners, and platform integrations beyond the core consumer workflow.",
+  },
+  {
+    label: "Payments and payouts",
+    regex:
+      /payment|payout|withdraw|stripe|paypal|currency|checkout|tip/i,
+    detail:
+      "Better checkout, payout flexibility, and local payment support remain meaningful product gaps.",
+  },
+];
+
+function buildGapInsights(competitors) {
+  const grouped = new Map();
+
+  for (const competitor of competitors || []) {
+    const missingFeatures = competitor?.details?.missingFeatures || [];
+    for (const feature of missingFeatures) {
+      const pattern =
+        GAP_PATTERNS.find((entry) => entry.regex.test(feature)) || null;
+      const key = pattern?.label || "Other product gaps";
+      const existing = grouped.get(key) || {
+        label: key,
+        detail:
+          pattern?.detail ||
+          "Competitors still leave room for a better-focused product experience.",
+        examples: [],
+        competitors: new Set(),
+      };
+
+      if (existing.examples.length < 3) {
+        existing.examples.push(feature);
+      }
+      existing.competitors.add(competitor.name);
+      grouped.set(key, existing);
+    }
+  }
+
+  return [...grouped.values()]
+    .map((entry) => ({
+      label: entry.label,
+      detail: entry.detail,
+      competitorCount: entry.competitors.size,
+      competitors: [...entry.competitors].sort(),
+      examples: entry.examples,
+    }))
+    .sort((a, b) => b.competitorCount - a.competitorCount)
+    .slice(0, 5);
+}
+
+function inferVerdict(competitors, marketGaps) {
+  const directGapCoverage = marketGaps.filter((gap) => gap.competitorCount >= 2);
+  if ((competitors || []).length >= 5 && directGapCoverage.length >= 3) {
+    return "worth-entering";
+  }
+  if (directGapCoverage.length >= 1) {
+    return "risky";
+  }
+  return "crowded";
+}
+
+function inferConfidence(competitors) {
+  const count = (competitors || []).length;
+  if (count >= 8) return "high";
+  if (count >= 5) return "medium";
+  return "low";
+}
+
+function buildOpportunitySummary(idea, verdict, marketGaps) {
+  const strongestGap = marketGaps[0];
+  if (!strongestGap) {
+    return `The market around "${idea}" is active, but the current competitor set does not expose a strong unserved gap yet. Entry depends on sharper execution, distribution, or a narrower niche.`;
+  }
+
+  const verdictText = {
+    "worth-entering":
+      "There is a credible opening to enter this market because multiple competitors still leave the same important jobs unfinished.",
+    risky:
+      "There is some room to enter this market, but the opportunity depends on executing against a few clear product gaps better than incumbents.",
+    crowded:
+      "This market looks crowded, and the remaining opportunity is narrower because gaps are fragmented rather than repeated.",
+  }[verdict];
+
+  return `${verdictText} The strongest repeat gap is ${strongestGap.label.toLowerCase()}, which appears across ${strongestGap.competitorCount} competitors and points to a concrete wedge for "${idea}".`;
+}
+
+function buildRisks(competitors, marketGaps) {
+  const risks = [];
+
+  risks.push({
+    label: "Strong incumbents",
+    detail:
+      "Several established competitors already cover the core use case, so a new entrant will need a sharper wedge than basic feature parity.",
+  });
+
+  const pricingGap = marketGaps.find((gap) => gap.label === "Pricing transparency");
+  if (pricingGap) {
+    risks.push({
+      label: "Monetization pressure",
+      detail:
+        "Pricing is inconsistent across the market, which creates room for differentiation but also makes it harder to prove a clean monetization model early.",
+    });
+  } else {
+    risks.push({
+      label: "Distribution challenge",
+      detail:
+        "Even with better product execution, acquiring both sides of the market may be harder than building the feature set itself.",
+    });
+  }
+
+  return risks.slice(0, 3);
+}
+
+function synthesizeOpportunity(idea, competitors, existingOpportunity) {
+  const marketGaps = buildGapInsights(competitors);
+  const verdict = existingOpportunity?.verdict || inferVerdict(competitors, marketGaps);
+  const confidence = existingOpportunity?.confidence || inferConfidence(competitors);
+  const differentiators =
+    existingOpportunity?.differentiators?.length > 0
+      ? existingOpportunity.differentiators
+      : marketGaps.slice(0, 3).map((gap) => ({
+          label: gap.label,
+          detail: gap.detail,
+        }));
+  const risks =
+    existingOpportunity?.risks?.length > 0
+      ? existingOpportunity.risks
+      : buildRisks(competitors, marketGaps);
+
+  return {
+    verdict,
+    confidence,
+    summary:
+      existingOpportunity?.summary ||
+      buildOpportunitySummary(idea, verdict, marketGaps),
+    differentiators,
+    risks,
+    marketGaps,
+  };
+}
 
 /**
  * Handler for market-research-initial task.
@@ -43,22 +235,30 @@ export function marketResearchInitialHandler(task, taskLogger) {
         const raw = await fs.readFile(competitorTasksPath, "utf-8");
         competitorTasks = JSON.parse(raw);
       } catch {
-        logger.warn("Could not read competitor-tasks.json — skipping report assembly", {
-          sessionId,
-          taskId: task.id,
-        });
+        logger.warn(
+          "Could not read competitor-tasks.json — skipping report assembly",
+          {
+            sessionId,
+            taskId: task.id,
+          },
+        );
         return;
       }
 
       if (!Array.isArray(competitorTasks) || competitorTasks.length === 0) {
-        logger.warn("competitor-tasks.json is empty or invalid — skipping report assembly", {
-          sessionId,
-          taskId: task.id,
-        });
+        logger.warn(
+          "competitor-tasks.json is empty or invalid — skipping report assembly",
+          {
+            sessionId,
+            taskId: task.id,
+          },
+        );
         return;
       }
 
-      taskLogger.info(`Waiting for ${competitorTasks.length} competitor task(s) to complete…`);
+      taskLogger.info(
+        `Waiting for ${competitorTasks.length} competitor task(s) to complete…`,
+      );
 
       // Poll until all competitor tasks are completed or failed
       const deadline = Date.now() + TIMEOUT_MS;
@@ -77,15 +277,20 @@ export function marketResearchInitialHandler(task, taskLogger) {
           }
         }
 
-        taskLogger.info(`Waiting for competitor tasks: ${pending.size} remaining`);
+        taskLogger.info(
+          `Waiting for competitor tasks: ${pending.size} remaining`,
+        );
       }
 
       if (pending.size > 0) {
-        logger.warn(`Timed out waiting for ${pending.size} competitor task(s)`, {
-          sessionId,
-          taskId: task.id,
-          pendingTaskIds: [...pending],
-        });
+        logger.warn(
+          `Timed out waiting for ${pending.size} competitor task(s)`,
+          {
+            sessionId,
+            taskId: task.id,
+            pendingTaskIds: [...pending],
+          },
+        );
       }
 
       // Read competitor output files
@@ -122,10 +327,13 @@ export function marketResearchInitialHandler(task, taskLogger) {
         const raw = await fs.readFile(reportPath, "utf-8");
         report = JSON.parse(raw);
       } catch {
-        logger.warn("Could not read stub report.json — skipping report assembly", {
-          sessionId,
-          taskId: task.id,
-        });
+        logger.warn(
+          "Could not read stub report.json — skipping report assembly",
+          {
+            sessionId,
+            taskId: task.id,
+          },
+        );
         return;
       }
 
@@ -144,6 +352,12 @@ export function marketResearchInitialHandler(task, taskLogger) {
         }
       }
 
+      report.opportunity = synthesizeOpportunity(
+        report.idea,
+        report.competitors,
+        report.opportunity,
+      );
+
       report.status = "complete";
       report.completedAt = new Date().toISOString();
 
@@ -156,6 +370,12 @@ export function marketResearchInitialHandler(task, taskLogger) {
         taskId: task.id,
         competitorCount: report.competitors.length,
       });
+
+      // Persist completion metadata so the profile history endpoint reflects it
+      await marketResearchPersistence.markSessionComplete(
+        sessionId,
+        report.competitors.length,
+      );
 
       // Notify frontend
       emitSocketEvent(SOCKET_EVENTS.MARKET_RESEARCH_REPORT_READY, {
@@ -261,7 +481,9 @@ function _buildHandler(
         taskLogger.info(
           `🗜️  Compaction complete. Tokens after: ~${tokensAfter}`,
         );
-        taskLogger.log(`🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`);
+        taskLogger.log(
+          `🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`,
+        );
       }
     },
 

@@ -20,6 +20,7 @@ import {
   useMarketResearchStore,
   logLineToKind,
 } from "./useMarketResearchStore";
+import { useProfileStore } from "./useProfileStore";
 import { getMarketResearchReport } from "../api/market-research";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
@@ -256,7 +257,20 @@ export const useSocketStore = create((set, get) => ({
         }
       } else if (type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
         const sessionId = data?.params?.sessionId;
+        const idea = data?.params?.idea;
         const storeSessionId = useMarketResearchStore.getState().sessionId;
+
+        // Record the completed analysis in the profile history
+        if (sessionId && idea) {
+          useProfileStore.getState().addAnalysis({
+            id: sessionId,
+            idea,
+            completedAt: Date.now(),
+            competitorCount:
+              useMarketResearchStore.getState().competitors.length,
+          });
+        }
+
         if (sessionId && sessionId === storeSessionId) {
           // If MARKET_RESEARCH_REPORT_READY already applied the report, skip the fetch.
           if (useMarketResearchStore.getState().isAnalysisComplete) return;
@@ -528,14 +542,12 @@ export const useSocketStore = create((set, get) => ({
         data;
       const storeSessionId = useMarketResearchStore.getState().sessionId;
       if (sessionId && sessionId === storeSessionId) {
-        useMarketResearchStore
-          .getState()
-          ._addCompetitorStub({
-            taskId,
-            competitorId,
-            competitorName,
-            competitorUrl,
-          });
+        useMarketResearchStore.getState()._addCompetitorStub({
+          taskId,
+          competitorId,
+          competitorName,
+          competitorUrl,
+        });
       }
     });
 

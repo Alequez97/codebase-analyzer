@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Box, Text } from "@chakra-ui/react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useProfileStore } from "../../store/useProfileStore";
@@ -14,10 +15,15 @@ export function ProfilePage() {
   const signOut = useAuthStore((s) => s.signOut);
   const analysisHistory = useProfileStore((s) => s.analysisHistory);
   const clearHistory = useProfileStore((s) => s.clearHistory);
+  const fetchHistory = useProfileStore((s) => s.fetchHistory);
   const goToLanding = useMarketResearchStore((s) => s.goToLanding);
   const openHistoryAnalysis = useMarketResearchStore(
     (s) => s.openHistoryAnalysis,
   );
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   // If not signed in, redirect to landing
   if (!user) {
@@ -43,7 +49,7 @@ export function ProfilePage() {
         <AnalysisHistory
           history={analysisHistory}
           onClear={clearHistory}
-          onOpen={(entry) => openHistoryAnalysis(entry.idea)}
+          onOpen={(entry) => openHistoryAnalysis(entry)}
         />
       </Box>
     </Box>

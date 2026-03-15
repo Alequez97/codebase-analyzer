@@ -4,12 +4,43 @@ import {
   upsertSession,
   getSession,
   getMarketResearchReport,
+  getCompetitorProfile,
+  listSessions,
 } from "../persistence/market-research.js";
 import { queueMarketResearchInitialTask } from "../tasks/queue/market-research-initial.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { getNumCompetitors } from "../services/subscription.js";
 
 const router = Router();
+
+// GET /api/market-research
+// List analysis sessions as history entries.
+// Optional ?sessionId= query param to filter to a specific session.
+router.get("/", async (req, res) => {
+  const { sessionId } = req.query;
+  try {
+    const sessions = await listSessions();
+    const filtered = sessionId
+      ? sessions.filter((s) => s.sessionId === sessionId)
+      : sessions;
+    const history = filtered
+      .map((s) => ({
+        id: s.sessionId,
+        idea: s.idea,
+        completedAt: s.state?.completedAt ?? s.createdAt,
+        competitorCount: s.state?.competitorCount ?? 0,
+        status: s.state?.status ?? "analyzing",
+      }))
+      .sort((a, b) => b.completedAt - a.completedAt);
+    return res.json({ history });
+  } catch (error) {
+    logger.error("Failed to list market research history", {
+      error: error.message,
+      component: "MarketResearchRoutes",
+    });
+    return res.status(500).json({ error: "Failed to load history" });
+  }
+});
 
 // PUT /api/market-research/:sessionId
 // Save (or overwrite) an analysis session — called when user logs in
@@ -77,6 +108,20 @@ router.post("/:sessionId/analyze", async (req, res) => {
   // TODO: pass the authenticated user's ID once auth is implemented
   const numCompetitors = await getNumCompetitors();
 
+  // Persist the session so it appears in the history list
+  try {
+    await upsertSession(sessionId, idea.trim(), {
+      status: "analyzing",
+      numCompetitors,
+    });
+  } catch (persistError) {
+    logger.warn("Failed to persist session before queuing task", {
+      error: persistError.message,
+      sessionId,
+      component: "MarketResearchRoutes",
+    });
+  }
+
   try {
     const task = await queueMarketResearchInitialTask({
       sessionId,
@@ -110,6 +155,34 @@ router.post("/:sessionId/analyze", async (req, res) => {
       component: "MarketResearchRoutes",
     });
     return res.status(500).json({ error: "Failed to start analysis" });
+  }
+});
+
+// GET /api/market-research/:sessionId/competitors/:competitorId
+// Retrieve one competitor's detailed profile (written by the agent)
+router.get("/:sessionId/competitors/:competitorId", async (req, res) => {
+  const { sessionId, competitorId } = req.params;
+
+  try {
+    const profile = await getCompetitorProfile(sessionId, competitorId);
+    if (!profile) {
+      return res.status(404).json({ error: "Competitor profile not found" });
+    }
+    return res.json({ competitor: profile });
+  } catch (error) {
+    if (
+      error.message === "Invalid sessionId format" ||
+      error.message === "Invalid competitorId format"
+    ) {
+      return res.status(400).json({ error: error.message });
+    }
+    logger.error("Failed to load competitor profile", {
+      error: error.message,
+      sessionId,
+      competitorId,
+      component: "MarketResearchRoutes",
+    });
+    return res.status(500).json({ error: "Failed to load competitor profile" });
   }
 });
 

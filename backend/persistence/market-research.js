@@ -104,6 +104,45 @@ export async function deleteSession(sessionId) {
 }
 
 /**
+ * Mark a session as complete with competitor count.
+ * No-op if the session file doesn't exist yet.
+ * @param {string} sessionId
+ * @param {number} competitorCount
+ */
+export async function markSessionComplete(sessionId, competitorCount) {
+  const filePath = sessionPath(sessionId);
+
+  let session;
+  try {
+    session = await tryReadJsonFile(filePath, sessionId);
+  } catch {
+    return;
+  }
+
+  if (!session) return;
+
+  const now = Date.now();
+  const updated = {
+    ...session,
+    lastAccessedAt: now,
+    state: {
+      ...(session.state || {}),
+      status: "complete",
+      competitorCount,
+      completedAt: now,
+    },
+  };
+
+  await fs.writeFile(filePath, JSON.stringify(updated, null, 2));
+
+  logger.info("Market research session marked complete", {
+    sessionId,
+    competitorCount,
+    component: "MarketResearchPersistence",
+  });
+}
+
+/**
  * List all sessions with their metadata.
  * @returns {Promise<Object[]>}
  */
@@ -130,6 +169,39 @@ export async function listSessions() {
   }
 
   return sessions;
+}
+
+/**
+ * Read the AI-generated competitor profile for a session.
+ * Written by the LLM agent to
+ * .code-analysis/market-research/{sessionId}/competitors/{competitorId}.json
+ * @param {string} sessionId
+ * @param {string} competitorId
+ * @returns {Promise<Object|null>} Competitor profile or null if not found
+ */
+export async function getCompetitorProfile(sessionId, competitorId) {
+  if (!/^[0-9a-f-]{36}$/.test(sessionId)) {
+    throw new Error("Invalid sessionId format");
+  }
+  if (!/^[a-z0-9-]+$/.test(competitorId)) {
+    throw new Error("Invalid competitorId format");
+  }
+
+  const profilePath = path.join(
+    config.paths.targetAnalysis,
+    "market-research",
+    sessionId,
+    "competitors",
+    `${competitorId}.json`,
+  );
+
+  try {
+    const profile = await tryReadJsonFile(profilePath, competitorId);
+    return profile;
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
 }
 
 /**

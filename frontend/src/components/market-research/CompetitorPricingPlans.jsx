@@ -1,4 +1,5 @@
-import { Badge, Box, Grid, HStack, Text } from "@chakra-ui/react";
+import { Badge, Box, Button, Grid, HStack, Text, VStack } from "@chakra-ui/react";
+import { ExternalLink } from "lucide-react";
 
 function SectionLabel({ children }) {
   return (
@@ -15,7 +16,7 @@ function SectionLabel({ children }) {
   );
 }
 
-export function CompetitorPricingPlans({ pricingPlans }) {
+export function CompetitorPricingPlans({ pricingPlans, pricingEvidence }) {
   return (
     <Box
       bg="white"
@@ -90,6 +91,64 @@ export function CompetitorPricingPlans({ pricingPlans }) {
           </Box>
         ))}
       </Grid>
+
+      {pricingEvidence?.length > 0 && (
+        <Box mt={4} pt={4} borderTopWidth="1px" borderColor="#f1f5f9">
+          <Text
+            fontSize="10px"
+            fontWeight="700"
+            color="#64748b"
+            textTransform="uppercase"
+            letterSpacing="0.06em"
+            mb={2.5}
+          >
+            Pricing evidence
+          </Text>
+          <VStack align="stretch" gap={2}>
+            {pricingEvidence.map((item, index) => (
+              <HStack
+                key={`${item.url}-${index}`}
+                justify="space-between"
+                align="start"
+                gap={3}
+                borderWidth="1px"
+                borderColor="#e2e8f0"
+                borderRadius="9px"
+                p={3}
+                bg="#f8fafc"
+              >
+                <Text fontSize="12px" color="#334155" lineHeight="1.55" flex="1">
+                  {item.claim}
+                </Text>
+                <Button
+                  as="a"
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  size="xs"
+                  variant="outline"
+                  fontSize="11px"
+                  fontWeight="600"
+                  color="#374151"
+                  borderColor="#dbe4ee"
+                  borderRadius="7px"
+                  h="26px"
+                  px={2.5}
+                  flexShrink={0}
+                  _hover={{
+                    bg: "#ffffff",
+                    borderColor: "#6366f1",
+                    color: "#6366f1",
+                  }}
+                >
+                  {item.label}
+                  <ExternalLink size={10} style={{ marginLeft: "4px" }} />
+                </Button>
+              </HStack>
+            ))}
+          </VStack>
+        </Box>
+      )}
     </Box>
   );
 }

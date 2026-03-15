@@ -1,23 +1,28 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { getAnalysisHistory } from "../api/market-research";
+import { useMarketResearchStore } from "./useMarketResearchStore";
 
-export const useProfileStore = create(
-  persist(
-    (set) => ({
-      // [{ id, idea, completedAt, competitorCount }]
-      analysisHistory: [],
+export const useProfileStore = create((set) => ({
+  // [{ id, idea, completedAt, competitorCount, status }]
+  analysisHistory: [],
+  isLoading: false,
+  error: null,
 
-      addAnalysis: (entry) =>
-        set((state) => ({
-          analysisHistory: [entry, ...state.analysisHistory].slice(0, 100),
-        })),
+  fetchHistory: async () => {
+    const sessionId = useMarketResearchStore.getState().sessionId;
+    set({ isLoading: true, error: null });
+    try {
+      const response = await getAnalysisHistory(sessionId);
+      set({ analysisHistory: response.data?.history ?? [], isLoading: false });
+    } catch (err) {
+      set({ error: err.message ?? "Failed to load history", isLoading: false });
+    }
+  },
 
-      clearHistory: () => set({ analysisHistory: [] }),
-    }),
-    {
-      name: "profile-store",
-      storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({ analysisHistory: state.analysisHistory }),
-    },
-  ),
-);
+  addAnalysis: (entry) =>
+    set((state) => ({
+      analysisHistory: [entry, ...state.analysisHistory].slice(0, 100),
+    })),
+
+  clearHistory: () => set({ analysisHistory: [] }),
+}));

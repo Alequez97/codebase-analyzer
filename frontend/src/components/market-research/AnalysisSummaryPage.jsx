@@ -6,6 +6,7 @@ import { SummaryHeroBanner } from "./SummaryHeroBanner";
 import { StartBuildingModal } from "./StartBuildingModal";
 import { OpportunityCard } from "./OpportunityCard";
 import { CompetitorComparisonTable } from "./CompetitorComparisonTable";
+import { OpportunityMarketGapsTable } from "./OpportunityMarketGapsTable";
 
 export function AnalysisSummaryPage() {
   const idea = useMarketResearchStore((s) => s.idea);
@@ -46,6 +47,10 @@ export function AnalysisSummaryPage() {
           opportunity={report?.opportunity}
           competitorCount={competitors.length}
           onStartBuilding={() => setBuildingModalOpen(true)}
+        />
+
+        <OpportunityMarketGapsTable
+          marketGaps={report?.opportunity?.marketGaps}
         />
 
         <CompetitorComparisonTable
