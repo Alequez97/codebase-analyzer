@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Container, VStack } from "@chakra-ui/react";
 import { AnalyzingState } from "../components/dashboard/AnalyzingState";
 import { CodebaseAnalysisLogs } from "../components/dashboard/CodebaseAnalysisLogs";
+import { EmptyProjectState } from "../components/dashboard/EmptyProjectState";
 import { ModulesSection } from "../components/dashboard/ModulesSection";
 import { ErrorState, LoadingState } from "../components/dashboard/States";
 import { useCodebaseStore } from "../store/useCodebaseStore";
@@ -36,10 +37,16 @@ export default function Dashboard() {
   }
 
   const domains = analysis?.domains || [];
+  const isEmptyProject = config?.target?.isEmpty === true;
   const isHeroState = !analyzingCodebase && domains.length === 0;
   const isAnalyzingEmptyState = analyzingCodebase && domains.length === 0;
   const isFullScreenState =
     (isHeroState || isAnalyzingEmptyState) && !showDashboardLogs;
+
+  // Empty project (no source files yet) — show the "start here" screen
+  if (isEmptyProject && isHeroState && !showDashboardLogs) {
+    return <EmptyProjectState />;
+  }
 
   return (
     <>
