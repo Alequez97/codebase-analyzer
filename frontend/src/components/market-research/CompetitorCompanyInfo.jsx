@@ -1,4 +1,5 @@
 import { Box, Button, Grid, HStack, Text } from "@chakra-ui/react";
+import { ExternalLink } from "lucide-react";
 
 function SectionLabel({ children }) {
   return (
@@ -84,10 +85,18 @@ export function CompetitorCompanyInfo({ details }) {
                 borderRadius="7px"
                 h="26px"
                 px={2.5}
-                _hover={{ bg: "#f8fafc", borderColor: "#cbd5e1" }}
+                _hover={{
+                  bg: "#f8fafc",
+                  borderColor: "#6366f1",
+                  color: "#6366f1",
+                }}
                 textTransform="capitalize"
               >
                 {key}
+                <ExternalLink
+                  size={10}
+                  style={{ marginLeft: "4px", opacity: 0.6 }}
+                />
               </Button>
             ))}
           </HStack>

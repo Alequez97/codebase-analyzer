@@ -42,6 +42,11 @@ function StatCard({ label, value }) {
   );
 }
 
+function normalizeUrl(url) {
+  if (!url) return "#";
+  return url.startsWith("http") ? url : `https://${url}`;
+}
+
 export function CompetitorDetails({ competitor, onBack }) {
   const { details } = competitor;
 
@@ -99,7 +104,15 @@ export function CompetitorDetails({ competitor, onBack }) {
                   ✓ Done
                 </Badge>
               </HStack>
-              <Text fontSize="12px" color="#94a3b8">
+              <Text
+                as="a"
+                href={normalizeUrl(competitor.url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                fontSize="12px"
+                color="#94a3b8"
+                _hover={{ color: "#6366f1", textDecoration: "underline" }}
+              >
                 {competitor.url}
               </Text>
             </VStack>
@@ -107,7 +120,7 @@ export function CompetitorDetails({ competitor, onBack }) {
 
           <Button
             as="a"
-            href={`https://${competitor.url}`}
+            href={normalizeUrl(competitor.url)}
             target="_blank"
             rel="noopener noreferrer"
             size="sm"
