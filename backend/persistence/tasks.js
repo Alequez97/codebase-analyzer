@@ -87,6 +87,8 @@ export async function enqueueTask(task) {
     domainId: task.params?.domainId,
     delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
     competitorName: task.params?.competitorName ?? null,
+    competitorId: task.params?.competitorId ?? null,
+    competitorUrl: task.params?.competitorUrl ?? null,
     timestamp: new Date().toISOString(),
   });
 

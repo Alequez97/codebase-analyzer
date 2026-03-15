@@ -284,6 +284,16 @@ function _buildHandler(
           publicLogText: `Visiting: ${url}`,
           kind: "navigate",
         });
+      } else if (toolName === "delegate_task") {
+        const competitorName = toolInput?.params?.competitorName || "";
+        if (competitorName) {
+          taskLogger.log(`delegate_task: ${competitorName}`, {
+            publicLogText: `Found competitor: ${competitorName}`,
+            kind: "found",
+          });
+        } else {
+          taskLogger.log(`delegate_task`);
+        }
       } else {
         taskLogger.log(`${toolName}`);
       }

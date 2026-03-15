@@ -81,6 +81,49 @@ export const useSocketStore = create((set, get) => ({
         .then(() => {
           // Sync codebase task state after tasks are loaded
           useCodebaseStore.getState().syncCodebaseTaskFromProgress();
+
+          // Restore competitor stubs from loaded tasks after a page reload.
+          // Live MARKET_RESEARCH_COMPETITOR_FOUND events won't re-fire for
+          // tasks that were already queued/running before the reload.
+          const mrStore = useMarketResearchStore.getState();
+          const storeSessionId = mrStore.sessionId;
+          if (storeSessionId) {
+            const { progressByTaskId } = useTaskProgressStore.getState();
+            const competitorEntries = [];
+            const hasRunningInitial = [...progressByTaskId.values()].some(
+              (e) =>
+                e.type === TASK_TYPES.MARKET_RESEARCH_INITIAL &&
+                (e.status === "running" || e.status === "pending"),
+            );
+
+            for (const [taskId, entry] of progressByTaskId) {
+              if (
+                entry.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR &&
+                entry.competitorId &&
+                (entry.status === "running" || entry.status === "pending")
+              ) {
+                competitorEntries.push({ taskId, entry });
+              }
+            }
+
+            if (competitorEntries.length > 0 || hasRunningInitial) {
+              // Analysis is still in progress — restore UI state
+              if (!mrStore.isAnalyzing) {
+                useMarketResearchStore.setState({
+                  isAnalyzing: true,
+                  step: "analysis",
+                });
+              }
+              for (const { taskId, entry } of competitorEntries) {
+                mrStore._addCompetitorStub({
+                  taskId,
+                  competitorId: entry.competitorId,
+                  competitorName: entry.competitorName,
+                  competitorUrl: entry.competitorUrl ?? "",
+                });
+              }
+            }
+          }
         });
     });
 
@@ -109,13 +152,15 @@ export const useSocketStore = create((set, get) => ({
 
     // Task queued event — fires for every task regardless of who triggered it
     socket.on(SOCKET_EVENTS.TASK_QUEUED, (data) => {
-      const { taskId, type, domainId, delegatedByTaskId, competitorName } = data;
+      const { taskId, type, domainId, delegatedByTaskId, competitorName, competitorId, competitorUrl } = data;
       if (taskId) {
         useTaskProgressStore.getState().setPending(taskId, {
           domainId,
           type,
           delegatedByTaskId,
           competitorName,
+          competitorId,
+          competitorUrl,
         });
       }
     });

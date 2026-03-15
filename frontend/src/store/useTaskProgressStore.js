@@ -37,7 +37,7 @@ export const useTaskProgressStore = create((set, get) => ({
   // ── Pending ───────────────────────────────────────────────────────────────
   // Inserts a new task entry in 'pending' status (from TASK_QUEUED socket event).
   // Does NOT overwrite an entry that is already running (e.g. race with TASK_PROGRESS).
-  setPending: (taskId, { domainId, type, delegatedByTaskId, competitorName }) => {
+  setPending: (taskId, { domainId, type, delegatedByTaskId, competitorName, competitorId, competitorUrl }) => {
     set((state) => {
       const existing = state.progressByTaskId.get(taskId);
       if (existing?.status === "running") return state; // already running, skip
@@ -48,6 +48,8 @@ export const useTaskProgressStore = create((set, get) => ({
         status: "pending",
         delegatedByTaskId: delegatedByTaskId ?? null,
         competitorName: competitorName ?? null,
+        competitorId: competitorId ?? null,
+        competitorUrl: competitorUrl ?? null,
         stage: null,
         message: null,
         error: null,
@@ -149,6 +151,8 @@ export const useTaskProgressStore = create((set, get) => ({
             message: existing?.message,
             delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
             competitorName: task.params?.competitorName ?? null,
+            competitorId: task.params?.competitorId ?? null,
+            competitorUrl: task.params?.competitorUrl ?? null,
           });
         }
         return { progressByTaskId: next };
