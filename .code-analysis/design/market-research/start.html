@@ -234,7 +234,7 @@
 
   <!-- Header -->
   <div class="page-header">
-    <h1 class="page-header-title">What's your idea?</h1>
+    <h1 class="page-header-title">What's your <span class="accent">idea?</span></h1>
     <p class="page-header-sub">Describe it below — we'll find competitors, map gaps, and give you a verdict.</p>
   </div>
 
@@ -242,15 +242,15 @@
   <div class="input-card">
     <div class="input-card-body">
       <div class="input-label">Your idea</div>
-      <textarea class="idea-textarea" rows="3"
+      <textarea class="idea-textarea" rows="3" id="ideaInput"
         placeholder="e.g. An AI-powered Jira alternative for remote engineering teams that auto-prioritizes backlog based on git activity…"
       ></textarea>
       <div class="examples">
         <span style="font-size:10px; color:#94a3b8; align-self:center; margin-right:2px;">Try:</span>
-        <button class="example-chip"><span class="chip-icon">✦</span> AI code review tool</button>
-        <button class="example-chip"><span class="chip-icon">✦</span> No-code mobile builder</button>
-        <button class="example-chip"><span class="chip-icon">✦</span> Dev expense tracker</button>
-        <button class="example-chip"><span class="chip-icon">✦</span> Open-source Notion</button>
+        <button class="example-chip" onclick="fillExample('An AI-powered code review tool that learns your team\'s style and auto-suggests improvements')"><span class="chip-icon">✦</span> AI code review tool</button>
+        <button class="example-chip" onclick="fillExample('A no-code mobile app builder specifically for indie creators and small businesses')"><span class="chip-icon">✦</span> No-code mobile builder</button>
+        <button class="example-chip" onclick="fillExample('An expense tracker designed for developers with GitHub and Stripe integrations')"><span class="chip-icon">✦</span> Dev expense tracker</button>
+        <button class="example-chip" onclick="fillExample('An open-source Notion alternative with local-first storage and real-time collaboration')"><span class="chip-icon">✦</span> Open-source Notion</button>
       </div>
     </div>
     <div class="input-card-footer">
@@ -260,12 +260,12 @@
         </svg>
         Live market intelligence · ~20 competitors · ~5 min
       </div>
-      <button class="btn-analyze">
+      <a href="analysis.html" class="btn-analyze">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         Analyze Market
-      </button>
+      </a>
     </div>
   </div>
 
@@ -298,47 +298,34 @@
   <div class="proof-strip">
     <div class="proof-item">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-      <strong>2,400+</strong> reports run
-    </div>
-    <span class="proof-sep"></span>
-    <div class="proof-item">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <strong>18,000+</strong> companies analyzed
-    </div>
-    <span class="proof-sep"></span>
-    <div class="proof-item">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
-      Avg <strong>5 min</strong> per report
+      <strong>2,419</strong> ideas analyzed
     </div>
     <span class="proof-sep"></span>
     <div class="proof-item">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M8 12l2.5 2.5L16 9"/>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#16a34a">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
       </svg>
-      No credit card required to try
+      Average <strong>18 mins</strong> saved
+    </div>
+    <span class="proof-sep"></span>
+    <div class="proof-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#d97706">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+      <strong>4.8/5</strong> founder rating
     </div>
   </div>
 
 </main>
 
 <script>
-  // Fill textarea from example chips
-  document.querySelectorAll('.example-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const text = chip.textContent.replace('✦', '').trim();
-      document.querySelector('.idea-textarea').value = text;
-      document.querySelector('.idea-textarea').focus();
-    });
-  });
+  function fillExample(text) {
+    document.getElementById('ideaInput').value = text;
+    document.getElementById('ideaInput').focus();
+  }
 </script>
 
 </body>

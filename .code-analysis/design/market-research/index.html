@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Researchio — Market Analysis</title>
+  <title>Researchio — Is your idea worth building?</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ─── Reset ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -20,529 +19,317 @@
     button { cursor: pointer; font-family: inherit; }
     a { color: inherit; text-decoration: none; }
 
-    /* ─── Navbar (Researchio standalone product) ─── */
+    /* ─── Navbar ─── */
     .navbar {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid #e2e8f0;
-      height: 52px;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(250,250,250,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e4e4e7;
+      height: 48px;
       display: flex; align-items: center;
-      padding: 0 24px;
+      padding: 0 28px;
     }
-    .navbar-left { display: flex; align-items: center; gap: 4px; flex: 1; }
+    .navbar-left { display: flex; align-items: center; gap: 6px; flex: 1; }
     .navbar-right { display: flex; align-items: center; gap: 10px; }
 
-    /* Product logo */
     .logo-mark {
       display: flex; align-items: center; gap: 8px;
-      text-decoration: none; margin-right: 10px;
+      text-decoration: none;
     }
     .logo-icon {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+      width: 28px; height: 28px; border-radius: 7px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 1px 4px rgba(99,102,241,.35);
     }
     .logo-wordmark {
-      font-size: 14px; font-weight: 800; color: #0f172a; letter-spacing: -.02em;
+      font-size: 14px; font-weight: 700; color: #0f172a; letter-spacing: -.01em;
     }
     .logo-wordmark sup {
       font-size: 8px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #818cf8;
-      vertical-align: super; margin-left: 1px;
+      text-transform: uppercase; color: #6366f1;
+      vertical-align: super; margin-left: 2px;
     }
-
-    .nav-sep { width: 1px; height: 18px; background: #e2e8f0; margin: 0 6px; }
-
-    .btn-nav {
+    .btn-signin {
+      display: inline-flex; align-items: center;
+      background: none; border: none;
+      padding: 0 10px; height: 30px; font-size: 13px; color: #52525b;
+      font-weight: 500;
+    }
+    .btn-signin:hover { color: #0f172a; }
+    .btn-cta-sm {
       display: inline-flex; align-items: center; gap: 5px;
-      background: none; border: none; border-radius: 6px;
-      padding: 0 10px; height: 32px; font-size: 13px; color: #64748b;
-      font-weight: 500; cursor: pointer; transition: background .1s, color .1s;
+      background: #0f172a; border: none; border-radius: 7px;
+      padding: 0 14px; height: 32px; font-size: 13px; color: #fff;
+      font-weight: 600; transition: background .12s;
     }
-    .btn-nav:hover { background: #f1f5f9; color: #0f172a; }
+    .btn-cta-sm:hover { background: #1e293b; }
 
-    /* User chip (signed-in state) */
-    .user-chip {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 99px;
-      padding: 3px 10px 3px 4px;
-      font-size: 12px; font-weight: 500; color: #374151;
-      cursor: pointer; transition: border-color .12s;
-    }
-    .user-chip:hover { border-color: #cbd5e1; }
-    .user-avatar {
-      width: 22px; height: 22px; border-radius: 50%;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0;
-    }
-    .user-plan {
-      font-size: 10px; font-weight: 600; color: #94a3b8;
-      letter-spacing: .02em; margin-left: 2px;
+    /* ─── Hero ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 24px 80px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
     }
 
-    /* Running status badge */
-    .status-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #fff; color: #15803d;
-      border: 1px solid #bbf7d0;
-      border-radius: 9999px; padding: 3px 10px;
-      font-size: 11px; font-weight: 500;
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 700px;
+      background: radial-gradient(ellipse at 50% 30%, rgba(99,102,241,.08) 0%, transparent 65%);
+      pointer-events: none;
     }
-    .status-badge .dot {
-      width: 6px; height: 6px; background: #22c55e;
-      border-radius: 50%; flex-shrink: 0;
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f5f3ff; border: 1px solid #ddd6fe;
+      border-radius: 9999px; padding: 4px 14px;
+      font-size: 11px; font-weight: 600; color: #6366f1;
+      margin-bottom: 28px;
+      position: relative;
     }
-    .status-badge.running {
-      background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;
-    }
-    .status-badge.running .dot {
-      background: #3b82f6;
-      animation: pulse 1.4s infinite;
+    .hero-eyebrow .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #818cf8; flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
     }
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
     }
 
-    /* ─── Layout ─── */
-    .page {
-      display: grid;
-      grid-template-columns: 1fr 356px;
-      height: calc(100vh - 52px);
-      overflow: hidden;
+    .hero-title {
+      font-size: 52px; font-weight: 800; color: #0f172a;
+      line-height: 1.1; max-width: 700px;
+      letter-spacing: -.03em;
+      position: relative;
+    }
+    .hero-title .accent {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    /* ─── Left column: main content ─── */
-    .main-col {
-      display: flex; flex-direction: column;
-      overflow: hidden;
-      border-right: 1px solid #e2e8f0;
+    .hero-sub {
+      margin-top: 20px;
+      font-size: 16px; color: #64748b; line-height: 1.7;
+      max-width: 500px;
+      position: relative;
     }
 
-    /* ─── Page header ─── */
-    .page-header {
-      flex-shrink: 0;
-      padding: 18px 24px 16px;
+    .btn-hero {
+      margin-top: 40px;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      border: none; border-radius: 12px;
+      padding: 0 32px; height: 52px;
+      font-size: 15px; color: #fff; font-weight: 700;
+      letter-spacing: -.01em;
+      box-shadow: 0 4px 16px rgba(99,102,241,.4);
+      transition: opacity .15s, box-shadow .15s, transform .15s;
+      text-decoration: none;
+      position: relative;
+    }
+    .btn-hero:hover {
+      opacity: .93;
+      box-shadow: 0 6px 24px rgba(99,102,241,.5);
+      transform: translateY(-1px);
+    }
+    .btn-hero:active { transform: none; }
+    .btn-hero-sub {
+      margin-top: 12px;
+      font-size: 12px; color: #94a3b8;
+      position: relative;
+    }
+
+    /* ─── Feature pills ─── */
+    .features {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center;
+      margin-top: 52px;
+      max-width: 640px;
+      position: relative;
+    }
+    .feature-pill {
+      display: inline-flex; align-items: center; gap: 8px;
       background: #fff;
-      border-bottom: 1px solid #f1f5f9;
-      box-shadow: 0 1px 0 #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 12px; color: #374151; font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05);
     }
-    .page-header-top {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; margin-bottom: 14px;
-    }
-    .page-title-group { display: flex; align-items: center; gap: 10px; }
-    .page-title-icon {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    .pill-icon {
+      width: 22px; height: 22px; border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(99,102,241,.3);
     }
-    .page-title-icon svg { display: block; }
-    .page-title {
-      font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -.01em;
-    }
-    .page-meta { font-size: 11.5px; color: #94a3b8; margin-top: 1px; }
+    .pill-icon.blue  { background: #eff6ff; color: #3b82f6; }
+    .pill-icon.amber { background: #fef3c7; color: #d97706; }
+    .pill-icon.green { background: #f0fdf4; color: #16a34a; }
+    .pill-icon.purple{ background: #f5f3ff; color: #7c3aed; }
 
-    .header-actions { display: flex; align-items: center; gap: 6px; }
+    /* ─── Proof strip ─── */
+    .proof-strip {
+      margin-top: 48px;
+      display: flex; align-items: center; gap: 24px;
+      flex-wrap: wrap; justify-content: center;
+      position: relative;
+    }
+    .proof-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: #64748b;
+    }
+    .proof-item strong { color: #0f172a; font-weight: 700; }
+    .proof-sep { width: 3px; height: 3px; border-radius: 50%; background: #cbd5e1; }
 
-    .btn-secondary {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;
-      padding: 0 11px; height: 30px; font-size: 12px; color: #475569;
-      font-weight: 500;
-      transition: all .12s;
-    }
-    .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; color: #334155; }
-
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 6px;
-      padding: 0 13px; height: 30px; font-size: 12px; color: #fff;
-      font-weight: 600; letter-spacing: -.01em;
-      box-shadow: 0 1px 3px rgba(99,102,241,.4);
-      transition: all .12s;
-    }
-    .btn-primary:hover { box-shadow: 0 2px 8px rgba(99,102,241,.5); filter: brightness(1.05); }
-    .btn-primary:disabled { opacity: 0.5; cursor: default; }
-
-    /* ─── Input bar ─── */
-    .input-bar {
-      display: flex; gap: 8px; align-items: flex-end;
-    }
-    .input-wrap { flex: 1; position: relative; }
-    .idea-input {
-      width: 100%;
-      border: 1.5px solid #e2e8f0; border-radius: 9px;
-      padding: 10px 14px; font-size: 12.5px; color: #1e293b;
-      background: #f8fafc; outline: none;
-      resize: none; font-family: inherit;
-      line-height: 1.55; min-height: 46px; max-height: 120px;
-      transition: border-color .15s, background .15s, box-shadow .15s;
-    }
-    .idea-input::placeholder { color: #94a3b8; }
-    .idea-input:focus {
-      border-color: #818cf8; background: #fff;
-      box-shadow: 0 0 0 3px rgba(99,102,241,.1);
-    }
-    .idea-input:disabled {
-      background: #f1f5f9; color: #64748b;
-      border-color: #e2e8f0; cursor: not-allowed;
-    }
-
-    .btn-run {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 9px;
-      padding: 0 18px; height: 46px; font-size: 13px; color: #fff;
-      font-weight: 600; white-space: nowrap; flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(99,102,241,.35);
-      transition: all .12s;
-    }
-    .btn-run:hover { box-shadow: 0 4px 12px rgba(99,102,241,.45); filter: brightness(1.06); }
-    .btn-run.stop {
-      background: #fff; color: #dc2626;
-      border: 1.5px solid #fca5a5;
-      box-shadow: none;
-    }
-    .btn-run.stop:hover { background: #fff1f2; border-color: #f87171; }
-
-    /* ─── Competitors area ─── */
-    .competitors-scroll {
-      flex: 1; overflow-y: auto;
-      padding: 20px 24px 40px;
-    }
-
-    .section-label-row {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .section-label {
-      font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #94a3b8;
-    }
-    .section-label-count {
-      font-size: 11px; color: #94a3b8; font-weight: 400;
-      background: #f1f5f9; border-radius: 99px;
-      padding: 1px 8px; letter-spacing: 0; text-transform: none;
-    }
-
-    .comp-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-    }
-
-    /* Competitor card */
-    .comp-card {
+    /* ─── Pricing section ─── */
+    .pricing-section {
       background: #fff;
-      border: 1px solid #e4e4e7; border-radius: 10px;
-      overflow: hidden;
+      border-top: 1px solid #f1f5f9;
+      padding: 80px 24px 96px;
+    }
+    .pricing-inner {
+      max-width: 960px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .pricing-header { text-align: center; margin-bottom: 48px; }
+    .pricing-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: #6366f1;
+      margin-bottom: 12px;
+    }
+    .pricing-title {
+      font-size: 30px; font-weight: 800; color: #0f172a;
+      letter-spacing: -.02em; margin-bottom: 8px;
+    }
+    .pricing-sub { font-size: 14px; color: #64748b; margin-bottom: 6px; }
+    .pricing-note {
+      margin-top: 10px; font-size: 12px; color: #94a3b8;
+      display: flex; align-items: center; gap: 5px; justify-content: center;
+    }
+
+    .billing-toggle {
+      display: inline-flex; align-items: center;
+      background: #f1f5f9; border-radius: 8px; padding: 3px;
+      margin-top: 20px; gap: 2px;
+    }
+    .billing-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: none; border: none; border-radius: 6px;
+      padding: 5px 14px; font-size: 12px; color: #64748b;
+      font-weight: 500; transition: background .12s, color .12s;
+    }
+    .billing-btn.active {
+      background: #fff; color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+      font-weight: 600;
+    }
+    .billing-btn:hover:not(.active) { color: #0f172a; }
+    .save-badge {
+      font-size: 10px; font-weight: 700;
+      background: #dcfce7; color: #15803d;
+      padding: 1px 6px; border-radius: 9999px;
+    }
+
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; width: 100%; align-items: start;
+    }
+
+    .plan-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 22px 20px; position: relative;
       transition: box-shadow .15s;
     }
-    .comp-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.07); }
-
-    .comp-card-header {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px 10px;
+    .plan-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.06); }
+    .plan-card.featured {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 4px rgba(99,102,241,.08), 0 8px 24px rgba(99,102,241,.12);
     }
-    .comp-favicon {
-      width: 28px; height: 28px; border-radius: 6px;
-      background: #f1f5f9; border: 1px solid #e2e8f0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #64748b;
-      flex-shrink: 0; overflow: hidden;
+    .plan-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; padding: 3px 12px; border-radius: 9999px;
+      white-space: nowrap;
     }
-    .comp-favicon img { width: 100%; height: 100%; object-fit: cover; }
-    .comp-name-wrap { flex: 1; min-width: 0; }
-    .comp-name {
-      font-size: 13px; font-weight: 600; color: #0f172a;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .comp-url {
-      font-size: 11px; color: #3b82f6;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      cursor: pointer;
-    }
-    .comp-url:hover { text-decoration: underline; }
-
-    .comp-status-badge {
-      flex-shrink: 0;
-      font-size: 10px; font-weight: 500;
-      padding: 2px 7px; border-radius: 9999px;
-    }
-    .comp-status-badge.analyzing {
-      background: #eff6ff; color: #1d4ed8;
-    }
-    .comp-status-badge.done {
-      background: #f0fdf4; color: #15803d;
-    }
-    .comp-status-badge.queued {
-      background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;
-    }
-
-    .comp-card-body { padding: 0 14px 12px; }
-    .comp-desc {
-      font-size: 12px; color: #52525b; line-height: 1.55;
-      margin-bottom: 10px;
-    }
-
-    .comp-tags {
-      display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px;
-    }
-    .comp-tag {
-      font-size: 10px; font-weight: 500;
-      padding: 1px 6px; border-radius: 4px;
-      background: #f1f5f9; color: #475569;
-      border: 1px solid #e2e8f0;
-    }
-
-    .comp-metrics {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
-    }
-    .comp-metric {
-      background: #f8fafc; border-radius: 6px; padding: 6px 8px;
-    }
-    .comp-metric-label {
-      font-size: 9px; font-weight: 600; letter-spacing: .07em;
-      text-transform: uppercase; color: #94a3b8; margin-bottom: 2px;
-    }
-    .comp-metric-value { font-size: 12px; font-weight: 600; color: #0f172a; }
-    .comp-metric-value.green { color: #16a34a; }
-    .comp-metric-value.blue { color: #2563eb; }
-
-    /* Skeleton card */
-    .comp-card.skeleton { border-style: dashed; }
-    .skel {
-      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 4px;
-    }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* ─── Right column: live feed ─── */
-    .feed-col {
-      display: flex; flex-direction: column;
-      background: #fafafa; overflow: hidden;
-    }
-    .feed-header {
-      flex-shrink: 0;
-      padding: 13px 16px 12px;
-      background: #fff;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .feed-title {
-      font-size: 11.5px; font-weight: 700; letter-spacing: -.01em;
-      color: #0f172a;
-      display: flex; align-items: center; gap: 7px;
-    }
-    .live-pill {
+    .plan-name { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .plan-credits {
       display: inline-flex; align-items: center; gap: 4px;
-      background: #eff6ff; border: 1px solid #bfdbfe;
-      border-radius: 99px; padding: 1px 7px;
-      font-size: 10px; font-weight: 600; color: #1d4ed8;
-      letter-spacing: .02em;
+      background: #f5f3ff; color: #6366f1;
+      border-radius: 6px; padding: 2px 8px;
+      font-size: 11px; font-weight: 600;
+      margin-bottom: 12px;
     }
-    .live-pill .live-dot {
-      width: 5px; height: 5px; background: #3b82f6;
-      border-radius: 50%;
-      animation: pulse 1.4s infinite;
-    }
-    .feed-count {
-      font-size: 11px; color: #94a3b8;
-    }
-    .feed-clear {
-      font-size: 11px; color: #94a3b8;
-      background: none; border: none; padding: 2px 8px;
-      border-radius: 5px; font-weight: 500;
-    }
-    .feed-clear:hover { background: #f1f5f9; color: #64748b; }
+    .plan-price { display: flex; align-items: baseline; gap: 2px; margin-bottom: 6px; }
+    .plan-amount { font-size: 30px; font-weight: 800; color: #0f172a; letter-spacing: -.03em; }
+    .plan-period { font-size: 12px; color: #94a3b8; font-weight: 400; }
+    .plan-tagline { font-size: 12px; color: #64748b; line-height: 1.4; margin-bottom: 16px; }
 
-    .feed-scroll {
-      flex: 1; overflow-y: auto;
-      padding: 6px 0 6px;
-    }
-
-    /* Feed entries */
-    .feed-entry {
-      display: flex; gap: 9px;
-      padding: 6px 14px 6px 12px;
-      align-items: flex-start;
-      position: relative;
-      transition: background .1s;
-    }
-    .feed-entry::before {
-      content: '';
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 2px; border-radius: 0 2px 2px 0;
-      background: transparent;
-      transition: background .1s;
-    }
-    .feed-entry:hover { background: #f1f5f9; }
-    .feed-entry:hover::before { background: #cbd5e1; }
-    .feed-entry.active-tool { background: #eff6ff; }
-    .feed-entry.active-tool::before { background: #3b82f6; }
-    .feed-entry.event-nav::before { background: #10b981; }
-    .feed-entry.event-screenshot::before { background: #8b5cf6; }
-    .feed-entry.event-extract::before { background: #f59e0b; }
-    .feed-entry.event-write::before { background: #ec4899; }
-    .feed-entry.event-think::before { background: #cbd5e1; }
-    .feed-entry.event-search::before { background: #06b6d4; }
-
-    .feed-icon {
-      width: 22px; height: 22px; flex-shrink: 0;
-      border-radius: 6px;
+    .plan-cta {
+      width: 100%; height: 34px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; border: none;
       display: flex; align-items: center; justify-content: center;
-      margin-top: 0;
+      transition: opacity .12s, background .12s; cursor: pointer;
     }
-    .feed-icon.nav    { background: #d1fae5; color: #059669; }
-    .feed-icon.search { background: #cffafe; color: #0891b2; }
-    .feed-icon.screenshot { background: #ede9fe; color: #7c3aed; }
-    .feed-icon.extract { background: #fef3c7; color: #d97706; }
-    .feed-icon.write  { background: #fce7f3; color: #db2777; }
-    .feed-icon.think  { background: #f1f5f9; color: #94a3b8; }
-    .feed-icon.done   { background: #dcfce7; color: #16a34a; }
-    .feed-icon.error  { background: #fee2e2; color: #dc2626; }
+    .plan-cta.primary {
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,.3);
+    }
+    .plan-cta.primary:hover { opacity: .9; }
+    .plan-cta.outline {
+      background: #fff; border: 1px solid #e2e8f0; color: #374151;
+    }
+    .plan-cta.outline:hover { background: #f8fafc; border-color: #cbd5e1; }
 
-    .feed-body { flex: 1; min-width: 0; }
-    .feed-label {
-      font-size: 11.5px; font-weight: 600; color: #1e293b;
-      line-height: 1.4;
-    }
-    .feed-detail {
-      font-size: 11px; color: #64748b; line-height: 1.5;
-      margin-top: 1px; word-break: break-word;
-    }
-    .feed-link {
-      color: #6366f1; text-decoration: none;
-      word-break: break-all; font-weight: 500;
-    }
-    .feed-link:hover { text-decoration: underline; }
-    .feed-time {
-      font-size: 10px; color: #cbd5e1; flex-shrink: 0;
-      margin-top: 3px; white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
+    .plan-divider { height: 1px; background: #f1f5f9; margin: 16px 0; }
 
-    .feed-divider {
-      margin: 4px 12px;
-      border: none; border-top: 1px dashed #e2e8f0;
+    .plan-features {
+      list-style: none; display: flex; flex-direction: column; gap: 8px;
     }
+    .plan-features li {
+      display: flex; align-items: flex-start; gap: 7px;
+      font-size: 11.5px; color: #374151; line-height: 1.45;
+    }
+    .plan-features li.feat-muted { color: #94a3b8; }
+    .feat-check { color: #16a34a; font-weight: 700; flex-shrink: 0; font-size: 12px; }
+    .feat-x { color: #cbd5e1; font-weight: 700; flex-shrink: 0; font-size: 12px; }
 
-    /* Sub-agent badge */
-    .feed-agent-tag {
-      display: inline-flex; align-items: center; gap: 3px;
-      font-size: 9.5px; font-weight: 700; letter-spacing: .05em;
-      text-transform: uppercase; padding: 1px 6px; border-radius: 4px;
-      margin-bottom: 2px;
-      background: #eef2ff; color: #4338ca;
-      border: 1px solid #e0e7ff;
+    .topup-note {
+      margin-top: 24px; font-size: 12px; color: #64748b;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 14px 18px; max-width: 960px; width: 100%;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .topup-note strong { color: #0f172a; }
+    .topup-badge {
+      background: #fef3c7; color: #92400e;
+      font-size: 11px; font-weight: 700; padding: 2px 8px;
+      border-radius: 5px; flex-shrink: 0;
     }
 
-    /* ─── Feed stats bar ─── */
-    .feed-stats {
-      flex-shrink: 0;
-      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
-      border-top: 1px solid #e2e8f0;
-      background: #fff;
+    .pricing-footer-note {
+      margin-top: 20px; font-size: 12px; color: #94a3b8; text-align: center;
     }
-    .feed-stat {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 10px 8px;
-      border-right: 1px solid #f1f5f9;
-      gap: 1px;
-    }
-    .feed-stat:last-child { border-right: none; }
-    .feed-stat-val {
-      font-size: 17px; font-weight: 800; color: #0f172a;
-      line-height: 1; letter-spacing: -.02em;
-    }
-    .feed-stat-val.blue { color: #6366f1; }
-    .feed-stat-val.green { color: #16a34a; }
-    .feed-stat-val.purple { color: #7c3aed; }
-    .feed-stat-lbl {
-      font-size: 9.5px; font-weight: 600; letter-spacing: .06em;
-      text-transform: uppercase; color: #94a3b8;
-    }
-
-    /* ─── Empty / idle state ─── */
-    .idle-state {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 8px; padding: 32px 20px; text-align: center;
-    }
-    .idle-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: #f1f5f9; display: flex; align-items: center; justify-content: center;
-      color: #94a3b8; margin-bottom: 4px;
-    }
-    .idle-title { font-size: 12px; font-weight: 600; color: #64748b; }
-    .idle-sub { font-size: 11px; color: #94a3b8; line-height: 1.5; }
-
-    /* ─── Report summary card ─── */
-    .report-card {
-      display: none; /* shown after completion */
-      margin: 12px 24px 0;
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-      border-radius: 12px; padding: 20px 22px; color: #fff;
-    }
-    .report-card .report-title {
-      font-size: 14px; font-weight: 700; margin-bottom: 4px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .report-card .report-sub {
-      font-size: 11px; color: #a5b4fc; margin-bottom: 16px;
-    }
-    .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-    .report-metric {
-      background: rgba(255,255,255,.08); border-radius: 8px; padding: 10px 12px;
-    }
-    .report-metric-val {
-      font-size: 20px; font-weight: 800; color: #fff;
-    }
-    .report-metric-lbl {
-      font-size: 9px; font-weight: 600; letter-spacing: .08em;
-      text-transform: uppercase; color: #818cf8; margin-top: 2px;
-    }
-    .report-cta {
-      margin-top: 14px; display: flex; gap: 8px;
-    }
-    .btn-report {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #6366f1; border: none; border-radius: 6px;
-      padding: 0 14px; height: 30px; font-size: 11px;
-      color: #fff; font-weight: 600;
-    }
-    .btn-report:hover { background: #4f46e5; }
-    .btn-report.outline {
-      background: transparent; border: 1px solid rgba(255,255,255,.25);
-      color: rgba(255,255,255,.85);
-    }
-    .btn-report.outline:hover { background: rgba(255,255,255,.08); }
 
     /* ─── Burger / mobile nav ─── */
     .burger-btn {
       display: none; background: none; border: none;
       padding: 6px; border-radius: 7px; cursor: pointer;
-      color: #0f172a; margin-left: 8px; flex-shrink: 0;
+      color: #374151; margin-left: auto; flex-shrink: 0;
     }
     .burger-btn:hover { background: #f1f5f9; }
 
     .mobile-drawer {
       display: none; position: fixed;
-      top: 52px; left: 0; right: 0;
+      top: 48px; left: 0; right: 0;
       background: #fff; border-bottom: 1px solid #e2e8f0;
       padding: 8px 16px 16px; flex-direction: column;
       z-index: 97; box-shadow: 0 8px 24px rgba(0,0,0,.08);
@@ -552,62 +339,48 @@
       display: flex; align-items: center;
       padding: 11px 12px; border-radius: 8px;
       font-size: 14px; font-weight: 500; color: #374151;
-      background: none; border: none; cursor: pointer;
-      width: 100%; text-align: left; font-family: inherit;
+      text-decoration: none; background: none; border: none;
+      cursor: pointer; width: 100%; text-align: left; font-family: inherit;
     }
     .mob-item:hover { background: #f8fafc; }
     .mob-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
-    .mob-user {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px; background: #f8fafc; border-radius: 10px;
-      margin-bottom: 4px;
+    .mob-cta {
+      background: #0f172a; color: #fff; border-radius: 8px;
+      padding: 13px 16px; font-size: 14px; font-weight: 600;
+      text-align: center; border: none; cursor: pointer;
+      font-family: inherit; width: 100%; margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .mob-user-info { flex: 1; min-width: 0; }
-    .mob-user-email { font-size: 13px; font-weight: 600; color: #0f172a; }
-    .mob-user-plan { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
-    .mob-status-pill {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9999px;
-      padding: 4px 10px; font-size: 11px; font-weight: 500; color: #1d4ed8;
-      margin-bottom: 8px;
-    }
-    .mob-status-pill .dot {
-      width: 6px; height: 6px; background: #3b82f6;
-      border-radius: 50%; animation: pulse 1.4s infinite;
-    }
+    .mob-cta:hover { background: #1e293b; }
 
     @media (max-width: 640px) {
       .navbar { padding: 0 16px; }
-      .navbar-left .nav-sep,
-      .navbar-left .btn-nav { display: none; }
+      .navbar-left > a.btn-signin { display: none; }
       .navbar-right { display: none; }
       .burger-btn { display: flex; align-items: center; justify-content: center; }
 
-      .page {
-        grid-template-columns: 1fr;
-        height: auto;
-        overflow: visible;
-      }
-      .main-col {
-        height: calc(100vh - 52px);
-        border-right: none;
-      }
-      .feed-col { display: none; }
-      .page-header { padding: 14px 16px 12px; }
-      .page-meta { display: none; }
-      .competitors-scroll { padding: 14px 16px 40px; }
-      .comp-grid { grid-template-columns: 1fr; }
+      .hero { padding: 80px 20px 56px; }
+      .hero-title { font-size: 36px; }
+      .hero-sub { font-size: 14px; }
+      .features { margin-top: 36px; gap: 8px; }
+
+      .pricing-section { padding: 56px 16px 72px; }
+      .pricing-title { font-size: 24px; }
+      .pricing-grid { grid-template-columns: 1fr; gap: 24px; }
+      .topup-note { flex-direction: column; gap: 8px; align-items: flex-start; }
+    }
+
+    @media (min-width: 641px) and (max-width: 900px) {
+      .pricing-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     Navbar
-══════════════════════════════════════ -->
+<!-- Navbar -->
 <header class="navbar">
   <div class="navbar-left">
-    <a href="#" class="logo-mark">
+    <a href="index.html" class="logo-mark">
       <div class="logo-icon">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -615,21 +388,16 @@
       </div>
       <span class="logo-wordmark">Researchio<sup>beta</sup></span>
     </a>
-    <span class="nav-sep"></span>
-    <button class="btn-nav">How it works</button>
-    <button class="btn-nav">Pricing</button>
-    <button class="btn-nav">Docs</button>
+    <a href="#pricing" class="btn-signin" style="margin-left:4px">Pricing</a>
   </div>
   <div class="navbar-right">
-    <span class="status-badge running">
-      <span class="dot"></span>
-      Analyzing — 3 of 7 complete
-    </span>
-    <div class="user-chip">
-      <div class="user-avatar">JD</div>
-      john@example.com
-      <span class="user-plan">Starter</span>
-    </div>
+    <button class="btn-signin">Sign in</button>
+    <button class="btn-cta-sm" onclick="location.href='start.html'">
+      Get started free
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
   </div>
   <button class="burger-btn" id="burger-btn" onclick="toggleMenu()" aria-label="Open menu">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -641,564 +409,272 @@
 </header>
 
 <div class="mobile-drawer" id="mobile-drawer">
-  <div class="mob-user">
-    <div class="user-avatar">JD</div>
-    <div class="mob-user-info">
-      <div class="mob-user-email">john@example.com</div>
-      <div class="mob-user-plan">Starter plan</div>
-    </div>
-  </div>
-  <div class="mob-status-pill">
-    <span class="dot"></span>
-    Analyzing — 3 of 7 complete
-  </div>
+  <a href="#pricing" class="mob-item" onclick="document.getElementById('mobile-drawer').classList.remove('open')">Pricing</a>
   <div class="mob-divider"></div>
-  <button class="mob-item">How it works</button>
-  <button class="mob-item">Pricing</button>
-  <button class="mob-item">Docs</button>
+  <button class="mob-item">Sign in</button>
+  <button class="mob-cta" onclick="location.href='start.html'">
+    Get started free
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </button>
 </div>
 
+<!-- Hero -->
+<section class="hero">
+
+  <div class="hero-eyebrow">
+    <span class="dot"></span>
+    AI-powered competitive intelligence
+  </div>
+
+  <h1 class="hero-title">
+    Is your idea<br/>
+    <span class="accent">worth building?</span>
+  </h1>
+
+  <p class="hero-sub">
+    Describe your product idea. Our AI explores the competitive landscape,
+    finds gaps, maps pricing, and gives you a go/no-go verdict — in minutes.
+  </p>
+
+  <a href="start.html" class="btn-hero">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    Get started free
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </a>
+
+  <p class="btn-hero-sub">Results in ~5 minutes</p>
+
+  <!-- Feature pills -->
+  <div class="features">
+    <div class="feature-pill">
+      <span class="pill-icon blue">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </span>
+      Find competitors
+    </div>
+    <div class="feature-pill">
+      <span class="pill-icon amber">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </span>
+      Deep intelligence
+    </div>
+    <div class="feature-pill">
+      <span class="pill-icon green">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </span>
+      Map the gaps
+    </div>
+    <div class="feature-pill">
+      <span class="pill-icon purple">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </span>
+      Go / No-go verdict
+    </div>
+    <div class="feature-pill">
+      <span class="pill-icon blue">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </span>
+      Exportable PDF report
+    </div>
+  </div>
+
+  <!-- Social proof -->
+  <div class="proof-strip">
+    <div class="proof-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <strong>2,400+</strong> reports run
+    </div>
+    <span class="proof-sep"></span>
+    <div class="proof-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <strong>18,000+</strong> companies analyzed
+    </div>
+    <span class="proof-sep"></span>
+    <div class="proof-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Avg <strong>5 min</strong> per report
+    </div>
+    <span class="proof-sep"></span>
+    <div class="proof-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M8 12l2.5 2.5L16 9"/>
+      </svg>
+      No credit card required to try
+    </div>
+  </div>
+
+</section>
+
 <!-- ══════════════════════════════════════
-     Page Layout
+     Pricing
 ══════════════════════════════════════ -->
-<div class="page">
+<section id="pricing" class="pricing-section">
+  <div class="pricing-inner">
 
-  <!-- ══ LEFT: Main content ══ -->
-  <div class="main-col">
-
-    <!-- Page header + input bar -->
-    <div class="page-header">
-      <div class="page-header-top">
-        <div class="page-title-group">
-          <div class="page-title-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </div>
-          <div>
-            <div class="page-title">Market Analysis</div>
-            <div class="page-meta">Competitive intelligence report · Sub-agents analyzing each competitor in parallel</div>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button class="btn-secondary">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export report
-          </button>
-          <button class="btn-primary" disabled>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 3l14 9-14 9V3z"/>
-            </svg>
-            Start building →
-          </button>
-        </div>
-      </div>
-
-      <!-- Input bar -->
-      <div class="input-bar">
-        <div class="input-wrap">
-          <textarea class="idea-input" rows="1" disabled
-            placeholder="Describe your product idea — e.g. "An AI-powered Jira alternative for remote engineering teams""
-          >An AI-powered code review and bug detection tool that runs as a CI/CD plugin — finds logic errors, security issues, and suggests fixes before merging.</textarea>
-        </div>
-        <button class="btn-run stop">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="3" y="3" width="18" height="18" rx="3"/>
-          </svg>
-          Stop
+    <div class="pricing-header">
+      <div class="pricing-eyebrow">Pricing</div>
+      <h2 class="pricing-title">Simple, credit-based pricing</h2>
+      <p class="pricing-sub">Each report costs 1 credit. Credits come with your plan — top up anytime.</p>
+      <p class="pricing-note">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+        </svg>
+        Credits reset monthly. Unused credits do not roll over.
+      </p>
+      <div class="billing-toggle">
+        <button class="billing-btn active" id="btn-monthly" onclick="setBilling('monthly')">Monthly</button>
+        <button class="billing-btn" id="btn-annual" onclick="setBilling('annual')">
+          Annual <span class="save-badge">Save 20%</span>
         </button>
-      </div><!-- /input-bar -->
-    </div><!-- /page-header -->
-
-    <!-- Competitors grid -->
-    <div class="competitors-scroll">
-      <div class="section-label-row">
-        <span class="section-label">Competitors discovered</span>
-        <span class="section-label-count">7 found · 3 analyzed</span>
-      </div>
-      <div class="comp-grid">
-
-        <!-- Card 1: done -->
-        <div class="comp-card">
-          <div class="comp-card-header">
-            <div class="comp-favicon" style="background:#fff3e0;">
-              <img src="https://www.google.com/s2/favicons?domain=snyk.io&sz=32" alt="" />
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">Snyk</div>
-              <div class="comp-url">snyk.io</div>
-            </div>
-            <span class="comp-status-badge done">✓ Done</span>
-          </div>
-          <div class="comp-card-body">
-            <div class="comp-desc">
-              Developer security platform focusing on open-source vulnerabilities, container security, and IaC scanning. Integrates with GitHub, GitLab, and CI/CD pipelines.
-            </div>
-            <div class="comp-tags">
-              <span class="comp-tag">Security focus</span>
-              <span class="comp-tag">OSS scanning</span>
-              <span class="comp-tag">CI/CD native</span>
-              <span class="comp-tag">Free tier</span>
-            </div>
-            <div class="comp-metrics">
-              <div class="comp-metric">
-                <div class="comp-metric-label">Pricing</div>
-                <div class="comp-metric-value blue">$25/dev</div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Customers</div>
-                <div class="comp-metric-value">2.5M+</div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Gap</div>
-                <div class="comp-metric-value green">No AI fix</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: done -->
-        <div class="comp-card">
-          <div class="comp-card-header">
-            <div class="comp-favicon" style="background:#e8f5e9;">
-              <img src="https://www.google.com/s2/favicons?domain=sonarqube.org&sz=32" alt="" />
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">SonarQube</div>
-              <div class="comp-url">sonarqube.org</div>
-            </div>
-            <span class="comp-status-badge done">✓ Done</span>
-          </div>
-          <div class="comp-card-body">
-            <div class="comp-desc">
-              Static code analysis for 30+ languages. Detects bugs, code smells, and security vulnerabilities. Strong enterprise presence with self-hosted and cloud editions.
-            </div>
-            <div class="comp-tags">
-              <span class="comp-tag">Static analysis</span>
-              <span class="comp-tag">Multi-language</span>
-              <span class="comp-tag">Enterprise</span>
-              <span class="comp-tag">Self-hosted</span>
-            </div>
-            <div class="comp-metrics">
-              <div class="comp-metric">
-                <div class="comp-metric-label">Pricing</div>
-                <div class="comp-metric-value blue">$150/mo</div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Customers</div>
-                <div class="comp-metric-value">400K+</div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Gap</div>
-                <div class="comp-metric-value green">No AI</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3: done -->
-        <div class="comp-card">
-          <div class="comp-card-header">
-            <div class="comp-favicon" style="background:#e3f2fd;">
-              <img src="https://www.google.com/s2/favicons?domain=codeclimate.com&sz=32" alt="" />
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">Code Climate</div>
-              <div class="comp-url">codeclimate.com</div>
-            </div>
-            <span class="comp-status-badge done">✓ Done</span>
-          </div>
-          <div class="comp-card-body">
-            <div class="comp-desc">
-              Code quality and test coverage platform. Tracks technical debt trends over time. Popular with open-source projects via the free Velocity plan.
-            </div>
-            <div class="comp-tags">
-              <span class="comp-tag">Tech debt</span>
-              <span class="comp-tag">Coverage</span>
-              <span class="comp-tag">OSS friendly</span>
-            </div>
-            <div class="comp-metrics">
-              <div class="comp-metric">
-                <div class="comp-metric-label">Pricing</div>
-                <div class="comp-metric-value blue">$16/seat</div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Customers</div>
-                <div class="comp-metric-value">100K+</div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Gap</div>
-                <div class="comp-metric-value green">No fixes</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 4: analyzing -->
-        <div class="comp-card">
-          <div class="comp-card-header">
-            <div class="comp-favicon" style="background:#f3e5f5;">
-              <img src="https://www.google.com/s2/favicons?domain=deepsource.io&sz=32" alt="" />
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">DeepSource</div>
-              <div class="comp-url">deepsource.io</div>
-            </div>
-            <span class="comp-status-badge analyzing">⟳ Analyzing</span>
-          </div>
-          <div class="comp-card-body">
-            <div class="comp-desc">
-              <div class="skel" style="height:11px; width:90%; margin-bottom:4px;"></div>
-              <div class="skel" style="height:11px; width:70%;"></div>
-            </div>
-            <div class="comp-tags">
-              <span class="comp-tag">
-                <span class="skel" style="width:40px; height:9px; display:inline-block;"></span>
-              </span>
-              <span class="comp-tag">
-                <span class="skel" style="width:30px; height:9px; display:inline-block;"></span>
-              </span>
-            </div>
-            <div class="comp-metrics">
-              <div class="comp-metric">
-                <div class="comp-metric-label">Pricing</div>
-                <div class="skel" style="height:14px; width:40px; margin-top:3px;"></div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Customers</div>
-                <div class="skel" style="height:14px; width:30px; margin-top:3px;"></div>
-              </div>
-              <div class="comp-metric">
-                <div class="comp-metric-label">Gap</div>
-                <div class="skel" style="height:14px; width:38px; margin-top:3px;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 5: queued -->
-        <div class="comp-card skeleton">
-          <div class="comp-card-header">
-            <div class="comp-favicon">
-              <span style="font-size:12px">GH</span>
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">GitHub Advanced Security</div>
-              <div class="comp-url">github.com/features/security</div>
-            </div>
-            <span class="comp-status-badge queued">Queued</span>
-          </div>
-          <div class="comp-card-body">
-            <div style="font-size:11px; color:#94a3b8; font-style:italic;">
-              Waiting for sub-agent to start…
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 6: queued -->
-        <div class="comp-card skeleton">
-          <div class="comp-card-header">
-            <div class="comp-favicon">
-              <span style="font-size:12px">CO</span>
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">CodeScene</div>
-              <div class="comp-url">codescene.io</div>
-            </div>
-            <span class="comp-status-badge queued">Queued</span>
-          </div>
-          <div class="comp-card-body">
-            <div style="font-size:11px; color:#94a3b8; font-style:italic;">
-              Waiting for sub-agent to start…
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 7: queued -->
-        <div class="comp-card skeleton">
-          <div class="comp-card-header">
-            <div class="comp-favicon">
-              <span style="font-size:12px">QD</span>
-            </div>
-            <div class="comp-name-wrap">
-              <div class="comp-name">Qodana</div>
-              <div class="comp-url">jetbrains.com/qodana</div>
-            </div>
-            <span class="comp-status-badge queued">Queued</span>
-          </div>
-          <div class="comp-card-body">
-            <div style="font-size:11px; color:#94a3b8; font-style:italic;">
-              Waiting for sub-agent to start…
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /comp-grid -->
-    </div><!-- /competitors-scroll -->
-
-  </div><!-- /main-col -->
-
-  <!-- ══ RIGHT: Live feed ══ -->
-  <div class="feed-col">
-    <div class="feed-header">
-      <div class="feed-title">
-        Activity
-        <span class="live-pill">
-          <span class="live-dot"></span>
-          Live
-        </span>
-        <span class="feed-count">42 events</span>
-      </div>
-      <button class="feed-clear">Clear</button>
-    </div>
-
-    <div class="feed-scroll" id="feed">
-
-      <!-- ── Master agent: search phase ── -->
-      <div class="feed-entry event-search">
-        <div class="feed-icon search">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-label">Web search</div>
-          <div class="feed-detail">"AI code review CI/CD security analysis tools 2025"</div>
-        </div>
-        <div class="feed-time">00:02</div>
-      </div>
-
-      <div class="feed-entry event-search">
-        <div class="feed-icon search">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-label">Web search</div>
-          <div class="feed-detail">"static analysis bug detection developer tools pricing"</div>
-        </div>
-        <div class="feed-time">00:06</div>
-      </div>
-
-      <div class="feed-entry event-think">
-        <div class="feed-icon think">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-label">Found 7 competitors to analyze</div>
-          <div class="feed-detail">Snyk, SonarQube, Code Climate, DeepSource, GitHub Advanced Security, CodeScene, Qodana</div>
-        </div>
-        <div class="feed-time">00:11</div>
-      </div>
-
-      <hr class="feed-divider" />
-
-
-      <div class="feed-entry event-nav">
-        <div class="feed-icon nav">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">Snyk agent</div>
-          <div class="feed-label">Navigate</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">https://snyk.io</a>
-          </div>
-        </div>
-        <div class="feed-time">00:15</div>
-      </div>
-
-      <div class="feed-entry event-extract">
-        <div class="feed-icon extract">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">Snyk agent</div>
-          <div class="feed-label">Extract features from homepage</div>
-          <div class="feed-detail">23 feature mentions identified — OSS, container, IaC, SAST, SCA</div>
-        </div>
-        <div class="feed-time">00:18</div>
-      </div>
-
-      <div class="feed-entry event-nav">
-        <div class="feed-icon nav">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">Snyk agent</div>
-          <div class="feed-label">Navigate pricing page</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">https://snyk.io/plans/</a>
-          </div>
-        </div>
-        <div class="feed-time">00:21</div>
-      </div>
-
-      <div class="feed-entry event-extract">
-        <div class="feed-icon extract">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">Snyk agent</div>
-          <div class="feed-label">Extract pricing</div>
-          <div class="feed-detail">Free · Team $25/dev/mo · Business $62/dev/mo · Enterprise custom</div>
-        </div>
-        <div class="feed-time">00:24</div>
-      </div>
-
-      <div class="feed-entry event-write">
-        <div class="feed-icon write">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">Snyk agent</div>
-          <div class="feed-label">Write result</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">.code-analysis/research/competitors/snyk.json</a>
-          </div>
-        </div>
-        <div class="feed-time">00:27</div>
-      </div>
-
-      <hr class="feed-divider" />
-
-
-      <div class="feed-entry event-nav">
-        <div class="feed-icon nav">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">SonarQube agent</div>
-          <div class="feed-label">Navigate</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">https://www.sonarqube.org</a>
-          </div>
-        </div>
-        <div class="feed-time">00:16</div>
-      </div>
-
-      <div class="feed-entry event-nav active-tool">
-        <div class="feed-icon nav">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">SonarQube agent</div>
-          <div class="feed-label">Navigate docs</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">https://docs.sonarqube.org/latest/analyzing-source-code/</a>
-          </div>
-        </div>
-        <div class="feed-time">00:31</div>
-      </div>
-
-      <hr class="feed-divider" />
-
-
-      <div class="feed-entry event-nav">
-        <div class="feed-icon nav">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">DeepSource agent</div>
-          <div class="feed-label">Navigate</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">https://deepsource.io</a>
-          </div>
-        </div>
-        <div class="feed-time">00:15</div>
-      </div>
-
-      <div class="feed-entry event-extract">
-        <div class="feed-icon extract">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">DeepSource agent</div>
-          <div class="feed-label">Extract navigation</div>
-          <div class="feed-detail">Found links: /autofix, /pricing, /docs, /blog/comparing-static-analysis</div>
-        </div>
-        <div class="feed-time">00:20</div>
-      </div>
-
-      <div class="feed-entry event-nav active-tool">
-        <div class="feed-icon nav">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </div>
-        <div class="feed-body">
-          <div class="feed-agent-tag">DeepSource agent</div>
-          <div class="feed-label">Navigate → AutoFix feature page</div>
-          <div class="feed-detail">
-            <a href="#" class="feed-link">https://deepsource.io/autofix</a>
-            <span style="color:#3b82f6; font-weight:600;"> ← reading now</span>
-          </div>
-        </div>
-        <div class="feed-time">00:34</div>
-      </div>
-
-    </div><!-- /feed-scroll -->
-
-    <!-- Stats bar -->
-    <div class="feed-stats">
-      <div class="feed-stat">
-        <div class="feed-stat-val blue">7</div>
-        <div class="feed-stat-lbl">Agents</div>
-      </div>
-      <div class="feed-stat">
-        <div class="feed-stat-val">42</div>
-        <div class="feed-stat-lbl">Events</div>
-      </div>
-      <div class="feed-stat">
-        <div class="feed-stat-val">19</div>
-        <div class="feed-stat-lbl">URLs</div>
-      </div>
-      <div class="feed-stat">
-        <div class="feed-stat-val green">3</div>
-        <div class="feed-stat-lbl">Done</div>
       </div>
     </div>
 
-  </div><!-- /feed-col -->
+    <!-- Plan cards -->
+    <div class="pricing-grid">
 
-</div><!-- /page -->
+      <!-- Free -->
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-credits">2 credits / month</div>
+        <div class="plan-price">
+          <span class="plan-amount">$0</span>
+          <span class="plan-period">/mo</span>
+        </div>
+        <div class="plan-tagline">Try it out, no commitment.</div>
+        <button class="plan-cta outline" onclick="location.href='start.html'">Start for free</button>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> 2 reports/month</li>
+          <li><span class="feat-check">✓</span> ~20 competitors per report</li>
+          <li><span class="feat-check">✓</span> Basic gap analysis</li>
+          <li><span class="feat-x">✕</span><span class="feat-muted"> PDF export</span></li>
+          <li><span class="feat-x">✕</span><span class="feat-muted"> Report history</span></li>
+          <li><span class="feat-x">✕</span><span class="feat-muted"> Deep intelligence</span></li>
+        </ul>
+      </div>
+
+      <!-- Starter -->
+      <div class="plan-card featured">
+        <div class="plan-badge">Most popular</div>
+        <div class="plan-name">Starter</div>
+        <div class="plan-credits">15 credits / month</div>
+        <div class="plan-price">
+          <span class="plan-amount" data-monthly="19" data-annual="15">$19</span>
+          <span class="plan-period">/mo</span>
+        </div>
+        <div class="plan-tagline">For solo founders validating ideas regularly.</div>
+        <button class="plan-cta outline" onclick="location.href='start.html'">Get Starter</button>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> 15 reports/month</li>
+          <li><span class="feat-check">✓</span> ~20 competitors per report</li>
+          <li><span class="feat-check">✓</span> Full gap analysis</li>
+          <li><span class="feat-check">✓</span> PDF export</li>
+          <li><span class="feat-check">✓</span> 90-day report history</li>
+          <li><span class="feat-x">✕</span><span class="feat-muted"> Deep intelligence</span></li>
+        </ul>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan-card">
+        <div class="plan-name">Pro</div>
+        <div class="plan-credits">50 credits / month</div>
+        <div class="plan-price">
+          <span class="plan-amount" data-monthly="49" data-annual="39">$49</span>
+          <span class="plan-period">/mo</span>
+        </div>
+        <div class="plan-tagline">For PMs and founders running frequent research.</div>
+        <button class="plan-cta primary" onclick="location.href='start.html'">Get Pro</button>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> 50 reports/month</li>
+          <li><span class="feat-check">✓</span> Deep intelligence mode</li>
+          <li><span class="feat-check">✓</span> Full gap analysis</li>
+          <li><span class="feat-check">✓</span> PDF export</li>
+          <li><span class="feat-check">✓</span> Unlimited history</li>
+          <li><span class="feat-check">✓</span> Priority processing</li>
+        </ul>
+      </div>
+
+      <!-- Agency -->
+      <div class="plan-card">
+        <div class="plan-name">Agency</div>
+        <div class="plan-credits">200 credits / month</div>
+        <div class="plan-price">
+          <span class="plan-amount" data-monthly="149" data-annual="119">$149</span>
+          <span class="plan-period">/mo</span>
+        </div>
+        <div class="plan-tagline">For teams and agencies with multiple clients.</div>
+        <button class="plan-cta outline">Get Agency</button>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span> 200 reports/month</li>
+          <li><span class="feat-check">✓</span> Everything in Pro</li>
+          <li><span class="feat-check">✓</span> 5 team seats</li>
+          <li><span class="feat-check">✓</span> API access</li>
+          <li><span class="feat-check">✓</span> White-label PDF reports</li>
+          <li><span class="feat-check">✓</span> Dedicated support</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Top-up note -->
+    <div class="topup-note">
+      <span class="topup-badge">Top-up</span>
+      <span>Need more credits mid-month? Buy <strong>5 extra credits for $5</strong> on any paid plan — no plan change needed.</span>
+    </div>
+
+    <div class="pricing-footer-note">
+      All paid plans include a 7-day free trial. Cancel anytime.
+    </div>
+
+  </div>
+</section>
 
 <script>
   function toggleMenu() {
-    document.getElementById('mobile-drawer').classList.toggle('open');
+    var d = document.getElementById('mobile-drawer');
+    d.classList.toggle('open');
+  }
+
+  function setBilling(mode) {
+    document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
+    document.getElementById('btn-annual').classList.toggle('active', mode === 'annual');
+    document.querySelectorAll('[data-monthly]').forEach(el => {
+      el.textContent = '$' + el.dataset[mode];
+    });
   }
 </script>
 
 </body>
 </html>
+

@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Researchio — Market Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      color: #0f172a;
+      background: #f8fafc;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { cursor: pointer; font-family: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── Navbar (Researchio standalone product) ─── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e8f0;
+      height: 52px;
+      display: flex; align-items: center;
+      padding: 0 24px;
+    }
+    .navbar-left { display: flex; align-items: center; gap: 4px; flex: 1; }
+    .navbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* Product logo */
+    .logo-mark {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; margin-right: 10px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(99,102,241,.35);
+    }
+    .logo-wordmark {
+      font-size: 14px; font-weight: 800; color: #0f172a; letter-spacing: -.02em;
+    }
+    .logo-wordmark sup {
+      font-size: 8px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #818cf8;
+      vertical-align: super; margin-left: 1px;
+    }
+
+    .nav-sep { width: 1px; height: 18px; background: #e2e8f0; margin: 0 6px; }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: none; border: none; border-radius: 6px;
+      padding: 0 10px; height: 32px; font-size: 13px; color: #64748b;
+      font-weight: 500; cursor: pointer; transition: background .1s, color .1s;
+    }
+    .btn-nav:hover { background: #f1f5f9; color: #0f172a; }
+
+    /* User chip (signed-in state) */
+    .user-chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 99px;
+      padding: 3px 10px 3px 4px;
+      font-size: 12px; font-weight: 500; color: #374151;
+      cursor: pointer; transition: border-color .12s;
+    }
+    .user-chip:hover { border-color: #cbd5e1; }
+    .user-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .user-plan {
+      font-size: 10px; font-weight: 600; color: #94a3b8;
+      letter-spacing: .02em; margin-left: 2px;
+    }
+
+    /* Running status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #fff; color: #15803d;
+      border: 1px solid #bbf7d0;
+      border-radius: 9999px; padding: 3px 10px;
+      font-size: 11px; font-weight: 500;
+    }
+    .status-badge .dot {
+      width: 6px; height: 6px; background: #22c55e;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .status-badge.running {
+      background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;
+    }
+    .status-badge.running .dot {
+      background: #3b82f6;
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ─── Layout ─── */
+    .page {
+      display: grid;
+      grid-template-columns: 1fr 356px;
+      height: calc(100vh - 52px);
+      overflow: hidden;
+    }
+
+    /* ─── Left column: main content ─── */
+    .main-col {
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid #e2e8f0;
+    }
+
+    /* ─── Competitors area ─── */
+    .competitors-scroll {
+      flex: 1; overflow-y: auto;
+      padding: 24px 24px 40px;
+    }
+
+    .page-intro {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .page-intro-title {
+      font-size: 18px; font-weight: 700; color: #0f172a;
+      letter-spacing: -.01em; margin-bottom: 8px;
+    }
+    .page-intro-desc {
+      font-size: 13px; color: #64748b; line-height: 1.6;
+    }
+
+    .section-label-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-label {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #94a3b8;
+    }
+    .section-label-count {
+      font-size: 11px; color: #94a3b8; font-weight: 400;
+      background: #f1f5f9; border-radius: 99px;
+      padding: 1px 8px; letter-spacing: 0; text-transform: none;
+    }
+
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    /* Competitor card */
+    .comp-card {
+      background: #fff;
+      border: 1px solid #e4e4e7; border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow .15s, transform .15s, border-color .15s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+    .comp-card:hover { 
+      box-shadow: 0 4px 12px rgba(0,0,0,.07); 
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+    }
+
+    .comp-card-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px 10px;
+    }
+    .comp-favicon {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #64748b;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .comp-favicon img { width: 100%; height: 100%; object-fit: cover; }
+    .comp-name-wrap { flex: 1; min-width: 0; }
+    .comp-name {
+      font-size: 13px; font-weight: 600; color: #0f172a;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .comp-url {
+      font-size: 11px; color: #3b82f6;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      cursor: pointer;
+    }
+    .comp-url:hover { text-decoration: underline; }
+
+    .comp-status-badge {
+      flex-shrink: 0;
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px; border-radius: 9999px;
+    }
+    .comp-status-badge.analyzing {
+      background: #eff6ff; color: #1d4ed8;
+    }
+    .comp-status-badge.done {
+      background: #f0fdf4; color: #15803d;
+    }
+    .comp-status-badge.queued {
+      background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;
+    }
+
+    .comp-card-body { padding: 0 14px 12px; }
+    .comp-desc {
+      font-size: 12px; color: #52525b; line-height: 1.55;
+      margin-bottom: 10px;
+    }
+
+    .comp-tags {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px;
+    }
+    .comp-tag {
+      font-size: 10px; font-weight: 500;
+      padding: 1px 6px; border-radius: 4px;
+      background: #f1f5f9; color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .comp-metrics {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    }
+    .comp-metric {
+      background: #f8fafc; border-radius: 6px; padding: 6px 8px;
+    }
+    .comp-metric-label {
+      font-size: 9px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: #94a3b8; margin-bottom: 2px;
+    }
+    .comp-metric-value { font-size: 12px; font-weight: 600; color: #0f172a; }
+    .comp-metric-value.green { color: #16a34a; }
+    .comp-metric-value.blue { color: #2563eb; }
+
+    /* Skeleton card */
+    .comp-card.skeleton { border-style: dashed; }
+    .skel {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─── Right column: live feed ─── */
+    .feed-col {
+      display: flex; flex-direction: column;
+      background: #fafafa; overflow: hidden;
+    }
+    .feed-header {
+      flex-shrink: 0;
+      padding: 13px 16px 12px;
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .feed-title {
+      font-size: 11.5px; font-weight: 700; letter-spacing: -.01em;
+      color: #0f172a;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .live-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: 99px; padding: 1px 7px;
+      font-size: 10px; font-weight: 600; color: #1d4ed8;
+      letter-spacing: .02em;
+    }
+    .live-pill .live-dot {
+      width: 5px; height: 5px; background: #3b82f6;
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+    .feed-count {
+      font-size: 11px; color: #94a3b8;
+    }
+    .feed-clear {
+      font-size: 11px; color: #94a3b8;
+      background: none; border: none; padding: 2px 8px;
+      border-radius: 5px; font-weight: 500;
+    }
+    .feed-clear:hover { background: #f1f5f9; color: #64748b; }
+
+    .feed-scroll {
+      flex: 1; overflow-y: auto;
+      padding: 6px 0 6px;
+    }
+
+    /* Feed entries */
+    .feed-entry {
+      display: flex; gap: 9px;
+      padding: 6px 14px 6px 12px;
+      align-items: flex-start;
+      position: relative;
+      transition: background .1s;
+    }
+    .feed-entry::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 2px; border-radius: 0 2px 2px 0;
+      background: transparent;
+      transition: background .1s;
+    }
+    .feed-entry:hover { background: #f1f5f9; }
+    .feed-entry:hover::before { background: #cbd5e1; }
+    .feed-entry.active-tool { background: #eff6ff; }
+    .feed-entry.active-tool::before { background: #3b82f6; }
+    .feed-entry.event-nav::before { background: #10b981; }
+    .feed-entry.event-screenshot::before { background: #8b5cf6; }
+    .feed-entry.event-extract::before { background: #f59e0b; }
+    .feed-entry.event-write::before { background: #ec4899; }
+    .feed-entry.event-think::before { background: #cbd5e1; }
+    .feed-entry.event-search::before { background: #06b6d4; }
+
+    .feed-icon {
+      width: 22px; height: 22px; flex-shrink: 0;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 0;
+    }
+    .feed-icon.nav    { background: #d1fae5; color: #059669; }
+    .feed-icon.search { background: #cffafe; color: #0891b2; }
+    .feed-icon.screenshot { background: #ede9fe; color: #7c3aed; }
+    .feed-icon.extract { background: #fef3c7; color: #d97706; }
+    .feed-icon.write  { background: #fce7f3; color: #db2777; }
+    .feed-icon.think  { background: #f1f5f9; color: #94a3b8; }
+    .feed-icon.done   { background: #dcfce7; color: #16a34a; }
+    .feed-icon.error  { background: #fee2e2; color: #dc2626; }
+
+    .feed-body { flex: 1; min-width: 0; }
+    .feed-label {
+      font-size: 11.5px; font-weight: 600; color: #1e293b;
+      line-height: 1.4;
+    }
+    .feed-detail {
+      font-size: 11px; color: #64748b; line-height: 1.5;
+      margin-top: 1px; word-break: break-word;
+    }
+    .feed-link {
+      color: #6366f1; text-decoration: none;
+      word-break: break-all; font-weight: 500;
+    }
+    .feed-link:hover { text-decoration: underline; }
+    .feed-time {
+      font-size: 10px; color: #cbd5e1; flex-shrink: 0;
+      margin-top: 3px; white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .feed-divider {
+      margin: 4px 12px;
+      border: none; border-top: 1px dashed #e2e8f0;
+    }
+
+    /* Sub-agent badge */
+    .feed-agent-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; padding: 1px 6px; border-radius: 4px;
+      margin-bottom: 2px;
+      background: #eef2ff; color: #4338ca;
+      border: 1px solid #e0e7ff;
+    }
+
+    /* ─── Feed stats bar ─── */
+    .feed-stats {
+      flex-shrink: 0;
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+      border-top: 1px solid #e2e8f0;
+      background: #fff;
+    }
+    .feed-stat {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 10px 8px;
+      border-right: 1px solid #f1f5f9;
+      gap: 1px;
+    }
+    .feed-stat:last-child { border-right: none; }
+    .feed-stat-val {
+      font-size: 17px; font-weight: 800; color: #0f172a;
+      line-height: 1; letter-spacing: -.02em;
+    }
+    .feed-stat-val.blue { color: #6366f1; }
+    .feed-stat-val.green { color: #16a34a; }
+    .feed-stat-val.purple { color: #7c3aed; }
+    .feed-stat-lbl {
+      font-size: 9.5px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: #94a3b8;
+    }
+
+    /* ─── Empty / idle state ─── */
+    .idle-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; padding: 32px 20px; text-align: center;
+    }
+    .idle-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+      color: #94a3b8; margin-bottom: 4px;
+    }
+    .idle-title { font-size: 12px; font-weight: 600; color: #64748b; }
+    .idle-sub { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+
+    /* ─── Report summary card ─── */
+    .report-card {
+      display: none; /* shown after completion */
+      margin: 12px 24px 0;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      border-radius: 12px; padding: 20px 22px; color: #fff;
+    }
+    .report-card .report-title {
+      font-size: 14px; font-weight: 700; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .report-card .report-sub {
+      font-size: 11px; color: #a5b4fc; margin-bottom: 16px;
+    }
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .report-metric {
+      background: rgba(255,255,255,.08); border-radius: 8px; padding: 10px 12px;
+    }
+    .report-metric-val {
+      font-size: 20px; font-weight: 800; color: #fff;
+    }
+    .report-metric-lbl {
+      font-size: 9px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: #818cf8; margin-top: 2px;
+    }
+    .report-cta {
+      margin-top: 14px; display: flex; gap: 8px;
+    }
+    .btn-report {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #6366f1; border: none; border-radius: 6px;
+      padding: 0 14px; height: 30px; font-size: 11px;
+      color: #fff; font-weight: 600;
+    }
+    .btn-report:hover { background: #4f46e5; }
+    .btn-report.outline {
+      background: transparent; border: 1px solid rgba(255,255,255,.25);
+      color: rgba(255,255,255,.85);
+    }
+    .btn-report.outline:hover { background: rgba(255,255,255,.08); }
+
+    /* ─── Burger / mobile nav ─── */
+    .burger-btn {
+      display: none; background: none; border: none;
+      padding: 6px; border-radius: 7px; cursor: pointer;
+      color: #0f172a; margin-left: 8px; flex-shrink: 0;
+    }
+    .burger-btn:hover { background: #f1f5f9; }
+
+    .mobile-drawer {
+      display: none; position: fixed;
+      top: 52px; left: 0; right: 0;
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      padding: 8px 16px 16px; flex-direction: column;
+      z-index: 97; box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    .mobile-drawer.open { display: flex; }
+    .mob-item {
+      display: flex; align-items: center;
+      padding: 11px 12px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: #374151;
+      background: none; border: none; cursor: pointer;
+      width: 100%; text-align: left; font-family: inherit;
+    }
+    .mob-item:hover { background: #f8fafc; }
+    .mob-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+    .mob-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; background: #f8fafc; border-radius: 10px;
+      margin-bottom: 4px;
+    }
+    .mob-user-info { flex: 1; min-width: 0; }
+    .mob-user-email { font-size: 13px; font-weight: 600; color: #0f172a; }
+    .mob-user-plan { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+    .mob-status-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9999px;
+      padding: 4px 10px; font-size: 11px; font-weight: 500; color: #1d4ed8;
+      margin-bottom: 8px;
+    }
+    .mob-status-pill .dot {
+      width: 6px; height: 6px; background: #3b82f6;
+      border-radius: 50%; animation: pulse 1.4s infinite;
+    }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 0 16px; }
+      .navbar-left .nav-sep,
+      .navbar-left .btn-nav { display: none; }
+      .navbar-right { display: none; }
+      .burger-btn { display: flex; align-items: center; justify-content: center; }
+
+      .page {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .main-col {
+        height: calc(100vh - 52px);
+        border-right: none;
+      }
+      .feed-col { display: none; }
+      .competitors-scroll { padding: 14px 16px 40px; }
+      .comp-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     Navbar
+══════════════════════════════════════ -->
+<header class="navbar">
+  <div class="navbar-left">
+    <a href="index.html" class="logo-mark">
+      <div class="logo-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <span class="logo-wordmark">Researchio<sup>beta</sup></span>
+    </a>
+    <span class="nav-sep"></span>
+    <button class="btn-nav">How it works</button>
+    <button class="btn-nav">Pricing</button>
+    <button class="btn-nav">Docs</button>
+  </div>
+  <div class="navbar-right">
+    <span class="status-badge running">
+      <span class="dot"></span>
+      Analyzing — 3 of 7 complete
+    </span>
+    <a href="final-summary.html" class="btn-nav" style="background: #f5f3ff; color: #6366f1; font-weight: 600;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      View Summary
+    </a>
+    <div class="user-chip">
+      <div class="user-avatar">JD</div>
+      john@example.com
+      <span class="user-plan">Starter</span>
+    </div>
+  </div>
+  <button class="burger-btn" id="burger-btn" onclick="toggleMenu()" aria-label="Open menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+</header>
+
+<div class="mobile-drawer" id="mobile-drawer">
+  <div class="mob-user">
+    <div class="user-avatar">JD</div>
+    <div class="mob-user-info">
+      <div class="mob-user-email">john@example.com</div>
+      <div class="mob-user-plan">Starter plan</div>
+    </div>
+  </div>
+  <div class="mob-status-pill">
+    <span class="dot"></span>
+    Analyzing — 3 of 7 complete
+  </div>
+  <div class="mob-divider"></div>
+  <button class="mob-item">How it works</button>
+  <button class="mob-item">Pricing</button>
+  <button class="mob-item">Docs</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     Page Layout
+══════════════════════════════════════ -->
+<div class="page">
+
+  <!-- ══ LEFT: Main content ══ -->
+  <div class="main-col">
+
+    <!-- Competitors grid -->
+    <div class="competitors-scroll">
+      
+      <!-- Page intro -->
+      <div class="page-intro">
+        <div class="page-intro-title">Market Analysis</div>
+        <div class="page-intro-desc">
+          <strong>Analyzing:</strong> An AI-powered code review and bug detection tool that runs as a CI/CD plugin — finds logic errors, security issues, and suggests fixes before merging.
+        </div>
+      </div>
+
+      <div class="section-label-row">
+        <span class="section-label">Competitors discovered</span>
+        <span class="section-label-count">7 found · 3 analyzed</span>
+      </div>
+      <div class="comp-grid">
+
+        <!-- Card 1: done -->
+        <a href="competitor-detail.html" class="comp-card">
+          <div class="comp-card-header">
+            <div class="comp-favicon" style="background:#fff3e0;">
+              <img src="https://www.google.com/s2/favicons?domain=snyk.io&sz=32" alt="" />
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">Snyk</div>
+              <div class="comp-url">snyk.io</div>
+            </div>
+            <span class="comp-status-badge done">✓ Done</span>
+          </div>
+          <div class="comp-card-body">
+            <div class="comp-desc">
+              Developer security platform focusing on open-source vulnerabilities, container security, and IaC scanning. Integrates with GitHub, GitLab, and CI/CD pipelines.
+            </div>
+            <div class="comp-tags">
+              <span class="comp-tag">Security focus</span>
+              <span class="comp-tag">OSS scanning</span>
+              <span class="comp-tag">CI/CD native</span>
+              <span class="comp-tag">Free tier</span>
+            </div>
+            <div class="comp-metrics">
+              <div class="comp-metric">
+                <div class="comp-metric-label">Pricing</div>
+                <div class="comp-metric-value blue">$25/dev</div>
+              </div>
+              <div class="comp-metric">
+                <div class="comp-metric-label">Customers</div>
+                <div class="comp-metric-value">2.5M+</div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 2: done -->
+        <a href="competitor-detail.html" class="comp-card">
+          <div class="comp-card-header">
+            <div class="comp-favicon" style="background:#e8f5e9;">
+              <img src="https://www.google.com/s2/favicons?domain=sonarqube.org&sz=32" alt="" />
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">SonarQube</div>
+              <div class="comp-url">sonarqube.org</div>
+            </div>
+            <span class="comp-status-badge done">✓ Done</span>
+          </div>
+          <div class="comp-card-body">
+            <div class="comp-desc">
+              Static code analysis for 30+ languages. Detects bugs, code smells, and security vulnerabilities. Strong enterprise presence with self-hosted and cloud editions.
+            </div>
+            <div class="comp-tags">
+              <span class="comp-tag">Static analysis</span>
+              <span class="comp-tag">Multi-language</span>
+              <span class="comp-tag">Enterprise</span>
+              <span class="comp-tag">Self-hosted</span>
+            </div>
+            <div class="comp-metrics">
+              <div class="comp-metric">
+                <div class="comp-metric-label">Pricing</div>
+                <div class="comp-metric-value blue">$150/mo</div>
+              </div>
+              <div class="comp-metric">
+                <div class="comp-metric-label">Customers</div>
+                <div class="comp-metric-value">400K+</div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 3: done -->
+        <a href="competitor-detail.html" class="comp-card">
+          <div class="comp-card-header">
+            <div class="comp-favicon" style="background:#e3f2fd;">
+              <img src="https://www.google.com/s2/favicons?domain=codeclimate.com&sz=32" alt="" />
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">Code Climate</div>
+              <div class="comp-url">codeclimate.com</div>
+            </div>
+            <span class="comp-status-badge done">✓ Done</span>
+          </div>
+          <div class="comp-card-body">
+            <div class="comp-desc">
+              Code quality and test coverage platform. Tracks technical debt trends over time. Popular with open-source projects via the free Velocity plan.
+            </div>
+            <div class="comp-tags">
+              <span class="comp-tag">Tech debt</span>
+              <span class="comp-tag">Coverage</span>
+              <span class="comp-tag">OSS friendly</span>
+            </div>
+            <div class="comp-metrics">
+              <div class="comp-metric">
+                <div class="comp-metric-label">Pricing</div>
+                <div class="comp-metric-value blue">$16/seat</div>
+              </div>
+              <div class="comp-metric">
+                <div class="comp-metric-label">Customers</div>
+                <div class="comp-metric-value">100K+</div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 4: analyzing -->
+        <a href="#" class="comp-card" onclick="return false;" style="cursor: wait;">
+          <div class="comp-card-header">
+            <div class="comp-favicon" style="background:#f3e5f5;">
+              <img src="https://www.google.com/s2/favicons?domain=deepsource.io&sz=32" alt="" />
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">DeepSource</div>
+              <div class="comp-url">deepsource.io</div>
+            </div>
+            <span class="comp-status-badge analyzing">⟳ Analyzing</span>
+          </div>
+          <div class="comp-card-body">
+            <div class="comp-desc">
+              <div class="skel" style="height:11px; width:90%; margin-bottom:4px;"></div>
+              <div class="skel" style="height:11px; width:70%;"></div>
+            </div>
+            <div class="comp-tags">
+              <span class="comp-tag">
+                <span class="skel" style="width:40px; height:9px; display:inline-block;"></span>
+              </span>
+              <span class="comp-tag">
+                <span class="skel" style="width:30px; height:9px; display:inline-block;"></span>
+              </span>
+            </div>
+            <div class="comp-metrics">
+              <div class="comp-metric">
+                <div class="comp-metric-label">Pricing</div>
+                <div class="skel" style="height:14px; width:40px; margin-top:3px;"></div>
+              </div>
+              <div class="comp-metric">
+                <div class="comp-metric-label">Customers</div>
+                <div class="skel" style="height:14px; width:30px; margin-top:3px;"></div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 5: queued -->
+        <a href="#" class="comp-card skeleton" onclick="return false;" style="cursor: not-allowed;">
+          <div class="comp-card-header">
+            <div class="comp-favicon">
+              <span style="font-size:12px">GH</span>
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">GitHub Advanced Security</div>
+              <div class="comp-url">github.com/features/security</div>
+            </div>
+            <span class="comp-status-badge queued">Queued</span>
+          </div>
+          <div class="comp-card-body">
+            <div style="font-size:11px; color:#94a3b8; font-style:italic;">
+              Waiting for sub-agent to start…
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 6: queued -->
+        <a href="#" class="comp-card skeleton" onclick="return false;" style="cursor: not-allowed;">
+          <div class="comp-card-header">
+            <div class="comp-favicon">
+              <span style="font-size:12px">CO</span>
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">CodeScene</div>
+              <div class="comp-url">codescene.io</div>
+            </div>
+            <span class="comp-status-badge queued">Queued</span>
+          </div>
+          <div class="comp-card-body">
+            <div style="font-size:11px; color:#94a3b8; font-style:italic;">
+              Waiting for sub-agent to start…
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 7: queued -->
+        <a href="#" class="comp-card skeleton" onclick="return false;" style="cursor: not-allowed;">
+          <div class="comp-card-header">
+            <div class="comp-favicon">
+              <span style="font-size:12px">QD</span>
+            </div>
+            <div class="comp-name-wrap">
+              <div class="comp-name">Qodana</div>
+              <div class="comp-url">jetbrains.com/qodana</div>
+            </div>
+            <span class="comp-status-badge queued">Queued</span>
+          </div>
+          <div class="comp-card-body">
+            <div style="font-size:11px; color:#94a3b8; font-style:italic;">
+              Waiting for sub-agent to start…
+            </div>
+          </div>
+        </a>
+
+      </div><!-- /comp-grid -->
+    </div><!-- /competitors-scroll -->
+
+  </div><!-- /main-col -->
+
+  <!-- ══ RIGHT: Live feed ══ -->
+  <div class="feed-col">
+    <div class="feed-header">
+      <div class="feed-title">
+        Activity
+        <span class="live-pill">
+          <span class="live-dot"></span>
+          Live
+        </span>
+        <span class="feed-count">42 events</span>
+      </div>
+      <button class="feed-clear">Clear</button>
+    </div>
+
+    <div class="feed-scroll" id="feed">
+
+      <!-- ── Master agent: search phase ── -->
+      <div class="feed-entry event-search">
+        <div class="feed-icon search">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-label">Web search</div>
+          <div class="feed-detail">"AI code review CI/CD security analysis tools 2025"</div>
+        </div>
+        <div class="feed-time">00:02</div>
+      </div>
+
+      <div class="feed-entry event-search">
+        <div class="feed-icon search">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-label">Web search</div>
+          <div class="feed-detail">"static analysis bug detection developer tools pricing"</div>
+        </div>
+        <div class="feed-time">00:06</div>
+      </div>
+
+      <div class="feed-entry event-think">
+        <div class="feed-icon think">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-label">Found 7 competitors to analyze</div>
+          <div class="feed-detail">Snyk, SonarQube, Code Climate, DeepSource, GitHub Advanced Security, CodeScene, Qodana</div>
+        </div>
+        <div class="feed-time">00:11</div>
+      </div>
+
+      <hr class="feed-divider" />
+
+
+      <div class="feed-entry event-nav">
+        <div class="feed-icon nav">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">Snyk agent</div>
+          <div class="feed-label">Navigate</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">https://snyk.io</a>
+          </div>
+        </div>
+        <div class="feed-time">00:15</div>
+      </div>
+
+      <div class="feed-entry event-extract">
+        <div class="feed-icon extract">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">Snyk agent</div>
+          <div class="feed-label">Extract features from homepage</div>
+          <div class="feed-detail">23 feature mentions identified — OSS, container, IaC, SAST, SCA</div>
+        </div>
+        <div class="feed-time">00:18</div>
+      </div>
+
+      <div class="feed-entry event-nav">
+        <div class="feed-icon nav">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">Snyk agent</div>
+          <div class="feed-label">Navigate pricing page</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">https://snyk.io/plans/</a>
+          </div>
+        </div>
+        <div class="feed-time">00:21</div>
+      </div>
+
+      <div class="feed-entry event-extract">
+        <div class="feed-icon extract">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">Snyk agent</div>
+          <div class="feed-label">Extract pricing</div>
+          <div class="feed-detail">Free · Team $25/dev/mo · Business $62/dev/mo · Enterprise custom</div>
+        </div>
+        <div class="feed-time">00:24</div>
+      </div>
+
+      <div class="feed-entry event-write">
+        <div class="feed-icon write">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">Snyk agent</div>
+          <div class="feed-label">Write result</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">.code-analysis/research/competitors/snyk.json</a>
+          </div>
+        </div>
+        <div class="feed-time">00:27</div>
+      </div>
+
+      <hr class="feed-divider" />
+
+
+      <div class="feed-entry event-nav">
+        <div class="feed-icon nav">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">SonarQube agent</div>
+          <div class="feed-label">Navigate</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">https://www.sonarqube.org</a>
+          </div>
+        </div>
+        <div class="feed-time">00:16</div>
+      </div>
+
+      <div class="feed-entry event-nav active-tool">
+        <div class="feed-icon nav">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">SonarQube agent</div>
+          <div class="feed-label">Navigate docs</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">https://docs.sonarqube.org/latest/analyzing-source-code/</a>
+          </div>
+        </div>
+        <div class="feed-time">00:31</div>
+      </div>
+
+      <hr class="feed-divider" />
+
+
+      <div class="feed-entry event-nav">
+        <div class="feed-icon nav">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">DeepSource agent</div>
+          <div class="feed-label">Navigate</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">https://deepsource.io</a>
+          </div>
+        </div>
+        <div class="feed-time">00:15</div>
+      </div>
+
+      <div class="feed-entry event-extract">
+        <div class="feed-icon extract">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">DeepSource agent</div>
+          <div class="feed-label">Extract navigation</div>
+          <div class="feed-detail">Found links: /autofix, /pricing, /docs, /blog/comparing-static-analysis</div>
+        </div>
+        <div class="feed-time">00:20</div>
+      </div>
+
+      <div class="feed-entry event-nav active-tool">
+        <div class="feed-icon nav">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </div>
+        <div class="feed-body">
+          <div class="feed-agent-tag">DeepSource agent</div>
+          <div class="feed-label">Navigate → AutoFix feature page</div>
+          <div class="feed-detail">
+            <a href="#" class="feed-link">https://deepsource.io/autofix</a>
+            <span style="color:#3b82f6; font-weight:600;"> ← reading now</span>
+          </div>
+        </div>
+        <div class="feed-time">00:34</div>
+      </div>
+
+    </div><!-- /feed-scroll -->
+
+    <!-- Stats bar -->
+    <div class="feed-stats">
+      <div class="feed-stat">
+        <div class="feed-stat-val blue">7</div>
+        <div class="feed-stat-lbl">Agents</div>
+      </div>
+      <div class="feed-stat">
+        <div class="feed-stat-val">42</div>
+        <div class="feed-stat-lbl">Events</div>
+      </div>
+      <div class="feed-stat">
+        <div class="feed-stat-val">19</div>
+        <div class="feed-stat-lbl">URLs</div>
+      </div>
+      <div class="feed-stat">
+        <div class="feed-stat-val green">3</div>
+        <div class="feed-stat-lbl">Done</div>
+      </div>
+    </div>
+
+  </div><!-- /feed-col -->
+
+</div><!-- /page -->
+
+<script>
+  function toggleMenu() {
+    document.getElementById('mobile-drawer').classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
