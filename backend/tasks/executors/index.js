@@ -1,27 +1,18 @@
 import * as llmApi from "./llm-api.js";
-import * as aider from "./aider.js";
 import config from "../../config.js";
 import { AGENT_ERROR_CODES } from "../../constants/agent-error-codes.js";
 import { AGENTS as AGENT_TYPES } from "../../constants/agents.js";
 
 /**
  * Available AI agents
- * - llm-api: Direct LLM API calls for generating analysis JSON
- * - aider: AI coding assistant for editing files and writing code
+ * - llm-api: Direct LLM API calls via the shared LLMAgent core
  */
 const AGENTS = {
   [AGENT_TYPES.LLM_API]: {
     id: AGENT_TYPES.LLM_API,
     name: "LLM API",
-    purpose: "Generates analysis JSON files",
+    purpose: "Runs tasks via the LLMAgent iteration loop",
     agent: llmApi,
-  },
-  [AGENT_TYPES.AIDER]: {
-    id: AGENT_TYPES.AIDER,
-    name: "Aider",
-    purpose: "Edits files and writes code",
-    installUrl: "https://aider.chat/docs/install.html",
-    agent: aider,
   },
 };
 

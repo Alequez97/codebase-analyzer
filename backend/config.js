@@ -47,7 +47,6 @@ const projectName = path.basename(targetDirectory);
  * Application configuration
  *
  * Task-based agent and model configuration:
- * - Each task type can use a different agent (llm-api or aider)
  * - Each task type can use a different model
  * - API keys are loaded from .env file
  */
@@ -204,11 +203,6 @@ const config = {
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
-  },
-
-  // Aider-specific configuration (when agent is AGENTS.AIDER)
-  aider: {
-    extraArgs: "",
   },
 
   // Default agent config

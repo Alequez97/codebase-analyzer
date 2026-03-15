@@ -2,7 +2,7 @@
 
 ## Purpose
 
-**Codebase Analyzer** is a web-based tool that leverages AI agents (like Aider) to automatically audit your codebase, find bugs, identify missing tests, detect security vulnerabilities, and help you apply fixes with minimal manual effort.
+**Codebase Analyzer** is a web-based tool that leverages a shared **LLMAgent** core to automatically audit your codebase, find bugs, identify missing tests, detect security vulnerabilities, and help you apply fixes with minimal manual effort.
 
 ## The Problem We Solve
 
@@ -133,10 +133,9 @@ A **beautiful web interface** where you can:
 └────────────────┬───────────────────────────────┘
                  │ Spawns & monitors
 ┌────────────────▼───────────────────────────────┐
-│            AI Agent (Aider, etc.)              │
-│  - Analyzes code                               │
-│  - Generates findings                          │
-│  - Creates fixes                               │
+│            AI Agent (LLMAgent core)            │
+│  - Runs the LLM iteration loop                 │
+│  - Executes tools (read/write/delegate)        │
 │  - Writes JSON output                          │
 └────────────────┬───────────────────────────────┘
                  │ Reads/writes
@@ -158,39 +157,16 @@ The backend and frontend communicate via **JSON contracts**:
 - No tight coupling between components
 - Easy to swap AI agents
 
-## Supported AI Agents
+## AI Agent
 
-### Current: Aider
+All tasks are executed by the **LLMAgent** (`backend/agents/agent.js`) — a shared iteration loop core:
 
-- **What**: AI-powered coding assistant
-- **Why**: Excellent code understanding and modification
-- **Setup**: `pip install aider-chat`
+- Manages a conversation with any LLM provider (Anthropic, OpenAI, DeepSeek, OpenRouter)
+- Executes tools the LLM requests (read/write files, search, delegate tasks)
+- Handles context compaction, token tracking, and cancellation
+- Is provider-agnostic — the model is configured per task type in `config.js`
 
-#### How Aider Handles Token Limits
-
-Aider has built-in features to handle large codebases without hitting token limits:
-
-- **Repository Map**: Creates a compact representation of your codebase (using `--map-tokens`)
-- **Smart Context**: Only loads relevant files into LLM context
-- **Auto-Refresh**: Updates its understanding as it works (`--map-refresh auto`)
-- **No Manual Chunking**: All complexity is handled internally by Aider
-
-**You don't need to manage tokens** - Aider does it automatically. If you encounter limits, Aider will work incrementally, analyzing critical files first and continuing with remaining files.
-
-### Future Agents
-
-The architecture supports any agent that can:
-
-1. Read instruction files (markdown)
-2. Analyze code
-3. Write JSON output (following our schemas)
-
-Potential agents:
-
-- Custom LLM integrations (Claude, GPT-4, etc.)
-- Specialized security scanners
-- Code quality analyzers
-- Test generation tools
+The agent itself has no domain knowledge. Task-specific behaviour comes entirely from the system prompt injected at runtime.
 
 ## Configuration
 
@@ -208,9 +184,7 @@ The tool analyzes the current directory.
 ```env
 # backend/.env
 PORT=3001
-ANALYSIS_TOOL=aider
-LLM_MODEL=deepseek
-DEEPSEEK_API_KEY=your_key_here
+ANTHROPIC_API_KEY=your_key_here
 ```
 
 ## Output Structure

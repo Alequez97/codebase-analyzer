@@ -5,5 +5,4 @@
 
 export const AGENTS = {
   LLM_API: "llm-api",
-  AIDER: "aider",
 };

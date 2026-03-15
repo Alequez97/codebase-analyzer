@@ -27,13 +27,13 @@ The AGENTS.md file contains:
 
 - **Backend**: Node.js + Express + Socket.IO
 - **Frontend**: React + Vite + Zustand
-- **AI Agents**: Aider (current), LLM API (Claude/OpenAI/DeepSeek)
+- **AI Agents**: LLM API (Claude/OpenAI/DeepSeek) via shared LLMAgent core
 
 ### Key Directories
 
 ```
 backend/
-  agents/          # AI agent implementations (aider, llm-api)
+  agents/          # LLMAgent core — shared iteration loop used by all task executors
   llm/            # LLM client wrappers and tools
   utils/          # Centralized logger, file scanner, etc.
   persistence/    # File-based data storage
