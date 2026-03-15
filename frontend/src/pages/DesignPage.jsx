@@ -8,7 +8,19 @@ import {
   Spinner,
   Center,
 } from "@chakra-ui/react";
-import { Layers, LayoutTemplate } from "lucide-react";
+import {
+  Layers,
+  LayoutTemplate,
+  Monitor,
+  Tablet,
+  Smartphone,
+} from "lucide-react";
+
+const VIEWPORTS = [
+  { id: "desktop", label: "Desktop", icon: Monitor, width: null },
+  { id: "tablet", label: "Tablet", icon: Tablet, width: 768 },
+  { id: "mobile", label: "Mobile", icon: Smartphone, width: 375 },
+];
 
 async function fetchManifest() {
   const res = await fetch("/api/design/manifest");
@@ -24,8 +36,10 @@ export default function DesignPage() {
   // "prototype" | "components"
   const [panel, setPanel] = useState("prototype");
   const [selectedUrl, setSelectedUrl] = useState(null);
+  const [viewport, setViewport] = useState("desktop");
 
   const iframeRef = useRef(null);
+  const activeViewport = VIEWPORTS.find((v) => v.id === viewport);
 
   useEffect(() => {
     fetchManifest()
@@ -146,45 +160,121 @@ export default function DesignPage() {
       </Box>
 
       {/* Preview area */}
-      <Box flex={1} bg="gray.100" position="relative">
-        {isEmpty ? (
-          <Center h="100%" flexDirection="column" gap={3}>
-            <Text fontSize="lg" fontWeight="semibold" color="gray.500">
-              No design files yet
-            </Text>
-            <Text
-              fontSize="sm"
-              color="gray.400"
-              maxW="320px"
-              textAlign="center"
-            >
-              Design prototypes and component previews will appear here once
-              generated. HTML files in{" "}
-              <Text as="span" fontFamily="mono" fontSize="xs">
-                .code-analysis/design/
-              </Text>{" "}
-              are served automatically.
-            </Text>
-          </Center>
-        ) : selectedUrl ? (
-          <iframe
-            ref={iframeRef}
-            src={selectedUrl}
-            title="Design Preview"
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none",
-              display: "block",
-            }}
-          />
-        ) : (
-          <Center h="100%">
-            <Text color="gray.400" fontSize="sm">
-              Select an item from the sidebar
-            </Text>
-          </Center>
+      <Box flex={1} display="flex" flexDirection="column" overflow="hidden">
+        {/* Viewport toolbar */}
+        {!isEmpty && (
+          <HStack
+            gap={1}
+            px={3}
+            py={2}
+            borderBottomWidth="1px"
+            borderColor="gray.200"
+            bg="white"
+            justify="center"
+          >
+            {VIEWPORTS.map(({ id, label, icon: Icon, width }) => (
+              <Button
+                key={id}
+                size="xs"
+                variant={viewport === id ? "solid" : "ghost"}
+                colorPalette={viewport === id ? "blue" : "gray"}
+                onClick={() => setViewport(id)}
+                title={width ? `${width}px` : "Full width"}
+              >
+                <Icon size={12} />
+                {label}
+                {width && (
+                  <Text as="span" fontSize="10px" opacity={0.7} ml={1}>
+                    {width}px
+                  </Text>
+                )}
+              </Button>
+            ))}
+          </HStack>
         )}
+
+        {/* Canvas */}
+        <Box flex={1} bg="gray.100" position="relative" overflow="auto">
+          {isEmpty ? (
+            <Center h="100%" flexDirection="column" gap={3}>
+              <Text fontSize="lg" fontWeight="semibold" color="gray.500">
+                No design files yet
+              </Text>
+              <Text
+                fontSize="sm"
+                color="gray.400"
+                maxW="320px"
+                textAlign="center"
+              >
+                Design prototypes and component previews will appear here once
+                generated. HTML files in{" "}
+                <Text as="span" fontFamily="mono" fontSize="xs">
+                  .code-analysis/design/
+                </Text>{" "}
+                are served automatically.
+              </Text>
+            </Center>
+          ) : selectedUrl ? (
+            <Center
+              h={activeViewport.width ? "auto" : "100%"}
+              minH="100%"
+              py={activeViewport.width ? 4 : 0}
+            >
+              <Box
+                w={activeViewport.width ? `${activeViewport.width}px` : "100%"}
+                h={activeViewport.width ? "calc(100vh - 120px)" : "100%"}
+                bg="white"
+                boxShadow={activeViewport.width ? "lg" : "none"}
+                borderRadius={activeViewport.width ? "md" : "none"}
+                overflow="hidden"
+                position="relative"
+                transition="width 0.2s ease"
+              >
+                {activeViewport.width && (
+                  <Box
+                    position="absolute"
+                    top={0}
+                    left={0}
+                    right={0}
+                    h="20px"
+                    bg="gray.200"
+                    display="flex"
+                    alignItems="center"
+                    px={2}
+                    gap={1}
+                    zIndex={1}
+                    borderTopRadius="md"
+                  >
+                    <Box w={2} h={2} borderRadius="full" bg="red.400" />
+                    <Box w={2} h={2} borderRadius="full" bg="yellow.400" />
+                    <Box w={2} h={2} borderRadius="full" bg="green.400" />
+                    <Text fontSize="10px" color="gray.500" ml={1}>
+                      {activeViewport.label} — {activeViewport.width}px
+                    </Text>
+                  </Box>
+                )}
+                <iframe
+                  ref={iframeRef}
+                  src={selectedUrl}
+                  title="Design Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                    display: "block",
+                    marginTop: activeViewport.width ? "20px" : "0",
+                  }}
+                />
+              </Box>
+            </Center>
+          ) : (
+            <Center h="100%">
+              <Text color="gray.400" fontSize="sm">
+                Select an item from the sidebar
+              </Text>
+            </Center>
+          )}
+        </Box>
       </Box>
     </Box>
   );
