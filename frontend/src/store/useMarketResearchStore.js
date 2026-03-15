@@ -5,6 +5,36 @@ import {
 } from "../components/market-research/constants";
 
 // ---------------------------------------------------------------------------
+// Session ID — persisted in sessionStorage so it survives page refresh
+// within the same browser tab, but cleared when the tab is closed.
+// ---------------------------------------------------------------------------
+const SESSION_STORAGE_KEY = "mr-session-id";
+
+function loadSessionId() {
+  try {
+    return sessionStorage.getItem(SESSION_STORAGE_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSessionId(sessionId) {
+  try {
+    sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+  } catch {
+    // ignore — storage quota / private mode
+  }
+}
+
+function clearSessionId() {
+  try {
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Module-level timer handles — not reactive state, just cancellation tokens
 // ---------------------------------------------------------------------------
 let simulationTimers = [];
@@ -66,6 +96,7 @@ export const useMarketResearchStore = create((set) => ({
   billingMode: "monthly", // "monthly" | "annual"
 
   // --- Analysis state ---
+  sessionId: loadSessionId(), // null until first analysis is started
   analysisStartedAt: null,
   isAnalyzing: false,
   isAnalysisComplete: false,
@@ -89,8 +120,11 @@ export const useMarketResearchStore = create((set) => ({
   // --- Analysis actions ---
   startAnalysis: () => {
     cancelSimulation();
+    const sessionId = crypto.randomUUID();
+    saveSessionId(sessionId);
     set({
       step: "analysis",
+      sessionId,
       isAnalyzing: true,
       isAnalysisComplete: false,
       competitors: [],
@@ -102,8 +136,10 @@ export const useMarketResearchStore = create((set) => ({
 
   resetAnalysis: () => {
     cancelSimulation();
+    clearSessionId();
     set({
       step: "input",
+      sessionId: null,
       isAnalyzing: false,
       isAnalysisComplete: false,
       competitors: [],

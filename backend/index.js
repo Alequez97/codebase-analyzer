@@ -23,7 +23,9 @@ import {
   e2eConfigRoutes,
   reviewChangesRoutes,
   designRoutes,
+  marketResearchRoutes,
 } from "./routes/index.js";
+import { startCleanupJob } from "./utils/market-research-cleanup.js";
 
 // Domain routes (modular structure)
 import * as domainRoutes from "./routes/domain/index.js";
@@ -91,6 +93,7 @@ app.use("/api/review-changes", reviewChangesRoutes);
 app.use("/api", domainSectionsChatRoutes);
 app.use("/api", codebaseChatRoutes);
 app.use("/api/design", designRoutes);
+app.use("/api/market-research", marketResearchRoutes);
 
 // ==================== Design Preview Static Files ====================
 
@@ -154,4 +157,7 @@ httpServer.listen(config.port, async () => {
 
   // Start the queue processor — picks up recovered + any pre-existing pending tasks
   startQueueProcessor();
+
+  // Start the market research session cleanup job (removes sessions older than 2 days)
+  startCleanupJob();
 });

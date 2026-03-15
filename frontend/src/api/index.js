@@ -13,6 +13,7 @@ export * from "./domain-sections-chat";
 export * from "./codebase-chat";
 export * from "./e2e-config";
 export * from "./review-changes";
+export * from "./market-research";
 
 // Default export for backward compatibility (if needed)
 import * as status from "./status";
