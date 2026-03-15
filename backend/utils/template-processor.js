@@ -451,6 +451,23 @@ export async function buildTemplateVariables(task) {
         CODEBASE_PATH: task.params?.targetDirectory || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };
+    case TASK_TYPES.MARKET_RESEARCH_INITIAL:
+      return {
+        SESSION_ID: task.params?.sessionId || "",
+        IDEA: task.params?.idea || "",
+        OUTPUT_FILE: task.outputFile || "",
+        PROGRESS_FILE: getProgressFileRelativePath(task.id),
+      };
+    case TASK_TYPES.MARKET_RESEARCH_COMPETITOR:
+      return {
+        SESSION_ID: task.params?.sessionId || "",
+        COMPETITOR_ID: task.params?.competitorId || "",
+        COMPETITOR_NAME: task.params?.competitorName || "",
+        COMPETITOR_URL: task.params?.competitorUrl || "",
+        COMPETITOR_DESCRIPTION: task.params?.competitorDescription || "",
+        OUTPUT_FILE: task.outputFile || "",
+        PROGRESS_FILE: getProgressFileRelativePath(task.id),
+      };
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

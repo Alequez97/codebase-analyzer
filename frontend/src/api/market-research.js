@@ -14,3 +14,18 @@ export const saveMarketResearchSession = (sessionId, idea, state) =>
  */
 export const getMarketResearchSession = (sessionId) =>
   client.get(`/market-research/${sessionId}`);
+
+/**
+ * Queue an AI market research task for the given session.
+ * @param {string} sessionId
+ * @param {string} idea
+ */
+export const requestMarketResearchAnalysis = (sessionId, idea) =>
+  client.post(`/market-research/${sessionId}/analyze`, { idea });
+
+/**
+ * Retrieve the AI-generated report once the task has completed.
+ * @param {string} sessionId
+ */
+export const getMarketResearchReport = (sessionId) =>
+  client.get(`/market-research/${sessionId}/report`);

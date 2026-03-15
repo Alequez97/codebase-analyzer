@@ -1,0 +1,11 @@
+[
+  { "competitorId": "vantage", "taskId": "market-research-competitor-20260315T203209-b462f8" },
+  { "competitorId": "cloudzero", "taskId": "market-research-competitor-20260315T203235-8d1259" },
+  { "competitorId": "finout", "taskId": "market-research-competitor-20260315T203235-cfc05e" },
+  { "competitorId": "cloudability", "taskId": "market-research-competitor-20260315T203235-4e7310" },
+  { "competitorId": "kubecost", "taskId": "market-research-competitor-20260315T203235-fded61" },
+  { "competitorId": "harness-ccm", "taskId": "market-research-competitor-20260315T203235-0d5ea9" },
+  { "competitorId": "sastrify", "taskId": "market-research-competitor-20260315T203235-f6209f" },
+  { "competitorId": "zylo", "taskId": "market-research-competitor-20260315T203235-aed569" },
+  { "competitorId": "vendr", "taskId": "market-research-competitor-20260315T203235-473ae4" }
+]

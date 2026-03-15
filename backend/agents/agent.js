@@ -7,6 +7,14 @@ import {
   DelegationToolExecutor,
   DELEGATION_TOOLS,
 } from "../llm/tools/delegation-tools.js";
+import {
+  WebSearchToolExecutor,
+  WEB_SEARCH_TOOLS,
+} from "../llm/tools/web-search-tools.js";
+import {
+  WebFetchToolExecutor,
+  WEB_FETCH_TOOLS,
+} from "../llm/tools/web-fetch-tools.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 
@@ -37,6 +45,8 @@ export class LLMAgent {
     this.fileToolExecutor = new FileToolExecutor(this.workingDirectory);
     this.commandToolExecutor = null; // Enabled per-task via enableCommandTools()
     this.delegationToolExecutor = null; // Enabled per-task via enableDelegationTools()
+    this.webSearchToolExecutor = null; // Enabled per-task via enableWebSearchTools()
+    this.webFetchToolExecutor = null;  // Enabled per-task via enableWebFetchTools()
     this.conversationLog = [];
   }
 
@@ -80,6 +90,30 @@ export class LLMAgent {
   }
 
   /**
+   * Enable web search tools for this agent session.
+   * Must be called before run() to take effect.
+   *
+   * @param {string} apiKey - Brave Search API key
+   */
+  enableWebSearchTools(apiKey) {
+    this.webSearchToolExecutor = new WebSearchToolExecutor(apiKey);
+    logger.info("Web search tools enabled for agent session", {
+      component: "LLMAgent",
+    });
+  }
+
+  /**
+   * Enable URL fetch tools for this agent session.
+   * Must be called before run() to take effect.
+   */
+  enableWebFetchTools() {
+    this.webFetchToolExecutor = new WebFetchToolExecutor();
+    logger.info("Web fetch tools enabled for agent session", {
+      component: "LLMAgent",
+    });
+  }
+
+  /**
    * Get the full list of tools available in this session
    * @private
    */
@@ -87,6 +121,8 @@ export class LLMAgent {
     const tools = [...FILE_TOOLS];
     if (this.commandToolExecutor) tools.push(...COMMAND_TOOLS);
     if (this.delegationToolExecutor) tools.push(...DELEGATION_TOOLS);
+    if (this.webSearchToolExecutor) tools.push(...WEB_SEARCH_TOOLS);
+    if (this.webFetchToolExecutor) tools.push(...WEB_FETCH_TOOLS);
     return tools;
   }
 
@@ -385,6 +421,17 @@ export class LLMAgent {
           !isDelegationTool &&
           this.commandToolExecutor &&
           COMMAND_TOOLS.some((t) => t.name === toolCall.name);
+        const isWebSearchTool =
+          !isDelegationTool &&
+          !isCommandTool &&
+          this.webSearchToolExecutor &&
+          WEB_SEARCH_TOOLS.some((t) => t.name === toolCall.name);
+        const isWebFetchTool =
+          !isDelegationTool &&
+          !isCommandTool &&
+          !isWebSearchTool &&
+          this.webFetchToolExecutor &&
+          WEB_FETCH_TOOLS.some((t) => t.name === toolCall.name);
 
         let result;
         if (isDelegationTool) {
@@ -393,6 +440,16 @@ export class LLMAgent {
             toolCall.arguments,
           );
           result = JSON.stringify(delegationResult, null, 2);
+        } else if (isWebSearchTool) {
+          result = await this.webSearchToolExecutor.executeTool(
+            toolCall.name,
+            toolCall.arguments,
+          );
+        } else if (isWebFetchTool) {
+          result = await this.webFetchToolExecutor.executeTool(
+            toolCall.name,
+            toolCall.arguments,
+          );
         } else {
           const executor = isCommandTool
             ? this.commandToolExecutor

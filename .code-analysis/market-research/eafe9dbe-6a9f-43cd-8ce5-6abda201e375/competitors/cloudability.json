@@ -1,0 +1,115 @@
+{
+  "id": "cloudability",
+  "name": "Apptio Cloudability",
+  "url": "https://www.apptio.com/products/cloudability/",
+  "description": "Enterprise FinOps platform for visibility, allocation, optimization, governance and planning of multi-cloud spend, targeted at mid-to-large enterprises and FinOps teams.",
+  "logoChar": "C",
+  "logoColor": "#3b82f6",
+  "logoBg": "#eff6ff",
+  "tags": ["FinOps", "Cloud Cost Management", "Enterprise", "Multi-cloud"],
+  "pricing": "Custom",
+  "pricingPeriod": "",
+  "customers": "250+",
+  "status": "done",
+  "details": {
+    "founded": "2011",
+    "country": "US",
+    "funding": "$40M (pre-acquisition)",
+    "employees": "~100 (at acquisition, now part of Apptio/IBM)",
+    "business": "B2B SaaS",
+    "targetMarket": "Mid-to-large enterprises with significant cloud spend; FinOps, IT finance, engineering and product teams",
+    "features": [
+      {
+        "category": "Visibility & Reporting",
+        "items": [
+          "Granular cost and usage reporting across AWS, Azure, and GCP",
+          "True Cost Explorer for mapping cloud spend to business units and products",
+          "Pre-built and customizable dashboards and executive reports",
+          "Tag explorer and business mapping for showback/chargeback"
+        ]
+      },
+      {
+        "category": "Allocation & Chargeback",
+        "items": [
+          "Automated allocation of cloud costs to teams and business units",
+          "Showback/chargeback workflows and billing exports",
+          "Support for unit economics and cost attribution"
+        ]
+      },
+      {
+        "category": "Optimization & Recommendations",
+        "items": [
+          "Rightsizing recommendations for VMs, databases and storage",
+          "Commitment coverage analysis and Savings Plan / RI recommendations",
+          "Automated optimization recommendations and actionable insights"
+        ]
+      },
+      {
+        "category": "Planning & Forecasting",
+        "items": [
+          "Budgeting, forecasting and spend-to-plan tracking",
+          "Workload planning and historical trend analysis",
+          "Unit cost modelling and what-if scenarios"
+        ]
+      },
+      {
+        "category": "Governance & Automation",
+        "items": [
+          "Policy-based cost governance (Cloudability Governance) integrated with IaC tooling",
+          "Alerts, anomaly detection and guardrails for spend compliance",
+          "APIs and automation hooks for embedding recommendations into workflows"
+        ]
+      },
+      {
+        "category": "Integrations & Platform",
+        "items": [
+          "Native integrations with AWS, Azure, GCP billing APIs",
+          "Kubernetes/container cost support (and integration with Kubecost)",
+          "Open APIs, data exports and marketplace availability (AWS Marketplace)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "High price and enterprise-only packaging — not SMB-friendly (opportunity for lower-cost alternatives)",
+      "Steep learning curve and heavy dependence on professional services for onboarding",
+      "Less developer-native automation/embeddable workflows compared with newer tooling (e.g., CI/CD or Slack-first remediation)",
+      "Limited real-time, in-cluster telemetry compared with agent-based/in-cluster tools (some latency for container/Kubernetes cost data)",
+      "Perceived UI/UX complexity — can be overwhelming for non-finance or non-expert users",
+      "Potential vendor/portfolio lock-in to Apptio/IBM ecosystem for some customers"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Free Trial",
+        "price": "$0",
+        "period": "",
+        "note": "Short free trial (demo/14-day trial available through Apptio) ",
+        "highlight": false
+      },
+      {
+        "name": "Enterprise (Custom)",
+        "price": "Custom",
+        "period": "",
+        "note": "Annual, contract-based pricing tiered by managed cloud spend (enterprise-focused). Public reporting and market examples indicate large minimums for meaningful coverage; pricing typically requires a sales quote.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://help.apptio.com/en-us/cloudability",
+      "pricing": "https://www.apptio.com/products/cloudability/",
+      "blog": "https://www.apptio.com/resources/resource-center-cloud/",
+      "jobs": "https://www.apptio.com/company/careers/"
+    },
+    "strengths": [
+      "Comprehensive, enterprise-grade FinOps feature set across visibility, allocation, optimization and governance",
+      "Strong integrations with major cloud providers and support for multi-cloud environments",
+      "Proven at scale — used by hundreds of enterprises and manages billions in cloud spend",
+      "Backed by Apptio (and IBM ownership) with professional services and ecosystem support"
+    ],
+    "weaknesses": [
+      "High cost and opaque/custom pricing that can exclude smaller organizations",
+      "Complex product surface and on-boarding often requires services",
+      "UI/UX and usability can be less approachable than newer, developer-first competitors",
+      "Slower to offer some developer-native workflows and in-cluster, real-time telemetry compared to in-cluster tools"
+    ]
+  }
+}

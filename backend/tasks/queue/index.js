@@ -28,3 +28,7 @@ export { queueCustomCodebaseTask } from "./custom-codebase-task.js";
 
 // Review changes task (AI orchestrator — diffs git, delegates edit-* tasks)
 export { queueReviewChangesTask } from "./review-changes.js";
+
+// Market research tasks (project-level, no domainId)
+export { queueMarketResearchInitialTask } from "./market-research-initial.js";
+export { queueMarketResearchCompetitorTask } from "./market-research-competitor.js";

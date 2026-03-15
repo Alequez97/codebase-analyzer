@@ -58,4 +58,14 @@ export const SOCKET_EVENTS = {
 
   // Review changes task log
   LOG_REVIEW_CHANGES: "log:review-changes",
+
+  // Market research task logs
+  LOG_MARKET_RESEARCH_INITIAL: "log:market-research-initial",
+  LOG_MARKET_RESEARCH_COMPETITOR: "log:market-research-competitor",
+
+  // Market research completed — carries sessionId in params
+  MARKET_RESEARCH_COMPLETED: "market-research:completed",
+
+  // Market research final report assembled — carries sessionId + taskId
+  MARKET_RESEARCH_REPORT_READY: "market-research:report-ready",
 };

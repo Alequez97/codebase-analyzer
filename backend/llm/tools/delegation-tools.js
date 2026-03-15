@@ -5,8 +5,6 @@ import * as logger from "../../utils/logger.js";
 
 /**
  * Task types that can be targeted by delegate_task.
- * Only edit-* types are supported — they accept a user instruction via chat
- * history, making delegation transparent to the handler layer.
  */
 export const DELEGATABLE_TASK_TYPES = [
   "edit-documentation",
@@ -14,6 +12,7 @@ export const DELEGATABLE_TASK_TYPES = [
   "edit-requirements",
   "edit-bugs-security",
   "edit-refactoring-and-testing",
+  "market-research-competitor",
 ];
 
 /**
@@ -38,46 +37,43 @@ export const DELEGATION_TOOLS = [
 
 How to use:
   1. Use write_file to create a delegation request file under .code-analysis/temp/delegation-requests/ describing exactly what the delegated agent should do and why (include relevant context from your analysis).
-  2. Call delegate_task with the path to that file, the target task type, and the domain ID.
+  2. Call delegate_task with the path to that file, the target task type, and any required params.
 
-The delegation request file content becomes the user message for the delegated agent — treat it like a detailed chat message.`,
+The delegation request file content becomes the user message (or briefing) for the delegated agent — treat it like a detailed chat message.`,
     parameters: {
       type: {
         type: "string",
         enum: DELEGATABLE_TASK_TYPES,
         description: "The type of specialized agent to delegate to.",
       },
-      domainId: {
-        type: "string",
-        description: "The domain ID to run the delegated task against.",
-      },
       requestFile: {
         type: "string",
         description:
           "Relative path (from project root) to the delegation request file you wrote. Must be under .code-analysis/temp/. The file content becomes the delegated agent's user message.",
       },
+      params: {
+        type: "object",
+        description:
+          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Market research competitor tasks require `sessionId`, `competitorId`, `competitorName`, `competitorUrl`, and optionally `competitorDescription`.",
+      },
     },
-    required: ["type", "domainId", "requestFile"],
+    required: ["type", "requestFile"],
   },
 ];
 
 /**
  * Executor for delegation tools.
  *
- * Reads an instruction file written by the parent agent, creates a synthetic
- * chat-history session so the target edit handler can load it unchanged, then
- * calls the appropriate queue function to enqueue the child task.
+ * Reads an instruction file written by the parent agent, then either:
+ * - For edit-* types: creates a synthetic chat-history session so the target
+ *   edit handler can load it unchanged, then calls the queue function.
+ * - For market-research-competitor: calls the queue function directly with
+ *   the merged params and competitorBriefing from the request file.
  *
  * @example
  * const executor = new DelegationToolExecutor(projectRoot, parentTaskId, {
  *   "edit-documentation": queueEditDocumentationTask,
- *   "edit-diagrams": queueEditDiagramsTask,
- *   // ...
- * });
- * const result = await executor.execute("delegate_task", {
- *   type: "edit-documentation",
- *   domainId: "match-scoring",
- *   requestFile: ".code-analysis/temp/delegation-requests/doc-update-xyz.md",
+ *   "market-research-competitor": queueMarketResearchCompetitorTask,
  * });
  */
 export class DelegationToolExecutor {
@@ -85,8 +81,7 @@ export class DelegationToolExecutor {
    * @param {string} projectRoot - Absolute path to the analysed project root
    * @param {string} parentTaskId - ID of the running task that is delegating
    * @param {Object<string, Function>} queueFunctions
-   *   Map of task type string → queue function, e.g.
-   *   { "edit-documentation": queueEditDocumentationTask, ... }
+   *   Map of task type string → queue function
    */
   constructor(projectRoot, parentTaskId, queueFunctions) {
     this.projectRoot = projectRoot;
@@ -112,13 +107,13 @@ export class DelegationToolExecutor {
 
   // ─── Private ───────────────────────────────────────────────────────────────
 
-  async _delegateTask({ type, domainId, requestFile } = {}) {
+  async _delegateTask({ type, domainId, requestFile, params = {} } = {}) {
     // Validate required args
-    if (!type || !domainId || !requestFile) {
+    if (!type || !requestFile) {
       return {
         success: false,
         error: {
-          message: "type, domainId, and requestFile are all required",
+          message: "type and requestFile are required",
         },
       };
     }
@@ -187,17 +182,72 @@ export class DelegationToolExecutor {
     // Consume and discard — the file is only needed to pass instructions here
     fs.unlink(absPath).catch(() => {});
 
+    // Merge top-level domainId (backwards compat for old edit-task callers) with params
+    const mergedParams = { ...(domainId ? { domainId } : {}), ...params };
+
+    // ── market-research-competitor ──────────────────────────────────────────
+    if (type === "market-research-competitor") {
+      logger.info("Delegating market-research-competitor task", {
+        component: "DelegationTools",
+        type,
+        competitorId: mergedParams.competitorId,
+        parentTaskId: this.parentTaskId,
+      });
+
+      const task = await queueFn({
+        ...mergedParams,
+        competitorBriefing: requestContent,
+        delegatedByTaskId: this.parentTaskId,
+      });
+
+      if (task?.success === false) {
+        return {
+          success: false,
+          error: {
+            message: task.error || "Failed to queue delegated competitor task",
+            code: task.code,
+          },
+        };
+      }
+
+      logger.info("Delegated competitor task queued", {
+        component: "DelegationTools",
+        taskId: task.id,
+        type: task.type,
+        competitorId: mergedParams.competitorId,
+      });
+
+      return {
+        success: true,
+        data: {
+          taskId: task.id,
+          type: task.type,
+          competitorId: mergedParams.competitorId,
+          message: `Queued market-research-competitor task for competitor '${mergedParams.competitorId}' (taskId: ${task.id})`,
+        },
+      };
+    }
+
+    // ── edit-* tasks (existing behaviour) ──────────────────────────────────
+    const effectiveDomainId = mergedParams.domainId;
+    if (!effectiveDomainId) {
+      return {
+        success: false,
+        error: {
+          message: "domainId is required for edit task delegation (pass via params.domainId or top-level domainId)",
+        },
+      };
+    }
+
     const sectionType = SECTION_TYPE_BY_TASK_TYPE[type];
 
     // Generate a unique synthetic chatId for this delegation.
-    // Format: delegated-{parentTaskId}-{6-hex} — stable prefix makes it
-    // easy to identify delegated sessions in chat-history files.
     const syntheticChatId = `delegated-${this.parentTaskId}-${randomBytes(3).toString("hex")}`;
 
     // Write a synthetic chat-history file so the edit handler loads the
     // delegation request as a first user message — zero changes to handler code.
     await this._writeSyntheticChatHistory({
-      domainId,
+      domainId: effectiveDomainId,
       sectionType,
       chatId: syntheticChatId,
       content: requestContent,
@@ -206,14 +256,14 @@ export class DelegationToolExecutor {
     logger.info("Delegating task", {
       component: "DelegationTools",
       type,
-      domainId,
+      domainId: effectiveDomainId,
       parentTaskId: this.parentTaskId,
       syntheticChatId,
     });
 
     // Queue the delegated task
     const task = await queueFn({
-      domainId,
+      domainId: effectiveDomainId,
       chatId: syntheticChatId,
       delegatedByTaskId: this.parentTaskId,
     });
@@ -232,7 +282,7 @@ export class DelegationToolExecutor {
       component: "DelegationTools",
       taskId: task.id,
       type: task.type,
-      domainId,
+      domainId: effectiveDomainId,
     });
 
     return {
@@ -240,8 +290,8 @@ export class DelegationToolExecutor {
       data: {
         taskId: task.id,
         type: task.type,
-        domainId,
-        message: `Queued ${type} task for domain '${domainId}' (taskId: ${task.id})`,
+        domainId: effectiveDomainId,
+        message: `Queued ${type} task for domain '${effectiveDomainId}' (taskId: ${task.id})`,
       },
     };
   }

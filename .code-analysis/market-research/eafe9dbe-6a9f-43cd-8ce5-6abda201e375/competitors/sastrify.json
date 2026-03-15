@@ -1,0 +1,114 @@
+{
+  "id": "sastrify",
+  "name": "Sastrify",
+  "url": "https://www.sastrify.com/",
+  "description": "SaaS spend management and procurement platform that helps IT, finance and procurement teams discover, negotiate, track, and optimize software subscriptions.",
+  "logoChar": "S",
+  "logoColor": "#2563EB",
+  "logoBg": "#EFF6FF",
+  "tags": ["SaaS procurement", "SaaS management", "Cost optimization", "Compliance"],
+  "pricing": "€12.5k",
+  "pricingPeriod": "/yr",
+  "customers": "100+",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "Germany",
+    "funding": "$32M (Series B, May 2023); ~$45M total reported",
+    "employees": "~60",
+    "business": "B2B SaaS",
+    "targetMarket": "Mid-market and enterprise companies; procurement, finance and IT teams looking to centralize and optimize SaaS spend",
+    "features": [
+      {
+        "category": "Procurement & Negotiation",
+        "items": [
+          "Access to large SaaS price benchmark database ($6B+ managed/benchmarked spend)",
+          "Negotiation support & expert procurement team (optional managed service)",
+          "Sastrify Marketplace with pre-negotiated offers and flexible payment/financing options",
+          "ROI / savings guarantees for procurement engagements"
+        ]
+      },
+      {
+        "category": "SaaS Management",
+        "items": [
+          "Automated software inventory and usage analytics",
+          "Renewal & contract lifecycle management with reminders",
+          "License rightsizing recommendations",
+          "Integrations and discovery (SSO discovery, invoice/contract ingestion)",
+          "Shadow IT detection"
+        ]
+      },
+      {
+        "category": "Compliance & Security",
+        "items": [
+          "Automated compliance documentation and audit reports",
+          "Vendor risk scoring and policy tracking",
+          "Centralized document repository for contracts and certificates"
+        ]
+      },
+      {
+        "category": "Managed Services",
+        "items": [
+          "Dedicated procurement experts to run negotiations",
+          "Fully outsourced procurement service option",
+          "Ongoing vendor management and renewal handling"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Transparent, low-cost self-serve tier for small startups — pricing is largely enterprise/custom",
+      "More advanced/custom reporting and dashboarding for power users (some reviews request richer analytics)",
+      "Deeper granular usage/technical telemetry compared to specialized usage analytics vendors",
+      "Stronger UX consistency — several users report occasional UI/UX friction during onboarding",
+      "Broader marketplace breadth for niche or regional vendors in some markets"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Software Management",
+        "price": "€12.5k",
+        "period": "/yr",
+        "note": "Automated inventory, usage analytics, renewal workflows and compliance monitoring. Entry-level platform offering (custom engagement).",
+        "highlight": false
+      },
+      {
+        "name": "Vendor Benchmarks",
+        "price": "€15k",
+        "period": "/yr",
+        "note": "Access to Sastrify’s pricing benchmarks and negotiation levers to prepare for vendor discussions.",
+        "highlight": false
+      },
+      {
+        "name": "Expert Procurement",
+        "price": "€25k",
+        "period": "/yr",
+        "note": "Includes a dedicated procurement expert and strategic negotiation support (Sastrify ROI Guarantee).",
+        "highlight": true
+      },
+      {
+        "name": "Managed Service (per identity)",
+        "price": "Custom (starts at pricing by identity)",
+        "period": "",
+        "note": "Fully managed procurement & vendor management priced per identity/month or via a custom quote.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://support.sastrify.com/",
+      "pricing": "https://www.sastrify.com/pricing",
+      "blog": "https://www.sastrify.com/blog",
+      "jobs": "https://www.sastrify.com/careers"
+    },
+    "strengths": [
+      "Large benchmark database and clear negotiation expertise — proven procurement ROI",
+      "Combines procurement services with a product (platform + managed services) for hands-on savings",
+      "Strong compliance & audit features (automated docs, vendor risk tracking)",
+      "Designed for mid-market/enterprise scale with dedicated CSM/support"
+    ],
+    "weaknesses": [
+      "Enterprise-focused pricing and custom quotes limit appeal for smaller companies",
+      "Some users report UI/UX friction and a learning curve during onboarding",
+      "Reporting/dashboard customization is less mature than some analytics-first competitors",
+      "Reliance on managed services can add cost and process overhead for teams wanting pure self-serve"
+    ]
+  }
+}

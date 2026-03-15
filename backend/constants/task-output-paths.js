@@ -57,3 +57,22 @@ export function getDomainSectionContentMarkdownOutputPath(domainId, sectionId) {
     PERSISTENCE_FILES.CONTENT_MD,
   );
 }
+
+export function getMarketResearchReportOutputPath(sessionId) {
+  return joinOutputPath(
+    PERSISTENCE_FILES.ANALYSIS_ROOT_DIR,
+    "market-research",
+    sessionId,
+    "report.json",
+  );
+}
+
+export function getMarketResearchCompetitorOutputPath(sessionId, competitorId) {
+  return joinOutputPath(
+    PERSISTENCE_FILES.ANALYSIS_ROOT_DIR,
+    "market-research",
+    sessionId,
+    "competitors",
+    `${competitorId}.json`,
+  );
+}

@@ -27,4 +27,8 @@ export const TASK_TYPES = {
 
   // Review changes task (delegating agent — reviews a git diff)
   REVIEW_CHANGES: "review-changes",
+
+  // Market research tasks (project-level, no domainId)
+  MARKET_RESEARCH_INITIAL: "market-research-initial",
+  MARKET_RESEARCH_COMPETITOR: "market-research-competitor",
 };

@@ -74,6 +74,7 @@ const config = {
     [PROVIDERS.ANTHROPIC]: process.env.ANTHROPIC_API_KEY,
     [PROVIDERS.DEEPSEEK]: process.env.DEEPSEEK_API_KEY,
     [PROVIDERS.OPENROUTER]: process.env.OPENROUTER_API_KEY,
+    braveSearch: process.env.BRAVE_SEARCH_API_KEY,
   },
 
   // Task-specific agent and model configuration
@@ -201,6 +202,22 @@ const config = {
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
+
+    // Market research tasks
+    [TASK_TYPES.MARKET_RESEARCH_INITIAL]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_2,
+      maxTokens: 64000,
+      maxIterations: 50,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
+    [TASK_TYPES.MARKET_RESEARCH_COMPETITOR]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_MINI,
+      maxTokens: 32000,
+      maxIterations: 30,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
   },

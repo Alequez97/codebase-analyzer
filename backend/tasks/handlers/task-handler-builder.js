@@ -21,6 +21,11 @@ import { applyRefactoringHandler } from "./apply-refactoring.js";
 import { implementFixHandler } from "./implement-fix.js";
 import { defaultAnalysisHandler } from "./default-analysis.js";
 import { reviewChangesHandler } from "./review-changes.js";
+import {
+  marketResearchInitialHandler,
+  marketResearchCompetitorHandler,
+} from "./market-research.js";
+import { queueMarketResearchCompetitorTask } from "../queue/market-research-competitor.js";
 
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 
@@ -283,6 +288,25 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = applyRefactoringHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
     overrides = implementFixHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
+    agent?.enableDelegationTools?.(task.id, {
+      "market-research-competitor": queueMarketResearchCompetitorTask,
+    });
+    overrides = marketResearchInitialHandler(task, taskLogger);
+  } else if (task.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
+    if (agent && config.apiKeys.braveSearch) {
+      agent.enableWebSearchTools(config.apiKeys.braveSearch);
+      taskLogger.info("🔍 Web search tools enabled", {
+        component: "TaskHandler",
+      });
+    }
+    if (agent) {
+      agent.enableWebFetchTools();
+      taskLogger.info("🌐 Web fetch tools enabled", {
+        component: "TaskHandler",
+      });
+    }
+    overrides = marketResearchCompetitorHandler(task, taskLogger);
   }
 
   // Merge: defaults provide all callbacks, overrides replace what's needed

@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import config from "../config.js";
 import * as logger from "../utils/logger.js";
 import { tryReadJsonFile } from "./utils.js";
 
@@ -129,4 +130,34 @@ export async function listSessions() {
   }
 
   return sessions;
+}
+
+/**
+ * Read the AI-generated market research report for a session.
+ * The report file is written by the LLM agent to
+ * .code-analysis/market-research/{sessionId}/report.json
+ * inside the target project directory.
+ * @param {string} sessionId
+ * @returns {Promise<Object|null>} Report object or null if not found
+ */
+export async function getMarketResearchReport(sessionId) {
+  // Validate sessionId to prevent path traversal
+  if (!/^[0-9a-f-]{36}$/.test(sessionId)) {
+    throw new Error("Invalid sessionId format");
+  }
+
+  const reportPath = path.join(
+    config.paths.targetAnalysis,
+    "market-research",
+    sessionId,
+    "report.json",
+  );
+
+  try {
+    const report = await tryReadJsonFile(reportPath, sessionId);
+    return report;
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
 }

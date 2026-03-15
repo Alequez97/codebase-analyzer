@@ -1,20 +1,27 @@
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
-import { Activity, CheckCircle } from "lucide-react";
+import {
+  Box,
+  Button,
+  CloseButton,
+  Dialog,
+  HStack,
+  Portal,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { Activity, CheckCircle, Code2, GitBranch, Wrench, Zap } from "lucide-react";
+import { useState } from "react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
-import { MOCK_COMPETITORS } from "./constants";
+import { CompetitorDetails } from "./CompetitorDetails";
 
 // ---------------------------------------------------------------------------
 // Hero section — dark indigo card with stats
 // ---------------------------------------------------------------------------
 
-const HERO_STATS = [
-  { value: "7", label: "Competitors analyzed" },
-  { value: "$25–$150", label: "Avg. pricing/seat" },
-  { value: "5.6M+", label: "Total users" },
-  { value: "4 min", label: "Analysis time" },
-];
-
-function HeroBanner({ idea }) {
+function HeroBanner({ idea, competitorCount }) {
+  const heroStats = [
+    { value: String(competitorCount ?? 0), label: "Competitors analyzed" },
+    { value: "High", label: "Confidence level" },
+  ];
   return (
     <Box
       bg="linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #3730a3 100%)"
@@ -76,7 +83,7 @@ function HeroBanner({ idea }) {
 
       {/* Stats row */}
       <HStack gap={3} flexWrap="wrap">
-        {HERO_STATS.map((stat) => (
+        {heroStats.map((stat) => (
           <Box
             key={stat.label}
             bg="rgba(255,255,255,0.07)"
@@ -114,105 +121,241 @@ function HeroBanner({ idea }) {
 }
 
 // ---------------------------------------------------------------------------
-// Opportunity card
+// Start Building modal
 // ---------------------------------------------------------------------------
 
-const OPPORTUNITY_DIFFERENTIATORS = [
+const PLATFORM_FEATURES = [
   {
-    label: "AI-powered auto-fix",
-    detail:
-      "None of the competitors offer contextual, AI-driven code fixes beyond basic suggestions",
+    icon: Code2,
+    title: "AI Codebase Analyzer",
+    description:
+      "Deep static analysis powered by Claude — finds logic bugs, security issues, and dead code across your entire repo.",
   },
   {
-    label: "Logic bug detection",
-    detail:
-      "Current tools focus on known CVEs; gap exists for algorithmic and edge-case error detection",
+    icon: Zap,
+    title: "Auto-Fix Engine",
+    description:
+      "One-click AI fixes with full context. No copy-pasting from ChatGPT — changes land directly in your codebase.",
   },
   {
-    label: "Test generation",
-    detail:
-      "No competitor generates test cases; opportunity for AI-suggested unit/integration tests",
+    icon: GitBranch,
+    title: "PR-level Review",
+    description:
+      "Every pull request gets an AI reviewer that understands your architecture and flags real problems, not noise.",
   },
   {
-    label: "Usage-based pricing",
-    detail:
-      "Avoid per-seat model; charge per analysis or LOC scanned to lower barrier to entry",
-  },
-  {
-    label: "Developer UX first",
-    detail:
-      "Snyk leads here; match or exceed their Git integration and PR workflow polish",
+    icon: Wrench,
+    title: "Ongoing Maintenance",
+    description:
+      "Continuous refactor suggestions, dependency upgrades, and tech-debt tracking — your codebase stays healthy automatically.",
   },
 ];
 
-function OpportunityCard() {
+function StartBuildingModal({ open, onClose }) {
+  return (
+    <Dialog.Root open={open} onOpenChange={({ open }) => !open && onClose()} size="lg" motionPreset="slide-in-bottom">
+      <Portal>
+        <Dialog.Backdrop bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <Dialog.Positioner>
+          <Dialog.Content borderRadius="20px" overflow="hidden" mx={4}>
+            {/* Header */}
+            <Box
+              bg="linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)"
+              px={7}
+              py={6}
+            >
+              <HStack justify="space-between" align="start">
+                <Box>
+                  <Text
+                    fontSize="22px"
+                    fontWeight="800"
+                    color="white"
+                    letterSpacing="-0.02em"
+                    mb={1}
+                  >
+                    Build it with JFS
+                  </Text>
+                  <Text fontSize="13px" color="rgba(255,255,255,0.75)" fontWeight="500">
+                    The AI platform that builds, maintains, and analyzes your code
+                  </Text>
+                </Box>
+                <CloseButton
+                  size="sm"
+                  color="white"
+                  opacity={0.7}
+                  _hover={{ opacity: 1, bg: "whiteAlpha.200" }}
+                  onClick={onClose}
+                />
+              </HStack>
+            </Box>
+
+            {/* Body */}
+            <Dialog.Body px={7} py={6} bg="white">
+              <Text fontSize="13px" color="#64748b" mb={5} lineHeight="1.6">
+                Your market research shows a clear gap. JFS gives you the exact
+                AI-powered tools to fill it — from day one to production.
+              </Text>
+
+              <VStack gap={4} align="stretch">
+                {PLATFORM_FEATURES.map(({ icon: Icon, title, description }) => (
+                  <HStack key={title} gap={4} align="start">
+                    <Box
+                      w="38px"
+                      h="38px"
+                      borderRadius="10px"
+                      bg="linear-gradient(135deg, #ede9fe, #ddd6fe)"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                      color="#7c3aed"
+                    >
+                      <Icon size={17} strokeWidth={2} />
+                    </Box>
+                    <Box>
+                      <Text fontSize="13px" fontWeight="700" color="#0f172a" mb={0.5}>
+                        {title}
+                      </Text>
+                      <Text fontSize="12px" color="#64748b" lineHeight="1.55">
+                        {description}
+                      </Text>
+                    </Box>
+                  </HStack>
+                ))}
+              </VStack>
+            </Dialog.Body>
+
+            {/* Footer */}
+            <Box
+              px={7}
+              py={5}
+              borderTopWidth="1px"
+              borderColor="#f1f5f9"
+              bg="white"
+            >
+              <Button
+                w="full"
+                h="44px"
+                bg="linear-gradient(135deg, #6366f1, #7c3aed)"
+                color="white"
+                fontSize="14px"
+                fontWeight="700"
+                borderRadius="11px"
+                _hover={{ opacity: 0.9 }}
+                mb={2.5}
+              >
+                Get early access →
+              </Button>
+              <Text textAlign="center" fontSize="11px" color="#94a3b8">
+                Free to start · No credit card required
+              </Text>
+            </Box>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Opportunity card
+// ---------------------------------------------------------------------------
+
+const VERDICT_STYLES = {
+  "worth-entering": { borderColor: "#86efac", iconColor: "#16a34a", labelColor: "#15803d", label: "Worth entering this market" },
+  "risky": { borderColor: "#fcd34d", iconColor: "#d97706", labelColor: "#92400e", label: "Risky — proceed with caution" },
+  "crowded": { borderColor: "#fca5a5", iconColor: "#dc2626", labelColor: "#991b1b", label: "Crowded market — tough entry" },
+};
+
+function OpportunityCard({ opportunity, competitorCount, onStartBuilding }) {
+  const verdict = opportunity?.verdict ?? "worth-entering";
+  const styles = VERDICT_STYLES[verdict] ?? VERDICT_STYLES["worth-entering"];
+  const differentiators = opportunity?.differentiators ?? [];
+  const summary = opportunity?.summary ?? "";
+  const confidence = opportunity?.confidence ?? "high";
+
   return (
     <Box
       bg="white"
       borderWidth="1.5px"
-      borderColor="#86efac"
+      borderColor={styles.borderColor}
       borderRadius="14px"
       p={6}
       mb={6}
     >
       {/* Header row */}
       <HStack gap={3} mb={4} align="start">
-        <Box color="#16a34a" flexShrink={0} mt="1px">
+        <Box color={styles.iconColor} flexShrink={0} mt="1px">
           <CheckCircle size={22} strokeWidth={2.5} />
         </Box>
         <Box>
-          <Text fontSize="16px" fontWeight="800" color="#15803d" mb={0.5}>
-            Worth entering this market
+          <Text fontSize="16px" fontWeight="800" color={styles.labelColor} mb={0.5}>
+            {styles.label}
           </Text>
           <Text fontSize="12px" color="#64748b" fontWeight="500">
-            High confidence · Based on 7 competitor analyses
+            {confidence.charAt(0).toUpperCase() + confidence.slice(1)} confidence · Based on {competitorCount ?? 0} competitor {(competitorCount ?? 0) === 1 ? "analysis" : "analyses"}
           </Text>
         </Box>
       </HStack>
 
-      {/* Opportunity summary */}
-      <Box mb={4} pl={9}>
-        <Text fontSize="13px" fontWeight="700" color="#0f172a" mb={1}>
-          Market opportunity identified:
-        </Text>
-        <Text fontSize="13px" color="#374151" lineHeight="1.65">
-          All existing competitors focus heavily on security scanning (CVE
-          detection, dependency vulnerabilities) but lack AI-powered contextual
-          bug fixes and logic error detection. Pricing ranges from
-          $25–$150/dev/month, creating an opening for usage-based or freemium
-          models.
-        </Text>
-      </Box>
+      {summary && (
+        <Box mb={4} pl={9}>
+          <Text fontSize="13px" fontWeight="700" color="#0f172a" mb={1}>
+            Market opportunity identified:
+          </Text>
+          <Text fontSize="13px" color="#374151" lineHeight="1.65">
+            {summary}
+          </Text>
+        </Box>
+      )}
 
-      {/* Differentiators */}
-      <Box pl={9}>
-        <Text fontSize="13px" fontWeight="700" color="#0f172a" mb={2.5}>
-          Key differentiators to pursue:
-        </Text>
-        <VStack align="start" gap={2}>
-          {OPPORTUNITY_DIFFERENTIATORS.map((item) => (
-            <HStack key={item.label} align="start" gap={2.5}>
-              <Text
-                fontSize="13px"
-                color="#16a34a"
-                fontWeight="700"
-                flexShrink={0}
-                mt="1px"
-              >
-                ✓
-              </Text>
-              <Text fontSize="13px" color="#374151" lineHeight="1.55">
-                <Text as="span" fontWeight="700" color="#0f172a">
-                  {item.label}
-                </Text>{" "}
-                —{" "}
-                <Text as="span" color="#4b5563">
-                  {item.detail}
+      {differentiators.length > 0 && (
+        <Box pl={9}>
+          <Text fontSize="13px" fontWeight="700" color="#0f172a" mb={2.5}>
+            Key differentiators to pursue:
+          </Text>
+          <VStack align="start" gap={2}>
+            {differentiators.map((item) => (
+              <HStack key={item.label} align="start" gap={2.5}>
+                <Text
+                  fontSize="13px"
+                  color="#16a34a"
+                  fontWeight="700"
+                  flexShrink={0}
+                  mt="1px"
+                >
+                  ✓
                 </Text>
-              </Text>
-            </HStack>
-          ))}
-        </VStack>
+                <Text fontSize="13px" color="#374151" lineHeight="1.55">
+                  <Text as="span" fontWeight="700" color="#0f172a">
+                    {item.label}
+                  </Text>{" "}
+                  —{" "}
+                  <Text as="span" color="#4b5563">
+                    {item.detail}
+                  </Text>
+                </Text>
+              </HStack>
+            ))}
+          </VStack>
+        </Box>
+      )}
+
+      {/* CTA */}
+      <Box mt={5}>
+        <Button
+          w="full"
+          h="46px"
+          bg="linear-gradient(135deg, #6366f1, #7c3aed)"
+          color="white"
+          fontSize="14px"
+          fontWeight="700"
+          borderRadius="10px"
+          _hover={{ opacity: 0.9 }}
+          onClick={onStartBuilding}
+        >
+          Start building →
+        </Button>
       </Box>
     </Box>
   );
@@ -225,101 +368,11 @@ function OpportunityCard() {
 const TABLE_COLUMNS = [
   { key: "competitor", label: "Competitor", flex: 2.2 },
   { key: "pricing", label: "Pricing", flex: 1.2 },
-  { key: "users", label: "Users", flex: 1 },
-  { key: "aiAutoFix", label: "AI Auto-Fix", flex: 1.2 },
-  { key: "logicBugs", label: "Logic Bugs", flex: 1.2 },
-  { key: "testGen", label: "Test Gen", flex: 1 },
-  { key: "marketPosition", label: "Market Position", flex: 1.3 },
+  { key: "customers", label: "Users", flex: 1 },
+  { key: "tags", label: "Tags", flex: 2 },
 ];
 
-const COMPETITOR_TABLE_META = {
-  snyk: {
-    pricing: "$25/dev/mo",
-    users: "2.5M+",
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "Weak", bg: "#fff7ed", color: "#c2410c" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Leader", bg: "#f0fdf4", color: "#15803d" },
-  },
-  sonarqube: {
-    pricing: "$150/mo team",
-    users: "400K+",
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "Partial", bg: "#fff7ed", color: "#b45309" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Strong", bg: "#f0fdf4", color: "#15803d" },
-  },
-  codeclimate: {
-    pricing: "$16/seat/mo",
-    users: "100K+",
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Niche", bg: "#f8fafc", color: "#475569" },
-  },
-  deepsource: {
-    pricing: "$30/dev/mo",
-    users: "50K+",
-    aiAutoFix: { label: "Basic", bg: "#fefce8", color: "#a16207" },
-    logicBugs: { label: "Partial", bg: "#fff7ed", color: "#b45309" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Growing", bg: "#f0fdfa", color: "#0f766e" },
-  },
-  ghas: {
-    pricing: "$49/user/mo",
-    users: "1.2M+",
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "Weak", bg: "#fff7ed", color: "#c2410c" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Leader", bg: "#f0fdf4", color: "#15803d" },
-  },
-  codescene: {
-    pricing: "$90/dev/mo",
-    users: "20K+",
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "Behavioral", bg: "#f5f3ff", color: "#7c3aed" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Niche", bg: "#f8fafc", color: "#475569" },
-  },
-  qodana: {
-    pricing: "$3.30/user/mo",
-    users: "150K+",
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "Partial", bg: "#fff7ed", color: "#b45309" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "IDE-focused", bg: "#f8fafc", color: "#475569" },
-  },
-};
-
-function StatusBadge({ badge }) {
-  return (
-    <Box
-      display="inline-flex"
-      alignItems="center"
-      justifyContent="center"
-      px={2}
-      py={0.5}
-      borderRadius="5px"
-      fontSize="11px"
-      fontWeight="600"
-      bg={badge.bg}
-      color={badge.color}
-    >
-      {badge.label}
-    </Box>
-  );
-}
-
-function CompetitorTableRow({ competitor }) {
-  const meta = COMPETITOR_TABLE_META[competitor.id] ?? {
-    pricing: competitor.pricing + competitor.pricingPeriod,
-    users: competitor.customers,
-    aiAutoFix: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    logicBugs: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    testGen: { label: "No", bg: "#fef2f2", color: "#dc2626" },
-    marketPosition: { label: "Niche", bg: "#f8fafc", color: "#475569" },
-  };
-
+function CompetitorTableRow({ competitor, onClick }) {
   return (
     <HStack
       px={4}
@@ -328,7 +381,9 @@ function CompetitorTableRow({ competitor }) {
       borderColor="#f1f5f9"
       _last={{ borderBottomWidth: 0 }}
       gap={0}
-      _hover={{ bg: "#fafafa" }}
+      cursor="pointer"
+      onClick={onClick}
+      _hover={{ bg: "#f1f5f9" }}
     >
       {/* Competitor name */}
       <HStack gap={2.5} flex={TABLE_COLUMNS[0].flex} minW={0}>
@@ -355,41 +410,39 @@ function CompetitorTableRow({ competitor }) {
       {/* Pricing */}
       <Box flex={TABLE_COLUMNS[1].flex}>
         <Text fontSize="12px" fontWeight="600" color="#374151">
-          {meta.pricing}
+          {competitor.pricing}{competitor.pricingPeriod}
         </Text>
       </Box>
 
-      {/* Users */}
+      {/* Customers */}
       <Box flex={TABLE_COLUMNS[2].flex}>
         <Text fontSize="12px" fontWeight="600" color="#374151">
-          {meta.users}
+          {competitor.customers}
         </Text>
       </Box>
 
-      {/* AI Auto-Fix */}
-      <Box flex={TABLE_COLUMNS[3].flex}>
-        <StatusBadge badge={meta.aiAutoFix} />
-      </Box>
-
-      {/* Logic Bugs */}
-      <Box flex={TABLE_COLUMNS[4].flex}>
-        <StatusBadge badge={meta.logicBugs} />
-      </Box>
-
-      {/* Test Gen */}
-      <Box flex={TABLE_COLUMNS[5].flex}>
-        <StatusBadge badge={meta.testGen} />
-      </Box>
-
-      {/* Market Position */}
-      <Box flex={TABLE_COLUMNS[6].flex}>
-        <StatusBadge badge={meta.marketPosition} />
-      </Box>
+      {/* Tags */}
+      <HStack flex={TABLE_COLUMNS[3].flex} gap={1} flexWrap="wrap">
+        {(competitor.tags ?? []).slice(0, 3).map((tag) => (
+          <Box
+            key={tag}
+            px={2}
+            py={0.5}
+            borderRadius="5px"
+            fontSize="10px"
+            fontWeight="600"
+            bg="#f1f5f9"
+            color="#475569"
+          >
+            {tag}
+          </Box>
+        ))}
+      </HStack>
     </HStack>
   );
 }
 
-function FullComparisonTable() {
+function FullComparisonTable({ competitors, onSelectCompetitor }) {
   return (
     <Box>
       <Text fontSize="15px" fontWeight="700" color="#0f172a" mb={3}>
@@ -426,8 +479,8 @@ function FullComparisonTable() {
           ))}
         </HStack>
 
-        {MOCK_COMPETITORS.map((c) => (
-          <CompetitorTableRow key={c.id} competitor={c} />
+        {competitors.map((c) => (
+          <CompetitorTableRow key={c.id} competitor={c} onClick={() => onSelectCompetitor(c.id)} />
         ))}
       </Box>
     </Box>
@@ -441,34 +494,47 @@ function FullComparisonTable() {
 export function AnalysisSummaryPage() {
   const idea = useMarketResearchStore((s) => s.idea);
   const resetAnalysis = useMarketResearchStore((s) => s.resetAnalysis);
-  const goToLanding = useMarketResearchStore((s) => s.goToLanding);
+  const competitors = useMarketResearchStore((s) => s.competitors);
+  const report = useMarketResearchStore((s) => s.report);
+  const selectedCompetitorId = useMarketResearchStore((s) => s.selectedCompetitorId);
+  const selectCompetitor = useMarketResearchStore((s) => s.selectCompetitor);
+  const clearSelectedCompetitor = useMarketResearchStore((s) => s.clearSelectedCompetitor);
+  const [buildingModalOpen, setBuildingModalOpen] = useState(false);
+
+  const selectedCompetitor =
+    competitors.find((c) => c.id === selectedCompetitorId) ?? null;
+
+  if (selectedCompetitor) {
+    return (
+      <Box minH="100vh" bg="#f8fafc">
+        <Box maxW="1040px" mx="auto" px={6} pt="72px" pb={16}>
+          <CompetitorDetails
+            competitor={selectedCompetitor}
+            onBack={clearSelectedCompetitor}
+          />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box minH="100vh" bg="#f8fafc">
       <Box maxW="1040px" mx="auto" px={6} pt="72px" pb={16}>
         {/* Hero banner */}
-        <HeroBanner idea={idea} />
+        <HeroBanner idea={idea} competitorCount={competitors.length} />
 
         {/* Opportunity verdict card */}
-        <OpportunityCard />
+        <OpportunityCard
+          opportunity={report?.opportunity}
+          competitorCount={competitors.length}
+          onStartBuilding={() => setBuildingModalOpen(true)}
+        />
 
         {/* Full competitive landscape table */}
-        <FullComparisonTable />
+        <FullComparisonTable competitors={competitors} onSelectCompetitor={selectCompetitor} />
 
         {/* Action buttons */}
         <HStack justify="center" gap={3} flexWrap="wrap" mt={10}>
-          <Button
-            bg="linear-gradient(135deg, #6366f1, #7c3aed)"
-            color="white"
-            fontSize="13px"
-            fontWeight="700"
-            borderRadius="9px"
-            px={5}
-            h="38px"
-            _hover={{ opacity: 0.9 }}
-          >
-            Start building →
-          </Button>
           <Button
             variant="outline"
             fontSize="13px"
@@ -497,6 +563,11 @@ export function AnalysisSummaryPage() {
             Run new analysis
           </Button>
         </HStack>
+
+        <StartBuildingModal
+          open={buildingModalOpen}
+          onClose={() => setBuildingModalOpen(false)}
+        />
       </Box>
     </Box>
   );

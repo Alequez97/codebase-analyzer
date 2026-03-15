@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260315T203235-cfc05e",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-15T20:32:35.840Z",
+  "params": {
+    "sessionId": "eafe9dbe-6a9f-43cd-8ce5-6abda201e375",
+    "competitorId": "finout",
+    "competitorName": "Finout",
+    "competitorUrl": "https://www.finout.io/",
+    "competitorDescription": "FinOps platform for multi-cloud and Kubernetes cost allocation, budgeting, and unit-cost tracking.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Finout\nWebsite: https://www.finout.io/\nDescription: FinOps platform for multi-cloud and Kubernetes cost allocation, budgeting, and unit-cost tracking.\nSession ID: eafe9dbe-6a9f-43cd-8ce5-6abda201e375\nCompetitor ID: finout\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260315T203128-5c436a"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 30,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/eafe9dbe-6a9f-43cd-8ce5-6abda201e375/competitors/finout.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260315T203235-cfc05e.md",
+  "logFile": "logs/market-research-competitor-20260315T203235-cfc05e.log",
+  "startedAt": "2026-03-15T20:32:37.823Z",
+  "completedAt": "2026-03-15T20:33:38.036Z"
+}

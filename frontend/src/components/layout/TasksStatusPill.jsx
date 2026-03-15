@@ -40,6 +40,8 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
   [TASK_TYPES.CUSTOM_CODEBASE_TASK]: "Custom Task",
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
+  [TASK_TYPES.MARKET_RESEARCH_INITIAL]: "Market Research",
+  [TASK_TYPES.MARKET_RESEARCH_COMPETITOR]: "Competitor Research",
 };
 
 function taskLabel(type) {

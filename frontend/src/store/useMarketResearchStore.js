@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import {
-  MOCK_COMPETITORS,
-  SIMULATION_EVENTS,
-} from "../components/market-research/constants";
+  requestMarketResearchAnalysis,
+  getMarketResearchReport,
+} from "../api/market-research";
 import { useProfileStore } from "./useProfileStore";
 
 // ---------------------------------------------------------------------------
@@ -36,59 +36,30 @@ function clearSessionId() {
 }
 
 // ---------------------------------------------------------------------------
-// Module-level timer handles — not reactive state, just cancellation tokens
+// Parse a raw log line from the backend into an activity event kind
 // ---------------------------------------------------------------------------
-let simulationTimers = [];
-
-function cancelSimulation() {
-  simulationTimers.forEach(clearTimeout);
-  simulationTimers = [];
+function logLineToKind(log) {
+  const lower = log.toLowerCase();
+  if (lower.includes("write_file") || lower.includes("writing")) return "write";
+  if (
+    lower.includes("read_file") ||
+    lower.includes("reading") ||
+    lower.includes("extract")
+  )
+    return "extract";
+  if (lower.includes("navigate") || lower.includes("visiting"))
+    return "navigate";
+  if (lower.includes("found") || lower.includes("identified")) return "found";
+  return "search";
 }
 
-function applySimulationEvent(eventType, data) {
-  const store = useMarketResearchStore.getState();
-
-  switch (eventType) {
-    case "activity":
-      store._addActivityEvent({
-        id: `${Date.now()}-${Math.random()}`,
-        ...data.payload,
-        timestamp: Date.now(),
-      });
-      break;
-
-    case "add_competitors":
-      store._setCompetitors(
-        MOCK_COMPETITORS.map((c) => ({ ...c, status: "queued" })),
-      );
-      break;
-
-    case "competitor_status":
-      store._updateCompetitorStatus(data.id, data.status);
-      break;
-
-    case "analysis_complete":
-      store._markAnalysisComplete();
-      break;
-
-    default:
-      break;
-  }
-}
-
-function runSimulation() {
-  cancelSimulation();
-
-  simulationTimers = SIMULATION_EVENTS.map(({ delay, type, ...rest }) =>
-    setTimeout(() => applySimulationEvent(type, rest), delay),
-  );
-}
+export { logLineToKind };
 
 // ---------------------------------------------------------------------------
 // Store
 // ---------------------------------------------------------------------------
 
-export const useMarketResearchStore = create((set) => ({
+export const useMarketResearchStore = create((set, get) => ({
   // --- Navigation ---
   step: "landing", // "landing" | "input" | "analysis" | "summary" | "profile"
 
@@ -104,14 +75,12 @@ export const useMarketResearchStore = create((set) => ({
   competitors: [],
   activityEvents: [],
   selectedCompetitorId: null,
+  report: null,
 
   // --- Navigation actions ---
   setStep: (step) => set({ step }),
 
-  goToLanding: () => {
-    cancelSimulation();
-    set({ step: "landing", idea: "" });
-  },
+  goToLanding: () => set({ step: "landing", idea: "" }),
 
   goToInput: () => set({ step: "input" }),
 
@@ -120,10 +89,11 @@ export const useMarketResearchStore = create((set) => ({
   setBillingMode: (mode) => set({ billingMode: mode }),
 
   // --- Analysis actions ---
-  startAnalysis: () => {
-    cancelSimulation();
+  startAnalysis: async () => {
+    const { idea } = get();
     const sessionId = crypto.randomUUID();
     saveSessionId(sessionId);
+
     set({
       step: "analysis",
       sessionId,
@@ -132,12 +102,18 @@ export const useMarketResearchStore = create((set) => ({
       competitors: [],
       activityEvents: [],
       analysisStartedAt: Date.now(),
+      report: null,
     });
-    runSimulation();
+
+    try {
+      await requestMarketResearchAnalysis(sessionId, idea);
+    } catch {
+      // Task queue failed — mark as complete with empty state so UI isn't stuck
+      set({ isAnalyzing: false, isAnalysisComplete: true });
+    }
   },
 
   resetAnalysis: () => {
-    cancelSimulation();
     clearSessionId();
     set({
       step: "input",
@@ -148,13 +124,14 @@ export const useMarketResearchStore = create((set) => ({
       activityEvents: [],
       analysisStartedAt: null,
       selectedCompetitorId: null,
+      report: null,
     });
   },
 
   selectCompetitor: (id) => set({ selectedCompetitorId: id }),
   clearSelectedCompetitor: () => set({ selectedCompetitorId: null }),
 
-  // --- Internal mutation helpers (called by simulation only) ---
+  // --- Internal mutation helpers ---
   _addActivityEvent: (event) =>
     set((state) => ({
       activityEvents: [...state.activityEvents, event],
@@ -168,6 +145,28 @@ export const useMarketResearchStore = create((set) => ({
         c.id === id ? { ...c, status } : c,
       ),
     })),
+
+  _applyReport: (report) => {
+    const competitors = (report?.competitors || []).map((c) => ({
+      ...c,
+      status: "done",
+    }));
+
+    set((state) => {
+      useProfileStore.getState().addAnalysis({
+        id: state.sessionId ?? crypto.randomUUID(),
+        idea: state.idea,
+        completedAt: Date.now(),
+        competitorCount: competitors.length,
+      });
+      return {
+        report,
+        competitors,
+        isAnalyzing: false,
+        isAnalysisComplete: true,
+      };
+    });
+  },
 
   _markAnalysisComplete: () =>
     set((state) => {

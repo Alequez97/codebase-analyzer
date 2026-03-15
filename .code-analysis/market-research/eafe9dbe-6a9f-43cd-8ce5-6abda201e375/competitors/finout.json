@@ -1,0 +1,113 @@
+{
+  "id": "finout",
+  "name": "Finout",
+  "url": "https://www.finout.io/",
+  "description": "Enterprise FinOps platform for multi-cloud and Kubernetes cost allocation, budgeting, and unit-economic tracking targeted at engineering and finance teams.",
+  "logoChar": "F",
+  "logoColor": "#6C5CE9",
+  "logoBg": "#F3F5FF",
+  "tags": ["FinOps", "Cloud cost management", "Multi-cloud", "Kubernetes"],
+  "pricing": "Custom",
+  "pricingPeriod": "/yr",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2021",
+    "country": "Israel",
+    "funding": "$85M",
+    "employees": "~100+",
+    "business": "B2B SaaS",
+    "targetMarket": "Mid‑to‑large cloud-native engineering and finance/FinOps teams in enterprises and high-growth companies",
+    "features": [
+      {
+        "category": "Core cost visibility",
+        "items": [
+          "MegaBill: consolidated, normalized bill across AWS, GCP, Azure, Kubernetes and SaaS",
+          "100% cost allocation and shared-cost reallocation",
+          "Virtual Tags (VTags) and AI-powered automated tagging",
+          "Data enrichments to map cloud billing units to engineering concepts"
+        ]
+      },
+      {
+        "category": "FinOps & financial planning",
+        "items": [
+          "Financial Plans: budgeting, forecasting and commitment burndown tracking",
+          "Unit economics (automatic and custom UEs) including cost-per-customer and cost-per-feature",
+          "Saved views, reporting, and shareable dashboards for stakeholders"
+        ]
+      },
+      {
+        "category": "Governance & alerting",
+        "items": [
+          "Anomaly detection and alerts (Slack/Email/Teams)",
+          "Policy-based budget alerts and role-based dashboards",
+          "SAML/SSO and enterprise support channels"
+        ]
+      },
+      {
+        "category": "Optimization & integrations",
+        "items": [
+          "CostGuard and CostOptimizer: automated recommendations for rightsizing, commitments, and idle resources",
+          "Kubernetes cost integration (Prometheus/Datadog support) and container allocation",
+          "Integrations with Datadog, Snowflake, Databricks, OpenAI/Anthropic and many cloud providers"
+        ]
+      },
+      {
+        "category": "Platform & API",
+        "items": [
+          "Cost API for querying user-defined Finout views",
+          "Custom cost inputs for non-integrated vendors",
+          "Shareable links and in-app collaboration features"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Automated remediation (e.g., automatic rightsizing or auto-purchasing commitments) — Finout focuses on visibility and recommendations rather than enacting changes",
+      "End-to-end automated commitment/RI/Savings Plan purchasing workflows (buying/renewals) — more tooling-oriented competitors offer automation",
+      "Built-in chargeback/invoicing export tailored for internal billing teams (beyond reporting) — limited public info on billing exports",
+      "Packaged, prescriptive optimization playbooks and marketplace for one-click runbooks — would speed time-to-value for customers",
+      "Deeper workload-level cost-vs-performance simulation (e.g., tradeoff modeling for performance vs cost across configurations)"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Business",
+        "price": "Custom",
+        "period": "/yr",
+        "note": "Flat-fee yearly pricing based on committed/forecasted cloud spend; supports ~2 cost centers and core features (MegaBill, VTags, basic FinOps features). Request a quote.",
+        "highlight": false
+      },
+      {
+        "name": "Pro",
+        "price": "Custom",
+        "period": "/yr",
+        "note": "Tier for larger teams with more cost centers (3+), extended retention, and advanced FinOps features (unit economics, CostGuard). Request a quote.",
+        "highlight": true
+      },
+      {
+        "name": "Enterprise",
+        "price": "Request a quote",
+        "period": "",
+        "note": "Unlimited cost centers, enterprise SLAs, advanced governance, dedicated support and onboarding. Custom enterprise contract.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://docs.finout.io",
+      "pricing": "https://www.finout.io/pricing",
+      "blog": "https://www.finout.io/blog",
+      "jobs": "https://www.finout.io/careers"
+    },
+    "strengths": [
+      "Strong multi-cloud and Kubernetes coverage with accurate cost allocation (virtual tags / MegaBill)",
+      "Enterprise FinOps feature set: budgeting, forecasting, unit economics and shared-cost allocation",
+      "Predictable flat-fee pricing model (yearly, spend‑based) that appeals to finance teams",
+      "Well-funded ($85M) with notable enterprise customers (Lyft, The New York Times, Choice Hotels, etc.)"
+    ],
+    "weaknesses": [
+      "Pricing is not transparent on the site — customers must request a quote, which slows evaluation for SMBs",
+      "Emphasis on visibility and recommendations over automated remediation/action",
+      "May be over-featured/complex for small teams or startups that need lightweight, low-touch tools",
+      "Less public detail on chargeback/invoicing and automated commitment purchasing compared with some competitors"
+    ]
+  }
+}

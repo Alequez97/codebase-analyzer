@@ -16,6 +16,8 @@ import { useLogsStore } from "./useLogsStore";
 import { useRefactoringAndTestingStore } from "./useRefactoringAndTestingStore";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 import { useAgentChatStore } from "./useAgentChatStore";
+import { useMarketResearchStore, logLineToKind } from "./useMarketResearchStore";
+import { getMarketResearchReport } from "../api/market-research";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
 function computeTestChanges(oldMissingTests, newMissingTests) {
@@ -189,6 +191,23 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
+        const sessionId = data?.params?.sessionId;
+        const storeSessionId = useMarketResearchStore.getState().sessionId;
+        if (sessionId && sessionId === storeSessionId) {
+          getMarketResearchReport(sessionId)
+            .then((response) => {
+              const report = response?.data?.report;
+              if (report) {
+                useMarketResearchStore.getState()._applyReport(report);
+              } else {
+                useMarketResearchStore.getState()._markAnalysisComplete();
+              }
+            })
+            .catch(() => {
+              useMarketResearchStore.getState()._markAnalysisComplete();
+            });
+        }
       }
     });
 
@@ -318,6 +337,12 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
+        const sessionId = data?.params?.sessionId;
+        const storeSessionId = useMarketResearchStore.getState().sessionId;
+        if (sessionId && sessionId === storeSessionId) {
+          useMarketResearchStore.getState()._markAnalysisComplete();
+        }
       } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
         // Handle custom codebase task failures
         const chatStore = useAgentChatStore.getState();
@@ -413,6 +438,28 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_EDIT_CODEBASE_ANALYSIS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REVIEW_CHANGES, handleLogEvent);
+
+    // Market research log lines → activity feed in market research store
+    const handleMarketResearchLog = (data, agentLabel, agentColor) => {
+      const log = data?.log;
+      if (!log || typeof log !== "string") return;
+      const trimmed = log.trim();
+      if (!trimmed) return;
+      useMarketResearchStore.getState()._addActivityEvent({
+        id: `log-${Date.now()}-${Math.random()}`,
+        kind: logLineToKind(trimmed),
+        message: trimmed.replace(/^[⚡🔍]\s*/, ""),
+        agent: agentLabel,
+        agentColor,
+        timestamp: Date.now(),
+      });
+    };
+    socket.on(SOCKET_EVENTS.LOG_MARKET_RESEARCH_INITIAL, (data) =>
+      handleMarketResearchLog(data, "Initial", "#6366f1"),
+    );
+    socket.on(SOCKET_EVENTS.LOG_MARKET_RESEARCH_COMPETITOR, (data) =>
+      handleMarketResearchLog(data, "Competitor", "#d97706"),
+    );
 
     // ── Custom codebase task events (floating agent chat) ───────────────────
 
