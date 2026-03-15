@@ -1,5 +1,5 @@
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
+import { emitTaskProgress } from "../../utils/socket-emitter.js";
 import * as logger from "../../utils/logger.js";
 import * as codebaseAnalysisPersistence from "../../persistence/codebase-analysis.js";
 
@@ -22,9 +22,7 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
     initialMessage,
 
     onStart: () => {
-      taskLogger.info("📝 Editing codebase analysis structure…", {
-        component: "EditCodebaseAnalysis",
-      });
+      taskLogger.info("📝 Editing codebase analysis structure…");
       emitTaskProgress(
         task,
         PROGRESS_STAGES.PROCESSING,
@@ -34,9 +32,7 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
 
     onProgress: (progress) => {
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`, {
-          component: "EditCodebaseAnalysis",
-        });
+        taskLogger.info(`  ⚡ ${progress.message}`);
         emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
         return;
       }
@@ -53,17 +49,12 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
         phase === "complete"
           ? `Compaction complete. Tokens after: ~${tokensAfter}`
           : "Compacting context…";
-      taskLogger.info(`🗜️  ${msg}`, { component: "EditCodebaseAnalysis" });
+      taskLogger.info(`🗜️  ${msg}`);
       emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
     },
 
     onToolCall: (toolName, args, result) => {
-      emitTaskLog(task, {
-        taskId,
-        type: task.type,
-        stream: "stdout",
-        log: `[${toolName}] ${result?.slice?.(0, 200) ?? ""}`,
-      });
+      taskLogger.log(`[${toolName}] ${result?.slice?.(0, 200) ?? ""}`);
     },
 
     onComplete: async () => {
@@ -79,7 +70,6 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
       }
 
       logger.info("✅ Codebase analysis structure updated", {
-        component: "EditCodebaseAnalysis",
         taskId,
       });
 

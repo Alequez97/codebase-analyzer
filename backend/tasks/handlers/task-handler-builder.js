@@ -87,9 +87,7 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     task.type === TASK_TYPES.APPLY_REFACTORING
   ) {
     fileToolExecutor.setAllowAnyWrite(true);
-    taskLogger.info(`🔓 Full project write access granted (${task.type})`, {
-      component: "TaskHandler",
-    });
+    taskLogger.info(`🔓 Full project write access granted (${task.type})`);
     return;
   }
 
@@ -105,9 +103,7 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
       task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK
         ? "read+write"
         : "read-only";
-    taskLogger.info(`🔓 Full project ${access} access granted (${task.type})`, {
-      component: "TaskHandler",
-    });
+    taskLogger.info(`🔓 Full project ${access} access granted (${task.type})`);
     return;
   }
 
@@ -122,12 +118,10 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   if (allowedPaths.length > 0) {
     taskLogger.info(
       `🔓 Write access restricted to output file only (edit task): ${allowedPaths.join(", ")}`,
-      { component: "TaskHandler" },
     );
   } else {
     taskLogger.info(
       `🔒 No explicit write paths set — analysis task writes only to .code-analysis/ (enforced by write gate)`,
-      { component: "TaskHandler" },
     );
   }
 }
@@ -175,9 +169,7 @@ function enableGitCommandsIfUseful(agent, task, taskLogger) {
     ],
   });
 
-  taskLogger.info("🔧 Git command tools enabled", {
-    component: "TaskHandler",
-  });
+  taskLogger.info("🔧 Git command tools enabled");
 }
 
 export async function createTaskHandler(task, taskLogger, agent) {
@@ -193,9 +185,7 @@ export async function createTaskHandler(task, taskLogger, agent) {
 
   // Load task-specific system instructions
   const instructions = await loadSystemInstructionForTask(task);
-  taskLogger.info(`📝 Instructions loaded (${instructions.length} chars)`, {
-    component: "TaskHandler",
-  });
+  taskLogger.info(`📝 Instructions loaded (${instructions.length} chars)`);
 
   // Dump processed instruction to temp folder for debugging
   try {
@@ -209,7 +199,6 @@ export async function createTaskHandler(task, taskLogger, agent) {
   } catch (err) {
     logger.debug("Failed to write instruction dump", {
       error: err.message,
-      component: "TaskHandler",
     });
   }
 
@@ -296,15 +285,11 @@ export async function createTaskHandler(task, taskLogger, agent) {
   } else if (task.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
     if (agent && config.apiKeys.braveSearch) {
       agent.enableWebSearchTools(config.apiKeys.braveSearch);
-      taskLogger.info("🔍 Web search tools enabled", {
-        component: "TaskHandler",
-      });
+      taskLogger.info("🔍 Web search tools enabled");
     }
     if (agent) {
       agent.enableWebFetchTools();
-      taskLogger.info("🌐 Web fetch tools enabled", {
-        component: "TaskHandler",
-      });
+      taskLogger.info("🌐 Web fetch tools enabled");
     }
     overrides = marketResearchCompetitorHandler(task, taskLogger);
   }

@@ -76,6 +76,8 @@ export const useMarketResearchStore = create((set, get) => ({
   activityEvents: [],
   selectedCompetitorId: null,
   report: null,
+  // Maps taskId → competitorId so progress events can identify which competitor is running
+  competitorTaskMap: {},
 
   // --- Navigation actions ---
   setStep: (step) => set({ step }),
@@ -138,6 +140,26 @@ export const useMarketResearchStore = create((set, get) => ({
     })),
 
   _setCompetitors: (competitors) => set({ competitors }),
+
+  _addCompetitorStub: ({ taskId, competitorId, competitorName, competitorUrl }) =>
+    set((state) => {
+      if (state.competitors.some((c) => c.id === competitorId)) return state;
+      return {
+        competitors: [
+          ...state.competitors,
+          {
+            id: competitorId,
+            name: competitorName,
+            url: competitorUrl,
+            status: "queued",
+            logoChar: competitorName?.[0]?.toUpperCase() ?? "?",
+            logoColor: "#6366f1",
+            logoBg: "#eef2ff",
+          },
+        ],
+        competitorTaskMap: { ...state.competitorTaskMap, [taskId]: competitorId },
+      };
+    }),
 
   _updateCompetitorStatus: (id, status) =>
     set((state) => ({

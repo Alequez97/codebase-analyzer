@@ -47,11 +47,21 @@ export function isSocketReady() {
 }
 
 /**
- * Emit a task log event using task type -> socket event mapping
+ * Emit a task log event using task type -> socket event mapping.
+ *
+ * Pass `publicLogText` to broadcast a client-friendly message to connected clients.
+ * The internal `log` message is always server-side only.
+ * Pass `kind` to classify the activity type for the client UI
+ * (e.g. "search", "navigate", "write", "extract", "found").
+ *
  * @param {Object} task - Task object with id, type, and params
- * @param {Object} payload - Additional payload fields (e.g. log, stream)
+ * @param {Object} payload - { log, publicLogText, kind }
  */
 export function emitTaskLog(task, payload = {}) {
+  const { publicLogText, kind } = payload;
+
+  if (!publicLogText) return;
+
   const logEventResult = getLogEventForTaskType(task.type);
   if (!logEventResult.success) {
     logger.warn(logEventResult.error, {
@@ -67,8 +77,8 @@ export function emitTaskLog(task, payload = {}) {
     taskId: task.id,
     domainId: task.params?.domainId,
     type: task.type,
-    stream: "stdout",
-    ...payload,
+    log: publicLogText,
+    kind: kind ?? "info",
   });
 }
 
@@ -86,9 +96,5 @@ export function emitTaskProgress(task, stage, message) {
     type: task.type,
     stage,
     message,
-  });
-
-  emitTaskLog(task, {
-    log: `[${String(stage || "").toUpperCase()}] ${message}\n`,
   });
 }

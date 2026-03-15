@@ -3,7 +3,7 @@ import path from "path";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { TASK_STATUS } from "../../constants/task-status.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
-import { emitTaskLog, emitTaskProgress, emitSocketEvent } from "../../utils/socket-emitter.js";
+import { emitTaskProgress, emitSocketEvent } from "../../utils/socket-emitter.js";
 import * as tasksPersistence from "../../persistence/tasks.js";
 import config from "../../config.js";
 import * as logger from "../../utils/logger.js";
@@ -44,7 +44,6 @@ export function marketResearchInitialHandler(task, taskLogger) {
         competitorTasks = JSON.parse(raw);
       } catch {
         logger.warn("Could not read competitor-tasks.json — skipping report assembly", {
-          component: "MarketResearchInitial",
           sessionId,
           taskId: task.id,
         });
@@ -53,16 +52,13 @@ export function marketResearchInitialHandler(task, taskLogger) {
 
       if (!Array.isArray(competitorTasks) || competitorTasks.length === 0) {
         logger.warn("competitor-tasks.json is empty or invalid — skipping report assembly", {
-          component: "MarketResearchInitial",
           sessionId,
           taskId: task.id,
         });
         return;
       }
 
-      taskLogger.info(`Waiting for ${competitorTasks.length} competitor task(s) to complete…`, {
-        component: "MarketResearchInitial",
-      });
+      taskLogger.info(`Waiting for ${competitorTasks.length} competitor task(s) to complete…`);
 
       // Poll until all competitor tasks are completed or failed
       const deadline = Date.now() + TIMEOUT_MS;
@@ -81,14 +77,11 @@ export function marketResearchInitialHandler(task, taskLogger) {
           }
         }
 
-        taskLogger.info(`Waiting for competitor tasks: ${pending.size} remaining`, {
-          component: "MarketResearchInitial",
-        });
+        taskLogger.info(`Waiting for competitor tasks: ${pending.size} remaining`);
       }
 
       if (pending.size > 0) {
         logger.warn(`Timed out waiting for ${pending.size} competitor task(s)`, {
-          component: "MarketResearchInitial",
           sessionId,
           taskId: task.id,
           pendingTaskIds: [...pending],
@@ -110,7 +103,6 @@ export function marketResearchInitialHandler(task, taskLogger) {
           competitorResults.push(JSON.parse(raw));
         } catch {
           logger.warn(`Could not read competitor output for ${competitorId}`, {
-            component: "MarketResearchInitial",
             sessionId,
             competitorId,
           });
@@ -131,7 +123,6 @@ export function marketResearchInitialHandler(task, taskLogger) {
         report = JSON.parse(raw);
       } catch {
         logger.warn("Could not read stub report.json — skipping report assembly", {
-          component: "MarketResearchInitial",
           sessionId,
           taskId: task.id,
         });
@@ -161,7 +152,6 @@ export function marketResearchInitialHandler(task, taskLogger) {
       await fs.writeFile(reportPath, JSON.stringify(report, null, 2), "utf-8");
 
       logger.info("Market research report assembled and written", {
-        component: "MarketResearchInitial",
         sessionId,
         taskId: task.id,
         competitorCount: report.competitors.length,
@@ -174,7 +164,6 @@ export function marketResearchInitialHandler(task, taskLogger) {
       });
     } catch (err) {
       logger.error("Failed to assemble market research report", {
-        component: "MarketResearchInitial",
         sessionId,
         taskId: task.id,
         error: err.message,
@@ -244,16 +233,14 @@ function _buildHandler(
     initialMessage,
 
     onStart: () => {
-      taskLogger.info(`🔍 ${startMessage}`, { component: componentName });
+      taskLogger.info(`🔍 ${startMessage}`);
       emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, startMessage);
     },
 
     onProgress: (progress) => {
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`, {
-          component: componentName,
-        });
-        emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
+        // Internal tool execution — log to file only, not to client
+        taskLogger.info(`  ⚡ ${progress.message}`);
         return;
       }
       if (progress.stage) {
@@ -263,48 +250,48 @@ function _buildHandler(
 
     onCompaction: (phase, tokensAfter) => {
       if (phase === "start") {
-        taskLogger.info("🗜️  Compacting chat history…", {
-          component: componentName,
-        });
+        taskLogger.info("🗜️  Compacting chat history…");
         emitTaskProgress(
           task,
           PROGRESS_STAGES.COMPACTING,
           "Compacting chat history…",
         );
-        emitTaskLog(task, {
-          log: `\n🗜️  [Compacting] Summarizing conversation…\n`,
-        });
+        taskLogger.log(`\n🗜️  [Compacting] Summarizing conversation…\n`);
       } else if (phase === "complete") {
         taskLogger.info(
           `🗜️  Compaction complete. Tokens after: ~${tokensAfter}`,
-          {
-            component: componentName,
-          },
         );
-        emitTaskLog(task, {
-          log: `🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`,
-        });
+        taskLogger.log(`🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`);
       }
     },
 
     onIteration: (iteration, response) => {
       taskLogger.info(
         `  Iteration ${iteration}: ${response?.stop_reason || "in progress"}`,
-        {
-          component: componentName,
-        },
       );
     },
 
     onToolCall: (toolName, toolInput) => {
-      let detail = toolInput?.path || toolInput?.query || toolInput?.url || "";
-      const msg = detail ? `${toolName}: ${detail}` : toolName;
-      emitTaskLog(task, { log: `⚡ ${msg}\n` });
+      if (toolName === "web_search") {
+        const query = toolInput?.query || "";
+        taskLogger.log(`web_search: ${query}`, {
+          publicLogText: `Searching: ${query}`,
+          kind: "search",
+        });
+      } else if (toolName === "fetch_url") {
+        const url = toolInput?.url || "";
+        taskLogger.log(`fetch_url: ${url}`, {
+          publicLogText: `Visiting: ${url}`,
+          kind: "navigate",
+        });
+      } else {
+        taskLogger.log(`${toolName}`);
+      }
     },
 
     onMessage: (message) => {
       if (message) {
-        emitTaskLog(task, { log: `${message}\n` });
+        taskLogger.log(message);
       }
     },
 

@@ -109,12 +109,13 @@ export const useSocketStore = create((set, get) => ({
 
     // Task queued event — fires for every task regardless of who triggered it
     socket.on(SOCKET_EVENTS.TASK_QUEUED, (data) => {
-      const { taskId, type, domainId, delegatedByTaskId } = data;
+      const { taskId, type, domainId, delegatedByTaskId, competitorName } = data;
       if (taskId) {
         useTaskProgressStore.getState().setPending(taskId, {
           domainId,
           type,
           delegatedByTaskId,
+          competitorName,
         });
       }
     });
@@ -191,6 +192,12 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
+        const mrStore = useMarketResearchStore.getState();
+        const competitorId = mrStore.competitorTaskMap[taskId];
+        if (competitorId) {
+          mrStore._updateCompetitorStatus(competitorId, "done");
+        }
       } else if (type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
         const sessionId = data?.params?.sessionId;
         const storeSessionId = useMarketResearchStore.getState().sessionId;
@@ -223,6 +230,24 @@ export const useSocketStore = create((set, get) => ({
         stage,
         message,
       });
+
+      if (type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
+        const mrStore = useMarketResearchStore.getState();
+        const competitorId = mrStore.competitorTaskMap[taskId];
+        if (competitorId) {
+          mrStore._updateCompetitorStatus(competitorId, "analyzing");
+          if (message) {
+            mrStore._addActivityEvent({
+              id: `progress-${taskId}-${Date.now()}`,
+              kind: "search",
+              message,
+              agent: "Competitor",
+              agentColor: "#d97706",
+              timestamp: Date.now(),
+            });
+          }
+        }
+      }
 
       if (domainId) {
         // Ensure loading state remains true during progress
@@ -439,16 +464,25 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REVIEW_CHANGES, handleLogEvent);
 
+    // Competitor found — add skeleton card immediately
+    socket.on(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_FOUND, (data) => {
+      const { sessionId, taskId, competitorId, competitorName, competitorUrl } = data;
+      const storeSessionId = useMarketResearchStore.getState().sessionId;
+      if (sessionId && sessionId === storeSessionId) {
+        useMarketResearchStore.getState()._addCompetitorStub({ taskId, competitorId, competitorName, competitorUrl });
+      }
+    });
+
     // Market research log lines → activity feed in market research store
     const handleMarketResearchLog = (data, agentLabel, agentColor) => {
-      const log = data?.log;
+      const { log, kind } = data ?? {};
       if (!log || typeof log !== "string") return;
       const trimmed = log.trim();
       if (!trimmed) return;
       useMarketResearchStore.getState()._addActivityEvent({
         id: `log-${Date.now()}-${Math.random()}`,
-        kind: logLineToKind(trimmed),
-        message: trimmed.replace(/^[⚡🔍]\s*/, ""),
+        kind: kind ?? logLineToKind(trimmed),
+        message: trimmed,
         agent: agentLabel,
         agentColor,
         timestamp: Date.now(),

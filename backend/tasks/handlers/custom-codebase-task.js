@@ -27,15 +27,10 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
       ensureProgressDirectory(taskId).catch((err) =>
         taskLogger.warn(
           `Failed to prepare progress directory: ${err.message}`,
-          {
-            component: "CustomCodebaseTask",
-          },
         ),
       );
 
-      taskLogger.info("🤔 AI is thinking...", {
-        component: "CustomCodebaseTask",
-      });
+      taskLogger.info("🤔 AI is thinking...");
 
       emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_THINKING, {
         taskId,
@@ -49,9 +44,7 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
 
     onProgress: (progress) => {
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`, {
-          component: "CustomCodebaseTask",
-        });
+        taskLogger.info(`  ⚡ ${progress.message}`);
         emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
         return;
       }
@@ -75,7 +68,7 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         phase === "complete"
           ? `Compaction complete. Tokens after: ~${tokensAfter}`
           : "Compacting chat history…";
-      taskLogger.info(`🗜️  ${msg}`, { component: "CustomCodebaseTask" });
+      taskLogger.info(`🗜️  ${msg}`);
       emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
     },
 
@@ -84,7 +77,6 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         messageCount++;
 
         taskLogger.info(`📨 AI message #${messageCount}`, {
-          component: "CustomCodebaseTask",
           contentLength: content.length,
         });
 
@@ -101,9 +93,7 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         // Persist to chat history
         await appendChatMessage(taskId, { role: "assistant", content }).catch(
           (err) =>
-            taskLogger.warn(`Failed to save chat message: ${err.message}`, {
-              component: "CustomCodebaseTask",
-            }),
+            taskLogger.warn(`Failed to save chat message: ${err.message}`),
         );
       }
     },
@@ -130,7 +120,6 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         });
 
         taskLogger.info(`📝 File updated: ${args.path}`, {
-          component: "CustomCodebaseTask",
           toolName,
         });
       }
@@ -143,7 +132,6 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
       taskLogger.info(
         `✅ Custom task complete after ${result.iterations} iterations`,
         {
-          component: "CustomCodebaseTask",
           stopReason: result.stopReason,
         },
       );

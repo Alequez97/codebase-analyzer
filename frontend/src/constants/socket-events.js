@@ -68,4 +68,7 @@ export const SOCKET_EVENTS = {
 
   // Market research final report assembled — carries sessionId + taskId
   MARKET_RESEARCH_REPORT_READY: "market-research:report-ready",
+
+  // Emitted when a competitor sub-task is queued — lets the UI show a skeleton card immediately
+  MARKET_RESEARCH_COMPETITOR_FOUND: "market-research:competitor-found",
 };

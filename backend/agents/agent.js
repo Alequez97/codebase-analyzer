@@ -396,8 +396,8 @@ export class LLMAgent {
         toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
       } else if (toolCall.name === "delegate_task") {
         const delType = toolCall.arguments?.type || "task";
-        const delDomain = toolCall.arguments?.domainId || "unknown";
-        toolDescription = `Delegating ${delType} for domain '${delDomain}'`;
+        const delName = toolCall.arguments?.params?.competitorName || toolCall.arguments?.params?.domainId;
+        toolDescription = delName ? `Delegating ${delType}: ${delName}` : `Delegating ${delType}`;
       }
 
       logger.debug(`Executing tool: ${toolDescription}`, {

@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
+import { emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
  * Default handler for generic analysis tasks
@@ -21,54 +21,32 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
 
     onCompaction: (phase, tokensAfter) => {
       if (phase === "start") {
-        taskLogger.info("🗜️  Compacting chat history...", {
-          component: "LLM-API",
-        });
+        taskLogger.info("🗜️  Compacting chat history...");
         emitTaskProgress(
           task,
           PROGRESS_STAGES.COMPACTING,
           "Compacting chat history...",
         );
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n🗜️  [Compacting] Summarizing conversation...\n`,
-        });
+        taskLogger.log(`\n🗜️  [Compacting] Summarizing conversation...\n`);
       } else if (phase === "complete") {
         taskLogger.info(
           `🗜️  Compaction complete. Tokens after: ~${tokensAfter}`,
-          { component: "LLM-API" },
         );
         emitTaskProgress(
           task,
           PROGRESS_STAGES.COMPACTING,
           `Compaction complete. Tokens after: ~${tokensAfter}`,
         );
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`,
-        });
+        taskLogger.log(`🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`);
       }
     },
 
     onIteration: (iteration, response) => {
       taskLogger.info(
         `📥 [${iteration}/${agent.maxIterations}] Response - ${response.usage.inputTokens} in / ${response.usage.outputTokens} out (${response.stopReason})`,
-        { component: "LLM-API" },
       );
 
-      emitTaskLog(task, {
-        taskId: task.id,
-        domainId: task.params?.domainId,
-        type: task.type,
-        stream: "stdout",
-        log: `\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`,
-      });
+      taskLogger.log(`\n📥 [Response] ${response.toolCalls?.length ? `Tool calls: ${response.toolCalls.length}` : "Text response"} (tokens: ${response.usage.inputTokens}/${response.usage.outputTokens})\n`);
     },
 
     onToolCall: (toolName, args, result, error) => {
@@ -102,19 +80,11 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       const logPrefix = error ? "❌" : "📖";
       const logStatus = error ? `failed: ${error}` : `completed`;
 
-      taskLogger.info(`  ${logPrefix} ${toolDescription}`, {
-        component: "LLM-API",
-      });
+      taskLogger.info(`  ${logPrefix} ${toolDescription}`);
 
       const argsJson = JSON.stringify(args ?? {});
       const argsPreview = argsJson.substring(0, 150);
-      emitTaskLog(task, {
-        taskId: task.id,
-        domainId: task.params?.domainId,
-        type: task.type,
-        stream: "stdout",
-        log: `  ├─ ${logPrefix} ${toolDescription}\n  │  Args: ${argsPreview}${argsJson.length > 150 ? "..." : ""}\n  └─ ${logStatus}\n`,
-      });
+      taskLogger.log(`  ├─ ${logPrefix} ${toolDescription}\n  │  Args: ${argsPreview}${argsJson.length > 150 ? "..." : ""}\n  └─ ${logStatus}\n`);
 
       if (!error) {
         emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, toolDescription);
@@ -128,23 +98,13 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
         response.stopReason === "completed" ||
         response.stopReason === "stop"
       ) {
-        taskLogger.info("✅ Analysis complete", {
-          component: "Analysis",
-        });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✅ [Complete] Analysis finished\n`,
-        });
+        taskLogger.info("✅ Analysis complete");
+        taskLogger.log(`\n✅ [Complete] Analysis finished\n`);
         return false;
       }
 
       if (response.stopReason === "max_tokens" && !response.toolCalls?.length) {
-        taskLogger.warn("⚠️  Max tokens reached, requesting JSON output", {
-          component: "Analysis",
-        });
+        taskLogger.warn("⚠️  Max tokens reached, requesting JSON output");
         agent.addUserMessage(
           "You've hit the token limit. Please output the complete JSON with all analysis.",
         );
@@ -162,16 +122,11 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       try {
         await fs.access(outputPath);
         outputExists = true;
-        taskLogger.info("✅ Output file found", {
-          component: "Analysis",
-        });
+        taskLogger.info("✅ Output file found");
       } catch {
         outputExists = false;
         taskLogger.warn(
           "⚠️  Output file not found, extracting from conversation",
-          {
-            component: "Analysis",
-          },
         );
       }
 
@@ -191,9 +146,7 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
           JSON.stringify(jsonContent, null, 2),
           "utf-8",
         );
-        taskLogger.info("✅ Output file written", {
-          component: "Analysis",
-        });
+        taskLogger.info("✅ Output file written");
       }
 
       return {

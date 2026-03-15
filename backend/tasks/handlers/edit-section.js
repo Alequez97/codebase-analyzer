@@ -46,7 +46,7 @@ export function createEditSectionHandler(
     priorMessages,
 
     onStart: () => {
-      taskLogger.info("🤔 AI is thinking...", { component: componentName });
+      taskLogger.info("🤔 AI is thinking...");
 
       emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
         chatId: task.params.chatId,
@@ -65,7 +65,6 @@ export function createEditSectionHandler(
     onMessage: (role, content) => {
       if (role === "assistant") {
         taskLogger.info(`📨 Sending AI chat message to client`, {
-          component: componentName,
           contentLength: content.length,
         });
 
@@ -84,7 +83,6 @@ export function createEditSectionHandler(
           { role: "assistant", content, chatId: task.params.chatId },
         ).catch((err) => {
           taskLogger.warn(`Failed to persist assistant message`, {
-            component: componentName,
             error: err.message,
           });
         });
@@ -131,7 +129,6 @@ export function createEditSectionHandler(
       });
 
       taskLogger.info(`✅ Updated ${sectionLabel} sent via socket`, {
-        component: componentName,
         contentLength: raw.length,
       });
 

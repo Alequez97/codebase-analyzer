@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
-import { emitTaskLog, emitSocketEvent } from "../../utils/socket-emitter.js";
+import { emitSocketEvent } from "../../utils/socket-emitter.js";
 
 /**
  * Handler for analyze-documentation task
@@ -19,16 +19,8 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
         response.stopReason === "stop_sequence" ||
         response.stopReason === "completed"
       ) {
-        taskLogger.info("✨ Documentation complete!", {
-          component: "AnalyzeDocumentation",
-        });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✨ [Complete] Documentation finished\n`,
-        });
+        taskLogger.info("✨ Documentation complete!");
+        taskLogger.log(`\n✨ [Complete] Documentation finished\n`);
         return false;
       }
 
@@ -59,7 +51,6 @@ export function analyzeDocumentationHandler(task, taskLogger, agent) {
       });
 
       taskLogger.info("✅ Documentation sent via socket", {
-        component: "AnalyzeDocumentation",
         contentLength: content.length,
       });
 

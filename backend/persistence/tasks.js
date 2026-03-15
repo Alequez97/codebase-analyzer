@@ -86,8 +86,20 @@ export async function enqueueTask(task) {
     type: task.type,
     domainId: task.params?.domainId,
     delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
+    competitorName: task.params?.competitorName ?? null,
     timestamp: new Date().toISOString(),
   });
+
+  if (task.type === "market-research-competitor" && task.params?.competitorId) {
+    emitSocketEvent(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_FOUND, {
+      sessionId: task.params.sessionId,
+      taskId: task.id,
+      competitorId: task.params.competitorId,
+      competitorName: task.params.competitorName,
+      competitorUrl: task.params.competitorUrl,
+      competitorDescription: task.params.competitorDescription || "",
+    });
+  }
 }
 
 /**

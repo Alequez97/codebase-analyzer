@@ -3,7 +3,7 @@ import path from "path";
 import config from "../../config.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
-import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
+import { emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
  * Handler for implement-test task
@@ -13,9 +13,7 @@ import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
 export function implementTestHandler(task, taskLogger, agent) {
   if (agent) {
     agent.enableCommandTools({ timeoutMs: 60_000 });
-    taskLogger.info("🔧 Command execution tools enabled (test runner)", {
-      component: "ImplementTest",
-    });
+    taskLogger.info("🔧 Command execution tools enabled (test runner)");
   }
 
   return {
@@ -28,23 +26,13 @@ export function implementTestHandler(task, taskLogger, agent) {
         response.stopReason === "stop_sequence" ||
         response.stopReason === "completed"
       ) {
-        taskLogger.info("✅ Test generation and validation complete", {
-          component: "ImplementTest",
-        });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✅ [Complete] Test written and validated\n`,
-        });
+        taskLogger.info("✅ Test generation and validation complete");
+        taskLogger.log(`\n✅ [Complete] Test written and validated\n`);
         return false;
       }
 
       if (response.stopReason === "max_tokens" && !response.toolCalls?.length) {
-        taskLogger.warn("⚠️  Max tokens reached, requesting test file write", {
-          component: "ImplementTest",
-        });
+        taskLogger.warn("⚠️  Max tokens reached, requesting test file write");
         agent.addUserMessage(
           `You've hit the token limit. Please write the complete test file to ${task.params.testFile} now using the write_file tool.`,
         );
@@ -66,29 +54,15 @@ export function implementTestHandler(task, taskLogger, agent) {
         await fs.access(testFilePath);
         testFileExists = true;
         taskLogger.info("✅ Test file created successfully", {
-          component: "ImplementTest",
           testFile: task.params.testFile,
         });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✅ [Success] Test file created: ${task.params.testFile}\n`,
-        });
+        taskLogger.log(`\n✅ [Success] Test file created: ${task.params.testFile}\n`);
       } catch {
         testFileExists = false;
         taskLogger.error("❌ Test file was not created", {
-          component: "ImplementTest",
           expectedPath: testFilePath,
         });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stderr",
-          log: `\n❌ [Error] Test file was not created at: ${task.params.testFile}\n`,
-        });
+        taskLogger.log(`\n❌ [Error] Test file was not created at: ${task.params.testFile}\n`);
       }
 
       if (!testFileExists) {
@@ -102,7 +76,6 @@ export function implementTestHandler(task, taskLogger, agent) {
       const stats = await fs.stat(testFilePath);
       if (stats.size === 0) {
         taskLogger.error("❌ Test file is empty", {
-          component: "ImplementTest",
           testFile: task.params.testFile,
         });
         return {
@@ -111,9 +84,7 @@ export function implementTestHandler(task, taskLogger, agent) {
         };
       }
 
-      taskLogger.info(`✅ Test file verified (${stats.size} bytes)`, {
-        component: "ImplementTest",
-      });
+      taskLogger.info(`✅ Test file verified (${stats.size} bytes)`);
 
       if (task.params?.domainId && task.params?.testId) {
         try {
@@ -128,7 +99,6 @@ export function implementTestHandler(task, taskLogger, agent) {
         } catch (error) {
           taskLogger.error("Failed to update existing tests list", {
             error,
-            component: "ImplementTest",
             taskId: task.id,
           });
         }
@@ -145,7 +115,6 @@ export function implementTestHandler(task, taskLogger, agent) {
         } catch (error) {
           taskLogger.error("Failed to record completed testing action", {
             error,
-            component: "ImplementTest",
             taskId: task.id,
           });
         }

@@ -59,7 +59,14 @@ export function getLogEventForTaskType(taskType) {
 }
 
 /**
- * Set up task logger and log files
+ * Set up task logger and log files.
+ *
+ * The returned taskLogger includes a `log(message, { publicLogText, kind })` method
+ * for sending log lines to connected clients via socket.
+ * Pass `publicLogText` to broadcast a client-friendly message (can differ from the
+ * internal server-side message). Omit it to keep the log server-side only.
+ * Pass `kind` to classify the activity (e.g. "search", "navigate", "write").
+ *
  * @param {Object} task - The task object
  * @returns {Promise<Object>} Object containing taskLogger, logStream, and logFile path
  */
@@ -71,6 +78,10 @@ export async function setupTaskLogger(task) {
   const fsSync = await import("fs");
   const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
   const taskLogger = logger.createLogger([logStream]);
+
+  taskLogger.log = (message, { publicLogText, kind } = {}) => {
+    emitTaskLog(task, { log: message, publicLogText, kind });
+  };
 
   return { taskLogger, logStream, logFile };
 }
@@ -84,48 +95,30 @@ export function logTaskHeader(taskLogger, task) {
   const agentConfig = task.agentConfig || {};
   taskLogger.raw("=".repeat(80));
   taskLogger.info(`🚀 STARTING ${task.type.toUpperCase()} TASK`, {
-    component: "TaskLogger",
     taskId: task.id,
   });
-  taskLogger.info(`📋 Type:              ${task.type}`, {
-    component: "TaskLogger",
-  });
-  taskLogger.info(`🤖 Agent:             ${agentConfig.agent || "unknown"}`, {
-    component: "TaskLogger",
-  });
-  taskLogger.info(`🧠 Model:             ${agentConfig.model || "unknown"}`, {
-    component: "TaskLogger",
-  });
+  taskLogger.info(`📋 Type:              ${task.type}`);
+  taskLogger.info(`🤖 Agent:             ${agentConfig.agent || "unknown"}`);
+  taskLogger.info(`🧠 Model:             ${agentConfig.model || "unknown"}`);
   if (agentConfig.reasoningEffort) {
-    taskLogger.info(`💭 Reasoning effort:  ${agentConfig.reasoningEffort}`, {
-      component: "TaskLogger",
-    });
+    taskLogger.info(`💭 Reasoning effort:  ${agentConfig.reasoningEffort}`);
   }
   taskLogger.info(
     `🔢 Max tokens:        ${agentConfig.maxTokens ?? "default"}`,
-    { component: "TaskLogger" },
   );
   taskLogger.info(
     `🔁 Max iterations:    ${agentConfig.maxIterations ?? "default"}`,
-    { component: "TaskLogger" },
   );
   if (task.params?.domainId) {
-    taskLogger.info(`🗂️  Domain:            ${task.params.domainId}`, {
-      component: "TaskLogger",
-    });
+    taskLogger.info(`🗂️  Domain:            ${task.params.domainId}`);
   }
   if (Array.isArray(task.params?.files) && task.params.files.length > 0) {
     taskLogger.info(
       `📄 Files (${task.params.files.length}):        ${task.params.files.join(", ")}`,
-      { component: "TaskLogger" },
     );
   }
-  taskLogger.info(`📁 Output:            ${task.outputFile}`, {
-    component: "TaskLogger",
-  });
-  taskLogger.info(`🎯 Target:            ${config.target.directory}`, {
-    component: "TaskLogger",
-  });
+  taskLogger.info(`📁 Output:            ${task.outputFile}`);
+  taskLogger.info(`🎯 Target:            ${config.target.directory}`);
   taskLogger.raw("=".repeat(80));
   taskLogger.raw("");
 }
@@ -141,15 +134,11 @@ export function logTaskSuccess(taskLogger, task, agent) {
   taskLogger.raw("");
   taskLogger.raw("=".repeat(80));
   taskLogger.info(`🎉 TASK COMPLETED SUCCESSFULLY`, {
-    component: "TaskLogger",
     taskId: task.id,
   });
-  taskLogger.info(`🔄 Iterations: ${metadata.iterations}`, {
-    component: "TaskLogger",
-  });
+  taskLogger.info(`🔄 Iterations: ${metadata.iterations}`);
   taskLogger.info(
     `🪙 Tokens: ${metadata.tokenUsage.total.toLocaleString()} (${metadata.tokenUsage.input.toLocaleString()} in / ${metadata.tokenUsage.output.toLocaleString()} out)`,
-    { component: "TaskLogger" },
   );
   taskLogger.raw("=".repeat(80));
 }
@@ -166,16 +155,9 @@ export function logTaskError(taskLogger, task, error) {
   taskLogger.error(`❌ TASK FAILED`, {
     error: error.message,
     stack: error.stack,
-    component: "TaskLogger",
     taskId: task.id,
   });
   taskLogger.raw("=".repeat(80));
 
-  emitTaskLog(task, {
-    taskId: task.id,
-    domainId: task.params?.domainId,
-    type: task.type,
-    stream: "stderr",
-    log: `\n${"=".repeat(80)}\n❌ [FAILED] ${error.message}\n${"=".repeat(80)}\n`,
-  });
+  taskLogger.log(`\n${"=".repeat(80)}\n❌ [FAILED] ${error.message}\n${"=".repeat(80)}\n`);
 }

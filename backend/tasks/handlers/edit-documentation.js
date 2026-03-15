@@ -32,9 +32,7 @@ export function editDocumentationHandler(
     priorMessages,
 
     onStart: () => {
-      taskLogger.info("🤔 AI is thinking...", {
-        component: "EditDocumentation",
-      });
+      taskLogger.info("🤔 AI is thinking...");
 
       emitSocketEvent(SOCKET_EVENTS.CHAT_MESSAGE, {
         // Use the stable session chatId, NOT task.id.
@@ -56,7 +54,6 @@ export function editDocumentationHandler(
     onMessage: (role, content) => {
       if (role === "assistant") {
         taskLogger.info(`📨 Sending AI chat message to client`, {
-          component: "EditDocumentation",
           contentLength: content.length,
         });
 
@@ -78,7 +75,6 @@ export function editDocumentationHandler(
           { role: "assistant", content, chatId: task.params.chatId },
         ).catch((err) => {
           taskLogger.warn(`Failed to persist assistant message`, {
-            component: "EditDocumentation",
             error: err.message,
           });
         });
@@ -105,7 +101,6 @@ export function editDocumentationHandler(
       });
 
       taskLogger.info("✅ Updated documentation sent via socket", {
-        component: "EditDocumentation",
         contentLength: content.length,
       });
 

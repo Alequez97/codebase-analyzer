@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
-import { emitTaskLog } from "../../utils/socket-emitter.js";
 
 /**
  * Handler for apply-refactoring task
@@ -12,9 +11,7 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
   // Enable command execution for running tests
   if (agent) {
     agent.enableCommandTools({ timeoutMs: 120_000 }); // Longer timeout for potentially running full test suite
-    taskLogger.info("🔧 Command execution tools enabled (test validation)", {
-      component: "ApplyRefactoring",
-    });
+    taskLogger.info("🔧 Command execution tools enabled (test validation)");
   }
 
   return {
@@ -27,23 +24,13 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
         response.stopReason === "stop_sequence" ||
         response.stopReason === "completed"
       ) {
-        taskLogger.info("✅ Refactoring application complete", {
-          component: "ApplyRefactoring",
-        });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✅ [Complete] Refactoring applied and validated\n`,
-        });
+        taskLogger.info("✅ Refactoring application complete");
+        taskLogger.log(`\n✅ [Complete] Refactoring applied and validated\n`);
         return false;
       }
 
       if (response.stopReason === "max_tokens" && !response.toolCalls?.length) {
-        taskLogger.warn("⚠️  Max tokens reached, requesting file completion", {
-          component: "ApplyRefactoring",
-        });
+        taskLogger.warn("⚠️  Max tokens reached, requesting file completion");
         agent.addUserMessage(
           `You've hit the token limit. If the service file is not yet created, write it to ${task.params.newServiceFile} using write_file. If the service file exists but the controller hasn't been updated, use read_file on ${task.params.targetFile} to get current line numbers, then use replace_lines to add the import and replace the extracted function body. Do NOT rewrite the entire controller with write_file.`,
         );
@@ -69,29 +56,15 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
         await fs.access(newServiceFilePath);
         serviceFileExists = true;
         taskLogger.info("✅ New service file created successfully", {
-          component: "ApplyRefactoring",
           serviceFile: task.params.newServiceFile,
         });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stdout",
-          log: `\n✅ [Success] Service file created: ${task.params.newServiceFile}\n`,
-        });
+        taskLogger.log(`\n✅ [Success] Service file created: ${task.params.newServiceFile}\n`);
       } catch {
         serviceFileExists = false;
         taskLogger.error("❌ Service file was not created", {
-          component: "ApplyRefactoring",
           expectedPath: newServiceFilePath,
         });
-        emitTaskLog(task, {
-          taskId: task.id,
-          domainId: task.params?.domainId,
-          type: task.type,
-          stream: "stderr",
-          log: `\n❌ [Error] Service file was not created at: ${task.params.newServiceFile}\n`,
-        });
+        taskLogger.log(`\n❌ [Error] Service file was not created at: ${task.params.newServiceFile}\n`);
       }
 
       if (!serviceFileExists) {
@@ -105,7 +78,6 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
       const serviceStats = await fs.stat(newServiceFilePath);
       if (serviceStats.size === 0) {
         taskLogger.error("❌ Service file is empty", {
-          component: "ApplyRefactoring",
           serviceFile: task.params.newServiceFile,
         });
         return {
@@ -114,21 +86,17 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
         };
       }
 
-      taskLogger.info(`✅ Service file verified (${serviceStats.size} bytes)`, {
-        component: "ApplyRefactoring",
-      });
+      taskLogger.info(`✅ Service file verified (${serviceStats.size} bytes)`);
 
       // Verify target file was modified
       try {
         await fs.access(targetFilePath);
         const targetStats = await fs.stat(targetFilePath);
         taskLogger.info(`✅ Target file verified (${targetStats.size} bytes)`, {
-          component: "ApplyRefactoring",
           targetFile: task.params.targetFile,
         });
       } catch {
         taskLogger.warn("⚠️  Target file not found or not modified", {
-          component: "ApplyRefactoring",
           targetFile: task.params.targetFile,
         });
       }
@@ -149,21 +117,13 @@ export function applyRefactoringHandler(task, taskLogger, agent) {
           );
 
           taskLogger.info("✅ Refactoring status updated in domain data", {
-            component: "ApplyRefactoring",
             refactoringId: task.params.refactoringId,
           });
 
-          emitTaskLog(task, {
-            taskId: task.id,
-            domainId: task.params.domainId,
-            type: task.type,
-            stream: "stdout",
-            log: `\n✅ [Updated] Refactoring ${task.params.refactoringId} marked as applied\n`,
-          });
+          taskLogger.log(`\n✅ [Updated] Refactoring ${task.params.refactoringId} marked as applied\n`);
         } catch (error) {
           taskLogger.error("Failed to update refactoring status", {
             error,
-            component: "ApplyRefactoring",
             taskId: task.id,
           });
         }

@@ -1,5 +1,5 @@
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import { emitTaskLog, emitTaskProgress } from "../../utils/socket-emitter.js";
+import { emitTaskProgress } from "../../utils/socket-emitter.js";
 import {
   queueEditCodebaseAnalysisTask,
   queueEditDocumentationTask,
@@ -37,9 +37,7 @@ export function reviewChangesHandler(task, taskLogger, agent) {
   if (agent) {
     agent.enableDelegationTools(taskId, REVIEW_CHANGES_QUEUE_FUNCTIONS);
 
-    taskLogger.info("🔧 Delegation tools enabled", {
-      component: "ReviewChanges",
-    });
+    taskLogger.info("🔧 Delegation tools enabled");
   }
 
   // Build the initial message from task params so the agent knows the scope
@@ -57,17 +55,13 @@ export function reviewChangesHandler(task, taskLogger, agent) {
     initialMessage,
 
     onStart: () => {
-      taskLogger.info("🔍 Reviewing changes…", {
-        component: "ReviewChanges",
-      });
+      taskLogger.info("🔍 Reviewing changes…");
       emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, "Reviewing changes…");
     },
 
     onProgress: (progress) => {
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`, {
-          component: "ReviewChanges",
-        });
+        taskLogger.info(`  ⚡ ${progress.message}`);
         emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
         return;
       }
@@ -84,17 +78,12 @@ export function reviewChangesHandler(task, taskLogger, agent) {
         phase === "complete"
           ? `Compaction complete. Tokens after: ~${tokensAfter}`
           : "Compacting context…";
-      taskLogger.info(`🗜️  ${msg}`, { component: "ReviewChanges" });
+      taskLogger.info(`🗜️  ${msg}`);
       emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
     },
 
     onToolCall: (toolName, args, result) => {
-      emitTaskLog(task, {
-        taskId,
-        type: task.type,
-        stream: "stdout",
-        log: `[${toolName}] ${result?.slice?.(0, 200) ?? ""}`,
-      });
+      taskLogger.log(`[${toolName}] ${result?.slice?.(0, 200) ?? ""}`);
     },
 
     // Results flow via delegated tasks — no validation needed
