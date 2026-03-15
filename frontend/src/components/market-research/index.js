@@ -19,6 +19,7 @@ export { ActivityFeed } from "./ActivityFeed";
 export { AnalysisStatsBar } from "./AnalysisStatsBar";
 export { AnalysisPage } from "./AnalysisPage";
 export { AnalysisSummaryPage } from "./AnalysisSummaryPage";
+export { ProfilePage } from "./ProfilePage";
 
 // Constants
 export * from "./constants";

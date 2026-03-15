@@ -3,6 +3,7 @@ import {
   MOCK_COMPETITORS,
   SIMULATION_EVENTS,
 } from "../components/market-research/constants";
+import { useProfileStore } from "./useProfileStore";
 
 // ---------------------------------------------------------------------------
 // Session ID — persisted in sessionStorage so it survives page refresh
@@ -89,7 +90,7 @@ function runSimulation() {
 
 export const useMarketResearchStore = create((set) => ({
   // --- Navigation ---
-  step: "landing", // "landing" | "input" | "analysis"
+  step: "landing", // "landing" | "input" | "analysis" | "summary" | "profile"
 
   // --- Input form ---
   idea: "",
@@ -169,7 +170,19 @@ export const useMarketResearchStore = create((set) => ({
     })),
 
   _markAnalysisComplete: () =>
-    set({ isAnalyzing: false, isAnalysisComplete: true }),
+    set((state) => {
+      useProfileStore.getState().addAnalysis({
+        id: state.sessionId ?? crypto.randomUUID(),
+        idea: state.idea,
+        completedAt: Date.now(),
+        competitorCount: state.competitors.length,
+      });
+      return { isAnalyzing: false, isAnalysisComplete: true };
+    }),
 
   goToSummary: () => set({ step: "summary" }),
+
+  goToProfile: () => set({ step: "profile" }),
+
+  openHistoryAnalysis: (idea) => set({ step: "summary", idea }),
 }));

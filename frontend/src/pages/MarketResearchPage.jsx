@@ -3,6 +3,7 @@ import { LandingPage } from "../components/market-research/LandingPage";
 import { IdeaInputPage } from "../components/market-research/IdeaInputPage";
 import { AnalysisPage } from "../components/market-research/AnalysisPage";
 import { AnalysisSummaryPage } from "../components/market-research/AnalysisSummaryPage";
+import { ProfilePage } from "../components/market-research/ProfilePage";
 import { MarketResearchNavbar } from "../components/market-research/Navbar";
 
 const STEP_VIEWS = {
@@ -10,6 +11,7 @@ const STEP_VIEWS = {
   input: IdeaInputPage,
   analysis: AnalysisPage,
   summary: AnalysisSummaryPage,
+  profile: ProfilePage,
 };
 
 export default function MarketResearchPage() {

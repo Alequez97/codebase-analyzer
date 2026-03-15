@@ -183,6 +183,7 @@ export function NavLogo({ onClick }) {
 export function MarketResearchNavbar() {
   const step = useMarketResearchStore((s) => s.step);
   const goToLanding = useMarketResearchStore((s) => s.goToLanding);
+  const goToProfile = useMarketResearchStore((s) => s.goToProfile);
   const resetAnalysis = useMarketResearchStore((s) => s.resetAnalysis);
 
   const user = useAuthStore((s) => s.user);
@@ -210,6 +211,10 @@ export function MarketResearchNavbar() {
         borderColor="#e2e8f0"
         bg="white"
         minW={0}
+        cursor="pointer"
+        _hover={{ bg: "#f8fafc", borderColor: "#c7d2fe" }}
+        transition="all 0.12s"
+        onClick={goToProfile}
       >
         <Box
           w="20px"
@@ -269,29 +274,5 @@ export function MarketResearchNavbar() {
     </Button>
   );
 
-  const right = (
-    <>
-      {showNewAnalysis && (
-        <Button
-          size="sm"
-          variant="outline"
-          fontSize="12px"
-          fontWeight="600"
-          borderColor="#e2e8f0"
-          color="#374151"
-          borderRadius="7px"
-          px={3}
-          h="30px"
-          w={{ base: "100%", lg: "auto" }}
-          _hover={{ bg: "#f1f5f9" }}
-          onClick={resetAnalysis}
-        >
-          New Analysis
-        </Button>
-      )}
-      {authControls}
-    </>
-  );
-
-  return <AppNavbar onLogoClick={onLogoClick} right={right} />;
+  return <AppNavbar onLogoClick={onLogoClick} right={authControls} />;
 }
