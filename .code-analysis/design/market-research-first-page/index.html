@@ -318,6 +318,61 @@
     .pricing-footer-note {
       margin-top: 20px; font-size: 12px; color: #94a3b8; text-align: center;
     }
+
+    /* ─── Burger / mobile nav ─── */
+    .burger-btn {
+      display: none; background: none; border: none;
+      padding: 6px; border-radius: 7px; cursor: pointer;
+      color: #374151; margin-left: auto; flex-shrink: 0;
+    }
+    .burger-btn:hover { background: #f1f5f9; }
+
+    .mobile-drawer {
+      display: none; position: fixed;
+      top: 48px; left: 0; right: 0;
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      padding: 8px 16px 16px; flex-direction: column;
+      z-index: 97; box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    .mobile-drawer.open { display: flex; }
+    .mob-item {
+      display: flex; align-items: center;
+      padding: 11px 12px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: #374151;
+      text-decoration: none; background: none; border: none;
+      cursor: pointer; width: 100%; text-align: left; font-family: inherit;
+    }
+    .mob-item:hover { background: #f8fafc; }
+    .mob-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+    .mob-cta {
+      background: #0f172a; color: #fff; border-radius: 8px;
+      padding: 13px 16px; font-size: 14px; font-weight: 600;
+      text-align: center; border: none; cursor: pointer;
+      font-family: inherit; width: 100%; margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .mob-cta:hover { background: #1e293b; }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 0 16px; }
+      .navbar-left > a.btn-signin { display: none; }
+      .navbar-right { display: none; }
+      .burger-btn { display: flex; align-items: center; justify-content: center; }
+
+      .hero { padding: 80px 20px 56px; }
+      .hero-title { font-size: 36px; }
+      .hero-sub { font-size: 14px; }
+      .features { margin-top: 36px; gap: 8px; }
+
+      .pricing-section { padding: 56px 16px 72px; }
+      .pricing-title { font-size: 24px; }
+      .pricing-grid { grid-template-columns: 1fr; gap: 24px; }
+      .topup-note { flex-direction: column; gap: 8px; align-items: flex-start; }
+    }
+
+    @media (min-width: 641px) and (max-width: 900px) {
+      .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -344,7 +399,26 @@
       </svg>
     </button>
   </div>
+  <button class="burger-btn" id="burger-btn" onclick="toggleMenu()" aria-label="Open menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
 </header>
+
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="#pricing" class="mob-item" onclick="document.getElementById('mobile-drawer').classList.remove('open')">Pricing</a>
+  <div class="mob-divider"></div>
+  <button class="mob-item">Sign in</button>
+  <button class="mob-cta" onclick="location.href='start.html'">
+    Get started free
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </button>
+</div>
 
 <!-- Hero -->
 <section class="hero">
@@ -587,6 +661,11 @@
 </section>
 
 <script>
+  function toggleMenu() {
+    var d = document.getElementById('mobile-drawer');
+    d.classList.toggle('open');
+  }
+
   function setBilling(mode) {
     document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
     document.getElementById('btn-annual').classList.toggle('active', mode === 'annual');

@@ -531,6 +531,73 @@
       color: rgba(255,255,255,.85);
     }
     .btn-report.outline:hover { background: rgba(255,255,255,.08); }
+
+    /* ─── Burger / mobile nav ─── */
+    .burger-btn {
+      display: none; background: none; border: none;
+      padding: 6px; border-radius: 7px; cursor: pointer;
+      color: #0f172a; margin-left: 8px; flex-shrink: 0;
+    }
+    .burger-btn:hover { background: #f1f5f9; }
+
+    .mobile-drawer {
+      display: none; position: fixed;
+      top: 52px; left: 0; right: 0;
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      padding: 8px 16px 16px; flex-direction: column;
+      z-index: 97; box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    .mobile-drawer.open { display: flex; }
+    .mob-item {
+      display: flex; align-items: center;
+      padding: 11px 12px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: #374151;
+      background: none; border: none; cursor: pointer;
+      width: 100%; text-align: left; font-family: inherit;
+    }
+    .mob-item:hover { background: #f8fafc; }
+    .mob-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+    .mob-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; background: #f8fafc; border-radius: 10px;
+      margin-bottom: 4px;
+    }
+    .mob-user-info { flex: 1; min-width: 0; }
+    .mob-user-email { font-size: 13px; font-weight: 600; color: #0f172a; }
+    .mob-user-plan { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+    .mob-status-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9999px;
+      padding: 4px 10px; font-size: 11px; font-weight: 500; color: #1d4ed8;
+      margin-bottom: 8px;
+    }
+    .mob-status-pill .dot {
+      width: 6px; height: 6px; background: #3b82f6;
+      border-radius: 50%; animation: pulse 1.4s infinite;
+    }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 0 16px; }
+      .navbar-left .nav-sep,
+      .navbar-left .btn-nav { display: none; }
+      .navbar-right { display: none; }
+      .burger-btn { display: flex; align-items: center; justify-content: center; }
+
+      .page {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .main-col {
+        height: calc(100vh - 52px);
+        border-right: none;
+      }
+      .feed-col { display: none; }
+      .page-header { padding: 14px 16px 12px; }
+      .page-meta { display: none; }
+      .competitors-scroll { padding: 14px 16px 40px; }
+      .comp-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -564,7 +631,32 @@
       <span class="user-plan">Starter</span>
     </div>
   </div>
+  <button class="burger-btn" id="burger-btn" onclick="toggleMenu()" aria-label="Open menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
 </header>
+
+<div class="mobile-drawer" id="mobile-drawer">
+  <div class="mob-user">
+    <div class="user-avatar">JD</div>
+    <div class="mob-user-info">
+      <div class="mob-user-email">john@example.com</div>
+      <div class="mob-user-plan">Starter plan</div>
+    </div>
+  </div>
+  <div class="mob-status-pill">
+    <span class="dot"></span>
+    Analyzing — 3 of 7 complete
+  </div>
+  <div class="mob-divider"></div>
+  <button class="mob-item">How it works</button>
+  <button class="mob-item">Pricing</button>
+  <button class="mob-item">Docs</button>
+</div>
 
 <!-- ══════════════════════════════════════
      Page Layout
@@ -1101,6 +1193,12 @@
   </div><!-- /feed-col -->
 
 </div><!-- /page -->
+
+<script>
+  function toggleMenu() {
+    document.getElementById('mobile-drawer').classList.toggle('open');
+  }
+</script>
 
 </body>
 </html>
