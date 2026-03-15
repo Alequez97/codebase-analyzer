@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
-import { Menu, Search, X } from "lucide-react";
+import { LogOut, Menu, Search, User, X } from "lucide-react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 /**
  * Shared top navigation shell.
@@ -108,7 +109,7 @@ export function AppNavbar({ onLogoClick, right }) {
       </Box>
 
       {/* Mobile / Tablet dropdown */}
-      {open && (
+      {open && right && (
         <Box
           display={{ base: "flex", lg: "none" }}
           flexDirection="column"
@@ -125,34 +126,9 @@ export function AppNavbar({ onLogoClick, right }) {
           py={3}
           gap={1}
         >
-          {NAV_LINKS.map((label) => (
-            <Button
-              key={label}
-              variant="ghost"
-              justifyContent="flex-start"
-              fontSize="14px"
-              fontWeight="500"
-              color="#374151"
-              h="40px"
-              borderRadius="8px"
-              _hover={{ bg: "#f8fafc", color: "#0f172a" }}
-              onClick={() => setOpen(false)}
-            >
-              {label}
-            </Button>
-          ))}
-          {right && (
-            <VStack
-              align="stretch"
-              gap={2}
-              borderTopWidth="1px"
-              borderColor="#f1f5f9"
-              mt={1}
-              pt={3}
-            >
-              {right}
-            </VStack>
-          )}
+          <VStack align="stretch" gap={2}>
+            {right}
+          </VStack>
         </Box>
       )}
     </>
@@ -207,86 +183,95 @@ export function NavLogo({ onClick }) {
 export function MarketResearchNavbar() {
   const step = useMarketResearchStore((s) => s.step);
   const goToLanding = useMarketResearchStore((s) => s.goToLanding);
-  const goToInput = useMarketResearchStore((s) => s.goToInput);
   const resetAnalysis = useMarketResearchStore((s) => s.resetAnalysis);
+
+  const user = useAuthStore((s) => s.user);
+  const signIn = useAuthStore((s) => s.signIn);
+  const signOut = useAuthStore((s) => s.signOut);
 
   const onLogoClick = step === "landing" ? undefined : goToLanding;
 
-  let right;
+  const showNewAnalysis = step === "analysis" || step === "summary";
 
-  if (step === "landing" || step === "input") {
-    right = (
-      <HStack gap={2}>
-        <Button
-          variant="ghost"
-          size="sm"
-          fontSize="13px"
-          fontWeight="500"
-          color="#52525b"
-          _hover={{ color: "#0f172a" }}
+  const authControls = user ? (
+    <Box
+      display="flex"
+      flexDirection={{ base: "column", lg: "row" }}
+      gap={1.5}
+      w={{ base: "100%", lg: "auto" }}
+      alignItems={{ base: "stretch", lg: "center" }}
+    >
+      <HStack
+        gap={1.5}
+        px={2.5}
+        py={1}
+        borderRadius="7px"
+        borderWidth="1px"
+        borderColor="#e2e8f0"
+        bg="white"
+        minW={0}
+      >
+        <Box
+          w="20px"
+          h="20px"
+          borderRadius="50%"
+          bg="linear-gradient(135deg, #6366f1, #7c3aed)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          flexShrink={0}
         >
-          Sign in
-        </Button>
+          <User size={11} color="white" strokeWidth={2.5} />
+        </Box>
+        <Text
+          fontSize="12px"
+          fontWeight="500"
+          color="#374151"
+          maxW="140px"
+          truncate
+        >
+          {user.email}
+        </Text>
       </HStack>
-    );
-  } else if (step === "analysis") {
-    right = (
       <Button
         size="sm"
-        variant="outline"
+        variant="ghost"
         fontSize="12px"
-        fontWeight="600"
-        borderColor="#e2e8f0"
-        color="#374151"
+        fontWeight="500"
+        color="#64748b"
         borderRadius="7px"
-        px={3}
+        px={2}
         h="30px"
-        _hover={{ bg: "#f1f5f9" }}
-        onClick={resetAnalysis}
+        gap={1}
+        _hover={{ bg: "#fef2f2", color: "#dc2626" }}
+        onClick={signOut}
+        w={{ base: "100%", lg: "auto" }}
       >
-        New Analysis
+        <LogOut size={13} />
+        Sign out
       </Button>
-    );
-  } else if (step === "summary") {
-    right = (
-      <HStack gap={2}>
-        <HStack
-          gap={2}
-          px={2.5}
-          py={1}
-          borderRadius="7px"
-          borderWidth="1px"
-          borderColor="#e2e8f0"
-          bg="white"
-        >
-          <Box
-            w="20px"
-            h="20px"
-            borderRadius="50%"
-            bg="linear-gradient(135deg, #6366f1, #7c3aed)"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fontSize="9px" fontWeight="700" color="white">
-              J
-            </Text>
-          </Box>
-          <Text fontSize="12px" fontWeight="500" color="#374151">
-            john@example.com
-          </Text>
-          <Box
-            px={1.5}
-            py={0.5}
-            borderRadius="4px"
-            bg="#eff6ff"
-            color="#2563eb"
-            fontSize="10px"
-            fontWeight="700"
-          >
-            Starter
-          </Box>
-        </HStack>
+    </Box>
+  ) : (
+    <Button
+      variant="ghost"
+      size="sm"
+      fontSize="13px"
+      fontWeight="500"
+      color="#52525b"
+      borderRadius="7px"
+      h="30px"
+      px={3}
+      w={{ base: "100%", lg: "auto" }}
+      _hover={{ color: "#0f172a", bg: "#f8fafc" }}
+      onClick={() => signIn({ email: "demo@example.com", name: "Demo User" })}
+    >
+      Sign in
+    </Button>
+  );
+
+  const right = (
+    <>
+      {showNewAnalysis && (
         <Button
           size="sm"
           variant="outline"
@@ -297,14 +282,16 @@ export function MarketResearchNavbar() {
           borderRadius="7px"
           px={3}
           h="30px"
+          w={{ base: "100%", lg: "auto" }}
           _hover={{ bg: "#f1f5f9" }}
           onClick={resetAnalysis}
         >
           New Analysis
         </Button>
-      </HStack>
-    );
-  }
+      )}
+      {authControls}
+    </>
+  );
 
   return <AppNavbar onLogoClick={onLogoClick} right={right} />;
 }
