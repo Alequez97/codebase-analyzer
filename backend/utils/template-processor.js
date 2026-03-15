@@ -455,6 +455,7 @@ export async function buildTemplateVariables(task) {
       return {
         SESSION_ID: task.params?.sessionId || "",
         IDEA: task.params?.idea || "",
+        NUM_COMPETITORS: String(task.params?.numCompetitors ?? 10),
         OUTPUT_FILE: task.outputFile || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };

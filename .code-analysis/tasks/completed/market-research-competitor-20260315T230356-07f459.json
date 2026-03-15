@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260315T230356-07f459",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-15T23:03:56.556Z",
+  "params": {
+    "sessionId": "e863a26c-bc85-46c3-9394-a4f988673a97",
+    "competitorId": "boostingfactory",
+    "competitorName": "Boosting Factory",
+    "competitorUrl": "https://boostingfactory.com/",
+    "competitorDescription": "Competitive gaming services provider offering boosting, coaching, and duo queue/play-with options.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Boosting Factory\nWebsite: https://boostingfactory.com/\nDescription: Competitive gaming services provider offering boosting, coaching, and duo queue/play-with options.\nSession ID: e863a26c-bc85-46c3-9394-a4f988673a97\nCompetitor ID: boostingfactory\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260315T230217-290275"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/e863a26c-bc85-46c3-9394-a4f988673a97/competitors/boostingfactory.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260315T230356-07f459.md",
+  "logFile": "logs/market-research-competitor-20260315T230356-07f459.log",
+  "startedAt": "2026-03-15T23:05:11.267Z",
+  "completedAt": "2026-03-15T23:07:14.886Z"
+}

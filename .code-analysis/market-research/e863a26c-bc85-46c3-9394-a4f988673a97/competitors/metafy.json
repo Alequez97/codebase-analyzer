@@ -1,0 +1,100 @@
+{
+  "id": "metafy",
+  "name": "Metafy",
+  "url": "https://metafy.gg/",
+  "description": "A creator-first marketplace to book live gaming coaching, buy on-demand guides, join community subscriptions and attend group events — targeting gamers and creators who monetize game expertise.",
+  "logoChar": "M",
+  "logoColor": "#7c3aed",
+  "logoBg": "#f5f3ff",
+  "tags": ["gaming", "creator-economy", "coaching", "marketplace"],
+  "pricing": "$19",
+  "pricingPeriod": "/mo",
+  "customers": "100k+",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "US",
+    "funding": "$33.7M (reported)",
+    "employees": "~70 (2024)",
+    "business": "Creator marketplace / coaching platform",
+    "targetMarket": "Amateur and semi-pro gamers, streamers, and creators seeking paid coaching and creators/coaches who want to monetize skills",
+    "features": [
+      {
+        "category": "Core marketplace",
+        "items": [
+          "Book 1:1 live coaching sessions (set price & availability)",
+          "Buy on-demand Guides (video or written)",
+          "Events (group classes, bootcamps, watch parties)",
+          "Creator profile pages with reviews and featured content"
+        ]
+      },
+      {
+        "category": "Creator monetization & community",
+        "items": [
+          "Metafy Core revenue-share model (8% fee) and Metafy Pro (fixed monthly fee, keep 100%)",
+          "Subscription-based Communities / Supporter tiers",
+          "Training Plans and bundled session packages",
+          "Tiers, perks and Discord integration for gated community access"
+        ]
+      },
+      {
+        "category": "Operations & discovery",
+        "items": [
+          "Scheduling/booking and messaging between student and coach",
+          "Search and discovery by game/skill/coach reputation",
+          "Payouts and withdrawal tools for creators",
+          "Basic analytics and earnings estimation tools"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Native in-browser/live lesson tooling (video, recording, whiteboard) — many creators rely on Discord or external tools",
+      "Structured learner progress tracking/certifications or curriculum with measurable outcomes",
+      "Robust enterprise / team offerings for schools, esports orgs, or educational partners",
+      "Deeper learner analytics and coach performance dashboards for continuous improvement",
+      "Flexible student subscription/bundle payment options (multi-session subscriptions, family plans)",
+      "Advanced AI-assisted coach matching, personalized learning paths, or automated curriculum generation"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Core",
+        "price": "$0",
+        "period": "",
+        "note": "No monthly fee; platform takes ~8% revenue share on earnings (Core is recommended for new creators).",
+        "highlight": false
+      },
+      {
+        "name": "Pro (monthly)",
+        "price": "$29",
+        "period": "/mo",
+        "note": "Fixed monthly fee; creators keep 100% of earnings. Monthly billing shown at $29/mo.",
+        "highlight": true
+      },
+      {
+        "name": "Pro (yearly)",
+        "price": "$19",
+        "period": "/mo",
+        "note": "Annual billing option (advertised as save 33%) — effectively $19/mo billed yearly.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://help.metafy.gg/",
+      "pricing": "https://metafy.gg/pro",
+      "blog": "https://handbook.metafy.gg/",
+      "jobs": "https://metafy.gg/careers"
+    },
+    "strengths": [
+      "Creator-first monetization (clear Core vs Pro choices and revenue-share model)",
+      "Multiple product channels: 1:1 sessions, Guides, Events, and subscription Communities",
+      "Brand recognition in gaming and a growing network of high-profile coaches",
+      "Rapid feature iteration and visible product roadmap (active help center & updates)"
+    ],
+    "weaknesses": [
+      "Many lessons currently rely on external tools (Discord) rather than a fully native lesson experience",
+      "Limited structured learning paths and progress tracking for students",
+      "Marketplace discoverability can be noisy for new creators without promotion",
+      "Mobile and in-platform native live features have historically lagged behind expectations"
+    ]
+  }
+}

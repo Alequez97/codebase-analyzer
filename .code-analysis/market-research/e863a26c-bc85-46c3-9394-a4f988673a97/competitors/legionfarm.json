@@ -1,0 +1,98 @@
+{
+  "id": "legionfarm",
+  "name": "LegionFarm",
+  "url": "https://legionfarm.com/",
+  "description": "A marketplace connecting everyday gamers with pro players for coaching, duo-queue companionship, and boosting services.",
+  "logoChar": "LF",
+  "logoColor": "#7c3aed",
+  "logoBg": "#f5f3ff",
+  "tags": ["gaming", "coaching", "boosting", "marketplace"],
+  "pricing": "$50",
+  "pricingPeriod": "/mo",
+  "customers": "250k+",
+  "status": "done",
+  "details": {
+    "founded": "2016",
+    "country": "US",
+    "funding": "$17.8M (reported)",
+    "employees": "~68",
+    "business": "B2C marketplace (gaming services)",
+    "targetMarket": "Casual and competitive gamers seeking one-on-one coaching, duo-queue play, account boosting, and companionship across AAA multiplayer titles",
+    "features": [
+      {
+        "category": "Core services",
+        "items": [
+          "One-on-one coaching sessions with vetted pro players",
+          "Duo-queue / play-with-a-pro (companion) sessions",
+          "Carry / boosting services to achieve in-game goals",
+          "Group play sessions (multi-customer sessions with a Pro)"
+        ]
+      },
+      {
+        "category": "Product features",
+        "items": [
+          "Session scheduling and calendar",
+          "VOD / replay review and coach feedback",
+          "Subscription option for recurring access to group sessions",
+          "Per-hour and package pricing for flexible buys"
+        ]
+      },
+      {
+        "category": "Pro platform & community",
+        "items": [
+          "Onboarding and tiers for Pros (Semi-Pro/Pro roles)",
+          "Tools for Pros to accept orders and manage sessions",
+          "Promotions, incentives and NFT/guild-style offerings (experimental)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Clear, standardized coach quality metrics and verified credentials (hard to compare coaches objectively)",
+      "Structured, progressive curricula and learning paths tied to measurable outcomes",
+      "Robust in-app progress analytics and long-term skill tracking for customers",
+      "Enterprise / team-focused offerings for esports orgs or schools",
+      "Transparent packaged pricing bundles (most offerings are pay-per-session or subscription without consistent bundled learning plans)"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Subscription (Standard)",
+        "price": "$50",
+        "period": "/mo",
+        "note": "Monthly subscription that grants access to group play sessions and discounts; company previously describes $50/mo as the default subscription tier.",
+        "highlight": true
+      },
+      {
+        "name": "Pay-per-session",
+        "price": "Varies",
+        "period": "per hour",
+        "note": "Individual 1:1 or duo sessions charged hourly; historically examples reported ~$12/hr for some services but rates vary by game and pro level.",
+        "highlight": false
+      },
+      {
+        "name": "Top-up / Senior",
+        "price": "$500",
+        "period": "one-time (monthly top-up)",
+        "note": "Higher-value top-ups (e.g. $500) that have been promoted with added benefits/subscription access.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://promo.legionfarm.com/coaching-rewards",
+      "pricing": "https://legionfarm.com/",
+      "blog": "https://promo.legionfarm.com/patch-notes",
+      "jobs": "Unknown"
+    },
+    "strengths": [
+      "Large network of professional players across multiple AAA titles",
+      "Multiple monetization models (subscription + pay-per-session + packages)",
+      "Product features focused on live coaching, VOD review and scheduling",
+      "YC exposure / notable investor backing and solid early traction"
+    ],
+    "weaknesses": [
+      "Inconsistent transparency around coach qualification and performance metrics",
+      "Limited structured learning pathways and long-term progress tracking",
+      "Pricing and packages can feel fragmented for users who want clear outcomes",
+      "Primary focus on consumer sessions — limited B2B/enterprise products"
+    ]
+  }
+}

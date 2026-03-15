@@ -1,12 +1,18 @@
 import { Box, Button, HStack, Text, Textarea, VStack } from "@chakra-ui/react";
-import { Search } from "lucide-react";
+import { Search, Zap } from "lucide-react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { EXAMPLE_IDEAS } from "./constants";
+
+const IS_TEST_MODE = import.meta.env.VITE_PRICING_TEST_MODE === "true";
 
 export function IdeaInputCard() {
   const idea = useMarketResearchStore((s) => s.idea);
   const setIdea = useMarketResearchStore((s) => s.setIdea);
   const startAnalysis = useMarketResearchStore((s) => s.startAnalysis);
+  const selectedPlan = useMarketResearchStore((s) => s.selectedPlan);
+  const clearPlan = useMarketResearchStore((s) => s.clearPlan);
+
+  const numCompetitors = selectedPlan?.numCompetitors ?? 10;
 
   return (
     <Box
@@ -74,8 +80,44 @@ export function IdeaInputCard() {
         </VStack>
 
         <Text fontSize="11px" color="#94a3b8">
-          💡 Live market intelligence · ~20 competitors · ~5 min
+          💡 Live market intelligence · ~{numCompetitors} competitors · ~5 min
         </Text>
+
+        {IS_TEST_MODE && selectedPlan && (
+          <HStack
+            bg="#f0fdf4"
+            borderWidth="1px"
+            borderColor="#bbf7d0"
+            borderRadius="8px"
+            px={3}
+            py={2}
+            gap={2}
+            fontSize="11px"
+          >
+            <Zap size={12} color="#16a34a" />
+            <Text color="#166534" fontWeight="600">
+              {selectedPlan.name} plan active
+            </Text>
+            <Text color="#4ade80">·</Text>
+            <Text color="#166534">
+              {selectedPlan.numCompetitors} competitors/report
+            </Text>
+            <Button
+              ml="auto"
+              size="xs"
+              variant="ghost"
+              color="#94a3b8"
+              fontSize="10px"
+              h="auto"
+              minW="auto"
+              p={0}
+              _hover={{ color: "#64748b" }}
+              onClick={clearPlan}
+            >
+              ✕ clear
+            </Button>
+          </HStack>
+        )}
 
         <Button
           display="inline-flex"

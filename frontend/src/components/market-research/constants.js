@@ -35,7 +35,7 @@ export const HERO_STATS = [
 
 const PLAN_FEATURES_FREE = [
   { text: "2 reports/month", included: true },
-  { text: "~20 competitors per report", included: true },
+  { text: "~10 competitors per report", included: true },
   { text: "Basic gap analysis", included: true },
   { text: "PDF export", included: false },
   { text: "Report history", included: false },
@@ -44,7 +44,7 @@ const PLAN_FEATURES_FREE = [
 
 const PLAN_FEATURES_STARTER = [
   { text: "15 reports/month", included: true },
-  { text: "~20 competitors per report", included: true },
+  { text: "~15 competitors per report", included: true },
   { text: "Full gap analysis", included: true },
   { text: "PDF export", included: true },
   { text: "90-day report history", included: true },
@@ -53,6 +53,7 @@ const PLAN_FEATURES_STARTER = [
 
 const PLAN_FEATURES_PRO = [
   { text: "50 reports/month", included: true },
+  { text: "~20 competitors per report", included: true },
   { text: "Deep intelligence mode", included: true },
   { text: "Full gap analysis", included: true },
   { text: "PDF export", included: true },
@@ -62,6 +63,7 @@ const PLAN_FEATURES_PRO = [
 
 const PLAN_FEATURES_AGENCY = [
   { text: "200 reports/month", included: true },
+  { text: "~25 competitors per report", included: true },
   { text: "Everything in Pro", included: true },
   { text: "5 team seats", included: true },
   { text: "API access", included: true },
@@ -75,6 +77,7 @@ export const PRICING_PLANS = {
       name: "Free",
       credits: "2 credits / month",
       price: 0,
+      numCompetitors: 10,
       tagline: "Try it out, no commitment.",
       cta: "Start for free",
       ctaStyle: "outline",
@@ -84,6 +87,7 @@ export const PRICING_PLANS = {
       name: "Starter",
       credits: "15 credits / month",
       price: 19,
+      numCompetitors: 15,
       tagline: "For solo founders validating ideas regularly.",
       cta: "Get Starter",
       ctaStyle: "outline",
@@ -94,6 +98,7 @@ export const PRICING_PLANS = {
       name: "Pro",
       credits: "50 credits / month",
       price: 49,
+      numCompetitors: 20,
       tagline: "For PMs and founders running frequent research.",
       cta: "Get Pro",
       ctaStyle: "primary",
@@ -103,6 +108,7 @@ export const PRICING_PLANS = {
       name: "Agency",
       credits: "200 credits / month",
       price: 149,
+      numCompetitors: 25,
       tagline: "For teams and agencies with multiple clients.",
       cta: "Get Agency",
       ctaStyle: "outline",
@@ -114,6 +120,7 @@ export const PRICING_PLANS = {
       name: "Free",
       credits: "2 credits / month",
       price: 0,
+      numCompetitors: 10,
       tagline: "Try it out, no commitment.",
       cta: "Start for free",
       ctaStyle: "outline",
@@ -123,6 +130,7 @@ export const PRICING_PLANS = {
       name: "Starter",
       credits: "15 credits / month",
       price: 15,
+      numCompetitors: 15,
       tagline: "For solo founders validating ideas regularly.",
       cta: "Get Starter",
       ctaStyle: "outline",
@@ -133,6 +141,7 @@ export const PRICING_PLANS = {
       name: "Pro",
       credits: "50 credits / month",
       price: 39,
+      numCompetitors: 20,
       tagline: "For PMs and founders running frequent research.",
       cta: "Get Pro",
       ctaStyle: "primary",
@@ -142,6 +151,7 @@ export const PRICING_PLANS = {
       name: "Agency",
       credits: "200 credits / month",
       price: 119,
+      numCompetitors: 25,
       tagline: "For teams and agencies with multiple clients.",
       cta: "Get Agency",
       ctaStyle: "outline",

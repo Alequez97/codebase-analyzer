@@ -1,0 +1,108 @@
+{
+  "id": "epal",
+  "name": "E-Pal",
+  "url": "https://www.epal.gg/",
+  "description": "A two-sided marketplace where gamers hire vetted ‘ePals’ for in-game companionship, coaching, and social/lifestyle interactions.",
+  "logoChar": "EP",
+  "logoColor": "#7c3aed",
+  "logoBg": "#f5f3ff",
+  "tags": ["gaming marketplace", "companion & coaching", "creator monetization", "social gaming"],
+  "pricing": "Custom",
+  "pricingPeriod": "",
+  "customers": "4.2M+",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "US",
+    "funding": "$30M+",
+    "employees": "~50",
+    "business": "Two-sided consumer marketplace",
+    "targetMarket": "Casual and competitive gamers looking for teammates, companionship, coaching, or streamers/creators seeking monetization and audience growth",
+    "features": [
+      {
+        "category": "Core marketplace",
+        "items": [
+          "Browse ePal profiles by game, service type and rating",
+          "Place orders for sessions (gameplay, coaching, social/lifestyle services)",
+          "In-app chat and voice for sessions",
+          "Live section and Arcade mini-games to discover active ePals"
+        ]
+      },
+      {
+        "category": "Economy & monetization",
+        "items": [
+          "Buff virtual currency (1 Buff = $1) for purchases and tips",
+          "E-Coin for in-chat gifts and team-room gifting",
+          "Withdrawals to PayPal for ePals (withdraw rules and hold periods applied)",
+          "Tips, reviews and creator/coach badges to surface sellers"
+        ]
+      },
+      {
+        "category": "Creator & growth tools",
+        "items": [
+          "Twitch integration (sync streams and panels)",
+          "Creator and Coach badges (application process for qualified sellers)",
+          "Streamer Growth Project and leaderboards to promote top creators"
+        ]
+      },
+      {
+        "category": "Safety & community",
+        "items": [
+          "Review system and refund flow (3-day refund window for completed orders)",
+          "Verification options for creators/streamers",
+          "Community guidelines, multimedia and platform policies"
+        ]
+      },
+      {
+        "category": "Platforms",
+        "items": ["Web platform and mobile app presence (download links on site)"]
+      }
+    ],
+    "missingFeatures": [
+      "Limited payment options (PayPal-only for recharges/withdrawals; no card/Stripe/alternate local payments exposed)",
+      "No clearly documented standard pricing or packaged coaching subscriptions — prices are set per-ePal and can be inconsistent",
+      "Limited built-in scheduling / calendar / recurring booking workflow for regular coaching clients",
+      "Discovery and matchmaking appear primarily profile-driven (opportunity for stronger algorithmic matching)",
+      "Few B2B / publisher integrations or exposed APIs for teams, game publishers or enterprise partners"
+    ],
+    "pricingPlans": [
+      {
+        "name": "ePal orders (per-session)",
+        "price": "Custom",
+        "period": "",
+        "note": "ePals set individual prices per order/session. Payments use Buff (1 Buff = $1).",
+        "highlight": false
+      },
+      {
+        "name": "VIP Plus (subscription)",
+        "price": "Unknown",
+        "period": "/mo",
+        "note": "Monthly/seasonal/annual tiers. Includes free Buffs on subscribe, unlimited messaging, extra Meet features and other platform perks.",
+        "highlight": false
+      },
+      {
+        "name": "VIP Premium (subscription)",
+        "price": "Unknown",
+        "period": "/mo",
+        "note": "Higher-tier subscription with larger free Buff allowance, exclusive effects and additional perks. Exact prices are handled through platform stores (PayPal / Apple / Google).",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://www.epal.gg/faq",
+      "pricing": "https://www.epal.gg/vip",
+      "blog": "https://www.epal.gg/blog",
+      "jobs": "Unknown"
+    },
+    "strengths": [
+      "Large two-sided user base and network effects for matching gamers and ePals (millions of users reported)",
+      "Rich set of social features: voice chat, mini-games (Arcade), team rooms and Twitch integration",
+      "Clear monetization for creators via orders, tips, virtual currencies and subscriptions"
+    ],
+    "weaknesses": [
+      "Narrow payment support (PayPal-only) increases friction for some buyers and sellers",
+      "Fragmented pricing — per-ePal custom rates make price discovery and standardized offerings harder",
+      "Limited professional tooling for coaches (scheduling, invoicing, recurring sessions) and few enterprise integrations"
+    ]
+  }
+}

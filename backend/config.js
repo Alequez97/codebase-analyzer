@@ -217,7 +217,7 @@ const config = {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 32000,
-      maxIterations: 30,
+      maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
   },

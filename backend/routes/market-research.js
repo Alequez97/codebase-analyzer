@@ -7,6 +7,7 @@ import {
 } from "../persistence/market-research.js";
 import { queueMarketResearchInitialTask } from "../tasks/queue/market-research-initial.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
+import { getNumCompetitors } from "../services/subscription.js";
 
 const router = Router();
 
@@ -73,10 +74,14 @@ router.post("/:sessionId/analyze", async (req, res) => {
     return res.status(400).json({ error: "idea is required" });
   }
 
+  // TODO: pass the authenticated user's ID once auth is implemented
+  const numCompetitors = await getNumCompetitors();
+
   try {
     const task = await queueMarketResearchInitialTask({
       sessionId,
       idea: idea.trim(),
+      numCompetitors,
     });
 
     if (task?.success === false) {

@@ -1,0 +1,1098 @@
+{
+  "sessionId": "e863a26c-bc85-46c3-9394-a4f988673a97",
+  "idea": "Platform where gamers can hire another players and pay for sessions which they play together. Tip if they help really well",
+  "status": "complete",
+  "competitors": [
+    {
+      "id": "epal",
+      "name": "E-Pal",
+      "url": "https://www.epal.gg/",
+      "description": "A two-sided marketplace where gamers hire vetted ‘ePals’ for in-game companionship, coaching, and social/lifestyle interactions.",
+      "status": "done",
+      "logoChar": "EP",
+      "logoColor": "#7c3aed",
+      "logoBg": "#f5f3ff",
+      "tags": [
+        "gaming marketplace",
+        "companion & coaching",
+        "creator monetization",
+        "social gaming"
+      ],
+      "pricing": "Custom",
+      "pricingPeriod": "",
+      "customers": "4.2M+",
+      "details": {
+        "founded": "2020",
+        "country": "US",
+        "funding": "$30M+",
+        "employees": "~50",
+        "business": "Two-sided consumer marketplace",
+        "targetMarket": "Casual and competitive gamers looking for teammates, companionship, coaching, or streamers/creators seeking monetization and audience growth",
+        "features": [
+          {
+            "category": "Core marketplace",
+            "items": [
+              "Browse ePal profiles by game, service type and rating",
+              "Place orders for sessions (gameplay, coaching, social/lifestyle services)",
+              "In-app chat and voice for sessions",
+              "Live section and Arcade mini-games to discover active ePals"
+            ]
+          },
+          {
+            "category": "Economy & monetization",
+            "items": [
+              "Buff virtual currency (1 Buff = $1) for purchases and tips",
+              "E-Coin for in-chat gifts and team-room gifting",
+              "Withdrawals to PayPal for ePals (withdraw rules and hold periods applied)",
+              "Tips, reviews and creator/coach badges to surface sellers"
+            ]
+          },
+          {
+            "category": "Creator & growth tools",
+            "items": [
+              "Twitch integration (sync streams and panels)",
+              "Creator and Coach badges (application process for qualified sellers)",
+              "Streamer Growth Project and leaderboards to promote top creators"
+            ]
+          },
+          {
+            "category": "Safety & community",
+            "items": [
+              "Review system and refund flow (3-day refund window for completed orders)",
+              "Verification options for creators/streamers",
+              "Community guidelines, multimedia and platform policies"
+            ]
+          },
+          {
+            "category": "Platforms",
+            "items": [
+              "Web platform and mobile app presence (download links on site)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Limited payment options (PayPal-only for recharges/withdrawals; no card/Stripe/alternate local payments exposed)",
+          "No clearly documented standard pricing or packaged coaching subscriptions — prices are set per-ePal and can be inconsistent",
+          "Limited built-in scheduling / calendar / recurring booking workflow for regular coaching clients",
+          "Discovery and matchmaking appear primarily profile-driven (opportunity for stronger algorithmic matching)",
+          "Few B2B / publisher integrations or exposed APIs for teams, game publishers or enterprise partners"
+        ],
+        "pricingPlans": [
+          {
+            "name": "ePal orders (per-session)",
+            "price": "Custom",
+            "period": "",
+            "note": "ePals set individual prices per order/session. Payments use Buff (1 Buff = $1).",
+            "highlight": false
+          },
+          {
+            "name": "VIP Plus (subscription)",
+            "price": "Unknown",
+            "period": "/mo",
+            "note": "Monthly/seasonal/annual tiers. Includes free Buffs on subscribe, unlimited messaging, extra Meet features and other platform perks.",
+            "highlight": false
+          },
+          {
+            "name": "VIP Premium (subscription)",
+            "price": "Unknown",
+            "period": "/mo",
+            "note": "Higher-tier subscription with larger free Buff allowance, exclusive effects and additional perks. Exact prices are handled through platform stores (PayPal / Apple / Google).",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://www.epal.gg/faq",
+          "pricing": "https://www.epal.gg/vip",
+          "blog": "https://www.epal.gg/blog",
+          "jobs": "Unknown"
+        },
+        "strengths": [
+          "Large two-sided user base and network effects for matching gamers and ePals (millions of users reported)",
+          "Rich set of social features: voice chat, mini-games (Arcade), team rooms and Twitch integration",
+          "Clear monetization for creators via orders, tips, virtual currencies and subscriptions"
+        ],
+        "weaknesses": [
+          "Narrow payment support (PayPal-only) increases friction for some buyers and sellers",
+          "Fragmented pricing — per-ePal custom rates make price discovery and standardized offerings harder",
+          "Limited professional tooling for coaches (scheduling, invoicing, recurring sessions) and few enterprise integrations"
+        ]
+      }
+    },
+    {
+      "id": "metafy",
+      "name": "Metafy",
+      "url": "https://metafy.gg/",
+      "description": "A creator-first marketplace to book live gaming coaching, buy on-demand guides, join community subscriptions and attend group events — targeting gamers and creators who monetize game expertise.",
+      "status": "done",
+      "logoChar": "M",
+      "logoColor": "#7c3aed",
+      "logoBg": "#f5f3ff",
+      "tags": [
+        "gaming",
+        "creator-economy",
+        "coaching",
+        "marketplace"
+      ],
+      "pricing": "$19",
+      "pricingPeriod": "/mo",
+      "customers": "100k+",
+      "details": {
+        "founded": "2020",
+        "country": "US",
+        "funding": "$33.7M (reported)",
+        "employees": "~70 (2024)",
+        "business": "Creator marketplace / coaching platform",
+        "targetMarket": "Amateur and semi-pro gamers, streamers, and creators seeking paid coaching and creators/coaches who want to monetize skills",
+        "features": [
+          {
+            "category": "Core marketplace",
+            "items": [
+              "Book 1:1 live coaching sessions (set price & availability)",
+              "Buy on-demand Guides (video or written)",
+              "Events (group classes, bootcamps, watch parties)",
+              "Creator profile pages with reviews and featured content"
+            ]
+          },
+          {
+            "category": "Creator monetization & community",
+            "items": [
+              "Metafy Core revenue-share model (8% fee) and Metafy Pro (fixed monthly fee, keep 100%)",
+              "Subscription-based Communities / Supporter tiers",
+              "Training Plans and bundled session packages",
+              "Tiers, perks and Discord integration for gated community access"
+            ]
+          },
+          {
+            "category": "Operations & discovery",
+            "items": [
+              "Scheduling/booking and messaging between student and coach",
+              "Search and discovery by game/skill/coach reputation",
+              "Payouts and withdrawal tools for creators",
+              "Basic analytics and earnings estimation tools"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Native in-browser/live lesson tooling (video, recording, whiteboard) — many creators rely on Discord or external tools",
+          "Structured learner progress tracking/certifications or curriculum with measurable outcomes",
+          "Robust enterprise / team offerings for schools, esports orgs, or educational partners",
+          "Deeper learner analytics and coach performance dashboards for continuous improvement",
+          "Flexible student subscription/bundle payment options (multi-session subscriptions, family plans)",
+          "Advanced AI-assisted coach matching, personalized learning paths, or automated curriculum generation"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Core",
+            "price": "$0",
+            "period": "",
+            "note": "No monthly fee; platform takes ~8% revenue share on earnings (Core is recommended for new creators).",
+            "highlight": false
+          },
+          {
+            "name": "Pro (monthly)",
+            "price": "$29",
+            "period": "/mo",
+            "note": "Fixed monthly fee; creators keep 100% of earnings. Monthly billing shown at $29/mo.",
+            "highlight": true
+          },
+          {
+            "name": "Pro (yearly)",
+            "price": "$19",
+            "period": "/mo",
+            "note": "Annual billing option (advertised as save 33%) — effectively $19/mo billed yearly.",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://help.metafy.gg/",
+          "pricing": "https://metafy.gg/pro",
+          "blog": "https://handbook.metafy.gg/",
+          "jobs": "https://metafy.gg/careers"
+        },
+        "strengths": [
+          "Creator-first monetization (clear Core vs Pro choices and revenue-share model)",
+          "Multiple product channels: 1:1 sessions, Guides, Events, and subscription Communities",
+          "Brand recognition in gaming and a growing network of high-profile coaches",
+          "Rapid feature iteration and visible product roadmap (active help center & updates)"
+        ],
+        "weaknesses": [
+          "Many lessons currently rely on external tools (Discord) rather than a fully native lesson experience",
+          "Limited structured learning paths and progress tracking for students",
+          "Marketplace discoverability can be noisy for new creators without promotion",
+          "Mobile and in-platform native live features have historically lagged behind expectations"
+        ]
+      }
+    },
+    {
+      "id": "proguides",
+      "name": "ProGuides",
+      "url": "https://proguides.com/",
+      "description": "Paid gaming coaching and training platform offering on-demand courses, 1:1 coaching and gameplay analysis for competitive gamers.",
+      "status": "done",
+      "logoChar": "PG",
+      "logoColor": "#FF6A00",
+      "logoBg": "#FFF7ED",
+      "tags": [
+        "gaming coaching",
+        "courses",
+        "gameplay analysis",
+        "marketplace"
+      ],
+      "pricing": "$7.99",
+      "pricingPeriod": "/mo",
+      "customers": "1M+",
+      "details": {
+        "founded": "2015",
+        "country": "US",
+        "funding": "$5M seed (reported; later acquired by Statespace in 2021)",
+        "employees": "≈80 (plus thousands of freelance coaches)",
+        "business": "B2C marketplace / training",
+        "targetMarket": "Competitive and aspiring esports players, casual players who want to improve, and fans who want to learn from pro gamers.",
+        "features": [
+          {
+            "category": "On-demand courses & guides",
+            "items": [
+              "Video courses from pro players",
+              "Structured lessons and bootcamps",
+              "Playstyle and role-specific guides"
+            ]
+          },
+          {
+            "category": "Coaching marketplace",
+            "items": [
+              "1:1 live coaching sessions (bookable on-demand)",
+              "Play-with-the-pro sessions / scrims",
+              "Coach discovery and ratings"
+            ]
+          },
+          {
+            "category": "Gameplay analysis & tools",
+            "items": [
+              "Upload gameplay for coach analysis (Gameplay Analysis)",
+              "VALORANT StatsCenter and match metrics",
+              "Run It Back: personalized Aimlabs tasks from deaths"
+            ]
+          },
+          {
+            "category": "Aimlabs & AI integration",
+            "items": [
+              "Aimlabs+ membership integration",
+              "Discovery AI to generate training tasks and recommendations",
+              "Personalized aim training tasks and analytics"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Transparent, genuinely monthly billing option (users report annual-only charge despite advertised monthly price)",
+          "Robust team/org features for pro teams or coaches managing rosters (B2B product)",
+          "Verified, standardized coach certification or quality-assurance program",
+          "Deeper long-term learning paths, progress certifications or accredited curricula",
+          "Public API or integrations for third-party platforms (analytics export, LMS integration)",
+          "Localized content and broader language support"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Pro Member",
+            "price": "$7.99",
+            "period": "/mo",
+            "note": "Entry-level membership granting access to courses and member benefits (commonly marketed at $7.99/mo but often billed annually).",
+            "highlight": true
+          },
+          {
+            "name": "Pay-per-session (PG Points)",
+            "price": "Varies (avg $10/session)",
+            "period": "",
+            "note": "Coaching and gameplay analysis are purchased per session using PG Points; price depends on coach and session length.",
+            "highlight": false
+          },
+          {
+            "name": "Aimlabs+ / Combined Membership",
+            "price": "Varies",
+            "period": "/mo",
+            "note": "Aimlabs+ and ProGuides memberships have integrated benefits (discounts on coaching, Aimlabs tasks and Discovery AI).",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://www.proguides.com/guides/",
+          "pricing": "https://www.proguides.com/settings/subscriptions",
+          "blog": "https://www.proguides.com/guides/",
+          "jobs": "https://www.linkedin.com/company/proguidescom"
+        },
+        "strengths": [
+          "Large library of pro-led courses and lessons across multiple competitive titles",
+          "Marketplace model with thousands of bookable coaches and on-demand sessions",
+          "Tight integration with Aimlabs tools (Discovery AI, personalized tasks) and proprietary match analytics",
+          "Affordable entry price point compared with private coaching, and discounts for members"
+        ],
+        "weaknesses": [
+          "Pricing transparency and billing complaints from users (annual charges despite advertised monthly rate)",
+          "Quality variability between coaches—limited standardized certification",
+          "Primarily B2C focus; limited enterprise/team features for esports organizations",
+          "Dependent on third-party freelance coaches for capacity and quality control"
+        ]
+      }
+    },
+    {
+      "id": "gamersensei",
+      "name": "Gamer Sensei",
+      "url": "https://www.gamersensei.com/",
+      "description": "A marketplace connecting players with professional esports coaches for live 1:1 and team coaching sessions to improve competitive gameplay.",
+      "status": "done",
+      "logoChar": "GS",
+      "logoColor": "#3b82f6",
+      "logoBg": "#eff6ff",
+      "tags": [
+        "esports",
+        "coaching",
+        "marketplace",
+        "1:1"
+      ],
+      "pricing": "$16/hr",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2016",
+        "country": "US",
+        "funding": "$4M (Series A, 2017); acquired by Corsair 2020",
+        "employees": "~37 (Built In Boston)",
+        "business": "Marketplace / B2C coaching (also offers B2B team coaching)",
+        "targetMarket": "Individual competitive gamers (casual to aspiring pro), esports teams, parents purchasing coaching for children",
+        "features": [
+          {
+            "category": "Core marketplace",
+            "items": [
+              "Coach directory and searchable profiles",
+              "Coach ratings and reviews",
+              "Coach-set pricing (hourly/lesson rates)",
+              "Scheduling and booking system"
+            ]
+          },
+          {
+            "category": "Coaching & curriculum",
+            "items": [
+              "One-on-one live lessons",
+              "Team coaching and group sessions",
+              "Custom lesson plans and curriculum",
+              "Skills assessments (flat-rate assessment offering announced)"
+            ]
+          },
+          {
+            "category": "Platform & delivery",
+            "items": [
+              "Built-in video conferencing (added in 2021)",
+              "In-platform messaging and scheduling sync",
+              "Lesson packages and unscheduled-hours credit/refund system",
+              "Coach onboarding and career development support"
+            ]
+          },
+          {
+            "category": "Payments & commerce",
+            "items": [
+              "In-platform payments and credit system",
+              "Refunds/credits for canceled lessons",
+              "Coach-managed pricing tiers (novice to pro/legendary)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Subscription or membership plans for recurring coaching (mostly pay-per-lesson)",
+          "Robust progress analytics / learning dashboard to track player improvement over time",
+          "Stronger, standardized coach certification and transparent vetting details",
+          "Native in-game integrations or overlays for live coach spectating and replay annotation",
+          "Mobile-first app experience and easier localized language support for non-English markets"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Pay-per-lesson",
+            "price": "$16+",
+            "period": "",
+            "note": "Coach-set hourly rates; typical range reported around $16–$100+ per hour depending on coach skill level.",
+            "highlight": true
+          },
+          {
+            "name": "Team Coaching",
+            "price": "Custom",
+            "period": "",
+            "note": "Custom pricing for team sessions and packages (offers team coaching services).",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://support.gamersensei.com/hc/en-us",
+          "pricing": "https://www.gamersensei.com/senseis",
+          "blog": "https://blog.gamersensei.com/",
+          "jobs": "https://www.gamersensei.com/about"
+        },
+        "strengths": [
+          "Early mover and recognizable brand in esports coaching with a large coach network",
+          "Wide game coverage and coach variety (roles, skill levels, former pros)",
+          "Flexible, coach-driven pricing enabling entry-level and premium options",
+          "Acquired by Corsair (2020) — access to resources and broader esports partnerships"
+        ],
+        "weaknesses": [
+          "Inconsistent coach quality and uneven user experience due to marketplace model",
+          "Lack of standardized progress-tracking or learning analytics for students",
+          "No clear subscription/retention product — relies on one-off lesson purchases",
+          "Pricing can be expensive for casual players; limited low-cost learning paths"
+        ]
+      }
+    },
+    {
+      "id": "eloking",
+      "name": "Eloking",
+      "url": "https://eloking.com/",
+      "description": "A boosting, coaching and duo-queue teammate service for competitive gamers seeking faster rank progression in titles like League of Legends, Valorant and CS:GO.",
+      "status": "done",
+      "logoChar": "E",
+      "logoColor": "#3b82f6",
+      "logoBg": "#eff6ff",
+      "tags": [
+        "boosting",
+        "coaching",
+        "teammate",
+        "gaming"
+      ],
+      "pricing": "€6",
+      "pricingPeriod": "",
+      "customers": "20,000+",
+      "details": {
+        "founded": "2021",
+        "country": "Latvia",
+        "funding": "Unknown",
+        "employees": "Unknown",
+        "business": "B2C gaming services (boosting/coaching)",
+        "targetMarket": "Individual competitive gamers who want rank boosts, coaching, or to play duo/teammate sessions in games such as League of Legends, Valorant, CS:GO, Dota 2, Overwatch 2 and Rocket League.",
+        "features": [
+          {
+            "category": "Core services",
+            "items": [
+              "Rank/division boosting (division-by-division)",
+              "Placement and win-based boosts",
+              "Duo / teammate sessions (play-with a pro)",
+              "Coaching sessions with vetted pros",
+              "Faceit / platform-specific boosts (CS)"
+            ]
+          },
+          {
+            "category": "Platform & trust",
+            "items": [
+              "Online boosting price calculator",
+              "24/7 live support / order support",
+              "Screened professional boosters (claim top players/pros)",
+              "Refunds and a loyalty program (cashback, discounts, daily lootbox)"
+            ]
+          },
+          {
+            "category": "Product",
+            "items": [
+              "Multi-game support across major competitive titles",
+              "Regional pricing adjustments",
+              "Encrypted payments (Stripe integration)",
+              "Order tracking and member area"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Live, verifiable in-game streaming or replay evidence per order (better proof of booster activity)",
+          "Subscription / recurring coaching plans for long-term skill development",
+          "Official API or in-product game-account verification to reduce account-sharing risk",
+          "Dedicated mobile app for ordering and tracking",
+          "Transparent booster performance metrics (win-rate, average completion time) on each booster profile"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Pay-per-order",
+            "price": "Custom",
+            "period": "",
+            "note": "Primary pricing model: calculator computes cost per order (per-division / per-win). Example low-rank rate cited ~€6 per division in some articles/region pages.",
+            "highlight": true
+          },
+          {
+            "name": "Coaching / Teammate",
+            "price": "Custom",
+            "period": "",
+            "note": "One-off coaching or duo sessions priced per session; rates depend on coach rank and game.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "Unknown",
+          "pricing": "https://eloking.com/ (boosting price calculator on-site)",
+          "blog": "https://eloking.com/blog",
+          "jobs": "https://eloking.com/jobs"
+        },
+        "strengths": [
+          "Competitive, calculator-driven pricing with regional adjustments",
+          "Wide game support and multiple service types (boosts, coaching, teammate)",
+          "Strong social proof (Trustpilot reviews, site testimonials) and 24/7 support",
+          "Vetted boosters and a loyalty program to encourage repeat customers"
+        ],
+        "weaknesses": [
+          "Boosting is inherently against many games' terms of service — reputational and account-risk exposure",
+          "Limited public company transparency (funding, team size and growth not clearly published)",
+          "No clear standardized subscription or long-term coaching packages for retention",
+          "Lack of verifiable per-booster performance metrics and live proof for orders"
+        ]
+      }
+    },
+    {
+      "id": "legionfarm",
+      "name": "LegionFarm",
+      "url": "https://legionfarm.com/",
+      "description": "A marketplace connecting everyday gamers with pro players for coaching, duo-queue companionship, and boosting services.",
+      "status": "done",
+      "logoChar": "LF",
+      "logoColor": "#7c3aed",
+      "logoBg": "#f5f3ff",
+      "tags": [
+        "gaming",
+        "coaching",
+        "boosting",
+        "marketplace"
+      ],
+      "pricing": "$50",
+      "pricingPeriod": "/mo",
+      "customers": "250k+",
+      "details": {
+        "founded": "2016",
+        "country": "US",
+        "funding": "$17.8M (reported)",
+        "employees": "~68",
+        "business": "B2C marketplace (gaming services)",
+        "targetMarket": "Casual and competitive gamers seeking one-on-one coaching, duo-queue play, account boosting, and companionship across AAA multiplayer titles",
+        "features": [
+          {
+            "category": "Core services",
+            "items": [
+              "One-on-one coaching sessions with vetted pro players",
+              "Duo-queue / play-with-a-pro (companion) sessions",
+              "Carry / boosting services to achieve in-game goals",
+              "Group play sessions (multi-customer sessions with a Pro)"
+            ]
+          },
+          {
+            "category": "Product features",
+            "items": [
+              "Session scheduling and calendar",
+              "VOD / replay review and coach feedback",
+              "Subscription option for recurring access to group sessions",
+              "Per-hour and package pricing for flexible buys"
+            ]
+          },
+          {
+            "category": "Pro platform & community",
+            "items": [
+              "Onboarding and tiers for Pros (Semi-Pro/Pro roles)",
+              "Tools for Pros to accept orders and manage sessions",
+              "Promotions, incentives and NFT/guild-style offerings (experimental)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Clear, standardized coach quality metrics and verified credentials (hard to compare coaches objectively)",
+          "Structured, progressive curricula and learning paths tied to measurable outcomes",
+          "Robust in-app progress analytics and long-term skill tracking for customers",
+          "Enterprise / team-focused offerings for esports orgs or schools",
+          "Transparent packaged pricing bundles (most offerings are pay-per-session or subscription without consistent bundled learning plans)"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Subscription (Standard)",
+            "price": "$50",
+            "period": "/mo",
+            "note": "Monthly subscription that grants access to group play sessions and discounts; company previously describes $50/mo as the default subscription tier.",
+            "highlight": true
+          },
+          {
+            "name": "Pay-per-session",
+            "price": "Varies",
+            "period": "per hour",
+            "note": "Individual 1:1 or duo sessions charged hourly; historically examples reported ~$12/hr for some services but rates vary by game and pro level.",
+            "highlight": false
+          },
+          {
+            "name": "Top-up / Senior",
+            "price": "$500",
+            "period": "one-time (monthly top-up)",
+            "note": "Higher-value top-ups (e.g. $500) that have been promoted with added benefits/subscription access.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://promo.legionfarm.com/coaching-rewards",
+          "pricing": "https://legionfarm.com/",
+          "blog": "https://promo.legionfarm.com/patch-notes",
+          "jobs": "Unknown"
+        },
+        "strengths": [
+          "Large network of professional players across multiple AAA titles",
+          "Multiple monetization models (subscription + pay-per-session + packages)",
+          "Product features focused on live coaching, VOD review and scheduling",
+          "YC exposure / notable investor backing and solid early traction"
+        ],
+        "weaknesses": [
+          "Inconsistent transparency around coach qualification and performance metrics",
+          "Limited structured learning pathways and long-term progress tracking",
+          "Pricing and packages can feel fragmented for users who want clear outcomes",
+          "Primary focus on consumer sessions — limited B2B/enterprise products"
+        ]
+      }
+    },
+    {
+      "id": "boostingfactory",
+      "name": "Boosting Factory",
+      "url": "https://boostingfactory.com/",
+      "description": "Competitive-gaming services provider offering rank boosting, coaching, duo-queue and account services for players across multiple titles and platforms.",
+      "status": "done",
+      "logoChar": "BF",
+      "logoColor": "#f59e0b",
+      "logoBg": "#fff7ed",
+      "tags": [
+        "game-boosting",
+        "coaching",
+        "duo-queue",
+        "account-services"
+      ],
+      "pricing": "Custom",
+      "pricingPeriod": "",
+      "customers": "200K+",
+      "details": {
+        "founded": "2015",
+        "country": "Unknown",
+        "funding": "Unknown",
+        "employees": "6 (estimated)",
+        "business": "B2C services",
+        "targetMarket": "Competitive and casual players who want fast rank progression, account leveling, coaching or play-with/duo services across PC and console.",
+        "features": [
+          {
+            "category": "Core services",
+            "items": [
+              "Rank/division boosting (per-division and full placement boosts)",
+              "Duo-queue / Play-with booster (play on customer's account alongside booster)",
+              "Coaching sessions and one-on-one coaching",
+              "Account leveling, wins boosting and placement matches",
+              "Platform & region support across major titles (LoL, Valorant, CoD, OW, Apex, CS2, etc.)"
+            ]
+          },
+          {
+            "category": "Customer experience & safety",
+            "items": [
+              "Real-time order tracking and booster chat",
+              "Scheduling / pause/resume boost orders",
+              "Live streaming option (extra fee)",
+              "Loyalty program with tiered discounts and cashback",
+              "VPN IP-mimicking for booster sessions and anonymous accounts"
+            ]
+          },
+          {
+            "category": "Service options",
+            "items": [
+              "Express orders and priority starts",
+              "Custom requests (specific heroes/agents/champions)",
+              "Money-back guarantee and dispute support",
+              "Multiple payment methods (PayPal commonly supported)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Transparent, public pricing matrix/searchable price calculator without entering an order",
+          "Public, verifiable booster profiles (match history, verified stats and individual ratings)",
+          "Ongoing subscription/coaching plans for recurring skill development",
+          "Mobile app or first-class push/notification experience for order updates",
+          "Clearer, standardized SLAs or insurance around bans/penalties (buyer protection)"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Per-order (Boosting / Duo / Play-with)",
+            "price": "Custom",
+            "period": "",
+            "note": "Pay-per-service. Prices vary by game, start/end rank, platform, extras (streaming, express). Loyalty discounts available.",
+            "highlight": true
+          },
+          {
+            "name": "Coaching / Sessions",
+            "price": "Custom",
+            "period": "",
+            "note": "One-off coaching sessions and coaching packages; price depends on coach and duration.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "Unknown",
+          "pricing": "https://www.boostingfactory.com/",
+          "blog": "https://www.boostingfactory.com/blog",
+          "jobs": "https://www.boostingfactory.com/contact-us",
+          "reviews": "https://www.trustpilot.com/review/boostingfactory.com"
+        },
+        "strengths": [
+          "Established operator (site and copyright show operation since 2015)",
+          "Wide game coverage and multi-platform support",
+          "Feature-rich ordering experience: scheduling, pause/resume, chat, live-streaming",
+          "Loyalty program that grants permanent discounts and cashback",
+          "Generally positive reviewer sentiment (high Trustpilot scores / many positive reviews)"
+        ],
+        "weaknesses": [
+          "No public, granular pricing visible without configuring an order (friction for buyers)",
+          "Limited transparency on individual boosters (few verifiable public profiles)",
+          "Potential ToS/legal risk for customers (account sharing/boosting violates many publishers' terms)",
+          "Small company footprint / limited corporate disclosure (funding & HQ unclear)",
+          "Some customer complaints about booster performance or start delays in reviews"
+        ]
+      }
+    },
+    {
+      "id": "overgear",
+      "name": "Overgear",
+      "url": "https://overgear.com/",
+      "description": "A global marketplace connecting gamers with boosters, coaches, and in-game services (duo-play, carries, currency) aimed at MMO and competitive players.",
+      "status": "done",
+      "logoChar": "OG",
+      "logoColor": "#3b82f6",
+      "logoBg": "#eff6ff",
+      "tags": [
+        "game-services",
+        "boosting-marketplace",
+        "in-game-economy",
+        "coaching"
+      ],
+      "pricing": "Custom",
+      "pricingPeriod": "",
+      "customers": "100K+",
+      "details": {
+        "founded": "2017",
+        "country": "Cyprus (Nicosia)",
+        "funding": "Unknown (no public venture funding found; appears bootstrapped)",
+        "employees": "~50",
+        "business": "B2C marketplace / C2C (gaming services)",
+        "targetMarket": "MMO and competitive game players seeking boosting, coaching, in-game currency, carries, and related services",
+        "features": [
+          {
+            "category": "Marketplace & Services",
+            "items": [
+              "Boosting/carry orders (PvE & PvP)",
+              "Coaching and lessons (1:1) ",
+              "In-game currency & item sales",
+              "Bundles and weekly curated Vault deals",
+              "Play-with/duo services and scheduled runs"
+            ]
+          },
+          {
+            "category": "Safety & Trust",
+            "items": [
+              "Seller vetting / interview process",
+              "Escrow-style payment hold until completion",
+              "Order tracking and delivery updates",
+              "Refunds via Overgear Wallet / OG Coins"
+            ]
+          },
+          {
+            "category": "Payments & Loyalty",
+            "items": [
+              "Overgear Wallet and OG Coins cashback system",
+              "Multiple payment options (cards, Google/Apple Pay, third-party processors)",
+              "Promotions, discounts and VIP packages"
+            ]
+          },
+          {
+            "category": "Seller Tools & Support",
+            "items": [
+              "24/7 live support/chat",
+              "Seller dashboards and reputation/ratings",
+              "Offer customization and scheduling",
+              "Bundles and package creation for sellers"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No site-wide subscription or standardized pricing model (prices vary widely by seller)",
+          "Limited public transparency on seller qualifications and consistent quality guarantees beyond basic vetting",
+          "No prominent official mobile app experience (web-first; mobile web only) — app could improve convenience and trust",
+          "Limited enterprise or team-focused features (bulk/partner tooling, APIs) for studios or large buyers",
+          "Potentially slow or confusing KYC/refund flows for some buyers (document requests post-payment reported in forums)"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Browse (free)",
+            "price": "$0",
+            "period": "",
+            "note": "Create an account, browse offers, and chat with sellers for free; no subscription required.",
+            "highlight": false
+          },
+          {
+            "name": "Pay-as-you-go (marketplace pricing)",
+            "price": "Custom",
+            "period": "",
+            "note": "Individual service prices are set by sellers (boosts, carries, coaching); Overgear takes a platform fee — final price varies by game, region, and seller.",
+            "highlight": true
+          },
+          {
+            "name": "VIP / Bundles",
+            "price": "Varies",
+            "period": "",
+            "note": "Curated weekly Vault deals and VIP packages with fixed bundle pricing; prices depend on contents and promotions.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://help.overgear.com/",
+          "pricing": "https://overgear.com/ (marketplace pricing varies by offer)",
+          "blog": "https://overgearteam.medium.com/",
+          "jobs": "https://www.linkedin.com/company/overgearcom/"
+        },
+        "strengths": [
+          "Large multi-game marketplace with many service categories (boosts, coaching, currency)",
+          "Seller-driven pricing keeps costs competitive; platform focuses on low prices and fast delivery",
+          "Escrow-like wallet and OG Coins loyalty program improves repeat purchase rates",
+          "Seller vetting, order tracking and 24/7 support provide baseline safety for buyers"
+        ],
+        "weaknesses": [
+          "Quality variability — marketplace model leads to inconsistent service quality between sellers",
+          "Regulatory and TOS risk — services (boosting, account-related offers) may conflict with game publishers’ policies",
+          "Transparency and trust gaps in some user reports (post-payment KYC requests, delayed deliveries reported on forums)",
+          "No clear subscription or enterprise offering for high-volume buyers or partners"
+        ]
+      }
+    },
+    {
+      "id": "fiverr",
+      "name": "Fiverr",
+      "url": "https://www.fiverr.com/",
+      "description": "A global gig marketplace connecting buyers and freelance sellers across hundreds of service categories (small businesses and individuals buying on-demand digital services, including gaming coaching and play-with-me sessions).",
+      "status": "done",
+      "logoChar": "F",
+      "logoColor": "#1DBF73",
+      "logoBg": "#ecfdf5",
+      "tags": [
+        "gig-marketplace",
+        "freelance",
+        "on-demand",
+        "marketplace"
+      ],
+      "pricing": "$5",
+      "pricingPeriod": "",
+      "customers": "4M+",
+      "details": {
+        "founded": "2010",
+        "country": "Israel",
+        "funding": "$111M (pre-IPO)",
+        "employees": "~762",
+        "business": "Online freelance marketplace (gig economy)",
+        "targetMarket": "Small businesses, startups, marketing teams, and individuals seeking affordable on-demand digital services; freelancers and small agencies selling services",
+        "features": [
+          {
+            "category": "Marketplace",
+            "items": [
+              "Gig-based listings with packages and add-ons",
+              "Search, categories, and buyer reviews/ratings",
+              "Subscription Gigs (recurring services)"
+            ]
+          },
+          {
+            "category": "Buyer & Seller Tools",
+            "items": [
+              "Messaging and order management",
+              "Seller dashboards (performance insights, analytics)",
+              "Seller programs: Seller Plus, Fiverr Pro, Top Rated Seller badges"
+            ]
+          },
+          {
+            "category": "Payments & Protections",
+            "items": [
+              "Escrow-style order payments and milestone delivery",
+              "Multiple payment methods and buyer protection policies",
+              "Commission / fee model (platform takes ~20% of seller revenue)"
+            ]
+          },
+          {
+            "category": "Business & Enterprise",
+            "items": [
+              "Fiverr Business: team workflows and curated talent",
+              "Fiverr Pro: vetted professional freelancers",
+              "Fiverr Workspace (formerly AND.CO): invoicing, proposals, contracts"
+            ]
+          },
+          {
+            "category": "Learning & AI",
+            "items": [
+              "Fiverr Learn courses",
+              "AI features integrated across product (search/assistance)",
+              "Product features for recurring subscriptions and gig visibility"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Dedicated live/co-play session tooling (scheduling, in-platform low-latency co-play or streaming integration) for gaming services",
+          "Stronger standardized vetting and quality guarantees for niche/high-stakes categories (e.g., gaming coaching certifications)",
+          "Better matchmaking/recommendation for recurring or long-term engagements (beyond one-off gigs)",
+          "More transparent fee-sharing or lower commission options for high-value sellers",
+          "Deeper integrations for team collaboration and project management tailored to buyers hiring multiple freelancers"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Gig (entry)",
+            "price": "$5",
+            "period": "",
+            "note": "Core marketplace model — buyers purchase one-off gigs or packages; sellers set prices (gigs start at $5).",
+            "highlight": false
+          },
+          {
+            "name": "Seller Plus",
+            "price": "$25",
+            "period": "/mo",
+            "note": "Subscription for sellers with growth tools, early payouts and promotional features (Standard tier).",
+            "highlight": false
+          },
+          {
+            "name": "Seller Plus Premium",
+            "price": "$49",
+            "period": "/mo",
+            "note": "Premium seller subscription with additional business tools and support.",
+            "highlight": false
+          },
+          {
+            "name": "Fiverr Pro Advanced",
+            "price": "$129",
+            "period": "/mo",
+            "note": "Advanced subscription for enterprise access to vetted talent and management tools.",
+            "highlight": true
+          },
+          {
+            "name": "Fiverr Workspace",
+            "price": "Free / Paid",
+            "period": "",
+            "note": "Workspace offers free invoicing and a paid Unlimited plan for freelancers/agencies (pricing varies).",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://help.fiverr.com/hc/en-us",
+          "pricing": "https://pro.fiverr.com/pro-solutions/plans",
+          "blog": "https://www.fiverr.com/resources",
+          "jobs": "https://www.fiverr.com/careers"
+        },
+        "strengths": [
+          "Large, global marketplace and strong brand awareness",
+          "Low-friction buyer experience and very broad category coverage",
+          "Multiple monetization and product layers (Pro, Business, Workspace)",
+          "Public company with resources to invest in product and growth"
+        ],
+        "weaknesses": [
+          "High variability in quality across sellers leading to trust issues for some buyers",
+          "Relatively high seller commission (around 20%) which can discourage higher-end talent",
+          "Commoditization of services making differentiation difficult for sellers",
+          "Limited specialized tooling for live gaming/co-play experiences"
+        ]
+      }
+    },
+    {
+      "id": "playerauctions",
+      "name": "PlayerAuctions",
+      "url": "https://www.playerauctions.com/",
+      "description": "A long-running player-to-player marketplace for buying and selling game accounts, in-game items/currency, and services like boosting and coaching (including play-with/duo options).",
+      "status": "done",
+      "logoChar": "PA",
+      "logoColor": "#0056B3",
+      "logoBg": "#E6F2FF",
+      "tags": [
+        "marketplace",
+        "P2P",
+        "game-items",
+        "accounts",
+        "boosting"
+      ],
+      "pricing": "Free",
+      "pricingPeriod": "",
+      "customers": "1M+",
+      "details": {
+        "founded": "1999",
+        "country": "US",
+        "funding": "Unknown (private; reported investment/ownership links with ItemMania)",
+        "employees": "~100",
+        "business": "Player-to-player marketplace (C2C/P2P)",
+        "targetMarket": "Gamers worldwide who buy/sell game accounts, in-game currency, items, skins, and pay-for services such as boosting or coaching; sellers range from casual players to professional power-sellers.",
+        "features": [
+          {
+            "category": "Core marketplace",
+            "items": [
+              "Listings for accounts, currency, items, skins, and services (boosting/coaching)",
+              "Storefronts / seller stores and featured seller promotions",
+              "Search and category browsing across hundreds of games"
+            ]
+          },
+          {
+            "category": "Security & Trust",
+            "items": [
+              "PlayerGuardian escrow system (holds buyer payment until delivery confirmed)",
+              "Seller levels/verification and feedback ratings",
+              "Dispute resolution and evidence-based claims handling",
+              "Account insurance options for some listings"
+            ]
+          },
+          {
+            "category": "Payments & Payouts",
+            "items": [
+              "Multiple disbursement methods (bank transfer, crypto options listed), buyer payment gateways",
+              "Transaction fees applied to buyers and sellers",
+              "Minimum disbursement thresholds and wire fee disclosures"
+            ]
+          },
+          {
+            "category": "Seller tools & operations",
+            "items": [
+              "Offer creation and inventory management for sellers",
+              "Delivery instructions and in-game delivery workflows",
+              "Featured seller advertising slots"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Transparent, published per-product fee schedule (fees vary by product/disbursement and are not always clearly communicated on product pages)",
+          "Modern seller APIs and automation for high-volume/pro sellers (bulk listing, inventory sync, programmatic order handling)",
+          "Faster/instant payout options and lower minimum withdrawal thresholds — current disbursement minimums and bank fees can be a friction point",
+          "Native mobile apps with improved UX compared with the web experience",
+          "Stronger long-term guarantees for account sales (many protections are short-term and rely on buyer evidence/disputes)",
+          "Advanced analytics/dashboarding for sellers (sales analytics, pricing suggestions, dynamic repricing)"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Free",
+            "price": "$0",
+            "period": "",
+            "note": "Free to register and create listings — no subscription; Platform earns via per-transaction fees applied to buyers and/or sellers.",
+            "highlight": false
+          },
+          {
+            "name": "Transaction fees",
+            "price": "Varies",
+            "period": "per transaction",
+            "note": "Buyer service fees (to cover fraud protection/escrow/support) and seller fees/disbursement fees apply. Fees vary by product type, payment gateway and payout method (help center lists variable seller fees and disbursement minimums).",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://support.playerauctions.com/hc/en-us",
+          "pricing": "https://support.playerauctions.com/hc/en-us/articles/115008180648-What-are-the-fees-and-disbursement-methods-for-selling",
+          "blog": "https://blog.playerauctions.com/",
+          "jobs": "https://www.linkedin.com/company/itemmania-network-technology-shanghai-ld./"
+        },
+        "strengths": [
+          "Long-established brand (operating since 1999) with a large registered user base and global reach",
+          "PlayerGuardian escrow system reduces buyer fraud and provides an industry-recognized protection model",
+          "Supports many game titles and product types (accounts, currency, items, boosting/coaching), consolidating multiple needs in one marketplace",
+          "Seller-level system and review/feedback mechanisms help surface more reliable sellers",
+          "Operational features like featured seller promotions and multiple payout methods for sellers"
+        ],
+        "weaknesses": [
+          "Transaction fees, minimum disbursement thresholds, and occasional wire fees frustrate smaller sellers",
+          "Protection primarily relies on evidence submission and manual dispute resolution — can be slow and contentious",
+          "Selling game accounts and services carries legal/ToS risk with publishers, creating potential platform exposure",
+          "Limited modern seller tooling (APIs, bulk-listing automation, analytics) compared to newer competitors",
+          "UX and platform experience feel dated in places; mobile/native experience is limited"
+        ]
+      }
+    }
+  ],
+  "opportunity": null,
+  "completedAt": "2026-03-15T23:07:39.794Z"
+}

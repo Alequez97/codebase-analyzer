@@ -66,6 +66,7 @@ export const useMarketResearchStore = create((set, get) => ({
   // --- Input form ---
   idea: "",
   billingMode: "monthly", // "monthly" | "annual"
+  selectedPlan: null, // { name, numCompetitors, ... } — set when user picks a plan
 
   // --- Analysis state ---
   sessionId: loadSessionId(), // null until first analysis is started
@@ -89,10 +90,13 @@ export const useMarketResearchStore = create((set, get) => ({
   // --- Input form actions ---
   setIdea: (idea) => set({ idea }),
   setBillingMode: (mode) => set({ billingMode: mode }),
+  selectPlan: (plan) => set({ selectedPlan: plan }),
+  clearPlan: () => set({ selectedPlan: null }),
 
   // --- Analysis actions ---
   startAnalysis: async () => {
-    const { idea } = get();
+    const { idea, selectedPlan } = get();
+    const numCompetitors = selectedPlan?.numCompetitors ?? 10;
     const sessionId = crypto.randomUUID();
     saveSessionId(sessionId);
 
@@ -108,7 +112,7 @@ export const useMarketResearchStore = create((set, get) => ({
     });
 
     try {
-      await requestMarketResearchAnalysis(sessionId, idea);
+      await requestMarketResearchAnalysis(sessionId, idea, numCompetitors);
     } catch {
       // Task queue failed — mark as complete with empty state so UI isn't stuck
       set({ isAnalyzing: false, isAnalysisComplete: true });
@@ -141,7 +145,12 @@ export const useMarketResearchStore = create((set, get) => ({
 
   _setCompetitors: (competitors) => set({ competitors }),
 
-  _addCompetitorStub: ({ taskId, competitorId, competitorName, competitorUrl }) =>
+  _addCompetitorStub: ({
+    taskId,
+    competitorId,
+    competitorName,
+    competitorUrl,
+  }) =>
     set((state) => {
       if (state.competitors.some((c) => c.id === competitorId)) return state;
       return {
@@ -157,7 +166,10 @@ export const useMarketResearchStore = create((set, get) => ({
             logoBg: "#eef2ff",
           },
         ],
-        competitorTaskMap: { ...state.competitorTaskMap, [taskId]: competitorId },
+        competitorTaskMap: {
+          ...state.competitorTaskMap,
+          [taskId]: competitorId,
+        },
       };
     }),
 

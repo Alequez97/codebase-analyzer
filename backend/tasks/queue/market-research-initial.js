@@ -19,7 +19,11 @@ import * as logger from "../../utils/logger.js";
  * @param {string} params.idea - The startup idea text to research
  * @returns {Promise<Object>} The created task, or { success: false, error, code }
  */
-export async function queueMarketResearchInitialTask({ sessionId, idea } = {}) {
+export async function queueMarketResearchInitialTask({
+  sessionId,
+  idea,
+  numCompetitors,
+} = {}) {
   if (!sessionId || !idea) {
     return { success: false, error: "sessionId and idea are required" };
   }
@@ -40,6 +44,7 @@ export async function queueMarketResearchInitialTask({ sessionId, idea } = {}) {
     params: {
       sessionId,
       idea,
+      numCompetitors,
       targetDirectory: config.target.directory,
     },
     agentConfig,

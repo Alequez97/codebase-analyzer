@@ -26,7 +26,7 @@ function CompetitorCardDone({ competitor }) {
       </Text>
 
       <HStack gap={1.5} flexWrap="wrap">
-        {competitor.tags.map((tag) => (
+        {(competitor.tags ?? []).map((tag) => (
           <Badge
             key={tag}
             bg="#f8fafc"

@@ -19,9 +19,17 @@ export const getMarketResearchSession = (sessionId) =>
  * Queue an AI market research task for the given session.
  * @param {string} sessionId
  * @param {string} idea
+ * @param {number} numCompetitors - How many competitors to analyze (plan-dependent)
  */
-export const requestMarketResearchAnalysis = (sessionId, idea) =>
-  client.post(`/market-research/${sessionId}/analyze`, { idea });
+export const requestMarketResearchAnalysis = (
+  sessionId,
+  idea,
+  numCompetitors,
+) =>
+  client.post(`/market-research/${sessionId}/analyze`, {
+    idea,
+    numCompetitors,
+  });
 
 /**
  * Retrieve the AI-generated report once the task has completed.

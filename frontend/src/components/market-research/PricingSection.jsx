@@ -8,14 +8,17 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, FlaskConical } from "lucide-react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { PRICING_PLANS } from "./constants";
 import { BillingToggle } from "./BillingToggle";
 import { PricingCard } from "./PricingCard";
 
+const IS_TEST_MODE = import.meta.env.VITE_PRICING_TEST_MODE === "true";
+
 export function PricingSection() {
   const billingMode = useMarketResearchStore((s) => s.billingMode);
+  const selectedPlan = useMarketResearchStore((s) => s.selectedPlan);
   const plans = PRICING_PLANS[billingMode];
 
   return (
@@ -29,7 +32,34 @@ export function PricingSection() {
     >
       <Container maxW="960px">
         <VStack gap={12} align="stretch">
-          {/* Header */}
+          {/* Test mode banner */}
+          {IS_TEST_MODE && (
+            <HStack
+              bg="#fffbeb"
+              borderWidth="1px"
+              borderColor="#fde68a"
+              borderRadius="10px"
+              p={3.5}
+              gap={2.5}
+              fontSize="12px"
+              color="#92400e"
+            >
+              <FlaskConical size={14} style={{ flexShrink: 0 }} />
+              <Text>
+                <Text as="span" fontWeight="700">
+                  Test mode active
+                </Text>{" "}
+                — click any plan to select it and test the subscription flow. No
+                payment is processed.
+                {selectedPlan && (
+                  <Text as="span" fontWeight="600" ml={1}>
+                    Active plan: {selectedPlan.name} (~
+                    {selectedPlan.numCompetitors} competitors/report)
+                  </Text>
+                )}
+              </Text>
+            </HStack>
+          )}
           <VStack gap={5} textAlign="center">
             <Text
               fontSize="11px"

@@ -45,6 +45,8 @@ function StatCard({ label, value }) {
 export function CompetitorDetails({ competitor, onBack }) {
   const { details } = competitor;
 
+  if (!details) return null;
+
   return (
     <VStack align="stretch" gap={5}>
       {/* Back link */}
@@ -140,7 +142,7 @@ export function CompetitorDetails({ competitor, onBack }) {
         </Grid>
 
         <HStack gap={1.5} flexWrap="wrap">
-          {competitor.tags.map((tag) => (
+          {(competitor.tags ?? []).map((tag) => (
             <Badge
               key={tag}
               bg="#f8fafc"
