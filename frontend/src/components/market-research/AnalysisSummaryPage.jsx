@@ -1,7 +1,6 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { Activity, CheckCircle } from "lucide-react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
-import { Navbar, NavLogo } from "./Navbar";
 import { MOCK_COMPETITORS } from "./constants";
 
 // ---------------------------------------------------------------------------
@@ -446,84 +445,6 @@ export function AnalysisSummaryPage() {
 
   return (
     <Box minH="100vh" bg="#f8fafc">
-      <Navbar
-        left={
-          <HStack gap={0}>
-            <NavLogo onClick={goToLanding} />
-            {["How it works", "Pricing", "Docs"].map((label) => (
-              <Button
-                key={label}
-                variant="ghost"
-                size="sm"
-                fontSize="13px"
-                fontWeight="500"
-                color="#52525b"
-                ml={1}
-                _hover={{ color: "#0f172a" }}
-              >
-                {label}
-              </Button>
-            ))}
-          </HStack>
-        }
-        right={
-          <HStack gap={2}>
-            <HStack
-              gap={2}
-              px={2.5}
-              py={1}
-              borderRadius="7px"
-              borderWidth="1px"
-              borderColor="#e2e8f0"
-              bg="white"
-            >
-              <Box
-                w="20px"
-                h="20px"
-                borderRadius="50%"
-                bg="linear-gradient(135deg, #6366f1, #7c3aed)"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text fontSize="9px" fontWeight="700" color="white">
-                  J
-                </Text>
-              </Box>
-              <Text fontSize="12px" fontWeight="500" color="#374151">
-                john@example.com
-              </Text>
-              <Box
-                px={1.5}
-                py={0.5}
-                borderRadius="4px"
-                bg="#eff6ff"
-                color="#2563eb"
-                fontSize="10px"
-                fontWeight="700"
-              >
-                Starter
-              </Box>
-            </HStack>
-            <Button
-              size="sm"
-              variant="outline"
-              fontSize="12px"
-              fontWeight="600"
-              borderColor="#e2e8f0"
-              color="#374151"
-              borderRadius="7px"
-              px={3}
-              h="30px"
-              _hover={{ bg: "#f1f5f9" }}
-              onClick={resetAnalysis}
-            >
-              New Analysis
-            </Button>
-          </HStack>
-        }
-      />
-
       <Box maxW="1040px" mx="auto" px={6} pt="72px" pb={16}>
         {/* Hero banner */}
         <HeroBanner idea={idea} />

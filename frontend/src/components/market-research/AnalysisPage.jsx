@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
-import { Navbar, NavLogo } from "./Navbar";
 import { CompetitorsGrid } from "./CompetitorsGrid";
 import { ActivityFeed } from "./ActivityFeed";
 import { CompetitorDetails } from "./CompetitorDetails";
@@ -141,29 +140,6 @@ export function AnalysisPage() {
 
   return (
     <Box minH="100vh" bg="#f8fafc">
-      <Navbar
-        left={<NavLogo onClick={goToLanding} />}
-        right={
-          <HStack gap={2}>
-            <Button
-              size="sm"
-              variant="outline"
-              fontSize="12px"
-              fontWeight="600"
-              borderColor="#e2e8f0"
-              color="#374151"
-              borderRadius="7px"
-              px={3}
-              h="30px"
-              _hover={{ bg: "#f1f5f9" }}
-              onClick={resetAnalysis}
-            >
-              New Analysis
-            </Button>
-          </HStack>
-        }
-      />
-
       <Box maxW="1024px" mx="auto" px={6} pt="72px" pb={12}>
         {/* Page header */}
         <VStack align="start" gap={0.5} mb={8}>

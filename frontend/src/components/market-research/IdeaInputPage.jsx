@@ -8,7 +8,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
-import { Navbar, NavLogo } from "./Navbar";
 import { IdeaInputCard } from "./IdeaInputCard";
 import { SignInNotice } from "./SignInNotice";
 import { InputStatsFooter } from "./InputStatsFooter";
@@ -19,38 +18,6 @@ export function IdeaInputPage() {
 
   return (
     <Box minH="100vh" bg="#f8fafc">
-      <Navbar
-        left={<NavLogo onClick={goToLanding} />}
-        right={
-          <HStack gap={2}>
-            <Button
-              variant="ghost"
-              size="sm"
-              fontSize="13px"
-              fontWeight="500"
-              color="#52525b"
-              _hover={{ color: "#0f172a" }}
-            >
-              Sign in
-            </Button>
-            <Button
-              size="sm"
-              bg="#0f172a"
-              color="white"
-              fontSize="13px"
-              fontWeight="600"
-              borderRadius="7px"
-              px={3.5}
-              h="32px"
-              _hover={{ bg: "#1e293b" }}
-              onClick={goToInput}
-            >
-              Get started free
-            </Button>
-          </HStack>
-        }
-      />
-
       <Container maxW="680px" py={16} pt="80px">
         <VStack gap={8} align="stretch">
           {/* Page header */}

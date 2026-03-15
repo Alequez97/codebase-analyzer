@@ -7,13 +7,12 @@ export function HeroSection() {
 
   return (
     <Box
-      minH="100vh"
       display="flex"
       flexDir="column"
       alignItems="center"
       justifyContent="center"
       pt="80px"
-      pb="80px"
+      pb="60px"
       px={6}
       position="relative"
       overflow="hidden"

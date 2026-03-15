@@ -19,7 +19,14 @@ export function PricingSection() {
   const plans = PRICING_PLANS[billingMode];
 
   return (
-    <Box bg="white" borderTopWidth="1px" borderColor="#f1f5f9" py={20} px={6}>
+    <Box
+      bg="white"
+      borderTopWidth="1px"
+      borderColor="#f1f5f9"
+      pt={10}
+      pb={20}
+      px={6}
+    >
       <Container maxW="960px">
         <VStack gap={12} align="stretch">
           {/* Header */}
