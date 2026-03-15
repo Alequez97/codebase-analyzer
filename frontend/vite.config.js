@@ -32,6 +32,10 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
       },
+      "/design-preview": {
+        target: backendTarget,
+        changeOrigin: true,
+      },
     },
   },
 });

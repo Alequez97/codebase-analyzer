@@ -14,3 +14,4 @@ export { default as domainSectionsChatRoutes } from "./domain-sections-chat.js";
 export { default as codebaseChatRoutes } from "./codebase-chat.js";
 export { default as e2eConfigRoutes } from "./e2e-config.js";
 export { default as reviewChangesRoutes } from "./review-changes.js";
+export { default as designRoutes } from "./design.js";

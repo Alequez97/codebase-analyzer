@@ -20,7 +20,7 @@ The key insight: **code generated from a brainstorm/design phase is still code**
         💡 Brainstorm                    │
         🎨 Design                        │
         📋 Requirements                  │
-        ⚙️  Code scaffold                │
+        ⚙️  Code generation              │
                │                         │
                └──────────┬─────────────┘
                            ▼
@@ -54,6 +54,48 @@ The key insight: **code generated from a brainstorm/design phase is still code**
 - [ ] Not needed yet — single entry point for now
 
 **Notes:**
+
+---
+
+### 1.3 Unified `codebase-analysis.json` — the common contract between both entry paths
+
+**Decision:** `codebase-analysis.json` is the shared handoff format for **both** entry paths. A new-project agent (code generation agent) produces the exact same JSON structure as the existing-codebase discovery agent. The UI reads only this file — it has no idea which path was used.
+
+The difference between the two paths is expressed through a small set of flags at the project and domain level, not through a different schema:
+
+```json
+{
+  "projectOrigin": "existing" | "new",
+  "hasFrontend": true | false,
+  "domains": [
+    {
+      "id": "user-authentication",
+      "name": "User Authentication",
+      "businessPurpose": "...",
+      "files": [...],
+      "priority": "P0",
+      "hasCode": true | false,
+      "hasAnalysis": false
+    }
+  ]
+}
+```
+
+**`projectOrigin`** — `"existing"` when the project was imported/scanned; `"new"` when domains were planned by the new-project agent before any code was written.
+
+**`hasFrontend`** — detected automatically by scanning for framework deps and frontend directories. Written by the discovery agent for existing projects; declared explicitly by the new-project agent based on what it plans to scaffold. Drives the design agent branching (see section 14, question 4).
+
+**`hasCode`** — `true` for all domains in existing projects (code already exists). `false` for domains in new projects where code has not been generated yet. When `false`, the domain card replaces all analysis action buttons (Docs, Reqs, Bugs, Tests) with a single **"Generate Code"** button. After code generation runs for a domain, `hasCode` flips to `true` and the full audit UI becomes available — same card, same layout, different controls.
+
+**The domain card state machine:**
+
+```
+hasCode=false                      →  [ Generate Code ]
+hasCode=true, hasAnalysis=false    →  [ Analyze ]
+hasCode=true, hasAnalysis=true     →  [ Docs ] [ Reqs ] [ Bugs ] [ Tests ]
+```
+
+This means a new project flows the user naturally into the same UI they would see for an existing project — no separate screen or separate product. Just a progressive reveal as more pipeline stages complete.
 
 ---
 
@@ -329,139 +371,89 @@ What format does the design agent produce?
 
 ## 6. Navigation Model in the App
 
-Currently the app has: Dashboard → Domain Details page.
+**Decided.** Three clear additions to the existing layout, no new navigation layer needed:
 
-With project-level features, we need a new navigation layer.
+### 6.1 Empty project screen
 
-### 6.1 How should project-level features appear in the UI?
+When no `.code-analysis/` data exists yet, the app shows a "start here" screen instead of an empty domain list. Two paths:
 
-- [ ] **Top-level tabs/nav** alongside the domain list (e.g. "Design | Domains | Review")
-- [ ] **Dashboard sections** — separate card areas for project-level vs. domain-level
-- [ ] **Sidebar navigation** — persistent nav, Design has its own entry
-- [ ] **Modal / overlay** — Design opens as a full-screen overlay from the dashboard
-- [ ] Not decided yet
+- **Analyze existing codebase** → kicks off the domain discovery agent (current flow)
+- **Start new project** → enters the new-project onboarding flow (research → design → scaffold)
 
-**Notes:**
+### 6.2 Design mode toggle
 
-### 6.2 Should Design be its own full page (route)?
+A **"Design" button** lives in the top sidebar next to the project name. Clicking it switches the entire layout to the Design panel. While in design mode, the button label changes to **"Project"** — clicking it returns to the normal domain dashboard.
 
-- [ ] Yes — `/design` route, its own page
-- [ ] No — embedded in dashboard
-- [ ] Yes, but only if it becomes a navigation hub with links to domains
+No separate route needed. The toggle swaps the main content area. State can be a simple URL param (`?mode=design`) so users can link to it.
 
-**Notes:**
+### 6.3 Market analysis
+
+**Research is a separate product with its own pricing plan.** It is not part of the codebase-analyzer — it is a standalone tool that happens to share infrastructure but is marketed and sold independently.
+
+Its role in the business model:
+
+- User comes to the research product with an idea
+- Research agent analyses the market, competitors, pricing landscape
+- Report concludes with an AI-generated verdict: is this worth building?
+- If positive: the report ends with a **conversion CTA** — "Looks like a solid opportunity. Want to build it? Start your project on [platform name]" — deep-linking into the dev platform's new-project onboarding flow with the research report pre-loaded as context
+- If the user doesn't convert, they can **export the report** and take it anywhere
+
+The research product is a top-of-funnel lead generator for the dev platform. No tight coupling in the code — the handoff is a URL + an exportable JSON file.
 
 ---
 
 ## 7. Phasing — What to Build and When
 
-### Proposed phases
+**Revised phases based on all decisions above:**
 
 ```
-Phase 1 — Project detection
-  Backend detects new vs. existing project
-  Status endpoint returns projectType: "new" | "existing"
-  Frontend shows appropriate entry point
+Phase 1 — Empty project screen
+  Detection: backend checks if .code-analysis/ has useful data
+  Frontend shows "start here" screen with two entry points
+  No new backend work needed — existing status endpoint is sufficient
 
-Phase 2 — Design agent (existing project, audit mode)
-  New TASK_TYPES.DESIGN + system instruction file
+Phase 2 — Design mode toggle + Design panel (existing project, audit mode)
+  "Design" button in top sidebar
+  Design panel: Foundation tab, Screens tab (prototype browser), Audit tab
+  New TASK_TYPES.DESIGN_IMPORT + system instruction file (master + sub-agent pattern)
   Persists to .code-analysis/design/
-  Design page in the React app (read-only first)
-  No domain linking yet
 
-Phase 3 — Design ↔ Domain linking
-  AI-inferred screen → domain mappings
-  Clickable wireframe regions in the design page
-  Back-links from domain areas to design screens
-
-Phase 4 — New project flow
-  "Start from scratch" onboarding
-  Research agent + Brainstorm agent
-  Design agent in creation mode
+Phase 3 — New project flow
+  Research agent → standalone market analysis page (with export)
+  Design agent in creation mode (same master/sub-agent architecture as audit)
   Requirements agent seeded from design output
+  Code generation agent — writes the actual project scaffold from requirements + design
+  Generated code feeds directly into the unified analysis pipeline (domain breakdown, bugs, tests, etc.)
+
+Phase 4 — Design chat & partial re-import
+  Chat with design agent to evolve prototype after initial import
+  Re-import specific screens when codebase changes
 ```
 
-### 7.1 Does this phasing make sense?
-
-- [ ] Yes, in this order
-- [ ] Yes, but skip Phase 1 for now — project detection can come later
-- [ ] Phases 2 and 3 should be a single phase
-- [ ] Phase 4 is the priority — new project flow first
-- [ ] Different order: **\*\***\_\_\_**\*\***
-
-**Notes:**
+Domain linking remains out of scope (see section 4).
 
 ---
 
 ## 8. Prototype First?
 
-Before implementing any of the above, a static HTML prototype (in `frontend/designs/`) would:
+~~Deferred — build HTML prototypes to answer navigation questions.~~
 
-- Show the new top-level navigation structure visually
-- Mock a Design page with a wireframe + domain links
-- Answer questions 4–6 cheaply before touching React or backend schemas
-
-### 8.1 Should we build an HTML prototype before React implementation?
-
-- [ ] Yes — prototype the design page and nav model first
-- [ ] No — decisions are clear enough, go straight to implementation
-- [ ] Partial — prototype only the Design page layout, nav is clear
-
-**Notes:**
+**Navigation questions are resolved** (see section 6). No prototype needed before starting implementation. Go straight to Phase 1 backend + Phase 2 design panel.
 
 ---
 
-## 9. Modularity — Agents as Independently Shippable Products
+## 9. Modularity — Agents as Composable Units
 
-This is a key architectural principle that should be decided early, because it affects how agents are structured internally.
+Each agent (research, design, domain analysis) must be self-contained: its own input contract, output schema, system instructions, and persistence layer. The composition points between agents are clean JSON handoffs — no tight coupling.
 
-Each agent in the platform should be **independently shippable** as a standalone product, while also being composable into the full pipeline. Examples:
+**One repo, one backend, one `package.json`.** Research lives in the current `backend/` as new routes, a new task type, and new system instructions — alongside everything else. The "empty project" screen is its natural entry point.
 
-| Agent / Module                  | Standalone product                                                       | Combined product                     |
-| ------------------------------- | ------------------------------------------------------------------------ | ------------------------------------ |
-| Research                        | "Market Research Tool" — analyze competitors, market size, user personas | Feeds brainstorm + design stages     |
-| Research + Design               | "Product Discovery Tool" — research → wireframes → component spec        | Feeds requirements + scaffold stages |
-| Research + Design + Code export | "Idea to Prototype Tool" — full new project flow                         | Feeds into full platform             |
-| Full platform                   | "Development Lifecycle Platform"                                         | The complete vision                  |
+If the platform is ever split into separately deployed products, that's a future business and ops decision. Cross that bridge when you're actually running two separate deployments.
 
-### What this means technically
+### Input/output contracts
 
-Each agent must be:
-
-- **Self-contained**: its own input contract, output schema, system instructions, and persistence layer
-- **Composable**: its output is a well-defined JSON that the next agent can consume as input
-- **Configurable at deploy time**: a "Research-only" deployment simply doesn't mount the other agents/routes
-- **UI-agnostic**: the agent logic lives in the backend; different frontends can wrap different subsets
-
-The composition points (where one agent's output feeds the next) are the API layer — clean JSON handoffs, no tight coupling.
-
-### 9.1 Should agent modularity be a first-class constraint from the start?
-
-- [ ] Yes — every new agent must have a standalone-ready interface before being wired into the platform
-- [ ] Yes — but enforce this only for new-project-flow agents (research, brainstorm, design); existing analysis agents are already scoped anyway
-- [ ] Not yet — get the full platform working first, extract standalone products later
-- [ ] Different approach: **\*\***\_\_\_**\*\***
-
-**Notes:**
-
-### 9.2 How should agents declare their input/output contracts?
-
-- [ ] JSON Schema files (like current `designs/v1/data/contracts.json`)
-- [ ] TypeScript interfaces (shared types package)
-- [ ] Informal convention — documented but not enforced
-- [ ] Not decided yet
-
-**Notes:**
-
-### 9.3 How should multi-agent composition be configured?
-
-- [ ] **Environment variables / config file** — `ENABLED_AGENTS=research,design,code-analysis` at deploy time
-- [ ] **Backend plugins** — each agent registers itself, platform mounts what's present
-- [ ] **Separate npm packages** — each agent is a package, the platform imports what it needs
-- [ ] **Monorepo workspaces** — agents live in `packages/agent-research`, `packages/agent-design`, etc.
-- [ ] Not decided yet
-
-**Notes:**
+- **Informal convention for now** — JSON files with documented schemas, no enforcement tooling
+- **Upgrade path**: add JSON Schema files for the handoff formats (research report → design agent, design foundation → screen agents, etc.) when the contracts stabilize
 
 ---
 
@@ -608,17 +600,19 @@ The master agent decides **how many sub-agents to spawn and what each one covers
 
 ---
 
-### The research report — a user gate
+### The research report — a separate product with a conversion CTA
 
-Research output is a **go/no-go report** presented to the user before any design work begins:
+**Research is its own product, not a gate inside the dev platform.** It runs independently, has its own pricing, and is marketed separately. Its output:
 
 - **Competitor matrix** — feature comparison table across all found products
 - **Market opportunity** — size, growth, gaps not covered by competitors
 - **Pricing landscape** — what exists and at what price points
 - **Risk signals** — crowded market, dominant player, declining interest
-- **Recommendation** — AI-generated assessment: is this worth building?
+- **Recommendation** — AI-generated verdict: is this worth building?
 
-Hard gate: design agents do not run until the user explicitly proceeds.
+If the verdict is positive, the report surfaces a **conversion CTA**: "Looks like a solid opportunity. Want to build it?" — this deep-links the user into the dev platform's new-project onboarding with the research report pre-loaded as context (passed as an exported JSON).
+
+If the user doesn't convert, they export the report and go elsewhere. The handoff is a URL + a JSON file — no tight code coupling between the two products.
 
 ---
 
@@ -670,12 +664,22 @@ Written once by the master agent. Never modified by screen agents.
 
 If 8 of 10 parallel agents succeed but 2 fail:
 
-- [ ] Retry failed agents automatically
+- [x] Retry failed agents automatically
 - [ ] Mark partial result as complete, flag failed screens for manual retry
 - [ ] Fail the whole task (atomic)
-- [ ] Not decided yet
 
-**Notes:**
+**Decided:** Retry logic lives in the **queue processor** (`orchestrators/queue-processor.js`), not in individual task executors or the master agent.
+
+The queue processor checks whether a task is a delegated sub-task by the presence of `delegatedByTaskId` on the task object. If it exists, the task is a sub-task and qualifies for automatic retry. A `retryCount` field tracks how many times it has been tried; on the 4th failure the task is marked permanently failed.
+
+```
+task: {
+  ...
+  delegatedByTaskId: "parent-task-id",  // present on sub-tasks, set by delegate_task tool
+  retryCount: 0,                         // incremented by queue processor on each failure
+  maxRetries: 3                          // hardcoded in queue processor
+}
+```
 
 ---
 
@@ -760,7 +764,7 @@ It cannot collect:
 ### 12.1 Should the platform detect headless vs. headed and adapt output?
 
 - [ ] Yes — enrich output with screenshots when headed, skip when headless
-- [ ] Yes — but this is future work, headless-only for now
+- [x] Yes — but this is future work, headless-only for now
 - [ ] No — always headless for consistency
 
 **Notes:**
@@ -822,15 +826,44 @@ The development platform **optionally consumes** research output as seed input �
 
 ### 13.1 Should we isolate research agent files now (no domain coupling)?
 
-- [ ] Yes — research system instructions and schemas must be domain-agnostic from the start
-- [ ] Yes — but this is enforced at code review, not structurally
-- [ ] Not yet — clean up isolation later
+- [x] Yes — research system instructions and schemas must be domain-agnostic from the start
 
-**Notes:**
+**Decided:** Reorganize `backend/system-instructions/` into subdirectories by agent scope:
+
+```
+backend/system-instructions/
+  domain/                     ← per-domain analysis instructions (existing)
+    analyze-domain-bugs-security.md
+    analyze-domain-diagrams.md
+    analyze-domain-documentation.md
+    analyze-domain-refactoring-and-testing.md
+    analyze-domain-requirements.md
+    edit-bugs-security.md
+    edit-diagrams.md
+    edit-documentation.md
+    edit-requirements.md
+    edit-refactoring-and-testing.md
+    implement-finding-fix.md
+    implement-test.md
+    apply-refactoring.md
+  project/                    ← project-level instructions (new + some existing)
+    analyze-full-codebase.md
+    edit-codebase-analysis.md
+    edit-domain-section.md
+    review-changes.md
+    custom-codebase-task.md
+    design-import.md          ← new: audit mode master agent
+    design-screen.md          ← new: screen sub-agent (both modes)
+  research/                   ← research product instructions (new)
+    research-master.md
+    research-competitor.md
+```
+
+This is a structural enforcement — file location makes scope obvious and prevents domain instructions from being accidentally reused for project/research agents. Do the reorganization when adding the first new instruction file (design or research), not as a standalone refactor.
 
 ### 13.2 Freemium model — tracked where?
 
-- [ ] Backend tracks usage per user/API key, enforces limit
+- [x] Backend tracks usage per user/API key, enforces limit
 - [ ] Out of scope for now — just build the agent, worry about billing later
 - [ ] Other: **\*\***\_\_\_**\*\***
 
@@ -846,27 +879,38 @@ Things not yet decided that may affect architecture:
 
 1. **What happens when the user re-analyzes a domain — does the Design auto-update?**
 
-   > Answer: **\*\***\_\_\_**\*\***
+   > **Answer:** Not related. The Design prototype is a standalone, pure browser app that uses only mocked data — it has no connection to the live codebase analysis pipeline. Re-analyzing a domain never touches the prototype. The prototype is a separate artifact: a reference and communication tool, not a live reflection of the code.
 
 2. **Is Design the right name, or should it be "Product Design" / "UI Design" / "Prototype"?**
 
-   > Answer: **\*\***\_\_\_**\*\***
+   > **Answer:** Keep **"Design"** as the top-level label in the sidebar toggle. Inside the Design panel, there are two views: **"Prototype"** (the full clickable prototype with screen navigation) and **"Components"** (a component gallery with isolated examples). The Design panel is a browser-only viewer — it serves HTML mockup files from `.code-analysis/design/` in an iframe. All data inside those files is mocked; nothing is fetched from the backend at runtime.
 
 3. **Should `frontend/designs/` be repurposed as where the agent writes project wireframes, or stay as internal code-analyzer UI prototyping?**
 
-   > Answer: **\*\***\_\_\_**\*\***
+   > **Answer:** `frontend/designs/` human-authored prototypes for the codebase-analyzer platform itself are moved to `.code-analysis/design/` — the same folder that agent-generated wireframes use. There is no longer a distinction between human-authored and agent-generated design artifacts at the folder level; both live in `.code-analysis/design/` and are served as static files by the backend. `frontend/designs/` is removed.
 
 4. **How does the design agent handle projects with no frontend (pure API / backend)?**
 
-   > Answer: **\*\***\_\_\_**\*\***
+   > **Answer:** Stored in `codebase-analysis.json` as `hasFrontend: boolean`, detected by the discovery agent (no `frontend/`/`client/`/`web/` directories, no framework deps in any `package.json`) or declared explicitly by the new-project agent.
+   >
+   > The design agent branches on this flag:
+   >
+   > - **`hasFrontend: true`** — normal audit/import flow (existing project) or full creation mode (new project).
+   > - **`hasFrontend: false`, project has API routes** — design panel shows "No UI detected. Want to design one?" → creation mode seeded from discovered route definitions, data models, and inferred CRUD screens rather than a blank slate. Produces the same `design/screens/` output and the same foundation JSON.
+   > - **`hasFrontend: false`, no HTTP API either (CLI tool, library, etc.)** — Design panel is hidden entirely. The "Design" button in the sidebar is replaced with a disabled indicator and a tooltip: "Design is not available for this project type."
 
-5. **What is the right repo structure if agents become independently shippable — monorepo, separate repos, or npm packages?**
+5. **Who owns the "composition layer" (pipeline ordering, agent handoffs) — the backend orchestrator, a config file, or the UI?**
 
-   > Answer: **\*\***\_\_\_**\*\***
-
-6. **Who owns the "composition layer" (pipeline ordering, agent handoffs) — the backend orchestrator, a config file, or the UI?**
-
-   > Answer: **\*\***\_\_\_**\*\***
+   > **Answer:** The **AI agent** owns it — there is no separate composition layer. The only pipeline mechanism is `delegate_task`, and sub-agent spawning decisions are made autonomously by master agents at runtime, not pre-wired in config or orchestrator code.
+   >
+   > The current model:
+   >
+   > - **User** initiates master agents only (clicks Analyze, clicks Generate Code, etc.)
+   > - **Master agent** decides what sub-tasks to spawn, when, and with what context — entirely at inference time
+   > - **Backend orchestrator** (`queue-processor.js`) is a dumb runner: it executes tasks from the queue, handles retries, emits socket events — it has no knowledge of pipeline shape
+   > - **No config file** describes pipeline order — that knowledge lives in the master agent's system instructions
+   >
+   > This question is therefore moot for now. It becomes relevant only if we ever want to hardcode a fixed multi-step pipeline that runs automatically without a master agent driving it. That is not the current design.
 
 ---
 

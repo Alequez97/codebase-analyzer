@@ -6,6 +6,7 @@ import { Toaster } from "./components/ui/toaster";
 import { FloatingAgentChat } from "./components/FloatingChat";
 import Dashboard from "./pages/Dashboard";
 import DomainDetailsPage from "./pages/DomainDetailsPage";
+import DesignPage from "./pages/DesignPage";
 import { useSocketStore } from "./store/useSocketStore";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/domains/:domainId" element={<DomainDetailsPage />} />
+            <Route path="/design" element={<DesignPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

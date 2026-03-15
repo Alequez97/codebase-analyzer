@@ -2,6 +2,8 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
 import config from "./config.js";
 import { recoverOrphanedTasks } from "./orchestrators/task.js";
 import { startQueueProcessor } from "./orchestrators/queue-processor.js";
@@ -20,6 +22,7 @@ import {
   codebaseChatRoutes,
   e2eConfigRoutes,
   reviewChangesRoutes,
+  designRoutes,
 } from "./routes/index.js";
 
 // Domain routes (modular structure)
@@ -87,6 +90,22 @@ app.use("/api/e2e-config", e2eConfigRoutes);
 app.use("/api/review-changes", reviewChangesRoutes);
 app.use("/api", domainSectionsChatRoutes);
 app.use("/api", codebaseChatRoutes);
+app.use("/api/design", designRoutes);
+
+// ==================== Design Preview Static Files ====================
+
+const designDir = path.join(
+  config.target.directory,
+  ".code-analysis",
+  "design",
+);
+if (fs.existsSync(designDir)) {
+  app.use("/design-preview", express.static(designDir));
+} else {
+  app.get("/design-preview/*", (_req, res) =>
+    res.status(404).json({ error: "No design files found" }),
+  );
+}
 
 // ==================== Error Handler ====================
 
