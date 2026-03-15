@@ -1,98 +1,133 @@
-import { Badge, Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { Navbar, NavLogo } from "./Navbar";
 import { CompetitorsGrid } from "./CompetitorsGrid";
 import { ActivityFeed } from "./ActivityFeed";
-import { AnalysisStatsBar } from "./AnalysisStatsBar";
 
-function AnalyzingBadge() {
+function ProgressBar() {
   const competitors = useMarketResearchStore((s) => s.competitors);
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
   const isAnalysisComplete = useMarketResearchStore(
     (s) => s.isAnalysisComplete,
   );
-  const doneCount = competitors.filter((c) => c.status === "done").length;
+
   const total = competitors.length;
+  const doneCount = competitors.filter((c) => c.status === "done").length;
+  const analyzingNow = competitors.find((c) => c.status === "analyzing");
 
-  if (isAnalysisComplete) {
-    return (
-      <Badge
-        display="inline-flex"
-        alignItems="center"
-        gap={1.5}
-        bg="#dcfce7"
-        color="#15803d"
-        borderRadius="9999px"
-        px={3}
-        py={1}
-        fontSize="11px"
-        fontWeight="600"
-      >
-        ✓ Analysis complete — {total} competitors analyzed
-      </Badge>
-    );
-  }
+  if (total === 0) return null;
 
-  if (isAnalyzing && total > 0) {
-    return (
-      <Badge
-        display="inline-flex"
-        alignItems="center"
-        gap={1.5}
-        bg="#eff6ff"
-        color="#1d4ed8"
-        borderRadius="9999px"
-        px={3}
-        py={1}
-        fontSize="11px"
-        fontWeight="600"
-      >
-        <Box
-          w="6px"
-          h="6px"
-          borderRadius="50%"
-          bg="#3b82f6"
-          css={{
-            "@keyframes pulse": {
-              "0%, 100%": { opacity: 1 },
-              "50%": { opacity: 0.4 },
-            },
-            animation: "pulse 1.5s ease-in-out infinite",
-          }}
-        />
-        Analyzing — {doneCount} of {total} complete
-      </Badge>
-    );
-  }
+  const pct = Math.round((doneCount / total) * 100);
 
   return (
-    <Badge
-      display="inline-flex"
-      alignItems="center"
-      gap={1.5}
+    <Box w="full">
+      <Box h="3px" bg="#f1f5f9" borderRadius="9999px" overflow="hidden" mb={2}>
+        <Box
+          h="full"
+          bg={isAnalysisComplete ? "#16a34a" : "#6366f1"}
+          w={`${pct}%`}
+          borderRadius="9999px"
+          transition="width 0.5s ease"
+        />
+      </Box>
+      {isAnalysisComplete ? (
+        <Text fontSize="11px" color="#15803d" fontWeight="600">
+          ✓ All {total} competitors analyzed
+        </Text>
+      ) : (
+        <Text fontSize="11px" color="#64748b">
+          <Text as="span" fontWeight="700" color="#0f172a">
+            {doneCount}
+          </Text>
+          {" / "}
+          {total} analyzed
+          {analyzingNow && (
+            <Text as="span" color="#94a3b8">
+              {" · "}
+              analyzing{" "}
+              <Text as="span" fontWeight="500" color="#64748b">
+                {analyzingNow.name}
+              </Text>
+              ...
+            </Text>
+          )}
+        </Text>
+      )}
+    </Box>
+  );
+}
+
+function TabBar({ active, onChange, activityCount, isAnalyzing }) {
+  const tabs = [
+    { id: "competitors", label: "Competitors" },
+    {
+      id: "activity",
+      label: activityCount > 0 ? `Activity · ${activityCount}` : "Activity",
+    },
+  ];
+
+  return (
+    <HStack
+      gap="2px"
       bg="#f1f5f9"
-      color="#64748b"
-      borderRadius="9999px"
-      px={3}
-      py={1}
-      fontSize="11px"
-      fontWeight="600"
+      borderRadius="10px"
+      p="3px"
+      display="inline-flex"
     >
-      Starting analysis...
-    </Badge>
+      {tabs.map(({ id, label }) => (
+        <Button
+          key={id}
+          h="28px"
+          px={3.5}
+          fontSize="12px"
+          fontWeight="600"
+          borderRadius="8px"
+          bg={active === id ? "white" : "transparent"}
+          color={active === id ? "#0f172a" : "#64748b"}
+          boxShadow={active === id ? "0 1px 3px rgba(0,0,0,0.08)" : "none"}
+          _hover={{
+            bg: active === id ? "white" : "rgba(0,0,0,0.04)",
+            color: active === id ? "#0f172a" : "#374151",
+          }}
+          onClick={() => onChange(id)}
+        >
+          {id === "activity" && isAnalyzing && (
+            <Box
+              w="5px"
+              h="5px"
+              borderRadius="50%"
+              bg="#ef4444"
+              mr={1.5}
+              flexShrink={0}
+              css={{
+                "@keyframes pulse": {
+                  "0%, 100%": { opacity: 1 },
+                  "50%": { opacity: 0.4 },
+                },
+                animation: "pulse 1.5s ease-in-out infinite",
+              }}
+            />
+          )}
+          {label}
+        </Button>
+      ))}
+    </HStack>
   );
 }
 
 export function AnalysisPage() {
+  const [activeTab, setActiveTab] = useState("competitors");
   const idea = useMarketResearchStore((s) => s.idea);
+  const activityEvents = useMarketResearchStore((s) => s.activityEvents);
+  const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
   const resetAnalysis = useMarketResearchStore((s) => s.resetAnalysis);
   const goToLanding = useMarketResearchStore((s) => s.goToLanding);
 
   return (
-    <Box minH="100vh" bg="#f8fafc" display="flex" flexDir="column">
+    <Box minH="100vh" bg="#f8fafc">
       <Navbar
         left={<NavLogo onClick={goToLanding} />}
-        center={<AnalyzingBadge />}
         right={
           <HStack gap={2}>
             <Button
@@ -105,7 +140,7 @@ export function AnalysisPage() {
               borderRadius="7px"
               px={3}
               h="30px"
-              _hover={{ bg: "#f8fafc" }}
+              _hover={{ bg: "#f1f5f9" }}
               onClick={resetAnalysis}
             >
               New Analysis
@@ -114,52 +149,41 @@ export function AnalysisPage() {
         }
       />
 
-      {/* Main content area — fills viewport below nav */}
-      <Box
-        display="flex"
-        flex="1"
-        mt="48px"
-        overflow="hidden"
-        h="calc(100vh - 48px - 56px)"
-      >
-        {/* Left: competitors scroll area */}
-        <Box flex="1" overflowY="auto" p={6}>
-          <VStack align="stretch" gap={5} maxW="1000px">
-            <Box>
-              <Text
-                fontSize="22px"
-                fontWeight="800"
-                color="#0f172a"
-                letterSpacing="-0.02em"
-              >
-                Market Analysis
+      <Box maxW="1024px" mx="auto" px={6} pt="72px" pb={12}>
+        {/* Page header */}
+        <VStack align="start" gap={0.5} mb={8}>
+          <Text
+            fontSize="26px"
+            fontWeight="800"
+            color="#0f172a"
+            letterSpacing="-0.025em"
+          >
+            Market Analysis
+          </Text>
+          {idea && (
+            <Text fontSize="13px" color="#64748b" lineHeight="1.5">
+              Analyzing:{" "}
+              <Text as="span" fontWeight="600" color="#475569">
+                {idea}
               </Text>
-              {idea && (
-                <Text
-                  fontSize="12px"
-                  color="#64748b"
-                  mt={1}
-                  lineHeight="1.5"
-                  maxW="600px"
-                >
-                  <Text as="span" fontWeight="600" color="#374151">
-                    Analyzing:
-                  </Text>{" "}
-                  {idea}
-                </Text>
-              )}
-            </Box>
+            </Text>
+          )}
+        </VStack>
 
-            <CompetitorsGrid />
-          </VStack>
-        </Box>
+        {/* Tabs + progress */}
+        <VStack align="start" gap={3} mb={6}>
+          <TabBar
+            active={activeTab}
+            onChange={setActiveTab}
+            activityCount={activityEvents.length}
+            isAnalyzing={isAnalyzing}
+          />
+          {activeTab === "competitors" && <ProgressBar />}
+        </VStack>
 
-        {/* Right: activity feed */}
-        <ActivityFeed />
+        {/* Tab content */}
+        {activeTab === "competitors" ? <CompetitorsGrid /> : <ActivityFeed />}
       </Box>
-
-      {/* Bottom stats bar */}
-      <AnalysisStatsBar />
     </Box>
   );
 }

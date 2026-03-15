@@ -260,7 +260,7 @@ export const MOCK_COMPETITORS = [
 //   "competitor_status" → transitions a competitor to "analyzing" | "done"
 //   "analysis_complete" → marks the analysis as finished
 //
-// Activity payload types: "search" | "found" | "navigate" | "extract" | "write"
+// Activity payload types: "search" | "found" | "navigate" | "extract"
 // ---------------------------------------------------------------------------
 
 export const SIMULATION_EVENTS = [
@@ -421,17 +421,6 @@ export const SIMULATION_EVENTS = [
       url: "https://codeclimate.com/pricing",
     },
   },
-  {
-    delay: 4300,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "SNYK AGENT",
-      agentColor: "#ef4444",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/snyk.json",
-    },
-  },
   { delay: 4450, type: "competitor_status", id: "snyk", status: "done" },
   {
     delay: 4500,
@@ -444,29 +433,7 @@ export const SIMULATION_EVENTS = [
       detail: "Free OSS — Team $16/seat/mo — 100K+ customers",
     },
   },
-  {
-    delay: 4650,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "SONARQUBE AGENT",
-      agentColor: "#0284c7",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/sonarqube.json",
-    },
-  },
   { delay: 4800, type: "competitor_status", id: "sonarqube", status: "done" },
-  {
-    delay: 4900,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "CODECLIMATE AGENT",
-      agentColor: "#16a34a",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/codeclimate.json",
-    },
-  },
   {
     delay: 5000,
     type: "competitor_status",
@@ -574,29 +541,7 @@ export const SIMULATION_EVENTS = [
         "Included with GitHub Advanced — Enterprise $21/user/mo additional",
     },
   },
-  {
-    delay: 6900,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "DEEPSOURCE AGENT",
-      agentColor: "#0891b2",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/deepsource.json",
-    },
-  },
   { delay: 7000, type: "competitor_status", id: "deepsource", status: "done" },
-  {
-    delay: 7100,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "GHAS AGENT",
-      agentColor: "#1f2937",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/ghas.json",
-    },
-  },
   { delay: 7200, type: "competitor_status", id: "ghas", status: "done" },
 
   // --- Wave 3: CodeScene, Qodana ---
@@ -700,32 +645,10 @@ export const SIMULATION_EVENTS = [
     },
   },
   {
-    delay: 9100,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "CODESCENE AGENT",
-      agentColor: "#7c3aed",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/codescene.json",
-    },
-  },
-  {
     delay: 9200,
     type: "competitor_status",
     id: "codescene",
     status: "done",
-  },
-  {
-    delay: 9300,
-    type: "activity",
-    payload: {
-      kind: "write",
-      agent: "QODANA AGENT",
-      agentColor: "#db2777",
-      message: "Write result",
-      detail: "code-analysis/research/competitors/qodana.json",
-    },
   },
   { delay: 9400, type: "competitor_status", id: "qodana", status: "done" },
   { delay: 9600, type: "analysis_complete" },

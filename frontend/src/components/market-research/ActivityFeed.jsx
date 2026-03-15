@@ -1,4 +1,4 @@
-import { Badge, Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { ActivityEvent } from "./ActivityEvent";
@@ -8,7 +8,6 @@ export function ActivityFeed() {
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
   const scrollRef = useRef(null);
 
-  // Auto-scroll to the bottom whenever new events arrive
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -16,45 +15,36 @@ export function ActivityFeed() {
   }, [activityEvents.length]);
 
   const handleClear = () => {
-    // Visual-only clear — does not reset analysis state
     useMarketResearchStore.setState({ activityEvents: [] });
   };
 
   return (
     <Box
-      w={{ base: "full", lg: "360px" }}
-      flexShrink={0}
-      borderLeftWidth="1px"
-      borderColor="#e4e4e7"
-      display="flex"
-      flexDir="column"
-      h="full"
+      bg="white"
+      borderRadius="12px"
+      borderWidth="1px"
+      borderColor="#e2e8f0"
+      overflow="hidden"
     >
-      {/* Feed header */}
+      {/* Header */}
       <HStack
         justify="space-between"
-        px={4}
+        px={5}
         py={3}
         borderBottomWidth="1px"
-        borderColor="#e4e4e7"
-        flexShrink={0}
+        borderColor="#f1f5f9"
       >
-        <HStack gap={2}>
+        <HStack gap={2.5}>
           <Text fontSize="12px" fontWeight="700" color="#0f172a">
             Activity
           </Text>
           {isAnalyzing && (
-            <Badge
-              display="inline-flex"
-              alignItems="center"
-              gap={1}
-              bg="#dcfce7"
-              color="#15803d"
-              fontSize="9px"
-              fontWeight="700"
-              px={1.5}
-              py={0.5}
+            <HStack
+              gap={1.5}
+              bg="#f0fdf4"
               borderRadius="9999px"
+              px={2}
+              py={0.5}
             >
               <Box
                 w="5px"
@@ -69,8 +59,10 @@ export function ActivityFeed() {
                   animation: "pulse 1.5s ease-in-out infinite",
                 }}
               />
-              Live
-            </Badge>
+              <Text fontSize="9px" fontWeight="700" color="#15803d">
+                Live
+              </Text>
+            </HStack>
           )}
           <Text fontSize="10px" color="#94a3b8">
             {activityEvents.length} events
@@ -89,14 +81,14 @@ export function ActivityFeed() {
         </Button>
       </HStack>
 
-      {/* Scrollable event list */}
+      {/* Event list */}
       <VStack
         ref={scrollRef}
         align="stretch"
         gap={0}
-        flex="1"
+        maxH="600px"
         overflowY="auto"
-        px={4}
+        px={5}
         py={2}
         css={{
           "&::-webkit-scrollbar": { width: "4px" },
@@ -108,8 +100,8 @@ export function ActivityFeed() {
         }}
       >
         {activityEvents.length === 0 ? (
-          <Box py={8} textAlign="center">
-            <Text fontSize="11px" color="#94a3b8">
+          <Box py={12} textAlign="center">
+            <Text fontSize="12px" color="#94a3b8">
               Events will appear here as the AI works...
             </Text>
           </Box>
