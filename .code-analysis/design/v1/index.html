@@ -1,1131 +1,1699 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task Status UI - v1</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #f7f8fa;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codebase Analyzer — Platform Prototype</title>
+  <style>
+    /* ── Design Tokens ─────────────────────────────────────────────────────── */
+    :root {
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-      /* ── Header ── */
-      .header {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: #f9fafb;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 8px 32px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-      }
-      .header-left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .header-left .logo {
-        font-size: 13px;
-        font-weight: 600;
-        color: #374151;
-        cursor: pointer;
-      }
-      .header-left .logo:hover {
-        color: #2563eb;
-      }
-      .header-right {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
+      /* Grays */
+      --gray-50:  #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
 
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 2px 8px;
-        border-radius: 9999px;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.03em;
-      }
-      .badge.green {
-        background: #dcfce7;
-        color: #15803d;
-      }
-      .badge.red {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
-      .badge.blue {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-      .badge.gray {
-        background: #f1f5f9;
-        color: #64748b;
-      }
-      .badge .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: currentColor;
-      }
+      /* Blues */
+      --blue-50:  #eff6ff;
+      --blue-100: #dbeafe;
+      --blue-300: #93c5fd;
+      --blue-400: #60a5fa;
+      --blue-500: #3b82f6;
+      --blue-600: #2563eb;
 
-      .status-group {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .status-label {
-        font-size: 12px;
-        color: #6b7280;
-      }
+      /* Status */
+      --green-200: #bbf7d0;
+      --green-400: #4ade80;
+      --green-600: #16a34a;
 
-      .divider-v {
-        width: 1px;
-        height: 18px;
-        background: #e2e8f0;
-      }
+      /* Priority */
+      --p0-bg: #fff5f5; --p0-border: #f9c6c6; --p0-color: #991b1b; --p0-dot: #ef4444;
+      --p1-bg: #fff8f2; --p1-border: #fddcb5; --p1-color: #9a3412; --p1-dot: #f97316;
+      --p2-bg: #fefce8; --p2-border: #fde68a; --p2-color: #854d0e; --p2-dot: #eab308;
+      --p3-bg: #f9fafb; --p3-border: #e5e7eb; --p3-color: #4b5563; --p3-dot: #9ca3af;
 
-      /* ── Tasks Pill ── */
-      .tasks-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 10px;
-        border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        border: 1px solid transparent;
-        transition: all 0.15s;
-        position: relative;
-      }
-      .tasks-pill.has-failed {
-        background: #fee2e2;
-        color: #b91c1c;
-        border-color: #fca5a5;
-      }
-      .tasks-pill.has-running {
-        background: #dbeafe;
-        color: #1d4ed8;
-        border-color: #93c5fd;
-      }
-      .tasks-pill.has-pending {
-        background: #f1f5f9;
-        color: #475569;
-        border-color: #cbd5e1;
-      }
-      .tasks-pill:hover {
-        filter: brightness(0.95);
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      }
+      /* Purple (Design toggle) */
+      --purple-100: #f3e8ff;
+      --purple-500: #a855f7;
+      --purple-600: #9333ea;
 
-      .tasks-pill .pill-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        padding: 1px 7px;
-        border-radius: 9999px;
-        font-size: 11px;
-        font-weight: 700;
-      }
-      .tasks-pill.has-failed .pill-badge {
-        background: #fca5a5;
-        color: #7f1d1d;
-      }
-      .tasks-pill.has-running .pill-badge {
-        background: #93c5fd;
-        color: #1e3a8a;
-      }
+      /* Orange (Tasks running) */
+      --orange-50:  #fff7ed;
+      --orange-400: #fb923c;
+      --orange-500: #f97316;
 
-      /* Spinner */
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      .spinner {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        border: 2px solid currentColor;
-        border-top-color: transparent;
-        animation: spin 0.7s linear infinite;
-        display: inline-block;
-      }
+      --header-h: 49px;
+    }
 
-      /* Chevron */
-      .chevron {
-        width: 10px;
-        height: 10px;
-        border-right: 1.5px solid currentColor;
-        border-bottom: 1.5px solid currentColor;
-        transform: rotate(45deg);
-        margin-top: -3px;
-        transition: transform 0.2s;
-      }
-      .chevron.up {
-        transform: rotate(-135deg);
-        margin-top: 2px;
-      }
+    /* ── Reset ─────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: var(--font); font-size: 14px; color: var(--gray-800); background: #fff; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
 
-      /* Header action buttons */
-      .btn-ghost {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        background: none;
-        color: #374151;
-        transition: background 0.15s;
-      }
-      .btn-ghost:hover {
-        background: #e5e7eb;
-      }
-      .btn-ghost.active {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
+    /* ── Screen routing ────────────────────────────────────────────────────── */
+    .screen { display: none; height: 100vh; overflow: hidden; flex-direction: column; }
+    .screen.active { display: flex; }
 
-      /* ── Page body ── */
-      .page-body {
-        padding: 32px;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      .placeholder-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        padding: 24px;
-        margin-bottom: 16px;
-        color: #9ca3af;
-        font-size: 13px;
-        text-align: center;
-      }
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    .header {
+      height: var(--header-h);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
 
-      /* ── Popover ── */
-      .popover-anchor {
-        position: relative;
-      }
-      .popover {
-        display: none;
-        position: absolute;
-        right: 0;
-        top: calc(100% + 10px);
-        width: 380px;
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow:
-          0 8px 24px rgba(0, 0, 0, 0.12),
-          0 2px 8px rgba(0, 0, 0, 0.06);
-        z-index: 500;
-        overflow: hidden;
-      }
-      .popover.open {
-        display: block;
-      }
+    .btn-ghost {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      background: transparent;
+      transition: background 0.12s, color 0.12s;
+    }
+    .btn-ghost:hover { background: var(--gray-100); color: var(--blue-600); }
 
-      .popover-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 16px 10px;
-        border-bottom: 1px solid #f1f5f9;
-      }
-      .popover-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: #111827;
-      }
-      .time-period-select {
-        font-size: 11px;
-        color: #4b5563;
-        font-weight: 500;
-        padding: 4px 8px;
-        background: white;
-        border-radius: 6px;
-        border: 1px solid #d1d5db;
-        cursor: pointer;
-        transition: all 0.15s;
-        min-width: 100px;
-      }
-      .time-period-select:hover {
-        border-color: #9ca3af;
-        background: #f9fafb;
-      }
-      .time-period-select:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-      }
+    .btn-outline {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-600);
+      background: white;
+      border: 1px solid var(--gray-200);
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-outline:hover { background: var(--gray-50); border-color: var(--gray-300); }
 
-      .popover-section {
-        padding: 8px 0;
-      }
-      .popover-section + .popover-section {
-        border-top: 1px solid #f1f5f9;
-      }
+    .btn-solid-purple {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: white;
+      background: var(--purple-500);
+      border: none;
+    }
+    .btn-ghost-purple {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--purple-600);
+      background: transparent;
+    }
+    .btn-ghost-purple:hover { background: var(--purple-100); }
 
-      .section-heading {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 16px 6px;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #9ca3af;
-      }
-      .section-heading .count {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 1px 6px;
-        border-radius: 9999px;
-        font-size: 10px;
-        font-weight: 700;
-      }
-      .section-heading.running .count {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-      .section-heading.failed .count {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
+    .sep-v { width: 1px; height: 16px; background: var(--gray-200); margin: 0 4px; }
 
-      /* ── Review Changes Section ── */
-      .review-changes-section {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        padding: 12px 16px;
-        border-bottom: 2px solid #e0f2fe;
-      }
-      .review-heading {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        font-weight: 700;
-        color: #0c4a6e;
-        margin-bottom: 8px;
-      }
-      .branch-selector-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .branch-info {
-        font-size: 11px;
-        color: #0369a1;
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-      .branch-label {
-        font-size: 11px;
-        color: #0369a1;
-        font-weight: 600;
-        white-space: nowrap;
-      }
-      .branch-select {
-        flex: 1;
-        padding: 5px 8px;
-        border: 1px solid #bae6fd;
-        border-radius: 6px;
-        font-size: 11px;
-        background: white;
-        color: #0c4a6e;
-        cursor: pointer;
-        transition: all 0.15s;
-      }
-      .branch-select:hover {
-        border-color: #7dd3fc;
-      }
-      .branch-select:focus {
-        outline: none;
-        border-color: #0ea5e9;
-        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
-      }
-      .btn-review {
-        padding: 5px 12px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        border: none;
-        background: #0ea5e9;
-        color: white;
-        cursor: pointer;
-        transition: all 0.15s;
-        white-space: nowrap;
-      }
-      .btn-review:hover {
-        background: #0284c7;
-        box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
-      }
-      .btn-review:active {
-        transform: translateY(1px);
-      }
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 18px;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-yellow { background: #fef9c3; color: #a16207; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-orange-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px 3px 8px;
+      border-radius: 9999px;
+      background: var(--orange-50);
+      border: 1px solid #fed7aa;
+      font-size: 12px; font-weight: 600;
+      color: var(--orange-500);
+    }
 
-      .task-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 8px 16px;
-        transition: background 0.1s;
-      }
-      .task-row:hover {
-        background: #fafafa;
-      }
+    /* Status text */
+    .status-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-600); }
 
-      .task-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        margin-top: 1px;
-      }
-      .task-icon.running {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-      .task-icon.pending {
-        background: #f1f5f9;
-        color: #64748b;
-      }
-      .task-icon.failed {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
+    /* ── Dashboard layout ──────────────────────────────────────────────────── */
+    .dashboard-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px 40px;
+    }
+    .logs-panel {
+      width: 320px;
+      flex-shrink: 0;
+      border-left: 1px solid var(--gray-200);
+      overflow-y: auto;
+      padding: 16px;
+      background: var(--gray-50);
+      font-size: 12px;
+    }
+    .logs-panel h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--gray-400); margin-bottom: 12px; }
+    .log-entry { padding: 4px 0; color: var(--gray-600); line-height: 1.5; border-bottom: 1px solid var(--gray-100); }
+    .log-entry span { color: var(--gray-400); margin-right: 6px; }
 
-      .task-body {
-        flex: 1;
-        min-width: 0;
-      }
-      .task-name {
-        font-size: 12px;
-        font-weight: 600;
-        color: #111827;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .task-section {
-        font-size: 11px;
-        color: #6b7280;
-        margin-top: 1px;
-      }
-      .task-message {
-        font-size: 11px;
-        color: #374151;
-        margin-top: 3px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-style: italic;
-      }
-      .task-message.error {
-        color: #b91c1c;
-        font-style: normal;
-      }
+    /* ── Page heading ──────────────────────────────────────────────────────── */
+    .page-heading { margin-bottom: 24px; }
+    .page-heading h1 { font-size: 28px; font-weight: 800; color: var(--gray-800); line-height: 1.2; }
+    .page-heading p  { font-size: 16px; color: var(--gray-600); margin-top: 4px; }
+    .project-name-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 10px;
+      font-size: 14px; font-weight: 600;
+      color: var(--blue-600);
+      background: var(--blue-50);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
 
-      .task-action {
-        flex-shrink: 0;
-        margin-top: 2px;
-        font-size: 11px;
-        cursor: pointer;
-        padding: 2px 8px;
-        border-radius: 4px;
-        border: 1px solid;
-        font-weight: 500;
-        background: none;
-        transition: background 0.15s;
-      }
-      .task-action.cancel {
-        color: #374151;
-        border-color: #d1d5db;
-      }
-      .task-action.cancel:hover {
-        background: #f3f4f6;
-      }
-      .task-action.delete {
-        color: #6b7280;
-        border-color: #e5e7eb;
-      }
-      .task-action.delete:hover {
-        background: #f3f4f6;
-      }
-      .task-action.dismiss {
-        color: #b91c1c;
-        border-color: #fca5a5;
-      }
-      .task-action.dismiss:hover {
-        background: #fee2e2;
-      }
+    /* Action bar */
+    .action-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 24px;
+    }
+    .btn-analyze-codebase {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      color: white;
+      background: var(--blue-500);
+      border: none;
+      box-shadow: 0 1px 3px rgba(59,130,246,.25);
+      transition: background .12s;
+    }
+    .btn-analyze-codebase:hover { background: var(--blue-600); }
+    .search-input {
+      padding: 7px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 13px;
+      width: 220px;
+      color: var(--gray-700);
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--blue-300); }
 
-      .popover-footer {
-        padding: 8px 16px;
-        border-top: 1px solid #f1f5f9;
-        display: flex;
-        justify-content: center;
-      }
-      .btn-link {
-        font-size: 11px;
-        color: #6b7280;
-        cursor: pointer;
-        border: none;
-        background: none;
-        padding: 2px;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-      }
-      .btn-link:hover {
-        color: #374151;
-      }
+    /* Sort/filter */
+    .toolbar-end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
-      /* ── Progress bar inside running row ── */
-      .progress-track {
-        height: 3px;
-        background: #e0e7ff;
-        border-radius: 2px;
-        margin-top: 5px;
-        overflow: hidden;
-      }
-      @keyframes progress {
-        0% {
-          transform: translateX(-100%);
-        }
-        100% {
-          transform: translateX(250%);
-        }
-      }
-      .progress-bar {
-        height: 100%;
-        width: 40%;
-        background: #3b82f6;
-        border-radius: 2px;
-        animation: progress 1.4s ease-in-out infinite;
-      }
+    /* ── Priority sections ─────────────────────────────────────────────────── */
+    .priority-group {
+      border: 1.5px solid;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .priority-group.P0 { border-color: var(--p0-border); }
+    .priority-group.P1 { border-color: var(--p1-border); }
+    .priority-group.P2 { border-color: var(--p2-border); }
+    .priority-group.P3 { border-color: var(--p3-border); }
 
-      /* ── State variants section ── */
-      .variants {
-        display: flex;
-        gap: 24px;
-        flex-wrap: wrap;
-        padding: 24px 0;
-      }
-      .variant-label {
-        font-size: 11px;
-        color: #9ca3af;
-        margin-bottom: 8px;
-        text-align: center;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
+    .priority-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: filter .12s;
+    }
+    .priority-header:hover { filter: brightness(.97); }
+    .P0 .priority-header { background: var(--p0-bg); border-bottom: 1px solid var(--p0-border); }
+    .P1 .priority-header { background: var(--p1-bg); border-bottom: 1px solid var(--p1-border); }
+    .P2 .priority-header { background: var(--p2-bg); border-bottom: 1px solid var(--p2-border); }
+    .P3 .priority-header { background: var(--p3-bg); border-bottom: 1px solid var(--p3-border); }
+    .priority-group.collapsed .priority-header { border-bottom: none; }
 
-      /* ── Section title for demo page ── */
-      .demo-section-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: #374151;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 12px;
-        margin-top: 32px;
-        padding-bottom: 6px;
-        border-bottom: 2px solid #e2e8f0;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- ════════════════════════════════════════════
-     DEMO HEADER (interactive)
-════════════════════════════════════════════ -->
-    <div class="header">
-      <div class="header-left">
-        <span class="logo">📁 Codebase Analyzer</span>
-      </div>
-      <div class="header-right">
-        <div class="status-group">
-          <span class="status-label">API:</span>
-          <span class="badge green"><span class="dot"></span> Connected</span>
-        </div>
+    .priority-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .P0 .priority-dot { background: var(--p0-dot); }
+    .P1 .priority-dot { background: var(--p1-dot); }
+    .P2 .priority-dot { background: var(--p2-dot); }
+    .P3 .priority-dot { background: var(--p3-dot); }
 
-        <div class="status-group">
-          <span class="status-label">Socket:</span>
-          <span class="badge green"><span class="dot"></span> Connected</span>
-        </div>
+    .priority-title { font-size: 13px; font-weight: 700; flex: 1; }
+    .P0 .priority-title { color: var(--p0-color); }
+    .P1 .priority-title { color: var(--p1-color); }
+    .P2 .priority-title { color: var(--p2-color); }
+    .P3 .priority-title { color: var(--p3-color); }
 
-        <div class="divider-v"></div>
+    .priority-count {
+      font-size: 10px; font-weight: 700;
+      border-radius: 9999px; padding: 1px 8px; line-height: 16px;
+    }
+    .P0 .priority-count { background: #fee2e2; color: #b91c1c; }
+    .P1 .priority-count { background: #ffedd5; color: #c2410c; }
+    .P2 .priority-count { background: #fef9c3; color: #a16207; }
+    .P3 .priority-count { background: var(--gray-100); color: var(--gray-500); }
 
-        <!-- Tasks Pill (click to toggle popover) -->
-        <div class="popover-anchor" id="pillAnchor">
-          <button
-            class="tasks-pill has-failed"
-            id="tasksPill"
-            onclick="togglePopover()"
-          >
-            <span class="spinner"></span>
-            <span>2 running</span>
-            <span
-              class="divider-v"
-              style="height: 12px; background: rgba(0, 0, 0, 0.15)"
-            ></span>
-            <span class="pill-badge">✕ 1 failed</span>
-            <span class="chevron" id="pillChevron"></span>
-          </button>
+    .chevron { font-size: 12px; color: var(--gray-400); transition: transform .2s; }
+    .collapsed .chevron { transform: rotate(-90deg); }
 
-          <!-- Popover -->
-          <div class="popover" id="popover">
-            <div class="popover-header">
-              <span class="popover-title">Tasks</span>
-              <select class="time-period-select">
-                <option value="1">Last hour</option>
-                <option value="24" selected>Last 24 hours</option>
-                <option value="168">Last 7 days</option>
-                <option value="720">Last 30 days</option>
-                <option value="all">All time</option>
-              </select>
-            </div>
+    .priority-body {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 12px 12px 4px;
+      background: white;
+    }
+    .priority-group.collapsed .priority-body { display: none; }
 
-            <!-- REVIEW CHANGES SECTION -->
-            <div class="review-changes-section">
-              <div class="review-heading">🌿 Review Changes</div>
-              <div class="branch-selector-row">
-                <span class="branch-info">
-                  Current: <strong>feature/new-scoring</strong>
-                </span>
-              </div>
-              <div class="branch-selector-row" style="margin-top: 6px">
-                <span class="branch-label">Compare against:</span>
-                <select class="branch-select">
-                  <option selected>main</option>
-                  <option>develop</option>
-                  <option>staging</option>
-                </select>
-                <button class="btn-review">Analyze</button>
-              </div>
-            </div>
+    /* ── Domain card ───────────────────────────────────────────────────────── */
+    .domain-card {
+      display: flex;
+      align-items: stretch;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      background: white;
+      transition: box-shadow .12s, border-color .12s;
+      cursor: default;
+    }
+    .domain-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.1); border-color: var(--gray-300); }
+    .domain-card.analyzed {
+      border-color: var(--green-200);
+      border-left: 3px solid var(--green-400);
+    }
+    .domain-card.running { border-color: var(--blue-300); border-left: 3px solid var(--blue-400); }
 
-            <!-- RUNNING -->
-            <div class="popover-section">
-              <div class="section-heading running">
-                <span
-                  class="spinner"
-                  style="border-color: #1d4ed8; border-top-color: transparent"
-                ></span>
-                Running
-                <span class="count">2</span>
-              </div>
+    .drag-handle {
+      padding: 0 8px;
+      display: flex; align-items: center;
+      color: var(--gray-300);
+      border-right: 1px solid var(--gray-100);
+      flex-shrink: 0;
+      cursor: grab;
+    }
+    .drag-handle:hover { color: var(--gray-500); background: var(--gray-50); }
+    .drag-handle-icon { font-size: 14px; }
 
-              <div class="task-row">
-                <div class="task-icon running">
-                  <span class="spinner"></span>
-                </div>
-                <div class="task-body">
-                  <div class="task-name">Telegram Bot User Interaction</div>
-                  <div class="task-section">Bugs &amp; Security</div>
-                  <div class="task-message">
-                    Reading src/bot/callbackHandler.ts…
-                  </div>
-                  <div class="progress-track">
-                    <div class="progress-bar"></div>
-                  </div>
-                </div>
-                <button class="task-action cancel">Cancel</button>
-              </div>
+    .card-body { padding: 12px; flex: 1; min-width: 0; }
 
-              <div class="task-row">
-                <div class="task-icon running">
-                  <span class="spinner"></span>
-                </div>
-                <div class="task-body">
-                  <div class="task-name">Match Change Detection</div>
-                  <div class="task-section">Documentation</div>
-                  <div class="task-message">
-                    Editing src/match/diff.ts (lines 42–58)…
-                  </div>
-                  <div class="progress-track">
-                    <div
-                      class="progress-bar"
-                      style="animation-delay: 0.4s"
-                    ></div>
-                  </div>
-                </div>
-                <button class="task-action cancel">Cancel</button>
-              </div>
-            </div>
+    .domain-name {
+      font-size: 13px; font-weight: 700;
+      color: var(--gray-800);
+      line-height: 1.3;
+      margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .domain-purpose {
+      font-size: 11px; color: var(--gray-500);
+      line-height: 1.5;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-            <!-- PENDING -->
-            <div class="popover-section">
-              <div class="section-heading">
-                ↑ Pending
-                <span class="count">1</span>
-              </div>
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
 
-              <div class="task-row">
-                <div class="task-icon pending">↑</div>
-                <div class="task-body">
-                  <div class="task-name">Notification Delivery</div>
-                  <div class="task-section">Requirements</div>
-                  <div class="task-message" style="color: #94a3b8">
-                    Queued — waiting for a free slot
-                  </div>
-                </div>
-                <button class="task-action delete">Delete</button>
-              </div>
-            </div>
+    /* Section dots */
+    .section-dots { display: flex; align-items: center; gap: 8px; }
+    .section-dot-group { display: flex; align-items: center; gap: 3px; }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-gray   { background: var(--gray-300); }
+    .dot-green  { background: var(--green-400); }
+    .dot-blue   { background: var(--blue-400); animation: dotBounce .7s ease-in-out infinite; }
+    .dot-label  { font-size: 9px; font-weight: 500; }
+    .dot-label-gray  { color: var(--gray-400); }
+    .dot-label-green { color: var(--green-600); }
+    .dot-label-blue  { color: var(--blue-500); }
 
-            <!-- FAILED -->
-            <div class="popover-section">
-              <div class="section-heading failed">
-                ✕ Failed
-                <span class="count">1</span>
-              </div>
+    @keyframes dotBounce {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.7); }
+    }
 
-              <div class="task-row">
-                <div class="task-icon failed">✕</div>
-                <div class="task-body">
-                  <div class="task-name">CueScore Data Provider</div>
-                  <div class="task-section">Diagrams</div>
-                  <div class="task-message error">
-                    Agent exited: context window exceeded
-                  </div>
-                </div>
-                <button class="task-action dismiss">Dismiss</button>
-              </div>
-            </div>
+    /* Card buttons */
+    .card-btns { display: flex; align-items: center; gap: 6px; }
+    .btn-analyze-card {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      color: var(--blue-500);
+      background: var(--blue-50);
+      border: none;
+      transition: background .12s;
+    }
+    .btn-analyze-card:hover { background: var(--blue-100); }
+    .btn-view-card {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      color: var(--blue-500);
+      background: white;
+      border: 1px solid #bfdbfe;
+      transition: background .12s;
+    }
+    .btn-view-card:hover { background: var(--blue-50); }
+    .btn-running {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      color: var(--blue-600);
+      background: var(--blue-50);
+      border: 1px solid var(--blue-100);
+    }
 
-            <div class="popover-footer">
-              <button class="btn-link">View full task logs →</button>
-            </div>
-          </div>
-        </div>
-        <!-- end popover-anchor -->
+    /* ── Domain details page ───────────────────────────────────────────────── */
+    .details-body {
+      flex: 1; overflow: hidden; display: flex;
+    }
+    .details-content {
+      flex: 1; overflow-y: auto; padding: 28px 32px 40px;
+    }
+    .domain-header-row { margin-bottom: 24px; }
+    .domain-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .domain-page-title { font-size: 22px; font-weight: 800; color: var(--gray-800); }
 
-        <div class="divider-v"></div>
+    .priority-badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px; font-weight: 700;
+    }
+    .pb-p0 { background: #fee2e2; color: #b91c1c; }
+    .pb-p1 { background: #ffedd5; color: #c2410c; }
+    .pb-p2 { background: #fef9c3; color: #a16207; }
+    .pb-p3 { background: var(--gray-100); color: var(--gray-600); }
 
-        <button class="btn-ghost">
-          <svg
-            width="13"
-            height="13"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-            />
-            <polyline points="14 2 14 8 20 8" />
-          </svg>
-          Logs
+    .domain-desc { font-size: 14px; color: var(--gray-600); }
+
+    /* Section tabs */
+    .section-tabs {
+      display: flex; gap: 2px;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 24px;
+    }
+    .section-tab {
+      padding: 8px 16px;
+      font-size: 13px; font-weight: 500;
+      color: var(--gray-500);
+      border-radius: 8px 8px 0 0;
+      border: none; background: none;
+      cursor: pointer;
+      position: relative;
+      transition: color .12s;
+    }
+    .section-tab:hover { color: var(--gray-800); background: var(--gray-50); }
+    .section-tab.active {
+      color: var(--blue-600); font-weight: 600;
+    }
+    .section-tab.active::after {
+      content: ""; position: absolute; bottom: -1px; left: 0; right: 0;
+      height: 2px; background: var(--blue-500); border-radius: 2px 2px 0 0;
+    }
+    .tab-dot {
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; margin-left: 5px; margin-bottom: 1px;
+      vertical-align: middle;
+    }
+
+    /* Section content */
+    .section-content { max-width: 900px; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-title { font-size: 18px; font-weight: 700; color: var(--gray-800); }
+    .section-meta  { font-size: 12px; color: var(--gray-400); }
+
+    /* Content card */
+    .content-card {
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .content-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .content-card-title { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+    .content-card-body  { padding: 16px; font-size: 13px; color: var(--gray-600); line-height: 1.8; }
+
+    /* Markdown-ish styles */
+    .md-h3 { font-size: 15px; font-weight: 700; color: var(--gray-800); margin: 16px 0 8px; }
+    .md-p  { margin-bottom: 12px; }
+    .md-ul { padding-left: 20px; margin-bottom: 12px; }
+    .md-ul li { margin-bottom: 4px; }
+    .md-code {
+      background: var(--gray-100); border-radius: 4px;
+      padding: 1px 5px; font-family: "SF Mono", Consolas, monospace; font-size: 11px;
+      color: var(--gray-700);
+    }
+
+    /* Finding cards (Bugs & Security) */
+    .finding-card {
+      border: 1px solid var(--gray-200); border-radius: 10px;
+      overflow: hidden; margin-bottom: 12px;
+    }
+    .finding-header {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; cursor: pointer;
+      transition: background .12s;
+    }
+    .finding-header:hover { background: var(--gray-50); }
+    .finding-sev-badge {
+      padding: 2px 8px; border-radius: 9999px;
+      font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+    }
+    .sev-critical { background: #fee2e2; color: #b91c1c; }
+    .sev-high     { background: #ffedd5; color: #c2410c; }
+    .sev-medium   { background: #fef9c3; color: #a16207; }
+    .sev-low      { background: var(--gray-100); color: var(--gray-600); }
+    .finding-title { font-size: 13px; font-weight: 600; color: var(--gray-800); flex: 1; }
+    .finding-location { font-size: 11px; color: var(--gray-400); margin-top: 3px; font-family: monospace; }
+    .finding-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .btn-fix {
+      display: inline-flex; align-items: center; gap: 3px;
+      height: 26px; padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      color: var(--blue-600);
+      background: var(--blue-50);
+      border: 1px solid var(--blue-100);
+      cursor: pointer;
+    }
+    .btn-fix:hover { background: var(--blue-100); }
+
+    .finding-body {
+      padding: 0 16px 14px 40px;
+      font-size: 12px; color: var(--gray-600);
+      display: none;
+    }
+    .finding-card.open .finding-body { display: block; }
+
+    /* ── Design page ───────────────────────────────────────────────────────── */
+    .design-layout {
+      flex: 1; overflow: hidden; display: flex;
+    }
+    .design-sidebar {
+      width: 220px; flex-shrink: 0;
+      border-right: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+    .design-sidebar-toggle {
+      display: flex; gap: 4px; margin-bottom: 16px;
+    }
+    .btn-toggle {
+      flex: 1; padding: 5px 0;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      color: var(--gray-500);
+      background: white;
+      border: 1px solid var(--gray-200);
+      cursor: pointer;
+    }
+    .btn-toggle.active { background: var(--blue-500); color: white; border-color: var(--blue-500); }
+
+    .design-item {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px; color: var(--gray-600);
+      margin-bottom: 2px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background .12s;
+    }
+    .design-item:hover { background: white; }
+    .design-item.active {
+      background: white;
+      color: var(--blue-600);
+      border-left-color: var(--blue-500);
+      font-weight: 600;
+    }
+
+    .design-main {
+      flex: 1; overflow: hidden;
+      background: var(--gray-100);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .iframe-container {
+      width: 100%; height: 100%;
+      background: white;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+    }
+    .iframe-container iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+    .design-empty {
+      text-align: center; color: var(--gray-400);
+    }
+    .design-empty h3 { font-size: 16px; margin-bottom: 8px; color: var(--gray-500); }
+    .design-empty p  { font-size: 13px; }
+
+    /* ── Tasks status popover ──────────────────────────────────────────────── */
+    .tasks-pill-wrap { position: relative; }
+    .tasks-popover {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      width: 320px;
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+    }
+    .tasks-popover.open { display: block; }
+    .popover-section-head {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 16px 6px;
+    }
+    .popover-section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--gray-400);
+    }
+    .popover-count {
+      padding: 1px 6px; border-radius: 9999px;
+      font-size: 10px; font-weight: 700; line-height: 16px;
+    }
+
+    .task-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 8px 16px; border-top: 1px solid var(--gray-100);
+    }
+    .task-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 13px;
+    }
+    .task-icon-blue   { background: #dbeafe; }
+    .task-icon-orange { background: #ffedd5; }
+    .task-icon-purple { background: var(--purple-100); }
+    .task-info { flex: 1; min-width: 0; }
+    .task-primary { font-size: 12px; font-weight: 600; color: var(--gray-800); }
+    .task-sub { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+    .task-msg { font-size: 11px; color: var(--blue-500); margin-top: 3px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .spinner {
+      width: 14px; height: 14px; border: 2px solid var(--blue-100); border-top-color: var(--blue-500);
+      border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; margin-top: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Logs panel ────────────────────────────────────────────────────────── */
+    .logs-panel-domain { 
+      width: 360px; flex-shrink: 0;
+      border-left: 1px solid var(--gray-200);
+      background: var(--gray-50); overflow-y: auto; 
+    }
+    .logs-section-tabs {
+      display: flex; gap: 2px; padding: 12px 12px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .log-stab {
+      padding: 5px 10px; font-size: 11px; font-weight: 600;
+      border-radius: 6px 6px 0 0; color: var(--gray-500); cursor: pointer; 
+      border: none; background: none;
+    }
+    .log-stab.active { background: white; color: var(--blue-600); border: 1px solid var(--gray-200); border-bottom: 1px solid white; }
+    .log-content { padding: 12px; }
+    .log-line { font-size: 11px; font-family: monospace; color: var(--gray-600); padding: 2px 0; }
+
+    /* ── Design Versions page ──────────────────────────────────────────────── */
+    .design-versions-layout {
+      flex: 1; overflow-y: auto;
+      background: var(--gray-50);
+    }
+    .design-versions-content {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 36px 32px 48px;
+    }
+    .design-versions-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .design-versions-head h2 {
+      font-size: 24px; font-weight: 800; color: var(--gray-800); line-height: 1.2;
+    }
+    .design-versions-head p {
+      font-size: 14px; color: var(--gray-500); margin-top: 4px;
+    }
+    .btn-new-version {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      color: white;
+      background: var(--purple-500);
+      border: none;
+      box-shadow: 0 1px 3px rgba(168,85,247,.3);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .12s;
+    }
+    .btn-new-version:hover { background: var(--purple-600); }
+
+    .versions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .version-card {
+      background: white;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      transition: box-shadow .12s, border-color .12s;
+    }
+    .version-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .version-card.version-current {
+      border-color: var(--purple-500);
+      box-shadow: 0 0 0 3px rgba(168,85,247,.12);
+    }
+    .version-card-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .version-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      font-size: 12px; font-weight: 800;
+      background: var(--gray-100); color: var(--gray-600);
+      flex-shrink: 0;
+    }
+    .version-badge-purple { background: var(--purple-100); color: var(--purple-600); }
+    .version-badge-blue   { background: var(--blue-50);    color: var(--blue-500); }
+
+    .version-pill {
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 9999px;
+    }
+    .version-pill-current    { background: var(--purple-100); color: var(--purple-600); }
+    .version-pill-generating { background: var(--blue-50); color: var(--blue-500); display: inline-flex; align-items: center; gap: 4px; }
+
+    .version-card-title {
+      font-size: 15px; font-weight: 700; color: var(--gray-800);
+      margin-bottom: 6px;
+    }
+    .version-card-desc {
+      font-size: 12px; color: var(--gray-500); line-height: 1.6;
+      flex: 1; margin-bottom: 12px;
+    }
+    .version-card-prompt {
+      font-size: 11px; color: var(--gray-500); line-height: 1.6;
+      flex: 1; margin-bottom: 12px;
+      font-style: italic;
+      background: var(--gray-50);
+      border-radius: 6px;
+      padding: 8px 10px;
+      border-left: 2px solid var(--gray-200);
+    }
+    .version-card-meta {
+      font-size: 11px; color: var(--gray-400); margin-bottom: 16px;
+    }
+    .version-card-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    }
+    .btn-view-version {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 12px;
+      border-radius: 6px;
+      font-size: 12px; font-weight: 600;
+      color: var(--purple-600);
+      background: var(--purple-100);
+      border: none; cursor: pointer;
+      transition: background .12s;
+    }
+    .btn-view-version:hover { background: #e9d5ff; }
+
+    /* Add-version dashed card */
+    .version-card.version-add {
+      border: 1.5px dashed var(--gray-300);
+      box-shadow: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      text-align: center;
+      min-height: 180px;
+      background: transparent;
+      transition: border-color .12s, background .12s;
+    }
+    .version-card.version-add:hover {
+      border-color: var(--purple-500);
+      background: var(--purple-100);
+    }
+    .version-add-icon {
+      font-size: 28px; font-weight: 300;
+      color: var(--gray-400); margin-bottom: 8px; line-height: 1;
+    }
+    .version-card.version-add:hover .version-add-icon { color: var(--purple-600); }
+    .version-add-label {
+      font-size: 14px; font-weight: 700; color: var(--gray-500);
+    }
+    .version-card.version-add:hover .version-add-label { color: #7c3aed; }
+    .version-add-desc {
+      font-size: 11px; color: var(--gray-400); margin-top: 4px; line-height: 1.5;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      width: 100%; max-width: 540px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .modal-title { font-size: 16px; font-weight: 700; color: var(--gray-800); }
+    .modal-close {
+      width: 28px; height: 28px; border-radius: 6px;
+      font-size: 14px; color: var(--gray-400);
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: var(--gray-100); color: var(--gray-700); }
+    .modal-body { padding: 20px 24px; }
+    .modal-label {
+      display: block;
+      font-size: 13px; font-weight: 600; color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+    .modal-hint {
+      font-size: 11px; color: var(--gray-400); margin-top: 8px; line-height: 1.5;
+    }
+    .modal-textarea {
+      width: 100%; min-height: 140px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 13px; font-family: var(--font);
+      color: var(--gray-700); line-height: 1.6;
+      resize: vertical; outline: none;
+      transition: border-color .12s;
+    }
+    .modal-textarea:focus { border-color: var(--purple-500); }
+    .modal-footer {
+      padding: 12px 24px 20px;
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    /* ── Utilities ─────────────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+
+    /* Files section list */
+    .files-section { max-width: 700px; }
+    .file-list-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px; font-family: monospace; color: var(--gray-600);
+    }
+    .file-list-item:nth-child(even) { background: var(--gray-50); }
+    .file-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-400); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 1: Dashboard
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-dashboard">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <button class="btn-ghost" onclick="goTo('screen-dashboard')" style="font-weight:600">📁 TaxStick API</button>
+      <button class="btn-ghost-purple" onclick="goTo('screen-design')" style="display:inline-flex;align-items:center;gap:5px">
+        🎨 Design
+      </button>
+    </div>
+    <div class="header-right">
+      <!-- Tasks pill -->
+      <div class="tasks-pill-wrap">
+        <button class="badge-orange-pill" onclick="toggleTasksPopover()">
+          <span style="animation:spin .7s linear infinite;display:inline-block;width:10px;height:10px;border:2px solid #fed7aa;border-top-color:var(--orange-500);border-radius:50%"></span>
+          3 running
+          <span style="font-size:10px;color:var(--orange-400)">▾</span>
         </button>
-        <button class="btn-ghost">⚙</button>
+        <div class="tasks-popover" id="tasks-popover">
+          <div class="popover-section-head">
+            <span class="popover-section-label">Running</span>
+            <span class="popover-count" style="background:#ffedd5;color:#c2410c">3</span>
+          </div>
+          <div class="task-row">
+            <div class="task-icon task-icon-blue">📄</div>
+            <div class="task-info">
+              <div class="task-primary">User Authentication</div>
+              <div class="task-sub">Documentation</div>
+              <div class="task-msg">Reading src/auth/login.ts…</div>
+            </div>
+            <div class="spinner"></div>
+          </div>
+          <div class="task-row">
+            <div class="task-icon task-icon-orange">🐛</div>
+            <div class="task-info">
+              <div class="task-primary">Payment Processing</div>
+              <div class="task-sub">Bugs &amp; Security</div>
+              <div class="task-msg">Analyzing stripe-client.js…</div>
+            </div>
+            <div class="spinner"></div>
+          </div>
+          <div class="task-row">
+            <div class="task-icon task-icon-purple">🧪</div>
+            <div class="task-info">
+              <div class="task-primary">Aircraft Management</div>
+              <div class="task-sub">Refactoring &amp; Testing</div>
+              <div class="task-msg">Generating test cases…</div>
+            </div>
+            <div class="spinner"></div>
+          </div>
+          <div class="popover-section-head" style="border-top:1px solid var(--gray-100)">
+            <span class="popover-section-label">Completed</span>
+            <span class="popover-count" style="background:var(--gray-100);color:var(--gray-500)">7</span>
+          </div>
+          <div class="task-row" style="opacity:.6">
+            <div class="task-icon" style="background:#dcfce7;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px">✓</div>
+            <div class="task-info">
+              <div class="task-primary">Work Orders</div>
+              <div class="task-sub">Documentation</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div class="sep-v"></div>
+
+      <!-- Logs button -->
+      <button class="btn-outline" onclick="toggleLogs()">📄 Logs</button>
+
+      <!-- Config -->
+      <button class="btn-outline">⚙ Config</button>
+
+      <!-- Status -->
+      <div class="status-item">API: <span class="badge badge-green" style="margin-left:4px">Connected</span></div>
+      <div class="status-item">Socket: <span class="badge badge-green" style="margin-left:4px">Connected</span></div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="dashboard-body">
+    <div class="main-content">
+
+      <!-- Page heading -->
+      <div class="page-heading">
+        <h1>Codebase Analyzer</h1>
+        <p>AI-powered code analysis and insights</p>
+        <div class="project-name-link">📁 TaxStick API</div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button class="btn-analyze-codebase">✨ Analyze Codebase</button>
+        <input class="search-input" placeholder="🔍 Search domains…" />
+        <div class="toolbar-end">
+          <span style="font-size:12px;color:var(--gray-400);margin-right:4px">Sort:</span>
+          <button class="btn-outline" style="font-size:12px;padding:5px 10px">Priority ▾</button>
+        </div>
+      </div>
+
+      <!-- P0 Critical (expanded) -->
+      <div class="priority-group P0" id="grp-P0">
+        <div class="priority-header" onclick="toggleGroup('P0')">
+          <div class="priority-dot"></div>
+          <span class="priority-title">P0 · Critical</span>
+          <span class="priority-count">3</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="priority-body">
+
+          <!-- User Authentication (fully analyzed, running) -->
+          <div class="domain-card running" onclick="goTo('screen-domain-auth')">
+            <div class="drag-handle"><span class="drag-handle-icon">⠿</span></div>
+            <div class="card-body">
+              <div class="domain-name">User Authentication</div>
+              <div class="domain-purpose">Handles JWT token management, login/logout flows, OAuth providers, and session persistence.</div>
+              <div class="card-footer">
+                <div class="section-dots">
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Docs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Reqs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-blue"></div><span class="dot-label dot-label-blue">Bugs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Tests</span></div>
+                </div>
+                <div class="card-btns">
+                  <button class="btn-running">⟳ Running</button>
+                  <button class="btn-view-card">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Processing (fully analyzed) -->
+          <div class="domain-card analyzed" onclick="goTo('screen-domain-payment')">
+            <div class="drag-handle"><span class="drag-handle-icon">⠿</span></div>
+            <div class="card-body">
+              <div class="domain-name">Payment Processing</div>
+              <div class="domain-purpose">Stripe integration, invoice generation, refund workflows, and transaction audit logging.</div>
+              <div class="card-footer">
+                <div class="section-dots">
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Docs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Reqs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Bugs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Tests</span></div>
+                </div>
+                <div class="card-btns">
+                  <button class="btn-view-card">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aircraft Management (not analyzed) -->
+          <div class="domain-card">
+            <div class="drag-handle"><span class="drag-handle-icon">⠿</span></div>
+            <div class="card-body">
+              <div class="domain-name">Aircraft Management</div>
+              <div class="domain-purpose">Fleet registration, airworthiness tracking, maintenance schedules, and compliance reporting.</div>
+              <div class="card-footer">
+                <div class="section-dots">
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Docs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Reqs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Bugs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-blue"></div><span class="dot-label dot-label-blue">Tests</span></div>
+                </div>
+                <div class="card-btns">
+                  <button class="btn-analyze-card">✨ Analyze</button>
+                  <button class="btn-view-card">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- spacer row -->
+        <div style="height:8px;background:white"></div>
+      </div>
+
+      <!-- P1 High (expanded) -->
+      <div class="priority-group P1" id="grp-P1">
+        <div class="priority-header" onclick="toggleGroup('P1')">
+          <div class="priority-dot"></div>
+          <span class="priority-title">P1 · High</span>
+          <span class="priority-count">2</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="priority-body">
+
+          <!-- Work Orders (partially) -->
+          <div class="domain-card analyzed">
+            <div class="drag-handle"><span class="drag-handle-icon">⠿</span></div>
+            <div class="card-body">
+              <div class="domain-name">Work Orders</div>
+              <div class="domain-purpose">Maintenance work order creation, assignment, and lifecycle management for field technicians.</div>
+              <div class="card-footer">
+                <div class="section-dots">
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Docs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-green"></div><span class="dot-label dot-label-green">Reqs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Bugs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Tests</span></div>
+                </div>
+                <div class="card-btns">
+                  <button class="btn-analyze-card">✨ Analyze</button>
+                  <button class="btn-view-card">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parts Inventory -->
+          <div class="domain-card">
+            <div class="drag-handle"><span class="drag-handle-icon">⠿</span></div>
+            <div class="card-body">
+              <div class="domain-name">Parts Inventory</div>
+              <div class="domain-purpose">Spare parts catalog, stock-level tracking, warehouse location, and reorder automation.</div>
+              <div class="card-footer">
+                <div class="section-dots">
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Docs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Reqs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Bugs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Tests</span></div>
+                </div>
+                <div class="card-btns">
+                  <button class="btn-analyze-card">✨ Analyze</button>
+                  <button class="btn-view-card">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div style="height:8px;background:white"></div>
+      </div>
+
+      <!-- P2 Medium (collapsed) -->
+      <div class="priority-group P2 collapsed" id="grp-P2">
+        <div class="priority-header" onclick="toggleGroup('P2')">
+          <div class="priority-dot"></div>
+          <span class="priority-title">P2 · Medium</span>
+          <span class="priority-count">1</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="priority-body">
+          <div class="domain-card">
+            <div class="drag-handle"><span class="drag-handle-icon">⠿</span></div>
+            <div class="card-body">
+              <div class="domain-name">Dashboard Analytics</div>
+              <div class="domain-purpose">KPI chart rendering, time-range filters, metric aggregation queries, and export functionality.</div>
+              <div class="card-footer">
+                <div class="section-dots">
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Docs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Reqs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Bugs</span></div>
+                  <div class="section-dot-group"><div class="dot dot-gray"></div><span class="dot-label dot-label-gray">Tests</span></div>
+                </div>
+                <div class="card-btns">
+                  <button class="btn-analyze-card">✨ Analyze</button>
+                  <button class="btn-view-card">View →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="height:8px;background:white"></div>
+      </div>
+
     </div>
 
-    <!-- ════════════════════════════════════════════
-     PILL VARIANTS
-════════════════════════════════════════════ -->
-    <div class="page-body">
-      <div class="demo-section-title">Pill State Variants</div>
-      <div class="variants">
-        <div>
-          <div class="variant-label">All clear</div>
-          <div
-            style="
-              opacity: 0.4;
-              font-size: 12px;
-              color: #9ca3af;
-              padding: 4px 0;
-            "
-          >
-            (pill hidden)
-          </div>
-        </div>
+    <!-- Logs panel (hidden by default, toggled) -->
+    <div class="logs-panel hidden" id="dash-logs">
+      <h4>Dashboard Logs</h4>
+      <div class="log-entry"><span>09:41:02</span>Codebase analysis complete — 6 domains found</div>
+      <div class="log-entry"><span>09:41:18</span>Analysis queued: User Authentication → Documentation</div>
+      <div class="log-entry"><span>09:41:22</span>Analysis queued: Payment Processing → all sections</div>
+      <div class="log-entry"><span>09:42:01</span>Documentation complete: User Authentication</div>
+      <div class="log-entry"><span>09:42:45</span>Documentation complete: Payment Processing</div>
+      <div class="log-entry"><span>09:43:11</span>Requirements complete: User Authentication</div>
+      <div class="log-entry"><span>09:44:03</span>Requirements complete: Payment Processing</div>
+      <div class="log-entry"><span>09:44:30</span>Bugs &amp; Security running: User Authentication…</div>
+      <div class="log-entry"><span>09:44:31</span>Bugs &amp; Security running: Payment Processing…</div>
+    </div>
+  </div>
+</div>
 
-        <div>
-          <div class="variant-label">Pending only</div>
-          <button class="tasks-pill has-pending">
-            ↑ 3 queued <span class="chevron" style="margin-top: -1px"></span>
-          </button>
-        </div>
 
-        <div>
-          <div class="variant-label">Running only</div>
-          <button class="tasks-pill has-running">
-            <span class="spinner"></span> 2 running
-            <span class="chevron"></span>
-          </button>
-        </div>
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 2: Domain Details — User Authentication
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-domain-auth">
 
-        <div>
-          <div class="variant-label">Running + failed</div>
-          <button class="tasks-pill has-failed">
-            <span class="spinner"></span> 1 running
-            <span
-              class="divider-v"
-              style="height: 12px; background: rgba(0, 0, 0, 0.15)"
-            ></span
-            ><span class="pill-badge">✕ 2 failed</span>
-            <span class="chevron"></span>
-          </button>
-        </div>
+  <div class="header">
+    <div class="header-left">
+      <button class="btn-ghost" onclick="goTo('screen-dashboard')" style="font-weight:600">📁 TaxStick API</button>
+      <button class="btn-ghost-purple" onclick="goTo('screen-design')">🎨 Design</button>
+    </div>
+    <div class="header-right">
+      <span class="badge-orange-pill"><span style="display:inline-block;width:10px;height:10px;border:2px solid #fed7aa;border-top-color:var(--orange-500);border-radius:50%;animation:spin .7s linear infinite"></span> 3 running</span>
+      <div class="sep-v"></div>
+      <button class="btn-outline" onclick="toggleDomainLogs()">📄 Logs</button>
+      <button class="btn-outline">⚙ Config</button>
+      <div class="status-item">API: <span class="badge badge-green" style="margin-left:4px">Connected</span></div>
+    </div>
+  </div>
 
-        <div>
-          <div class="variant-label">Failed only</div>
-          <button
-            class="tasks-pill has-failed"
-            style="background: #fee2e2; border-color: #fca5a5"
-          >
-            ✕ 3 failed <span class="chevron"></span>
-          </button>
+  <div class="details-body">
+    <div class="details-content">
+
+      <!-- Domain Header -->
+      <div class="domain-header-row">
+        <div class="domain-title-row">
+          <span class="domain-page-title">User Authentication</span>
+          <span class="priority-badge pb-p0">P0</span>
         </div>
+        <p class="domain-desc">Handles JWT token management, login/logout flows, OAuth providers, and session persistence across all client types.</p>
       </div>
 
-      <!-- ════════════════════════════════════════════
-       POPOVER STANDALONE (always visible for demo)
-  ════════════════════════════════════════════ -->
-      <div class="demo-section-title">Popover (standalone view)</div>
-      <div style="position: relative; width: 380px">
-        <div
-          class="popover"
-          style="
-            display: block;
-            position: static;
-            margin-top: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          "
-        >
-          <div class="popover-header">
-            <span class="popover-title">Tasks</span>
-            <select class="time-period-select">
-              <option value="1">Last hour</option>
-              <option value="24" selected>Last 24 hours</option>
-              <option value="168">Last 7 days</option>
-              <option value="720">Last 30 days</option>
-              <option value="all">All time</option>
-            </select>
+      <!-- Section Tabs -->
+      <div class="section-tabs">
+        <button class="section-tab active" id="tab-docs" onclick="switchTab('docs')">
+          Documentation <span class="tab-dot" style="background:var(--green-400)"></span>
+        </button>
+        <button class="section-tab" id="tab-reqs" onclick="switchTab('reqs')">
+          Requirements <span class="tab-dot" style="background:var(--green-400)"></span>
+        </button>
+        <button class="section-tab" id="tab-diagrams" onclick="switchTab('diagrams')">
+          Diagrams
+        </button>
+        <button class="section-tab" id="tab-bugs" onclick="switchTab('bugs')">
+          Bugs &amp; Security <span class="tab-dot" style="background:var(--blue-400);animation:dotBounce .7s ease-in-out infinite"></span>
+        </button>
+        <button class="section-tab" id="tab-tests" onclick="switchTab('tests')">
+          Refactoring &amp; Testing
+        </button>
+        <button class="section-tab" id="tab-files" onclick="switchTab('files')">
+          Files
+        </button>
+      </div>
+
+      <!-- Tab panels -->
+      <div class="section-content" id="panel-docs">
+        <div class="section-header">
+          <span class="section-title">Documentation</span>
+          <span class="section-meta">Last analyzed 12 min ago</span>
+        </div>
+
+        <div class="content-card">
+          <div class="content-card-header">
+            <span class="content-card-title">Overview</span>
+            <button class="btn-outline" style="font-size:11px;height:26px;padding:0 10px">✏ Edit</button>
           </div>
+          <div class="content-card-body">
+            <div class="md-h3">Purpose</div>
+            <p class="md-p">The User Authentication domain is the security foundation of the TaxStick platform. It manages identity verification, session tokens, and authorization gates for all API endpoints. The system supports both native email/password login and OAuth 2.0 providers (Google, Microsoft).</p>
 
-          <!-- REVIEW CHANGES SECTION -->
-          <div class="review-changes-section">
-            <div class="review-heading">🌿 Review Changes</div>
-            <div class="branch-selector-row">
-              <span class="branch-info">
-                Current: <strong>feature/new-scoring</strong>
-              </span>
-            </div>
-            <div class="branch-selector-row" style="margin-top: 6px">
-              <span class="branch-label">Compare against:</span>
-              <select class="branch-select">
-                <option selected>main</option>
-                <option>develop</option>
-                <option>staging</option>
-              </select>
-              <button class="btn-review">Analyze</button>
-            </div>
+            <div class="md-h3">Architecture</div>
+            <p class="md-p">Authentication follows a stateless JWT pattern. Access tokens are short-lived (15 min) and refresh tokens are stored server-side in Redis with a 7-day TTL. Token rotation is enforced on every refresh cycle to mitigate replay attacks.</p>
+
+            <div class="md-h3">Key Files</div>
+            <ul class="md-ul">
+              <li><code class="md-code">src/auth/login.ts</code> — Login handler, rate limiting, brute-force protection</li>
+              <li><code class="md-code">src/auth/jwt.ts</code> — Token generation, validation, rotation logic</li>
+              <li><code class="md-code">src/auth/oauth.ts</code> — Google/Microsoft OAuth callback handlers</li>
+              <li><code class="md-code">src/auth/middleware.ts</code> — Express middleware for route protection</li>
+              <li><code class="md-code">src/auth/refresh.ts</code> — Refresh token lifecycle management</li>
+            </ul>
           </div>
+        </div>
 
-          <div class="popover-section">
-            <div class="section-heading running">
-              <span
-                class="spinner"
-                style="border-color: #1d4ed8; border-top-color: transparent"
-              ></span>
-              Running
-              <span class="count">2</span>
-            </div>
-
-            <div class="task-row">
-              <div class="task-icon running"><span class="spinner"></span></div>
-              <div class="task-body">
-                <div class="task-name">Telegram Bot User Interaction</div>
-                <div class="task-section">Bugs &amp; Security</div>
-                <div class="task-message">
-                  Reading src/bot/callbackHandler.ts…
-                </div>
-                <div class="progress-track">
-                  <div class="progress-bar"></div>
-                </div>
-              </div>
-              <button class="task-action cancel">Cancel</button>
-            </div>
-
-            <div class="task-row">
-              <div class="task-icon running"><span class="spinner"></span></div>
-              <div class="task-body">
-                <div class="task-name">Match Change Detection</div>
-                <div class="task-section">Documentation</div>
-                <div class="task-message">
-                  Editing src/match/diff.ts (lines 42–58)…
-                </div>
-                <div class="progress-track">
-                  <div class="progress-bar" style="animation-delay: 0.4s"></div>
-                </div>
-              </div>
-              <button class="task-action cancel">Cancel</button>
-            </div>
+        <div class="content-card">
+          <div class="content-card-header">
+            <span class="content-card-title">Technical Notes</span>
           </div>
-
-          <div class="popover-section">
-            <div class="section-heading">
-              ↑ Pending
-              <span class="count">1</span>
-            </div>
-            <div class="task-row">
-              <div class="task-icon pending">↑</div>
-              <div class="task-body">
-                <div class="task-name">Notification Delivery</div>
-                <div class="task-section">Requirements</div>
-                <div class="task-message" style="color: #94a3b8">
-                  Queued — waiting for a free slot
-                </div>
-              </div>
-              <button class="task-action delete">Delete</button>
-            </div>
-          </div>
-
-          <div class="popover-section">
-            <div class="section-heading failed">
-              ✕ Failed
-              <span class="count">1</span>
-            </div>
-            <div class="task-row">
-              <div class="task-icon failed">✕</div>
-              <div class="task-body">
-                <div class="task-name">CueScore Data Provider</div>
-                <div class="task-section">Diagrams</div>
-                <div class="task-message error">
-                  Agent exited: context window exceeded
-                </div>
-              </div>
-              <button class="task-action dismiss">Dismiss</button>
-            </div>
-          </div>
-
-          <div class="popover-footer">
-            <button class="btn-link">View full task logs →</button>
+          <div class="content-card-body">
+            <p class="md-p">Password hashing uses bcrypt with a cost factor of 12. All token payloads are unsigned (payload-visible) — no sensitive claims should be included. The <code class="md-code">sub</code> claim carries a UUID (not the database row ID) to prevent enumeration.</p>
+            <p class="md-p">Rate limiting is applied at the IP level (10 requests/min via Redis) and at the account level (5 failed logins → 15 min lockout). Unlock is automatic; no manual admin intervention is needed.</p>
           </div>
         </div>
       </div>
 
-      <!-- ════════════════════════════════════════════
-       META-TASK EXAMPLE: Review Changes Running
-  ════════════════════════════════════════════ -->
-      <div class="demo-section-title" style="margin-top: 60px">
-        Meta-Task Flow: Review Changes Creating Child Tasks
-      </div>
-      <div style="position: relative; width: 380px">
-        <div
-          class="popover"
-          style="
-            display: block;
-            position: static;
-            margin-top: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          "
-        >
-          <div class="popover-header">
-            <span class="popover-title">Tasks</span>
-            <select class="time-period-select">
-              <option value="1">Last hour</option>
-              <option value="24" selected>Last 24 hours</option>
-              <option value="168">Last 7 days</option>
-              <option value="720">Last 30 days</option>
-              <option value="all">All time</option>
-            </select>
+      <div class="section-content hidden" id="panel-reqs">
+        <div class="section-header">
+          <span class="section-title">Requirements</span>
+          <span class="section-meta">8 functional · 4 non-functional</span>
+        </div>
+        <div class="content-card">
+          <div class="content-card-header">
+            <span class="content-card-title">Functional Requirements</span>
           </div>
-
-          <!-- Review section - disabled while task runs -->
-          <div class="review-changes-section" style="opacity: 0.5">
-            <div class="review-heading">🌿 Review Changes</div>
-            <div class="branch-selector-row">
-              <span class="branch-info">
-                Current: <strong>feature/new-scoring</strong>
-              </span>
-            </div>
-            <div class="branch-selector-row" style="margin-top: 6px">
-              <span class="branch-label">Compare against:</span>
-              <select class="branch-select" disabled>
-                <option selected>main</option>
-              </select>
-              <button
-                class="btn-review"
-                disabled
-                style="opacity: 0.5; cursor: not-allowed"
-              >
-                Analyzing...
-              </button>
-            </div>
+          <div class="content-card-body">
+            <ul class="md-ul">
+              <li>Users shall be able to register with email and password</li>
+              <li>Users shall be able to log in via Google OAuth 2.0</li>
+              <li>Sessions shall expire after 15 minutes of inactivity</li>
+              <li>Refresh tokens shall be rotated on every use</li>
+              <li>Accounts shall be locked after 5 consecutive failed logins</li>
+              <li>Password reset shall be initiated via email link (24h expiry)</li>
+              <li>All authentication events shall be logged for audit trail</li>
+              <li>Two-factor authentication (TOTP) shall be optionally enabled</li>
+            </ul>
           </div>
-
-          <!-- META-TASK RUNNING -->
-          <div class="popover-section">
-            <div class="section-heading running">
-              <span
-                class="spinner"
-                style="border-color: #1d4ed8; border-top-color: transparent"
-              ></span>
-              Running
-              <span class="count">1</span>
-            </div>
-
-            <div class="task-row">
-              <div class="task-icon running"><span class="spinner"></span></div>
-              <div class="task-body">
-                <div class="task-name">
-                  🔍 Review Changes: main → feature/new-scoring
-                </div>
-                <div class="task-section">Meta-Task</div>
-                <div class="task-message">
-                  Analyzing git diff (12 files changed)...
-                </div>
-                <div class="progress-track">
-                  <div class="progress-bar"></div>
-                </div>
-              </div>
-              <button class="task-action cancel">Cancel</button>
-            </div>
+        </div>
+        <div class="content-card">
+          <div class="content-card-header">
+            <span class="content-card-title">Non-Functional Requirements</span>
           </div>
-
-          <!-- CHILD TASKS BEING CREATED -->
-          <div class="popover-section">
-            <div class="section-heading">
-              ↑ Queued by Agent
-              <span class="count">5</span>
-            </div>
-
-            <div class="task-row" style="background: #f0fdf4">
-              <div
-                class="task-icon pending"
-                style="background: #dcfce7; color: #15803d"
-              >
-                ↑
-              </div>
-              <div class="task-body">
-                <div class="task-name">Match Scoring Engine</div>
-                <div class="task-section">Documentation</div>
-                <div class="task-message" style="color: #15803d">
-                  Created by agent: implementation files changed
-                </div>
-              </div>
-            </div>
-
-            <div class="task-row" style="background: #f0fdf4">
-              <div
-                class="task-icon pending"
-                style="background: #dcfce7; color: #15803d"
-              >
-                ↑
-              </div>
-              <div class="task-body">
-                <div class="task-name">Match Scoring Engine</div>
-                <div class="task-section">Requirements</div>
-                <div class="task-message" style="color: #15803d">
-                  Created by agent: business logic changed
-                </div>
-              </div>
-            </div>
-
-            <div class="task-row" style="background: #f0fdf4">
-              <div
-                class="task-icon pending"
-                style="background: #dcfce7; color: #15803d"
-              >
-                ↑
-              </div>
-              <div class="task-body">
-                <div class="task-name">Match Scoring Engine</div>
-                <div class="task-section">Testing</div>
-                <div class="task-message" style="color: #15803d">
-                  Created by agent: new code paths need coverage
-                </div>
-              </div>
-            </div>
-
-            <div class="task-row" style="background: #f0fdf4">
-              <div
-                class="task-icon pending"
-                style="background: #dcfce7; color: #15803d"
-              >
-                ↑
-              </div>
-              <div class="task-body">
-                <div class="task-name">Authentication System</div>
-                <div class="task-section">Documentation</div>
-                <div class="task-message" style="color: #15803d">
-                  Created by agent: auth middleware updated
-                </div>
-              </div>
-            </div>
-
-            <div class="task-row" style="background: #f0fdf4">
-              <div
-                class="task-icon pending"
-                style="background: #dcfce7; color: #15803d"
-              >
-                ↑
-              </div>
-              <div class="task-body">
-                <div class="task-name">Authentication System</div>
-                <div class="task-section">Bugs &amp; Security</div>
-                <div class="task-message" style="color: #15803d">
-                  Created by agent: security-sensitive files changed
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="popover-footer">
-            <button class="btn-link">View full task logs →</button>
+          <div class="content-card-body">
+            <ul class="md-ul">
+              <li>Login endpoint latency ≤ 200ms (p99)</li>
+              <li>Token validation shall be performed in &lt; 5ms</li>
+              <li>Auth service shall achieve 99.9% monthly uptime</li>
+              <li>All credentials at rest shall be encrypted with AES-256</li>
+            </ul>
           </div>
         </div>
       </div>
 
-      <div style="height: 80px"></div>
+      <div class="section-content hidden" id="panel-diagrams">
+        <div class="section-header">
+          <span class="section-title">Diagrams</span>
+          <span class="section-meta">Not yet analyzed</span>
+        </div>
+        <div style="text-align:center;padding:60px 20px;color:var(--gray-400)">
+          <div style="font-size:40px;margin-bottom:12px">📊</div>
+          <div style="font-size:16px;color:var(--gray-500);font-weight:600;margin-bottom:8px">No diagrams yet</div>
+          <div style="font-size:13px;margin-bottom:20px">Click Analyze to generate architecture and flow diagrams</div>
+          <button class="btn-analyze-codebase" style="margin:0 auto">✨ Analyze Diagrams</button>
+        </div>
+      </div>
+
+      <div class="section-content hidden" id="panel-bugs">
+        <div class="section-header">
+          <span class="section-title">Bugs &amp; Security</span>
+          <div style="display:flex;gap:6px">
+            <span style="padding:2px 8px;border-radius:4px;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700">2 Critical</span>
+            <span style="padding:2px 8px;border-radius:4px;background:#ffedd5;color:#c2410c;font-size:11px;font-weight:700">1 High</span>
+            <span style="padding:2px 8px;border-radius:4px;background:var(--blue-50);color:var(--blue-500);font-size:11px;font-weight:700;border:1px solid var(--blue-100);animation:dotBounce .7s ease-in-out infinite">⟳ Analyzing…</span>
+          </div>
+        </div>
+
+        <!-- Finding 1: Critical -->
+        <div class="finding-card open">
+          <div class="finding-header" onclick="toggleFinding(this)">
+            <span class="finding-sev-badge sev-critical">CRITICAL</span>
+            <div>
+              <div class="finding-title">JWT secret falls back to hardcoded default</div>
+              <div class="finding-location">src/auth/jwt.ts:12</div>
+            </div>
+            <div class="finding-actions">
+              <button class="btn-fix">🔧 Fix</button>
+            </div>
+          </div>
+          <div class="finding-body">
+            <p class="md-p"><strong>Description:</strong> The JWT signing secret is read from <code class="md-code">process.env.JWT_SECRET</code> with a hardcoded fallback <code class="md-code">"my-secret-key"</code>. In production environments where the env var is missing, all tokens are signed with a predictable value attackers can exploit to forge arbitrary tokens.</p>
+            <div class="md-h3">Suggested Fix</div>
+            <p class="md-p">Remove the fallback. Throw an error on startup if <code class="md-code">JWT_SECRET</code> is absent or shorter than 32 characters.</p>
+          </div>
+        </div>
+
+        <!-- Finding 2: Critical -->
+        <div class="finding-card">
+          <div class="finding-header" onclick="toggleFinding(this)">
+            <span class="finding-sev-badge sev-critical">CRITICAL</span>
+            <div>
+              <div class="finding-title">Refresh token not invalidated on logout</div>
+              <div class="finding-location">src/auth/login.ts:89</div>
+            </div>
+            <div class="finding-actions">
+              <button class="btn-fix">🔧 Fix</button>
+            </div>
+          </div>
+          <div class="finding-body">
+            <p class="md-p">The logout handler clears the client-side cookie but does not delete the refresh token from Redis. An attacker who obtained the token cookie before logout can continue to refresh access tokens indefinitely.</p>
+          </div>
+        </div>
+
+        <!-- Finding 3: High -->
+        <div class="finding-card">
+          <div class="finding-header" onclick="toggleFinding(this)">
+            <span class="finding-sev-badge sev-high">HIGH</span>
+            <div>
+              <div class="finding-title">Timing attack in password comparison</div>
+              <div class="finding-location">src/auth/login.ts:44</div>
+            </div>
+            <div class="finding-actions">
+              <button class="btn-fix">🔧 Fix</button>
+            </div>
+          </div>
+          <div class="finding-body">
+            <p class="md-p">Password comparison exits early on first mismatch, leaking timing information about partial matches. Use <code class="md-code">crypto.timingSafeEqual()</code> instead.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-content hidden" id="panel-tests">
+        <div class="section-header">
+          <span class="section-title">Refactoring &amp; Testing</span>
+          <span class="section-meta">Not yet analyzed</span>
+        </div>
+        <div style="text-align:center;padding:60px 20px;color:var(--gray-400)">
+          <div style="font-size:40px;margin-bottom:12px">🧪</div>
+          <div style="font-size:16px;color:var(--gray-500);font-weight:600;margin-bottom:8px">No testing analysis yet</div>
+          <div style="font-size:13px;margin-bottom:20px">Analyze this section to discover missing tests and refactoring opportunities</div>
+          <button class="btn-analyze-codebase" style="margin:0 auto">✨ Analyze</button>
+        </div>
+      </div>
+
+      <div class="section-content hidden" id="panel-files">
+        <div class="section-header">
+          <span class="section-title">Files</span>
+          <span class="section-meta">8 files · 1,243 lines</span>
+        </div>
+        <div class="files-section">
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/login.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/jwt.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/oauth.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/middleware.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/refresh.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/password.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/totp.ts</div>
+          <div class="file-list-item"><div class="file-dot"></div>src/auth/__tests__/login.test.ts</div>
+        </div>
+      </div>
+
     </div>
 
-    <script>
-      function togglePopover() {
-        const p = document.getElementById("popover");
-        const c = document.getElementById("pillChevron");
-        const open = p.classList.toggle("open");
-        c.classList.toggle("up", open);
-      }
+    <!-- Domain logs panel -->
+    <div class="logs-panel-domain hidden" id="domain-logs">
+      <div class="logs-section-tabs">
+        <button class="log-stab active">Documentation</button>
+        <button class="log-stab">Bugs</button>
+        <button class="log-stab">Tests</button>
+      </div>
+      <div class="log-content">
+        <div class="log-line">09:42:01 Documentation task started</div>
+        <div class="log-line">09:42:02 Reading src/auth/login.ts…</div>
+        <div class="log-line">09:42:04 Reading src/auth/jwt.ts…</div>
+        <div class="log-line">09:42:07 Reading src/auth/middleware.ts…</div>
+        <div class="log-line">09:42:09 Writing .code-analysis/domains/user-authentication.json…</div>
+        <div class="log-line" style="color:var(--green-600)">09:42:11 ✓ Documentation complete</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-      // Close on outside click
-      document.addEventListener("click", (e) => {
-        const anchor = document.getElementById("pillAnchor");
-        if (!anchor.contains(e.target)) {
-          document.getElementById("popover").classList.remove("open");
-          document.getElementById("pillChevron").classList.remove("up");
-        }
-      });
-    </script>
-  </body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 3: Domain Details — Payment Processing
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-domain-payment">
+  <div class="header">
+    <div class="header-left">
+      <button class="btn-ghost" onclick="goTo('screen-dashboard')" style="font-weight:600">📁 TaxStick API</button>
+      <button class="btn-ghost-purple" onclick="goTo('screen-design')">🎨 Design</button>
+    </div>
+    <div class="header-right">
+      <button class="btn-outline">📄 Logs</button>
+      <button class="btn-outline">⚙ Config</button>
+      <div class="status-item">API: <span class="badge badge-green" style="margin-left:4px">Connected</span></div>
+    </div>
+  </div>
+  <div class="details-body">
+    <div class="details-content">
+      <div class="domain-header-row">
+        <div class="domain-title-row">
+          <span class="domain-page-title">Payment Processing</span>
+          <span class="priority-badge pb-p0">P0</span>
+        </div>
+        <p class="domain-desc">Stripe integration, invoice generation, refund workflows, and transaction audit logging.</p>
+      </div>
+      <div class="section-tabs">
+        <button class="section-tab active">Documentation <span class="tab-dot" style="background:var(--green-400)"></span></button>
+        <button class="section-tab">Requirements <span class="tab-dot" style="background:var(--green-400)"></span></button>
+        <button class="section-tab">Diagrams</button>
+        <button class="section-tab">Bugs &amp; Security <span class="tab-dot" style="background:var(--green-400)"></span></button>
+        <button class="section-tab">Refactoring &amp; Testing <span class="tab-dot" style="background:var(--green-400)"></span></button>
+        <button class="section-tab">Files</button>
+      </div>
+      <div class="section-content">
+        <div class="section-header">
+          <span class="section-title">Documentation</span>
+          <span class="section-meta">Last analyzed 8 min ago</span>
+        </div>
+        <div class="content-card">
+          <div class="content-card-header">
+            <span class="content-card-title">Overview</span>
+          </div>
+          <div class="content-card-body">
+            <div class="md-h3">Purpose</div>
+            <p class="md-p">The Payment Processing domain orchestrates all monetary transactions on the TaxStick platform. It integrates with Stripe as the sole payment processor, handles webhook events for async state updates, and ensures PCI-DSS compliance by never touching raw card data.</p>
+            <div class="md-h3">Flow</div>
+            <p class="md-p">Payment Intent created server-side → client confirms with Stripe.js → webhook fires <code class="md-code">payment_intent.succeeded</code> → invoice record created → email receipt dispatched. Retry logic (exponential backoff, 3 attempts) handles transient Stripe failures.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 4: Design — Version Selection
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-design">
+  <div class="header">
+    <div class="header-left">
+      <button class="btn-ghost" onclick="goTo('screen-dashboard')" style="font-weight:600">📁 TaxStick API</button>
+      <button class="btn-solid-purple">🎨 Design</button>
+    </div>
+    <div class="header-right">
+      <button class="btn-outline">⚙ Config</button>
+      <div class="status-item">API: <span class="badge badge-green" style="margin-left:4px">Connected</span></div>
+    </div>
+  </div>
+
+  <div class="design-versions-layout">
+    <div class="design-versions-content">
+
+      <!-- Page heading + action -->
+      <div class="design-versions-head">
+        <div>
+          <h2>Design Prototypes</h2>
+          <p>Versioned UI prototypes — select a version to preview or generate a new one</p>
+        </div>
+        <button class="btn-new-version" onclick="openNewVersionModal()">＋ New Version</button>
+      </div>
+
+      <!-- Version cards -->
+      <div class="versions-grid" id="versions-grid">
+
+        <!-- V1 — initial prototype -->
+        <div class="version-card version-current">
+          <div class="version-card-header">
+            <span class="version-badge version-badge-purple">V1</span>
+            <span class="version-pill version-pill-current">Current</span>
+          </div>
+          <div class="version-card-title">Initial Prototype</div>
+          <div class="version-card-desc">Full platform UI: dashboard with domain cards, domain detail pages with tabbed sections, bugs &amp; security findings, and logs panels.</div>
+          <div class="version-card-meta">Created March 15, 2026</div>
+          <div class="version-card-footer">
+            <button class="btn-view-version" onclick="goTo('screen-design-preview')">View →</button>
+          </div>
+        </div>
+
+        <!-- Dashed add card -->
+        <div class="version-card version-add" onclick="openNewVersionModal()">
+          <div class="version-add-icon">＋</div>
+          <div class="version-add-label">New Version</div>
+          <div class="version-add-desc">Describe what to fix and generate<br>a new prototype iteration</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- New Version Modal -->
+  <div class="modal-overlay hidden" id="new-version-modal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">✨ New Prototype Version</span>
+        <button class="modal-close" onclick="closeNewVersionModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="modal-label" for="version-prompt">What should be fixed or changed?</label>
+        <textarea
+          class="modal-textarea"
+          id="version-prompt"
+          placeholder="Describe the changes you want in the new prototype version…
+
+Example: Fix the domain card layout so the section dots are more visible. Add a "Batch Analyze" button to the action bar. Improve the header spacing on mobile."
+        ></textarea>
+        <p class="modal-hint">The AI will generate a new version based on your description. The current version remains accessible.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeNewVersionModal()">Cancel</button>
+        <button class="btn-new-version" onclick="submitNewVersion()">Generate Version →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 5: Design preview (full-screen prototype)
+══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-design-preview">
+  <div class="header">
+    <div class="header-left">
+      <button class="btn-ghost" onclick="goTo('screen-design')" style="font-weight:600">← Back to versions</button>
+      <span style="color:var(--gray-300)">|</span>
+      <span style="font-size:13px;font-weight:600;color:var(--purple-600);background:var(--purple-100);padding:3px 10px;border-radius:6px;margin-left:4px">V1 — Initial Prototype</span>
+    </div>
+    <div class="header-right">
+      <button class="btn-outline" style="font-size:12px" onclick="goTo('screen-design')">All Versions</button>
+    </div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--gray-100)">
+    <div style="text-align:center;color:var(--gray-400)">
+      <div style="font-size:48px;margin-bottom:16px">🎨</div>
+      <div style="font-size:16px;font-weight:600;color:var(--gray-500);margin-bottom:8px">V1 Prototype</div>
+      <div style="font-size:13px;margin-bottom:20px">In production this renders the actual HTML prototype in an iframe</div>
+      <button class="btn-ghost" onclick="goTo('screen-design')" style="border:1px solid var(--gray-200)">← Back to Versions</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     JavaScript
+══════════════════════════════════════════════════════════════════ -->
+<script>
+  // ── Screen navigation ─────────────────────────────────────────────────────
+  function goTo(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  // ── Priority group collapse ───────────────────────────────────────────────
+  function toggleGroup(priority) {
+    document.getElementById("grp-" + priority).classList.toggle("collapsed");
+  }
+
+  // ── Tasks popover ─────────────────────────────────────────────────────────
+  function toggleTasksPopover() {
+    document.getElementById("tasks-popover").classList.toggle("open");
+  }
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".tasks-pill-wrap")) {
+      document.getElementById("tasks-popover")?.classList.remove("open");
+    }
+  });
+
+  // ── Dashboard logs panel ──────────────────────────────────────────────────
+  function toggleLogs() {
+    document.getElementById("dash-logs").classList.toggle("hidden");
+  }
+
+  // ── Domain logs panel ─────────────────────────────────────────────────────
+  function toggleDomainLogs() {
+    document.getElementById("domain-logs").classList.toggle("hidden");
+  }
+
+  // ── Domain detail tabs ────────────────────────────────────────────────────
+  const TABS = ["docs", "reqs", "diagrams", "bugs", "tests", "files"];
+  function switchTab(name) {
+    TABS.forEach(t => {
+      document.getElementById("tab-" + t)?.classList.remove("active");
+      const panel = document.getElementById("panel-" + t);
+      if (panel) panel.classList.add("hidden");
+    });
+    document.getElementById("tab-" + name)?.classList.add("active");
+    document.getElementById("panel-" + name)?.classList.remove("hidden");
+  }
+
+  // ── Finding expand/collapse ───────────────────────────────────────────────
+  function toggleFinding(header) {
+    header.closest(".finding-card").classList.toggle("open");
+  }
+
+  // ── Design page ───────────────────────────────────────────────────────────
+  function setDesignView(view) {
+    const isProto = view === "proto";
+    document.getElementById("dsb-proto")?.classList.toggle("active", isProto);
+    document.getElementById("dsb-comp")?.classList.toggle("active", !isProto);
+    document.getElementById("dsb-proto-list")?.classList.toggle("hidden", !isProto);
+    document.getElementById("dsb-comp-list")?.classList.toggle("hidden", isProto);
+  }
+  function selectDesignItem(el, url) {
+    el.closest(".design-sidebar").querySelectorAll(".design-item").forEach(i => i.classList.remove("active"));
+    el.classList.add("active");
+  }
+
+  // ── New Version Modal ─────────────────────────────────────────────────────
+  function openNewVersionModal() {
+    document.getElementById("version-prompt").value = "";
+    document.getElementById("new-version-modal").classList.remove("hidden");
+    setTimeout(() => document.getElementById("version-prompt").focus(), 80);
+  }
+  function closeNewVersionModal() {
+    document.getElementById("new-version-modal").classList.add("hidden");
+  }
+  function closeModalOnOverlay(e) {
+    if (e.target === document.getElementById("new-version-modal")) closeNewVersionModal();
+  }
+  function submitNewVersion() {
+    const prompt = document.getElementById("version-prompt").value.trim();
+    if (!prompt) {
+      document.getElementById("version-prompt").focus();
+      document.getElementById("version-prompt").style.borderColor = "#f87171";
+      setTimeout(() => { document.getElementById("version-prompt").style.borderColor = ""; }, 1200);
+      return;
+    }
+    closeNewVersionModal();
+
+    const grid = document.getElementById("versions-grid");
+    const realCards = grid.querySelectorAll(".version-card:not(.version-add)");
+    const versionNum = realCards.length + 1;
+    const truncated = prompt.length > 140 ? prompt.slice(0, 137) + "…" : prompt;
+
+    // Remove "current" styling from all existing cards
+    realCards.forEach(c => {
+      c.classList.remove("version-current");
+      const pill = c.querySelector(".version-pill-current");
+      if (pill) pill.remove();
+      const badge = c.querySelector(".version-badge");
+      if (badge) { badge.classList.remove("version-badge-purple"); badge.classList.add("version-badge-blue"); }
+    });
+
+    // Create generating card
+    const card = document.createElement("div");
+    card.className = "version-card version-current";
+    card.id = "version-card-" + versionNum;
+    card.innerHTML = `
+      <div class="version-card-header">
+        <span class="version-badge version-badge-purple">V${versionNum}</span>
+        <span class="version-pill version-pill-generating">
+          <span style="display:inline-block;width:8px;height:8px;border:1.5px solid #bfdbfe;border-top-color:var(--blue-500);border-radius:50%;animation:spin .7s linear infinite"></span>
+          Generating…
+        </span>
+      </div>
+      <div class="version-card-title">Version ${versionNum}</div>
+      <div class="version-card-prompt">"${truncated}"</div>
+      <div class="version-card-meta">Started just now</div>
+      <div class="version-card-footer"></div>
+    `;
+    grid.insertBefore(card, grid.querySelector(".version-add"));
+
+    // Simulate completion after 3 s
+    setTimeout(() => {
+      card.innerHTML = `
+        <div class="version-card-header">
+          <span class="version-badge version-badge-purple">V${versionNum}</span>
+          <span class="version-pill version-pill-current">Current</span>
+        </div>
+        <div class="version-card-title">Version ${versionNum}</div>
+        <div class="version-card-prompt">"${truncated}"</div>
+        <div class="version-card-meta">Created just now</div>
+        <div class="version-card-footer">
+          <button class="btn-view-version" onclick="goTo('screen-design-preview')">View →</button>
+        </div>
+      `;
+    }, 3000);
+  }
+</script>
+</body>
 </html>

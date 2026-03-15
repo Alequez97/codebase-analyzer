@@ -16,15 +16,22 @@ This is a hard boundary. Do not modify any source code files, configuration file
 
 ```
 .code-analysis/design/
-  foundation.json          ← design tokens: palette, typography, spacing, shadows
-  screen-inventory.json    ← list of all screens with metadata
-  audit.json               ← drift findings (audit mode only)
-  complete.json            ← final consistency report (creation mode only)
-  screens/
-    <screen-name>.html     ← one self-contained HTML wireframe per screen
+  foundation.json              ← design tokens: palette, typography, spacing, shadows
+  screen-inventory.json        ← list of all screens with metadata
+  versions.json                ← version registry (see schema below)
+  audit.json                   ← drift findings (audit mode only)
+  complete.json                ← final consistency report (creation mode only)
+  v1/                          ← first prototype version (self-contained folder)
+    index.html                 ← entry point — rendered in the platform's Design page
+    <screen-name>.html         ← one HTML file per screen (optional, linked from index.html)
+  v2/                          ← second version, created from a user prompt
+    index.html
+    ...
+  components/
+    <component-name>.html      ← isolated UI component previews
 ```
 
-All files you write must live under `.code-analysis/design/`. Do not create files anywhere else.
+Each version lives in its own numbered sub-folder (`v1/`, `v2/`, …). The platform always displays the **latest version** in the preview iframe. All files you write must live under `.code-analysis/design/`. Do not create files anywhere else.
 
 ---
 
@@ -43,6 +50,8 @@ The design feature operates in one of two modes depending on the project state. 
 | **Phase 3** | Detect drift between screens and foundation   | Validate consistency across all screens     |
 
 Both modes produce the exact same output schema. The React UI reads only `.code-analysis/design/` — it has no knowledge of which mode ran.
+
+> **Versioning rule:** every generation — whether an initial prototype or a modification — produces a new numbered version folder (`v1/`, `v2/`, …). The platform sidebar always shows **one active version** at a time (the latest), and the user creates new versions by submitting a prompt describing what to change.
 
 ---
 
@@ -71,8 +80,9 @@ Then plan what screens the product needs: auth/onboarding, core features, settin
 
 - `foundation.json` — the complete design token system
 - `screen-inventory.json` — full list of screens with id, name, route, and assigned complexity weight
+- `versions.json` — updated to register the new version (see schema in Section 6)
 
-After writing these two files, partition the screen inventory into N groups and spawn one sub-agent per group via `delegate_task`.
+After writing these files, determine the next version number (read `versions.json`, increment), create the version folder (e.g. `v1/`), then partition the screen inventory into N groups and spawn one sub-agent per group via `delegate_task`.
 
 #### Phase 2 — Parallel Screen Processing (N sub-agents)
 
@@ -85,7 +95,7 @@ Each sub-agent is spawned with:
 
 **Creation mode sub-agent:** For each screen, design the layout, content hierarchy, and interactive regions appropriate for that screen's purpose, then generate an HTML wireframe using the foundation tokens.
 
-Each sub-agent writes one `screens/<screen-name>.html` file per assigned screen. Sub-agents **never modify `foundation.json`** — it is read-only for them.
+Each sub-agent writes one HTML file per assigned screen into the current version folder (e.g. `v1/<screen-name>.html`). Sub-agents **never modify `foundation.json`** — it is read-only for them.
 
 #### Phase 3 — Aggregation (master agent resumes)
 
@@ -107,6 +117,8 @@ Writes `audit.json` — drift findings, each with screen name and specific viola
 ### 3. HTML Wireframe Format
 
 Each screen is a **self-contained HTML file** — all styles are inlined or embedded in a `<style>` tag. No external stylesheet links, no JavaScript framework imports, no build step required.
+
+Each version folder **must contain an `index.html`** that serves as the entry point — the platform renders this file in the preview iframe. `index.html` should be the primary or most representative screen (e.g. the main dashboard). Additional screens can be separate HTML files in the same folder and linked from `index.html` via `<a href>` navigation.
 
 Design principles for wireframes:
 
@@ -209,13 +221,61 @@ The goal is a **browsable prototype**, not a Figma export. Each file should rend
 
 ---
 
-### 6. Modification Workflow (Phase 4 — Chat & Partial Regeneration)
+### 6. `versions.json` Schema
 
-Once the initial prototype exists, the user can request changes via chat. The master agent decides how to handle the request:
+This file is the version registry. The platform reads it to populate the sidebar's version card and to route the preview iframe to the correct `index.html`.
 
-- **Targeted edit** (one or a few screens): handle in-place, edit the relevant `screens/*.html` files and update `foundation.json` if tokens changed
-- **Broad re-style** (palette swap, typography change): update `foundation.json` first, then spawn sub-agents to regenerate all affected screens
-- **New screen added**: add entry to `screen-inventory.json`, spawn one sub-agent for the single new screen
+```json
+{
+  "current": "v2",
+  "versions": [
+    {
+      "id": "v1",
+      "label": "v1",
+      "createdAt": "2026-03-15T10:00:00Z",
+      "description": "Initial design — tasks popover, header, domain cards",
+      "screenCount": 6,
+      "prompt": null
+    },
+    {
+      "id": "v2",
+      "label": "v2",
+      "createdAt": "2026-03-15T14:30:00Z",
+      "description": "Dark mode toggle in header, replaced domain cards with table view",
+      "screenCount": 6,
+      "prompt": "Dark mode toggle in header, replace domain cards with table view"
+    }
+  ]
+}
+```
+
+- `current` — the `id` of the version the platform should display (always the latest you just created)
+- `prompt` — the user's raw modification prompt; `null` for the first generated version
+- `description` — a concise human-readable summary of what changed (write this yourself, don't just echo the prompt)
+
+**Always write `versions.json` as the very last step** of any generation, after all HTML files are confirmed written. This makes it the commit signal — the platform only shows a version once it appears here.
+
+---
+
+### 7. Modification Workflow (Phase 4 — New Version from Prompt)
+
+When the user submits a prompt describing what to change, you **always create a new version** — never mutate an existing one. This preserves history and lets the user compare.
+
+**Steps:**
+
+1. Read `versions.json` to find the current version (e.g. `v2`)
+2. Determine the next version number (`v3`)
+3. Read the HTML files from the current version folder to understand what exists
+4. Apply the user's requested changes — update `foundation.json` if tokens changed
+5. Write all new screen files into the new version folder (e.g. `v3/<screen-name>.html`)
+6. Write `v3/index.html` as the entry point
+7. Append the new entry to `versions.json` and set `current` to the new version id
+
+**Scope of changes:**
+
+- **Targeted edit** (one or a few screens): copy unaffected screens unchanged, only rewrite the touched ones
+- **Broad re-style** (palette swap, typography change): update `foundation.json` first, then rewrite all screens
+- **New screen added**: add entry to `screen-inventory.json`, write the new screen file, update `index.html` navigation
 
 After any modification, re-run Phase 3 consistency validation and update `audit.json` / `complete.json`.
 
@@ -224,7 +284,9 @@ After any modification, re-run Phase 3 consistency validation and update `audit.
 ## Constraints
 
 - **Never write outside `.code-analysis/design/`**. Read anywhere, write only here.
+- **Never mutate an existing version folder.** Every change = new version.
+- **Always write `versions.json` last** — it is the signal that a version is ready to display.
 - **Never modify `foundation.json` from a sub-agent**. It is written by the master in Phase 1 and is read-only for all sub-agents.
 - **Never use external CDN links** in HTML wireframes that would break if the file is opened offline. Embed all styles.
-- **One HTML file per screen**. Do not combine multiple screens into a single file.
+- **Every version folder must have an `index.html`**. This is the file the platform loads in the iframe.
 - **Keep `foundation.json` as the single source of truth** for design tokens. HTML wireframes embed token values directly (for offline browsability) but those values must always match `foundation.json`.

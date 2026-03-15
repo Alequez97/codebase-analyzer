@@ -1,0 +1,13 @@
+{
+  "current": "v1",
+  "versions": [
+    {
+      "id": "v1",
+      "label": "v1",
+      "createdAt": "2026-03-15T10:00:00Z",
+      "description": "Full platform prototype: dashboard with priority-grouped domain cards, domain detail pages with tabbed sections (Docs, Requirements, Diagrams, Bugs & Security, Testing, Files), tasks popover, logs panel, and Design version gallery.",
+      "screenCount": 5,
+      "prompt": null
+    }
+  ]
+}
