@@ -4,6 +4,7 @@ import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { Navbar, NavLogo } from "./Navbar";
 import { CompetitorsGrid } from "./CompetitorsGrid";
 import { ActivityFeed } from "./ActivityFeed";
+import { CompetitorDetails } from "./CompetitorDetails";
 
 function ProgressBar() {
   const competitors = useMarketResearchStore((s) => s.competitors);
@@ -121,8 +122,22 @@ export function AnalysisPage() {
   const idea = useMarketResearchStore((s) => s.idea);
   const activityEvents = useMarketResearchStore((s) => s.activityEvents);
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
+  const isAnalysisComplete = useMarketResearchStore(
+    (s) => s.isAnalysisComplete,
+  );
   const resetAnalysis = useMarketResearchStore((s) => s.resetAnalysis);
   const goToLanding = useMarketResearchStore((s) => s.goToLanding);
+  const goToSummary = useMarketResearchStore((s) => s.goToSummary);
+  const selectedCompetitorId = useMarketResearchStore(
+    (s) => s.selectedCompetitorId,
+  );
+  const clearSelectedCompetitor = useMarketResearchStore(
+    (s) => s.clearSelectedCompetitor,
+  );
+  const competitors = useMarketResearchStore((s) => s.competitors);
+
+  const selectedCompetitor =
+    competitors.find((c) => c.id === selectedCompetitorId) ?? null;
 
   return (
     <Box minH="100vh" bg="#f8fafc">
@@ -170,19 +185,52 @@ export function AnalysisPage() {
           )}
         </VStack>
 
-        {/* Tabs + progress */}
-        <VStack align="start" gap={3} mb={6}>
-          <TabBar
-            active={activeTab}
-            onChange={setActiveTab}
-            activityCount={activityEvents.length}
-            isAnalyzing={isAnalyzing}
+        {selectedCompetitor ? (
+          <CompetitorDetails
+            competitor={selectedCompetitor}
+            onBack={() => {
+              clearSelectedCompetitor();
+              setActiveTab("competitors");
+            }}
           />
-          {activeTab === "competitors" && <ProgressBar />}
-        </VStack>
+        ) : (
+          <>
+            {/* Tabs + progress */}
+            <VStack align="start" gap={3} mb={6}>
+              <HStack gap={3} align="center">
+                <TabBar
+                  active={activeTab}
+                  onChange={setActiveTab}
+                  activityCount={activityEvents.length}
+                  isAnalyzing={isAnalyzing}
+                />
+                {isAnalysisComplete && (
+                  <Button
+                    h="28px"
+                    px={3.5}
+                    fontSize="12px"
+                    fontWeight="700"
+                    borderRadius="8px"
+                    bg="linear-gradient(135deg, #6366f1, #7c3aed)"
+                    color="white"
+                    _hover={{ opacity: 0.9 }}
+                    onClick={goToSummary}
+                  >
+                    View Summary →
+                  </Button>
+                )}
+              </HStack>
+              {activeTab === "competitors" && <ProgressBar />}
+            </VStack>
 
-        {/* Tab content */}
-        {activeTab === "competitors" ? <CompetitorsGrid /> : <ActivityFeed />}
+            {/* Tab content */}
+            {activeTab === "competitors" ? (
+              <CompetitorsGrid />
+            ) : (
+              <ActivityFeed />
+            )}
+          </>
+        )}
       </Box>
     </Box>
   );

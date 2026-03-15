@@ -102,6 +102,7 @@ export const useMarketResearchStore = create((set) => ({
   isAnalysisComplete: false,
   competitors: [],
   activityEvents: [],
+  selectedCompetitorId: null,
 
   // --- Navigation actions ---
   setStep: (step) => set({ step }),
@@ -145,8 +146,12 @@ export const useMarketResearchStore = create((set) => ({
       competitors: [],
       activityEvents: [],
       analysisStartedAt: null,
+      selectedCompetitorId: null,
     });
   },
+
+  selectCompetitor: (id) => set({ selectedCompetitorId: id }),
+  clearSelectedCompetitor: () => set({ selectedCompetitorId: null }),
 
   // --- Internal mutation helpers (called by simulation only) ---
   _addActivityEvent: (event) =>
@@ -165,4 +170,6 @@ export const useMarketResearchStore = create((set) => ({
 
   _markAnalysisComplete: () =>
     set({ isAnalyzing: false, isAnalysisComplete: true }),
+
+  goToSummary: () => set({ step: "summary" }),
 }));

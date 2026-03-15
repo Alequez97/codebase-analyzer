@@ -13,10 +13,12 @@ export { InputStatsFooter } from "./InputStatsFooter";
 export { IdeaInputPage } from "./IdeaInputPage";
 export { CompetitorCard } from "./CompetitorCard";
 export { CompetitorsGrid } from "./CompetitorsGrid";
+export { CompetitorDetails } from "./CompetitorDetails";
 export { ActivityEvent } from "./ActivityEvent";
 export { ActivityFeed } from "./ActivityFeed";
 export { AnalysisStatsBar } from "./AnalysisStatsBar";
 export { AnalysisPage } from "./AnalysisPage";
+export { AnalysisSummaryPage } from "./AnalysisSummaryPage";
 
 // Constants
 export * from "./constants";

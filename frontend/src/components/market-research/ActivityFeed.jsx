@@ -6,12 +6,10 @@ import { ActivityEvent } from "./ActivityEvent";
 export function ActivityFeed() {
   const activityEvents = useMarketResearchStore((s) => s.activityEvents);
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
-  const scrollRef = useRef(null);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activityEvents.length]);
 
   const handleClear = () => {
@@ -82,23 +80,7 @@ export function ActivityFeed() {
       </HStack>
 
       {/* Event list */}
-      <VStack
-        ref={scrollRef}
-        align="stretch"
-        gap={0}
-        maxH="600px"
-        overflowY="auto"
-        px={5}
-        py={2}
-        css={{
-          "&::-webkit-scrollbar": { width: "4px" },
-          "&::-webkit-scrollbar-track": { background: "transparent" },
-          "&::-webkit-scrollbar-thumb": {
-            background: "#e2e8f0",
-            borderRadius: "2px",
-          },
-        }}
-      >
+      <VStack align="stretch" gap={0} px={5} py={2}>
         {activityEvents.length === 0 ? (
           <Box py={12} textAlign="center">
             <Text fontSize="12px" color="#94a3b8">
@@ -110,6 +92,7 @@ export function ActivityFeed() {
             <ActivityEvent key={event.id} event={event} />
           ))
         )}
+        <Box ref={bottomRef} />
       </VStack>
     </Box>
   );
