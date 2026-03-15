@@ -1,95 +1,7 @@
 import { Badge, Box, HStack, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
-
-function StatusBadge({ status }) {
-  if (status === "done") {
-    return (
-      <Badge
-        display="inline-flex"
-        alignItems="center"
-        gap={1}
-        bg="#dcfce7"
-        color="#15803d"
-        fontSize="10px"
-        fontWeight="600"
-        px={2}
-        py={0.5}
-        borderRadius="9999px"
-      >
-        ✓ Done
-      </Badge>
-    );
-  }
-
-  if (status === "analyzing") {
-    return (
-      <Badge
-        display="inline-flex"
-        alignItems="center"
-        gap={1}
-        bg="#eff6ff"
-        color="#1d4ed8"
-        fontSize="10px"
-        fontWeight="600"
-        px={2}
-        py={0.5}
-        borderRadius="9999px"
-        css={{
-          "@keyframes blink": {
-            "0%, 100%": { opacity: 1 },
-            "50%": { opacity: 0.5 },
-          },
-          animation: "blink 1.4s ease-in-out infinite",
-        }}
-      >
-        ⊙ Analyzing
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge
-      display="inline-flex"
-      alignItems="center"
-      gap={1}
-      bg="#f1f5f9"
-      color="#64748b"
-      fontSize="10px"
-      fontWeight="600"
-      px={2}
-      py={0.5}
-      borderRadius="9999px"
-    >
-      Queued
-    </Badge>
-  );
-}
-
-function CompetitorLogo({ competitor }) {
-  return (
-    <Box
-      w="32px"
-      h="32px"
-      borderRadius="8px"
-      bg={competitor.logoBg}
-      borderWidth="1px"
-      borderColor={`${competitor.logoColor}33`}
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      flexShrink={0}
-    >
-      <Text
-        fontSize="10px"
-        fontWeight="800"
-        color={competitor.logoColor}
-        letterSpacing="-0.02em"
-      >
-        {competitor.logoChar}
-      </Text>
-    </Box>
-  );
-}
+import { CompetitorLogo } from "./CompetitorLogo";
+import { CompetitorStatusBadge } from "./CompetitorStatusBadge";
 
 function CompetitorCardDone({ competitor }) {
   return (
@@ -106,7 +18,7 @@ function CompetitorCardDone({ competitor }) {
             </Text>
           </VStack>
         </HStack>
-        <StatusBadge status="done" />
+        <CompetitorStatusBadge status="done" />
       </HStack>
 
       <Text fontSize="11.5px" color="#374151" lineHeight="1.55">
@@ -190,7 +102,7 @@ function CompetitorCardAnalyzing({ competitor }) {
             </Text>
           </VStack>
         </HStack>
-        <StatusBadge status="analyzing" />
+        <CompetitorStatusBadge status="analyzing" />
       </HStack>
 
       <VStack align="start" gap={2} w="full">
@@ -227,7 +139,7 @@ function CompetitorCardQueued({ competitor }) {
             </Text>
           </VStack>
         </HStack>
-        <StatusBadge status="queued" />
+        <CompetitorStatusBadge status="queued" />
       </HStack>
 
       <Text fontSize="11px" color="#94a3b8" fontStyle="italic">

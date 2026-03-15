@@ -16,7 +16,10 @@ import { useLogsStore } from "./useLogsStore";
 import { useRefactoringAndTestingStore } from "./useRefactoringAndTestingStore";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 import { useAgentChatStore } from "./useAgentChatStore";
-import { useMarketResearchStore, logLineToKind } from "./useMarketResearchStore";
+import {
+  useMarketResearchStore,
+  logLineToKind,
+} from "./useMarketResearchStore";
 import { getMarketResearchReport } from "../api/market-research";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
@@ -152,7 +155,15 @@ export const useSocketStore = create((set, get) => ({
 
     // Task queued event — fires for every task regardless of who triggered it
     socket.on(SOCKET_EVENTS.TASK_QUEUED, (data) => {
-      const { taskId, type, domainId, delegatedByTaskId, competitorName, competitorId, competitorUrl } = data;
+      const {
+        taskId,
+        type,
+        domainId,
+        delegatedByTaskId,
+        competitorName,
+        competitorId,
+        competitorUrl,
+      } = data;
       if (taskId) {
         useTaskProgressStore.getState().setPending(taskId, {
           domainId,
@@ -247,6 +258,8 @@ export const useSocketStore = create((set, get) => ({
         const sessionId = data?.params?.sessionId;
         const storeSessionId = useMarketResearchStore.getState().sessionId;
         if (sessionId && sessionId === storeSessionId) {
+          // If MARKET_RESEARCH_REPORT_READY already applied the report, skip the fetch.
+          if (useMarketResearchStore.getState().isAnalysisComplete) return;
           getMarketResearchReport(sessionId)
             .then((response) => {
               const report = response?.data?.report;
@@ -511,11 +524,42 @@ export const useSocketStore = create((set, get) => ({
 
     // Competitor found — add skeleton card immediately
     socket.on(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_FOUND, (data) => {
-      const { sessionId, taskId, competitorId, competitorName, competitorUrl } = data;
+      const { sessionId, taskId, competitorId, competitorName, competitorUrl } =
+        data;
       const storeSessionId = useMarketResearchStore.getState().sessionId;
       if (sessionId && sessionId === storeSessionId) {
-        useMarketResearchStore.getState()._addCompetitorStub({ taskId, competitorId, competitorName, competitorUrl });
+        useMarketResearchStore
+          .getState()
+          ._addCompetitorStub({
+            taskId,
+            competitorId,
+            competitorName,
+            competitorUrl,
+          });
       }
+    });
+
+    // Final merged report is ready — apply it immediately.
+    // This fires inside onComplete (before TASK_COMPLETED) so the UI
+    // reflects the complete data as soon as it's available.
+    socket.on(SOCKET_EVENTS.MARKET_RESEARCH_REPORT_READY, (data) => {
+      const { sessionId } = data ?? {};
+      const mrStore = useMarketResearchStore.getState();
+      if (!sessionId || sessionId !== mrStore.sessionId) return;
+      // Guard: don't fetch if _applyReport was already called
+      if (mrStore.isAnalysisComplete) return;
+      getMarketResearchReport(sessionId)
+        .then((response) => {
+          const report = response?.data?.report;
+          if (report) {
+            useMarketResearchStore.getState()._applyReport(report);
+          } else {
+            useMarketResearchStore.getState()._markAnalysisComplete();
+          }
+        })
+        .catch(() => {
+          useMarketResearchStore.getState()._markAnalysisComplete();
+        });
     });
 
     // Market research log lines → activity feed in market research store

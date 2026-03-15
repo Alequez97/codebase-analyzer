@@ -82,11 +82,72 @@ export function ActivityFeed() {
       {/* Event list */}
       <VStack align="stretch" gap={0} px={5} py={2}>
         {activityEvents.length === 0 ? (
-          <Box py={12} textAlign="center">
-            <Text fontSize="12px" color="#94a3b8">
-              Events will appear here as the AI works...
-            </Text>
-          </Box>
+          isAnalyzing ? (
+            <Box
+              py={10}
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={4}
+            >
+              {/* Ripple rings */}
+              <Box position="relative" w="40px" h="40px">
+                {[0, 1, 2].map((i) => (
+                  <Box
+                    key={i}
+                    position="absolute"
+                    inset={0}
+                    borderRadius="50%"
+                    borderWidth="1.5px"
+                    borderColor="#818cf8"
+                    css={{
+                      "@keyframes ripple": {
+                        "0%": { transform: "scale(0.6)", opacity: 0.9 },
+                        "100%": { transform: "scale(2.2)", opacity: 0 },
+                      },
+                      animation: `ripple 2s ease-out ${i * 0.6}s infinite`,
+                    }}
+                  />
+                ))}
+                <Box
+                  position="absolute"
+                  inset={0}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Box
+                    w="12px"
+                    h="12px"
+                    borderRadius="50%"
+                    bg="#6366f1"
+                    css={{
+                      "@keyframes pulse": {
+                        "0%, 100%": { transform: "scale(0.9)", opacity: 0.8 },
+                        "50%": { transform: "scale(1.1)", opacity: 1 },
+                      },
+                      animation: "pulse 1.5s ease-in-out infinite",
+                    }}
+                  />
+                </Box>
+              </Box>
+              <Text fontSize="11px" color="#94a3b8" fontWeight="500">
+                Waiting for activity
+              </Text>
+            </Box>
+          ) : (
+            <Box py={10} textAlign="center">
+              <Text fontSize="20px" mb={2}>
+                📋
+              </Text>
+              <Text fontSize="12px" fontWeight="600" color="#475569" mb={0.5}>
+                No activity yet
+              </Text>
+              <Text fontSize="11px" color="#94a3b8">
+                Events will appear here as the AI works.
+              </Text>
+            </Box>
+          )
         ) : (
           activityEvents.map((event) => (
             <ActivityEvent key={event.id} event={event} />
