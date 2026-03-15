@@ -16,6 +16,7 @@ import {
   ScanSearch,
   TrendingUp,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCodebaseStore } from "../../store/useCodebaseStore";
 
 const RESEARCH_STEPS = [
@@ -25,6 +26,7 @@ const RESEARCH_STEPS = [
 ];
 
 export function EmptyProjectState() {
+  const navigate = useNavigate();
   const { analyzeCodebase } = useCodebaseStore();
 
   return (
@@ -186,10 +188,7 @@ export function EmptyProjectState() {
                   colorPalette="violet"
                   borderRadius="xl"
                   fontWeight="700"
-                  isDisabled
-                  opacity={0.6}
-                  cursor="not-allowed"
-                  title="Coming soon"
+                  onClick={() => navigate("/market-research")}
                 >
                   <Lightbulb size={16} />
                   Start Research
@@ -201,7 +200,7 @@ export function EmptyProjectState() {
                   textAlign="center"
                   w="full"
                 >
-                  Coming soon — research agent is under development
+                  AI-powered market validation in minutes
                 </Text>
               </VStack>
             </Box>
