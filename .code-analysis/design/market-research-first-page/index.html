@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Market Research — Start</title>
+  <title>Researchio — Is your idea worth building?</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ─── Reset ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -28,7 +27,7 @@
       border-bottom: 1px solid #e4e4e7;
       height: 48px;
       display: flex; align-items: center;
-      padding: 0 24px;
+      padding: 0 28px;
     }
     .navbar-left { display: flex; align-items: center; gap: 6px; flex: 1; }
     .navbar-right { display: flex; align-items: center; gap: 10px; }
@@ -49,73 +48,66 @@
     .logo-wordmark sup {
       font-size: 8px; font-weight: 700; letter-spacing: .08em;
       text-transform: uppercase; color: #6366f1;
-      vertical-align: super;
-      margin-left: 2px;
+      vertical-align: super; margin-left: 2px;
     }
-
-    .nav-sep { width: 1px; height: 18px; background: #e4e4e7; margin: 0 4px; }
-
-    .btn-nav {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: none; border: none; border-radius: 5px;
-      padding: 0 10px; height: 30px; font-size: 13px; color: #52525b;
-      font-weight: 450;
-    }
-    .btn-nav:hover { background: #f1f5f9; color: #0f172a; }
-
     .btn-signin {
       display: inline-flex; align-items: center;
       background: none; border: none;
       padding: 0 10px; height: 30px; font-size: 13px; color: #52525b;
-      font-weight: 450;
+      font-weight: 500;
     }
     .btn-signin:hover { color: #0f172a; }
-
-    .btn-cta {
-      display: inline-flex; align-items: center; gap: 6px;
+    .btn-cta-sm {
+      display: inline-flex; align-items: center; gap: 5px;
       background: #0f172a; border: none; border-radius: 7px;
       padding: 0 14px; height: 32px; font-size: 13px; color: #fff;
-      font-weight: 600; letter-spacing: -.01em;
-      transition: background .12s;
+      font-weight: 600; transition: background .12s;
     }
-    .btn-cta:hover { background: #1e293b; }
+    .btn-cta-sm:hover { background: #1e293b; }
 
     /* ─── Hero ─── */
     .hero {
       min-height: 100vh;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 80px 24px 60px;
+      padding: 80px 24px 80px;
       position: relative;
       overflow: hidden;
+      text-align: center;
     }
 
-    /* faint radial glow behind hero */
     .hero::before {
       content: '';
       position: absolute;
-      top: -120px; left: 50%; transform: translateX(-50%);
-      width: 800px; height: 600px;
-      background: radial-gradient(ellipse at center, rgba(99,102,241,.1) 0%, transparent 70%);
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 700px;
+      background: radial-gradient(ellipse at 50% 30%, rgba(99,102,241,.08) 0%, transparent 65%);
       pointer-events: none;
     }
 
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 6px;
       background: #f5f3ff; border: 1px solid #ddd6fe;
-      border-radius: 9999px; padding: 4px 12px;
+      border-radius: 9999px; padding: 4px 14px;
       font-size: 11px; font-weight: 600; color: #6366f1;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      position: relative;
     }
     .hero-eyebrow .dot {
       width: 5px; height: 5px; border-radius: 50%;
       background: #818cf8; flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
     }
 
     .hero-title {
-      font-size: 44px; font-weight: 800; color: #0f172a;
-      line-height: 1.12; text-align: center; max-width: 680px;
-      letter-spacing: -.02em;
+      font-size: 52px; font-weight: 800; color: #0f172a;
+      line-height: 1.1; max-width: 700px;
+      letter-spacing: -.03em;
+      position: relative;
     }
     .hero-title .accent {
       background: linear-gradient(135deg, #6366f1, #a855f7);
@@ -124,153 +116,70 @@
     }
 
     .hero-sub {
-      margin-top: 16px;
-      font-size: 15px; color: #64748b; line-height: 1.65;
-      text-align: center; max-width: 520px;
-    }
-
-    /* ─── Input card ─── */
-    .input-card {
-      margin-top: 40px;
-      width: 100%; max-width: 680px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
-      overflow: hidden;
-    }
-
-    .input-card-body { padding: 20px 20px 14px; }
-
-    .input-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #94a3b8;
-      margin-bottom: 10px;
-    }
-
-    .idea-textarea {
-      width: 100%;
-      border: 1px solid #e2e8f0; border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 14px; color: #0f172a; line-height: 1.6;
-      background: #f8fafc; outline: none;
-      resize: none; font-family: inherit;
-      min-height: 80px;
-      transition: border-color .15s, box-shadow .15s;
-    }
-    .idea-textarea::placeholder { color: #b0bcc8; }
-    .idea-textarea:focus {
-      border-color: #818cf8;
-      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
-      background: #fff;
-    }
-
-    /* example chips */
-    .examples {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      margin-top: 10px;
-    }
-    .example-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px;
-      padding: 3px 10px; font-size: 11px; color: #52525b;
-      cursor: pointer; transition: background .1s, border-color .1s;
-    }
-    .example-chip:hover {
-      background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8;
-    }
-    .example-chip .chip-icon { color: #94a3b8; font-size: 10px; }
-
-    .input-card-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 20px 16px;
-      border-top: 1px solid #f1f5f9;
-    }
-    .footer-hint {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 11px; color: #94a3b8;
-    }
-    .footer-hint svg { flex-shrink: 0; }
-
-    .btn-analyze {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      border: none; border-radius: 9px;
-      padding: 0 20px; height: 38px;
-      font-size: 13px; color: #fff; font-weight: 600;
-      box-shadow: 0 2px 8px rgba(99,102,241,.35);
-      transition: opacity .15s, box-shadow .15s;
-    }
-    .btn-analyze:hover {
-      opacity: .92;
-      box-shadow: 0 4px 14px rgba(99,102,241,.45);
-    }
-
-    /* ─── How it works ─── */
-    .how {
-      margin-top: 56px;
-      display: flex; align-items: flex-start; gap: 0;
-      max-width: 640px; width: 100%;
-    }
-    .how-step {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      text-align: center; padding: 0 12px;
+      margin-top: 20px;
+      font-size: 16px; color: #64748b; line-height: 1.7;
+      max-width: 500px;
       position: relative;
     }
-    .how-step:not(:last-child)::after {
-      content: '';
-      position: absolute; top: 18px; right: -6px;
-      width: 12px; height: 1px;
-      background: #e2e8f0;
-    }
-    .how-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 10px; flex-shrink: 0;
-    }
-    .how-icon.s1 { background: #eff6ff; color: #3b82f6; }
-    .how-icon.s2 { background: #fef3c7; color: #d97706; }
-    .how-icon.s3 { background: #f0fdf4; color: #16a34a; }
-    .how-icon.s4 { background: #f5f3ff; color: #7c3aed; }
-    .how-step-title {
-      font-size: 12px; font-weight: 600; color: #0f172a;
-      margin-bottom: 4px;
-    }
-    .how-step-desc { font-size: 11px; color: #64748b; line-height: 1.5; }
 
-    /* ─── My reports empty state ─── */
-    .my-reports {
-      margin-top: 48px; width: 100%; max-width: 680px;
+    .btn-hero {
+      margin-top: 40px;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      border: none; border-radius: 12px;
+      padding: 0 32px; height: 52px;
+      font-size: 15px; color: #fff; font-weight: 700;
+      letter-spacing: -.01em;
+      box-shadow: 0 4px 16px rgba(99,102,241,.4);
+      transition: opacity .15s, box-shadow .15s, transform .15s;
+      text-decoration: none;
+      position: relative;
     }
-    .my-reports-inner {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-      padding: 28px 24px;
-      display: flex; align-items: center; gap: 20px;
+    .btn-hero:hover {
+      opacity: .93;
+      box-shadow: 0 6px 24px rgba(99,102,241,.5);
+      transform: translateY(-1px);
     }
-    .my-reports-icon {
-      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
-      background: #f5f3ff; border: 1px solid #ddd6fe;
-      display: flex; align-items: center; justify-content: center;
-      color: #6366f1;
+    .btn-hero:active { transform: none; }
+    .btn-hero-sub {
+      margin-top: 12px;
+      font-size: 12px; color: #94a3b8;
+      position: relative;
     }
-    .my-reports-text { flex: 1; }
-    .my-reports-title {
-      font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 3px;
-    }
-    .my-reports-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
-    .btn-signin-inline {
-      display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 7px;
-      padding: 0 14px; height: 34px; font-size: 12px; color: #374151;
-      font-weight: 500; transition: background .12s, border-color .12s;
-    }
-    .btn-signin-inline:hover { background: #f8fafc; border-color: #cbd5e1; }
 
-    /* ─── Social proof strip ─── */
+    /* ─── Feature pills ─── */
+    .features {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center;
+      margin-top: 52px;
+      max-width: 640px;
+      position: relative;
+    }
+    .feature-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 12px; color: #374151; font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    }
+    .pill-icon {
+      width: 22px; height: 22px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pill-icon.blue  { background: #eff6ff; color: #3b82f6; }
+    .pill-icon.amber { background: #fef3c7; color: #d97706; }
+    .pill-icon.green { background: #f0fdf4; color: #16a34a; }
+    .pill-icon.purple{ background: #f5f3ff; color: #7c3aed; }
+
+    /* ─── Proof strip ─── */
     .proof-strip {
       margin-top: 48px;
       display: flex; align-items: center; gap: 24px;
       flex-wrap: wrap; justify-content: center;
+      position: relative;
     }
     .proof-item {
       display: flex; align-items: center; gap: 6px;
@@ -278,165 +187,14 @@
     }
     .proof-item strong { color: #0f172a; font-weight: 700; }
     .proof-sep { width: 3px; height: 3px; border-radius: 50%; background: #cbd5e1; }
-
-    /* ─── Pricing section ─── */
-    .pricing-section {
-      background: #fff;
-      border-top: 1px solid #f1f5f9;
-      padding: 80px 24px 96px;
-    }
-    .pricing-inner {
-      max-width: 960px; margin: 0 auto;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .pricing-header { text-align: center; margin-bottom: 48px; }
-    .pricing-eyebrow {
-      display: inline-flex; align-items: center;
-      font-size: 11px; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: #6366f1;
-      margin-bottom: 12px;
-    }
-    .pricing-title {
-      font-size: 30px; font-weight: 800; color: #0f172a;
-      letter-spacing: -.02em; margin-bottom: 8px;
-    }
-    .pricing-sub { font-size: 14px; color: #64748b; }
-
-    .billing-toggle {
-      display: inline-flex; align-items: center;
-      background: #f1f5f9; border-radius: 8px; padding: 3px;
-      margin-top: 20px; gap: 2px;
-    }
-    .billing-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: none; border: none; border-radius: 6px;
-      padding: 5px 14px; font-size: 12px; color: #64748b;
-      font-weight: 500; transition: background .12s, color .12s;
-    }
-    .billing-btn.active {
-      background: #fff; color: #0f172a;
-      box-shadow: 0 1px 3px rgba(0,0,0,.1);
-    }
-    .billing-btn:hover:not(.active) { color: #0f172a; }
-    .save-badge {
-      font-size: 10px; font-weight: 700;
-      background: #dcfce7; color: #15803d;
-      padding: 1px 5px; border-radius: 9999px;
-    }
-
-    .pricing-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px; width: 100%; align-items: start;
-    }
-
-    .plan-card {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-      padding: 24px 22px; position: relative;
-      transition: box-shadow .15s;
-    }
-    .plan-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.06); }
-    .plan-card.featured {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 4px rgba(99,102,241,.08), 0 8px 24px rgba(99,102,241,.12);
-    }
-    .plan-badge {
-      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; padding: 3px 12px; border-radius: 9999px;
-      white-space: nowrap;
-    }
-    .plan-top { margin-bottom: 18px; }
-    .plan-name { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
-    .plan-price { display: flex; align-items: baseline; gap: 2px; margin-bottom: 6px; }
-    .plan-amount { font-size: 34px; font-weight: 800; color: #0f172a; letter-spacing: -.03em; }
-    .plan-period { font-size: 13px; color: #94a3b8; font-weight: 400; }
-    .plan-tagline { font-size: 12px; color: #64748b; line-height: 1.4; }
-
-    .plan-cta {
-      width: 100%; height: 36px; border-radius: 8px;
-      font-size: 13px; font-weight: 600; border: none;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity .12s, background .12s;
-    }
-    .plan-cta.primary {
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,.3);
-    }
-    .plan-cta.primary:hover { opacity: .9; }
-    .plan-cta.outline {
-      background: #fff; border: 1px solid #e2e8f0; color: #374151;
-    }
-    .plan-cta.outline:hover { background: #f8fafc; border-color: #cbd5e1; }
-
-    .plan-divider { height: 1px; background: #f1f5f9; margin: 18px 0; }
-
-    .plan-features {
-      list-style: none; display: flex; flex-direction: column; gap: 9px;
-    }
-    .plan-features li {
-      display: flex; align-items: flex-start; gap: 8px;
-      font-size: 12px; color: #374151; line-height: 1.4;
-    }
-    .plan-features li.feat-muted { color: #94a3b8; }
-    .feat-check { color: #16a34a; font-weight: 700; flex-shrink: 0; font-size: 12px; }
-    .feat-x { color: #cbd5e1; font-weight: 700; flex-shrink: 0; font-size: 12px; }
-
-    .pricing-footer-note {
-      margin-top: 28px; font-size: 12px; color: #94a3b8; text-align: center;
-    }
-
-    /* ─── Comparison table ─── */
-    .comp-table-wrap {
-      width: 100%; margin-top: 48px;
-      overflow-x: auto;
-    }
-    .comp-table-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: #94a3b8;
-      margin-bottom: 14px;
-    }
-    .comp-table {
-      width: 100%; border-collapse: collapse;
-    }
-    .comp-table thead th {
-      padding: 8px 16px; text-align: left;
-      font-size: 11px; font-weight: 700; color: #64748b;
-      border-bottom: 1px solid #e2e8f0; white-space: nowrap;
-    }
-    .comp-table thead th.col-feat { width: auto; }
-    .comp-table thead th.col-plan {
-      text-align: center; width: 110px;
-    }
-    .comp-table thead th.col-plan.hl { color: #6366f1; }
-    .comp-table tbody tr:hover td { background: #f8fafc; }
-    .comp-table tbody td {
-      padding: 9px 16px;
-      font-size: 12px; color: #374151;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .comp-table tbody td.col-plan {
-      text-align: center; font-size: 13px;
-    }
-    .comp-table tbody td.col-plan.hl { background: rgba(99,102,241,.03); }
-    .tck { color: #16a34a; font-weight: 700; }
-    .dash { color: #e2e8f0; font-weight: 700; }
-    .cap {
-      display: inline-block;
-      font-size: 10px; font-weight: 600;
-      background: #eff6ff; color: #2563eb;
-      padding: 1px 6px; border-radius: 4px;
-    }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     Navbar
-══════════════════════════════════════ -->
+<!-- Navbar -->
 <header class="navbar">
   <div class="navbar-left">
-    <a href="#" class="logo-mark">
+    <a href="index.html" class="logo-mark">
       <div class="logo-icon">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -444,14 +202,10 @@
       </div>
       <span class="logo-wordmark">Researchio<sup>beta</sup></span>
     </a>
-    <span class="nav-sep"></span>
-    <button class="btn-nav">How it works</button>
-    <button class="btn-nav">Pricing</button>
-    <button class="btn-nav">Docs</button>
   </div>
   <div class="navbar-right">
     <button class="btn-signin">Sign in</button>
-    <button class="btn-cta">
+    <button class="btn-cta-sm" onclick="location.href='start.html'">
       Get started free
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -460,9 +214,7 @@
   </div>
 </header>
 
-<!-- ══════════════════════════════════════
-     Hero
-══════════════════════════════════════ -->
+<!-- Hero -->
 <section class="hero">
 
   <div class="hero-eyebrow">
@@ -480,114 +232,61 @@
     finds gaps, maps pricing, and gives you a go/no-go verdict — in minutes.
   </p>
 
-  <!-- Input card -->
-  <div class="input-card">
-    <div class="input-card-body">
-      <div class="input-label">Your idea</div>
-      <textarea class="idea-textarea" rows="3"
-        placeholder="e.g. An AI-powered Jira alternative for remote engineering teams that auto-prioritizes backlog based on git activity…"
-      ></textarea>
-      <div class="examples">
-        <span style="font-size:10px; color:#94a3b8; align-self:center; margin-right:2px;">Try:</span>
-        <button class="example-chip">
-          <span class="chip-icon">✦</span>
-          AI code review tool
-        </button>
-        <button class="example-chip">
-          <span class="chip-icon">✦</span>
-          No-code mobile builder
-        </button>
-        <button class="example-chip">
-          <span class="chip-icon">✦</span>
-          Dev expense tracker
-        </button>
-        <button class="example-chip">
-          <span class="chip-icon">✦</span>
-          Open-source Notion
-        </button>
-      </div>
-    </div>
-    <div class="input-card-footer">
-      <div class="footer-hint">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 8v4"/><path d="M12 16h.01"/>
-        </svg>
-        Live market intelligence · ~20 competitors · ~3 min
-      </div>
-      <button class="btn-analyze">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <a href="start.html" class="btn-hero">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    Get started free
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  </a>
+
+  <p class="btn-hero-sub">No credit card required · results in ~3 minutes</p>
+
+  <!-- Feature pills -->
+  <div class="features">
+    <div class="feature-pill">
+      <span class="pill-icon blue">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        Analyze Market
-      </button>
+      </span>
+      Find competitors
     </div>
-  </div>
-
-  <!-- How it works -->
-  <div class="how">
-    <div class="how-step">
-      <div class="how-icon s1">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
+    <div class="feature-pill">
+      <span class="pill-icon amber">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
-      </div>
-      <div class="how-step-title">Find competitors</div>
-      <div class="how-step-desc">AI searches the web for real competing products</div>
+      </span>
+      Deep intelligence
     </div>
-    <div class="how-step">
-      <div class="how-icon s2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-        </svg>
-      </div>
-      <div class="how-step-title">Deep intelligence</div>
-      <div class="how-step-desc">Analyzes positioning, feature sets, and competitive angles</div>
-    </div>
-    <div class="how-step">
-      <div class="how-icon s3">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="feature-pill">
+      <span class="pill-icon green">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
           <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
         </svg>
-      </div>
-      <div class="how-step-title">Map the gaps</div>
-      <div class="how-step-desc">Identifies what nobody is doing well yet</div>
+      </span>
+      Map the gaps
     </div>
-    <div class="how-step">
-      <div class="how-icon s4">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
+    <div class="feature-pill">
+      <span class="pill-icon purple">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
         </svg>
-      </div>
-      <div class="how-step-title">Go / No-go verdict</div>
-      <div class="how-step-desc">Honest AI assessment with exportable report</div>
+      </span>
+      Go / No-go verdict
     </div>
-  </div>
-
-  <!-- My reports (signed-out state) -->
-  <div class="my-reports">
-    <div class="my-reports-inner">
-      <div class="my-reports-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="feature-pill">
+      <span class="pill-icon blue">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
-      </div>
-      <div class="my-reports-text">
-        <div class="my-reports-title">Your reports will appear here</div>
-        <div class="my-reports-desc">Sign in to save results, track your ideas, and access your full report history.</div>
-      </div>
-      <button class="btn-signin-inline">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
-        Sign in
-      </button>
+      </span>
+      Exportable PDF report
     </div>
   </div>
 
@@ -596,7 +295,8 @@
     <div class="proof-item">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
       <strong>2,400+</strong> reports run
@@ -621,203 +321,12 @@
         <circle cx="12" cy="12" r="10"/>
         <path d="M8 12l2.5 2.5L16 9"/>
       </svg>
-      No credit card required
+      No credit card required to try
     </div>
   </div>
 
-</section>
-
-<!-- ══════════════════════════════════════
-     Pricing
-══════════════════════════════════════ -->
-<section id="pricing" class="pricing-section">
-  <div class="pricing-inner">
-
-    <div class="pricing-header">
-      <div class="pricing-eyebrow">Pricing</div>
-      <h2 class="pricing-title">Simple, transparent pricing</h2>
-      <p class="pricing-sub">Start free. Upgrade when you need more depth.</p>
-      <div class="billing-toggle">
-        <button class="billing-btn active">Monthly</button>
-        <button class="billing-btn">
-          Annual
-          <span class="save-badge">Save 25%</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Plan cards -->
-    <div class="pricing-grid">
-
-      <!-- Starter -->
-      <div class="plan-card">
-        <div class="plan-top">
-          <div class="plan-name">Starter</div>
-          <div class="plan-price">
-            <span class="plan-amount">$0</span>
-            <span class="plan-period">/mo</span>
-          </div>
-          <div class="plan-tagline">Validate a few ideas at no cost.</div>
-        </div>
-        <button class="plan-cta outline">Start for free</button>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li><span class="feat-check">✓</span> 5 reports per month</li>
-          <li><span class="feat-check">✓</span> Up to 8 competitors per report</li>
-          <li><span class="feat-check">✓</span> Go / No-go verdict</li>
-          <li><span class="feat-check">✓</span> PDF export</li>
-          <li><span class="feat-check">✓</span> 7-day report history</li>
-          <li class="feat-muted"><span class="feat-x">✗</span> Pricing intelligence</li>
-          <li class="feat-muted"><span class="feat-x">✗</span> API access</li>
-          <li class="feat-muted"><span class="feat-x">✗</span> Team seats</li>
-        </ul>
-      </div>
-
-      <!-- Pro (featured) -->
-      <div class="plan-card featured">
-        <div class="plan-badge">Most popular</div>
-        <div class="plan-top">
-          <div class="plan-name">Pro</div>
-          <div class="plan-price">
-            <span class="plan-amount">$29</span>
-            <span class="plan-period">/mo</span>
-          </div>
-          <div class="plan-tagline">For founders who move fast.</div>
-        </div>
-        <button class="plan-cta primary">Get Pro</button>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li><span class="feat-check">✓</span> <strong>Unlimited</strong> reports</li>
-          <li><span class="feat-check">✓</span> Up to 20 competitors per report</li>
-          <li><span class="feat-check">✓</span> Go / No-go verdict</li>
-          <li><span class="feat-check">✓</span> PDF + CSV export</li>
-          <li><span class="feat-check">✓</span> Full report history &amp; search</li>
-          <li><span class="feat-check">✓</span> Pricing intelligence matrix</li>
-          <li><span class="feat-check">✓</span> Priority agents — 2× faster</li>
-          <li class="feat-muted"><span class="feat-x">✗</span> API access</li>
-        </ul>
-      </div>
-
-      <!-- Agency -->
-      <div class="plan-card">
-        <div class="plan-top">
-          <div class="plan-name">Agency</div>
-          <div class="plan-price">
-            <span class="plan-amount">$89</span>
-            <span class="plan-period">/mo</span>
-          </div>
-          <div class="plan-tagline">For teams and consultancies.</div>
-        </div>
-        <button class="plan-cta outline">Get Agency</button>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li><span class="feat-check">✓</span> Everything in Pro</li>
-          <li><span class="feat-check">✓</span> 5 team seats included</li>
-          <li><span class="feat-check">✓</span> API access <span class="cap">1,000 calls/mo</span></li>
-          <li><span class="feat-check">✓</span> White-label reports</li>
-          <li><span class="feat-check">✓</span> Custom export templates</li>
-          <li><span class="feat-check">✓</span> SSO / SAML</li>
-          <li><span class="feat-check">✓</span> Priority support</li>
-        </ul>
-      </div>
-
-    </div><!-- /pricing-grid -->
-
-    <!-- Feature comparison table -->
-    <div class="comp-table-wrap">
-      <div class="comp-table-label">Full feature comparison</div>
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th class="col-feat">Feature</th>
-            <th class="col-plan">Starter</th>
-            <th class="col-plan hl">Pro</th>
-            <th class="col-plan">Agency</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Reports per month</td>
-            <td class="col-plan">5</td>
-            <td class="col-plan hl">Unlimited</td>
-            <td class="col-plan">Unlimited</td>
-          </tr>
-          <tr>
-            <td>Competitors per report</td>
-            <td class="col-plan">8</td>
-            <td class="col-plan hl">20</td>
-            <td class="col-plan">20</td>
-          </tr>
-          <tr>
-            <td>Go / No-go verdict</td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-            <td class="col-plan hl"><span class="tck">✓</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>PDF export</td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-            <td class="col-plan hl"><span class="tck">✓</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>CSV export</td>
-            <td class="col-plan"><span class="dash">—</span></td>
-            <td class="col-plan hl"><span class="tck">✓</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>Pricing intelligence matrix</td>
-            <td class="col-plan"><span class="dash">—</span></td>
-            <td class="col-plan hl"><span class="tck">✓</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>Report history</td>
-            <td class="col-plan">7 days</td>
-            <td class="col-plan hl">Unlimited</td>
-            <td class="col-plan">Unlimited</td>
-          </tr>
-          <tr>
-            <td>Priority agents (speed)</td>
-            <td class="col-plan"><span class="dash">—</span></td>
-            <td class="col-plan hl"><span class="tck">✓</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>Team seats</td>
-            <td class="col-plan">1</td>
-            <td class="col-plan hl">1</td>
-            <td class="col-plan">5</td>
-          </tr>
-          <tr>
-            <td>API access</td>
-            <td class="col-plan"><span class="dash">—</span></td>
-            <td class="col-plan hl"><span class="dash">—</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>White-label reports</td>
-            <td class="col-plan"><span class="dash">—</span></td>
-            <td class="col-plan hl"><span class="dash">—</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-          <tr>
-            <td>SSO / SAML</td>
-            <td class="col-plan"><span class="dash">—</span></td>
-            <td class="col-plan hl"><span class="dash">—</span></td>
-            <td class="col-plan"><span class="tck">✓</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pricing-footer-note">
-      All plans include a 14-day free trial on Pro features. No credit card required to start.
-    </div>
-
-  </div>
 </section>
 
 </body>
 </html>
+
