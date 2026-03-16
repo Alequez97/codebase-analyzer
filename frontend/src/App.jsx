@@ -9,14 +9,16 @@ import DomainDetailsPage from "./pages/DomainDetailsPage";
 import DesignPage from "./pages/DesignPage";
 import MarketResearchPage from "./pages/MarketResearchPage";
 import { useSocketStore } from "./store/useSocketStore";
+import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
-  // Initialize socket connection before any routing
   const { initSocket } = useSocketStore();
+  const rehydrate = useAuthStore((s) => s.rehydrate);
 
   useEffect(() => {
     initSocket();
-  }, [initSocket]);
+    rehydrate();
+  }, [initSocket, rehydrate]);
 
   return (
     <ChakraProvider value={defaultSystem}>

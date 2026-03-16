@@ -261,6 +261,19 @@ const config = {
     enabled: process.env.FILE_WATCH !== "false",
     debounceMs: parseInt(process.env.FILE_WATCH_DEBOUNCE || "500", 10),
   },
+
+  // Auth
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
+  jwtSecret: (() => {
+    if (!process.env.JWT_SECRET) {
+      logger.warn(
+        "JWT_SECRET env var is not set — Google Sign-In will not work correctly",
+        { component: "Config" },
+      );
+      return "insecure-default-secret-change-me";
+    }
+    return process.env.JWT_SECRET;
+  })(),
 };
 
 // Ensure required directories exist

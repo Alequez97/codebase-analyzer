@@ -16,3 +16,4 @@ export { default as e2eConfigRoutes } from "./e2e-config.js";
 export { default as reviewChangesRoutes } from "./review-changes.js";
 export { default as designRoutes } from "./design.js";
 export { default as marketResearchRoutes } from "./market-research.js";
+export { default as authRoutes } from "./auth.js";

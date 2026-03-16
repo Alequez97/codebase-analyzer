@@ -27,7 +27,10 @@ export function getMarketResearchSessionDir(sessionId) {
 }
 
 export function getMarketResearchCompetitorTasksPath(sessionId) {
-  return path.join(getMarketResearchSessionDir(sessionId), "competitor-tasks.json");
+  return path.join(
+    getMarketResearchSessionDir(sessionId),
+    "competitor-tasks.json",
+  );
 }
 
 export function getMarketResearchCompetitorsDir(sessionId) {
@@ -42,7 +45,10 @@ export function getMarketResearchOpportunityPath(sessionId) {
   return path.join(getMarketResearchSessionDir(sessionId), "opportunity.json");
 }
 
-export function getMarketResearchCompetitorProfilePath(sessionId, competitorId) {
+export function getMarketResearchCompetitorProfilePath(
+  sessionId,
+  competitorId,
+) {
   assertValidCompetitorId(competitorId);
   return path.join(
     getMarketResearchCompetitorsDir(sessionId),
@@ -65,14 +71,23 @@ export async function upsertSession(sessionId, idea, state) {
   const now = Date.now();
 
   let createdAt = now;
+  let ownerId = null;
   try {
     const existing = await tryReadJsonFile(filePath, sessionId);
     if (existing?.createdAt) createdAt = existing.createdAt;
+    if (existing?.ownerId) ownerId = existing.ownerId;
   } catch {
     // New session
   }
 
-  const session = { sessionId, idea, createdAt, lastAccessedAt: now, state };
+  const session = {
+    sessionId,
+    ownerId,
+    idea,
+    createdAt,
+    lastAccessedAt: now,
+    state,
+  };
 
   await fs.writeFile(filePath, JSON.stringify(session, null, 2));
 
@@ -170,6 +185,36 @@ export async function listSessions() {
   return sessions;
 }
 
+/**
+ * Claim an anonymous session by assigning it to a user.
+ * @param {string} sessionId
+ * @param {string} userId
+ * @returns {Promise<boolean>} true if claimed, false if session not found
+ */
+export async function claimSession(sessionId, userId) {
+  const filePath = sessionPath(sessionId);
+
+  let session;
+  try {
+    session = await tryReadJsonFile(filePath, sessionId);
+  } catch {
+    return false;
+  }
+
+  if (!session) return false;
+
+  const updated = { ...session, ownerId: userId, lastAccessedAt: Date.now() };
+  await fs.writeFile(filePath, JSON.stringify(updated, null, 2));
+
+  logger.info("Market research session claimed", {
+    sessionId,
+    userId,
+    component: "MarketResearchPersistence",
+  });
+
+  return true;
+}
+
 export async function getCompetitorProfile(sessionId, competitorId) {
   const profilePath = getMarketResearchCompetitorProfilePath(
     sessionId,
@@ -216,3 +261,4 @@ export async function getMarketResearchReport(sessionId) {
     throw error;
   }
 }
+

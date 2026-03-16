@@ -6,23 +6,31 @@ import {
   getMarketResearchReport,
   getCompetitorProfile,
   listSessions,
+  claimSession,
 } from "../persistence/market-research.js";
 import { queueMarketResearchInitialTask } from "../tasks/queue/market-research-initial.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { getNumCompetitors } from "../services/subscription.js";
+import { softAuth, requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
 // GET /api/market-research
 // List analysis sessions as history entries.
 // Optional ?sessionId= query param to filter to a specific session.
-router.get("/", async (req, res) => {
+// When authenticated, only return sessions owned by the authenticated user.
+router.get("/", softAuth, async (req, res) => {
   const { sessionId } = req.query;
   try {
     const sessions = await listSessions();
-    const filtered = sessionId
+    let filtered = sessionId
       ? sessions.filter((s) => s.sessionId === sessionId)
       : sessions;
+
+    // If authenticated, only return owned sessions (cross-device history)
+    if (req.userId) {
+      filtered = filtered.filter((s) => s.ownerId === req.userId);
+    }
     const history = filtered
       .map((s) => ({
         id: s.sessionId,
@@ -92,6 +100,30 @@ router.get("/:sessionId", async (req, res) => {
       component: "MarketResearchRoutes",
     });
     return res.status(500).json({ error: "Failed to load session" });
+  }
+});
+
+// POST /api/market-research/:sessionId/claim
+// Claim an anonymous session for the authenticated user.
+router.post("/:sessionId/claim", requireAuth, async (req, res) => {
+  const { sessionId } = req.params;
+
+  try {
+    const claimed = await claimSession(sessionId, req.userId);
+    if (!claimed) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    return res.json({ success: true });
+  } catch (error) {
+    if (error.message === "Invalid sessionId format") {
+      return res.status(400).json({ error: "Invalid sessionId format" });
+    }
+    logger.error("Failed to claim session", {
+      error: error.message,
+      sessionId,
+      component: "MarketResearchRoutes",
+    });
+    return res.status(500).json({ error: "Failed to claim session" });
   }
 });
 

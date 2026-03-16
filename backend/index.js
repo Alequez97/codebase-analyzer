@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
 import config from "./config.js";
@@ -24,6 +25,7 @@ import {
   reviewChangesRoutes,
   designRoutes,
   marketResearchRoutes,
+  authRoutes,
 } from "./routes/index.js";
 import { startCleanupJob } from "./utils/market-research-cleanup.js";
 
@@ -51,7 +53,8 @@ const io = new Server(httpServer, {
 initSocketEmitter(io);
 
 // Middleware
-app.use(cors());
+app.use(cors({ credentials: true, origin: (origin, cb) => cb(null, true) }));
+app.use(cookieParser());
 app.use(express.json());
 app.use((req, res, next) => {
   if (req.path.startsWith("/api/")) {
@@ -94,6 +97,7 @@ app.use("/api", domainSectionsChatRoutes);
 app.use("/api", codebaseChatRoutes);
 app.use("/api/design", designRoutes);
 app.use("/api/market-research", marketResearchRoutes);
+app.use("/api/auth", authRoutes);
 
 // ==================== Design Preview Static Files ====================
 
