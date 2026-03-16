@@ -156,6 +156,9 @@ export const useMarketResearchStore = create(
         }
       },
 
+      // --- Derived selectors ---
+      latestActivityEvent: () => get().activityEvents[0] ?? null,
+
       // --- Internal mutation helpers ---
       _addActivityEvent: (event) =>
         set((state) => ({

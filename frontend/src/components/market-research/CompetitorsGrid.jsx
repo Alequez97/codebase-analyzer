@@ -64,11 +64,12 @@ function SkeletonCard({ delay = 0 }) {
 export function CompetitorsGrid() {
   const competitors = useMarketResearchStore((s) => s.competitors);
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
-  const activityEvents = useMarketResearchStore((s) => s.activityEvents);
+  const latestActivityEvent = useMarketResearchStore((s) =>
+    s.latestActivityEvent(),
+  );
 
   if (competitors.length === 0) {
     if (isAnalyzing) {
-      const lastEvent = activityEvents[activityEvents.length - 1];
       return (
         <Box>
           <HStack gap={1.5} mb={3}>
@@ -120,7 +121,7 @@ export function CompetitorsGrid() {
               Scanning the web for competitors...
             </Text>
           </HStack>
-          {lastEvent && (
+          {latestActivityEvent && (
             <Box
               mb={4}
               px={3}
@@ -144,9 +145,9 @@ export function CompetitorsGrid() {
                 noOfLines={1}
               >
                 <Text as="span" color="#6366f1" fontWeight="700" mr={1.5}>
-                  {lastEvent.agent ?? "Agent"}
+                  {latestActivityEvent.agent ?? "Agent"}
                 </Text>
-                {lastEvent.message}
+                {latestActivityEvent.message}
               </Text>
             </Box>
           )}
