@@ -122,7 +122,10 @@ export const useMarketResearchStore = create(
         if (existing?.details) return; // already loaded
         try {
           const response = await getCompetitorDetails(sessionId, competitorId);
-          if (response?.status === 202 && response?.data?.status === "retrying") {
+          if (
+            response?.status === 202 &&
+            response?.data?.status === "retrying"
+          ) {
             set((state) => ({
               competitors: state.competitors.map((c) =>
                 c.id === competitorId ? { ...c, status: "analyzing" } : c,
@@ -149,7 +152,7 @@ export const useMarketResearchStore = create(
       // --- Internal mutation helpers ---
       _addActivityEvent: (event) =>
         set((state) => ({
-          activityEvents: [...state.activityEvents, event],
+          activityEvents: [event, ...state.activityEvents],
         })),
 
       _setCompetitors: (competitors) => set({ competitors }),

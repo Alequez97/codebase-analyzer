@@ -13,7 +13,7 @@ You will receive a startup idea and a session ID. You must:
 
 ## Step 1 — Identify competitors
 
-Think carefully about the idea. Identify {{NUM_COMPETITORS}} real companies that address the same problem. Prioritise direct competitors first.
+You have access to `web_search`. Use it to discover {{NUM_COMPETITORS}} real, currently active competitors for the idea. Come up with your own search queries based on what the idea is about — **2–4 targeted queries is enough**. Prioritise direct competitors first. Use the search results to find accurate names, websites, and a one-sentence description for each.
 
 ## Step 2 — Delegate each competitor
 

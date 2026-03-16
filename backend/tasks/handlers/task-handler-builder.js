@@ -282,6 +282,10 @@ export async function createTaskHandler(task, taskLogger, agent) {
     agent?.enableDelegationTools?.(task.id, {
       "market-research-competitor": queueMarketResearchCompetitorTask,
     });
+    if (agent && config.apiKeys.braveSearch) {
+      agent.enableWebSearchTools(config.apiKeys.braveSearch);
+      taskLogger.info("🔍 Web search tools enabled");
+    }
     overrides = marketResearchInitialHandler(task, taskLogger);
   } else if (task.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
     if (agent && config.apiKeys.braveSearch) {

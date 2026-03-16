@@ -1,16 +1,10 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
-import { useEffect, useRef } from "react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { ActivityEvent } from "./ActivityEvent";
 
 export function ActivityFeed() {
   const activityEvents = useMarketResearchStore((s) => s.activityEvents);
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
-  const bottomRef = useRef(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activityEvents.length]);
 
   const handleClear = () => {
     useMarketResearchStore.setState({ activityEvents: [] });
@@ -153,7 +147,6 @@ export function ActivityFeed() {
             <ActivityEvent key={event.id} event={event} />
           ))
         )}
-        <Box ref={bottomRef} />
       </VStack>
     </Box>
   );

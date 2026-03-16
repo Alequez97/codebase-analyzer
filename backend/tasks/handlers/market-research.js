@@ -1,9 +1,7 @@
 import fs from "fs/promises";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
-import {
-  emitSocketEvent,
-} from "../../utils/socket-emitter.js";
+import { emitSocketEvent } from "../../utils/socket-emitter.js";
 import * as marketResearchPersistence from "../../persistence/market-research.js";
 import { tryReadJsonFile } from "../../persistence/utils.js";
 import * as logger from "../../utils/logger.js";
@@ -231,7 +229,9 @@ export async function marketResearchSummaryHandler(task, taskLogger) {
         return full ? { ...stub, ...full } : stub;
       });
 
-      const mergedIds = new Set(mergedCompetitors.map((competitor) => competitor.id));
+      const mergedIds = new Set(
+        mergedCompetitors.map((competitor) => competitor.id),
+      );
       for (const competitor of competitors) {
         if (!mergedIds.has(competitor.id)) {
           mergedCompetitors.push(competitor);
@@ -325,9 +325,12 @@ function buildHandler(
         });
         taskLogger.log("\n[Compacting] Summarizing conversation...\n");
       } else if (phase === "complete") {
-        taskLogger.progress(`Compaction complete. Tokens after: ~${tokensAfter}`, {
-          stage: PROGRESS_STAGES.COMPACTING,
-        });
+        taskLogger.progress(
+          `Compaction complete. Tokens after: ~${tokensAfter}`,
+          {
+            stage: PROGRESS_STAGES.COMPACTING,
+          },
+        );
         taskLogger.log(`[Compacting] Done. Tokens after: ~${tokensAfter}\n`);
       }
     },

@@ -155,33 +155,35 @@ export function PricingCard({ plan, isComingSoon = false }) {
         <Box h="1px" bg="#f1f5f9" w="full" my={1} />
 
         <VStack align="start" gap={2} w="full">
-          {plan.features.map((feat) => (
-            <HStack
-              key={feat.text}
-              align="flex-start"
-              gap={1.5}
-              fontSize="11.5px"
-              lineHeight="1.45"
-              color={feat.included ? "#374151" : "#94a3b8"}
-            >
-              {feat.included ? (
-                <Check
-                  size={12}
-                  color="#16a34a"
-                  strokeWidth={2.5}
-                  style={{ flexShrink: 0, marginTop: "1px" }}
-                />
-              ) : (
-                <X
-                  size={12}
-                  color="#cbd5e1"
-                  strokeWidth={2.5}
-                  style={{ flexShrink: 0, marginTop: "1px" }}
-                />
-              )}
-              <Text>{feat.text}</Text>
-            </HStack>
-          ))}
+          {[...plan.features]
+            .sort((a, b) => b.included - a.included)
+            .map((feat) => (
+              <HStack
+                key={feat.text}
+                align="flex-start"
+                gap={1.5}
+                fontSize="11.5px"
+                lineHeight="1.45"
+                color={feat.included ? "#374151" : "#94a3b8"}
+              >
+                {feat.included ? (
+                  <Check
+                    size={12}
+                    color="#16a34a"
+                    strokeWidth={2.5}
+                    style={{ flexShrink: 0, marginTop: "1px" }}
+                  />
+                ) : (
+                  <X
+                    size={12}
+                    color="#cbd5e1"
+                    strokeWidth={2.5}
+                    style={{ flexShrink: 0, marginTop: "1px" }}
+                  />
+                )}
+                <Text>{feat.text}</Text>
+              </HStack>
+            ))}
         </VStack>
       </VStack>
     </Box>
