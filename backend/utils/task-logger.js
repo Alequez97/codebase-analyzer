@@ -2,7 +2,7 @@ import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { TASK_TYPES } from "../constants/task-types.js";
 import config from "../config.js";
 import * as logger from "./logger.js";
-import { emitTaskLog } from "./socket-emitter.js";
+import { emitTaskLog, emitTaskProgress } from "./socket-emitter.js";
 import fs from "fs/promises";
 import path from "path";
 
@@ -83,6 +83,25 @@ export async function setupTaskLogger(task) {
 
   taskLogger.log = (message, { publicLogText, kind } = {}) => {
     emitTaskLog(task, { log: message, publicLogText, kind });
+  };
+
+  taskLogger.progress = (message, options = {}) => {
+    const normalizedOptions =
+      options && typeof options === "object" ? options : {};
+    const stage = normalizedOptions.stage ?? null;
+    const publicLogText = normalizedOptions.publicLogText;
+    const kind = normalizedOptions.kind ?? "task_progress";
+    const level = normalizedOptions.level ?? "info";
+    const logMethod =
+      typeof taskLogger[level] === "function" ? taskLogger[level] : taskLogger.info;
+
+    logMethod(message);
+    if (publicLogText) {
+      emitTaskLog(task, { log: message, publicLogText, kind, stage });
+      if (stage) {
+        emitTaskProgress(task, stage, publicLogText);
+      }
+    }
   };
 
   return { taskLogger, logStream, logFile };

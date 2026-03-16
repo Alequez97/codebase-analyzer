@@ -1,9 +1,6 @@
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import {
-  emitSocketEvent,
-  emitTaskProgress,
-} from "../../utils/socket-emitter.js";
+import { emitSocketEvent } from "../../utils/socket-emitter.js";
 import { appendChatMessage } from "../../utils/chat-history.js";
 import {
   ensureProgressDirectory,
@@ -23,14 +20,10 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
     initialMessage: task.params.userInstruction,
 
     onStart: () => {
-      // Ensure progress directory exists — the model creates the file itself
+      // Ensure progress directory exists - the model creates the file itself
       ensureProgressDirectory(taskId).catch((err) =>
-        taskLogger.warn(
-          `Failed to prepare progress directory: ${err.message}`,
-        ),
+        taskLogger.warn(`Failed to prepare progress directory: ${err.message}`),
       );
-
-      taskLogger.info("🤔 AI is thinking...");
 
       emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_THINKING, {
         taskId,
@@ -39,13 +32,14 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
         timestamp: new Date().toISOString(),
       });
 
-      emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, "Thinking…");
+      taskLogger.progress("Thinking...", { stage: PROGRESS_STAGES.PROCESSING });
     },
 
     onProgress: (progress) => {
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`);
-        emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
+        taskLogger.progress(progress.message, {
+          stage: PROGRESS_STAGES.ANALYZING,
+        });
         return;
       }
 
@@ -59,7 +53,7 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
           message: msg,
           timestamp: new Date().toISOString(),
         });
-        emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, msg);
+        taskLogger.progress(msg, { stage: PROGRESS_STAGES.PROCESSING });
       }
     },
 
@@ -67,20 +61,20 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
       const msg =
         phase === "complete"
           ? `Compaction complete. Tokens after: ~${tokensAfter}`
-          : "Compacting chat history…";
-      taskLogger.info(`🗜️  ${msg}`);
-      emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
+          : "Compacting chat history...";
+      taskLogger.progress(msg, {
+        stage: PROGRESS_STAGES.COMPACTING,
+      });
     },
 
     onMessage: async (role, content) => {
       if (role === "assistant") {
         messageCount++;
 
-        taskLogger.info(`📨 AI message #${messageCount}`, {
+        taskLogger.info(`AI message #${messageCount}`, {
           contentLength: content.length,
         });
 
-        // Stream message to client
         emitSocketEvent(SOCKET_EVENTS.CUSTOM_TASK_MESSAGE, {
           taskId,
           domainId,
@@ -90,7 +84,6 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
           timestamp: new Date().toISOString(),
         });
 
-        // Persist to chat history
         await appendChatMessage(taskId, { role: "assistant", content }).catch(
           (err) =>
             taskLogger.warn(`Failed to save chat message: ${err.message}`),
@@ -98,7 +91,7 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
       }
     },
 
-    onToolCall: (toolName, args, result) => {
+    onToolCall: (toolName, args) => {
       const isFileWrite =
         toolName === "write_file" ||
         toolName === "create_file" ||
@@ -119,18 +112,18 @@ export function customCodebaseTaskHandler(task, taskLogger, agent) {
           timestamp: new Date().toISOString(),
         });
 
-        taskLogger.info(`📝 File updated: ${args.path}`, {
+        taskLogger.info(`File updated: ${args.path}`, {
           toolName,
         });
       }
     },
 
     /**
-     * Custom tasks don't produce an output file — just log completion and emit events.
+     * Custom tasks don't produce an output file - just log completion and emit events.
      */
     onComplete: async (result) => {
       taskLogger.info(
-        `✅ Custom task complete after ${result.iterations} iterations`,
+        `Custom task complete after ${result.iterations} iterations`,
         {
           stopReason: result.stopReason,
         },

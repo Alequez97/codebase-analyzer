@@ -2,7 +2,6 @@ import fs from "fs/promises";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import {
-  emitTaskProgress,
   emitSocketEvent,
 } from "../../utils/socket-emitter.js";
 import * as marketResearchPersistence from "../../persistence/market-research.js";
@@ -197,12 +196,9 @@ export async function marketResearchSummaryHandler(task, taskLogger) {
   });
 
   const onStart = () => {
-    taskLogger.info("Summarizing market opportunity...");
-    emitTaskProgress(
-      task,
-      PROGRESS_STAGES.ANALYZING,
-      "Summarizing market opportunity...",
-    );
+    taskLogger.progress("Summarizing market opportunity...", {
+      stage: PROGRESS_STAGES.ANALYZING,
+    });
   };
 
   const onComplete = async () => {
@@ -305,8 +301,9 @@ function buildHandler(
     onStart:
       overrides.onStart ||
       (() => {
-        taskLogger.info(startMessage);
-        emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, startMessage);
+        taskLogger.progress(startMessage, {
+          stage: PROGRESS_STAGES.ANALYZING,
+        });
       }),
 
     onProgress: (progress) => {
@@ -315,21 +312,22 @@ function buildHandler(
         return;
       }
       if (progress.stage) {
-        emitTaskProgress(task, progress.stage, progress.message);
+        taskLogger.progress(progress.message, {
+          stage: progress.stage,
+        });
       }
     },
 
     onCompaction: (phase, tokensAfter) => {
       if (phase === "start") {
-        taskLogger.info("Compacting chat history...");
-        emitTaskProgress(
-          task,
-          PROGRESS_STAGES.COMPACTING,
-          "Compacting chat history...",
-        );
+        taskLogger.progress("Compacting chat history...", {
+          stage: PROGRESS_STAGES.COMPACTING,
+        });
         taskLogger.log("\n[Compacting] Summarizing conversation...\n");
       } else if (phase === "complete") {
-        taskLogger.info(`Compaction complete. Tokens after: ~${tokensAfter}`);
+        taskLogger.progress(`Compaction complete. Tokens after: ~${tokensAfter}`, {
+          stage: PROGRESS_STAGES.COMPACTING,
+        });
         taskLogger.log(`[Compacting] Done. Tokens after: ~${tokensAfter}\n`);
       }
     },

@@ -1,5 +1,4 @@
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import { emitTaskProgress } from "../../utils/socket-emitter.js";
 import * as logger from "../../utils/logger.js";
 import * as codebaseAnalysisPersistence from "../../persistence/codebase-analysis.js";
 
@@ -13,7 +12,6 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
   const taskId = task.id;
   const { requestInstructions = null } = task.params || {};
 
-  // Build the initial message from requestInstructions
   const initialMessage = requestInstructions
     ? `Update the codebase analysis structure based on these instructions:\n\n${requestInstructions}`
     : "Update the codebase analysis structure as needed.";
@@ -22,25 +20,23 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
     initialMessage,
 
     onStart: () => {
-      taskLogger.info("📝 Editing codebase analysis structure…");
-      emitTaskProgress(
-        task,
-        PROGRESS_STAGES.PROCESSING,
-        "Editing codebase analysis structure…",
-      );
+      taskLogger.progress("Editing codebase analysis structure...", {
+        stage: PROGRESS_STAGES.PROCESSING,
+      });
     },
 
     onProgress: (progress) => {
       if (progress.stage === PROGRESS_STAGES.TOOL_EXECUTION) {
-        taskLogger.info(`  ⚡ ${progress.message}`);
-        emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, progress.message);
+        taskLogger.progress(progress.message, {
+          stage: PROGRESS_STAGES.ANALYZING,
+        });
         return;
       }
 
       if (progress.iteration && progress.iteration > 1) {
         const msg =
           progress.message || `Processing (iteration ${progress.iteration})`;
-        emitTaskProgress(task, PROGRESS_STAGES.PROCESSING, msg);
+        taskLogger.progress(msg, { stage: PROGRESS_STAGES.PROCESSING });
       }
     },
 
@@ -48,9 +44,8 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
       const msg =
         phase === "complete"
           ? `Compaction complete. Tokens after: ~${tokensAfter}`
-          : "Compacting context…";
-      taskLogger.info(`🗜️  ${msg}`);
-      emitTaskProgress(task, PROGRESS_STAGES.COMPACTING, msg);
+          : "Compacting context...";
+      taskLogger.progress(msg, { stage: PROGRESS_STAGES.COMPACTING });
     },
 
     onToolCall: (toolName, args, result) => {
@@ -58,7 +53,6 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
     },
 
     onComplete: async () => {
-      // Read the updated codebase analysis
       const updatedAnalysis =
         await codebaseAnalysisPersistence.readCodebaseAnalysis();
 
@@ -69,16 +63,13 @@ export function editCodebaseAnalysisHandler(task, taskLogger, _agent) {
         };
       }
 
-      logger.info("✅ Codebase analysis structure updated", {
+      logger.info("Codebase analysis structure updated", {
         taskId,
       });
 
-      // Emit socket event to notify frontend
-      emitTaskProgress(
-        task,
-        PROGRESS_STAGES.COMPLETED,
-        "Codebase analysis structure updated",
-      );
+      taskLogger.progress("Codebase analysis structure updated", {
+        stage: PROGRESS_STAGES.COMPLETING,
+      });
 
       return { success: true };
     },

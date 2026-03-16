@@ -33,6 +33,12 @@ const KIND_CONFIG = {
     iconBg: "#f0fdf4",
     label: "agent",
   },
+  task_progress: {
+    Icon: Layers,
+    iconColor: "#475569",
+    iconBg: "#f8fafc",
+    label: "agent",
+  },
 };
 
 function formatElapsed(timestamp, startedAt) {

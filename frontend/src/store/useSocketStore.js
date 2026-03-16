@@ -150,9 +150,7 @@ export const useSocketStore = create((set, get) => ({
       useCodebaseStore.getState().setAnalyzingCodebase(true);
     });
 
-    socket.on(SOCKET_EVENTS.ANALYSIS_PROGRESS, (_) => {
-      // Progress updates handled via TASK_PROGRESS event
-    });
+    socket.on(SOCKET_EVENTS.ANALYSIS_PROGRESS, (_) => {});
 
     socket.on(SOCKET_EVENTS.ANALYSIS_COMPLETED, async (_) => {
       useCodebaseStore.getState().setAnalyzingCodebase(false);
@@ -324,28 +322,6 @@ export const useSocketStore = create((set, get) => ({
         if (competitorId) {
           mrStore._updateCompetitorStatus(competitorId, "analyzing");
           mrStore._syncSummaryStatus();
-          if (message) {
-            mrStore._addActivityEvent({
-              id: `progress-${taskId}-${Date.now()}`,
-              kind: "search",
-              message,
-              agent: "Competitor",
-              agentColor: "#d97706",
-              timestamp: Date.now(),
-            });
-          }
-        }
-      } else if (type === TASK_TYPES.MARKET_RESEARCH_SUMMARY) {
-        const mrStore = useMarketResearchStore.getState();
-        if (mrStore.isAnalyzing && message) {
-          mrStore._addActivityEvent({
-            id: `progress-${taskId}-${Date.now()}`,
-            kind: "search",
-            message,
-            agent: "Summary",
-            agentColor: "#0f766e",
-            timestamp: Date.now(),
-          });
         }
       }
 

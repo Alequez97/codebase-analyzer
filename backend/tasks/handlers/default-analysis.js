@@ -2,7 +2,6 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
-import { emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
  * Default handler for generic analysis tasks
@@ -15,28 +14,20 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
 
     onProgress: (progress) => {
       if (progress.stage) {
-        emitTaskProgress(task, progress.stage, progress.message);
+        taskLogger.progress(progress.message, { stage: progress.stage });
       }
     },
 
     onCompaction: (phase, tokensAfter) => {
       if (phase === "start") {
-        taskLogger.info("🗜️  Compacting chat history...");
-        emitTaskProgress(
-          task,
-          PROGRESS_STAGES.COMPACTING,
-          "Compacting chat history...",
-        );
+        taskLogger.progress("Compacting chat history...", {
+          stage: PROGRESS_STAGES.COMPACTING,
+        });
         taskLogger.log(`\n🗜️  [Compacting] Summarizing conversation...\n`);
       } else if (phase === "complete") {
-        taskLogger.info(
-          `🗜️  Compaction complete. Tokens after: ~${tokensAfter}`,
-        );
-        emitTaskProgress(
-          task,
-          PROGRESS_STAGES.COMPACTING,
-          `Compaction complete. Tokens after: ~${tokensAfter}`,
-        );
+        taskLogger.progress(`Compaction complete. Tokens after: ~${tokensAfter}`, {
+          stage: PROGRESS_STAGES.COMPACTING,
+        });
         taskLogger.log(`🗜️  [Compacting] Done. Tokens after: ~${tokensAfter}\n`);
       }
     },
@@ -80,14 +71,12 @@ export function defaultAnalysisHandler(task, taskLogger, agent) {
       const logPrefix = error ? "❌" : "📖";
       const logStatus = error ? `failed: ${error}` : `completed`;
 
-      taskLogger.info(`  ${logPrefix} ${toolDescription}`);
-
       const argsJson = JSON.stringify(args ?? {});
       const argsPreview = argsJson.substring(0, 150);
       taskLogger.log(`  ├─ ${logPrefix} ${toolDescription}\n  │  Args: ${argsPreview}${argsJson.length > 150 ? "..." : ""}\n  └─ ${logStatus}\n`);
 
       if (!error) {
-        emitTaskProgress(task, PROGRESS_STAGES.ANALYZING, toolDescription);
+        taskLogger.progress(toolDescription, { stage: PROGRESS_STAGES.ANALYZING });
       }
     },
 

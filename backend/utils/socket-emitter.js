@@ -55,10 +55,10 @@ export function isSocketReady() {
  * (e.g. "search", "navigate", "write", "extract", "found").
  *
  * @param {Object} task - Task object with id, type, and params
- * @param {Object} payload - { log, publicLogText, kind }
+ * @param {Object} payload - { log, publicLogText, kind, stage }
  */
 export function emitTaskLog(task, payload = {}) {
-  const { publicLogText, kind } = payload;
+  const { publicLogText, kind, stage } = payload;
 
   if (!publicLogText) return;
 
@@ -79,16 +79,10 @@ export function emitTaskLog(task, payload = {}) {
     type: task.type,
     log: publicLogText,
     kind: kind ?? "info",
+    stage: stage ?? null,
   });
 }
 
-/**
- * Emit task progress event
- * Convenience helper for emitting task progress updates
- * @param {Object} task - Task object with id, type, and params
- * @param {string} stage - Progress stage (use PROGRESS_STAGES constants)
- * @param {string} message - Progress message to display
- */
 export function emitTaskProgress(task, stage, message) {
   emitSocketEvent(SOCKET_EVENTS.TASK_PROGRESS, {
     taskId: task.id,

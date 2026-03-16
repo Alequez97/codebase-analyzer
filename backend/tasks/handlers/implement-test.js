@@ -3,7 +3,6 @@ import path from "path";
 import config from "../../config.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
-import { emitTaskProgress } from "../../utils/socket-emitter.js";
 
 /**
  * Handler for implement-test task
@@ -120,11 +119,9 @@ export function implementTestHandler(task, taskLogger, agent) {
         }
       }
 
-      emitTaskProgress(
-        task,
-        PROGRESS_STAGES.COMPLETE,
-        `Test file created: ${task.params.testFile}`,
-      );
+      taskLogger.progress(`Test file created: ${task.params.testFile}`, {
+        stage: PROGRESS_STAGES.COMPLETING,
+      });
 
       return {
         success: true,
