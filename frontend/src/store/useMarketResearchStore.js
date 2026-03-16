@@ -38,6 +38,7 @@ export const useMarketResearchStore = create(
 
       // --- Input form ---
       idea: "",
+      regions: null, // null = Worldwide, string[] = selected country codes
       billingMode: "monthly", // "monthly" | "annual"
       selectedPlan: null, // { name, numCompetitors, ... } — set when user picks a plan
 
@@ -63,6 +64,7 @@ export const useMarketResearchStore = create(
 
       // --- Input form actions ---
       setIdea: (idea) => set({ idea }),
+      setRegions: (regions) => set({ regions }),
       setBillingMode: (mode) => set({ billingMode: mode }),
       selectPlan: (plan) => set({ selectedPlan: plan }),
       clearPlan: () => set({ selectedPlan: null }),

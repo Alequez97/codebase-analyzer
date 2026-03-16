@@ -1,12 +1,17 @@
 import { Box, Button, HStack, Text, Textarea, VStack } from "@chakra-ui/react";
 import { Search } from "lucide-react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
-import { EXAMPLE_IDEAS } from "./constants";
+import { RegionSelector } from "./RegionSelector";
 
 export function IdeaInputCard() {
   const idea = useMarketResearchStore((s) => s.idea);
   const setIdea = useMarketResearchStore((s) => s.setIdea);
+  const regions = useMarketResearchStore((s) => s.regions);
   const startAnalysis = useMarketResearchStore((s) => s.startAnalysis);
+
+  // null = Worldwide (valid), array with items = valid, empty array = invalid
+  const regionValid = regions === null || regions.length > 0;
+  const canSubmit = idea.trim() && regionValid;
 
   return (
     <Box
@@ -31,7 +36,7 @@ export function IdeaInputCard() {
           <Textarea
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
-            placeholder="e.g. An AI-powered Jira alternative for remote engineering teams that auto-prioritizes backlog based on git activity..."
+            placeholder="Describe your business idea…"
             minH="120px"
             fontSize="13px"
             borderColor="#cbd5e1"
@@ -44,34 +49,7 @@ export function IdeaInputCard() {
           />
         </VStack>
 
-        {/* Example idea chips */}
-        <VStack align="start" gap={2}>
-          <HStack gap={1.5}>
-            <Text fontSize="11px" color="#64748b">
-              Try:
-            </Text>
-          </HStack>
-          <HStack gap={2} flexWrap="wrap">
-            {EXAMPLE_IDEAS.map((example) => (
-              <Button
-                key={example}
-                size="xs"
-                variant="outline"
-                borderColor="#ddd6fe"
-                color="#6366f1"
-                fontSize="11px"
-                fontWeight="500"
-                px={2.5}
-                h="26px"
-                borderRadius="6px"
-                _hover={{ bg: "#f5f3ff", borderColor: "#c7d2fe" }}
-                onClick={() => setIdea(example)}
-              >
-                + {example}
-              </Button>
-            ))}
-          </HStack>
-        </VStack>
+        <RegionSelector />
 
         <Text fontSize="11px" color="#94a3b8">
           💡 Live market intelligence · competitive landscape · ~5 min
@@ -93,10 +71,10 @@ export function IdeaInputCard() {
             opacity: 0.93,
             boxShadow: "0 4px 12px rgba(99,102,241,.4)",
           }}
-          disabled={!idea.trim()}
+          disabled={!canSubmit}
           onClick={startAnalysis}
           w="full"
-          opacity={!idea.trim() ? 0.5 : 1}
+          opacity={!canSubmit ? 0.5 : 1}
         >
           <Search size={16} strokeWidth={2.5} />
           Analyze Market
