@@ -76,3 +76,12 @@ export function getMarketResearchCompetitorOutputPath(sessionId, competitorId) {
     `${competitorId}.json`,
   );
 }
+
+export function getMarketResearchSummaryOutputPath(sessionId) {
+  return joinOutputPath(
+    PERSISTENCE_FILES.ANALYSIS_ROOT_DIR,
+    "market-research",
+    sessionId,
+    "opportunity.json",
+  );
+}

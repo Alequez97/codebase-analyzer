@@ -26,15 +26,20 @@ const STATUS_COPY = {
     description:
       "Competitor analysts are filling in pricing, strengths, weaknesses, and evidence while the layout stays fixed.",
   },
-  synthesizing: {
-    title: "Building the summary",
+  summarizing: {
+    title: "Reasoning about the market",
     description:
-      "All competitor research is in. The final summary is being assembled without blocking the competitor cards you already see.",
+      "All competitor research is in. The summary agent is now reading the full competitor set and deciding whether this market is actually worth entering.",
   },
   ready: {
     title: "Summary ready",
     description:
       "The final verdict and cross-competitor insights are ready to review.",
+  },
+  failed: {
+    title: "Summary failed",
+    description:
+      "Competitor research finished, but the market verdict could not be generated. No fallback guess is shown.",
   },
 };
 
@@ -79,12 +84,28 @@ export function MarketResearchSummaryPanel() {
           px={2.5}
           py={1}
           borderRadius="9999px"
-          bg={summaryStatus === "ready" ? "#dcfce7" : "#eef2ff"}
-          color={summaryStatus === "ready" ? "#166534" : "#4f46e5"}
+          bg={
+            summaryStatus === "ready"
+              ? "#dcfce7"
+              : summaryStatus === "failed"
+                ? "#fee2e2"
+                : "#eef2ff"
+          }
+          color={
+            summaryStatus === "ready"
+              ? "#166534"
+              : summaryStatus === "failed"
+                ? "#b91c1c"
+                : "#4f46e5"
+          }
           fontSize="11px"
           fontWeight="700"
         >
-          {summaryStatus === "ready" ? "Ready" : "Loading"}
+          {summaryStatus === "ready"
+            ? "Ready"
+            : summaryStatus === "failed"
+              ? "Failed"
+              : "Loading"}
         </Box>
       </HStack>
 

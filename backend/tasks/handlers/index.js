@@ -16,4 +16,5 @@ export { defaultAnalysisHandler } from "./default-analysis.js";
 export {
   marketResearchInitialHandler,
   marketResearchCompetitorHandler,
+  marketResearchSummaryHandler,
 } from "./market-research.js";

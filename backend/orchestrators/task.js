@@ -97,6 +97,7 @@ async function persistTaskRevision(task) {
     // Market research: agent writes a clean report.json directly
     TASK_TYPES.MARKET_RESEARCH_INITIAL,
     TASK_TYPES.MARKET_RESEARCH_COMPETITOR,
+    TASK_TYPES.MARKET_RESEARCH_SUMMARY,
   ];
 
   // For JSON output tasks — rewrite the content file cleanly (no embedded metadata).

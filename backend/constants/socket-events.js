@@ -66,6 +66,7 @@ export const SOCKET_EVENTS = {
   // Market research task logs
   LOG_MARKET_RESEARCH_INITIAL: "log:market-research-initial",
   LOG_MARKET_RESEARCH_COMPETITOR: "log:market-research-competitor",
+  LOG_MARKET_RESEARCH_SUMMARY: "log:market-research-summary",
 
   // Market research completed — carries sessionId in params
   MARKET_RESEARCH_COMPLETED: "market-research:completed",

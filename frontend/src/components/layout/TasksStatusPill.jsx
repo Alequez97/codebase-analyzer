@@ -42,6 +42,7 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
   [TASK_TYPES.MARKET_RESEARCH_INITIAL]: "Market Research",
   [TASK_TYPES.MARKET_RESEARCH_COMPETITOR]: "Competitor Research",
+  [TASK_TYPES.MARKET_RESEARCH_SUMMARY]: "Market Summary",
 };
 
 function taskLabel(type) {
@@ -57,6 +58,7 @@ const TASK_TYPE_LABELS_SHORT = {
   [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
   [TASK_TYPES.MARKET_RESEARCH_INITIAL]: "Market Research",
+  [TASK_TYPES.MARKET_RESEARCH_SUMMARY]: "Market Summary",
 };
 
 function useDomainName(domainId) {

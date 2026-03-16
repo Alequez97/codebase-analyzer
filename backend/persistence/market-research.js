@@ -4,46 +4,72 @@ import config from "../config.js";
 import * as logger from "../utils/logger.js";
 import { tryReadJsonFile } from "./utils.js";
 
-const MARKET_RESEARCH_DIR = path.join(config.paths.targetAnalysis, "market-research");
+const MARKET_RESEARCH_DIR = path.join(
+  config.paths.targetAnalysis,
+  "market-research",
+);
 
-function sessionPath(sessionId) {
-  // Prevent path traversal — sessionId must be a UUID
+function assertValidSessionId(sessionId) {
   if (!/^[0-9a-f-]{36}$/.test(sessionId)) {
     throw new Error("Invalid sessionId format");
   }
-  return path.join(MARKET_RESEARCH_DIR, sessionId, "session.json");
+}
+
+function assertValidCompetitorId(competitorId) {
+  if (!/^[a-z0-9-]+$/.test(competitorId)) {
+    throw new Error("Invalid competitorId format");
+  }
+}
+
+export function getMarketResearchSessionDir(sessionId) {
+  assertValidSessionId(sessionId);
+  return path.join(MARKET_RESEARCH_DIR, sessionId);
+}
+
+export function getMarketResearchCompetitorTasksPath(sessionId) {
+  return path.join(getMarketResearchSessionDir(sessionId), "competitor-tasks.json");
+}
+
+export function getMarketResearchCompetitorsDir(sessionId) {
+  return path.join(getMarketResearchSessionDir(sessionId), "competitors");
+}
+
+export function getMarketResearchReportPath(sessionId) {
+  return path.join(getMarketResearchSessionDir(sessionId), "report.json");
+}
+
+export function getMarketResearchOpportunityPath(sessionId) {
+  return path.join(getMarketResearchSessionDir(sessionId), "opportunity.json");
+}
+
+export function getMarketResearchCompetitorProfilePath(sessionId, competitorId) {
+  assertValidCompetitorId(competitorId);
+  return path.join(
+    getMarketResearchCompetitorsDir(sessionId),
+    `${competitorId}.json`,
+  );
+}
+
+function sessionPath(sessionId) {
+  return path.join(getMarketResearchSessionDir(sessionId), "session.json");
 }
 
 async function ensureSessionDir(sessionId) {
-  await fs.mkdir(path.join(MARKET_RESEARCH_DIR, sessionId), { recursive: true });
+  await fs.mkdir(getMarketResearchSessionDir(sessionId), { recursive: true });
 }
 
-/**
- * Create a new analysis session.
- * @param {string} idea - The startup idea text
- * @returns {Promise<Object>} Created session
- */
-/**
- * Upsert an analysis session — creates or overwrites.
- * Called once when the user logs in and submits their local session data.
- * @param {string} sessionId - UUID from the frontend (sessionStorage)
- * @param {string} idea - The startup idea text
- * @param {Object} state - Full analysis state (competitors, events, etc.)
- * @returns {Promise<Object>} Saved session
- */
 export async function upsertSession(sessionId, idea, state) {
   await ensureSessionDir(sessionId);
 
   const filePath = sessionPath(sessionId);
   const now = Date.now();
 
-  // Preserve original createdAt if the session already exists
   let createdAt = now;
   try {
     const existing = await tryReadJsonFile(filePath, sessionId);
     if (existing?.createdAt) createdAt = existing.createdAt;
   } catch {
-    // ENOENT — new session
+    // New session
   }
 
   const session = { sessionId, idea, createdAt, lastAccessedAt: now, state };
@@ -58,11 +84,6 @@ export async function upsertSession(sessionId, idea, state) {
   return session;
 }
 
-/**
- * Load a session by ID and update its lastAccessedAt.
- * @param {string} sessionId
- * @returns {Promise<Object|null>} Session or null if not found
- */
 export async function getSession(sessionId) {
   const filePath = sessionPath(sessionId);
 
@@ -76,18 +97,12 @@ export async function getSession(sessionId) {
 
   if (!session) return null;
 
-  // Touch lastAccessedAt
   session.lastAccessedAt = Date.now();
   await fs.writeFile(filePath, JSON.stringify(session, null, 2));
 
   return session;
 }
 
-/**
- * Delete a session.
- * @param {string} sessionId
- * @returns {Promise<boolean>} True if deleted, false if not found
- */
 export async function deleteSession(sessionId) {
   const filePath = sessionPath(sessionId);
   try {
@@ -99,12 +114,6 @@ export async function deleteSession(sessionId) {
   }
 }
 
-/**
- * Mark a session as complete with competitor count.
- * No-op if the session file doesn't exist yet.
- * @param {string} sessionId
- * @param {number} competitorCount
- */
 export async function markSessionComplete(sessionId, competitorCount) {
   const filePath = sessionPath(sessionId);
 
@@ -138,10 +147,6 @@ export async function markSessionComplete(sessionId, competitorCount) {
   });
 }
 
-/**
- * List all sessions with their metadata.
- * @returns {Promise<Object[]>}
- */
 export async function listSessions() {
   let entries;
   try {
@@ -165,63 +170,47 @@ export async function listSessions() {
   return sessions;
 }
 
-/**
- * Read the AI-generated competitor profile for a session.
- * Written by the LLM agent to
- * .code-analysis/market-research/{sessionId}/competitors/{competitorId}.json
- * @param {string} sessionId
- * @param {string} competitorId
- * @returns {Promise<Object|null>} Competitor profile or null if not found
- */
 export async function getCompetitorProfile(sessionId, competitorId) {
-  if (!/^[0-9a-f-]{36}$/.test(sessionId)) {
-    throw new Error("Invalid sessionId format");
-  }
-  if (!/^[a-z0-9-]+$/.test(competitorId)) {
-    throw new Error("Invalid competitorId format");
-  }
-
-  const profilePath = path.join(
-    config.paths.targetAnalysis,
-    "market-research",
+  const profilePath = getMarketResearchCompetitorProfilePath(
     sessionId,
-    "competitors",
-    `${competitorId}.json`,
+    competitorId,
   );
 
   try {
-    const profile = await tryReadJsonFile(profilePath, competitorId);
-    return profile;
+    return await tryReadJsonFile(profilePath, competitorId);
   } catch (error) {
     if (error.code === "ENOENT") return null;
     throw error;
   }
 }
 
-/**
- * Read the AI-generated market research report for a session.
- * The report file is written by the LLM agent to
- * .code-analysis/market-research/{sessionId}/report.json
- * inside the target project directory.
- * @param {string} sessionId
- * @returns {Promise<Object|null>} Report object or null if not found
- */
-export async function getMarketResearchReport(sessionId) {
-  // Validate sessionId to prevent path traversal
-  if (!/^[0-9a-f-]{36}$/.test(sessionId)) {
-    throw new Error("Invalid sessionId format");
+export async function getCompetitorProfiles(sessionId, competitorIds) {
+  const profiles = [];
+
+  for (const competitorId of competitorIds) {
+    try {
+      const profile = await getCompetitorProfile(sessionId, competitorId);
+      if (profile) {
+        profiles.push(profile);
+      }
+    } catch (error) {
+      logger.warn("Could not read competitor output", {
+        component: "MarketResearchPersistence",
+        sessionId,
+        competitorId,
+        error: error.message,
+      });
+    }
   }
 
-  const reportPath = path.join(
-    config.paths.targetAnalysis,
-    "market-research",
-    sessionId,
-    "report.json",
-  );
+  return profiles;
+}
+
+export async function getMarketResearchReport(sessionId) {
+  const reportPath = getMarketResearchReportPath(sessionId);
 
   try {
-    const report = await tryReadJsonFile(reportPath, sessionId);
-    return report;
+    return await tryReadJsonFile(reportPath, sessionId);
   } catch (error) {
     if (error.code === "ENOENT") return null;
     throw error;

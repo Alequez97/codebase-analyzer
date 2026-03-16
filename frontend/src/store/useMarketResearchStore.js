@@ -46,7 +46,7 @@ export const useMarketResearchStore = create(
       analysisStartedAt: null,
       isAnalyzing: false,
       isAnalysisComplete: false,
-      summaryStatus: "idle", // "idle" | "finding-competitors" | "waiting-competitors" | "synthesizing" | "ready"
+      summaryStatus: "idle", // "idle" | "finding-competitors" | "waiting-competitors" | "summarizing" | "ready" | "failed"
       competitors: [],
       activityEvents: [],
       selectedCompetitorId: null,
@@ -166,11 +166,15 @@ export const useMarketResearchStore = create(
             return { summaryStatus: "finding-competitors" };
           }
           if (
-            state.competitors.some((competitor) => competitor.status !== "done")
+            state.competitors.some(
+              (competitor) =>
+                competitor.status === "queued" ||
+                competitor.status === "analyzing",
+            )
           ) {
             return { summaryStatus: "waiting-competitors" };
           }
-          return { summaryStatus: "synthesizing" };
+          return { summaryStatus: "summarizing" };
         }),
 
       _addCompetitorStub: ({
@@ -242,6 +246,14 @@ export const useMarketResearchStore = create(
           isAnalyzing: false,
           isAnalysisComplete: true,
           summaryStatus: "ready",
+        });
+      },
+
+      _markAnalysisFailed: () => {
+        set({
+          isAnalyzing: false,
+          isAnalysisComplete: false,
+          summaryStatus: "failed",
         });
       },
 

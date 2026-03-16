@@ -4,6 +4,7 @@ import config from "../config.js";
 import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
 import { tryReadJsonFile } from "./utils.js";
 import { TASK_STATUS, TASK_FOLDERS } from "../constants/task-status.js";
+import { TASK_TYPES } from "../constants/task-types.js";
 import * as logger from "../utils/logger.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";
@@ -92,7 +93,10 @@ export async function enqueueTask(task) {
     timestamp: new Date().toISOString(),
   });
 
-  if (task.type === "market-research-competitor" && task.params?.competitorId) {
+  if (
+    task.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR &&
+    task.params?.competitorId
+  ) {
     emitSocketEvent(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_FOUND, {
       sessionId: task.params.sessionId,
       taskId: task.id,

@@ -32,3 +32,4 @@ export { queueReviewChangesTask } from "./review-changes.js";
 // Market research tasks (project-level, no domainId)
 export { queueMarketResearchInitialTask } from "./market-research-initial.js";
 export { queueMarketResearchCompetitorTask } from "./market-research-competitor.js";
+export { queueMarketResearchSummaryTask } from "./market-research-summary.js";

@@ -220,6 +220,13 @@ const config = {
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
+    [TASK_TYPES.MARKET_RESEARCH_SUMMARY]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.CLAUDE_SONNET_4_6,
+      maxTokens: 16000,
+      maxIterations: 5,
+      reasoningEffort: REASONING_EFFORT.HIGH,
+    },
   },
 
   // Default agent config

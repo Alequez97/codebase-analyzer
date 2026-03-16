@@ -1,6 +1,7 @@
 import * as tasksPersistence from "../persistence/tasks.js";
 import { executeTask } from "./task.js";
 import * as logger from "../utils/logger.js";
+import { TASK_STATUS } from "../constants/task-status.js";
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_CONCURRENT = 5;
@@ -8,11 +9,6 @@ const MAX_CONCURRENT = 5;
 let pollTimer = null;
 let active = false;
 
-/**
- * Start the queue processor.
- * Polls the pending folder and fires off execution for queued tasks
- * up to MAX_CONCURRENT at a time.
- */
 export function startQueueProcessor() {
   if (active) return;
   active = true;
@@ -24,9 +20,6 @@ export function startQueueProcessor() {
   schedulePoll();
 }
 
-/**
- * Stop the queue processor (used during graceful shutdown / tests).
- */
 export function stopQueueProcessor() {
   active = false;
   if (pollTimer) {
@@ -41,6 +34,29 @@ function schedulePoll() {
   pollTimer = setTimeout(poll, POLL_INTERVAL_MS);
 }
 
+async function areDependenciesMet(task) {
+  if (!Array.isArray(task.dependsOn) || task.dependsOn.length === 0) {
+    return true;
+  }
+
+  for (const dependencyTaskId of task.dependsOn) {
+    const dependencyTask = await tasksPersistence.readTask(dependencyTaskId);
+
+    if (!dependencyTask) {
+      return false;
+    }
+
+    if (
+      dependencyTask.status !== TASK_STATUS.COMPLETED &&
+      dependencyTask.status !== TASK_STATUS.FAILED
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 async function poll() {
   try {
     const running = await tasksPersistence.listRunning();
@@ -48,19 +64,19 @@ async function poll() {
 
     if (slots > 0) {
       const pending = await tasksPersistence.listPending();
-
-      // listPending returns oldest-first; take as many as slots allow
       const toProcess = pending.slice(0, slots);
 
       for (const task of toProcess) {
-        // Claim the task synchronously (move pending/ → running/) before firing
-        // the agent, so the next poll doesn't see it as pending again.
+        if (!(await areDependenciesMet(task))) {
+          continue;
+        }
+
         try {
           await tasksPersistence.moveToRunning(task.id);
-        } catch (err) {
+        } catch (error) {
           logger.error(
             `Queue processor: failed to claim task ${task.id}, skipping`,
-            { error: err, component: "QueueProcessor", taskId: task.id },
+            { error, component: "QueueProcessor", taskId: task.id },
           );
           continue;
         }
@@ -70,19 +86,18 @@ async function poll() {
           { component: "QueueProcessor", taskId: task.id, type: task.type },
         );
 
-        // Fire-and-forget — task is already in running/, executeTask skips moveToRunning
-        executeTask(task.id).catch((err) => {
+        executeTask(task.id).catch((error) => {
           logger.error(`Queue processor: task ${task.id} threw unexpectedly`, {
-            error: err,
+            error,
             component: "QueueProcessor",
             taskId: task.id,
           });
         });
       }
     }
-  } catch (err) {
+  } catch (error) {
     logger.error("Queue processor poll error", {
-      error: err,
+      error,
       component: "QueueProcessor",
     });
   }

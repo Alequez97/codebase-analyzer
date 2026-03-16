@@ -99,6 +99,11 @@ export const useSocketStore = create((set, get) => ({
                 e.type === TASK_TYPES.MARKET_RESEARCH_INITIAL &&
                 (e.status === "running" || e.status === "pending"),
             );
+            const hasRunningSummary = [...progressByTaskId.values()].some(
+              (e) =>
+                e.type === TASK_TYPES.MARKET_RESEARCH_SUMMARY &&
+                (e.status === "running" || e.status === "pending"),
+            );
 
             for (const [taskId, entry] of progressByTaskId) {
               if (
@@ -110,7 +115,11 @@ export const useSocketStore = create((set, get) => ({
               }
             }
 
-            if (competitorEntries.length > 0 || hasRunningInitial) {
+            if (
+              competitorEntries.length > 0 ||
+              hasRunningInitial ||
+              hasRunningSummary
+            ) {
               // Analysis is still in progress — restore UI state
               if (!mrStore.isAnalyzing) {
                 useMarketResearchStore.setState({
@@ -259,10 +268,15 @@ export const useSocketStore = create((set, get) => ({
         }
       } else if (type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
         const sessionId = data?.params?.sessionId;
+        const storeSessionId = useMarketResearchStore.getState().sessionId;
+        if (sessionId && sessionId === storeSessionId) {
+          useMarketResearchStore.getState()._syncSummaryStatus();
+        }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_SUMMARY) {
+        const sessionId = data?.params?.sessionId;
         const idea = data?.params?.idea;
         const storeSessionId = useMarketResearchStore.getState().sessionId;
 
-        // Record the completed analysis in the profile history
         if (sessionId && idea) {
           useProfileStore.getState().addAnalysis({
             id: sessionId,
@@ -274,7 +288,6 @@ export const useSocketStore = create((set, get) => ({
         }
 
         if (sessionId && sessionId === storeSessionId) {
-          // If MARKET_RESEARCH_REPORT_READY already applied the report, skip the fetch.
           if (useMarketResearchStore.getState().isAnalysisComplete) return;
           getMarketResearchReport(sessionId)
             .then((response) => {
@@ -282,11 +295,11 @@ export const useSocketStore = create((set, get) => ({
               if (report) {
                 useMarketResearchStore.getState()._applyReport(report);
               } else {
-                useMarketResearchStore.getState()._markAnalysisComplete();
+                useMarketResearchStore.getState()._markAnalysisFailed();
               }
             })
             .catch(() => {
-              useMarketResearchStore.getState()._markAnalysisComplete();
+              useMarketResearchStore.getState()._markAnalysisFailed();
             });
         }
       }
@@ -321,6 +334,18 @@ export const useSocketStore = create((set, get) => ({
               timestamp: Date.now(),
             });
           }
+        }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_SUMMARY) {
+        const mrStore = useMarketResearchStore.getState();
+        if (mrStore.isAnalyzing && message) {
+          mrStore._addActivityEvent({
+            id: `progress-${taskId}-${Date.now()}`,
+            kind: "search",
+            message,
+            agent: "Summary",
+            agentColor: "#0f766e",
+            timestamp: Date.now(),
+          });
         }
       }
 
@@ -441,7 +466,7 @@ export const useSocketStore = create((set, get) => ({
         const sessionId = data?.params?.sessionId;
         const storeSessionId = useMarketResearchStore.getState().sessionId;
         if (sessionId && sessionId === storeSessionId) {
-          useMarketResearchStore.getState()._markAnalysisComplete();
+          useMarketResearchStore.getState()._markAnalysisFailed();
         }
       } else if (type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
         const mrStore = useMarketResearchStore.getState();
@@ -450,6 +475,8 @@ export const useSocketStore = create((set, get) => ({
           mrStore._updateCompetitorStatus(competitorId, "failed");
           mrStore._syncSummaryStatus();
         }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_SUMMARY) {
+        useMarketResearchStore.getState()._markAnalysisFailed();
       } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
         // Handle custom codebase task failures
         const chatStore = useAgentChatStore.getState();
@@ -588,11 +615,11 @@ export const useSocketStore = create((set, get) => ({
           if (report) {
             useMarketResearchStore.getState()._applyReport(report);
           } else {
-            useMarketResearchStore.getState()._markAnalysisComplete();
+            useMarketResearchStore.getState()._markAnalysisFailed();
           }
         })
         .catch(() => {
-          useMarketResearchStore.getState()._markAnalysisComplete();
+          useMarketResearchStore.getState()._markAnalysisFailed();
         });
     });
 
@@ -616,6 +643,9 @@ export const useSocketStore = create((set, get) => ({
     );
     socket.on(SOCKET_EVENTS.LOG_MARKET_RESEARCH_COMPETITOR, (data) =>
       handleMarketResearchLog(data, "Competitor", "#d97706"),
+    );
+    socket.on(SOCKET_EVENTS.LOG_MARKET_RESEARCH_SUMMARY, (data) =>
+      handleMarketResearchLog(data, "Summary", "#0f766e"),
     );
 
     // ── Custom codebase task events (floating agent chat) ───────────────────

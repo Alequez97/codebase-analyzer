@@ -24,6 +24,7 @@ import { reviewChangesHandler } from "./review-changes.js";
 import {
   marketResearchInitialHandler,
   marketResearchCompetitorHandler,
+  marketResearchSummaryHandler,
 } from "./market-research.js";
 import { queueMarketResearchCompetitorTask } from "../queue/market-research-competitor.js";
 
@@ -292,6 +293,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
       taskLogger.info("🌐 Web fetch tools enabled");
     }
     overrides = marketResearchCompetitorHandler(task, taskLogger);
+  } else if (task.type === TASK_TYPES.MARKET_RESEARCH_SUMMARY) {
+    overrides = await marketResearchSummaryHandler(task, taskLogger);
   }
 
   // Merge: defaults provide all callbacks, overrides replace what's needed

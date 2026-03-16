@@ -469,6 +469,13 @@ export async function buildTemplateVariables(task) {
         OUTPUT_FILE: task.outputFile || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };
+    case TASK_TYPES.MARKET_RESEARCH_SUMMARY:
+      return {
+        SESSION_ID: task.params?.sessionId || "",
+        IDEA: task.params?.idea || "",
+        OUTPUT_FILE: task.outputFile || "",
+        PROGRESS_FILE: getProgressFileRelativePath(task.id),
+      };
     default:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",
