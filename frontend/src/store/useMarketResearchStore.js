@@ -46,6 +46,7 @@ export const useMarketResearchStore = create(
       analysisStartedAt: null,
       isAnalyzing: false,
       isAnalysisComplete: false,
+      summaryStatus: "idle", // "idle" | "finding-competitors" | "waiting-competitors" | "synthesizing" | "ready"
       competitors: [],
       activityEvents: [],
       selectedCompetitorId: null,
@@ -77,6 +78,7 @@ export const useMarketResearchStore = create(
           sessionId,
           isAnalyzing: true,
           isAnalysisComplete: false,
+          summaryStatus: "finding-competitors",
           competitors: [],
           activityEvents: [],
           analysisStartedAt: Date.now(),
@@ -87,7 +89,11 @@ export const useMarketResearchStore = create(
           await requestMarketResearchAnalysis(sessionId, idea, numCompetitors);
         } catch {
           // Task queue failed — mark as complete with empty state so UI isn't stuck
-          set({ isAnalyzing: false, isAnalysisComplete: true });
+          set({
+            isAnalyzing: false,
+            isAnalysisComplete: true,
+            summaryStatus: "idle",
+          });
         }
       },
 
@@ -97,6 +103,7 @@ export const useMarketResearchStore = create(
           sessionId: null,
           isAnalyzing: false,
           isAnalysisComplete: false,
+          summaryStatus: "idle",
           competitors: [],
           activityEvents: [],
           analysisStartedAt: null,
@@ -115,6 +122,15 @@ export const useMarketResearchStore = create(
         if (existing?.details) return; // already loaded
         try {
           const response = await getCompetitorDetails(sessionId, competitorId);
+          if (response?.status === 202 && response?.data?.status === "retrying") {
+            set((state) => ({
+              competitors: state.competitors.map((c) =>
+                c.id === competitorId ? { ...c, status: "analyzing" } : c,
+              ),
+            }));
+            get()._syncSummaryStatus();
+            return;
+          }
           const profile = response?.data?.competitor;
           if (!profile) return;
           set((state) => ({
@@ -124,6 +140,7 @@ export const useMarketResearchStore = create(
                 : c,
             ),
           }));
+          get()._syncSummaryStatus();
         } catch {
           // silently ignore — the component will show a loading/error state
         }
@@ -136,6 +153,25 @@ export const useMarketResearchStore = create(
         })),
 
       _setCompetitors: (competitors) => set({ competitors }),
+
+      _syncSummaryStatus: () =>
+        set((state) => {
+          if (state.report || state.isAnalysisComplete) {
+            return { summaryStatus: "ready" };
+          }
+          if (!state.isAnalyzing) {
+            return { summaryStatus: "idle" };
+          }
+          if (state.competitors.length === 0) {
+            return { summaryStatus: "finding-competitors" };
+          }
+          if (
+            state.competitors.some((competitor) => competitor.status !== "done")
+          ) {
+            return { summaryStatus: "waiting-competitors" };
+          }
+          return { summaryStatus: "synthesizing" };
+        }),
 
       _addCompetitorStub: ({
         taskId,
@@ -163,8 +199,21 @@ export const useMarketResearchStore = create(
               ...state.competitorTaskMap,
               [taskId]: competitorId,
             },
+            summaryStatus:
+              state.summaryStatus === "idle"
+                ? "waiting-competitors"
+                : state.summaryStatus,
           };
         }),
+
+      _mergeCompetitorProfile: (competitor) =>
+        set((state) => ({
+          competitors: state.competitors.map((entry) =>
+            entry.id === competitor.id
+              ? { ...entry, ...competitor, status: "done" }
+              : entry,
+          ),
+        })),
 
       _updateCompetitorStatus: (id, status) =>
         set((state) => ({
@@ -184,11 +233,16 @@ export const useMarketResearchStore = create(
           competitors,
           isAnalyzing: false,
           isAnalysisComplete: true,
+          summaryStatus: "ready",
         });
       },
 
       _markAnalysisComplete: () => {
-        set({ isAnalyzing: false, isAnalysisComplete: true });
+        set({
+          isAnalyzing: false,
+          isAnalysisComplete: true,
+          summaryStatus: "ready",
+        });
       },
 
       goToSummary: () => set({ step: "summary" }),
@@ -205,6 +259,7 @@ export const useMarketResearchStore = create(
           competitors: [],
           isAnalyzing: false,
           isAnalysisComplete: true,
+          summaryStatus: "ready",
         });
 
         try {

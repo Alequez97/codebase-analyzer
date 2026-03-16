@@ -1,0 +1,155 @@
+{
+  "id": "cili-pica",
+  "name": "Čili Pizza",
+  "url": "https://www.cili.lv",
+  "description": "A Baltic pizza restaurant chain (originating in Lithuania) operating dine-in, takeaway and delivery outlets in Latvia and Lithuania, targeting families and casual diners.",
+  "logoChar": "C",
+  "logoColor": "#D32F2F",
+  "logoBg": "#FFF5F5",
+  "tags": ["pizza-chain", "delivery", "family-friendly", "franchise"],
+  "pricing": "€8.09",
+  "pricingPeriod": "",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "1997",
+    "country": "Lithuania",
+    "funding": "Unknown",
+    "employees": "~430 (company-level, varies by operator)",
+    "business": "B2C restaurant chain / franchise (dine-in, takeaway, delivery)",
+    "targetMarket": "Families, mall shoppers, casual diners and delivery customers in Latvia and Lithuania; franchise partners for local operators",
+    "features": [
+      {
+        "category": "Ordering & Delivery",
+        "items": [
+          "Online ordering and takeaway on brand site and partner platforms",
+          "Delivery through major local aggregators (Wolt) and Tiamo Food app",
+          "Set combos and meal bundles for value ordering"
+        ]
+      },
+      {
+        "category": "Menu & Offerings",
+        "items": [
+          "Large multi-regional pizza menu (30cm and 42cm sizes) plus burgers, kebabs, pasta, breakfasts and kids menu",
+          "Seasonal/promotional bundles and family deals",
+          "Specialty items (Romas/flat pizzas, Roman sizes, vegetarian and burrata options)"
+        ]
+      },
+      {
+        "category": "Loyalty & Marketing",
+        "items": [
+          "Loyalty program (promoted on main site), promotions and kids-focused offers",
+          "Local marketing and mall-based locations to attract family footfall"
+        ]
+      },
+      {
+        "category": "Franchise & Operations",
+        "items": [
+          "Franchise model and multiple local operators (different companies run locations in Latvia vs Lithuania)",
+          "Central brand menu and training materials for franchisees (offered historically)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No single nationwide direct-to-consumer ordering app and unified loyalty across all franchise operators — customers often order via aggregators (Wolt) or operator-specific channels, fragmenting data and rewards.",
+      "Limited real-time order tracking and SLA guarantees across locations — delivery is routed through third parties and performance varies by operator, making consistent delivery promises difficult.",
+      "No public API or clear B2B/corporate ordering interface for repeat office catering and subscription meal plans — large or recurring orders rely on phone/email coordination.",
+      "Inconsistent menu metadata (allergens, nutrition) and limited dietary filtering on aggregator menus — harder for customers with allergies or strict diets to pick safely.",
+      "Quality and service consistency gap due to multiple franchise/operators (examples of location-level complaints) — no visible verified quality badge or standardized ratings per location.",
+      "Weak centralized customer support and complaint resolution across different legal operators — repeated local complaints persist on review sites and social media."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Single pizza (entry)",
+        "price": "€8.09",
+        "period": "",
+        "note": "Typical entry-level 30cm Margarita price on delivery menus (example from Wolt).",
+        "highlight": false
+      },
+      {
+        "name": "Value combo (Student)",
+        "price": "€9.99",
+        "period": "",
+        "note": "Example promotional combo (Student 30cm + drink) frequently listed on delivery platforms.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://www.cili.lv/",
+      "pricing": "https://wolt.com/en/lva/riga/restaurant/cili-pizza-barona",
+      "blog": "https://www.cili.lv/akcijas-un-jaunumi",
+      "jobs": "https://www.cili.lv/vakances"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Wolt menu (Riga, Barona)",
+          "url": "https://wolt.com/en/lva/riga/restaurant/cili-pizza-barona",
+          "claim": "30cm Margarita priced at €8.09 and several combo offers (Student + drink) around €9.99 on delivery menus."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Wikipedia (Čili)",
+          "url": "https://en.wikipedia.org/wiki/%C4%8Cili",
+          "claim": "Čili Pica started in 1997 in Vilnius and expanded into Latvia; company is a Lithuanian-origin restaurant chain."
+        },
+        {
+          "label": "Rekvizitai (company registry data for Čili Pica, UAB)",
+          "url": "https://rekvizitai.vz.lt/en/company/cili_pica/",
+          "claim": "2023 reported sales and employee count for Čili Pica, UAB (company-level financials and ~428 employees reported)."
+        },
+        {
+          "label": "Tiamo grupa (operator page)",
+          "url": "https://tiamo.lv/en/enterprises/cili-pizza/",
+          "claim": "In Latvia 'Čili Pizza' locations are operated by SIA Tiamo Grupa, which runs multiple Čili Pizza outlets and promotes franchise activity."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Sūdzības.lv (consumer complaints)",
+          "url": "https://www.sudzibas.lv/business/cili-pizza/241455/page/10",
+          "claim": "Multiple user complaints about inconsistent portions, cold food, and slow or indifferent service at specific Čili Pizza locations."
+        },
+        {
+          "label": "TripAdvisor (location reviews)",
+          "url": "https://www.tripadvisor.com/Restaurant_Review-g274971-d6478566-Reviews-Cili_Pica-Valmiera_Vidzeme_Region.html",
+          "claim": "Mixed-to-negative reviews at individual Čili Pizza locations noting variable service quality."
+        },
+        {
+          "label": "Reddit (r/latvia threads)",
+          "url": "https://www.reddit.com/r/latvia/comments/1cbvyhu/what_happened_to_cili_pizza/",
+          "claim": "Community discussion reporting decline in perceived quality over time and franchise/operator fragmentation in Latvia."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Čili homepage (offers, loyalty)",
+          "url": "https://www.cili.lv",
+          "claim": "Site promotes online ordering, loyalty program, kids menu and offers (Akcijas), indicating loyalty and promotions are part of the product."
+        },
+        {
+          "label": "Wolt menu (detailed menu & delivery)",
+          "url": "https://wolt.com/en/lva/riga/restaurant/cili-pizza-barona",
+          "claim": "Delivery menu includes full pizza menu, sizes (30cm/42cm), combos, prices and breakfast/children's items demonstrating broad offering and aggregator distribution."
+        },
+        {
+          "label": "Tiamo group press (operations in Latvia)",
+          "url": "https://tiamo.lv/jau-desmita-cili-pizza-riga/",
+          "claim": "Tiamo Group (SIA Tiamo Grupa) opened multiple Čili Pizza locations in Riga and manages many Latvian outlets, showing local operator structure."
+        }
+      ]
+    },
+    "strengths": [
+      "Established regional brand with long history (since 1997) and wide recognition in Lithuania and Latvia.",
+      "Comprehensive menu and family-friendly positioning (kids menu, breakfast, mall locations) that drives repeat footfall.",
+      "Multiple distribution channels — dine-in, takeaway, and strong presence on delivery aggregators (Wolt) that give easy access to urban customers."
+    ],
+    "weaknesses": [
+      "Inconsistent quality and service across locations because several different legal operators/franchisees run restaurants, leading to reputational risk.",
+      "Fragmented digital experience: reliance on third-party aggregators and operator-specific channels fragments customer data and loyalty across platforms.",
+      "Limited B2B/corporate ordering and subscription capabilities — few standardized offerings for repeat office or catering customers.",
+      "Public complaint threads and review sites show repeated service and portion-size complaints, indicating weak centralized complaint resolution."
+    ]
+  }
+}

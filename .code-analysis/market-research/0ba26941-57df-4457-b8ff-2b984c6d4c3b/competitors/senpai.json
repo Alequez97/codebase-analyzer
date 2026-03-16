@@ -1,0 +1,144 @@
+{
+  "id": "senpai",
+  "name": "Senpai.gg",
+  "url": "https://senpai.gg/",
+  "description": "AI-powered in‑game assistant (desktop overlay + voice) that provides pre/post‑game analysis, live timers and recommendations for competitive PC gamers.",
+  "logoChar": "S",
+  "logoColor": "#3b82f6",
+  "logoBg": "#eff6ff",
+  "tags": ["gaming-assistant", "in-game-overlay", "ai-coaching", "freemium"],
+  "pricing": "Unknown",
+  "pricingPeriod": "",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2017",
+    "country": "US",
+    "funding": "Seed (~$2.5–3M reported, ACT Venture Partners)",
+    "employees": "~12",
+    "business": "B2C gaming SaaS (freemium)",
+    "targetMarket": "Competitive PC gamers (League of Legends, Valorant, TFT, Wild Rift and similar titles)",
+    "features": [
+      {
+        "category": "Core product",
+        "items": [
+          "Windows desktop app with in-game overlay and computer-vision features",
+          "Real-time Voice Assistant that gives audio cues and coaching during matches",
+          "Pregame recommendations (builds, counters, tier lists) and automatic import of pro builds",
+          "Post-game analysis and AI-generated clips/highlights with strength/weakness pointers"
+        ]
+      },
+      {
+        "category": "Live game utilities",
+        "items": [
+          "Timers and live trackers (e.g., spike timer for Valorant)",
+          "Game-specific assistants: jungle assistant, gank alerts, objective/vision indicators, enemy stats",
+          "Match history, player profiles and teammate search functionality"
+        ]
+      },
+      {
+        "category": "Community & Premium",
+        "items": [
+          "SenpAI Plus subscription: ad-free experience, profile badge, Discord role, premium contests and additional features",
+          "Tier lists and pro build catalogs, community-shared builds"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No built-in 1:1 human coach marketplace, scheduling, or paid coaching product — platform focuses on AI assistant rather than connecting players to verified coaches",
+      "No structured longitudinal progress plans or curriculum with measurable milestones to track improvement over time (beyond per-match feedback)",
+      "No public B2B/API offering for teams, esports orgs or third‑party coaches to pull analytics or integrate into coaching workflows",
+      "Pricing transparency and standardized plans are hard to find on the official site; regional/reseller listings show divergent prices, which hurts comparison and enterprise packaging",
+      "Limited platform reach: primarily a Windows desktop app (desktop/overlay only) with little mobile or console integration for cross‑device coaching"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Free",
+        "price": "$0",
+        "period": "",
+        "note": "Basic desktop assistant: overlays, basic pre/post-game stats and recommendations.",
+        "highlight": false
+      },
+      {
+        "name": "SenpAI Plus",
+        "price": "Unknown (regional resellers list ~30 TRY / month)",
+        "period": "/mo",
+        "note": "Premium, ad-free experience with profile badge, Discord role, premium contests and additional in-app perks; exact official price not clearly listed publicly.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://support.senpai.gg/hc/en-us",
+      "pricing": "https://senpai.gg/senpai-plus",
+      "blog": "https://senpai.gg/blog",
+      "jobs": "https://www.linkedin.com/company/senpaigg/jobs/"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "SenpAI Plus page (official)",
+          "url": "https://senpai.gg/senpai-plus",
+          "claim": "Official site advertises a SenpAI Plus subscription and perks, but does not expose a clear global USD sticker price on the public page."
+        },
+        {
+          "label": "Regional reseller listing (example: ByNoGame / epin sites)",
+          "url": "https://www.bynogame.com/tr/oyunlar/senpai-plus/1-aylik-senpai-plus",
+          "claim": "Third-party resellers list monthly SenpAI Plus packages (e.g., ~30 TRY/month), indicating regionally variable pricing and reseller channels."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Y Combinator company profile",
+          "url": "https://www.ycombinator.com/companies/senpai-gg",
+          "claim": "Lists SenpAI.GG as YC Summer 2021 company, founded 2017, based in Boston and reports a seed raise (~$3M) and team size of ~12."
+        },
+        {
+          "label": "Crunchbase company profile",
+          "url": "https://www.crunchbase.com/organization/senpai-gg",
+          "claim": "Crunchbase records a seed funding round (ACT Venture Partners) and company overview/funding timeline."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "SenpAI Help Center — Voice Assistant does not work",
+          "url": "https://support.senpai.gg/hc/en-us/articles/360019232439-Voice-Assistant-does-not-work",
+          "claim": "Official support article exists to troubleshoot the Voice Assistant, indicating users commonly encounter setup/compatibility issues."
+        },
+        {
+          "label": "Reddit discussion (r/VALORANT) — is senpai.gg allowed?",
+          "url": "https://www.reddit.com/r/VALORANT/comments/mh9c1x/is_senpaigg_allowed/",
+          "claim": "Community threads discuss whether SenpAI's in‑game assistant is allowed by game publishers, showing user concern about ban risk and compliance."
+        },
+        {
+          "label": "Scamadviser site check",
+          "url": "https://www.scamadviser.com/check-website/senpai.gg",
+          "claim": "Third‑party site rates senpai.gg as legitimate, which helps surface trust signals for users."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "About / product page (features list)",
+          "url": "https://senpai.gg/pl/about-the-app",
+          "claim": "Official product description lists desktop overlay, voice assistant, live trackers, timers, gank alerts, objective vision and other in-game assist features."
+        },
+        {
+          "label": "TechCrunch coverage",
+          "url": "https://techcrunch.com/2021/08/06/senpai-gg-wants-to-be-your-ai-powered-video-game-coach/",
+          "claim": "TechCrunch describes SenpAI.GG as an AI-powered assistant that provides real-time recommendations and post-game feedback, and notes legal/anti-cheat considerations."
+        }
+      ]
+    },
+    "strengths": [
+      "Real-time voice assistant + computer-vision overlay gives actionable in-match guidance (differentiator vs static stats sites)",
+      "Multi-game support with game-specific utilities (timers, jungle assistance, gank/vision alerts)",
+      "Backed by YC and early VC seed (ACT Venture Partners) which provides credibility and investor validation",
+      "Freemium model lowers adoption friction while allowing upsell to SenpAI Plus premium perks"
+    ],
+    "weaknesses": [
+      "No integrated human coach marketplace or scheduling/payment flow for verified 1:1 coaching — gap for users who want live instructors",
+      "Desktop-only Windows app and overlay model limits reach (no first-class mobile/console experience)",
+      "Official pricing transparency is weak; reliance on regional resellers and unclear pricing can hurt monetization and enterprise packaging",
+      "User support & reliability issues (voice/pregame failures reported and documented in help center), which reduces trust for competitive users concerned about in‑match stability"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260315T235958-041fee",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-15T23:59:58.165Z",
+  "params": {
+    "sessionId": "0ba26941-57df-4457-b8ff-2b984c6d4c3b",
+    "competitorId": "metafy",
+    "competitorName": "Metafy",
+    "competitorUrl": "https://metafy.gg/",
+    "competitorDescription": "Marketplace where gamers book 1:1 coaching and sessions with top players/creators, sometimes including live play.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Metafy\nWebsite: https://metafy.gg/\nDescription: Marketplace where gamers book 1:1 coaching and sessions with top players/creators, sometimes including live play.\nSession ID: 0ba26941-57df-4457-b8ff-2b984c6d4c3b\nCompetitor ID: metafy\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260315T235901-d78ff4"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/0ba26941-57df-4457-b8ff-2b984c6d4c3b/competitors/metafy.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260315T235958-041fee.md",
+  "logFile": "logs/market-research-competitor-20260315T235958-041fee.log",
+  "startedAt": "2026-03-15T23:59:59.917Z",
+  "completedAt": "2026-03-16T00:01:43.336Z"
+}

@@ -14,6 +14,7 @@ export function ProfilePage() {
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const analysisHistory = useProfileStore((s) => s.analysisHistory);
+  const isLoading = useProfileStore((s) => s.isLoading);
   const clearHistory = useProfileStore((s) => s.clearHistory);
   const fetchHistory = useProfileStore((s) => s.fetchHistory);
   const goToLanding = useMarketResearchStore((s) => s.goToLanding);
@@ -48,6 +49,7 @@ export function ProfilePage() {
         <ProfileHeader user={user} onSignOut={signOut} />
         <AnalysisHistory
           history={analysisHistory}
+          isLoading={isLoading}
           onClear={clearHistory}
           onOpen={(entry) => openHistoryAnalysis(entry)}
         />

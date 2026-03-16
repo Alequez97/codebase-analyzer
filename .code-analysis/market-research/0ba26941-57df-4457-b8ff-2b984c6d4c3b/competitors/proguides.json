@@ -1,0 +1,173 @@
+{
+  "id": "proguides",
+  "name": "ProGuides",
+  "url": "https://www.proguides.com/",
+  "description": "A consumer-focused marketplace and course platform that connects gamers with pro coaches, on-demand gameplay reviews, and structured courses to improve competitive game skills.",
+  "logoChar": "PG",
+  "logoColor": "#00AEEF",
+  "logoBg": "#e6f7ff",
+  "tags": ["game-coaching", "marketplace", "courses", "esports"],
+  "pricing": "$12.99",
+  "pricingPeriod": "/mo",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2015",
+    "country": "US",
+    "funding": "$~7.4M (pre-seed + seed), acquired by Statespace",
+    "employees": "~80 (est.)",
+    "business": "B2C marketplace / training platform",
+    "targetMarket": "Individual competitive gamers (casual to aspiring pros) seeking one-on-one coaching, gameplay reviews, and structured courses; secondary reach into esports orgs and partnerships via Statespace/Aim Lab",
+    "features": [
+      {
+        "category": "Coaching & marketplace",
+        "items": [
+          "On-demand 1:1 coaching sessions (coaches set prices; marketplace model)",
+          "Gameplay Analysis: upload recorded gameplay for coach review and buy a single review",
+          "Coach profiles, instant booking and chat with coaches"
+        ]
+      },
+      {
+        "category": "Courses & content",
+        "items": [
+          "Master classes, bootcamps and recorded guides across multiple competitive titles",
+          "500+ lessons / masterclasses (publisher claims) covering FPS and MOBA titles"
+        ]
+      },
+      {
+        "category": "Membership & integrations",
+        "items": [
+          "Pro membership that bundles unlimited access to classes/bootcamps and discounts on 1:1 coaching",
+          "Integration/positioning with Aim Lab (Statespace/Aim Lab acquisition to combine aim training and coaching)"
+        ]
+      },
+      {
+        "category": "Analytics & progress",
+        "items": [
+          "Platform claims data-driven progress trackers and analytics (limited public detail)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Transparent billing and packaging: consumers report the platform highlights a low monthly rate but often bills annually (bait-and-switch perception) — clearer monthly vs annual checkout and explicit confirmation is an opportunity.",
+      "Verified credentialing and standardized coach badges: coach marketplace relies on profile/rating signals but lacks a strong, verifiable credential or quality-tier system to reduce buyer risk for high-ticket sessions.",
+      "Structured recurring coaching subscriptions: no obvious built-in flow for weekly/recurring coaching packages (e.g., multi-session plans with scheduled cadence and progress milestones).",
+      "Stronger buyer protections and escrow/refund guarantees: multiple complaints about poor dispute resolution and surprise charges indicate a need for clearer escrow, refund, and mediation flows for coaching transactions.",
+      "Team/enterprise offering or API: limited evidence of B2B/team features for clubs, schools, or orgs to manage multiple players, invoices, and aggregated reporting.",
+      "Granular, standardized progress reporting: while the company references data-driven trackers, there is little public detail about standardized metrics, longitudinal learning plans, or exportable progress reports for coaches/players."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Free",
+        "price": "$0",
+        "period": "",
+        "note": "Some free guides and sample lessons available; browsing coach listings is free.",
+        "highlight": false
+      },
+      {
+        "name": "Pro Membership (monthly)",
+        "price": "$12.99",
+        "period": "/mo",
+        "note": "Membership bundling access to masterclasses/bootcamps and discounts on 1:1 coaching (platform has offered promotional pricing at times).",
+        "highlight": true
+      },
+      {
+        "name": "Pro Membership (annual)",
+        "price": "$95.88",
+        "period": "/yr",
+        "note": "Annual billing has been marketed as a low monthly equivalent (e.g., $7.99/mo billed yearly); some users report this being unclear at checkout.",
+        "highlight": false
+      },
+      {
+        "name": "Coaching (pay-per-session)",
+        "price": "Varies",
+        "period": "",
+        "note": "Coaches set individual session prices; platform takes a marketplace cut. Also offers single gameplay video reviews priced per submission.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://www.proguides.com/guides/",
+      "pricing": "https://www.proguides.com/settings/subscriptions",
+      "blog": "https://www.proguides.com/",
+      "jobs": "https://www.linkedin.com/company/proguidescom/"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "The Esports Advocate (report)",
+          "url": "https://esportsadvocate.net/2024/04/sources-proguides-will-shut-down-at-the-end-of-may/",
+          "claim": "Reports ProGuides charged a flat monthly fee ~ $12.99 (discounted to $9.99) for a pro program and references annual vs monthly pricing confusion."
+        },
+        {
+          "label": "Trustpilot - user reviews",
+          "url": "https://www.trustpilot.com/review/proguides.com",
+          "claim": "Multiple user reviews call out marketing of $7.99/month which is actually billed as an annual charge (users reported surprise annual billing)."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Crunchbase company profile",
+          "url": "https://www.crunchbase.com/organization/proguides",
+          "claim": "Company profile listing founding details and funding rounds (pre-seed and seed listed)."
+        },
+        {
+          "label": "TechCrunch / 2019 coverage",
+          "url": "https://techcrunch.com/2019/08/29/launching-from-beta-proguides-is-making-money-ensuring-that-gamers-never-play-alone/",
+          "claim": "Early funding and marketplace model details; mentions $1.9M pre-seed and coaching marketplace economics."
+        },
+        {
+          "label": "BusinessWire - Statespace acquisition announcement",
+          "url": "https://www.businesswire.com/news/home/20211102005937/en/Statespace-Acquires-ProGuides",
+          "claim": "Statespace (Aim Lab) publicly announced acquisition of ProGuides to combine coaching and aim-training products."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot - reviews",
+          "url": "https://www.trustpilot.com/review/proguides.com",
+          "claim": "A mix of positive reviews and repeated complaints about unclear billing and perceived deceptive pricing tactics."
+        },
+        {
+          "label": "BBB complaints",
+          "url": "https://www.bbb.org/us/ca/los-angeles/profile/online-gaming/proguides-1216-1083876/complaints",
+          "claim": "Customer complaints related to coach interactions, refunds and dispute resolution."
+        },
+        {
+          "label": "Reddit - community reports",
+          "url": "https://www.reddit.com/r/leagueoflegends/comments/j8wdj8/what_did_my_kid_buy_from_proguides_for_99/",
+          "claim": "Users reporting surprise charges and confusion about subscription billing (example thread)."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "ProGuides - Gameplay Analysis",
+          "url": "https://www.proguides.com/apex",
+          "claim": "Gameplay Analysis product page describes upload of recorded gameplay for coach review and pay-per-review workflow."
+        },
+        {
+          "label": "TrainingIndustry / press release",
+          "url": "https://trainingindustry.com/press-release/learning-technologies/statespace-acquires-proguides/",
+          "claim": "Claims ProGuides has 500+ lessons and 2500+ coaches available and references data-driven progress trackers."
+        },
+        {
+          "label": "VentureBeat coverage of acquisition",
+          "url": "https://venturebeat.com/games/aim-lab-developer-statespace-acquires-proguides-training-platform/",
+          "claim": "Acquisition coverage describing combined product vision (Aim Lab + ProGuides) to offer live and asynchronous training."
+        }
+      ]
+    },
+    "strengths": [
+      "Large, multi-format offering: mixes on-demand coaching, gameplay reviews, and recorded masterclasses (broad product coverage for learners).",
+      "Marketplace scale and catalogue: public claims of 500+ lessons and thousands of coaches give breadth across titles (helps with discovery and variety).",
+      "Strategic acquisition & Aim Lab integration: being part of Statespace/Aim Lab provides access to aim-training tech and potential cross-product synergies.",
+      "Established marketplace economics: coaches can set prices and platform has experience operating payouts (~$2M paid to coaches reported historically)."
+    ],
+    "weaknesses": [
+      "Billing transparency & trust issues: repeated user complaints about confusing annual vs monthly pricing and surprise charges undermine buyer confidence.",
+      "Quality consistency and verification: large coach pool creates variability in session quality and there is limited public evidence of strong, verifiable credentialing or curated coach tiers.",
+      "Customer support and dispute handling: BBB and forum complaints point to slow or unsatisfactory resolution for coach disputes and refunds.",
+      "Uncertain long-term availability: recent reporting suggested the platform may wind down operations, which creates risk for buyers and coaches (signals business instability)."
+    ]
+  }
+}

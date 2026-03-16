@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260315T235958-731628",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-15T23:59:58.179Z",
+  "params": {
+    "sessionId": "0ba26941-57df-4457-b8ff-2b984c6d4c3b",
+    "competitorId": "g2g",
+    "competitorName": "G2G",
+    "competitorUrl": "https://www.g2g.com/",
+    "competitorDescription": "Marketplace for gamers to buy services such as boosting, coaching, and in-game items/accounts.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: G2G\nWebsite: https://www.g2g.com/\nDescription: Marketplace for gamers to buy services such as boosting, coaching, and in-game items/accounts.\nSession ID: 0ba26941-57df-4457-b8ff-2b984c6d4c3b\nCompetitor ID: g2g\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260315T235901-d78ff4"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/0ba26941-57df-4457-b8ff-2b984c6d4c3b/competitors/g2g.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260315T235958-731628.md",
+  "logFile": "logs/market-research-competitor-20260315T235958-731628.log",
+  "startedAt": "2026-03-16T00:03:06.108Z",
+  "completedAt": "2026-03-16T00:05:09.834Z"
+}

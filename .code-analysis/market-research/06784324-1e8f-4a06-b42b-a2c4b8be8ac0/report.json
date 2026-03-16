@@ -1,0 +1,1556 @@
+{
+  "sessionId": "06784324-1e8f-4a06-b42b-a2c4b8be8ac0",
+  "idea": "food delivery in riga",
+  "status": "complete",
+  "competitors": [
+    {
+      "id": "wolt",
+      "name": "Wolt",
+      "url": "https://wolt.com",
+      "description": "On-demand food & local commerce marketplace connecting consumers with restaurants, stores and independent couriers (consumer-facing with merchant tools).",
+      "status": "done",
+      "logoChar": "W",
+      "logoColor": "#00C2E8",
+      "logoBg": "#FFFFFF",
+      "tags": [
+        "food-delivery",
+        "marketplace",
+        "logistics",
+        "subscription"
+      ],
+      "pricing": "€4.99",
+      "pricingPeriod": "/mo",
+      "customers": "12M+",
+      "details": {
+        "founded": "2014",
+        "country": "Finland",
+        "funding": "$856M raised (pre-acquisition)",
+        "employees": "~4,000+",
+        "business": "B2C marketplace with B2B merchant partnerships and courier logistics",
+        "targetMarket": "Consumers ordering food/groceries; local restaurants & retailers that want delivery distribution; independent couriers",
+        "features": [
+          {
+            "category": "Core consumer features",
+            "items": [
+              "On-demand restaurant & store ordering (delivery or pickup)",
+              "Scheduled / pre-order delivery (choose time up to 7 days ahead)",
+              "Wolt+ subscription for zero delivery fees & member offers",
+              "Real-time order tracking and ETA updates"
+            ]
+          },
+          {
+            "category": "Merchant & logistics features",
+            "items": [
+              "Wolt Merchant App to manage orders, scheduled orders and payouts",
+              "Marketplace promotional tools and Wolt+ exposure for partners",
+              "Variable commission model (takeaway vs delivery, Wolt+ adjustments)",
+              "Developer APIs & integrations (order flow, merchant integration, webhooks)"
+            ]
+          },
+          {
+            "category": "Retail / expansion",
+            "items": [
+              "Wolt Market (grocery / convenience delivery) in selected markets",
+              "Support for self-delivery (merchant’s own couriers) and pickup workflows"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No built-in recurring-subscription meal plans (weekly meal subscriptions) for consumers — only scheduled one-off orders, which creates an opening for subscriptions that guarantee repeat revenue for restaurants",
+          "Merchant pricing transparency: commissions and Wolt+ adjusted fees vary by market and by Wolt+ orders, making predictable margin forecasting for small restaurants difficult",
+          "Limited native POS synchronization: many merchants must rely on third-party integrations (e.g., Deliverect) rather than a single, deep native POS/stock sync, increasing friction for restaurants",
+          "Weak visible guarantees and dispute resolution for high-value orders — repeated complaints show refunds/support are inconsistent, so a competitor could offer stronger SLA/refund guarantees",
+          "No widely-adopted verified courier/trust layer (ID verification, on-delivery proof beyond photos) to reduce fraud and trust friction for higher-ticket deliveries"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Pay-per-order",
+            "price": "Varies",
+            "period": "",
+            "note": "Default consumer model: pay delivery fee + possible service fees per order (fees vary by market and distance)",
+            "highlight": false
+          },
+          {
+            "name": "Wolt+",
+            "price": "€4.99 (example; country-specific)",
+            "period": "/mo",
+            "note": "Monthly subscription that unlocks zero delivery fees and member-only offers; price & minimum order thresholds vary by country (e.g., €7.99 in FI, €4.99 in DE)",
+            "highlight": true
+          },
+          {
+            "name": "Merchant partnership (commissioned)",
+            "price": "Custom / percentage",
+            "period": "",
+            "note": "Restaurants are charged commissions (different rates for takeaway vs delivery and Wolt+ orders); details depend on market and partner agreement",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://developer.wolt.com/docs",
+          "pricing": "https://explore.wolt.com/en/mkd/merchant/learning-center/wolt-merchant-fees-and-commissions",
+          "blog": "https://blog.wolt.com",
+          "jobs": "https://careers.wolt.com"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Wolt+ product page (Germany)",
+              "url": "https://explore.wolt.com/en/deu/wolt-plus",
+              "claim": "Wolt+ is a monthly subscription offering zero delivery fees; example price listed as €4.99 in Germany"
+            },
+            {
+              "label": "Delivery fee explanation (regional example)",
+              "url": "https://wolt.com/en/est/tallinn/article/ftu_delivery-price",
+              "claim": "Wolt shows delivery fee structure and service fee applied at checkout (example and minimum basket rules)"
+            },
+            {
+              "label": "Wolt merchant fees & commissions (learning center)",
+              "url": "https://explore.wolt.com/en/mkd/merchant/learning-center/wolt-merchant-fees-and-commissions",
+              "claim": "Describes commission structure and that Wolt+ orders may carry an adjusted (often slightly higher) commission to offset lower customer delivery fees"
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Wolt About (official)",
+              "url": "https://explore.wolt.com/en/fin/about",
+              "claim": "Wolt was founded in 2014 in Helsinki and joined forces with DoorDash in 2022"
+            },
+            {
+              "label": "DoorDash press release (acquisition complete)",
+              "url": "https://ir.doordash.com/news/news-details/2022/DoorDash-Completes-Acquisition-of-Wolt/default.aspx",
+              "claim": "DoorDash completed acquisition of Wolt on June 1, 2022; Wolt operates as DoorDash International outside the U.S."
+            },
+            {
+              "label": "TechCrunch coverage of acquisition",
+              "url": "https://techcrunch.com/2021/11/09/doordash-to-acquire-food-delivery-company-wolt/",
+              "claim": "Acquisition announced as all-stock deal valued at ~€7 billion; Wolt had ~4,000 employees across 23 countries at announcement"
+            },
+            {
+              "label": "Crunchbase (funding rounds)",
+              "url": "https://www.crunchbase.com/organization/wolt",
+              "claim": "Crunchbase lists Wolt funding rounds including a Series E; Wolt raised large capital prior to acquisition (detailed rounds available on Crunchbase)"
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot (multiple country pages)",
+              "url": "https://www.trustpilot.com/review/www.wolt.de",
+              "claim": "User reviews across markets report repeated issues: late/cold deliveries and poor customer support or inconsistent refunds"
+            },
+            {
+              "label": "Reddit threads (user complaints)",
+              "url": "https://www.reddit.com/r/copenhagen/comments/1dw28ct/wolt_service_fee5_of_your_order/",
+              "claim": "Community threads highlight merchant/consumer frustration with layered fees and perceived high commissions"
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Wolt Merchant learning center (merchant features)",
+              "url": "https://explore.wolt.com/en/mkd/merchant/learning-center/wolt-merchant-fees-and-commissions",
+              "claim": "Explains merchant commission structures, Wolt+ economics and merchant-facing features such as the Merchant App"
+            },
+            {
+              "label": "Developer docs (order types)",
+              "url": "https://developer.wolt.com/docs/orderrestaurantguide",
+              "claim": "Developer docs document order types including scheduled orders, self-delivery and merchant integrations (APIs/webhooks)"
+            },
+            {
+              "label": "Wolt+ product page",
+              "url": "https://explore.wolt.com/wolt-plus",
+              "claim": "Wolt+ offers zero delivery fees for eligible orders and member-only offers; minimum order thresholds and distance rules apply"
+            }
+          ]
+        },
+        "strengths": [
+          "Strong regional market product-market fit in Europe/Asia with polished consumer app and product UX (easy discovery, realtime tracking)",
+          "Wolt+ subscription increases order frequency and provides predictable consumer monetization",
+          "Comprehensive merchant tooling (Merchant App, promotions) and documented developer APIs for integrations",
+          "Scale and capital backing after DoorDash acquisition — faster international product development and improved investment efficiency"
+        ],
+        "weaknesses": [
+          "High and complex merchant fees (commission + service adjustments for Wolt+), which strain small restaurant margins and create pushback",
+          "Repeated reliability & support complaints (late/cold deliveries, inconsistent refunds) visible in Trustpilot and Reddit — opportunity for better SLA and support",
+          "Merchant-facing integration friction: many restaurants rely on third-party POS integrations (Deliverect) rather than a single, deep native POS sync",
+          "Pricing & exposure prioritization (Wolt+ visibility) can disadvantage non-subscribing merchants and creates perceived marketplace imbalance"
+        ]
+      }
+    },
+    {
+      "id": "bolt-food",
+      "name": "Bolt Food",
+      "url": "https://bolt.eu/food/",
+      "description": "On-demand food and grocery delivery marketplace from Bolt that connects local restaurants and stores with urban consumers via courier partners.",
+      "status": "done",
+      "logoChar": "BF",
+      "logoColor": "#6FCF97",
+      "logoBg": "#E6F9F0",
+      "tags": [
+        "food-delivery",
+        "marketplace",
+        "on-demand",
+        "grocery"
+      ],
+      "pricing": "Custom",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2019 (Bolt Food launch)",
+        "country": "Estonia",
+        "funding": "€628M (major corporate round, Jan 2022)",
+        "employees": "Unknown",
+        "business": "B2C two-sided marketplace (restaurants — couriers — consumers)",
+        "targetMarket": "Urban consumers seeking on-demand meals and groceries; local restaurants and stores looking for order volume and lower commission alternatives to incumbents",
+        "features": [
+          {
+            "category": "Marketplace & consumer",
+            "items": [
+              "Restaurant and store discovery and menu browsing",
+              "Real-time order tracking and courier location",
+              "Distance-based delivery fees and promo codes"
+            ]
+          },
+          {
+            "category": "Delivery & logistics",
+            "items": [
+              "Crowd-sourced courier network (cars, bikes, scooters, on-foot)",
+              "Dynamic assignment of couriers and live ETA updates",
+              "Bolt Market — rapid grocery / convenience delivery in select markets"
+            ]
+          },
+          {
+            "category": "Merchant tools",
+            "items": [
+              "Bolt Merchant app for restaurants (order acceptance on tablet/phone)",
+              "Partner Portal dashboards with basic order and revenue metrics",
+              "Contracted commission/fee agreements and merchant terms"
+            ]
+          },
+          {
+            "category": "Payments & promotions",
+            "items": [
+              "In-app payments, refunds handled through platform",
+              "Customer promotions, first-order discounts and periodic offers",
+              "Restaurant-level pricing control (menu prices may differ from in-store)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Transparent, standardized commission tiers and public pricing for restaurants — commissions are negotiated per market and often opaque, creating friction for restaurant decision-making (opportunity to win sellers with clear, predictable packages).",
+          "Customer subscription / loyalty product (e.g., flat-fee delivery pass) across markets — Bolt relies on promo codes and per-order discounts rather than a widely-available subscription offering.",
+          "Formal SLA or guaranteed delivery-time refunds — repeated complaints indicate limited guarantees or meaningful compensation when deliveries are late or orders are missing, presenting an opening for guaranteed-on-time services.",
+          "Stronger quality & trust layer for high-value or brand-sensitive orders (no prominent verified-restaurants / insured-deliveries program) — creates risk for restaurants selling fragile or premium items.",
+          "Enterprise-grade POS / API integrations and white-label options — Bolt provides a Merchant app but lacks widely-documented, standardized POS/API offerings for larger multi-location chains (an opportunity for deeper integrations and order routing guarantees)."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Restaurant partnership (commission)",
+            "price": "15–30%",
+            "period": "",
+            "note": "Commission-based model; exact rate varies by market and contract (Bolt has historically advertised lower entry commissions in some markets).",
+            "highlight": true
+          },
+          {
+            "name": "Consumer (per-order)",
+            "price": "Variable",
+            "period": "",
+            "note": "Customers pay item prices + delivery fee (distance-based) and can use promo codes; pricing varies by market and restaurant.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://partners.food.bolt.eu/",
+          "pricing": "https://bolt.eu/en/support/articles/4402863195282/",
+          "blog": "https://bolt.eu/",
+          "jobs": "https://bolt.eu/en/careers/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Information about fees (Bolt Support)",
+              "url": "https://bolt.eu/en/support/articles/4402863195282/",
+              "claim": "Bolt describes platform fees and delivery charge types for Bolt Food (consumer delivery fees vary; restaurant fees exist)."
+            },
+            {
+              "label": "General Terms (Bolt Food) PDF",
+              "url": "https://food.bolt.eu/static/bolt_restaurant_terms_en-963e46c8e8024a9e50e3606b75a4daff.pdf",
+              "claim": "Contracted terms and a price list (Schedule 3) govern restaurant pricing and commissions — indicating negotiated/market-specific rates."
+            },
+            {
+              "label": "Independent blog on Bolt Food commissions",
+              "url": "https://blog.menuviel.com/bolt-food-fees-and-commissions-for-restaurants/",
+              "claim": "Independent reporting and aggregated observations put Bolt Food commission ranges around 15–30% depending on market and services."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Bolt (company) — Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Bolt_(company)",
+              "claim": "Bolt is an Estonian mobility company (founded 2013) that launched Bolt Food as its food delivery service and raised a €628M round in Jan 2022."
+            },
+            {
+              "label": "Bolt Food launch coverage — CNBC",
+              "url": "https://www.cnbc.com/2019/08/21/uber-rival-bolt-launches-food-delivery-service-bolt-food-in-europe.html",
+              "claim": "Bolt launched Bolt Food in 2019 as an expansion of its mobility business into food delivery."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot (food.bolt.eu reviews)",
+              "url": "https://www.trustpilot.com/review/food.bolt.eu",
+              "claim": "Large number of user complaints about late deliveries, missing items, cold food, and unsatisfactory customer support."
+            },
+            {
+              "label": "Reddit user complaints",
+              "url": "https://www.reddit.com/r/lithuania/comments/k23jm2/i_was_ripped_off_by_bolt_food/",
+              "claim": "Anecdotal reports of non-delivery, courier misconduct, and slow/unsatisfactory dispute resolution by Bolt Food support."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Bolt Merchant (Google Play)",
+              "url": "https://play.google.com/store/apps/details?id=com.bolt.deliveryproviderapp",
+              "claim": "Bolt provides a Merchant app for restaurants to receive and manage orders on Bolt Food."
+            },
+            {
+              "label": "Bolt Food App (App Store listing)",
+              "url": "https://apps.apple.com/us/app/bolt-food/id1451492388",
+              "claim": "Consumer app features include real-time tracking, restaurant discovery, and grocery delivery (Bolt Market) in supported markets."
+            },
+            {
+              "label": "Bolt Food — Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Bolt_Food",
+              "claim": "Describes Bolt Food features, geographic expansion, and the Bolt Market grocery product."
+            }
+          ]
+        },
+        "strengths": [
+          "Low-cost positioning vs incumbents — Bolt has used lower delivery fees and competitive commission offers to attract restaurants and price-sensitive consumers.",
+          "Rapid geographic expansion by leveraging Bolt’s existing ride-hailing network, allowing faster entry and lower operational setup costs.",
+          "Simple merchant onboarding via the Bolt Merchant app and partner portal provides basic analytics and order management for restaurants.",
+          "Integrated grocery offering (Bolt Market) broadens use cases beyond restaurant delivery and captures quick-commerce demand in some markets."
+        ],
+        "weaknesses": [
+          "Frequent customer complaints about delivery reliability, missing items and cold food indicate inconsistent courier quality control and operational execution.",
+          "Repeated negative reviews about support and refunds suggest a weak post-order dispute resolution process, harming trust for both consumers and restaurants.",
+          "Opaque, market-by-market commission/pricing structure creates friction for restaurants evaluating ROI and makes national rollouts harder for multi-location chains.",
+          "Bolt has paused or exited some markets (e.g., South Africa), showing that maintaining two-sided liquidity and profitability can be challenging in competitive regions."
+        ]
+      }
+    },
+    {
+      "id": "wolt-market",
+      "name": "Wolt Market",
+      "url": "https://wolt.com",
+      "description": "Quick-commerce grocery and convenience delivery inside the Wolt app — native 30-minute delivery from dark stores and local merchants, targeting urban consumers.",
+      "status": "done",
+      "logoChar": "W",
+      "logoColor": "#3b82f6",
+      "logoBg": "#eff6ff",
+      "tags": [
+        "quick-commerce",
+        "grocery delivery",
+        "marketplace",
+        "dark-stores"
+      ],
+      "pricing": "€4.99",
+      "pricingPeriod": "/mo",
+      "customers": "2.5M+ (monthly active, 2021)",
+      "details": {
+        "founded": "2014",
+        "country": "Finland",
+        "funding": "$856M raised (pre-acquisition); acquired by DoorDash in 2022",
+        "employees": "~4k–6k (pre-acquisition; varied by source)",
+        "business": "B2C marketplace with merchant-facing tools and logistics (B2B2C)",
+        "targetMarket": "Urban consumers who need fast grocery/convenience delivery; local supermarkets and small merchants seeking on-demand delivery channels",
+        "features": [
+          {
+            "category": "Delivery & Fulfillment",
+            "items": [
+              "30-minute quick-commerce delivery from Wolt Market dark stores and partner retailers",
+              "Wolt Drive: merchant-facing express logistics for e-commerce (last-mile)",
+              "Self-delivery and courier pickup options where available"
+            ]
+          },
+          {
+            "category": "Consumer Product",
+            "items": [
+              "In-app discovery for Market items and stores (search, categories, Wolt+ visibility)",
+              "Wolt+ subscription for zero delivery fees and member offers",
+              "In-app order tracking and customer support/chat for orders"
+            ]
+          },
+          {
+            "category": "Merchant Tools",
+            "items": [
+              "Merchant Portal and Merchant App Lite for picking, substitutions, and order management",
+              "Commission-based pricing with flexible payout cadence",
+              "Campaigns/ads and promotional visibility (Wolt Ads / Wolt+ placement)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No first-class recurring/auto-replenishment flow for groceries (weekly/biweekly baskets) — Wolt focuses on on-demand orders, leaving room for a groceries-first subscription that schedules repeat deliveries and curated baskets.",
+          "Limited cross-market, standardized pricing transparency for merchants — commissions and platform fees are set per-market/contract which makes merchant comparison and scaling harder for multi-market retailers.",
+          "Weak explicit freshness / quality guarantees for produce — repeated user complaints (see reviews) show issues with rotten produce or poor replacements; there is opportunity for photo-backed sourcing, quality SLAs and refund automation.",
+          "No clearly public, production-grade inventory-sync API for large retailers — while the Merchant Portal exists, large supermarket chains need robust real-time inventory and bulk price/update APIs and SLAs.",
+          "No dedicated grocery-tailored loyalty or pricing tier beyond the generic Wolt+ membership — Wolt+ is multi-vertical (restaurants, shops), so a grocery-specific loyalty plan (perishables discounts, frequency incentives) is an opening.",
+          "Analytics and forecasting tools for retailers are basic — merchants get category benchmarks and reports, but advanced demand forecasting, shrinkage analytics and perishable spoilage dashboards are not prominently offered."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Wolt+ (monthly)",
+            "price": "€4.99",
+            "period": "/mo",
+            "note": "Monthly subscription that unlocks zero delivery fees on eligible orders and member-only offers (price & minimum basket vary by market).",
+            "highlight": true
+          },
+          {
+            "name": "Wolt+ (annual)",
+            "price": "€95.88",
+            "period": "/yr",
+            "note": "Yearly discounted subscription available in some markets (annual price and discounts vary by country).",
+            "highlight": false
+          },
+          {
+            "name": "Merchant (platform)",
+            "price": "Custom / commission-based",
+            "period": "",
+            "note": "No sign-up fee in many markets; Wolt charges commissions and platform fees which vary by market and by merchant agreement.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://explore.wolt.com/en/",
+          "pricing": "https://wolt.com/en/deu/wolt-plus",
+          "blog": "https://blog.wolt.com/tag/wolt-market/",
+          "jobs": "https://careers.wolt.com/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Wolt+ subscription page (country example)",
+              "url": "https://explore.wolt.com/en/deu/wolt-plus",
+              "claim": "Wolt+ monthly subscription commonly priced at €4.99 in several markets and includes zero delivery fees on eligible orders with a free trial."
+            },
+            {
+              "label": "Wolt+ yearly plan article",
+              "url": "https://wolt.com/en/fin/oulu/article/wolt-plus-yearly-plan",
+              "claim": "Wolt advertises an annual Wolt+ plan (example price €95.88) and market-dependent minimum basket sizes for free delivery."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "DoorDash press release (acquisition complete)",
+              "url": "https://ir.doordash.com/news/news-details/2022/DoorDash-Completes-Acquisition-of-Wolt/default.aspx",
+              "claim": "DoorDash completed the acquisition of Wolt on May 31, 2022; Wolt was founded in 2014."
+            },
+            {
+              "label": "TechCrunch — DoorDash to acquire Wolt",
+              "url": "https://techcrunch.com/2021/11/09/doordash-to-acquire-food-delivery-company-wolt/",
+              "claim": "Reports Wolt was founded in 2014 and had raised over $850M prior to the acquisition; acquisition valued at approximately €7B (all-stock)."
+            },
+            {
+              "label": "Reuters — acquisition close and financial context",
+              "url": "https://www.reuters.com/markets/europe/doordash-sees-tepid-q2-wolt-it-completes-35-bln-takeover-2022-06-01/",
+              "claim": "Provides context on Wolt's adjusted EBITDA losses and employee counts (noting thousands of employees across markets) around the acquisition."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot — Wolt (Denmark)",
+              "url": "https://www.trustpilot.com/review/wolt.com/da",
+              "claim": "Many user reviews reporting late deliveries, missing or incorrect items, and poor customer support responsiveness in multiple markets."
+            },
+            {
+              "label": "Trustpilot — Wolt (Germany)",
+              "url": "https://explore.wolt.com/en/deu/merchant/learning-center/wolt-merchant-fees-and-commissions",
+              "claim": "Merchant-facing documentation explains commissions, while public reviews on Trustpilot for Germany show repeated complaints about support, refunds and delivery issues."
+            },
+            {
+              "label": "Trustpilot — Wolt Romania (example of product quality complaints)",
+              "url": "https://www.trustpilot.com/review/wolt.ro",
+              "claim": "Customer reports include rotten produce, missing items and long support wait times for groceries orders."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Wolt Market product listing / discovery",
+              "url": "https://explore.wolt.com/en/geo/wolt-market",
+              "claim": "Wolt Market offers fresh groceries delivered rapidly (promise: 30 minutes in many markets) and local product selection."
+            },
+            {
+              "label": "Engineering blog — Wolt Market dark stores",
+              "url": "https://careers.wolt.com/en/blog/tech/turning-on-the-lights-in-the-dark-stores-engineering-behind-wolt-market",
+              "claim": "Wolt operates delivery-only ‘dark stores’ (micro-fulfilment) and engineering investments to support quick-commerce operations."
+            },
+            {
+              "label": "Wolt merchant pages (Merchant App / fees)",
+              "url": "https://explore.wolt.com/en/deu/merchant/learning-center/wolt-merchant-fees-and-commissions",
+              "claim": "Wolt provides merchant tools (Merchant Portal, Merchant App Lite), commission models, and adjustable payout options for partners."
+            }
+          ]
+        },
+        "strengths": [
+          "Genuine quick-commerce capability: engineered dark-store model and logistics to deliver groceries in ~30 minutes in major cities (strong product-market fit for urban convenience).",
+          "Integrated multi-vertical app and retention tools (Wolt+), which drive repeat orders across restaurants, shops and markets — cross-selling increases LTV.",
+          "Scale and resources after DoorDash acquisition — access to DoorDash logistics experience, capital and international reach accelerates product and market investments.",
+          "Robust merchant tooling (Merchant Portal, picking app) and promotional placement (Wolt Ads / Wolt+) to drive merchant acquisition and monetization."
+        ],
+        "weaknesses": [
+          "Operational quality and support inconsistencies: repeated customer complaints about late deliveries, missing or rotten items and slow or unhelpful support responses (platform-level trust risk).",
+          "Opaque and variable commission/fee structures across markets — difficult for multi-market merchants to compare and scale, increasing merchant churn risk for retailers.",
+          "Profitability pressure for quick-commerce: public filings and reporting around the acquisition noted significant adjusted EBITDA losses, signaling unit-economics challenges in quick commerce.",
+          "Product gaps for grocery merchants and heavy retailers: limited public evidence of advanced inventory-sync APIs, perishable-specific SLAs or sophisticated forecasting tools that large grocery chains typically require."
+        ]
+      }
+    },
+    {
+      "id": "bolt-market",
+      "name": "Bolt Market",
+      "url": "https://bolt.eu/market/",
+      "description": "Rapid grocery and convenience delivery (15-minute dark-store model) inside the Bolt Food app, targeting urban consumers in Europe and Africa.",
+      "status": "done",
+      "logoChar": "BM",
+      "logoColor": "#FFD400",
+      "logoBg": "#000000",
+      "tags": [
+        "quick-commerce",
+        "grocery delivery",
+        "dark-stores",
+        "on-demand"
+      ],
+      "pricing": "Custom",
+      "pricingPeriod": "",
+      "customers": "200M+ (Bolt platform users)",
+      "details": {
+        "founded": "2013",
+        "country": "Estonia",
+        "funding": "€628M Series E (Jan 2022); total funding > $1B (company-wide)",
+        "employees": "~4,200 (2024)",
+        "business": "B2C on-demand commerce / marketplace (Bolt Food + Bolt Market)",
+        "targetMarket": "Urban consumers in Europe & Africa who want sub-30-minute grocery and convenience delivery via the Bolt Food app; local merchants and operators for dark-store operations.",
+        "features": [
+          {
+            "category": "Core offering",
+            "items": [
+              "15-minute delivery promise (where local dark stores exist)",
+              "In-app ordering via the Bolt Food app (Bolt Market as a store selection)",
+              "Selection of groceries, pantry staples, household essentials and alcohol depending on market"
+            ]
+          },
+          {
+            "category": "Operations & logistics",
+            "items": [
+              "Company-operated dark stores (micro-fulfilment) in launch markets",
+              "Leverages Bolt's existing courier network and Fleet (food couriers) for last-mile fulfilment",
+              "Local store managers and pickers staffing each dark store shift (operational model)"
+            ]
+          },
+          {
+            "category": "Product & sustainability",
+            "items": [
+              "'Save me' category to reduce food waste (discounted near-expiry items)",
+              "Sustainability commitments for Bolt Market locations (e.g., renewable electricity goals referenced)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No transparent, market-wide subscription/membership specifically for frequent grocery buyers (most users pay per order), leaving frequent shoppers without a clearly-priced loyalty product to lock-in retention.",
+          "Limited geographic coverage and dark-store density — 15-minute delivery promise only where a nearby dark store exists, which creates inconsistent availability across cities and neighbourhoods.",
+          "No widely-advertised scheduled or recurring grocery delivery feature (e.g., weekly pantry restock or subscription boxes) to serve repeat shoppers and reduce churn.",
+          "Customer support and refund resolution is inconsistent in multiple markets (slow or automated responses reported), which increases friction for higher-value grocery orders.",
+          "Weak merchant-facing APIs or partner tooling publicized for supermarket integration (Bolt relies on its own dark stores or ad-hoc supermarket partnerships rather than a standardized merchant platform/API)."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Pay-per-order",
+            "price": "Varies",
+            "period": "",
+            "note": "Delivery and service fees vary by city, distance and local promotions; no standard Bolt Market nationwide price — charged per order in-app.",
+            "highlight": true
+          },
+          {
+            "name": "Bolt Plus / membership (platform-level, varies by market)",
+            "price": "Varies",
+            "period": "/mo",
+            "note": "Bolt offers a platform membership (Bolt Plus) in some markets that can include discounts across services; Market-specific benefits are not consistently advertised.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://bolt.eu/en/support/articles/360007249339/",
+          "pricing": "https://bolt.eu/en/support/articles/360007249339/",
+          "blog": "https://bolt.eu/en/blog/category/bolt-market/",
+          "jobs": "https://bolt.eu/en/careers/teams/business-operations/bolt-market/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Bolt Market product page",
+              "url": "https://bolt.eu/en/food/market/",
+              "claim": "Describes Bolt Market as an online grocery service inside the Bolt Food app with fast delivery from nearby Bolt Market stores."
+            },
+            {
+              "label": "About price calculation (support)",
+              "url": "https://bolt.eu/en/support/articles/360007249339/",
+              "claim": "Explains that delivery/order fees apply for Bolt Food orders and that fees vary (used to support pay-per-order pricing model)."
+            },
+            {
+              "label": "Local launch / pricing detail (Croatia coverage)",
+              "url": "https://www.esmmagazine.com/technology/bolt-market-commences-operations-in-croatia-155582",
+              "claim": "Reports Bolt Market offering free delivery within three kilometres in Zagreb and notes local delivery-time and fee policies."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Bolt (company) - Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Bolt_(company)",
+              "claim": "Bolt (formerly Taxify) was founded in 2013 in Tallinn and operates ride-hailing, micromobility, food and grocery delivery across many countries."
+            },
+            {
+              "label": "Bolt secures €628M funding (company blog)",
+              "url": "https://bolt.eu/en/blog/bolt-secures-e628m-funding-in-the-largest-investment-round-to-date/",
+              "claim": "Bolt announced a €628M funding round (largest to date) and said the money would accelerate expansion including Bolt Market."
+            },
+            {
+              "label": "Bolt 2024 results / employee count (news coverage)",
+              "url": "https://news.err.ee/1609735410/bolt-turnover-up-but-loss-deepens-in-2024",
+              "claim": "Reports Bolt had more than 4,200 employees at the end of 2024 and provides platform-wide user and city counts."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot - food.bolt.eu",
+              "url": "https://www.trustpilot.com/review/food.bolt.eu",
+              "claim": "Aggregated customer reviews for Bolt Food (includes Bolt Market orders) show repeated complaints about delivery delays, missing orders and slow support responses."
+            },
+            {
+              "label": "App Store - Bolt Food listing (reviews)",
+              "url": "https://apps.apple.com/ee/app/bolt-food/id1451492388?see-all=reviews&platform=iphone",
+              "claim": "App Store reviews report mixed experiences including slow support and delivery reliability issues for Bolt Food/Market."
+            },
+            {
+              "label": "Reddit user complaints (local threads)",
+              "url": "https://www.reddit.com/r/lithuania/comments/k23jm2/i_was_ripped_off_by_bolt_food/",
+              "claim": "Local Reddit threads recount individual cases of missing deliveries and refunds disputes with Bolt Food."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Sifted article on Bolt Market and dark stores",
+              "url": "https://sifted.eu/articles/bolt-speedy-grocery",
+              "claim": "Describes Bolt Market's dark-store model, 15-minute delivery promise and plans to open hundreds of small fulfilment stores."
+            },
+            {
+              "label": "Bolt blog - Bolt Market launch and 'Save me'",
+              "url": "https://bolt.eu/en/blog/bolt-market-grocery-store-launch/",
+              "claim": "Bolt announced Bolt Market as an in-app grocery service and highlights categories such as the 'Save me' discount to reduce food waste."
+            },
+            {
+              "label": "Local Bolt Market store listing (Bolt Food marketplace)",
+              "url": "https://food.bolt.eu/en-US/325-bucharest/p/27141-bolt-market-central",
+              "claim": "Shows Bolt Market as a selectable store inside the Bolt Food marketplace, demonstrating in-app availability and local store presence."
+            }
+          ]
+        },
+        "strengths": [
+          "Operational leverage from Bolt's existing courier network and fleet, reducing marginal cost to enter quick-commerce in markets where they already operate.",
+          "15-minute delivery promise via company-operated dark stores provides clear positioning vs standard grocery delivery services.",
+          "Large corporate backing and a substantial funding round (€628M) enabled rapid rollout and the ability to open hundreds of dark stores across multiple countries.",
+          "Integration into the main Bolt app (Bolt Food) gives immediate access to an existing user base and cross-selling opportunities."
+        ],
+        "weaknesses": [
+          "Coverage is inconsistent — fast delivery is only available near dark stores, creating patchy user experience and limiting scale in lower-density areas.",
+          "Repeated customer-reported issues with delivery reliability and slow support responses, which harm trust for higher-frequency grocery orders.",
+          "No clear, standardized pricing or subscription product for frequent grocery buyers—pricing and promotions vary by city leading to unclear value for power users.",
+          "Bolt Market appears to rely heavily on company-run dark stores (stocked for short horizons), which can limit product breadth compared to full supermarkets and complicate inventory management."
+        ]
+      }
+    },
+    {
+      "id": "barbora",
+      "name": "Barbora",
+      "url": "https://www.barbora.lv",
+      "description": "Online grocery and household-goods delivery service in Latvia (part of Maxima Grupė), serving Riga and regional towns with home delivery and pickup options.",
+      "status": "done",
+      "logoChar": "B",
+      "logoColor": "#8B5CF6",
+      "logoBg": "#F5F3FF",
+      "tags": [
+        "e-grocery",
+        "home delivery",
+        "retail",
+        "Baltics"
+      ],
+      "pricing": "€2.19",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2014 (Barbora launched in Lithuania); expanded to Latvia in 2018",
+        "country": "Latvia",
+        "funding": "Owned by Maxima Grupė (acquired; reported transaction ~€1.4M)",
+        "employees": "Unknown (local operations; Linkedin presence for Barbora Latvia)",
+        "business": "B2C e-grocery / retail",
+        "targetMarket": "Retail consumers and households in Riga and surrounding Latvian regions seeking convenient home delivery or pick-up of groceries and household goods",
+        "features": [
+          {
+            "category": "Fulfillment & delivery",
+            "items": [
+              "Home delivery with selectable hourly delivery windows",
+              "Priority / same-day delivery option (Priority fee applies) and reported 2-hour slots in parts of Riga",
+              "Barbora Express and Drive-in pickup points at Maxima stores",
+              "Temperature-controlled vans for chilled / frozen goods",
+              "Alcohol delivery with restriction: cannot be delivered earlier than 6 hours after order"
+            ]
+          },
+          {
+            "category": "Ordering & payments",
+            "items": [
+              "Web and mobile apps (iOS/Android) with saved favourites and recurring baskets",
+              "Multiple payment methods: card, Apple Pay / Google Pay, and card-on-delivery option",
+              "Account registration and order history"
+            ]
+          },
+          {
+            "category": "Product & assortment",
+            "items": [
+              "Broad assortment (company statements cite ~15,000 SKUs for the Latvian site)",
+              "Everyday groceries, fresh produce, chilled and frozen items, household goods",
+              "Site-level promotions and Maxima-group campaign integration"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Real-time delivery tracking / live ETA for couriers (site/app documents delivery windows but no public live-tracking evidence) — opportunity to reduce delivery-time anxiety and missed deliveries",
+          "Transparent substitution and real-time stock visibility — customers frequently learn about missing items only after packing, creating friction during delivery",
+          "Clear, documented delivery subscription / membership product on official site (users report ad-hoc low-cost delivery subscriptions but there is no clear, routable subscription product page) — a packaged membership with predictable benefits could convert frequent buyers",
+          "Stronger freshness guarantees and third-party verified quality signals for fresh and weighed produce (customers report weight/quality disputes) — guarantee + photographic proof workflow could build trust for premium buyers",
+          "B2B / API ordering or corporate procurement flows — limited public evidence of a dedicated business/corporate ordering API or integrations for offices or hospitality buyers",
+          "Improved site/app performance and UX (page speed and reliability) — Trustpilot and user reports call out slow/buggy web experience which increases drop-off during checkout"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Per-order delivery",
+            "price": "€2.19+",
+            "period": "",
+            "note": "Delivery fee starts at €2.19 depending on time/zone; free delivery for orders over €59.99; minimum basket €24.99; Priority delivery €4.99 (applies even if order > €59.99).",
+            "highlight": true
+          },
+          {
+            "name": "Delivery subscription (user-reported)",
+            "price": "€1.99",
+            "period": "60 days (reported)",
+            "note": "Reported by users on Reddit as a 60-day delivery pass; this is not clearly documented on the official pricing/FAQ pages and should be considered anecdotal until confirmed.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://barbora.lv/info/jautajumi-un-atbildes",
+          "pricing": "https://barbora.lv/info/jautajumi-un-atbildes",
+          "blog": "https://www.maxima.lv/preses-relizes",
+          "jobs": "https://karjera.barbora.lv/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "FAQ / Pricing & delivery rules",
+              "url": "https://barbora.lv/info/jautajumi-un-atbildes",
+              "claim": "Site states delivery fee starts from €2.19 (varies by time/zone); free delivery for orders over €59.99; minimum basket €24.99; Priority delivery costs €4.99."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Maxima grupė – Barbora expansion note",
+              "url": "https://www.maximagrupe.eu/media-inner/barbora-owned-by-maxima-grupe-uab-enters-the-polish-market/",
+              "claim": "Barbora started operations in Lithuania in 2014 and expanded to Latvia and Estonia in 2018; Barbora is owned by Maxima Grupė."
+            },
+            {
+              "label": "ESM Magazine – Maxima acquires Barbora",
+              "url": "https://www.esmmagazine.com/retail/maxima-grupe-acquires-e-commerce-company-barbora-37490",
+              "claim": "Report on Maxima Grupė acquiring Barbora (transaction referenced in press coverage)."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Sūdzības.lv — customer complaints (Latvia)",
+              "url": "https://www.sudzibas.lv/business/barbora/591024",
+              "claim": "Multiple customer complaints about late deliveries, missing items, product freshness, and slow or unsatisfactory customer support."
+            },
+            {
+              "label": "Reddit — user discussion on delivery subscription and service experience",
+              "url": "https://www.reddit.com/r/latvia/comments/kgz0iy/internetveikali_ikdienas_pirkumiem/",
+              "claim": "Users report a delivery subscription costing ~€1.99 for 60 days and share comparative experience (speed, item quality) versus competitors."
+            },
+            {
+              "label": "Trustpilot (Barbora.lt)",
+              "url": "https://www.trustpilot.com/review/barbora.lt",
+              "claim": "Reviews calling out site performance issues (slow/buggy) while noting that physical delivery experience can be good — mixed sentiment."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Barbora.lv main site",
+              "url": "https://barbora.lv/",
+              "claim": "Official site describing online grocery store, delivery and pickup options."
+            },
+            {
+              "label": "Barbora App (App Store)",
+              "url": "https://apps.apple.com/lv/app/barbora-lv/id1339130111",
+              "claim": "App description references home delivery, Priority (fast) delivery in parts of Riga, saved favourites, and Apple/Google Pay support."
+            },
+            {
+              "label": "Barbora Express pickup points",
+              "url": "https://barbora.lv/info/barbora-express-pasutijumu-sanemsanas-punkti",
+              "claim": "Barbora offers express order pickup points (drive-in / pickup at Maxima stores) across regions."
+            }
+          ]
+        },
+        "strengths": [
+          "Strong backing and sourcing / logistical support from Maxima Grupė — access to supplier network and in-store fulfilment resources",
+          "Wide local coverage in Latvia (Riga + many suburbs and regional pickup points) and integration with Maxima stores for drive-in/express pickup",
+          "Comprehensive assortment (~15k SKUs reported) with chilled/frozen fulfilment and selectable hourly delivery windows (convenience for consumers)",
+          "Multiple convenient payment options (card, Apple/Google Pay, pay at delivery) and native mobile apps"
+        ],
+        "weaknesses": [
+          "Repeated customer complaints about missing items, weight/quality of fresh produce, and slow or difficult customer support resolution",
+          "Reports of slow/buggy web/app experience that can increase checkout friction and abandoned carts",
+          "Opaque fee structure for customers (e‑commerce service fee, priority exceptions, minimums) which can confuse price-sensitive buyers",
+          "Operational quality inconsistency for fresh/weighed items (customers often discover substitutions or shortfalls only after order packing), weakening trust for higher-value orders",
+          "Limited public B2B / API offerings and lack of published developer / partnership integrations — constrains expansion into corporate or partner channels"
+        ]
+      }
+    },
+    {
+      "id": "rimi-eveikals",
+      "name": "Rimi e-veikals",
+      "url": "https://www.rimi.lv/e-veikals",
+      "description": "Rimi’s online grocery store in the Baltics offering home delivery, click-and-collect and Drive pickup for Latvian consumers.",
+      "status": "done",
+      "logoChar": "R",
+      "logoColor": "#E30613",
+      "logoBg": "#FFF5F5",
+      "tags": [
+        "grocery",
+        "online-grocery",
+        "click-and-collect",
+        "same-day-delivery"
+      ],
+      "pricing": "€5.99",
+      "pricingPeriod": "/60d",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2020",
+        "country": "Latvia",
+        "funding": "Unknown (owned by Salling Group)",
+        "employees": "~11,000 (Rimi Baltic)",
+        "business": "Omnichannel retail + e-commerce (grocery)",
+        "targetMarket": "Latvian consumers and households wanting online grocery delivery or fast pickup; also small businesses via Rimi to Business",
+        "features": [
+          {
+            "category": "Delivery & pickup",
+            "items": [
+              "Home delivery with same-day windows; standard deliveries and ‘fast’ 90-minute or 58-minute options",
+              "Rimi Drive (drive‑through pickup) and in-store pickup points (29-minute fast pickup in selected locations)",
+              "Delivery subscription (paid) which waives delivery fees for a period (60-day option)"
+            ]
+          },
+          {
+            "category": "Pricing & fulfillment",
+            "items": [
+              "Free standard delivery for orders above threshold (49.98 EUR Latvia; 59.99 EUR Estonia)",
+              "Standard delivery fees vary roughly €1.99–€3.99; fast delivery with partners (Wolt) or own service costs more (€3.99–€7.99)",
+              "Minimum order for delivery: €20"
+            ]
+          },
+          {
+            "category": "Product & order management",
+            "items": [
+              "Large grocery assortment including fresh, frozen and non-food items; cold-chain handled for frozen products",
+              "Ability to change or add to orders until picking/fulfilment begins",
+              "Integration with Mans Rimi loyalty (personal offers) and mobile app features for shopping lists and offers"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Limited geographic coverage beyond major cities — no consistent nationwide same‑day delivery, leaving room for services covering suburban/rural zones with predictable schedules",
+          "No public API or partner/developer platform for B2B integration (inventory, order routing, or marketplace) — opportunity to offer an integrations-first grocery commerce layer",
+          "Inventory transparency is limited (customers often only learn about out-of-stock items after picking), so better real‑time stock & replacement preferences would reduce friction",
+          "No advanced personalization / meal-planning flow tied to promotions — Rimi relies on loyalty offers but lacks deeper cross-sell automation and recipe-driven shopping",
+          "Fast delivery is priced separately and excluded from subscription and free-threshold rules, creating complexity; a simpler slot/price model would improve conversion",
+          "Limited seller/marketplace model — Rimi operates supply-controlled assortment (good for quality) but leaves a gap for curated local/third‑party marketplaces within the checkout"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Delivery subscription (60 days)",
+            "price": "€5.99",
+            "period": "/60d",
+            "note": "Waives delivery fee for qualifying orders during subscription period (does not apply to fast deliveries)",
+            "highlight": true
+          },
+          {
+            "name": "Standard delivery",
+            "price": "€1.99-€3.99",
+            "period": "per order",
+            "note": "Standard same‑day delivery fees; free if order > €49.98 (Latvia)",
+            "highlight": false
+          },
+          {
+            "name": "Fast delivery / express",
+            "price": "€3.99-€7.99",
+            "period": "per order",
+            "note": "Express/partner deliveries (58–90 minutes) are charged separately and excluded from some free/ subscription rules",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://www.rimi.lv/e-veikals/lv/palidziba/piegade",
+          "pricing": "https://www.rimi.lv/e-veikals/lv/piegades-sanemsanas-veidi",
+          "blog": "https://www.rimi.lv/jaunumi",
+          "jobs": "https://www.rimi.lv/e-veikals/lv/vakances"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Piegādes un Saņemšanas veidi (delivery page)",
+              "url": "https://www.rimi.lv/e-veikals/lv/piegades-sanemsanas-veidi",
+              "claim": "Shows delivery fees (€1.99–€3.99 standard), free delivery over €49.98 in Latvia, fast pickup/delivery options and 60‑day delivery subscription pricing"
+            },
+            {
+              "label": "Delivery subscription product page",
+              "url": "https://www.rimi.lv/e-veikals/en/products/services/delivery-subscription/c/SH-0-0",
+              "claim": "Delivery subscription (60 days) sold as a product in the e‑store (en product listing)"
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Rimi Baltic (corporate site)",
+              "url": "https://www.rimibaltic.com/",
+              "claim": "Rimi Baltic operates the Rimi retail chains in Estonia, Latvia and Lithuania and launched e‑store solution (omnichannel retail)"
+            },
+            {
+              "label": "Rimi Baltic — Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Rimi_Baltic",
+              "claim": "Background on Rimi Baltic, store counts and corporate history (operations in Baltics since the late 1990s; Rimi Baltic formed 2004/2005)"
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Reddit — r/latvia thread",
+              "url": "https://www.reddit.com/r/latvia/comments/kgz0iy/internetveikali_ikdienas_pirkumiem/",
+              "claim": "User reports of recurring out-of-stock items and substitution issues when ordering from Rimi e-veikals"
+            },
+            {
+              "label": "Sūdzības.lv (customer complaints)",
+              "url": "https://www.sudzibas.lv/business/rimi/241441",
+              "claim": "Public customer complaints about product quality, service and store issues (site collecting consumer complaints)"
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Help — delivery rules and order changes",
+              "url": "https://www.rimi.lv/e-veikals/lv/palidziba/piegade",
+              "claim": "Documents ability to change/augment orders until picking starts, delivery area notes, storage temperature rules for frozen goods"
+            },
+            {
+              "label": "Rimi e-veikals homepage",
+              "url": "https://www.rimi.lv/e-veikals",
+              "claim": "Product page promoting same‑day delivery, Drive pickup and mobile app shopping"
+            },
+            {
+              "label": "Google Play — Rimi app",
+              "url": "https://play.google.com/store/apps/details?id=lv.rimi.card&hl=en_US",
+              "claim": "Mobile app offers shopping lists, personal offers and functionality linked to the e‑store (Mans Rimi loyalty integration)"
+            }
+          ]
+        },
+        "strengths": [
+          "Strong omnichannel retail footprint and brand trust across the Baltics (many physical stores provide local fulfillment and cold‑chain capability)",
+          "Multiple fulfilment options (home delivery, Rimi Drive, in‑store pickup) including sub‑hour fast pickup/delivery in selected zones",
+          "Competitive and simple delivery subscription product that reduces per‑order friction for frequent shoppers; free delivery threshold incentivizes larger baskets",
+          "Integrated loyalty (Mans Rimi) and mobile app for personalised offers and seamless in‑store/e‑commerce experience"
+        ],
+        "weaknesses": [
+          "Delivery coverage and slot availability are inconsistent outside main cities — rural customers may have limited or infrequent service",
+          "Inventory transparency and out‑of‑stock handling frustrate customers (many report learning of missing items only after picking), increasing operational churn and returns",
+          "Express/partner delivery is excluded from subscription/free‑threshold rules, adding price complexity and undermining subscription value for urgent orders",
+          "Limited developer/API presence or marketplace capability — hard for partners or B2B customers to integrate or resell through Rimi’s platform"
+        ]
+      }
+    },
+    {
+      "id": "lulu-pica",
+      "name": "Pica Lulū",
+      "url": "https://www.lulu.lv",
+      "description": "Major Latvian pizza chain with its own ordering and delivery operations.",
+      "status": "pending"
+    },
+    {
+      "id": "cili-pica",
+      "name": "Čili Pizza",
+      "url": "https://www.cili.lv",
+      "description": "A Baltic pizza restaurant chain (originating in Lithuania) operating dine-in, takeaway and delivery outlets in Latvia and Lithuania, targeting families and casual diners.",
+      "status": "done",
+      "logoChar": "C",
+      "logoColor": "#D32F2F",
+      "logoBg": "#FFF5F5",
+      "tags": [
+        "pizza-chain",
+        "delivery",
+        "family-friendly",
+        "franchise"
+      ],
+      "pricing": "€8.09",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "1997",
+        "country": "Lithuania",
+        "funding": "Unknown",
+        "employees": "~430 (company-level, varies by operator)",
+        "business": "B2C restaurant chain / franchise (dine-in, takeaway, delivery)",
+        "targetMarket": "Families, mall shoppers, casual diners and delivery customers in Latvia and Lithuania; franchise partners for local operators",
+        "features": [
+          {
+            "category": "Ordering & Delivery",
+            "items": [
+              "Online ordering and takeaway on brand site and partner platforms",
+              "Delivery through major local aggregators (Wolt) and Tiamo Food app",
+              "Set combos and meal bundles for value ordering"
+            ]
+          },
+          {
+            "category": "Menu & Offerings",
+            "items": [
+              "Large multi-regional pizza menu (30cm and 42cm sizes) plus burgers, kebabs, pasta, breakfasts and kids menu",
+              "Seasonal/promotional bundles and family deals",
+              "Specialty items (Romas/flat pizzas, Roman sizes, vegetarian and burrata options)"
+            ]
+          },
+          {
+            "category": "Loyalty & Marketing",
+            "items": [
+              "Loyalty program (promoted on main site), promotions and kids-focused offers",
+              "Local marketing and mall-based locations to attract family footfall"
+            ]
+          },
+          {
+            "category": "Franchise & Operations",
+            "items": [
+              "Franchise model and multiple local operators (different companies run locations in Latvia vs Lithuania)",
+              "Central brand menu and training materials for franchisees (offered historically)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No single nationwide direct-to-consumer ordering app and unified loyalty across all franchise operators — customers often order via aggregators (Wolt) or operator-specific channels, fragmenting data and rewards.",
+          "Limited real-time order tracking and SLA guarantees across locations — delivery is routed through third parties and performance varies by operator, making consistent delivery promises difficult.",
+          "No public API or clear B2B/corporate ordering interface for repeat office catering and subscription meal plans — large or recurring orders rely on phone/email coordination.",
+          "Inconsistent menu metadata (allergens, nutrition) and limited dietary filtering on aggregator menus — harder for customers with allergies or strict diets to pick safely.",
+          "Quality and service consistency gap due to multiple franchise/operators (examples of location-level complaints) — no visible verified quality badge or standardized ratings per location.",
+          "Weak centralized customer support and complaint resolution across different legal operators — repeated local complaints persist on review sites and social media."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Single pizza (entry)",
+            "price": "€8.09",
+            "period": "",
+            "note": "Typical entry-level 30cm Margarita price on delivery menus (example from Wolt).",
+            "highlight": false
+          },
+          {
+            "name": "Value combo (Student)",
+            "price": "€9.99",
+            "period": "",
+            "note": "Example promotional combo (Student 30cm + drink) frequently listed on delivery platforms.",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://www.cili.lv/",
+          "pricing": "https://wolt.com/en/lva/riga/restaurant/cili-pizza-barona",
+          "blog": "https://www.cili.lv/akcijas-un-jaunumi",
+          "jobs": "https://www.cili.lv/vakances"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Wolt menu (Riga, Barona)",
+              "url": "https://wolt.com/en/lva/riga/restaurant/cili-pizza-barona",
+              "claim": "30cm Margarita priced at €8.09 and several combo offers (Student + drink) around €9.99 on delivery menus."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Wikipedia (Čili)",
+              "url": "https://en.wikipedia.org/wiki/%C4%8Cili",
+              "claim": "Čili Pica started in 1997 in Vilnius and expanded into Latvia; company is a Lithuanian-origin restaurant chain."
+            },
+            {
+              "label": "Rekvizitai (company registry data for Čili Pica, UAB)",
+              "url": "https://rekvizitai.vz.lt/en/company/cili_pica/",
+              "claim": "2023 reported sales and employee count for Čili Pica, UAB (company-level financials and ~428 employees reported)."
+            },
+            {
+              "label": "Tiamo grupa (operator page)",
+              "url": "https://tiamo.lv/en/enterprises/cili-pizza/",
+              "claim": "In Latvia 'Čili Pizza' locations are operated by SIA Tiamo Grupa, which runs multiple Čili Pizza outlets and promotes franchise activity."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Sūdzības.lv (consumer complaints)",
+              "url": "https://www.sudzibas.lv/business/cili-pizza/241455/page/10",
+              "claim": "Multiple user complaints about inconsistent portions, cold food, and slow or indifferent service at specific Čili Pizza locations."
+            },
+            {
+              "label": "TripAdvisor (location reviews)",
+              "url": "https://www.tripadvisor.com/Restaurant_Review-g274971-d6478566-Reviews-Cili_Pica-Valmiera_Vidzeme_Region.html",
+              "claim": "Mixed-to-negative reviews at individual Čili Pizza locations noting variable service quality."
+            },
+            {
+              "label": "Reddit (r/latvia threads)",
+              "url": "https://www.reddit.com/r/latvia/comments/1cbvyhu/what_happened_to_cili_pizza/",
+              "claim": "Community discussion reporting decline in perceived quality over time and franchise/operator fragmentation in Latvia."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Čili homepage (offers, loyalty)",
+              "url": "https://www.cili.lv",
+              "claim": "Site promotes online ordering, loyalty program, kids menu and offers (Akcijas), indicating loyalty and promotions are part of the product."
+            },
+            {
+              "label": "Wolt menu (detailed menu & delivery)",
+              "url": "https://wolt.com/en/lva/riga/restaurant/cili-pizza-barona",
+              "claim": "Delivery menu includes full pizza menu, sizes (30cm/42cm), combos, prices and breakfast/children's items demonstrating broad offering and aggregator distribution."
+            },
+            {
+              "label": "Tiamo group press (operations in Latvia)",
+              "url": "https://tiamo.lv/jau-desmita-cili-pizza-riga/",
+              "claim": "Tiamo Group (SIA Tiamo Grupa) opened multiple Čili Pizza locations in Riga and manages many Latvian outlets, showing local operator structure."
+            }
+          ]
+        },
+        "strengths": [
+          "Established regional brand with long history (since 1997) and wide recognition in Lithuania and Latvia.",
+          "Comprehensive menu and family-friendly positioning (kids menu, breakfast, mall locations) that drives repeat footfall.",
+          "Multiple distribution channels — dine-in, takeaway, and strong presence on delivery aggregators (Wolt) that give easy access to urban customers."
+        ],
+        "weaknesses": [
+          "Inconsistent quality and service across locations because several different legal operators/franchisees run restaurants, leading to reputational risk.",
+          "Fragmented digital experience: reliance on third-party aggregators and operator-specific channels fragments customer data and loyalty across platforms.",
+          "Limited B2B/corporate ordering and subscription capabilities — few standardized offerings for repeat office or catering customers.",
+          "Public complaint threads and review sites show repeated service and portion-size complaints, indicating weak centralized complaint resolution."
+        ]
+      }
+    },
+    {
+      "id": "hesburger-lv",
+      "name": "Hesburger Latvia",
+      "url": "https://www.hesburger.lv",
+      "description": "Finnish-founded fast-food burger chain operating 50+ restaurants in Latvia, targeting quick-service consumers in cities (strong presence in Riga) with dine-in, drive-thru, kiosk and app ordering.",
+      "status": "done",
+      "logoChar": "HB",
+      "logoColor": "#F97316",
+      "logoBg": "#FFF7ED",
+      "tags": [
+        "fast-food",
+        "mobile-ordering",
+        "delivery",
+        "vegetarian"
+      ],
+      "pricing": "€0.50",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "1966 (first kiosk), 1980 (first Hesburger restaurant)",
+        "country": "Finland",
+        "funding": "Private, family-owned (no public VC funding)",
+        "employees": "~6,700 (global, company-stated figure)",
+        "business": "B2C fast-food chain",
+        "targetMarket": "Consumers seeking affordable, quick-service burgers, salads and snacks across Latvian cities (commuters, students, families); partners include delivery platforms (Wolt, Bolt Food).",
+        "features": [
+          {
+            "category": "Menu & product",
+            "items": [
+              "Full fast-food menu: burgers, tortilla, fries, salads, desserts",
+              "VEKE® vegetarian product line (vege burgers, soya options)",
+              "Breakfast menu and low-price coffee/pastry combos"
+            ]
+          },
+          {
+            "category": "Ordering & delivery",
+            "items": [
+              "Native Hesburger mobile app for ordering and payment",
+              "Third-party delivery partnerships with Wolt and Bolt Food",
+              "Drive-in/drive-thru at selected locations and in-restaurant self-service kiosks"
+            ]
+          },
+          {
+            "category": "Operations & customer info",
+            "items": [
+              "Nutritional calculator and allergen information on website",
+              "Localized store pages with opening hours and contact details",
+              "Career pages and local hiring resources"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No first-party delivery fleet or integrated last-mile delivery — Hesburger in Latvia relies on Wolt/Bolt Food, limiting control over delivery quality and margins (opportunity: offer in-house delivery or better courier integration).",
+          "App appears focused on order & pickup rather than full real-time delivery tracking or proof-of-delivery (no evidence of courier tracking/photo confirmation) — opportunity: add end-to-end tracking and delivery ETA in-app.",
+          "No visible corporate/catering portal or standardized B2B ordering flow on the site — opportunity: provide a self-serve catering/office-ordering interface with scheduled bulk fulfillment and invoicing.",
+          "Weak pack/accuracy controls exposed by repeated user reports of missing items from third-party deliveries — opportunity: implement packing verification (checklists, photo proof, integration with delivery APIs) and automated refunds for missing items.",
+          "No public subscription/family-meal plans or loyalty personalization beyond the basic app — opportunity: launch subscription meal packs, recurring orders, or stronger personalized offers in-app to increase retention."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Single item (example)",
+            "price": "€0.50",
+            "period": "",
+            "note": "Example entry-level price (coffee 200 ml) shown on menu; many items priced from <€1 to single-digit euros.",
+            "highlight": false
+          },
+          {
+            "name": "Value meal (example)",
+            "price": "~€6",
+            "period": "",
+            "note": "Typical burger+fries+drink combo observed in consumer reviews (~€6.20 reported for a classic meal).",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://www.hesburger.lv/kaloriju-kalkulators",
+          "pricing": "https://www.hesburger.lv/--dienkarte",
+          "blog": "https://www.hesburger.lv/par-hesburger/jaunumi",
+          "jobs": "https://www.hesburger.lv/darbs"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Menu page (Ēdienkarte)",
+              "url": "https://www.hesburger.lv/--dienkarte",
+              "claim": "Website menu shows item prices (e.g., Rīta kafija 200 ml: €0.50; combo offers like 'Kafija & virtulis' €1.90)."
+            },
+            {
+              "label": "Tripadvisor review (example combo price)",
+              "url": "https://www.tripadvisor.com/Restaurant_Review-g274967-d10238418-Reviews-Hesburger-Riga_Riga_Region.html",
+              "claim": "Guest review reports a classic burger + fries + drink meal priced at approximately €6.20, supporting typical meal-level pricing."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Hesburger - about / company history",
+              "url": "https://www.hesburger.com/about-hesburger/company/how-did-it-all-start-",
+              "claim": "Company history: origins in 1966 (kiosk) and first Hesburger restaurant in 1980; family-owned Burger-In Oy."
+            },
+            {
+              "label": "Hesburger Latvia - news / presence",
+              "url": "https://www.hesburger.lv/par-hesburger/jaunumi/invest--jot-1-5-miljonus-eiro-----hesburger----atver-50--restor--nu-c--s--s",
+              "claim": "Hesburger states it operates ~50+ restaurants in Latvia and continues investments (news items about openings/renovations)."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Hesburger reviews & complaints (sudzibas.lv)",
+              "url": "https://www.sudzibas.lv/business/hesburger/242872",
+              "claim": "Multiple user complaints about missing items, slow preparation and inconsistent service across Latvian locations."
+            },
+            {
+              "label": "Reddit discussion (r/latvia)",
+              "url": "https://www.reddit.com/r/latvia/comments/1gxkk2b/hesburger_by_bolt_in_riga/",
+              "claim": "Users report delivery/order issues (long preparation times, delivery difficulties) when ordering Hesburger via delivery platforms."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Hesburger Latvia - app announcement",
+              "url": "https://www.hesburger.lv/par-hesburger/jaunumi/---hesburger----atkl--j-mobilo-aplik--ciju-latvijas-tirg--",
+              "claim": "Hesburger launched a mobile app in Latvia for ordering and payment; the app supports ordering and prepaid pickup."
+            },
+            {
+              "label": "Hesburger Latvia - delivery partnership news",
+              "url": "https://www.hesburger.lv/par-hesburger/jaunumi/pieg--de-uz-m--j--m-kop---ar-wolt-un-bolt-food-",
+              "claim": "Hesburger partners with Wolt and Bolt Food for home delivery in Latvia."
+            },
+            {
+              "label": "Menu VEKE vegetarian products",
+              "url": "https://www.hesburger.lv/--dienkarte/burgeri/veke---dubult---siera-burgers",
+              "claim": "Hesburger offers the VEKE® vegetarian product line (vege burgers and soya-based items) on its Latvian menu."
+            }
+          ]
+        },
+        "strengths": [
+          "Strong physical footprint in Latvia (approx. 50+ stores) giving high local visibility and broad access across cities including multiple Riga locations.",
+          "Existing digital infrastructure: native mobile app, self-service kiosks in renovated outlets and drive-in options reduce friction for repeat customers.",
+          "Product variety including a dedicated vegetarian VEKE® line and full breakfast/coffee offering, allowing wider customer segments (students, families, vegetarians).",
+          "Strategic partnerships with major delivery platforms (Wolt, Bolt Food) provide immediate delivery reach without building logistics."
+        ],
+        "weaknesses": [
+          "Reliance on third-party delivery exposes Hesburger to commission costs and inconsistent last-mile quality (customer complaints about missing items and late deliveries).",
+          "Documented service and order-accuracy problems across locations (multiple public complaints), which harms brand trust for delivery customers.",
+          "App and public materials emphasize pickup; there is limited visible investment in first-party delivery, real-time tracking, or packing verification.",
+          "No obvious self-serve corporate/catering offering on the public site, missing an easy channel for larger B2B orders and predictable volume."
+        ]
+      }
+    },
+    {
+      "id": "mcdonalds-lv",
+      "name": "McDonald’s Latvia",
+      "url": "https://www.mcdonalds.lv",
+      "description": "Global quick-service restaurant chain operating a network of McDonald’s restaurants in Latvia (dine-in, McDrive, McCafé) and offering delivery in Riga via third-party apps.",
+      "status": "done",
+      "logoChar": "M",
+      "logoColor": "#FFC72C",
+      "logoBg": "#DA291C",
+      "tags": [
+        "fast-food",
+        "delivery",
+        "franchise",
+        "QSR"
+      ],
+      "pricing": "Custom",
+      "pricingPeriod": "",
+      "customers": "5.9M+",
+      "details": {
+        "founded": "1994",
+        "country": "Latvia",
+        "funding": "Unknown",
+        "employees": "~800",
+        "business": "Franchise quick-service restaurant (operated locally by Premier Restaurants Latvia / Premier Capital)",
+        "targetMarket": "Consumers in Latvia (families, commuters, students and tourists) seeking affordable fast food, dine-in, drive-thru and on-demand delivery in urban areas (notably Riga).",
+        "features": [
+          {
+            "category": "Core product",
+            "items": [
+              "Full McDonald’s menu (burgers, McWraps, McCafé drinks, McFlurry, Happy Meal), breakfast menu"
+            ]
+          },
+          {
+            "category": "Channels",
+            "items": [
+              "Dine-in restaurants",
+              "McDrive (drive-thru)",
+              "McCafé counters",
+              "Third-party delivery via Bolt Food and Wolt",
+              "Self-service kiosks and mobile app for offers"
+            ]
+          },
+          {
+            "category": "Operational",
+            "items": [
+              "Standardized global recipes and quality controls",
+              "20-minute McDelivery freshness target (delivery radius limited accordingly)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No in-house last-mile delivery at scale: McDonald’s Latvia relies on third-party platforms (Bolt/Wolt), reducing operational control over delivery timing, packaging and customer experience (opportunity for a competitor to offer branded delivery with better temperature control and lower third-party fees).",
+          "Delivery menu limitations: McDelivery page explicitly states some restaurant items are removed from delivery apps to protect quality, creating gaps for customers who want full-menu delivery or specially packaged items for transport.",
+          "Channel offer fragmentation: McDonald’s mobile app offers cannot be redeemed through Bolt/Wolt (per McDelivery FAQ), so promotions and loyalty are fragmented across channels — opportunity for a unified offers/loyalty experience across direct and marketplace orders.",
+          "Limited scheduling & pre-ordering for delivery: McDelivery focuses on a 20-minute fulfillment radius and does not provide scheduling or advanced-order windows for customers who want future pickup/delivery times.",
+          "Limited direct dispute resolution for delivery failures: because delivery and some refunds are handled by third-party apps, guests report inconsistent compensation and slow issue resolution — an opening for services that guarantee on-time, warm delivery and simple recovery flows.",
+          "Pricing and menu transparency on official site: official Latvian site lists menu items but does not show local prices centrally (customers see prices in third-party apps), creating friction and opaque price comparisons across channels."
+        ],
+        "pricingPlans": [
+          {
+            "name": "A la carte (in-restaurant)",
+            "price": "Varies",
+            "period": "",
+            "note": "Individual menu item pricing varies by restaurant; in-restaurant prices differ from delivery app prices.",
+            "highlight": false
+          },
+          {
+            "name": "McDelivery (via Bolt / Wolt)",
+            "price": "Variable",
+            "period": "",
+            "note": "Third-party delivery fees and dynamic pricing apply; McDonald’s sets menu prices on partner apps and limits available items for quality.",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://www.mcdonalds.lv/menu/",
+          "pricing": "https://wolt.com/en/lva/riga/restaurant/mcdonalds-vecriga",
+          "blog": "https://premiercapital.com.mt/news/",
+          "jobs": "https://mcdonalds.lv/karjera/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Wolt restaurant listing (Vecrīga)",
+              "url": "https://wolt.com/en/lva/riga/restaurant/mcdonalds-vecriga",
+              "claim": "Delivery menu items with local prices (e.g., Big Mac €4.65) shown on Wolt for McDonald’s Riga."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Premier Capital - Our Restaurants (Latvia)",
+              "url": "https://premiercapital.com.mt/restaurants/",
+              "claim": "Premier Restaurants Latvia operates McDonald’s in Latvia with more than ~800 crew across 14 restaurants and reports 5.9 million guests in 2024."
+            },
+            {
+              "label": "Akropole Riga directory / historical note",
+              "url": "https://www.akropoleriga.lv/en/shop/mcdonalds/1507",
+              "claim": "First McDonald’s restaurant in Latvia opened in 1994; multiple restaurants and McCafé counters now operate in Latvia."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Reddit r/latvia — delivery complaints thread",
+              "url": "https://www.reddit.com/r/latvia/comments/1idqk52/bolt_pieg%C4%81des_p%C4%81rv%C4%93rties_par_miskasti/?tl=en",
+              "claim": "Local customers report repeated late or cold deliveries from third-party platforms (affecting orders from McDonald’s)."
+            },
+            {
+              "label": "TripAdvisor — McDonald’s Riga reviews",
+              "url": "https://www.tripadvisor.com/Restaurant_Review-g274967-d12192127-Reviews-McDonald_s-Riga_Riga_Region.html",
+              "claim": "Guest reviews mention inconsistent food quality (cold, salty, texture complaints) for McDonald’s in Riga."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "McDonald’s Latvia — Menu page",
+              "url": "https://www.mcdonalds.lv/menu/",
+              "claim": "Official Latvian site lists full restaurant menu (breakfast, burgers, McCafé, desserts) and in-restaurant features."
+            },
+            {
+              "label": "McDonald’s Latvia — McDelivery FAQ",
+              "url": "https://mcdonalds.lv/mcdelivery/",
+              "claim": "McDonald’s Latvia confirms delivery is provided via Bolt Food and Wolt, explains 20-minute freshness target, and states some items are removed from delivery apps and app offers are not valid on third-party apps."
+            }
+          ]
+        },
+        "strengths": [
+          "Very strong brand recognition and long-established presence in Latvia (first store 1994), which drives footfall and tourist familiarity.",
+          "Large local footprint with multiple restaurant formats (dine-in, McDrive, McCafé) and standardized operations via Premier Restaurants Latvia, enabling scale and consistency.",
+          "Established partnerships with local delivery marketplaces (Bolt Food and Wolt), giving quick access to on-demand delivery channels and large customer reach in Riga.",
+          "Operational standards and global menu familiarity reduce customer acquisition costs and support repeat visits (well-known limited-time offers and Happy Meal program)."
+        ],
+        "weaknesses": [
+          "Dependence on third-party delivery platforms reduces control over customer experience, timing, and refunds — leading to frequent complaints about cold/late deliveries.",
+          "Channel fragmentation: mobile app promotions cannot be redeemed on Bolt/Wolt and some menu items are omitted from delivery apps, creating inconsistent customer experience and lost upsell opportunities.",
+          "Official site lacks centralized local pricing (prices are surfaced on partner apps), which increases friction and makes price comparison across channels harder for customers.",
+          "Localized negative reviews about food temperature and quality on delivery indicate operational gaps for maintaining product quality through third-party logistics."
+        ]
+      }
+    }
+  ],
+  "opportunity": {
+    "verdict": "worth-entering",
+    "confidence": "high",
+    "summary": "There is a credible opening to enter this market because multiple competitors still leave the same important jobs unfinished. The strongest repeat gap is pricing transparency, which appears across 9 competitors and points to a concrete wedge for \"food delivery in riga\".",
+    "differentiators": [
+      {
+        "label": "Pricing transparency",
+        "detail": "Buyers need clearer pricing, simpler packaging, or recurring plans that reduce purchase friction."
+      },
+      {
+        "label": "Trust and verification",
+        "detail": "The market still lacks stronger trust signals, quality guarantees, and verification for both sides."
+      },
+      {
+        "label": "Scheduling and workflow",
+        "detail": "Teams can win by making booking, repeat sessions, and operational workflows much easier."
+      }
+    ],
+    "risks": [
+      {
+        "label": "Strong incumbents",
+        "detail": "Several established competitors already cover the core use case, so a new entrant will need a sharper wedge than basic feature parity."
+      },
+      {
+        "label": "Monetization pressure",
+        "detail": "Pricing is inconsistent across the market, which creates room for differentiation but also makes it harder to prove a clean monetization model early."
+      }
+    ],
+    "marketGaps": [
+      {
+        "label": "Pricing transparency",
+        "detail": "Buyers need clearer pricing, simpler packaging, or recurring plans that reduce purchase friction.",
+        "competitorCount": 9,
+        "competitors": [
+          "Barbora",
+          "Bolt Food",
+          "Bolt Market",
+          "Hesburger Latvia",
+          "McDonald’s Latvia",
+          "Rimi e-veikals",
+          "Wolt",
+          "Wolt Market",
+          "Čili Pizza"
+        ],
+        "examples": [
+          "No built-in recurring-subscription meal plans (weekly meal subscriptions) for consumers — only scheduled one-off orders, which creates an opening for subscriptions that guarantee repeat revenue for restaurants",
+          "Merchant pricing transparency: commissions and Wolt+ adjusted fees vary by market and by Wolt+ orders, making predictable margin forecasting for small restaurants difficult",
+          "Transparent, standardized commission tiers and public pricing for restaurants — commissions are negotiated per market and often opaque, creating friction for restaurant decision-making (opportunity to win sellers with clear, predictable packages)."
+        ]
+      },
+      {
+        "label": "Trust and verification",
+        "detail": "The market still lacks stronger trust signals, quality guarantees, and verification for both sides.",
+        "competitorCount": 8,
+        "competitors": [
+          "Barbora",
+          "Bolt Food",
+          "Hesburger Latvia",
+          "McDonald’s Latvia",
+          "Rimi e-veikals",
+          "Wolt",
+          "Wolt Market",
+          "Čili Pizza"
+        ],
+        "examples": [
+          "Weak visible guarantees and dispute resolution for high-value orders — repeated complaints show refunds/support are inconsistent, so a competitor could offer stronger SLA/refund guarantees",
+          "No widely-adopted verified courier/trust layer (ID verification, on-delivery proof beyond photos) to reduce fraud and trust friction for higher-ticket deliveries",
+          "Formal SLA or guaranteed delivery-time refunds — repeated complaints indicate limited guarantees or meaningful compensation when deliveries are late or orders are missing, presenting an opening for guaranteed-on-time services."
+        ]
+      },
+      {
+        "label": "Scheduling and workflow",
+        "detail": "Teams can win by making booking, repeat sessions, and operational workflows much easier.",
+        "competitorCount": 5,
+        "competitors": [
+          "Barbora",
+          "Bolt Market",
+          "Hesburger Latvia",
+          "McDonald’s Latvia",
+          "Rimi e-veikals"
+        ],
+        "examples": [
+          "Limited geographic coverage and dark-store density — 15-minute delivery promise only where a nearby dark store exists, which creates inconsistent availability across cities and neighbourhoods.",
+          "Stronger freshness guarantees and third-party verified quality signals for fresh and weighed produce (customers report weight/quality disputes) — guarantee + photographic proof workflow could build trust for premium buyers",
+          "Limited geographic coverage beyond major cities — no consistent nationwide same‑day delivery, leaving room for services covering suburban/rural zones with predictable schedules"
+        ]
+      },
+      {
+        "label": "Native live tooling",
+        "detail": "A more native session experience can reduce reliance on external tools and improve retention.",
+        "competitorCount": 3,
+        "competitors": [
+          "Barbora",
+          "McDonald’s Latvia",
+          "Wolt"
+        ],
+        "examples": [
+          "Limited native POS synchronization: many merchants must rely on third-party integrations (e.g., Deliverect) rather than a single, deep native POS/stock sync, increasing friction for restaurants",
+          "Real-time delivery tracking / live ETA for couriers (site/app documents delivery windows but no public live-tracking evidence) — opportunity to reduce delivery-time anxiety and missed deliveries",
+          "Transparent substitution and real-time stock visibility — customers frequently learn about missing items only after packing, creating friction during delivery"
+        ]
+      },
+      {
+        "label": "B2B and ecosystem expansion",
+        "detail": "Several players under-serve teams, partners, and platform integrations beyond the core consumer workflow.",
+        "competitorCount": 3,
+        "competitors": [
+          "Barbora",
+          "Bolt Market",
+          "Rimi e-veikals"
+        ],
+        "examples": [
+          "Weak merchant-facing APIs or partner tooling publicized for supermarket integration (Bolt relies on its own dark stores or ad-hoc supermarket partnerships rather than a standardized merchant platform/API).",
+          "B2B / API ordering or corporate procurement flows — limited public evidence of a dedicated business/corporate ordering API or integrations for offices or hospitality buyers",
+          "No public API or partner/developer platform for B2B integration (inventory, order routing, or marketplace) — opportunity to offer an integrations-first grocery commerce layer"
+        ]
+      }
+    ]
+  },
+  "completedAt": "2026-03-16T08:30:39.706Z"
+}

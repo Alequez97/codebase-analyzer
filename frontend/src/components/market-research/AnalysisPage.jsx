@@ -4,6 +4,7 @@ import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 import { CompetitorsGrid } from "./CompetitorsGrid";
 import { ActivityFeed } from "./ActivityFeed";
 import { CompetitorDetails } from "./CompetitorDetails";
+import { MarketResearchSummaryPanel } from "./MarketResearchSummaryPanel";
 
 function ProgressBar() {
   const competitors = useMarketResearchStore((s) => s.competitors);
@@ -201,7 +202,10 @@ export function AnalysisPage() {
 
             {/* Tab content */}
             {activeTab === "competitors" ? (
-              <CompetitorsGrid />
+              <VStack align="stretch" gap={4}>
+                <CompetitorsGrid />
+                <MarketResearchSummaryPanel />
+              </VStack>
             ) : (
               <ActivityFeed />
             )}

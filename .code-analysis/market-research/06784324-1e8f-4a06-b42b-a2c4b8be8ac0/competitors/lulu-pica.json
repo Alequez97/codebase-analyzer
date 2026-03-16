@@ -1,0 +1,145 @@
+{
+  "id": "lulu-pica",
+  "name": "Pica Lulū",
+  "url": "https://www.lulu.lv",
+  "description": "Major Latvian pizza chain operating 24/7 with its own ordering, app and in-house delivery, focused on consumers in Riga and nearby towns and on business/catering orders.",
+  "logoChar": "PL",
+  "logoColor": "#E63946",
+  "logoBg": "#FFF5F0",
+  "tags": ["pizza delivery", "24/7", "Latvian chain"],
+  "pricing": "€8.49",
+  "pricingPeriod": "",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "1993",
+    "country": "Latvia",
+    "funding": "Unknown",
+    "employees": "~360",
+    "business": "B2C restaurant & delivery (plus B2B catering/office orders)",
+    "targetMarket": "Retail consumers in Riga, Jurmala and nearby towns (late-night and convenience delivery), plus corporate/event catering customers",
+    "features": [
+      {
+        "category": "Ordering channels",
+        "items": ["Website ordering (online menu & checkout)", "Mobile app (iOS) for faster repeat orders", "Phone/operator ordering", "Presence on delivery marketplaces (Wolt)"]
+      },
+      {
+        "category": "Delivery & logistics",
+        "items": ["In-house delivery fleet", "49-minute delivery guarantee (free pizza if delivery >49 minutes, limited conditions)", "Delivery fee and minimum-order thresholds"]
+      },
+      {
+        "category": "Menu & product",
+        "items": ["Wide pizza menu (meat, fish, vegetarian, vegan, calzone)", "Large-format pizzas (45cm options shown on third-party listings)", "Build-your-own pizza with 40+ toppings", "Desserts, snacks, drinks and gift cards"]
+      },
+      {
+        "category": "Operations & people",
+        "items": ["Multiple pizzerias (~19 locations mentioned on site/news), 24/7 service in many locations", "Franchise / partner opportunities mentioned on LinkedIn and site pages"]
+      }
+    ],
+    "missingFeatures": [
+      "No public, real-time courier tracking or map-based ETA — deliveries are confirmed via operator call (terms state delivery is considered complete when operator calls), creating UX friction and higher perceived uncertainty.",
+      "No visible loyalty/subscription program on the website (search for loyalty/lojalitāte returns no results), limiting repeat-customer retention opportunities and predictable revenue from subscriptions.",
+      "Corporate ordering lacks a self-serve portal or API — business customers are asked to email a contact rather than use an online bulk-ordering or invoiced account, creating friction for large/recurring corporate orders.",
+      "Delivery guarantee is narrowly packaged (applies only to orders of not more than two pizzas and can be suspended), which makes SLA guarantees confusing for larger or party orders — an opportunity for clearer, more flexible delivery SLAs or premium on-time options.",
+      "Limited publicly-documented delivery coverage and scheduling options (guarantee zones and exclusions are noted but there is no interactive coverage map or scheduled-preorder portal), reducing conversion for customers outside core zones or who want future-time deliveries."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Menu (single order)",
+        "price": "€8.49",
+        "period": "",
+        "note": "Entry-level pizza price shown on the online menu (many pizzas start from €8.49)",
+        "highlight": true
+      },
+      {
+        "name": "Corporate / catering",
+        "price": "Custom",
+        "period": "",
+        "note": "Business / event orders handled via direct contact (email) — no public self-serve pricing", 
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://www.lulu.lv/en/ingredients-allergens",
+      "pricing": "https://www.lulu.lv/en/pizza",
+      "blog": "https://www.lulu.lv/en/news",
+      "jobs": "https://www.lulu.lv/en/work"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Menu page",
+          "url": "https://www.lulu.lv/en/pizza",
+          "claim": "Many pizzas listed with prices, several starting from €8.49."
+        },
+        {
+          "label": "Terms of delivery",
+          "url": "https://www.lulu.lv/en/terms-of-delivery",
+          "claim": "Minimum order and delivery fee are stated (example: minimum €8.99 + €5.00 delivery fee within 49-minute zone)."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "About page (Pica Lulū)",
+          "url": "https://www.lulu.lv/en/about-pizza-lulu",
+          "claim": "States the brand has been operating since 1993/1994 and positions itself as the largest pizza roller since 1994."
+        },
+        {
+          "label": "Cooperation / News page",
+          "url": "https://www.lulu.lv/en/news/cooperation-69",
+          "claim": "SIA Later LTD (Pica Lulū) described as the largest pizza producer in Latvia with more than 360 employees and operating since 1994."
+        },
+        {
+          "label": "Company registry (Lursoft / company record for Later Ltd)",
+          "url": "https://company.lursoft.lv/en/later-ltd/40003119373",
+          "claim": "Legal entity SIA Later LTD registered (reg. No. 40003119373) with company details; public company records show founding/registration information."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Tripadvisor review",
+          "url": "https://www.tripadvisor.com/Restaurant_Review-g274967-d2460249-Reviews-Lulu_Pizza-Riga_Riga_Region.html",
+          "claim": "Several guest reviews mention late deliveries and long waits; one review complained about delayed orders and referenced the 49-minute free-pizza policy."
+        },
+        {
+          "label": "Reddit discussion (r/latvia)",
+          "url": "https://www.reddit.com/r/latvia/comments/1ag6vt4/lulu_picas_appisiens/",
+          "claim": "Long-running community complaints about delivery delays, difficulty contacting the chain, and inconsistent courier reliability."
+        },
+        {
+          "label": "RestaurantGuru listing",
+          "url": "https://restaurantguru.com/Pica-LuLu-Agenskalns-Riga",
+          "claim": "Aggregate ratings and reviews show mixed sentiment and note delivery/taste/service variability."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Delivery guarantee (news/terms)",
+          "url": "https://www.lulu.lv/en/news/we-guarantee-pizza-delivery-in-49-minutes-38",
+          "claim": "Public promise to deliver within 49 minutes or the pizza is free (with conditions)."
+        },
+        {
+          "label": "Terms of delivery",
+          "url": "https://www.lulu.lv/en/terms-of-delivery",
+          "claim": "Describes delivery zones, minimum order amounts, and the mechanics of the delivery guarantee (including limitations)."
+        },
+        {
+          "label": "Mobile app listing (App Store) / marketplace presence",
+          "url": "https://apps.apple.com/mu/app/pica-lul%C5%AB/id1535804416",
+          "claim": "Pica Lulū offers a mobile app to place orders (store listing indicating app availability)."
+        }
+      ]
+    },
+    "strengths": [
+      "Strong local brand with long track record (operating since early 1990s) — trusted name in Riga and surrounding areas.",
+      "Operational focus on in-house delivery and 24/7 availability, supported by a public 49-minute delivery guarantee that drives conversion for time-sensitive customers.",
+      "Extensive menu and customization (build-your-own pizzas, vegetarian/vegan options, large-format pizzas) and multiple ordering channels (site, app, phone, marketplace)."
+    ],
+    "weaknesses": [
+      "Frequent customer complaints about late or cold deliveries and difficulty contacting support (multiple reviews and community posts cite delivery reliability issues).",
+      "Low digital transparency: no public real-time tracking of couriers and order completion is tied to an operator call, which hurts UX and perceived reliability.",
+      "Limited self-serve B2B tooling — corporate customers must email a contact rather than use a dedicated corporate portal, creating friction for large or repeat orders.",
+      "Delivery guarantee limitations (applies to ≤2 pizzas and can be suspended) create confusing expectations for group/party orders and reduce the appeal of guarantees for higher-value purchases."
+    ]
+  }
+}

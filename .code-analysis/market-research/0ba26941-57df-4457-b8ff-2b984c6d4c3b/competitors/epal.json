@@ -1,0 +1,167 @@
+{
+  "id": "epal",
+  "name": "ePal",
+  "url": "https://www.epal.gg/",
+  "description": "Marketplace connecting gamers with paid companions, coaches and creators for play, coaching, or social sessions (buyers hire freelancer 'ePals' by the session).",
+  "logoChar": "EP",
+  "logoColor": "#6D28D9",
+  "logoBg": "#F5F3FF",
+  "tags": ["gaming marketplace", "creator-led", "coaching", "paid companionship"],
+  "pricing": "Custom",
+  "pricingPeriod": "",
+  "customers": "2M+",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "US",
+    "funding": "$30M (reported)",
+    "employees": "~50",
+    "business": "C2C consumer marketplace (platform for freelance gaming services)",
+    "targetMarket": "Casual and competitive gamers who want paid teammates, coaches, or social gaming sessions; creators/streamers who monetize playtime.",
+    "features": [
+      {
+        "category": "Marketplace & Discovery",
+        "items": [
+          "Per-session / per-hour seller listings (merchant-set prices)",
+          "Search and filters by game, platform, service (chat, play, coach)",
+          "Merchant levels, badges and recommended lists to surface sellers"
+        ]
+      },
+      {
+        "category": "Payments & Wallet",
+        "items": [
+          "In-platform virtual currency (Buff) and wallet for purchases",
+          "Top-up / purchase flow and refunds credited to E-Pal wallet"
+        ]
+      },
+      {
+        "category": "Trust & Safety",
+        "items": [
+          "Ratings & reviews on orders",
+          "Coach certification badge (application-based) for verified pro coaches",
+          "Community moderation and a customer service dispute process (reported mixed speed)"
+        ]
+      },
+      {
+        "category": "Communication & Sessions",
+        "items": [
+          "In-platform booking and session ordering (voice/chat/play sessions); listings commonly state duration (e.g., 30 minutes / 1 hour)",
+          "Some sellers mark restrictions in listings (e.g., ‘voice chat only, no video calls’)
+          "
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standardized package templates or storefront-style productization — every ePal sets different durations/prices, making direct buyer comparisons hard (opportunity: fixed packages / add-ons)",
+      "No native recurring booking / automated subscription flow for repeat coaching or regular duo-queue sessions — buyers must rebook manually (opportunity: recurring bookings and calendar integration)",
+      "Limited identity verification and fraud-proofing beyond the Coach badge — multiple community reports of fake/catfish profiles and manipulated reviews (opportunity: stronger KYC, payment-verified badges, background checks)",
+      "Weak, slow or opaque dispute resolution and review moderation — users report delayed responses, unexplained bans and inconsistent review handling (opportunity: faster SLA'd support and transparent dispute workflows)",
+      "No structured coaching product (curricula, progress tracking, or outcomes metrics) to convert one-off sessions into measurable learning journeys (opportunity: lesson plans, progress dashboards, certificates)",
+      "No public B2B/API or team booking tools for publishers, esports teams or studios to book multiple ePals or integrate services into other products"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Free",
+        "price": "$0",
+        "period": "",
+        "note": "Create an account, browse listings, and purchase per-session services (pay-per-order).",
+        "highlight": false
+      },
+      {
+        "name": "VIP / Membership",
+        "price": "$Unknown",
+        "period": "",
+        "note": "Site advertises a VIP/membership program with perks; pricing is not publicly listed on the site.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://www.epal.gg/faq",
+      "pricing": "https://www.epal.gg/purchase",
+      "blog": "https://www.epal.gg/blog",
+      "jobs": "https://www.epal.gg/about"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Example ePal listing (price shown)",
+          "url": "https://www.epal.gg/epal/detail/54107",
+          "claim": "Profile listing shows a rate of 15.99 per 30 minutes and indicates session duration and delivery details."
+        },
+        {
+          "label": "Purchase page",
+          "url": "https://www.epal.gg/purchase",
+          "claim": "Site purchase page / flow for buying sessions and credits."
+        },
+        {
+          "label": "FAQ describing 'Buff' virtual currency",
+          "url": "https://www.epal.gg/faq",
+          "claim": "FAQ documents 'Buff' as the platform virtual currency used to pay for services."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "About page",
+          "url": "https://www.epal.gg/about",
+          "claim": "Company states it was founded to connect gamers, lists address in Irvine and claims ~2 million gamers and 200,000 ePals."
+        },
+        {
+          "label": "Venture press coverage (funding)",
+          "url": "https://www.businesswire.com/news/home/20240904378375/en/E-PAL-introduces-a-mass-adoption-focused-Web3-experience-infrastructure-BALANCE-raising-a-total-of-%2430-million-from-a16z-Galaxy-and-others",
+          "claim": "Press release reporting a $30M funding total led by a16z and Galaxy Interactive and company growth figures (reported)."
+        },
+        {
+          "label": "PitchBook / Pitch profile",
+          "url": "https://pitchbook.com/profiles/company/439305-40",
+          "claim": "Third-party profiles list founding year (2020) and headquarter location (Irvine, CA)."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/epal.gg",
+          "claim": "Mixed reviews: multiple complaints about support, bans, and alleged fake profiles alongside positive earning stories."
+        },
+        {
+          "label": "Reddit community reports",
+          "url": "https://www.reddit.com/r/ePal/comments/1cvrgku/need_help/",
+          "claim": "Reddit threads with ePals reporting trolls, unfair ratings, and support friction."
+        },
+        {
+          "label": "Official community forum thread on fake reviews",
+          "url": "https://www.epal.gg/community/topic/143195",
+          "claim": "Forum discussion where ePals describe receiving fraudulent or malicious reviews and describe review abuse."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Certifications / Coach badge page",
+          "url": "https://www.epal.gg/certifications/",
+          "claim": "E-Pal offers a Coach badge with application requirements for pro coaches in specific games."
+        },
+        {
+          "label": "Example ePal listing (session restrictions)",
+          "url": "https://www.epal.gg/epal/detail/54107",
+          "claim": "Listing text explicitly states 'price is for half an hour~ voice chat only, no video calls', demonstrating session metadata and restrictions."
+        },
+        {
+          "label": "FAQ (refunds and wallet behavior)",
+          "url": "https://www.epal.gg/faq",
+          "claim": "FAQ explains refund behavior and that Buff/Cash can be transferred to the in-platform Wallet."
+        }
+      ]
+    },
+    "strengths": [
+      "Large two-sided marketplace / supply — company claims millions of users and hundreds of thousands of ePals which improves liquidity for buyers.",
+      "Flexible seller-driven pricing lets a wide range of creators monetize (from inexpensive social sessions to pro coaching), increasing supply diversity.",
+      "Dedicated coaching certification and merchant-level system to promote higher-skill sellers and enable discoverability for serious buyers.",
+      "Recent VC backing and reported funding ($30M) provide runway for product development, partnerships and Web3/AI initiatives."
+    ],
+    "weaknesses": [
+      "Repeated trust & safety complaints: users report fake/catfish accounts, manipulated or malicious reviews and account/banning disputes that harm buyer and seller trust.",
+      "Pricing fragmentation and per-seller variability make it hard for buyers to compare offerings or pick a predictable package.",
+      "Support and dispute handling reported as slow or inconsistent in public reviews and forum posts, increasing friction for resolving scams or refunds.",
+      "Product gaps for repeat customers and coaches: limited recurring booking, no built-in coaching progress tracking or structured lesson products, and few B2B/team booking features."
+    ]
+  }
+}

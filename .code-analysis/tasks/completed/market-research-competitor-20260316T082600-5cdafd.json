@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260316T082600-5cdafd",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-16T08:26:00.301Z",
+  "params": {
+    "sessionId": "06784324-1e8f-4a06-b42b-a2c4b8be8ac0",
+    "competitorId": "bolt-food",
+    "competitorName": "Bolt Food",
+    "competitorUrl": "https://bolt.eu/food/",
+    "competitorDescription": "Food delivery service from Bolt offering restaurant delivery via courier partners.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Bolt Food\nWebsite: https://bolt.eu/food/\nDescription: Food delivery service from Bolt offering restaurant delivery via courier partners.\nSession ID: 06784324-1e8f-4a06-b42b-a2c4b8be8ac0\nCompetitor ID: bolt-food\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260316T082124-280c10"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/06784324-1e8f-4a06-b42b-a2c4b8be8ac0/competitors/bolt-food.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260316T082600-5cdafd.md",
+  "logFile": "logs/market-research-competitor-20260316T082600-5cdafd.log",
+  "startedAt": "2026-03-16T08:26:01.456Z",
+  "completedAt": "2026-03-16T08:27:14.552Z"
+}

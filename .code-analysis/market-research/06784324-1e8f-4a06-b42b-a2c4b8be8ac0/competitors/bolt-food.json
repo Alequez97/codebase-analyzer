@@ -1,0 +1,157 @@
+{
+  "id": "bolt-food",
+  "name": "Bolt Food",
+  "url": "https://bolt.eu/food/",
+  "description": "On-demand food and grocery delivery marketplace from Bolt that connects local restaurants and stores with urban consumers via courier partners.",
+  "logoChar": "BF",
+  "logoColor": "#6FCF97",
+  "logoBg": "#E6F9F0",
+  "tags": ["food-delivery", "marketplace", "on-demand", "grocery"],
+  "pricing": "Custom",
+  "pricingPeriod": "",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2019 (Bolt Food launch)",
+    "country": "Estonia",
+    "funding": "€628M (major corporate round, Jan 2022)",
+    "employees": "Unknown",
+    "business": "B2C two-sided marketplace (restaurants — couriers — consumers)",
+    "targetMarket": "Urban consumers seeking on-demand meals and groceries; local restaurants and stores looking for order volume and lower commission alternatives to incumbents",
+    "features": [
+      {
+        "category": "Marketplace & consumer",
+        "items": [
+          "Restaurant and store discovery and menu browsing",
+          "Real-time order tracking and courier location",
+          "Distance-based delivery fees and promo codes"
+        ]
+      },
+      {
+        "category": "Delivery & logistics",
+        "items": [
+          "Crowd-sourced courier network (cars, bikes, scooters, on-foot)",
+          "Dynamic assignment of couriers and live ETA updates",
+          "Bolt Market — rapid grocery / convenience delivery in select markets"
+        ]
+      },
+      {
+        "category": "Merchant tools",
+        "items": [
+          "Bolt Merchant app for restaurants (order acceptance on tablet/phone)",
+          "Partner Portal dashboards with basic order and revenue metrics",
+          "Contracted commission/fee agreements and merchant terms"
+        ]
+      },
+      {
+        "category": "Payments & promotions",
+        "items": [
+          "In-app payments, refunds handled through platform",
+          "Customer promotions, first-order discounts and periodic offers",
+          "Restaurant-level pricing control (menu prices may differ from in-store)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Transparent, standardized commission tiers and public pricing for restaurants — commissions are negotiated per market and often opaque, creating friction for restaurant decision-making (opportunity to win sellers with clear, predictable packages).",
+      "Customer subscription / loyalty product (e.g., flat-fee delivery pass) across markets — Bolt relies on promo codes and per-order discounts rather than a widely-available subscription offering.",
+      "Formal SLA or guaranteed delivery-time refunds — repeated complaints indicate limited guarantees or meaningful compensation when deliveries are late or orders are missing, presenting an opening for guaranteed-on-time services.",
+      "Stronger quality & trust layer for high-value or brand-sensitive orders (no prominent verified-restaurants / insured-deliveries program) — creates risk for restaurants selling fragile or premium items.",
+      "Enterprise-grade POS / API integrations and white-label options — Bolt provides a Merchant app but lacks widely-documented, standardized POS/API offerings for larger multi-location chains (an opportunity for deeper integrations and order routing guarantees)."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Restaurant partnership (commission)",
+        "price": "15–30%",
+        "period": "",
+        "note": "Commission-based model; exact rate varies by market and contract (Bolt has historically advertised lower entry commissions in some markets).",
+        "highlight": true
+      },
+      {
+        "name": "Consumer (per-order)",
+        "price": "Variable",
+        "period": "",
+        "note": "Customers pay item prices + delivery fee (distance-based) and can use promo codes; pricing varies by market and restaurant.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://partners.food.bolt.eu/",
+      "pricing": "https://bolt.eu/en/support/articles/4402863195282/",
+      "blog": "https://bolt.eu/",
+      "jobs": "https://bolt.eu/en/careers/"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Information about fees (Bolt Support)",
+          "url": "https://bolt.eu/en/support/articles/4402863195282/",
+          "claim": "Bolt describes platform fees and delivery charge types for Bolt Food (consumer delivery fees vary; restaurant fees exist)."
+        },
+        {
+          "label": "General Terms (Bolt Food) PDF",
+          "url": "https://food.bolt.eu/static/bolt_restaurant_terms_en-963e46c8e8024a9e50e3606b75a4daff.pdf",
+          "claim": "Contracted terms and a price list (Schedule 3) govern restaurant pricing and commissions — indicating negotiated/market-specific rates."
+        },
+        {
+          "label": "Independent blog on Bolt Food commissions",
+          "url": "https://blog.menuviel.com/bolt-food-fees-and-commissions-for-restaurants/",
+          "claim": "Independent reporting and aggregated observations put Bolt Food commission ranges around 15–30% depending on market and services."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Bolt (company) — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Bolt_(company)",
+          "claim": "Bolt is an Estonian mobility company (founded 2013) that launched Bolt Food as its food delivery service and raised a €628M round in Jan 2022."
+        },
+        {
+          "label": "Bolt Food launch coverage — CNBC",
+          "url": "https://www.cnbc.com/2019/08/21/uber-rival-bolt-launches-food-delivery-service-bolt-food-in-europe.html",
+          "claim": "Bolt launched Bolt Food in 2019 as an expansion of its mobility business into food delivery."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot (food.bolt.eu reviews)",
+          "url": "https://www.trustpilot.com/review/food.bolt.eu",
+          "claim": "Large number of user complaints about late deliveries, missing items, cold food, and unsatisfactory customer support."
+        },
+        {
+          "label": "Reddit user complaints",
+          "url": "https://www.reddit.com/r/lithuania/comments/k23jm2/i_was_ripped_off_by_bolt_food/",
+          "claim": "Anecdotal reports of non-delivery, courier misconduct, and slow/unsatisfactory dispute resolution by Bolt Food support."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Bolt Merchant (Google Play)",
+          "url": "https://play.google.com/store/apps/details?id=com.bolt.deliveryproviderapp",
+          "claim": "Bolt provides a Merchant app for restaurants to receive and manage orders on Bolt Food."
+        },
+        {
+          "label": "Bolt Food App (App Store listing)",
+          "url": "https://apps.apple.com/us/app/bolt-food/id1451492388",
+          "claim": "Consumer app features include real-time tracking, restaurant discovery, and grocery delivery (Bolt Market) in supported markets."
+        },
+        {
+          "label": "Bolt Food — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Bolt_Food",
+          "claim": "Describes Bolt Food features, geographic expansion, and the Bolt Market grocery product."
+        }
+      ]
+    },
+    "strengths": [
+      "Low-cost positioning vs incumbents — Bolt has used lower delivery fees and competitive commission offers to attract restaurants and price-sensitive consumers.",
+      "Rapid geographic expansion by leveraging Bolt’s existing ride-hailing network, allowing faster entry and lower operational setup costs.",
+      "Simple merchant onboarding via the Bolt Merchant app and partner portal provides basic analytics and order management for restaurants.",
+      "Integrated grocery offering (Bolt Market) broadens use cases beyond restaurant delivery and captures quick-commerce demand in some markets."
+    ],
+    "weaknesses": [
+      "Frequent customer complaints about delivery reliability, missing items and cold food indicate inconsistent courier quality control and operational execution.",
+      "Repeated negative reviews about support and refunds suggest a weak post-order dispute resolution process, harming trust for both consumers and restaurants.",
+      "Opaque, market-by-market commission/pricing structure creates friction for restaurants evaluating ROI and makes national rollouts harder for multi-location chains.",
+      "Bolt has paused or exited some markets (e.g., South Africa), showing that maintaining two-sided liquidity and profitability can be challenging in competitive regions."
+    ]
+  }
+}

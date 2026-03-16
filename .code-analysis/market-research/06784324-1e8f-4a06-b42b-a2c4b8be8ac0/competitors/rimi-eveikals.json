@@ -1,0 +1,152 @@
+{
+  "id": "rimi-eveikals",
+  "name": "Rimi e-veikals",
+  "url": "https://www.rimi.lv/e-veikals",
+  "description": "Rimi’s online grocery store in the Baltics offering home delivery, click-and-collect and Drive pickup for Latvian consumers.",
+  "logoChar": "R",
+  "logoColor": "#E30613",
+  "logoBg": "#FFF5F5",
+  "tags": ["grocery", "online-grocery", "click-and-collect", "same-day-delivery"],
+  "pricing": "€5.99",
+  "pricingPeriod": "/60d",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "Latvia",
+    "funding": "Unknown (owned by Salling Group)",
+    "employees": "~11,000 (Rimi Baltic)",
+    "business": "Omnichannel retail + e-commerce (grocery)",
+    "targetMarket": "Latvian consumers and households wanting online grocery delivery or fast pickup; also small businesses via Rimi to Business",
+    "features": [
+      {
+        "category": "Delivery & pickup",
+        "items": [
+          "Home delivery with same-day windows; standard deliveries and ‘fast’ 90-minute or 58-minute options",
+          "Rimi Drive (drive‑through pickup) and in-store pickup points (29-minute fast pickup in selected locations)",
+          "Delivery subscription (paid) which waives delivery fees for a period (60-day option)"
+        ]
+      },
+      {
+        "category": "Pricing & fulfillment",
+        "items": [
+          "Free standard delivery for orders above threshold (49.98 EUR Latvia; 59.99 EUR Estonia)",
+          "Standard delivery fees vary roughly €1.99–€3.99; fast delivery with partners (Wolt) or own service costs more (€3.99–€7.99)",
+          "Minimum order for delivery: €20"
+        ]
+      },
+      {
+        "category": "Product & order management",
+        "items": [
+          "Large grocery assortment including fresh, frozen and non-food items; cold-chain handled for frozen products",
+          "Ability to change or add to orders until picking/fulfilment begins",
+          "Integration with Mans Rimi loyalty (personal offers) and mobile app features for shopping lists and offers"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "Limited geographic coverage beyond major cities — no consistent nationwide same‑day delivery, leaving room for services covering suburban/rural zones with predictable schedules",
+      "No public API or partner/developer platform for B2B integration (inventory, order routing, or marketplace) — opportunity to offer an integrations-first grocery commerce layer",
+      "Inventory transparency is limited (customers often only learn about out-of-stock items after picking), so better real‑time stock & replacement preferences would reduce friction",
+      "No advanced personalization / meal-planning flow tied to promotions — Rimi relies on loyalty offers but lacks deeper cross-sell automation and recipe-driven shopping",
+      "Fast delivery is priced separately and excluded from subscription and free-threshold rules, creating complexity; a simpler slot/price model would improve conversion",
+      "Limited seller/marketplace model — Rimi operates supply-controlled assortment (good for quality) but leaves a gap for curated local/third‑party marketplaces within the checkout"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Delivery subscription (60 days)",
+        "price": "€5.99",
+        "period": "/60d",
+        "note": "Waives delivery fee for qualifying orders during subscription period (does not apply to fast deliveries)",
+        "highlight": true
+      },
+      {
+        "name": "Standard delivery",
+        "price": "€1.99-€3.99",
+        "period": "per order",
+        "note": "Standard same‑day delivery fees; free if order > €49.98 (Latvia)",
+        "highlight": false
+      },
+      {
+        "name": "Fast delivery / express",
+        "price": "€3.99-€7.99",
+        "period": "per order",
+        "note": "Express/partner deliveries (58–90 minutes) are charged separately and excluded from some free/ subscription rules",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://www.rimi.lv/e-veikals/lv/palidziba/piegade",
+      "pricing": "https://www.rimi.lv/e-veikals/lv/piegades-sanemsanas-veidi",
+      "blog": "https://www.rimi.lv/jaunumi",
+      "jobs": "https://www.rimi.lv/e-veikals/lv/vakances"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Piegādes un Saņemšanas veidi (delivery page)",
+          "url": "https://www.rimi.lv/e-veikals/lv/piegades-sanemsanas-veidi",
+          "claim": "Shows delivery fees (€1.99–€3.99 standard), free delivery over €49.98 in Latvia, fast pickup/delivery options and 60‑day delivery subscription pricing"
+        },
+        {
+          "label": "Delivery subscription product page",
+          "url": "https://www.rimi.lv/e-veikals/en/products/services/delivery-subscription/c/SH-0-0",
+          "claim": "Delivery subscription (60 days) sold as a product in the e‑store (en product listing)"
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Rimi Baltic (corporate site)",
+          "url": "https://www.rimibaltic.com/",
+          "claim": "Rimi Baltic operates the Rimi retail chains in Estonia, Latvia and Lithuania and launched e‑store solution (omnichannel retail)"
+        },
+        {
+          "label": "Rimi Baltic — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Rimi_Baltic",
+          "claim": "Background on Rimi Baltic, store counts and corporate history (operations in Baltics since the late 1990s; Rimi Baltic formed 2004/2005)"
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Reddit — r/latvia thread",
+          "url": "https://www.reddit.com/r/latvia/comments/kgz0iy/internetveikali_ikdienas_pirkumiem/",
+          "claim": "User reports of recurring out-of-stock items and substitution issues when ordering from Rimi e-veikals"
+        },
+        {
+          "label": "Sūdzības.lv (customer complaints)",
+          "url": "https://www.sudzibas.lv/business/rimi/241441",
+          "claim": "Public customer complaints about product quality, service and store issues (site collecting consumer complaints)"
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Help — delivery rules and order changes",
+          "url": "https://www.rimi.lv/e-veikals/lv/palidziba/piegade",
+          "claim": "Documents ability to change/augment orders until picking starts, delivery area notes, storage temperature rules for frozen goods"
+        },
+        {
+          "label": "Rimi e-veikals homepage",
+          "url": "https://www.rimi.lv/e-veikals",
+          "claim": "Product page promoting same‑day delivery, Drive pickup and mobile app shopping"
+        },
+        {
+          "label": "Google Play — Rimi app",
+          "url": "https://play.google.com/store/apps/details?id=lv.rimi.card&hl=en_US",
+          "claim": "Mobile app offers shopping lists, personal offers and functionality linked to the e‑store (Mans Rimi loyalty integration)"
+        }
+      ]
+    },
+    "strengths": [
+      "Strong omnichannel retail footprint and brand trust across the Baltics (many physical stores provide local fulfillment and cold‑chain capability)",
+      "Multiple fulfilment options (home delivery, Rimi Drive, in‑store pickup) including sub‑hour fast pickup/delivery in selected zones",
+      "Competitive and simple delivery subscription product that reduces per‑order friction for frequent shoppers; free delivery threshold incentivizes larger baskets",
+      "Integrated loyalty (Mans Rimi) and mobile app for personalised offers and seamless in‑store/e‑commerce experience"
+    ],
+    "weaknesses": [
+      "Delivery coverage and slot availability are inconsistent outside main cities — rural customers may have limited or infrequent service",
+      "Inventory transparency and out‑of‑stock handling frustrate customers (many report learning of missing items only after picking), increasing operational churn and returns",
+      "Express/partner delivery is excluded from subscription/free‑threshold rules, adding price complexity and undermining subscription value for urgent orders",
+      "Limited developer/API presence or marketplace capability — hard for partners or B2B customers to integrate or resell through Rimi’s platform"
+    ]
+  }
+}

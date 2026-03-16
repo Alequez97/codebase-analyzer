@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260315T235958-456a9c",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-15T23:59:58.171Z",
+  "params": {
+    "sessionId": "0ba26941-57df-4457-b8ff-2b984c6d4c3b",
+    "competitorId": "eloking",
+    "competitorName": "Eloking",
+    "competitorUrl": "https://eloking.com/",
+    "competitorDescription": "Game services platform offering boosting, duo-queue, and coaching for titles like League of Legends.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Eloking\nWebsite: https://eloking.com/\nDescription: Game services platform offering boosting, duo-queue, and coaching for titles like League of Legends.\nSession ID: 0ba26941-57df-4457-b8ff-2b984c6d4c3b\nCompetitor ID: eloking\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260315T235901-d78ff4"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/0ba26941-57df-4457-b8ff-2b984c6d4c3b/competitors/eloking.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260315T235958-456a9c.md",
+  "logFile": "logs/market-research-competitor-20260315T235958-456a9c.log",
+  "startedAt": "2026-03-16T00:01:44.019Z",
+  "completedAt": "2026-03-16T00:03:05.928Z"
+}

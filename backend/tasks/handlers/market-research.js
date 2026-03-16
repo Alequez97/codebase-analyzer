@@ -400,6 +400,8 @@ export function marketResearchInitialHandler(task, taskLogger) {
     "Identifying competitors…",
     onComplete,
   );
+
+
 }
 
 /**
@@ -432,13 +434,47 @@ export function marketResearchCompetitorHandler(task, taskLogger) {
     .filter(Boolean)
     .join("\n");
 
-  return _buildHandler(
+  const startMessage = `Researching ${competitorName}...`;
+
+  const onComplete = async (_result) => {
+    const competitorFilePath = path.join(
+      config.paths.targetAnalysis,
+      "market-research",
+      sessionId,
+      "competitors",
+      `${competitorId}.json`,
+    );
+
+    try {
+      const raw = await fs.readFile(competitorFilePath, "utf-8");
+      const competitor = JSON.parse(raw);
+
+      emitSocketEvent(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_UPDATED, {
+        sessionId,
+        taskId: task.id,
+        competitor,
+      });
+    } catch (error) {
+      logger.warn("Failed to emit completed competitor payload", {
+        component: "MarketResearchCompetitor",
+        taskId: task.id,
+        competitorId,
+        sessionId,
+        error: error.message,
+      });
+    }
+  };
+
+  const handler = _buildHandler(
     task,
     taskLogger,
     initialMessage,
     "MarketResearchCompetitor",
+    startMessage,
+    onComplete,
     `Researching ${competitorName}…`,
   );
+  return handler;
 }
 
 function _buildHandler(

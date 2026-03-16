@@ -1,4 +1,12 @@
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Skeleton,
+  SkeletonText,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import {
   BarChart2,
   ChevronRight,
@@ -133,7 +141,32 @@ function EmptyHistory() {
   );
 }
 
-export function AnalysisHistory({ history, onClear, onOpen }) {
+function HistoryLoading() {
+  return (
+    <Box>
+      {[0, 1, 2].map((i) => (
+        <Box
+          key={i}
+          py={3.5}
+          px={4}
+          borderBottomWidth={i === 2 ? "0" : "1px"}
+          borderColor="#f1f5f9"
+        >
+          <HStack gap={4} align="center">
+            <Skeleton w="32px" h="32px" borderRadius="8px" flexShrink={0} />
+            <Box flex="1" minW={0}>
+              <Skeleton h="13px" w="60%" mb={1.5} />
+              <Skeleton h="11px" w="35%" />
+            </Box>
+            <Skeleton h="24px" w="100px" borderRadius="20px" />
+          </HStack>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+export function AnalysisHistory({ history, isLoading, onClear, onOpen }) {
   return (
     <Box
       bg="white"
@@ -182,7 +215,9 @@ export function AnalysisHistory({ history, onClear, onOpen }) {
         )}
       </HStack>
 
-      {history.length === 0 ? (
+      {isLoading && history.length === 0 ? (
+        <HistoryLoading />
+      ) : history.length === 0 ? (
         <EmptyHistory />
       ) : (
         <VStack gap={0} align="stretch">

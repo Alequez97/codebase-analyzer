@@ -1,0 +1,148 @@
+{
+  "id": "gamersensei",
+  "name": "Gamer Sensei",
+  "url": "https://www.gamersensei.com/",
+  "description": "Online marketplace for booking one-on-one and team esports coaching sessions from screened pro and semi-pro players, targeting amateur-to-competitive gamers and educational esports programs.",
+  "logoChar": "GS",
+  "logoColor": "#00AEEF",
+  "logoBg": "#E6F8FF",
+  "tags": ["esports coaching", "marketplace", "one-on-one", "team coaching"],
+  "pricing": "$16",
+  "pricingPeriod": "",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2016",
+    "country": "US",
+    "funding": "$6.3M",
+    "employees": "Unknown (platform lists ~500 active coaches at times)",
+    "business": "B2C coaching marketplace with B2B partnerships (teams / schools)",
+    "targetMarket": "Casual-to-competitive gamers, parents of youth players, collegiate and high-school esports programs, and amateur teams seeking coaching",
+    "features": [
+      {
+        "category": "Core product",
+        "items": [
+          "One-on-one lessons and multi-player/team coaching sessions",
+          "Coach search and booking marketplace across ~20+ popular esports titles",
+          "Built-in lesson conferencing / screen-sharing (SenseiConnect)"
+        ]
+      },
+      {
+        "category": "Coach & trust",
+        "items": [
+          "Curated coach onboarding and screening process",
+          "Coach profiles with bios, past experience and lesson rates",
+          "Ability to connect in-game accounts (Steam, Battle.net, Riot) to profiles"
+        ]
+      },
+      {
+        "category": "Payments & scheduling",
+        "items": [
+          "Per-lesson / hourly pricing set by coaches (variable pricing)",
+          "Scheduling system and notifications (bot / Discord integration)",
+          "Subscription / discounted booking options and referral credits (platform offerings)
+"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standardized, comparable pricing tiers — coach-set hourly rates vary widely (e.g. $16–$93 reported), making side-by-side value comparison hard for buyers.",
+      "Limited measurable progress tracking or structured curriculum per student — platform emphasizes lessons but lacks a visible analytics/progress dashboard to show skill gains over time.",
+      "Weak verified outcomes or guarantees — beyond coach bios and ratings there is no consistent, verifiable skill-validation or refund/guarantee framework for high-ticket coaching packages.",
+      "Recurring lesson automation is minimal — no clear first-class workflow for recurring weekly lessons, automated practice plans, or curriculum drip for subscription students.",
+      "Marketplace quality signaling is coarse — coach quality varies and there is no advanced trust layer (certifications, third-party verification, standardized accreditation) beyond internal screening.",
+      "Limited B2B / API offerings for large organizations — while there are partnerships (NACE, team coaching), there is no public API or documented enterprise product for LMS integration or single-sign-on.
+"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Per-lesson (coach-set)",
+        "price": "$16+",
+        "period": "",
+        "note": "Individual coaches set hourly/session rates; reported student-facing range from low-teens to double-digits higher for pro coaches.",
+        "highlight": true
+      },
+      {
+        "name": "Team Coaching (enterprise / group)",
+        "price": "Custom",
+        "period": "",
+        "note": "Custom pricing for team / school coaching engagements (launched as a product offering in 2021).",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://support.gamersensei.com/hc/en-us",
+      "pricing": "https://www.gamersensei.com/senseis/searches",
+      "blog": "https://blog.gamersensei.com/",
+      "jobs": "https://www.gamersensei.com/sensei_sign_ups/new"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "USA Today (pricing range reported)",
+          "url": "https://eu.usatoday.com/story/tech/gaming/2021/08/17/video-game-coaches-improve-skills-gaming-call-of-duty-fortnite/5556933001/",
+          "claim": "Reports Gamer Sensei coach prices ranging from about $16/hour for beginner coaches to $93/hour for 'legendary' professional coaches."
+        },
+        {
+          "label": "TechieInsider review",
+          "url": "https://www.techieinsider.com/gamer-sensei-review/",
+          "claim": "Notes coach-set pricing starts as low as $5/hour and can go up to hundreds depending on teacher popularity (illustrates variable coach-driven pricing)."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "CORSAIR press release (acquisition)",
+          "url": "https://ir.corsair.com/news-releases/news-release-details/take-your-game-next-level-corsair-acquires-gamer-sensei",
+          "claim": "CORSAIR announced acquisition of Gamer Sensei; states Gamer Sensei was founded in 2016 and is positioning it as the world’s biggest esports coaching platform."
+        },
+        {
+          "label": "Crunchbase company profile",
+          "url": "https://www.crunchbase.com/organization/gamer-sensei",
+          "claim": "Company funding history on Crunchbase shows seed and Series A rounds; aggregated funding reported ~$6.3M prior to acquisition."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot review page",
+          "url": "https://www.trustpilot.com/review/gamersensei.com",
+          "claim": "Customer complaints include coach no-shows and charging issues (example: user reported paying $145 for a lesson where the coach did not show)."
+        },
+        {
+          "label": "Reddit thread (user complaints)",
+          "url": "https://www.reddit.com/r/DotA2/comments/nhj57c/gamer_sensei_is_scamming_people_now/",
+          "claim": "Users report site/checkout problems and duplicate charges, and changes to how coaches are surfaced — signals of trust and UX friction."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "How It Works (product features)",
+          "url": "https://www.gamersensei.com/how-it-works",
+          "claim": "Describes the platform's core features: coach marketplace, one-on-one lessons and built-in scheduling."
+        },
+        {
+          "label": "Blog: SenseiConnect / feature announcements",
+          "url": "https://blog.gamersensei.com/article/feature-announcement-gamer-sensei-connect-profile/",
+          "claim": "Blog posts describe features like connecting in-game accounts and SenseiConnect (screen sharing / conferencing) to improve lesson delivery."
+        },
+        {
+          "label": "CORSAIR newsroom (team coaching launch)",
+          "url": "https://www.corsair.com/newsroom/press-release/gamer-sensei-expands-esports-coaching-offerings-with-new-team-coaching-service",
+          "claim": "Announces Team Coaching product and built-in video conferencing; confirms platform supports team/school offerings."
+        }
+      ]
+    },
+    "strengths": [
+      "Strong brand and distribution support after acquisition by CORSAIR, which improves trust and reach into hardware customers and esports communities.",
+      "Large, curated pool of coaches across many popular esports titles and a screening process that filters coaches before listing.",
+      "Product features built for live coaching: built-in conferencing / screen-share (SenseiConnect), scheduling, game-account linking and team-coaching product for schools/teams.",
+      "Partnerships with esports organizations and schools (e.g., NACE, HSEL) that open B2B channels and credibility in educational esports programs."
+    ],
+    "weaknesses": [
+      "Pricing opacity and high variability: coach-set rates make it hard for buyers to evaluate value; platform lacks standardized packages for easier comparison.",
+      "Reported reliability and support issues (coach no-shows, billing glitches) reduce trust for higher-ticket purchases — seen in Trustpilot/Reddit complaints.",
+      "Lack of visible, structured progress tracking or measurable outcomes for students, which weakens value proposition for recurring, curriculum-driven customers.",
+      "Marketplace quality control is uneven — outcomes depend heavily on the individual coach and there is no widely-adopted external accreditation or standardized curriculum.",
+      "Enterprise/technical integration (APIs, LMS connectors) and explicit enterprise product documentation are limited or not public, which raises friction for large customers seeking integration."
+    ]
+  }
+}

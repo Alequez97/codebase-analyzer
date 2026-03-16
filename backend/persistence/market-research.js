@@ -1,25 +1,21 @@
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 import config from "../config.js";
 import * as logger from "../utils/logger.js";
 import { tryReadJsonFile } from "./utils.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const DATA_DIR = path.join(__dirname, "..", "data", "market-research");
-
-async function ensureDataDir() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-}
+const MARKET_RESEARCH_DIR = path.join(config.paths.targetAnalysis, "market-research");
 
 function sessionPath(sessionId) {
   // Prevent path traversal — sessionId must be a UUID
   if (!/^[0-9a-f-]{36}$/.test(sessionId)) {
     throw new Error("Invalid sessionId format");
   }
-  return path.join(DATA_DIR, `${sessionId}.json`);
+  return path.join(MARKET_RESEARCH_DIR, sessionId, "session.json");
+}
+
+async function ensureSessionDir(sessionId) {
+  await fs.mkdir(path.join(MARKET_RESEARCH_DIR, sessionId), { recursive: true });
 }
 
 /**
@@ -36,7 +32,7 @@ function sessionPath(sessionId) {
  * @returns {Promise<Object>} Saved session
  */
 export async function upsertSession(sessionId, idea, state) {
-  await ensureDataDir();
+  await ensureSessionDir(sessionId);
 
   const filePath = sessionPath(sessionId);
   const now = Date.now();
@@ -147,21 +143,19 @@ export async function markSessionComplete(sessionId, competitorCount) {
  * @returns {Promise<Object[]>}
  */
 export async function listSessions() {
-  await ensureDataDir();
-
   let entries;
   try {
-    entries = await fs.readdir(DATA_DIR);
+    entries = await fs.readdir(MARKET_RESEARCH_DIR, { withFileTypes: true });
   } catch {
     return [];
   }
 
   const sessions = [];
   for (const entry of entries) {
-    if (!entry.endsWith(".json")) continue;
-    const filePath = path.join(DATA_DIR, entry);
+    if (!entry.isDirectory()) continue;
+    const filePath = path.join(MARKET_RESEARCH_DIR, entry.name, "session.json");
     try {
-      const session = await tryReadJsonFile(filePath, entry);
+      const session = await tryReadJsonFile(filePath, entry.name);
       if (session) sessions.push(session);
     } catch {
       // Skip unreadable files

@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260315T235958-64c320",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-15T23:59:58.197Z",
+  "params": {
+    "sessionId": "0ba26941-57df-4457-b8ff-2b984c6d4c3b",
+    "competitorId": "senpai",
+    "competitorName": "Senpai.gg",
+    "competitorUrl": "https://senpai.gg/",
+    "competitorDescription": "Platform connecting players with coaches for 1:1 training and improvement in competitive games.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Senpai.gg\nWebsite: https://senpai.gg/\nDescription: Platform connecting players with coaches for 1:1 training and improvement in competitive games.\nSession ID: 0ba26941-57df-4457-b8ff-2b984c6d4c3b\nCompetitor ID: senpai\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260315T235901-d78ff4"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/0ba26941-57df-4457-b8ff-2b984c6d4c3b/competitors/senpai.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260315T235958-64c320.md",
+  "logFile": "logs/market-research-competitor-20260315T235958-64c320.log",
+  "startedAt": "2026-03-16T00:03:46.142Z",
+  "completedAt": "2026-03-16T00:05:58.175Z"
+}

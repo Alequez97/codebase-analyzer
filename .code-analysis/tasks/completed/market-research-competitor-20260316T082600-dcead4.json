@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260316T082600-dcead4",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-16T08:26:00.313Z",
+  "params": {
+    "sessionId": "06784324-1e8f-4a06-b42b-a2c4b8be8ac0",
+    "competitorId": "cili-pica",
+    "competitorName": "Čili Pizza",
+    "competitorUrl": "https://www.cili.lv",
+    "competitorDescription": "Restaurant/pizza chain in Latvia offering delivery and takeaway ordering.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Čili Pizza\nWebsite: https://www.cili.lv\nDescription: Restaurant/pizza chain in Latvia offering delivery and takeaway ordering.\nSession ID: 06784324-1e8f-4a06-b42b-a2c4b8be8ac0\nCompetitor ID: cili-pica\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260316T082124-280c10"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/06784324-1e8f-4a06-b42b-a2c4b8be8ac0/competitors/cili-pica.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260316T082600-dcead4.md",
+  "logFile": "logs/market-research-competitor-20260316T082600-dcead4.log",
+  "startedAt": "2026-03-16T08:28:21.584Z",
+  "completedAt": "2026-03-16T08:30:33.233Z"
+}

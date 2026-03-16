@@ -1,0 +1,143 @@
+{
+  "id": "g2g",
+  "name": "G2G",
+  "url": "https://www.g2g.com/",
+  "description": "A global peer-to-peer marketplace where gamers buy and sell in-game items, accounts, boosting and coaching services.",
+  "logoChar": "G2G",
+  "logoColor": "#6B21A8",
+  "logoBg": "#F5F3FF",
+  "tags": ["gaming-marketplace", "peer-to-peer", "accounts-and-boosting", "global-payments"],
+  "pricing": "Free",
+  "pricingPeriod": "",
+  "customers": "2.7M+",
+  "status": "done",
+  "details": {
+    "founded": "2013",
+    "country": "Malaysia",
+    "funding": "Unknown",
+    "employees": "51-200",
+    "business": "Marketplace (C2C) / B2C",
+    "targetMarket": "Gamers and semi-professional sellers offering in-game currency, items, accounts, boosting and coaching services globally",
+    "features": [
+      {
+        "category": "Marketplace types",
+        "items": ["Game currency (coins), items and skins", "Game accounts (with insured delivery windows)", "Boosting services (rank/skill boosting)", "Coaching services", "Gift cards & top-ups"]
+      },
+      {
+        "category": "Trust & safety",
+        "items": ["GamerProtect escrow and dispute process (escrows buyer payment until confirmation)", "Seller ranking and feedback system", "Seller verification (ID eKYC required to be verified)", "Insurance period for sold accounts (example: 14 days)"]
+      },
+      {
+        "category": "Payments & operations",
+        "items": ["Wide global payment support (many localized methods and currencies)", "Commission-based fees for sellers (no listing fee)", "Proof-of-delivery requirement for sellers and detailed support center articles"]
+      },
+      {
+        "category": "Platform & support",
+        "items": ["24/7 support and help center articles", "Mobile-optimized website and localized marketplaces", "Seller payout & withdrawal controls"]
+      }
+    ],
+    "missingFeatures": [
+      "No standardized/packaged coaching booking flow or recurring-subscription option for repeat coaching clients (coaching is listed but there is no first-class scheduling + subscription product)",
+      "No verified-skill or accreditation layer for high-risk services (boosters/coaches) beyond seller ratings and optional ID verification, making quality inconsistent for expensive services",
+      "Limited buyer guarantees for long-term assets — account insurance windows are short (e.g., 14 days) which leaves buyers exposed for account bans or later problems",
+      "No public API or B2B partner program for third parties to integrate catalogue, verification or payments (hindering platform partnerships and enterprise use cases)",
+      "Marketplace discovery and price-comparison is seller-by-seller with weak package standardization, which makes it hard for buyers to compare service quality and create trust for big-ticket purchases",
+      "Dispute resolution transparency — users report slow or canned support responses (an opening for a competitor with faster, more transparent claims handling)"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Buyer",
+        "price": "$0",
+        "period": "",
+        "note": "Buyers pay per-order prices set by individual sellers; platform holds payment in escrow (GamerProtect).",
+        "highlight": false
+      },
+      {
+        "name": "Seller (commission)",
+        "price": "4.99%+",
+        "period": "per transaction",
+        "note": "No registration/listing fee; commission is charged on successful transactions and varies by product type and seller rank (promo rates frequently applied).",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://support.g2g.com/",
+      "pricing": "https://support.g2g.com/en/support/solutions/articles/5000001408-what-is-the-commission-fee-to-sell-at-g2g-marketplace-",
+      "blog": "https://g2g-blog.g2g.com/blog/",
+      "jobs": "https://www.g2g.com/OWNERS"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "What Is the Commission Fee to Sell at G2G",
+          "url": "https://support.g2g.com/en/support/solutions/articles/5000001408-what-is-the-commission-fee-to-sell-at-g2g-marketplace-",
+          "claim": "G2G charges a commission on successful transactions (examples and ranges shown; promotional 4.99% applied to many categories)."
+        },
+        {
+          "label": "Gift cards FAQ (commission example)",
+          "url": "https://support.g2g.com/en/support/solutions/articles/5000873962-gift-cards-faq-for-sellers",
+          "claim": "Support article states commission typically ranges between 4.99% and 9.99%, with promotional 4.99% for many sellers."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "G2G homepage",
+          "url": "https://www.g2g.com/",
+          "claim": "G2G is a global digital marketplace for in-game items, accounts, boosting and coaching."
+        },
+        {
+          "label": "Triple-A partnership announcement",
+          "url": "https://www.triple-a.io/newsroom/g2g-triplea-digital-currency-payment",
+          "claim": "Article states G2G has over 2.7 million registered users and supports 200+ payment options (used as evidence of scale and payment coverage)."
+        },
+        {
+          "label": "LinkedIn company page",
+          "url": "https://www.linkedin.com/company/gamer2gamer",
+          "claim": "LinkedIn lists G2G (Gamer2Gamer) with company details and shows office location and employee-size range (used to estimate headcount and HQ)."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/www.g2g.com",
+          "claim": "Large number of customer reviews (50k+) with repeated complaints about customer support responsiveness and mixed seller reliability."
+        },
+        {
+          "label": "Reddit community threads",
+          "url": "https://www.reddit.com/r/ClashRoyale/comments/6uvz2s/ask_is_g2g_a_scam_how_do_they_offer_this/",
+          "claim": "Longstanding Reddit threads show user-reported issues with disputes, KYC requests and inconsistent seller behaviour."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "GamerProtect (escrow & dispute process)",
+          "url": "https://support.g2g.com/en/support/solutions/articles/5000804161-what-is-gamerprotect-and-how-does-it-work-",
+          "claim": "GamerProtect holds buyer payments in escrow and defines the platform's dispute resolution and seller protection mechanisms."
+        },
+        {
+          "label": "Types of services on G2G",
+          "url": "https://support.g2g.com/en/support/solutions/articles/5000877207-type-of-services",
+          "claim": "Support article enumerates marketplace categories: game coins, items, accounts, boosting, coaching, gift cards."
+        },
+        {
+          "label": "Insurance period for accounts",
+          "url": "https://support.g2g.com/en/support/solutions/articles/5000896721-how-long-is-the-insurance-period-for-game-accounts-sold-on-g2g-",
+          "claim": "G2G states that GamerProtect insurance for sold game accounts ends after 14 days."
+        }
+      ]
+    },
+    "strengths": [
+      "Large two-sided marketplace and liquidity — millions of registered users and a very large catalogue across many games, which helps with selection and price competition",
+      "Robust global payments coverage (many localized methods) and partnerships (e.g., Triple-A) that lower friction for international buyers/sellers",
+      "GamerProtect escrow, seller ranking and proof-of-delivery flow provide a baseline trust model that reduces straightforward scams compared to off-platform trades",
+      "No listing/registration fees and simple commission model lowers seller onboarding friction and increases supply-side liquidity"
+    ],
+    "weaknesses": [
+      "Quality and trust depend heavily on individual sellers — limited standardized vetting for high-risk services (boosting/coaching) which leads to inconsistent service quality",
+      "Repeated complaints about slow or formulaic customer support and dispute handling (Trustpilot/Reddit), undermining buyer confidence for higher-value purchases",
+      "Short insurance windows for accounts (14 days) and many exclusions in GamerProtect leave buyers exposed to post-delivery problems like bans or account recovery",
+      "Discovery and comparison friction — seller-by-seller pricing and non-standardized packages make it hard for buyers to compare offers or buy recurring services easily",
+      "No obvious public API or partner/B2B program limits integrations with game studios, esports teams or large sellers who need automation"
+    ]
+  }
+}

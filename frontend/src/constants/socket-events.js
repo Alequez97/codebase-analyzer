@@ -71,4 +71,5 @@ export const SOCKET_EVENTS = {
 
   // Emitted when a competitor sub-task is queued — lets the UI show a skeleton card immediately
   MARKET_RESEARCH_COMPETITOR_FOUND: "market-research:competitor-found",
+  MARKET_RESEARCH_COMPETITOR_UPDATED: "market-research:competitor-updated",
 };

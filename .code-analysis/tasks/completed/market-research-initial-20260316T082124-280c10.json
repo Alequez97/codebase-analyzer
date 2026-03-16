@@ -1,0 +1,25 @@
+{
+  "id": "market-research-initial-20260316T082124-280c10",
+  "type": "market-research-initial",
+  "status": "completed",
+  "createdAt": "2026-03-16T08:21:24.085Z",
+  "params": {
+    "sessionId": "06784324-1e8f-4a06-b42b-a2c4b8be8ac0",
+    "idea": "food delivery in riga",
+    "numCompetitors": 10,
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5.2",
+    "maxTokens": 64000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-initial.md",
+  "outputFile": ".code-analysis/market-research/06784324-1e8f-4a06-b42b-a2c4b8be8ac0/report.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-initial-20260316T082124-280c10.md",
+  "logFile": "logs/market-research-initial-20260316T082124-280c10.log",
+  "startedAt": "2026-03-16T08:21:25.256Z",
+  "completedAt": "2026-03-16T08:30:39.717Z"
+}

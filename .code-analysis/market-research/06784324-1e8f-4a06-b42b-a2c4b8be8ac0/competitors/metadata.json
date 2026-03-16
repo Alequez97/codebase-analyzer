@@ -1,0 +1,65 @@
+{
+  "version": 12,
+  "revisions": [
+    {
+      "taskId": "market-research-competitor-20260316T082525-6d1d32",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:26:49.353Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-5cdafd",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:27:14.551Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-abb99e",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:27:27.230Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-c6552d",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:27:46.764Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-7cb175",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:28:21.485Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-771b6b",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:28:30.941Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-0e131a",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:29:03.637Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-21733c",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:29:34.719Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-dcead4",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:30:33.231Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-0a3f68",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:30:37.105Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T082600-7d86a4",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:30:38.343Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260316T083046-83f2a7",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T08:32:34.253Z"
+    }
+  ]
+}

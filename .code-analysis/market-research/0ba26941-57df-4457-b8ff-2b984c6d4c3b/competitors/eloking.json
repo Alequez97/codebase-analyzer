@@ -1,0 +1,152 @@
+{
+  "id": "eloking",
+  "name": "Eloking",
+  "url": "https://eloking.com/",
+  "description": "A consumer-facing game-services marketplace that sells account boosting, duo/teammate sessions and one-off coaching for competitive PC titles (League of Legends, Valorant, CS:GO, etc.).",
+  "logoChar": "EL",
+  "logoColor": "#3b82f6",
+  "logoBg": "#eff6ff",
+  "tags": ["game-boosting", "coaching", "marketplace", "duo-queue"],
+  "pricing": "Custom",
+  "pricingPeriod": "",
+  "customers": "4,000+ orders",
+  "status": "done",
+  "details": {
+    "founded": "2022",
+    "country": "Latvia",
+    "funding": "Unknown",
+    "employees": "~51-100",
+    "business": "B2C marketplace",
+    "targetMarket": "Competitive PC gamers who want quick rank gains, duo teammates, or one-off coaching sessions in games like League of Legends, Valorant and CS:GO.",
+    "features": [
+      {
+        "category": "Core services",
+        "items": [
+          "Rank/ELO boosting (solo boost, win boosts, division climbs)",
+          "Duo / teammate sessions where a pro plays alongside the customer",
+          "Live 1-on-1 coaching sessions",
+          "Game-specific service pages and a price calculator"
+        ]
+      },
+      {
+        "category": "Operations & safety",
+        "items": [
+          "Live chat and 24/7 customer support",
+          "Refund and flexible cancellation policy (refunds available before start)",
+          "Screening/background checks for boosters (internal vetting)",
+          "Order tracking / communication with assigned booster"
+        ]
+      },
+      {
+        "category": "Platform",
+        "items": [
+          "Web-based marketplace and order calculator",
+          "Blog and help glossaries per game",
+          "Trust signals (Trustpilot presence, company registration in Latvia)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standard, transparent tiered pricing — prices are calculated per order via a calculator rather than clear per-hour or per-session packages, which makes comparison and budgeting harder for buyers.",
+      "No public, verifiable booster reputation/metrics (e.g., win rates, hours played, verified skill badges) exposed per booster — discovery and trust rely on aggregate reviews rather than granular seller performance data.",
+      "No explicit ban-protection or insurance policy: site promotes security but provides limited public guarantees against game bans or platform enforcement outcomes.",
+      "No subscription or progress-tracking product for ongoing coaching (no recurring coaching plans with measurable progress dashboards), limiting retention and LTV expansion.",
+      "No public API or B2B integration offering for partners (e.g., esports orgs, stream platforms, or game-platform integrations) — platform appears consumer-only.",
+      "Limited transparency in dispute/fulfilment responsibility — terms indicate Eloking mediates but places responsibility for fulfillment between customer and player, which can create trust friction for higher-value orders."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Custom order",
+        "price": "Custom",
+        "period": "",
+        "note": "Boosting and duo sessions are priced per-order using an on-site calculator (price depends on game, current rank, target rank, and extras).",
+        "highlight": true
+      },
+      {
+        "name": "Coaching (one-off)",
+        "price": "Custom",
+        "period": "",
+        "note": "Coaching sessions are sold per session; price varies by coach and game — no public standardized hourly menu visible.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://eloking.com/glossary",
+      "pricing": "https://eloking.com/",
+      "blog": "https://eloking.com/blog",
+      "jobs": "https://www.linkedin.com/company/eloking"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "League of Legends boosting prices (company blog)",
+          "url": "https://eloking.com/blog/league-of-legends-boosting-prices",
+          "claim": "Eloking publishes example price guidance (e.g., per-division price estimates) and explains its on-site price calculator."
+        },
+        {
+          "label": "Homepage / order calculator",
+          "url": "https://eloking.com/",
+          "claim": "Main site promotes a state-of-the-art boosting calculator used to compute order prices dynamically."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Crunchbase company profile",
+          "url": "https://www.crunchbase.com/organization/eloking",
+          "claim": "Lists Eloking (Eloking SIA) as a private company based in Riga, Latvia and shows headcount range."
+        },
+        {
+          "label": "About page (company info)",
+          "url": "https://eloking.com/about",
+          "claim": "Company describes founding story, lists registration in Riga and team background; positions itself as an official Latvian-registered company."
+        },
+        {
+          "label": "Press / Accesswire (orders claim)",
+          "url": "https://www.accessnewswire.com/newsroom/en/sports-leisure-and-entertainment/eloking-has-seen-tremendous-success-in-its-first-year-of-business-733274",
+          "claim": "Accesswire reports Eloking completed over 4,000 orders in its first year (company PR)."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/eloking.com",
+          "claim": "Eloking has an active Trustpilot profile with many positive reviews, used as a primary trust signal on the site."
+        },
+        {
+          "label": "Reddit user complaints",
+          "url": "https://www.reddit.com/r/Lolboosting/comments/1auqf8g/buying_avoid_eloking_boosting/",
+          "claim": "Reddit threads document multi-month delays and poor booster communication for some customers, evidence of operational complaints."
+        },
+        {
+          "label": "Product Hunt / user review",
+          "url": "https://www.producthunt.com/products/eloking/reviews",
+          "claim": "Independent review that describes a prolonged, poor-quality boost experience (long completion times, multiple boosters)."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "What is Eloking (glossary)",
+          "url": "https://eloking.com/glossary/general/eloking",
+          "claim": "Site documents core product: boosting, coaching, and a teammate/duo offering, plus booster screening."
+        },
+        {
+          "label": "Contact / refund policy page",
+ "url": "https://eloking.com/contact",
+          "claim": "Contact page and support messaging describe flexible refunds prior to order start and expected booster start times; used to support claims about support and refund policy."
+        }
+      ]
+    },
+    "strengths": [
+      "Narrow, clear product focus (boosting + coaching + duo) that simplifies onboarding for customers who only want rank or quick duet play.",
+      "Strong trust signals for a gray-market service: Latvian company registration, active Trustpilot presence and public customer-facing copy on refund and screening policies.",
+      "Operational features like a per-order price calculator and live-chat support reduce friction for one-off purchases and price discovery.",
+      "Competitive pricing positioning and frequent discount codes (company claims), which helps customer acquisition in a price-sensitive market."
+    ],
+    "weaknesses": [
+      "Boosting is a high-trust/gray-market activity — despite vetting claims, third-party complaints (Reddit/Product Hunt) show occasional long delays and communication failures that can damage reputation quickly.",
+      "No clear ban-protection or formal insurance product; customers have limited public guarantees against account sanctions, increasing perceived risk for high-value orders.",
+      "Pricing is per-order and opaque for new buyers — lack of standardized hourly/session pricing or subscription coaching products limits predictable spend and repeat purchase models.",
+      "Terms and platform language indicate responsibility and dispute complexity between 'customer' and 'player', which can create legal/fulfillment ambiguity for buyers and increase refund/chargeback risk."
+    ]
+  }
+}

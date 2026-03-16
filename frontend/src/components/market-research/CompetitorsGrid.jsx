@@ -64,12 +64,14 @@ function SkeletonCard({ delay = 0 }) {
 export function CompetitorsGrid() {
   const competitors = useMarketResearchStore((s) => s.competitors);
   const isAnalyzing = useMarketResearchStore((s) => s.isAnalyzing);
+  const activityEvents = useMarketResearchStore((s) => s.activityEvents);
 
   if (competitors.length === 0) {
     if (isAnalyzing) {
+      const lastEvent = activityEvents[activityEvents.length - 1];
       return (
         <Box>
-          <HStack gap={1.5} mb={4}>
+          <HStack gap={1.5} mb={3}>
             <Box
               w="6px"
               h="6px"
@@ -118,6 +120,36 @@ export function CompetitorsGrid() {
               Scanning the web for competitors...
             </Text>
           </HStack>
+          {lastEvent && (
+            <Box
+              mb={4}
+              px={3}
+              py={2}
+              bg="white"
+              borderRadius="8px"
+              borderWidth="1px"
+              borderColor="#e2e8f0"
+              css={{
+                "@keyframes fadeSlideIn": {
+                  "0%": { opacity: 0, transform: "translateY(4px)" },
+                  "100%": { opacity: 1, transform: "translateY(0)" },
+                },
+                animation: "fadeSlideIn 0.3s ease",
+              }}
+            >
+              <Text
+                fontSize="11px"
+                color="#64748b"
+                fontWeight="500"
+                noOfLines={1}
+              >
+                <Text as="span" color="#6366f1" fontWeight="700" mr={1.5}>
+                  {lastEvent.agent ?? "Agent"}
+                </Text>
+                {lastEvent.message}
+              </Text>
+            </Box>
+          )}
           <Grid
             templateColumns={{
               base: "1fr",

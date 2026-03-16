@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260316T082525-6d1d32",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-16T08:25:25.203Z",
+  "params": {
+    "sessionId": "06784324-1e8f-4a06-b42b-a2c4b8be8ac0",
+    "competitorId": "wolt",
+    "competitorName": "Wolt",
+    "competitorUrl": "https://wolt.com",
+    "competitorDescription": "On-demand food delivery marketplace connecting customers with local restaurants and couriers.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Wolt\nWebsite: https://wolt.com\nDescription: On-demand food delivery marketplace connecting customers with local restaurants and couriers.\nSession ID: 06784324-1e8f-4a06-b42b-a2c4b8be8ac0\nCompetitor ID: wolt\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260316T082124-280c10"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/06784324-1e8f-4a06-b42b-a2c4b8be8ac0/competitors/wolt.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260316T082525-6d1d32.md",
+  "logFile": "logs/market-research-competitor-20260316T082525-6d1d32.log",
+  "startedAt": "2026-03-16T08:25:25.426Z",
+  "completedAt": "2026-03-16T08:26:49.355Z"
+}

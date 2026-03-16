@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260316T082600-0a3f68",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-16T08:26:00.318Z",
+  "params": {
+    "sessionId": "06784324-1e8f-4a06-b42b-a2c4b8be8ac0",
+    "competitorId": "mcdonalds-lv",
+    "competitorName": "McDonald’s Latvia",
+    "competitorUrl": "https://www.mcdonalds.lv",
+    "competitorDescription": "Fast-food chain offering delivery in Riga (typically via third-party delivery apps).",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: McDonald’s Latvia\nWebsite: https://www.mcdonalds.lv\nDescription: Fast-food chain offering delivery in Riga (typically via third-party delivery apps).\nSession ID: 06784324-1e8f-4a06-b42b-a2c4b8be8ac0\nCompetitor ID: mcdonalds-lv\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260316T082124-280c10"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/06784324-1e8f-4a06-b42b-a2c4b8be8ac0/competitors/mcdonalds-lv.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260316T082600-0a3f68.md",
+  "logFile": "logs/market-research-competitor-20260316T082600-0a3f68.log",
+  "startedAt": "2026-03-16T08:29:05.620Z",
+  "completedAt": "2026-03-16T08:30:37.106Z"
+}

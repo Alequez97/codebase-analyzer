@@ -126,6 +126,7 @@ export const useSocketStore = create((set, get) => ({
                   competitorUrl: entry.competitorUrl ?? "",
                 });
               }
+              mrStore._syncSummaryStatus();
             }
           }
         });
@@ -254,6 +255,7 @@ export const useSocketStore = create((set, get) => ({
         const competitorId = mrStore.competitorTaskMap[taskId];
         if (competitorId) {
           mrStore._updateCompetitorStatus(competitorId, "done");
+          mrStore._syncSummaryStatus();
         }
       } else if (type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
         const sessionId = data?.params?.sessionId;
@@ -308,6 +310,7 @@ export const useSocketStore = create((set, get) => ({
         const competitorId = mrStore.competitorTaskMap[taskId];
         if (competitorId) {
           mrStore._updateCompetitorStatus(competitorId, "analyzing");
+          mrStore._syncSummaryStatus();
           if (message) {
             mrStore._addActivityEvent({
               id: `progress-${taskId}-${Date.now()}`,
@@ -440,6 +443,13 @@ export const useSocketStore = create((set, get) => ({
         if (sessionId && sessionId === storeSessionId) {
           useMarketResearchStore.getState()._markAnalysisComplete();
         }
+      } else if (type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
+        const mrStore = useMarketResearchStore.getState();
+        const competitorId = mrStore.competitorTaskMap[taskId];
+        if (competitorId) {
+          mrStore._updateCompetitorStatus(competitorId, "failed");
+          mrStore._syncSummaryStatus();
+        }
       } else if (type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
         // Handle custom codebase task failures
         const chatStore = useAgentChatStore.getState();
@@ -542,13 +552,25 @@ export const useSocketStore = create((set, get) => ({
         data;
       const storeSessionId = useMarketResearchStore.getState().sessionId;
       if (sessionId && sessionId === storeSessionId) {
-        useMarketResearchStore.getState()._addCompetitorStub({
+        const mrStore = useMarketResearchStore.getState();
+        mrStore._addCompetitorStub({
           taskId,
           competitorId,
           competitorName,
           competitorUrl,
         });
+        mrStore._syncSummaryStatus();
       }
+    });
+
+    socket.on(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_UPDATED, (data) => {
+      const { sessionId, competitor } = data ?? {};
+      const mrStore = useMarketResearchStore.getState();
+      if (!sessionId || sessionId !== mrStore.sessionId || !competitor?.id) {
+        return;
+      }
+      mrStore._mergeCompetitorProfile(competitor);
+      mrStore._syncSummaryStatus();
     });
 
     // Final merged report is ready — apply it immediately.

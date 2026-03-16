@@ -142,9 +142,21 @@ function CompetitorCardQueued({ competitor }) {
         <CompetitorStatusBadge status="queued" />
       </HStack>
 
-      <Text fontSize="11px" color="#94a3b8" fontStyle="italic">
-        Waiting for sub-agent to start...
-      </Text>
+      <VStack align="start" gap={2} w="full">
+        <Skeleton h="10px" w="full" borderRadius="4px" />
+        <Skeleton h="10px" w="78%" borderRadius="4px" />
+        <Skeleton h="10px" w="52%" borderRadius="4px" />
+      </VStack>
+
+      <HStack gap={1.5}>
+        <Skeleton h="20px" w="66px" borderRadius="5px" />
+        <Skeleton h="20px" w="54px" borderRadius="5px" />
+      </HStack>
+
+      <HStack justify="space-between" w="full" pt={1}>
+        <Skeleton h="28px" w="80px" borderRadius="5px" />
+        <Skeleton h="28px" w="80px" borderRadius="5px" />
+      </HStack>
     </VStack>
   );
 }
@@ -161,6 +173,7 @@ export function CompetitorCard({ competitor }) {
       borderWidth="1px"
       borderColor={isAnalyzing ? "#bfdbfe" : isDone ? "#e2e8f0" : "#f1f5f9"}
       p={4}
+      minH="208px"
       transition="all 0.2s"
       boxShadow={isAnalyzing ? "0 0 0 3px rgba(59,130,246,.08)" : "none"}
       cursor={isDone ? "pointer" : "default"}

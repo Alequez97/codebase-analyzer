@@ -1,0 +1,55 @@
+{
+  "version": 10,
+  "revisions": [
+    {
+      "taskId": "market-research-competitor-20260315T235958-041fee",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:01:43.335Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-acc947",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:01:52.530Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-75ad60",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:02:20.764Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-456a9c",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:03:05.926Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-caa7ef",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:03:12.897Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-ffadd9",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:03:45.878Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-c2d61b",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:04:11.669Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-731628",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:05:09.832Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-64c320",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:05:58.174Z"
+    },
+    {
+      "taskId": "market-research-competitor-20260315T235958-44bde2",
+      "type": "market-research-competitor",
+      "completedAt": "2026-03-16T00:06:11.801Z"
+    }
+  ]
+}

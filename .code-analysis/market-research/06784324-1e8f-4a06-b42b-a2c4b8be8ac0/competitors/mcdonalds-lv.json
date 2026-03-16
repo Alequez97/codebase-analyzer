@@ -1,0 +1,123 @@
+{
+  "id": "mcdonalds-lv",
+  "name": "McDonald’s Latvia",
+  "url": "https://www.mcdonalds.lv",
+  "description": "Global quick-service restaurant chain operating a network of McDonald’s restaurants in Latvia (dine-in, McDrive, McCafé) and offering delivery in Riga via third-party apps.",
+  "logoChar": "M",
+  "logoColor": "#FFC72C",
+  "logoBg": "#DA291C",
+  "tags": ["fast-food", "delivery", "franchise", "QSR"],
+  "pricing": "Custom",
+  "pricingPeriod": "",
+  "customers": "5.9M+",
+  "status": "done",
+  "details": {
+    "founded": "1994",
+    "country": "Latvia",
+    "funding": "Unknown",
+    "employees": "~800",
+    "business": "Franchise quick-service restaurant (operated locally by Premier Restaurants Latvia / Premier Capital)",
+    "targetMarket": "Consumers in Latvia (families, commuters, students and tourists) seeking affordable fast food, dine-in, drive-thru and on-demand delivery in urban areas (notably Riga).",
+    "features": [
+      {
+        "category": "Core product",
+        "items": ["Full McDonald’s menu (burgers, McWraps, McCafé drinks, McFlurry, Happy Meal), breakfast menu"]
+      },
+      {
+        "category": "Channels",
+        "items": ["Dine-in restaurants", "McDrive (drive-thru)", "McCafé counters", "Third-party delivery via Bolt Food and Wolt", "Self-service kiosks and mobile app for offers"]
+      },
+      {
+        "category": "Operational",
+        "items": ["Standardized global recipes and quality controls", "20-minute McDelivery freshness target (delivery radius limited accordingly)"]
+      }
+    ],
+    "missingFeatures": [
+      "No in-house last-mile delivery at scale: McDonald’s Latvia relies on third-party platforms (Bolt/Wolt), reducing operational control over delivery timing, packaging and customer experience (opportunity for a competitor to offer branded delivery with better temperature control and lower third-party fees).",
+      "Delivery menu limitations: McDelivery page explicitly states some restaurant items are removed from delivery apps to protect quality, creating gaps for customers who want full-menu delivery or specially packaged items for transport.",
+      "Channel offer fragmentation: McDonald’s mobile app offers cannot be redeemed through Bolt/Wolt (per McDelivery FAQ), so promotions and loyalty are fragmented across channels — opportunity for a unified offers/loyalty experience across direct and marketplace orders.",
+      "Limited scheduling & pre-ordering for delivery: McDelivery focuses on a 20-minute fulfillment radius and does not provide scheduling or advanced-order windows for customers who want future pickup/delivery times.",
+      "Limited direct dispute resolution for delivery failures: because delivery and some refunds are handled by third-party apps, guests report inconsistent compensation and slow issue resolution — an opening for services that guarantee on-time, warm delivery and simple recovery flows.",
+      "Pricing and menu transparency on official site: official Latvian site lists menu items but does not show local prices centrally (customers see prices in third-party apps), creating friction and opaque price comparisons across channels."
+    ],
+    "pricingPlans": [
+      {
+        "name": "A la carte (in-restaurant)",
+        "price": "Varies",
+        "period": "",
+        "note": "Individual menu item pricing varies by restaurant; in-restaurant prices differ from delivery app prices.",
+        "highlight": false
+      },
+      {
+        "name": "McDelivery (via Bolt / Wolt)",
+        "price": "Variable",
+        "period": "",
+        "note": "Third-party delivery fees and dynamic pricing apply; McDonald’s sets menu prices on partner apps and limits available items for quality.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://www.mcdonalds.lv/menu/",
+      "pricing": "https://wolt.com/en/lva/riga/restaurant/mcdonalds-vecriga",
+      "blog": "https://premiercapital.com.mt/news/",
+      "jobs": "https://mcdonalds.lv/karjera/"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Wolt restaurant listing (Vecrīga)",
+          "url": "https://wolt.com/en/lva/riga/restaurant/mcdonalds-vecriga",
+          "claim": "Delivery menu items with local prices (e.g., Big Mac €4.65) shown on Wolt for McDonald’s Riga."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Premier Capital - Our Restaurants (Latvia)",
+          "url": "https://premiercapital.com.mt/restaurants/",
+          "claim": "Premier Restaurants Latvia operates McDonald’s in Latvia with more than ~800 crew across 14 restaurants and reports 5.9 million guests in 2024."
+        },
+        {
+          "label": "Akropole Riga directory / historical note",
+          "url": "https://www.akropoleriga.lv/en/shop/mcdonalds/1507",
+          "claim": "First McDonald’s restaurant in Latvia opened in 1994; multiple restaurants and McCafé counters now operate in Latvia."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Reddit r/latvia — delivery complaints thread",
+          "url": "https://www.reddit.com/r/latvia/comments/1idqk52/bolt_pieg%C4%81des_p%C4%81rv%C4%93rties_par_miskasti/?tl=en",
+          "claim": "Local customers report repeated late or cold deliveries from third-party platforms (affecting orders from McDonald’s)."
+        },
+        {
+          "label": "TripAdvisor — McDonald’s Riga reviews",
+          "url": "https://www.tripadvisor.com/Restaurant_Review-g274967-d12192127-Reviews-McDonald_s-Riga_Riga_Region.html",
+          "claim": "Guest reviews mention inconsistent food quality (cold, salty, texture complaints) for McDonald’s in Riga."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "McDonald’s Latvia — Menu page",
+          "url": "https://www.mcdonalds.lv/menu/",
+          "claim": "Official Latvian site lists full restaurant menu (breakfast, burgers, McCafé, desserts) and in-restaurant features."
+        },
+        {
+          "label": "McDonald’s Latvia — McDelivery FAQ",
+          "url": "https://mcdonalds.lv/mcdelivery/",
+          "claim": "McDonald’s Latvia confirms delivery is provided via Bolt Food and Wolt, explains 20-minute freshness target, and states some items are removed from delivery apps and app offers are not valid on third-party apps."
+        }
+      ]
+    },
+    "strengths": [
+      "Very strong brand recognition and long-established presence in Latvia (first store 1994), which drives footfall and tourist familiarity.",
+      "Large local footprint with multiple restaurant formats (dine-in, McDrive, McCafé) and standardized operations via Premier Restaurants Latvia, enabling scale and consistency.",
+      "Established partnerships with local delivery marketplaces (Bolt Food and Wolt), giving quick access to on-demand delivery channels and large customer reach in Riga.",
+      "Operational standards and global menu familiarity reduce customer acquisition costs and support repeat visits (well-known limited-time offers and Happy Meal program)."
+    ],
+    "weaknesses": [
+      "Dependence on third-party delivery platforms reduces control over customer experience, timing, and refunds — leading to frequent complaints about cold/late deliveries.",
+      "Channel fragmentation: mobile app promotions cannot be redeemed on Bolt/Wolt and some menu items are omitted from delivery apps, creating inconsistent customer experience and lost upsell opportunities.",
+      "Official site lacks centralized local pricing (prices are surfaced on partner apps), which increases friction and makes price comparison across channels harder for customers.",
+      "Localized negative reviews about food temperature and quality on delivery indicate operational gaps for maintaining product quality through third-party logistics."
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "id": "boostroyal",
+  "name": "BoostRoyal",
+  "url": "https://boostroyal.com/",
+  "description": "A consumer-focused game-boosting marketplace offering rank boosts, win boosts, coaching and smurf/account sales for competitive games (LoL, Valorant, CS, TFT, Wild Rift).",
+  "logoChar": "BR",
+  "logoColor": "#D4AF37",
+  "logoBg": "#fff8e1",
+  "tags": ["game-boosting", "account-marketplace", "coaching", "competitive-gaming"],
+  "pricing": "$2",
+  "pricingPeriod": "",
+  "customers": "100K+",
+  "status": "done",
+  "details": {
+    "founded": "Unknown (site states it has operated for over ten years)",
+    "country": "Unknown",
+    "funding": "Unknown",
+    "employees": "Unknown",
+    "business": "B2C gaming services marketplace / services",
+    "targetMarket": "Competitive PC and mobile gamers seeking fast rank progression, coaching, or pre-leveled (smurf) accounts across games like League of Legends, Valorant, CS2, TFT, Wild Rift.",
+    "features": [
+      {
+        "category": "Boosting & Rank Services",
+        "items": [
+          "ELO / rank boosting (solo/duo/placement)",
+          "Win boosts (per-win pricing)",
+          "Match-by-match delivery with estimated completion time",
+          "‘Undercover’ / stealth mode to reduce detection (win rates below 65%)",
+          "Priority handling and live-streamed boost options"
+        ]
+      },
+      {
+        "category": "Accounts & Marketplace",
+        "items": [
+          "Smurf / pre-leveled account sales across multiple games",
+          "Account filters (server, rank, skins, blue essence) and price tiers"
+        ]
+      },
+      {
+        "category": "Coaching & Support",
+        "items": [
+          "Coaching sessions for multiple games",
+          "24/7 LiveChat support and order dashboard",
+          "Loyalty program (BoostCoin) and coupons"
+        ]
+      },
+      {
+        "category": "Operational / Security",
+        "items": [
+          "Dynamic price calculator generating per-order quotes",
+          "Security measures claimed for account safety (VPN, offline mode)",
+          "Booster verification and internal review system (site-hosted reviews)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standard, comparable productized packages — pricing is per-order via calculator, which makes apples-to-apples comparison between boosters and services difficult for buyers",
+      "No third-party-verified booster identity or skill verification layer (reliance on internal reviews only) — opportunity for a verified expert/badge system",
+      "No subscription or recurring coaching packages with progress tracking — coaching appears sold as one-off sessions without persistent analytics or milestone tracking",
+      "Limited buyer-protection standardization (refunds and guarantees are vaguely worded) — clearer escrow, staged delivery, or SLA guarantees would reduce buyer risk",
+      "No public API or B2B offering for platforms / streamers to integrate boosting or coaching services",
+      "Minimal transparent outcome analytics — customers lack structured progress reports, video highlights, or measurable coaching KPIs after a service"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Per-service (dynamic)",
+        "price": "$2+",
+        "period": "",
+        "note": "Prices are generated per-order via a dynamic calculator (varies by game, rank, server and options); some win boosts start around $2-$5.",
+        "highlight": true
+      },
+      {
+        "name": "Accounts (marketplace)",
+        "price": "$13+",
+        "period": "",
+        "note": "Smurf / pre-leveled accounts are sold with prices depending on rank, server and skins; examples on site show low-tier accounts starting in the low tens of dollars.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://boostroyal.com/blog",
+      "pricing": "https://boostroyal.com/elo-boost-services",
+      "blog": "https://boostroyal.com/blog",
+      "jobs": "https://www.linkedin.com/company/boostroyal"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "ELO boost / pricing explanation page",
+          "url": "https://boostroyal.com/elo-boost-services",
+          "claim": "BoostRoyal uses a dynamic calculator to generate per-order prices for ELO/rank boosting rather than fixed static price tables."
+        },
+        {
+          "label": "Marvel Rivals wins page (sample pricing)",
+          "url": "https://boostroyal.com/marvel-rivals-boosting/ranked-wins",
+          "claim": "Shows example starting prices for 'wins' beginning at approximately $2-$5 at lower ranks."
+        },
+        {
+          "label": "Account marketplace listing (sample price)",
+          "url": "https://boostroyal.com/mc/account",
+          "claim": "Marketplace account listings include low-tier examples (e.g., Minecraft account listed at $13), demonstrating account sales pricing."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Company reviews page (self-reported metrics)",
+          "url": "https://boostroyal.com/reviews",
+          "claim": "Site claims tens of thousands of reviews and a large order volume (mentions 65,000+ customer reviews and 250,000+ orders completed on the reviews page)."
+        },
+        {
+          "label": "Trustpilot company profile",
+          "url": "https://www.trustpilot.com/review/boostroyal.com",
+          "claim": "BoostRoyal's Trustpilot profile shows thousands of reviews and a high TrustScore, supporting market reach and customer count."
+        },
+        {
+          "label": "LinkedIn company entry",
+          "url": "https://www.linkedin.com/company/boostroyal",
+          "claim": "Public LinkedIn company entry exists (limited company metadata available), indicating a corporate presence online."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/boostroyal.com",
+          "claim": "Thousands of mostly positive reviews on Trustpilot, demonstrating high-volume customer feedback (BoostRoyal shows ~9k+ reviews on Trustpilot)."
+        },
+        {
+          "label": "Reddit complaint thread",
+          "url": "https://www.reddit.com/r/Lolboosting/comments/d3o8fi/boost_royal_avoid_this_scam/",
+          "claim": "User reports of failed or low-quality service and claims of being scammed — examples of negative customer experiences in public forums."
+        },
+        {
+          "label": "Facebook reviews / complaint post",
+          "url": "https://www.facebook.com/boostroyal/reviews/",
+          "claim": "Public Facebook reviews include customer complaints about refunds and service quality, supporting mixed sentiment in some channels."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "LoL boosting product page",
+          "url": "https://boostroyal.com/lol-boosting",
+          "claim": "Describes ELO boost services including solo/duo/placement options, priority handling and security assurances."
+        },
+        {
+          "label": "Loyalty program page",
+          "url": "https://boostroyal.com/loyalty-program",
+          "claim": "Documents BoostCoin loyalty rewards and tiered discounts for repeat customers."
+        },
+        {
+          "label": "Contact / security mention",
+          "url": "https://boostroyal.com/contact",
+          "claim": "Support page highlights 24/7 LiveChat and states security measures used to protect customer accounts (VPN, offline mode referenced elsewhere on product pages)."
+        }
+      ]
+    },
+    "strengths": [
+      "Large, established footprint in the boosting niche with thousands of independent reviews (Trustpilot/Reviews.io), which builds buyer confidence relative to anonymous providers.",
+      "Wide service breadth: rank boosting, win boosting, coaching and an account marketplace across many popular competitive titles, enabling cross-sell and repeat customers.",
+      "Operational features for consumer convenience: 24/7 live chat, per-order dynamic pricing calculator, priority/streaming add-ons and a loyalty program to drive retention."
+    ],
+    "weaknesses": [
+      "Pricing and packaging opacity — dynamic per-order quotes make direct price comparison and value benchmarking difficult for buyers.",
+      "Trust and verification gaps — reliance on internal reviews and site claims without a public, third-party booster verification or standardized skill badges.",
+      "Service quality inconsistency — public forum complaints and some refund disputes indicate variability in booster performance and support responsiveness.",
+      "Limited B2B/API capabilities and no clear subscription or long-term coaching programs for players wanting sustained progression and measurable outcomes."
+    ]
+  }
+}
