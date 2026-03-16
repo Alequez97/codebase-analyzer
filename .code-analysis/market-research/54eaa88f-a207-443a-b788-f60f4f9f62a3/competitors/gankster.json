@@ -1,0 +1,146 @@
+{
+  "id": "gankster",
+  "name": "Gankster",
+  "url": "https://gankster.gg/",
+  "description": "An all-in-one competitive gaming platform (LFG, scrims, ladders and team tools) that connects players and teams across titles like Valorant, LoL, Rocket League and Dota 2.",
+  "logoChar": "G",
+  "logoColor": "#8b5cf6",
+  "logoBg": "#f5f3ff",
+  "tags": ["LFG","Scrim scheduling","Reputation"],
+  "pricing": "Free",
+  "pricingPeriod": "",
+  "customers": "10K+",
+  "status": "done",
+  "details": {
+    "founded": "2021",
+    "country": "Israel",
+    "funding": "$4.25M seed",
+    "employees": "11-50",
+    "business": "B2B/B2C platform (consumer product with team/org use)",
+    "targetMarket": "Competitive players, amateur/pro esports teams, collegiate & community orgs, tournament organizers",
+    "features": [
+      {
+        "category": "Discovery & Matching",
+        "items": ["Looking-For-Group (LFG) boards with role/region/skill filters", "Gankster Groups — persistent duo/team posts and recommended groups"]
+      },
+      {
+        "category": "Scrims & Practice",
+        "items": ["Scrim scheduling and booking flow", "Built-in scrim chat and automatic invite/party actions via game integration", "Post-match peer reviews and reputation (GANKREP)"]
+      },
+      {
+        "category": "Integrations & Tools",
+        "items": ["Discord integration and notifications", "Overwolf in-game overlay / client integration for automatic invites and match-sync", "Match data tracking and basic leaderboards/ladders"]
+      },
+      {
+        "category": "Community & Growth",
+        "items": ["Community/teams pages, weekly/monthly rewards and leaderboards", "Public blog, guides and active Discord community"]
+      }
+    ],
+    "missingFeatures": [
+      "Dedicated 1:1 coaching marketplace and coach booking workflow (searchable coach profiles, credential verification, escrow/payments, recurring sessions) — Gankster focuses on team LFG/scrims rather than paid coaching discovery.",
+      "Advanced individual performance analytics and VOD review tools for coaches (timelineed highlights, heatmaps, automated clip generation) — match data is tracked but appears team/scrim-focused and lightweight for coach workflows.",
+      "Clear, public pricing and packaged team subscription tiers — site terms mention subscription plans but there is no transparent pricing page for teams/orgs, which raises buyer friction for organizations seeking to compare plans.",
+      "Verified credentialing / trust layer for paid services (coach certifications, background checks, formal guarantees) — reputation is peer-based and useful for matchmaking but doesn't substitute for coach credential verification needed for higher-ticket purchases.",
+      "Enterprise/API/white-label offerings for publishers or large orgs (SSO, data export, API access) — integrations emphasize overlays and Discord, but there is limited public info about B2B APIs or enterprise controls."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Free",
+        "price": "$0",
+        "period": "",
+        "note": "Core LFG, scrim scheduling, reputation, and community features are free for players and teams; monetization noted to be introduced via app/subscriptions.",
+        "highlight": true
+      },
+      {
+        "name": "Team / Subscription (in-app)",
+        "price": "Custom",
+        "period": "",
+        "note": "Gankster mentions subscription plans in its Terms and has signaled monetization plans; pricing is surfaced inside the app rather than on a public pricing page.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://gankster.gg/",
+      "pricing": "https://gankster.gg/terms/",
+      "blog": "https://gankster.gg/",
+      "jobs": "https://gankster.gg/team/"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Terms of Service (subscription mention)",
+          "url": "https://gankster.gg/terms/",
+          "claim": "Terms state access to Services and features may be subject to payment and reference Subscription Plans priced inside the app."
+        },
+        {
+          "label": "GamesBeat (monetization roadmap)",
+          "url": "https://gamesbeat.com/gankster-funding-4-25m-esports-competitive-gaming-platform/",
+          "claim": "Article notes Gankster planned to begin monetizing in Q1 2023 and will offer paid plans/features."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "GamesBeat (seed funding)",
+          "url": "https://gamesbeat.com/gankster-funding-4-25m-esports-competitive-gaming-platform/",
+          "claim": "Gankster raised a $4.25M seed round co-led by Bessemer Venture Partners and Hetz Ventures."
+        },
+        {
+          "label": "Esports Insider (funding & founding year)",
+          "url": "https://esportsinsider.com/2022/12/esports-platform-gankster-4-25m-funding",
+          "claim": "Coverage states Gankster was founded in 2021 and raised $4.25M to expand its competitive gaming platform."
+        },
+        {
+          "label": "Tracxn / Crunchbase summaries",
+          "url": "https://tracxn.com/d/companies/gankster/",
+          "claim": "Company profiles list Gankster as a Tel Aviv-based startup founded in 2021 with a Seed round of ~$4.25M."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Reddit (community reaction / traction)",
+          "url": "https://www.reddit.com/r/VALORANT/comments/sh4fge/gankster_the_competitive_gaming_platform_used_by/",
+          "claim": "Multiple Reddit posts from Gankster team and community show early traction, user praise for LFG/scrim features, and anecdotal metrics (thousands of users and scrims)."
+        },
+        {
+          "label": "Overwolf app listing",
+          "url": "https://www.overwolf.com/app/gankster_ltd.-gankster",
+          "claim": "Overwolf describes Gankster's LFG and reputation features and shows the product is distributed as an in-game overlay, with user reviews on that platform."
+        },
+        {
+          "label": "Discord community invite (size)",
+          "url": "https://discord.com/invite/gankster",
+          "claim": "Public Discord invite lists a large community (100k+ members in invite link metadata) demonstrating active user community and engagement."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Gankster product pages",
+          "url": "https://gankster.gg/",
+          "claim": "Homepage and feature pages describe LFG, Groups, scrim scheduling, reputation system, leaderboards and team tools."
+        },
+        {
+          "label": "Gankster Find Valorant players page",
+          "url": "https://gankster.gg/find-valorant-players/",
+          "claim": "Describes the Valorant-specific LFG tool, matching, chat, queue-together and mobile app integration."
+        },
+        {
+          "label": "GamesIndustry / Esports Insiders coverage",
+          "url": "https://esportsinsider.com/2022/12/esports-platform-gankster-4-25m-funding",
+          "claim": "Press notes the reputation system, scrim scheduling, leaderboards and Discord integration as core product features."
+        }
+      ]
+    },
+    "strengths": [
+      "Deep focus on competitive workflows (LFG -> scrims -> ladders) that matches the needs of amateur and collegiate teams rather than generic social matchmaking.",
+      "Integrated reputation system (peer post-match reviews) that helps reduce no-shows/toxicity and increases reliability for team scrims.",
+      "Strong early traction and VC backing (Bessemer, Hetz) — gives credibility and runway to expand into more games and features.",
+      "Game-client integrations (Overwolf/in-game actions, automatic invites) and Discord tie-ins reduce friction when moving from scheduling to playing."
+    ],
+    "weaknesses": [
+      "No clear public pricing or packaged team plans — buyers (team managers/orgs) face friction when evaluating and budgeting for paid features.",
+      "Lacks a dedicated coaching marketplace and coach-specific tooling (scheduling escrow, recurring lessons, coach verification) — missed revenue vertical and product expansion opportunity.",
+      "Analytics and coach-oriented review/VOD tooling appear limited compared with specialized coaching platforms; this hinders higher-value coaching engagements.",
+      "Heavy reliance on game integrations (Overwolf, API access) could slow expansion to non-PC or publisher-restricted titles and complicate scaling to mobile-first esports."
+    ]
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "id": "gamersensei",
+  "name": "Gamer Sensei",
+  "url": "https://www.gamersensei.com/",
+  "description": "An esports coaching marketplace that connects players (individuals and teams) with vetted pro and semi-pro gaming coaches for 1:1 and team lessons.",
+  "logoChar": "GS",
+  "logoColor": "#111827",
+  "logoBg": "#F3F4F6",
+  "tags": ["esports","coaching marketplace","team coaching","one-on-one"],
+  "pricing": "$25",
+  "pricingPeriod": "",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2016",
+    "country": "US",
+    "funding": "$6.3M+ (seed + Series A)",
+    "employees": "~30",
+    "business": "B2C marketplace (also B2B/team coaching offerings)",
+    "targetMarket": "Individual competitive gamers seeking skill improvement and amateur/semi-pro teams looking for structured team coaching and curriculum",
+    "features": [
+      {
+        "category": "Marketplace & Discovery",
+        "items": [
+          "Curated catalog of Sensei (coaches) across 20+ esports titles",
+          "Coach profiles with reviews and experience tiers",
+          "Patent-pending matching algorithm to surface coaches"
+        ]
+      },
+      {
+        "category": "Booking & Lessons",
+        "items": [
+          "One-on-one lessons, VOD/replay reviews, duo or partner sessions",
+          "Team Coaching product and structured curriculum for rosters",
+          "Built-in scheduling and in-browser video conferencing"
+        ]
+      },
+      {
+        "category": "Coach Tools & Operations",
+        "items": [
+          "Coach onboarding and career development resources",
+          "Ability for coaches to set their own rates and lesson packages",
+          "Student wallet/credit system and refund/credit flows"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standardized, platform-managed subscription or recurring lesson package for weekly coaching — customers must rebook individual sessions or rely on coach-created packages.",
+      "No robust progress analytics/dashboard for students (no standardized skill metrics, learning milestones, or longitudinal reporting to prove ROI to buyers).",
+      "Limited instant/on-demand coaching availability — many reviews report listed availability does not guarantee immediate sessions (weak real-time availability or instant-join experience).",
+      "Payments/refunds route customers into site credits often (non-transparent refundable flows), making cash refunds and dispute resolution friction points for buyers.",
+      "No public API or B2B integration product for organizations (schools, clubs, or platforms) to programmatically book or manage multiple students/teams at scale."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Per-session (coach-set)",
+        "price": "$25+",
+        "period": "",
+        "note": "Coaches set their own per-session rates; prices vary by coach experience, game, and lesson type (VOD review, live spectate, duo).",
+        "highlight": true
+      },
+      {
+        "name": "Skills assessment",
+        "price": "Varies (flat low fee)",
+        "period": "",
+        "note": "Platform offers a low flat-rate skills assessment product (price has been reduced historically per press releases).",
+        "highlight": false
+      },
+      {
+        "name": "Team Coaching",
+        "price": "Custom",
+        "period": "",
+        "note": "Structured curriculum and multi-player/team sessions priced per-team or custom per engagement.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://support.gamersensei.com/",
+      "pricing": "https://support.gamersensei.com/hc/en-us/articles/360054294072-What-does-it-cost-",
+      "blog": "https://blog.gamersensei.com/",
+      "jobs": "https://www.corsair.com/"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "StreamScheme (market writeup)",
+          "url": "https://streamscheme.com/league-of-legends-coaching/",
+          "claim": "Notes that Gamer Sensei coaches go through an application process and that coaches set their own rates; coaching sessions commonly range in the ~$10–$60+ range depending on coach."
+        },
+        {
+          "label": "NWA Online (news article)",
+          "url": "https://www.nwaonline.com/news/2019/nov/25/players-are-turning-to-gaming-tutors-20/",
+          "claim": "Reports typical coach charges and examples, observing rates from low tens of dollars up to high rates for well-known coaches."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "CORSAIR press release (acquisition)",
+          "url": "https://ir.corsair.com/news-releases/news-release-details/take-your-game-next-level-corsair-acquires-gamer-sensei",
+          "claim": "CORSAIR acquired Gamer Sensei in November 2020 and describes Gamer Sensei as founded in 2016 and the largest esports coaching platform."
+        },
+        {
+          "label": "Crunchbase company profile",
+          "url": "https://www.crunchbase.com/organization/gamer-sensei",
+          "claim": "Documents Gamer Sensei's seed and Series A funding rounds (seed ~ $2.3M, Series A $4M) and company overview."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Reddit: availability/refund complaints",
+          "url": "https://www.reddit.com/r/LeagueCoaching/comments/m7z3op/gamer_sensei_coaching_is_unprofessional_and_has/",
+          "claim": "User reports inconsistent coach availability and buggy scheduling; example of poor customer support response."
+        },
+        {
+          "label": "Reddit: refund/credits complaint",
+          "url": "https://www.reddit.com/r/dota2tutor/comments/hi2ah6/dont_use_gamersensei/",
+          "claim": "User describes refund being routed to site credits and restrictive refund policy tied to coach response windows."
+        },
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/gamersensei.com",
+          "claim": "Mixed reviews including complaints about no-shows and poor customer service for missed lessons."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "CORSAIR newsroom (Team Coaching & built-in video)",
+          "url": "https://www.corsair.com/newsroom/press-release/gamer-sensei-expands-esports-coaching-offerings-with-new-team-coaching-service",
+          "claim": "Announces Team Coaching product, built-in video conferencing, and a streamlined scheduling process; mentions curriculum and skills assessment."
+        },
+        {
+          "label": "Gamer Sensei blog (matching / curated coaches)",
+          "url": "https://blog.gamersensei.com/article/gamer-sensei-4-million-funding/",
+          "claim": "Describes the platform's patent-pending algorithm for matching students to curated, vetted Sensei (coaches) across esports titles."
+        }
+      ]
+    },
+    "strengths": [
+      "Large, curated coach marketplace with vetted pro and semi-pro talent — good supply for mainstream esports titles.",
+      "Backed by CORSAIR (acquired 2020) which provides distribution, brand trust and operational scale for growth and partnerships.",
+      "Product features for teams (Team Coaching), built-in video conferencing and a variety of lesson types (VOD review, live spectate, duo), enabling multiple monetizable lesson formats."
+    ],
+    "weaknesses": [
+      "Marketplace availability and scheduling reliability — multiple user reports that listed coach availability is inaccurate, creating booking friction and no true on-demand experience.",
+      "Pricing inconsistency and lack of standardized packages — coach-set pricing makes buyer comparison difficult and can deter lower-intent customers.",
+      "Refunds and credit flows have caused customer friction — complaints about refunds being routed to credits and restrictive refund rules harm trust for higher-ticket purchases.",
+      "Lack of measurable learning outcomes or student analytics — no public progress dashboards or standardized skill metrics to demonstrate ROI for repeat purchasers or teams.",
+      "Limited B2B/enterprise integration (no public API or white-label offering documented) which limits growth into schools, clubs, or platform partnerships."
+    ]
+  }
+}

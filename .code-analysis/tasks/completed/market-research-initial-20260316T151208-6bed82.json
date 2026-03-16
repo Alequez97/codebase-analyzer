@@ -1,0 +1,25 @@
+{
+  "id": "market-research-initial-20260316T151208-6bed82",
+  "type": "market-research-initial",
+  "status": "completed",
+  "createdAt": "2026-03-16T15:12:08.354Z",
+  "params": {
+    "sessionId": "54eaa88f-a207-443a-b788-f60f4f9f62a3",
+    "idea": "Platform where gamers can pay for sessions, collaborate",
+    "numCompetitors": 10,
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5.2",
+    "maxTokens": 64000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-initial.md",
+  "outputFile": ".code-analysis/market-research/54eaa88f-a207-443a-b788-f60f4f9f62a3/report.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-initial-20260316T151208-6bed82.md",
+  "logFile": "logs/market-research-initial-20260316T151208-6bed82.log",
+  "startedAt": "2026-03-16T15:12:11.074Z",
+  "completedAt": "2026-03-16T15:14:53.994Z"
+}

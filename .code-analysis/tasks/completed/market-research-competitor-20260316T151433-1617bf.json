@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260316T151433-1617bf",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-16T15:14:33.656Z",
+  "params": {
+    "sessionId": "54eaa88f-a207-443a-b788-f60f4f9f62a3",
+    "competitorId": "proguides",
+    "competitorName": "ProGuides",
+    "competitorUrl": "https://www.proguides.com/",
+    "competitorDescription": "Platform offering paid game coaching, courses, and training for competitive games.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: ProGuides\nWebsite: https://www.proguides.com/\nDescription: Platform offering paid game coaching, courses, and training for competitive games.\nSession ID: 54eaa88f-a207-443a-b788-f60f4f9f62a3\nCompetitor ID: proguides\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260316T151208-6bed82"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/54eaa88f-a207-443a-b788-f60f4f9f62a3/competitors/proguides.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260316T151433-1617bf.md",
+  "logFile": "logs/market-research-competitor-20260316T151433-1617bf.log",
+  "startedAt": "2026-03-16T15:14:35.164Z",
+  "completedAt": "2026-03-16T15:17:00.327Z"
+}

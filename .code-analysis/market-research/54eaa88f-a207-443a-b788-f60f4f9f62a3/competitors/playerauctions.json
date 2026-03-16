@@ -1,0 +1,181 @@
+{
+  "id": "playerauctions",
+  "name": "PlayerAuctions",
+  "url": "https://www.playerauctions.com/",
+  "description": "A global two-sided marketplace where gamers buy and sell virtual goods, game accounts, currency, boosts and coaching, with escrow-style protection.",
+  "logoChar": "PA",
+  "logoColor": "#FF6A00",
+  "logoBg": "#FFF7ED",
+  "tags": ["gaming","marketplace","virtual-goods","escrow"],
+  "pricing": "Free",
+  "pricingPeriod": "",
+  "customers": "2.1M+",
+  "status": "done",
+  "details": {
+    "founded": "1999",
+    "country": "US",
+    "funding": "No known institutional funding",
+    "employees": "51-200",
+    "business": "Two-sided consumer marketplace",
+    "targetMarket": "Individual gamers worldwide buying and selling in-game currency, accounts, items, power-leveling/boosting and coaching services",
+    "features": [
+      {
+        "category": "Trust & Safety",
+        "items": [
+          "PlayerGuardian escrow that holds buyer payments until delivery is confirmed",
+          "After-sale protection / account insurance (7/14/30 day options) for account purchases",
+          "Formal dispute resolution and Final Resolution Committee"
+        ]
+      },
+      {
+        "category": "Product Types",
+        "items": [
+          "Game accounts, in-game currency, items/skins, power-leveling and boosting services, coaching",
+          "Custom offers and seller-created listings across hundreds of games"
+        ]
+      },
+      {
+        "category": "Seller & Marketplace Tools",
+        "items": [
+          "Free listing creation and seller levels (reputation-based)",
+          "Featured seller advertising slots",
+          "Inventory management, delivery evidence requirements and disbursement options"
+        ]
+      },
+      {
+        "category": "Payments & Payouts",
+        "items": [
+          "Per-order service fees (buyer fee) and seller transaction fees (category-based, e.g., accounts),",
+          "Multiple disbursement methods (bank, Skrill, Coinbase/crypto in some regions),",
+          "Reserve / hold periods on payouts depending on product type, seller level and after-sale protection"
+        ]
+      },
+      {
+        "category": "Discovery & Reputation",
+        "items": [
+          "Search and filters by game/product type, seller ratings and order history,",
+          "Order-level ratings and review system"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standardized subscription or recurring booking flow for coaching or recurring boost engagements (coaching is sold per session or offer-by-offer),",
+      "No public, documented API or official B2B integration for partners (site warns against unauthorized APIs),",
+      "No clearly prominent ‘verified professional’ seller program or structured KYC/skill badges for high-ticket sellers — trust still relies on ratings and PlayerGuardian evidence rules,",
+      "Opaque, layered fee structure (platform fee + disbursement/provider fees + optional after-sale protection) with limited fee-simplification or bundled pricing for sellers,",
+      "Limited seller analytics and conversion tooling (no public dashboard docs showing advanced funnel/marketing analytics to optimize listings)"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Register & Browse",
+        "price": "Free",
+        "period": "",
+        "note": "Account registration and creating listings is free; fees are charged only when an order completes.",
+        "highlight": true
+      },
+      {
+        "name": "Per-transaction (sellers)",
+        "price": "12.99% + $0.99 (typical)",
+        "period": "per sale",
+        "note": "Platform transaction fee applied on sale (varies by product category); disbursement/payment-provider fees are deducted separately.",
+        "highlight": false
+      },
+      {
+        "name": "Buyer service fee",
+        "price": "Variable",
+        "period": "per order",
+        "note": "Buyers pay a service fee at checkout to cover fraud protection and platform costs; amount varies by payment gateway and order.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://support.playerauctions.com/hc/en-us",
+      "pricing": "https://support.playerauctions.com/hc/en-us/articles/115008180648-What-are-the-fees-to-sell-",
+      "blog": "https://blog.playerauctions.com/",
+      "jobs": "https://www.linkedin.com/company/itemmania-network-technology-shanghai-ld."
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Seller fees FAQ",
+          "url": "https://support.playerauctions.com/hc/en-us/articles/115008180648-What-are-the-fees-to-sell-",
+          "claim": "Registration and listing are free; PlayerAuctions charges a transaction fee (e.g., 12.99% + $0.99 for account sales) and disbursement fees are deducted based on chosen payout method."
+        },
+        {
+          "label": "Buyer Payments FAQ",
+          "url": "https://support.playerauctions.com/hc/en-us/articles/4402166845849-PlayerAuctions-Buyer-Payments",
+          "claim": "A buyer service fee is applied at checkout to cover buyer fraud protection and platform costs."
+        },
+        {
+          "label": "Reddit discussion on seller fee breakdown",
+          "url": "https://www.reddit.com/r/PlayerAuctions/comments/109dkvz/selling_questions/",
+          "claim": "Sellers report a visible platform fee of ~12.99% + $0.99 and additional disbursement/provider fees, producing confusion about the final payout."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "About page",
+          "url": "https://www.playerauctions.com/about/",
+          "claim": "PlayerAuctions was founded in 1999 and describes itself as a global e-commerce platform for virtual gaming products."
+        },
+        {
+          "label": "Crunchbase profile",
+          "url": "https://www.crunchbase.com/organization/playerauctions",
+          "claim": "Company profile listing PlayerAuctions as an online platform for buying/selling digital assets; public profile does not show major VC funding rounds."
+        },
+        {
+          "label": "SimilarWeb company overview",
+          "url": "https://www.similarweb.com/company/playerauctions.com/",
+          "claim": "Company data listing year founded (1999) and company size estimates used by market researchers."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/playerauctions.com",
+          "claim": "Thousands of user reviews with mixed sentiment: many positive notes about delivery/security but repeated complaints about disputes, banned accounts and fees."
+        },
+        {
+          "label": "Reddit threads",
+          "url": "https://www.reddit.com/r/PlayerAuctions/comments/uyn9a8/i_will_say_good_goodbye_to_playerauction_the_fees/",
+          "claim": "Multiple community posts calling out high/complex seller fees and dissatisfaction with net payouts after disbursement charges."
+        },
+        {
+          "label": "Independent review / safety guide",
+          "url": "https://www.alidrop.co/blogs/is-playerauctions-legit",
+          "claim": "Third‑party guides highlight PlayerGuardian escrow as a strength but call out mixed user experiences and account‑ban risks."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "PlayerGuardian / Secure Buyer Delivery Agreement",
+          "url": "https://www.playerauctions.com/about/secure-buyer-delivery-agreement/",
+          "claim": "Describes PlayerGuardian escrow protections, holding buyer payments until PlayerAuctions determines order completion and dispute procedures."
+        },
+        {
+          "label": "After‑sale protection FAQ",
+          "url": "https://support.playerauctions.com/hc/en-us/articles/4402691743257-How-does-after-sale-protection-work",
+          "claim": "Explains after-sale protection/insurance for account orders and how disbursements are withheld during protection windows."
+        },
+        {
+          "label": "Homepage / product categories",
+          "url": "https://www.playerauctions.com/",
+          "claim": "Public marketplace listing for accounts, currency, items, power-leveling/boosting and other services across many game titles."
+        }
+      ]
+    },
+    "strengths": [
+      "PlayerGuardian escrow and after-sale protection that meaningfully reduces buyer fraud risk compared with direct trades",
+      "Large, global marketplace with listings across hundreds of games and many product categories (accounts, currency, boosts, coaching)",
+      "Low friction to list: free listings and an established seller ecosystem (power-sellers) that create liquidity",
+      "Multiple payout/disbursement options and operational experience handling two-sided payments and disputes"
+    ],
+    "weaknesses": [
+      "Complex and opaque fee stacking (platform fee + disbursement/provider fees + optional protection) that frustrates sellers and compresses net payouts",
+      "Reserve/hold periods and disbursement rules can delay seller cashflow and create uncertainty for high-value sales",
+      "Marketplace attracts risky listings (allegations of hacked/modded accounts) and faces legal pressure from publishers (recent lawsuits), which increases compliance and reputational risk",
+      "Mixed user reviews highlight disputes over returns, long support interactions, and cases where after-sale protection was insufficient for banned/reclaimed accounts",
+      "Lack of clear developer/B2B API or partner program limits integration opportunities (no official public API documented)"
+    ]
+  }
+}

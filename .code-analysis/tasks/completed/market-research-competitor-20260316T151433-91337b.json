@@ -1,0 +1,29 @@
+{
+  "id": "market-research-competitor-20260316T151433-91337b",
+  "type": "market-research-competitor",
+  "status": "completed",
+  "createdAt": "2026-03-16T15:14:33.668Z",
+  "params": {
+    "sessionId": "54eaa88f-a207-443a-b788-f60f4f9f62a3",
+    "competitorId": "gankster",
+    "competitorName": "Gankster",
+    "competitorUrl": "https://gankster.gg/",
+    "competitorDescription": "Esports coaching and practice platform connecting players with coaches and tools.",
+    "competitorBriefing": "Research the following competitor for the market research session.\n\nCompetitor: Gankster\nWebsite: https://gankster.gg/\nDescription: Esports coaching and practice platform connecting players with coaches and tools.\nSession ID: 54eaa88f-a207-443a-b788-f60f4f9f62a3\nCompetitor ID: gankster\n",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer",
+    "delegatedByTaskId": "market-research-initial-20260316T151208-6bed82"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "gpt-5-mini",
+    "maxTokens": 32000,
+    "maxIterations": 50,
+    "reasoningEffort": "medium"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-competitor.md",
+  "outputFile": ".code-analysis/market-research/54eaa88f-a207-443a-b788-f60f4f9f62a3/competitors/gankster.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-competitor-20260316T151433-91337b.md",
+  "logFile": "logs/market-research-competitor-20260316T151433-91337b.log",
+  "startedAt": "2026-03-16T15:14:55.235Z",
+  "completedAt": "2026-03-16T15:17:01.639Z"
+}

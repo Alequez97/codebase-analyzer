@@ -1,0 +1,169 @@
+{
+  "id": "fiverr",
+  "name": "Fiverr (Gaming)",
+  "url": "https://www.fiverr.com/categories/gaming",
+  "description": "A global freelance marketplace where gamers can buy coaching, duo-queue/boosting, and gaming-related creative services from independent sellers.",
+  "logoChar": "F",
+  "logoColor": "#1DBF73",
+  "logoBg": "#f0fdf4",
+  "tags": ["marketplace", "freelance", "gaming", "coaching"],
+  "pricing": "$5",
+  "pricingPeriod": "",
+  "customers": "3.3M+",
+  "status": "done",
+  "details": {
+    "founded": "2010",
+    "country": "Israel",
+    "funding": "IPO (raised ~$111M in VC prior to IPO)",
+    "employees": "~762",
+    "business": "Two-sided freelance marketplace (B2C/B2B)",
+    "targetMarket": "Casual and competitive gamers seeking coaching, duo-queue/boosting, and streamers/content creators needing gaming assets; also small businesses and creators buying one-off game-related services.",
+    "features": [
+      {
+        "category": "Marketplace & discovery",
+        "items": [
+          "Gig catalog with searchable categories and subcategories (game coaching, game sessions, boosting)",
+          "Seller levels, badges and Fiverr Pro for curated/faster discovery",
+          "Gig packages, extras, and customizable offers for each seller"
+        ]
+      },
+      {
+        "category": "Transaction & trust",
+        "items": [
+          "Escrow-based payments and buyer fees (platform holds payment until delivery)",
+          "Order resolution center and dispute handling",
+          "Seller ratings and public reviews"
+        ]
+      },
+      {
+        "category": "Communication & sessions",
+        "items": [
+          "In-platform messaging and order management",
+          "Paid video consultations / Zoom calls with calendar integration",
+          "Pre-built scheduling for paid consultations (30/60 minute options)"
+        ]
+      },
+      {
+        "category": "Platform services",
+        "items": [
+          "Fiverr Pro and Fiverr Business for higher-trust or enterprise buying",
+          "Stores and curated collections (e.g., Fiverr Gaming Store)",
+          "Buyer and seller dashboards with basic order analytics"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No verified-skill credentialing specific to gaming coaches (beyond Pro and reviews) — buyers can’t filter reliably by objective coach metrics like rank, coaching certifications, or win-rate.",
+      "No built-in recurring/subscription booking flow for repeat coaching (weekly lessons with auto-scheduling and billing) — sellers rely on manual re-orders or consultations.",
+      "Discovery lacks role/skill-level matching for coaches — there’s no dynamic matching algorithm that pairs buyers by game, role, MMR/rank, and playstyle.",
+      "Weak standardized comparison tooling — gig packages and extras are seller-defined, making apples-to-apples price/feature comparison across coaches difficult for buyers.",
+      "Limited guarantees and standardized refund protection for high-ticket coaching (no esoteric warranty or SLA for multi-session packages), increasing buyer risk for expensive services.",
+      "No public API or esports/team integrations for B2B use (e.g., bulk booking for teams or roster-based coaching workflows)."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Gig (one-off)",
+        "price": "$5+",
+        "period": "",
+        "note": "Marketplace core model — individual sellers set one-off gig prices; many gaming coaching gigs start at low single-digit prices.",
+        "highlight": false
+      },
+      {
+        "name": "Fiverr Pro",
+        "price": "Custom",
+        "period": "",
+        "note": "Curated, higher-priced professional sellers for buyers who need vetted talent; pricing set by seller.",
+        "highlight": true
+      },
+      {
+        "name": "Fiverr Business",
+        "price": "Custom",
+        "period": "",
+        "note": "Team/enterprise-focused offering (billing and management for businesses); pricing and terms are enterprise-oriented.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://help.fiverr.com/hc/en-us",
+      "pricing": "https://help.fiverr.com/hc/en-us/articles/360050216133-Paying-for-orders-extras-or-custom-offers",
+      "blog": "https://www.fiverr.com/resources",
+      "jobs": "https://www.fiverr.com/careers"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Gaming category (example gigs)",
+          "url": "https://www.fiverr.com/categories/gaming",
+          "claim": "Fiverr’s Gaming category lists coaching and session gigs with prices set by individual sellers (many gigs start at $5+)."
+        },
+        {
+          "label": "Paying for orders (Help Center)",
+          "url": "https://help.fiverr.com/hc/en-us/articles/360050216133-Paying-for-orders-extras-or-custom-offers",
+          "claim": "Fiverr charges a buyer service fee (5.5%) and applies small-order fees for low-value purchases; sellers set gig prices and can offer extras."
+        },
+        {
+          "label": "Paid video consultations (Help Center)",
+          "url": "https://help.fiverr.com/hc/en-us/articles/12307695633041-Paid-video-consultations-for-freelancers",
+          "claim": "Sellers can offer paid consultations with set session lengths and prices, and integrate calendar availability."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Fiverr Q3 2025 results",
+          "url": "https://www.fiverr.com/news/Fiverr-Announces-Third-Quarter-2025-Results",
+          "claim": "Annual active buyers as of Sep 30, 2025 were 3.3 million; describes marketplace revenue and operational metrics."
+        },
+        {
+          "label": "TechCrunch IPO filing",
+          "url": "https://techcrunch.com/2019/05/16/fiverr-files-to-go-public/",
+          "claim": "Documents Fiverr’s IPO filing and notes approximately $111M raised in prior venture rounds before going public in 2019."
+        },
+        {
+          "label": "SEC Annual Report (Form/Annual Report)",
+          "url": "https://www.sec.gov/Archives/edgar/data/1762301/000117891325000559/zk2532679.htm",
+          "claim": "Official company filing with corporate details and audited disclosures (used for employee counts and operational descriptions)."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/www.fiverr.com",
+          "claim": "Aggregated buyer complaints include disputes over quality, refunds, and slow or unsatisfactory customer support."
+        },
+        {
+          "label": "Reddit community discussions",
+          "url": "https://www.reddit.com/r/Fiverr/",
+          "claim": "Frequent community threads highlight issues like fake reviews, disputes, and frustration with platform support and buyer/seller conflicts."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Gaming coaching category",
+          "url": "https://www.fiverr.com/categories/lifestyle/gaming/game-coaching",
+          "claim": "Fiverr lists dedicated subcategories for game coaching and game sessions where individual coaches offer gig-based lessons."
+        },
+        {
+          "label": "Video calls (Zoom) help center",
+          "url": "https://help.fiverr.com/hc/en-us/articles/360011062838-Video-calls-Zoom-calls",
+          "claim": "Fiverr supports in-platform Zoom calls and documents how sellers can use video calls in workflows."
+        },
+        {
+          "label": "How Fiverr works (Help Center)",
+          "url": "https://help.fiverr.com/hc/en-us/articles/360010558038-How-Fiverr-works",
+          "claim": "Explains Fiverr’s gig-based buying model, escrow payments, and order lifecycle used across categories including gaming."
+        }
+      ]
+    },
+    "strengths": [
+      "Large two-sided marketplace and brand recognition — deep supply of gaming coaches and related services makes it easy for buyers to find low-cost options.",
+      "Flexible seller-driven pricing and gig packaging — sellers can rapidly list niche game-specific services (duo-queue, boosting, VOD reviews) which increases inventory breadth.",
+      "Built-in session tooling — paid video consultations, Zoom integration, and calendar connectivity enable live coaching workflows without third-party tooling."
+    ],
+    "weaknesses": [
+      "High variability in seller quality — reliance on reviews and seller-defined packages creates trust friction for higher-ticket coaching purchases.",
+      "Fee structure and commissions — buyer service fees (5.5% + small-order fees) and a flat seller commission (20%) can make total costs opaque and reduce seller take-home.",
+      "No strong skill-verification for coaches — beyond Fiverr Pro, there’s limited objective verification for gaming-specific credentials, making comparison and trust-building harder.",
+      "Customer support and dispute handling are common complaint areas — public reviews cite slow or unsatisfactory resolution experiences for disputes or refunds."
+    ]
+  }
+}

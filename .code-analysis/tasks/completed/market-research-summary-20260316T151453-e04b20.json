@@ -1,0 +1,36 @@
+{
+  "id": "market-research-summary-20260316T151453-e04b20",
+  "type": "market-research-summary",
+  "status": "completed",
+  "createdAt": "2026-03-16T15:14:53.952Z",
+  "dependsOn": [
+    "market-research-competitor-20260316T151422-5ae395",
+    "market-research-competitor-20260316T151433-1617bf",
+    "market-research-competitor-20260316T151433-37fd2d",
+    "market-research-competitor-20260316T151433-ca60b8",
+    "market-research-competitor-20260316T151433-91337b",
+    "market-research-competitor-20260316T151433-3089fb",
+    "market-research-competitor-20260316T151433-ecddc0",
+    "market-research-competitor-20260316T151433-759176",
+    "market-research-competitor-20260316T151433-0851a8",
+    "market-research-competitor-20260316T151433-393aed"
+  ],
+  "params": {
+    "sessionId": "54eaa88f-a207-443a-b788-f60f4f9f62a3",
+    "idea": "Platform where gamers can pay for sessions, collaborate",
+    "targetDirectory": "C:\\_projects\\developing\\jfs\\codebase-analyzer"
+  },
+  "agentConfig": {
+    "agent": "llm-api",
+    "model": "claude-sonnet-4-6",
+    "maxTokens": 16000,
+    "maxIterations": 5,
+    "reasoningEffort": "high"
+  },
+  "systemInstructionFile": "backend/system-instructions/market-research/market-research-summary.md",
+  "outputFile": ".code-analysis/market-research/54eaa88f-a207-443a-b788-f60f4f9f62a3/opportunity.json",
+  "progressFile": ".code-analysis/temp/progress/market-research-summary-20260316T151453-e04b20.md",
+  "logFile": "logs/market-research-summary-20260316T151453-e04b20.log",
+  "startedAt": "2026-03-16T15:21:15.924Z",
+  "completedAt": "2026-03-16T15:22:51.322Z"
+}

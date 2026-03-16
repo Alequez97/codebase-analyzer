@@ -1,0 +1,164 @@
+{
+  "id": "epal",
+  "name": "E-Pal",
+  "url": "https://www.epal.gg/",
+  "description": "A consumer marketplace where gamers hire live companions, coaches and creators for paid play, coaching, and social gaming sessions.",
+  "logoChar": "EP",
+  "logoColor": "#ff3b8c",
+  "logoBg": "#fff0f6",
+  "tags": ["gaming-marketplace", "live-companions", "creator-monetization"],
+  "pricing": "Free",
+  "pricingPeriod": "",
+  "customers": "2M+",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "US",
+    "funding": "$30M",
+    "employees": "51-200",
+    "business": "C2C consumer marketplace",
+    "targetMarket": "Casual and competitive gamers who want paid teammates, social play, coaching, or creator interaction; creators and pro players who monetize play time.",
+    "features": [
+      {
+        "category": "Marketplace & discovery",
+        "items": [
+          "Search and browse profiles by game and activity",
+          "One-off orders and instant/live sessions",
+          "Creator/EPal storefronts and live streaming sections"
+        ]
+      },
+      {
+        "category": "Payments & wallet",
+        "items": [
+          "Platform virtual currency (Buff) used to pay for sessions",
+          "In-platform Wallet for refunds and balances",
+          "Subscription/VIP membership options (platform-level)"
+        ]
+      },
+      {
+        "category": "Trust & roles",
+        "items": [
+          "Verified badges for select roles (Coach badge for certain games)",
+          "Ratings and reviews for ePals",
+          "Community moderation and reporting flows (limited per reviews)"
+        ]
+      },
+      {
+        "category": "Creator tools & growth",
+        "items": [
+          "Live section to showcase online ePals",
+          "Profile levelling and exposure mechanics",
+          "Tips and store/shop features for sellers"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No standardized package pricing or bundled session products (most ePals set ad-hoc hourly rates), which makes price comparison and upfront commitment harder for buyers.",
+      "Limited verified identity/skill proof beyond a small set of Coach badges — no standardized credential verification or 3rd-party proof of skill for high-ticket coaches.",
+      "No built-in recurring booking/subscription flow for repeat coaching or regular sessions (buyers must repurchase manually), creating churn and scheduling friction.",
+      "Weak dispute and review reciprocity: multiple reviews report that ePals can’t leave written reviews for clients and that moderation is inconsistent, increasing risk for sellers.",
+      "Refunds and payment flow rely on virtual currency (Buff) and wallet-credit rather than guaranteed fiat refunds in all cases, reducing trust for buyers used to direct refunds.",
+      "Limited analytics and progression tools for sellers — no robust conversion, cohort, or lifetime-value dashboards to help top ePals scale as small businesses."
+    ],
+    "pricingPlans": [
+      {
+        "name": "Free",
+        "price": "$0",
+        "period": "",
+        "note": "Platform is free to join for buyers and ePals; transactions use in-platform currency (Buff).",
+        "highlight": false
+      },
+      {
+        "name": "VIP Membership",
+        "price": "Unknown",
+        "period": "/mo",
+        "note": "Paid membership level with perks (platform lists VIP page) — price not publicly clear on web pages used.",
+        "highlight": true
+      }
+    ],
+    "links": {
+      "docs": "https://www.epal.gg/faq",
+      "pricing": "https://www.epal.gg/vip/",
+      "blog": "https://blog.epal.gg/",
+      "jobs": "https://www.linkedin.com/company/epalgg"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "FAQ (Buff virtual currency & Wallet)",
+          "url": "https://www.epal.gg/faq",
+          "claim": "E-Pal uses a virtual currency called Buff and refunds are transferred into the E-Pal Wallet."
+        },
+        {
+          "label": "VIP page (membership listed)",
+          "url": "https://www.epal.gg/vip/",
+          "claim": "E-Pal advertises VIP/membership perks on a dedicated page (membership pricing not clearly posted on public page)."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "About page",
+          "url": "https://www.epal.gg/about",
+          "claim": "Company claims a community of ~2 million gamers and ~200,000 ePals (company-stated user counts)."
+        },
+        {
+          "label": "Coindesk press release (Sep 2024)",
+          "url": "https://www.coindesk.com/press-release/2024/09/05/e-pal-introduces-mass-adoption-focused-web3-experience-infrastructure-balance-raising-a-total-of-30-million-from-a16z-galaxy-and-others",
+          "claim": "Press release states E-Pal raised $30M in rounds led by a16z and Galaxy and lists 4.2M users / 450k companions (higher company figures cited in announcement)."
+        },
+        {
+          "label": "Crunchbase profile",
+          "url": "https://www.crunchbase.com/organization/e-pal",
+          "claim": "Crunchbase lists E-Pal with a Lake Forest / Irvine, CA presence and company metadata (founding info)."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://ca.trustpilot.com/review/epal.gg",
+          "claim": "Multiple reviews cite complaints about fake profiles, moderation issues, and perceived poor seller protections."
+        },
+        {
+          "label": "Reddit ePal community",
+          "url": "https://www.reddit.com/r/ePal/",
+          "claim": "Community posts discuss low per-order pay, catfishing, and safety/earnings concerns from both buyers and ePals."
+        },
+        {
+          "label": "App Store listing (reviews)",
+          "url": "https://apps.apple.com/us/app/epal-play-games-meet-friends/id1515406923",
+          "claim": "App Store reviews mention subscription mechanics, in-app purchases, and safety/quality issues."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Purchase / Order pages",
+          "url": "https://www.epal.gg/purchase",
+          "claim": "Site provides order and purchase flows for booking gaming companions and services."
+        },
+        {
+          "label": "Become an ePal (seller onboarding)",
+          "url": "https://www.epal.gg/becomeepal/",
+          "claim": "E-Pal documents how to register as a seller (ePal) and monetize gaming sessions."
+        },
+        {
+          "label": "FAQ (Coach badge)",
+          "url": "https://www.epal.gg/faq",
+          "claim": "E-Pal offers a Coach badge for specific games and documents role-specific application steps."
+        }
+      ]
+    },
+    "strengths": [
+      "Marketplace liquidity and scale — company claims multi-million user base and large companion pool, which reduces buyer wait times and increases order frequency.",
+      "Flexible, low-friction monetization — virtual currency and instant ordering enable quick transactions and tips for creators.",
+      "Strong investor backing (a16z, Galaxy) providing capital and strategic partnerships for growth and Web3/AI experiments.",
+      "Wide coverage of games and role types (coaching, social play, creators), enabling cross-use cases (coaching, language exchange, companionship)."
+    ],
+    "weaknesses": [
+      "Recurrent trust and moderation complaints (fake profiles, catfishing, inconsistent enforcement) that harm platform credibility for higher-ticket services.",
+      "Pricing fragmentation and race-to-the-bottom on hourly rates — sellers set ad-hoc prices, leading to unclear value and low earnings for many ePals.",
+      "Opaque refund/payment UX (refunds to Wallet/Buff) and limited fiat refund clarity reduces buyer trust and complicates disputes.",
+      "Limited verified credentialing beyond a small Coach badge program, making it risky for buyers to pay for high-priced coaching without third-party verification.",
+      "Weak seller business tools (limited analytics, no recurring booking or subscription flows) that make it hard for top ePals to scale as professional businesses."
+    ]
+  }
+}

@@ -1,0 +1,1654 @@
+{
+  "sessionId": "54eaa88f-a207-443a-b788-f60f4f9f62a3",
+  "idea": "Platform where gamers can pay for sessions, collaborate",
+  "status": "complete",
+  "competitors": [
+    {
+      "id": "metafy",
+      "name": "Metafy",
+      "url": "https://metafy.gg/",
+      "description": "A marketplace that connects gamers with paid 1:1 coaches, guides, events and creator communities — targeting players who want skill improvement and creators who want to monetize coaching.",
+      "status": "done",
+      "logoChar": "M",
+      "logoColor": "#00C2FF",
+      "logoBg": "#F0FCFF",
+      "tags": [
+        "gaming",
+        "creator-monetization",
+        "coaching",
+        "marketplace"
+      ],
+      "pricing": "$29.99",
+      "pricingPeriod": "/mo",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2020",
+        "country": "US",
+        "funding": "$25M Series A (Feb 2022); total disclosed funding ~$33M",
+        "employees": "51-200 (est.)",
+        "business": "Marketplace / Creator platform (consumer-facing, creator monetization)",
+        "targetMarket": "Amateur and semi-pro gamers who want paid coaching and creators/streamers who want to monetize teaching and communities",
+        "features": [
+          {
+            "category": "Core marketplace",
+            "items": [
+              "1:1 live coaching sessions (bookable by slot)",
+              "VOD / replay reviews",
+              "Public coach profiles and ratings",
+              "Search and discovery by game/title and coach"
+            ]
+          },
+          {
+            "category": "Creator monetization",
+            "items": [
+              "Metafy Pro subscription for creators (tools + distribution)",
+              "Sellable guides (video/written)",
+              "Paid subscription tiers / Communities",
+              "Events and group workshops"
+            ]
+          },
+          {
+            "category": "Scheduling & payments",
+            "items": [
+              "Built-in scheduling with availability blocks and rescheduling",
+              "Wallet & payments, cancellation fees configurable by coach",
+              "Revenue metrics and basic analytics for creators"
+            ]
+          },
+          {
+            "category": "Product integrations",
+            "items": [
+              "Discord linking for coordination and role gating",
+              "Mobile-friendly web experience"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No strong, platform-level verification or outcomes layer (no standardized proof of coaching outcomes or guaranteed improvement metrics) — buyers must rely on coach bios/reviews",
+          "Pricing and package standardization is weak: sessions are seller-priced with highly variable scopes and add-ons, making side-by-side comparison difficult for buyers",
+          "Limited buyer protection & refund guarantees: public user complaints describe unresolved refund or no-help scenarios when sessions are missed or coaches go inactive",
+          "Advanced learner analytics and progress tracking (program-level KPIs, long-term progress dashboards) are minimal — hard for students to measure ROI over multiple sessions",
+          "No public B2B / API product for partners or teams to manage coach bookings and reporting at scale (enterprise integrations appear limited)",
+          "Marketplace quality controls to prevent ‘hit-or-miss’ coaches (more curated onboarding, standardized trial/intake flows, or insurance-backed guarantees) are underdeveloped"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Metafy Pro (creator subscription)",
+            "price": "$29.99",
+            "period": "/mo",
+            "note": "Subscription for creators/partners that unlocks selling sessions, guides, communities and access to Pro tools; discounted annual rate available",
+            "highlight": true
+          },
+          {
+            "name": "Sessions (buyer-priced)",
+            "price": "Varies (commonly $8-$100+)",
+            "period": "per session",
+            "note": "Individual coaches set their own prices and bundles (VOD reviews, one-off sessions, multi-session programs)",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://help.metafy.gg/",
+          "pricing": "https://metafy.gg/pro",
+          "blog": "https://letters.metafy.gg/",
+          "jobs": "https://metafy.gg/careers"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "What is Metafy Pro? (Help Center)",
+              "url": "https://help.metafy.gg/en/articles/9300561-what-is-metafy-pro",
+              "claim": "Metafy Pro subscription costs $29.99 per month (or $19.99/mo billed annually) and provides creators with tools, billing, scheduling and distribution."
+            },
+            {
+              "label": "Metafy Pro product page",
+              "url": "https://metafy.gg/pro",
+              "claim": "Metafy Pro marketing page describing creator features and the Pro subscription offering."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "TechCrunch — Series A coverage",
+              "url": "https://techcrunch.com/2022/02/01/metafy-lands-25m-to-scale-its-gaming-coaching-platform/",
+              "claim": "Metafy closed a $25M Series A led by Tiger Global and Seven Seven Six in Feb 2022; company founded in 2020."
+            },
+            {
+              "label": "Esports Insider — Series A report",
+              "url": "https://esportsinsider.com/2022/02/metafy-series-a-round-25m",
+              "claim": "Reporting that Metafy raised $25M in a Series A to scale its esports coaching marketplace."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot reviews for metafy.gg",
+              "url": "https://www.trustpilot.com/review/metafy.gg",
+              "claim": "Mixed reviews including complaints about refunds and support response in some cases."
+            },
+            {
+              "label": "Reddit discussions (user experiences)",
+              "url": "https://www.reddit.com/r/CompetitiveHalo/comments/1hslq21/i_spent_49099_on_metafy_coaching_in_2024_ask_me/",
+              "claim": "User reports and threads show a range of experiences; some users find coaching valuable while others warn the platform can be ‘hit-or-miss’ depending on coach selection."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Our Offerings (Help Center)",
+              "url": "https://help.metafy.gg/en/articles/11867539-our-offerings",
+              "claim": "Metafy offers Sessions, Events, Communities, and Guides as core product lines (1:1 coaching, group events, paid communities and sellable guides)."
+            },
+            {
+              "label": "Sessions — product pages",
+              "url": "https://metafy.gg/sessions",
+              "claim": "Marketplace listings for coach sessions, showing coach profiles, session types, durations and booking flow."
+            }
+          ]
+        },
+        "strengths": [
+          "Strong product-market fit in gaming coaching: broad catalog across 200+ games and clear demand for 1:1 coaching (marketplace depth for many titles).",
+          "Well-funded and credible: $25M Series A led by Tiger Global / Seven Seven Six gives distribution and hiring runway. (TechCrunch coverage)",
+          "Creator-first monetization: creators can sell sessions, guides, events and communities and (as Pro) keep session/guide revenue — attractive to streamers/creators)",
+          "Integrated scheduling, payments and Discord linking reduce friction for coach-student coordination (built-in workflows for bookings, cancellations, wallet)."
+        ],
+        "weaknesses": [
+          "Quality variance across coaches creates buyer uncertainty — platform reviews and Reddit threads report inconsistent coaching outcomes and occasional poor experiences.",
+          "Lack of strong platform-level verification or outcome guarantees; buyers rely on coach-provided evidence and reviews rather than standardized proof of efficacy.",
+          "Refunds & support pain points: Trustpilot and user threads cite unresolved refund issues or slow mediation when coaches become inactive or fail to deliver.",
+          "Packaging and price standardization are weak, making discovery and apples-to-apples comparison of offerings hard for consumers."
+        ]
+      }
+    },
+    {
+      "id": "proguides",
+      "name": "ProGuides",
+      "url": "https://www.proguides.com/",
+      "description": "Subscription and marketplace for game coaching and on-demand courses taught by pro players, targeting competitive and improving gamers.",
+      "status": "done",
+      "logoChar": "PG",
+      "logoColor": "#3b82f6",
+      "logoBg": "#eff6ff",
+      "tags": [
+        "esports",
+        "coaching",
+        "courses",
+        "marketplace"
+      ],
+      "pricing": "$7.99",
+      "pricingPeriod": "/mo",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2015",
+        "country": "US",
+        "funding": "$7.4M (disclosed)",
+        "employees": "~80",
+        "business": "B2C marketplace + subscription (consumer-focused coaching & courses)",
+        "targetMarket": "Individual competitive gamers (casual-to-semi-pro) seeking skill improvement via courses, 1:1 coaching, and ‘play with the pros’ sessions",
+        "features": [
+          {
+            "category": "Content & Courses",
+            "items": [
+              "On-demand video courses and lessons created with pro players",
+              "Masterclasses and bootcamps across titles (LoL, CSGO, Fortnite, etc.)"
+            ]
+          },
+          {
+            "category": "Live Coaching Marketplace",
+            "items": [
+              "Roster of professional coaches available for 1:1 sessions",
+              "Play-with-the-pros / scrim sessions where users can schedule matches with pros"
+            ]
+          },
+          {
+            "category": "Membership & Integrations",
+            "items": [
+              "Pro membership (marketing price $7.99/mo) that unlocks course library and discounts",
+              "Integration/merger with Aimlab+ to combine aim training and ProGuides membership"
+            ]
+          },
+          {
+            "category": "Apps & Tools",
+            "items": [
+              "Desktop app (Overwolf) with coach roster, course catalogue and AI chatbot",
+              "Data-driven progress trackers mentioned in company descriptions"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Opaque subscription billing: marketed as $7.99/mo but commonly sold as an annual charge by default (heavy fine-print), which creates buyer confusion and refund disputes",
+          "Coaching purchase friction: 1:1 sessions are bought via 'PG Points' rather than transparent per-session pricing, preventing easy price comparison and driving additional microtransactions",
+          "No built-in recurring coaching bookings or subscription-for-coaching flow (weekly recurring sessions) — coaches are booked ad-hoc per session, increasing friction for users who want regular coaching",
+          "Limited buyer protection and refund transparency for paid coaching sessions — multiple user reports of difficulty getting refunds or resolving billing disputes",
+          "No obvious public B2B/team or API offering for esports organizations or coaching programs (limits expansion into team/enterprise workflows)"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Free",
+            "price": "$0",
+            "period": "",
+            "note": "Limited access to free guides and some coach listings; most premium courses and discounts reserved for paid members",
+            "highlight": false
+          },
+          {
+            "name": "Pro (marketing)",
+            "price": "$7.99",
+            "period": "/mo",
+            "note": "Marketed monthly price; historically sold as an annual subscription by default — includes access to course library, Aimlabs+ bundling benefits, and coaching discounts",
+            "highlight": true
+          },
+          {
+            "name": "Pro (monthly billed)",
+            "price": "$12.99",
+            "period": "/mo",
+            "note": "Reported monthly billing price (varies by promotion); coaching sessions are purchased separately via PG Points",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://www.proguides.com/guides/",
+          "pricing": "https://www.proguides.com/settings/subscriptions",
+          "blog": "https://www.proguides.com/guides/",
+          "jobs": "https://www.linkedin.com/company/proguidescom"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Forbes (reporting pricing)",
+              "url": "https://www.forbes.com/sites/mattperez/2020/01/24/esports-training-site-proguides-raises-5-million-in-seed-funding/",
+              "claim": "Article states ProGuides offered a subscription at $7.99 per month when reporting on company funding."
+            },
+            {
+              "label": "ProGuides - Subscriptions page",
+              "url": "https://www.proguides.com/settings/subscriptions",
+              "claim": "Official subscriptions/settings page where membership tiers and billing options are presented."
+            },
+            {
+              "label": "Dot Esports (product description)",
+              "url": "https://dotesports.com/sponsored/news/everything-you-need-to-know-about-proguides",
+              "claim": "Describes ProGuides as offering a $7.99-per-month subscription and on-demand coaching."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "BusinessWire (acquisition press release)",
+              "url": "https://www.businesswire.com/news/home/20211102005937/en/Statespace-Acquires-ProGuides",
+              "claim": "Statespace acquired ProGuides in November 2021; press release notes ProGuides was founded in 2015."
+            },
+            {
+              "label": "Crunchbase (company profile & funding rounds)",
+              "url": "https://www.crunchbase.com/organization/proguides",
+              "claim": "Lists ProGuides funding rounds including a $5.5M seed and a $1.9M pre-seed, describing the company as an on-demand coaching and courses platform."
+            },
+            {
+              "label": "PitchBook (company snapshot)",
+              "url": "https://pitchbook.com/profiles/company/232015-51",
+              "claim": "Company profile showing founding year (2015), headquarters in Los Angeles, and an estimated employee count (~79)."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot (user reviews)",
+              "url": "https://www.trustpilot.com/review/proguides.com",
+              "claim": "Multiple user reviews reporting confusion over advertised monthly pricing vs annual billing and complaints about refund/billing experiences."
+            },
+            {
+              "label": "EsportsBettingSite (critique of billing/PG Points)",
+              "url": "https://www.esportsbettingsite.com/proguides-predatory-selling-technique/",
+              "claim": "Article criticizes ProGuides for marketing $7.99/mo but billing annually and for requiring PG Points for coaching purchases, creating perceived predatory UX."
+            },
+            {
+              "label": "Reddit user threads",
+              "url": "https://www.reddit.com/r/CrazyHand/comments/exw8st/anyone_use_proguides/",
+              "claim": "Community posts recount negative experiences around subscription model, billing, and perceived poor value."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "ProGuides - Guides & Courses",
+              "url": "https://www.proguides.com/guides/",
+              "claim": "Official course catalog and guides showing on-demand courses by pro players across multiple titles."
+            },
+            {
+              "label": "ProGuides blog: Aimlabs+ and ProGuides memberships combining",
+              "url": "https://www.proguides.com/guides/aimlabs/aimlabs-and-proguides-memberships-are-combining/",
+              "claim": "Announcement that Aimlabs+ and ProGuides memberships are being combined to give members access to Aim Lab tools and ProGuides content."
+            },
+            {
+              "label": "Overwolf - The ProGuides App",
+              "url": "https://www.overwolf.com/app/proguides-the_proguides_app",
+              "claim": "Overwolf app listing describes features like AI chatbot, coach roster, and course catalogue available in the desktop app."
+            }
+          ]
+        },
+        "strengths": [
+          "High-profile pro content: Courses and masterclasses from well-known pro players provide credibility and discoverability (e.g., s1mple, Imaqtpie referenced in press).",
+          "Aim Lab / Statespace integration: Acquisition by Statespace and Aimlab+ bundling expands technical training (aim analytics) and gives product differentiation vs pure-marketplace rivals.",
+          "Affordable entry price: Low advertised entry price point (marketed at $7.99/mo) makes the product accessible to a large consumer base.",
+          "Breadth of content and marketplace: Combination of on-demand courses, live 1:1 coaching, and play-with-pro sessions addresses multiple learner preferences and monetization channels.",
+          "Desktop & platform integrations: Presence on Overwolf and Aim Lab integration increases in-game or desktop discoverability."
+        ],
+        "weaknesses": [
+          "Billing and transparency issues: Repeated complaints about annual default billing and unclear messaging damage trust and increase refund friction (Trustpilot/Reddit).",
+          "Opaque coaching commerce (PG Points): Using points to buy coaching (rather than clear per-session pricing) creates friction and obscures real cost-to-serve comparisons between coaches.",
+          "Mixed user reviews: While many praise coaches, there is a notable volume of complaints focused on billing and perceived value that harm conversion for skeptical buyers.",
+          "Marketplace quality control & guarantees: Limited visible buyer protections or standardized coach verification beyond listings and ratings makes high-ticket purchases riskier.",
+          "Limited B2B / team features: No clear public offering for teams, organizations, or APIs to integrate ProGuides coaching into enterprise or club workflows, constraining expansion."
+        ]
+      }
+    },
+    {
+      "id": "gamersensei",
+      "name": "Gamer Sensei",
+      "url": "https://www.gamersensei.com/",
+      "description": "An esports coaching marketplace that connects players (individuals and teams) with vetted pro and semi-pro gaming coaches for 1:1 and team lessons.",
+      "status": "done",
+      "logoChar": "GS",
+      "logoColor": "#111827",
+      "logoBg": "#F3F4F6",
+      "tags": [
+        "esports",
+        "coaching marketplace",
+        "team coaching",
+        "one-on-one"
+      ],
+      "pricing": "$25",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "2016",
+        "country": "US",
+        "funding": "$6.3M+ (seed + Series A)",
+        "employees": "~30",
+        "business": "B2C marketplace (also B2B/team coaching offerings)",
+        "targetMarket": "Individual competitive gamers seeking skill improvement and amateur/semi-pro teams looking for structured team coaching and curriculum",
+        "features": [
+          {
+            "category": "Marketplace & Discovery",
+            "items": [
+              "Curated catalog of Sensei (coaches) across 20+ esports titles",
+              "Coach profiles with reviews and experience tiers",
+              "Patent-pending matching algorithm to surface coaches"
+            ]
+          },
+          {
+            "category": "Booking & Lessons",
+            "items": [
+              "One-on-one lessons, VOD/replay reviews, duo or partner sessions",
+              "Team Coaching product and structured curriculum for rosters",
+              "Built-in scheduling and in-browser video conferencing"
+            ]
+          },
+          {
+            "category": "Coach Tools & Operations",
+            "items": [
+              "Coach onboarding and career development resources",
+              "Ability for coaches to set their own rates and lesson packages",
+              "Student wallet/credit system and refund/credit flows"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No standardized, platform-managed subscription or recurring lesson package for weekly coaching — customers must rebook individual sessions or rely on coach-created packages.",
+          "No robust progress analytics/dashboard for students (no standardized skill metrics, learning milestones, or longitudinal reporting to prove ROI to buyers).",
+          "Limited instant/on-demand coaching availability — many reviews report listed availability does not guarantee immediate sessions (weak real-time availability or instant-join experience).",
+          "Payments/refunds route customers into site credits often (non-transparent refundable flows), making cash refunds and dispute resolution friction points for buyers.",
+          "No public API or B2B integration product for organizations (schools, clubs, or platforms) to programmatically book or manage multiple students/teams at scale."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Per-session (coach-set)",
+            "price": "$25+",
+            "period": "",
+            "note": "Coaches set their own per-session rates; prices vary by coach experience, game, and lesson type (VOD review, live spectate, duo).",
+            "highlight": true
+          },
+          {
+            "name": "Skills assessment",
+            "price": "Varies (flat low fee)",
+            "period": "",
+            "note": "Platform offers a low flat-rate skills assessment product (price has been reduced historically per press releases).",
+            "highlight": false
+          },
+          {
+            "name": "Team Coaching",
+            "price": "Custom",
+            "period": "",
+            "note": "Structured curriculum and multi-player/team sessions priced per-team or custom per engagement.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://support.gamersensei.com/",
+          "pricing": "https://support.gamersensei.com/hc/en-us/articles/360054294072-What-does-it-cost-",
+          "blog": "https://blog.gamersensei.com/",
+          "jobs": "https://www.corsair.com/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "StreamScheme (market writeup)",
+              "url": "https://streamscheme.com/league-of-legends-coaching/",
+              "claim": "Notes that Gamer Sensei coaches go through an application process and that coaches set their own rates; coaching sessions commonly range in the ~$10–$60+ range depending on coach."
+            },
+            {
+              "label": "NWA Online (news article)",
+              "url": "https://www.nwaonline.com/news/2019/nov/25/players-are-turning-to-gaming-tutors-20/",
+              "claim": "Reports typical coach charges and examples, observing rates from low tens of dollars up to high rates for well-known coaches."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "CORSAIR press release (acquisition)",
+              "url": "https://ir.corsair.com/news-releases/news-release-details/take-your-game-next-level-corsair-acquires-gamer-sensei",
+              "claim": "CORSAIR acquired Gamer Sensei in November 2020 and describes Gamer Sensei as founded in 2016 and the largest esports coaching platform."
+            },
+            {
+              "label": "Crunchbase company profile",
+              "url": "https://www.crunchbase.com/organization/gamer-sensei",
+              "claim": "Documents Gamer Sensei's seed and Series A funding rounds (seed ~ $2.3M, Series A $4M) and company overview."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Reddit: availability/refund complaints",
+              "url": "https://www.reddit.com/r/LeagueCoaching/comments/m7z3op/gamer_sensei_coaching_is_unprofessional_and_has/",
+              "claim": "User reports inconsistent coach availability and buggy scheduling; example of poor customer support response."
+            },
+            {
+              "label": "Reddit: refund/credits complaint",
+              "url": "https://www.reddit.com/r/dota2tutor/comments/hi2ah6/dont_use_gamersensei/",
+              "claim": "User describes refund being routed to site credits and restrictive refund policy tied to coach response windows."
+            },
+            {
+              "label": "Trustpilot reviews",
+              "url": "https://www.trustpilot.com/review/gamersensei.com",
+              "claim": "Mixed reviews including complaints about no-shows and poor customer service for missed lessons."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "CORSAIR newsroom (Team Coaching & built-in video)",
+              "url": "https://www.corsair.com/newsroom/press-release/gamer-sensei-expands-esports-coaching-offerings-with-new-team-coaching-service",
+              "claim": "Announces Team Coaching product, built-in video conferencing, and a streamlined scheduling process; mentions curriculum and skills assessment."
+            },
+            {
+              "label": "Gamer Sensei blog (matching / curated coaches)",
+              "url": "https://blog.gamersensei.com/article/gamer-sensei-4-million-funding/",
+              "claim": "Describes the platform's patent-pending algorithm for matching students to curated, vetted Sensei (coaches) across esports titles."
+            }
+          ]
+        },
+        "strengths": [
+          "Large, curated coach marketplace with vetted pro and semi-pro talent — good supply for mainstream esports titles.",
+          "Backed by CORSAIR (acquired 2020) which provides distribution, brand trust and operational scale for growth and partnerships.",
+          "Product features for teams (Team Coaching), built-in video conferencing and a variety of lesson types (VOD review, live spectate, duo), enabling multiple monetizable lesson formats."
+        ],
+        "weaknesses": [
+          "Marketplace availability and scheduling reliability — multiple user reports that listed coach availability is inaccurate, creating booking friction and no true on-demand experience.",
+          "Pricing inconsistency and lack of standardized packages — coach-set pricing makes buyer comparison difficult and can deter lower-intent customers.",
+          "Refunds and credit flows have caused customer friction — complaints about refunds being routed to credits and restrictive refund rules harm trust for higher-ticket purchases.",
+          "Lack of measurable learning outcomes or student analytics — no public progress dashboards or standardized skill metrics to demonstrate ROI for repeat purchasers or teams.",
+          "Limited B2B/enterprise integration (no public API or white-label offering documented) which limits growth into schools, clubs, or platform partnerships."
+        ]
+      }
+    },
+    {
+      "id": "epal",
+      "name": "E-Pal",
+      "url": "https://www.epal.gg/",
+      "description": "A consumer marketplace where gamers hire live companions, coaches and creators for paid play, coaching, and social gaming sessions.",
+      "status": "done",
+      "logoChar": "EP",
+      "logoColor": "#ff3b8c",
+      "logoBg": "#fff0f6",
+      "tags": [
+        "gaming-marketplace",
+        "live-companions",
+        "creator-monetization"
+      ],
+      "pricing": "Free",
+      "pricingPeriod": "",
+      "customers": "2M+",
+      "details": {
+        "founded": "2020",
+        "country": "US",
+        "funding": "$30M",
+        "employees": "51-200",
+        "business": "C2C consumer marketplace",
+        "targetMarket": "Casual and competitive gamers who want paid teammates, social play, coaching, or creator interaction; creators and pro players who monetize play time.",
+        "features": [
+          {
+            "category": "Marketplace & discovery",
+            "items": [
+              "Search and browse profiles by game and activity",
+              "One-off orders and instant/live sessions",
+              "Creator/EPal storefronts and live streaming sections"
+            ]
+          },
+          {
+            "category": "Payments & wallet",
+            "items": [
+              "Platform virtual currency (Buff) used to pay for sessions",
+              "In-platform Wallet for refunds and balances",
+              "Subscription/VIP membership options (platform-level)"
+            ]
+          },
+          {
+            "category": "Trust & roles",
+            "items": [
+              "Verified badges for select roles (Coach badge for certain games)",
+              "Ratings and reviews for ePals",
+              "Community moderation and reporting flows (limited per reviews)"
+            ]
+          },
+          {
+            "category": "Creator tools & growth",
+            "items": [
+              "Live section to showcase online ePals",
+              "Profile levelling and exposure mechanics",
+              "Tips and store/shop features for sellers"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No standardized package pricing or bundled session products (most ePals set ad-hoc hourly rates), which makes price comparison and upfront commitment harder for buyers.",
+          "Limited verified identity/skill proof beyond a small set of Coach badges — no standardized credential verification or 3rd-party proof of skill for high-ticket coaches.",
+          "No built-in recurring booking/subscription flow for repeat coaching or regular sessions (buyers must repurchase manually), creating churn and scheduling friction.",
+          "Weak dispute and review reciprocity: multiple reviews report that ePals can’t leave written reviews for clients and that moderation is inconsistent, increasing risk for sellers.",
+          "Refunds and payment flow rely on virtual currency (Buff) and wallet-credit rather than guaranteed fiat refunds in all cases, reducing trust for buyers used to direct refunds.",
+          "Limited analytics and progression tools for sellers — no robust conversion, cohort, or lifetime-value dashboards to help top ePals scale as small businesses."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Free",
+            "price": "$0",
+            "period": "",
+            "note": "Platform is free to join for buyers and ePals; transactions use in-platform currency (Buff).",
+            "highlight": false
+          },
+          {
+            "name": "VIP Membership",
+            "price": "Unknown",
+            "period": "/mo",
+            "note": "Paid membership level with perks (platform lists VIP page) — price not publicly clear on web pages used.",
+            "highlight": true
+          }
+        ],
+        "links": {
+          "docs": "https://www.epal.gg/faq",
+          "pricing": "https://www.epal.gg/vip/",
+          "blog": "https://blog.epal.gg/",
+          "jobs": "https://www.linkedin.com/company/epalgg"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "FAQ (Buff virtual currency & Wallet)",
+              "url": "https://www.epal.gg/faq",
+              "claim": "E-Pal uses a virtual currency called Buff and refunds are transferred into the E-Pal Wallet."
+            },
+            {
+              "label": "VIP page (membership listed)",
+              "url": "https://www.epal.gg/vip/",
+              "claim": "E-Pal advertises VIP/membership perks on a dedicated page (membership pricing not clearly posted on public page)."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "About page",
+              "url": "https://www.epal.gg/about",
+              "claim": "Company claims a community of ~2 million gamers and ~200,000 ePals (company-stated user counts)."
+            },
+            {
+              "label": "Coindesk press release (Sep 2024)",
+              "url": "https://www.coindesk.com/press-release/2024/09/05/e-pal-introduces-mass-adoption-focused-web3-experience-infrastructure-balance-raising-a-total-of-30-million-from-a16z-galaxy-and-others",
+              "claim": "Press release states E-Pal raised $30M in rounds led by a16z and Galaxy and lists 4.2M users / 450k companions (higher company figures cited in announcement)."
+            },
+            {
+              "label": "Crunchbase profile",
+              "url": "https://www.crunchbase.com/organization/e-pal",
+              "claim": "Crunchbase lists E-Pal with a Lake Forest / Irvine, CA presence and company metadata (founding info)."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot reviews",
+              "url": "https://ca.trustpilot.com/review/epal.gg",
+              "claim": "Multiple reviews cite complaints about fake profiles, moderation issues, and perceived poor seller protections."
+            },
+            {
+              "label": "Reddit ePal community",
+              "url": "https://www.reddit.com/r/ePal/",
+              "claim": "Community posts discuss low per-order pay, catfishing, and safety/earnings concerns from both buyers and ePals."
+            },
+            {
+              "label": "App Store listing (reviews)",
+              "url": "https://apps.apple.com/us/app/epal-play-games-meet-friends/id1515406923",
+              "claim": "App Store reviews mention subscription mechanics, in-app purchases, and safety/quality issues."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Purchase / Order pages",
+              "url": "https://www.epal.gg/purchase",
+              "claim": "Site provides order and purchase flows for booking gaming companions and services."
+            },
+            {
+              "label": "Become an ePal (seller onboarding)",
+              "url": "https://www.epal.gg/becomeepal/",
+              "claim": "E-Pal documents how to register as a seller (ePal) and monetize gaming sessions."
+            },
+            {
+              "label": "FAQ (Coach badge)",
+              "url": "https://www.epal.gg/faq",
+              "claim": "E-Pal offers a Coach badge for specific games and documents role-specific application steps."
+            }
+          ]
+        },
+        "strengths": [
+          "Marketplace liquidity and scale — company claims multi-million user base and large companion pool, which reduces buyer wait times and increases order frequency.",
+          "Flexible, low-friction monetization — virtual currency and instant ordering enable quick transactions and tips for creators.",
+          "Strong investor backing (a16z, Galaxy) providing capital and strategic partnerships for growth and Web3/AI experiments.",
+          "Wide coverage of games and role types (coaching, social play, creators), enabling cross-use cases (coaching, language exchange, companionship)."
+        ],
+        "weaknesses": [
+          "Recurrent trust and moderation complaints (fake profiles, catfishing, inconsistent enforcement) that harm platform credibility for higher-ticket services.",
+          "Pricing fragmentation and race-to-the-bottom on hourly rates — sellers set ad-hoc prices, leading to unclear value and low earnings for many ePals.",
+          "Opaque refund/payment UX (refunds to Wallet/Buff) and limited fiat refund clarity reduces buyer trust and complicates disputes.",
+          "Limited verified credentialing beyond a small Coach badge program, making it risky for buyers to pay for high-priced coaching without third-party verification.",
+          "Weak seller business tools (limited analytics, no recurring booking or subscription flows) that make it hard for top ePals to scale as professional businesses."
+        ]
+      }
+    },
+    {
+      "id": "gankster",
+      "name": "Gankster",
+      "url": "https://gankster.gg/",
+      "description": "An all-in-one competitive gaming platform (LFG, scrims, ladders and team tools) that connects players and teams across titles like Valorant, LoL, Rocket League and Dota 2.",
+      "status": "done",
+      "logoChar": "G",
+      "logoColor": "#8b5cf6",
+      "logoBg": "#f5f3ff",
+      "tags": [
+        "LFG",
+        "Scrim scheduling",
+        "Reputation"
+      ],
+      "pricing": "Free",
+      "pricingPeriod": "",
+      "customers": "10K+",
+      "details": {
+        "founded": "2021",
+        "country": "Israel",
+        "funding": "$4.25M seed",
+        "employees": "11-50",
+        "business": "B2B/B2C platform (consumer product with team/org use)",
+        "targetMarket": "Competitive players, amateur/pro esports teams, collegiate & community orgs, tournament organizers",
+        "features": [
+          {
+            "category": "Discovery & Matching",
+            "items": [
+              "Looking-For-Group (LFG) boards with role/region/skill filters",
+              "Gankster Groups — persistent duo/team posts and recommended groups"
+            ]
+          },
+          {
+            "category": "Scrims & Practice",
+            "items": [
+              "Scrim scheduling and booking flow",
+              "Built-in scrim chat and automatic invite/party actions via game integration",
+              "Post-match peer reviews and reputation (GANKREP)"
+            ]
+          },
+          {
+            "category": "Integrations & Tools",
+            "items": [
+              "Discord integration and notifications",
+              "Overwolf in-game overlay / client integration for automatic invites and match-sync",
+              "Match data tracking and basic leaderboards/ladders"
+            ]
+          },
+          {
+            "category": "Community & Growth",
+            "items": [
+              "Community/teams pages, weekly/monthly rewards and leaderboards",
+              "Public blog, guides and active Discord community"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "Dedicated 1:1 coaching marketplace and coach booking workflow (searchable coach profiles, credential verification, escrow/payments, recurring sessions) — Gankster focuses on team LFG/scrims rather than paid coaching discovery.",
+          "Advanced individual performance analytics and VOD review tools for coaches (timelineed highlights, heatmaps, automated clip generation) — match data is tracked but appears team/scrim-focused and lightweight for coach workflows.",
+          "Clear, public pricing and packaged team subscription tiers — site terms mention subscription plans but there is no transparent pricing page for teams/orgs, which raises buyer friction for organizations seeking to compare plans.",
+          "Verified credentialing / trust layer for paid services (coach certifications, background checks, formal guarantees) — reputation is peer-based and useful for matchmaking but doesn't substitute for coach credential verification needed for higher-ticket purchases.",
+          "Enterprise/API/white-label offerings for publishers or large orgs (SSO, data export, API access) — integrations emphasize overlays and Discord, but there is limited public info about B2B APIs or enterprise controls."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Free",
+            "price": "$0",
+            "period": "",
+            "note": "Core LFG, scrim scheduling, reputation, and community features are free for players and teams; monetization noted to be introduced via app/subscriptions.",
+            "highlight": true
+          },
+          {
+            "name": "Team / Subscription (in-app)",
+            "price": "Custom",
+            "period": "",
+            "note": "Gankster mentions subscription plans in its Terms and has signaled monetization plans; pricing is surfaced inside the app rather than on a public pricing page.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://gankster.gg/",
+          "pricing": "https://gankster.gg/terms/",
+          "blog": "https://gankster.gg/",
+          "jobs": "https://gankster.gg/team/"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Terms of Service (subscription mention)",
+              "url": "https://gankster.gg/terms/",
+              "claim": "Terms state access to Services and features may be subject to payment and reference Subscription Plans priced inside the app."
+            },
+            {
+              "label": "GamesBeat (monetization roadmap)",
+              "url": "https://gamesbeat.com/gankster-funding-4-25m-esports-competitive-gaming-platform/",
+              "claim": "Article notes Gankster planned to begin monetizing in Q1 2023 and will offer paid plans/features."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "GamesBeat (seed funding)",
+              "url": "https://gamesbeat.com/gankster-funding-4-25m-esports-competitive-gaming-platform/",
+              "claim": "Gankster raised a $4.25M seed round co-led by Bessemer Venture Partners and Hetz Ventures."
+            },
+            {
+              "label": "Esports Insider (funding & founding year)",
+              "url": "https://esportsinsider.com/2022/12/esports-platform-gankster-4-25m-funding",
+              "claim": "Coverage states Gankster was founded in 2021 and raised $4.25M to expand its competitive gaming platform."
+            },
+            {
+              "label": "Tracxn / Crunchbase summaries",
+              "url": "https://tracxn.com/d/companies/gankster/",
+              "claim": "Company profiles list Gankster as a Tel Aviv-based startup founded in 2021 with a Seed round of ~$4.25M."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Reddit (community reaction / traction)",
+              "url": "https://www.reddit.com/r/VALORANT/comments/sh4fge/gankster_the_competitive_gaming_platform_used_by/",
+              "claim": "Multiple Reddit posts from Gankster team and community show early traction, user praise for LFG/scrim features, and anecdotal metrics (thousands of users and scrims)."
+            },
+            {
+              "label": "Overwolf app listing",
+              "url": "https://www.overwolf.com/app/gankster_ltd.-gankster",
+              "claim": "Overwolf describes Gankster's LFG and reputation features and shows the product is distributed as an in-game overlay, with user reviews on that platform."
+            },
+            {
+              "label": "Discord community invite (size)",
+              "url": "https://discord.com/invite/gankster",
+              "claim": "Public Discord invite lists a large community (100k+ members in invite link metadata) demonstrating active user community and engagement."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Gankster product pages",
+              "url": "https://gankster.gg/",
+              "claim": "Homepage and feature pages describe LFG, Groups, scrim scheduling, reputation system, leaderboards and team tools."
+            },
+            {
+              "label": "Gankster Find Valorant players page",
+              "url": "https://gankster.gg/find-valorant-players/",
+              "claim": "Describes the Valorant-specific LFG tool, matching, chat, queue-together and mobile app integration."
+            },
+            {
+              "label": "GamesIndustry / Esports Insiders coverage",
+              "url": "https://esportsinsider.com/2022/12/esports-platform-gankster-4-25m-funding",
+              "claim": "Press notes the reputation system, scrim scheduling, leaderboards and Discord integration as core product features."
+            }
+          ]
+        },
+        "strengths": [
+          "Deep focus on competitive workflows (LFG -> scrims -> ladders) that matches the needs of amateur and collegiate teams rather than generic social matchmaking.",
+          "Integrated reputation system (peer post-match reviews) that helps reduce no-shows/toxicity and increases reliability for team scrims.",
+          "Strong early traction and VC backing (Bessemer, Hetz) — gives credibility and runway to expand into more games and features.",
+          "Game-client integrations (Overwolf/in-game actions, automatic invites) and Discord tie-ins reduce friction when moving from scheduling to playing."
+        ],
+        "weaknesses": [
+          "No clear public pricing or packaged team plans — buyers (team managers/orgs) face friction when evaluating and budgeting for paid features.",
+          "Lacks a dedicated coaching marketplace and coach-specific tooling (scheduling escrow, recurring lessons, coach verification) — missed revenue vertical and product expansion opportunity.",
+          "Analytics and coach-oriented review/VOD tooling appear limited compared with specialized coaching platforms; this hinders higher-value coaching engagements.",
+          "Heavy reliance on game integrations (Overwolf, API access) could slow expansion to non-PC or publisher-restricted titles and complicate scaling to mobile-first esports."
+        ]
+      }
+    },
+    {
+      "id": "fiverr",
+      "name": "Fiverr (Gaming)",
+      "url": "https://www.fiverr.com/categories/gaming",
+      "description": "A global freelance marketplace where gamers can buy coaching, duo-queue/boosting, and gaming-related creative services from independent sellers.",
+      "status": "done",
+      "logoChar": "F",
+      "logoColor": "#1DBF73",
+      "logoBg": "#f0fdf4",
+      "tags": [
+        "marketplace",
+        "freelance",
+        "gaming",
+        "coaching"
+      ],
+      "pricing": "$5",
+      "pricingPeriod": "",
+      "customers": "3.3M+",
+      "details": {
+        "founded": "2010",
+        "country": "Israel",
+        "funding": "IPO (raised ~$111M in VC prior to IPO)",
+        "employees": "~762",
+        "business": "Two-sided freelance marketplace (B2C/B2B)",
+        "targetMarket": "Casual and competitive gamers seeking coaching, duo-queue/boosting, and streamers/content creators needing gaming assets; also small businesses and creators buying one-off game-related services.",
+        "features": [
+          {
+            "category": "Marketplace & discovery",
+            "items": [
+              "Gig catalog with searchable categories and subcategories (game coaching, game sessions, boosting)",
+              "Seller levels, badges and Fiverr Pro for curated/faster discovery",
+              "Gig packages, extras, and customizable offers for each seller"
+            ]
+          },
+          {
+            "category": "Transaction & trust",
+            "items": [
+              "Escrow-based payments and buyer fees (platform holds payment until delivery)",
+              "Order resolution center and dispute handling",
+              "Seller ratings and public reviews"
+            ]
+          },
+          {
+            "category": "Communication & sessions",
+            "items": [
+              "In-platform messaging and order management",
+              "Paid video consultations / Zoom calls with calendar integration",
+              "Pre-built scheduling for paid consultations (30/60 minute options)"
+            ]
+          },
+          {
+            "category": "Platform services",
+            "items": [
+              "Fiverr Pro and Fiverr Business for higher-trust or enterprise buying",
+              "Stores and curated collections (e.g., Fiverr Gaming Store)",
+              "Buyer and seller dashboards with basic order analytics"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No verified-skill credentialing specific to gaming coaches (beyond Pro and reviews) — buyers can’t filter reliably by objective coach metrics like rank, coaching certifications, or win-rate.",
+          "No built-in recurring/subscription booking flow for repeat coaching (weekly lessons with auto-scheduling and billing) — sellers rely on manual re-orders or consultations.",
+          "Discovery lacks role/skill-level matching for coaches — there’s no dynamic matching algorithm that pairs buyers by game, role, MMR/rank, and playstyle.",
+          "Weak standardized comparison tooling — gig packages and extras are seller-defined, making apples-to-apples price/feature comparison across coaches difficult for buyers.",
+          "Limited guarantees and standardized refund protection for high-ticket coaching (no esoteric warranty or SLA for multi-session packages), increasing buyer risk for expensive services.",
+          "No public API or esports/team integrations for B2B use (e.g., bulk booking for teams or roster-based coaching workflows)."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Gig (one-off)",
+            "price": "$5+",
+            "period": "",
+            "note": "Marketplace core model — individual sellers set one-off gig prices; many gaming coaching gigs start at low single-digit prices.",
+            "highlight": false
+          },
+          {
+            "name": "Fiverr Pro",
+            "price": "Custom",
+            "period": "",
+            "note": "Curated, higher-priced professional sellers for buyers who need vetted talent; pricing set by seller.",
+            "highlight": true
+          },
+          {
+            "name": "Fiverr Business",
+            "price": "Custom",
+            "period": "",
+            "note": "Team/enterprise-focused offering (billing and management for businesses); pricing and terms are enterprise-oriented.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://help.fiverr.com/hc/en-us",
+          "pricing": "https://help.fiverr.com/hc/en-us/articles/360050216133-Paying-for-orders-extras-or-custom-offers",
+          "blog": "https://www.fiverr.com/resources",
+          "jobs": "https://www.fiverr.com/careers"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Gaming category (example gigs)",
+              "url": "https://www.fiverr.com/categories/gaming",
+              "claim": "Fiverr’s Gaming category lists coaching and session gigs with prices set by individual sellers (many gigs start at $5+)."
+            },
+            {
+              "label": "Paying for orders (Help Center)",
+              "url": "https://help.fiverr.com/hc/en-us/articles/360050216133-Paying-for-orders-extras-or-custom-offers",
+              "claim": "Fiverr charges a buyer service fee (5.5%) and applies small-order fees for low-value purchases; sellers set gig prices and can offer extras."
+            },
+            {
+              "label": "Paid video consultations (Help Center)",
+              "url": "https://help.fiverr.com/hc/en-us/articles/12307695633041-Paid-video-consultations-for-freelancers",
+              "claim": "Sellers can offer paid consultations with set session lengths and prices, and integrate calendar availability."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Fiverr Q3 2025 results",
+              "url": "https://www.fiverr.com/news/Fiverr-Announces-Third-Quarter-2025-Results",
+              "claim": "Annual active buyers as of Sep 30, 2025 were 3.3 million; describes marketplace revenue and operational metrics."
+            },
+            {
+              "label": "TechCrunch IPO filing",
+              "url": "https://techcrunch.com/2019/05/16/fiverr-files-to-go-public/",
+              "claim": "Documents Fiverr’s IPO filing and notes approximately $111M raised in prior venture rounds before going public in 2019."
+            },
+            {
+              "label": "SEC Annual Report (Form/Annual Report)",
+              "url": "https://www.sec.gov/Archives/edgar/data/1762301/000117891325000559/zk2532679.htm",
+              "claim": "Official company filing with corporate details and audited disclosures (used for employee counts and operational descriptions)."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot reviews",
+              "url": "https://www.trustpilot.com/review/www.fiverr.com",
+              "claim": "Aggregated buyer complaints include disputes over quality, refunds, and slow or unsatisfactory customer support."
+            },
+            {
+              "label": "Reddit community discussions",
+              "url": "https://www.reddit.com/r/Fiverr/",
+              "claim": "Frequent community threads highlight issues like fake reviews, disputes, and frustration with platform support and buyer/seller conflicts."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Gaming coaching category",
+              "url": "https://www.fiverr.com/categories/lifestyle/gaming/game-coaching",
+              "claim": "Fiverr lists dedicated subcategories for game coaching and game sessions where individual coaches offer gig-based lessons."
+            },
+            {
+              "label": "Video calls (Zoom) help center",
+              "url": "https://help.fiverr.com/hc/en-us/articles/360011062838-Video-calls-Zoom-calls",
+              "claim": "Fiverr supports in-platform Zoom calls and documents how sellers can use video calls in workflows."
+            },
+            {
+              "label": "How Fiverr works (Help Center)",
+              "url": "https://help.fiverr.com/hc/en-us/articles/360010558038-How-Fiverr-works",
+              "claim": "Explains Fiverr’s gig-based buying model, escrow payments, and order lifecycle used across categories including gaming."
+            }
+          ]
+        },
+        "strengths": [
+          "Large two-sided marketplace and brand recognition — deep supply of gaming coaches and related services makes it easy for buyers to find low-cost options.",
+          "Flexible seller-driven pricing and gig packaging — sellers can rapidly list niche game-specific services (duo-queue, boosting, VOD reviews) which increases inventory breadth.",
+          "Built-in session tooling — paid video consultations, Zoom integration, and calendar connectivity enable live coaching workflows without third-party tooling."
+        ],
+        "weaknesses": [
+          "High variability in seller quality — reliance on reviews and seller-defined packages creates trust friction for higher-ticket coaching purchases.",
+          "Fee structure and commissions — buyer service fees (5.5% + small-order fees) and a flat seller commission (20%) can make total costs opaque and reduce seller take-home.",
+          "No strong skill-verification for coaches — beyond Fiverr Pro, there’s limited objective verification for gaming-specific credentials, making comparison and trust-building harder.",
+          "Customer support and dispute handling are common complaint areas — public reviews cite slow or unsatisfactory resolution experiences for disputes or refunds."
+        ]
+      }
+    },
+    {
+      "id": "playerauctions",
+      "name": "PlayerAuctions",
+      "url": "https://www.playerauctions.com/",
+      "description": "A global two-sided marketplace where gamers buy and sell virtual goods, game accounts, currency, boosts and coaching, with escrow-style protection.",
+      "status": "done",
+      "logoChar": "PA",
+      "logoColor": "#FF6A00",
+      "logoBg": "#FFF7ED",
+      "tags": [
+        "gaming",
+        "marketplace",
+        "virtual-goods",
+        "escrow"
+      ],
+      "pricing": "Free",
+      "pricingPeriod": "",
+      "customers": "2.1M+",
+      "details": {
+        "founded": "1999",
+        "country": "US",
+        "funding": "No known institutional funding",
+        "employees": "51-200",
+        "business": "Two-sided consumer marketplace",
+        "targetMarket": "Individual gamers worldwide buying and selling in-game currency, accounts, items, power-leveling/boosting and coaching services",
+        "features": [
+          {
+            "category": "Trust & Safety",
+            "items": [
+              "PlayerGuardian escrow that holds buyer payments until delivery is confirmed",
+              "After-sale protection / account insurance (7/14/30 day options) for account purchases",
+              "Formal dispute resolution and Final Resolution Committee"
+            ]
+          },
+          {
+            "category": "Product Types",
+            "items": [
+              "Game accounts, in-game currency, items/skins, power-leveling and boosting services, coaching",
+              "Custom offers and seller-created listings across hundreds of games"
+            ]
+          },
+          {
+            "category": "Seller & Marketplace Tools",
+            "items": [
+              "Free listing creation and seller levels (reputation-based)",
+              "Featured seller advertising slots",
+              "Inventory management, delivery evidence requirements and disbursement options"
+            ]
+          },
+          {
+            "category": "Payments & Payouts",
+            "items": [
+              "Per-order service fees (buyer fee) and seller transaction fees (category-based, e.g., accounts),",
+              "Multiple disbursement methods (bank, Skrill, Coinbase/crypto in some regions),",
+              "Reserve / hold periods on payouts depending on product type, seller level and after-sale protection"
+            ]
+          },
+          {
+            "category": "Discovery & Reputation",
+            "items": [
+              "Search and filters by game/product type, seller ratings and order history,",
+              "Order-level ratings and review system"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No standardized subscription or recurring booking flow for coaching or recurring boost engagements (coaching is sold per session or offer-by-offer),",
+          "No public, documented API or official B2B integration for partners (site warns against unauthorized APIs),",
+          "No clearly prominent ‘verified professional’ seller program or structured KYC/skill badges for high-ticket sellers — trust still relies on ratings and PlayerGuardian evidence rules,",
+          "Opaque, layered fee structure (platform fee + disbursement/provider fees + optional after-sale protection) with limited fee-simplification or bundled pricing for sellers,",
+          "Limited seller analytics and conversion tooling (no public dashboard docs showing advanced funnel/marketing analytics to optimize listings)"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Register & Browse",
+            "price": "Free",
+            "period": "",
+            "note": "Account registration and creating listings is free; fees are charged only when an order completes.",
+            "highlight": true
+          },
+          {
+            "name": "Per-transaction (sellers)",
+            "price": "12.99% + $0.99 (typical)",
+            "period": "per sale",
+            "note": "Platform transaction fee applied on sale (varies by product category); disbursement/payment-provider fees are deducted separately.",
+            "highlight": false
+          },
+          {
+            "name": "Buyer service fee",
+            "price": "Variable",
+            "period": "per order",
+            "note": "Buyers pay a service fee at checkout to cover fraud protection and platform costs; amount varies by payment gateway and order.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://support.playerauctions.com/hc/en-us",
+          "pricing": "https://support.playerauctions.com/hc/en-us/articles/115008180648-What-are-the-fees-to-sell-",
+          "blog": "https://blog.playerauctions.com/",
+          "jobs": "https://www.linkedin.com/company/itemmania-network-technology-shanghai-ld."
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Seller fees FAQ",
+              "url": "https://support.playerauctions.com/hc/en-us/articles/115008180648-What-are-the-fees-to-sell-",
+              "claim": "Registration and listing are free; PlayerAuctions charges a transaction fee (e.g., 12.99% + $0.99 for account sales) and disbursement fees are deducted based on chosen payout method."
+            },
+            {
+              "label": "Buyer Payments FAQ",
+              "url": "https://support.playerauctions.com/hc/en-us/articles/4402166845849-PlayerAuctions-Buyer-Payments",
+              "claim": "A buyer service fee is applied at checkout to cover buyer fraud protection and platform costs."
+            },
+            {
+              "label": "Reddit discussion on seller fee breakdown",
+              "url": "https://www.reddit.com/r/PlayerAuctions/comments/109dkvz/selling_questions/",
+              "claim": "Sellers report a visible platform fee of ~12.99% + $0.99 and additional disbursement/provider fees, producing confusion about the final payout."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "About page",
+              "url": "https://www.playerauctions.com/about/",
+              "claim": "PlayerAuctions was founded in 1999 and describes itself as a global e-commerce platform for virtual gaming products."
+            },
+            {
+              "label": "Crunchbase profile",
+              "url": "https://www.crunchbase.com/organization/playerauctions",
+              "claim": "Company profile listing PlayerAuctions as an online platform for buying/selling digital assets; public profile does not show major VC funding rounds."
+            },
+            {
+              "label": "SimilarWeb company overview",
+              "url": "https://www.similarweb.com/company/playerauctions.com/",
+              "claim": "Company data listing year founded (1999) and company size estimates used by market researchers."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot reviews",
+              "url": "https://www.trustpilot.com/review/playerauctions.com",
+              "claim": "Thousands of user reviews with mixed sentiment: many positive notes about delivery/security but repeated complaints about disputes, banned accounts and fees."
+            },
+            {
+              "label": "Reddit threads",
+              "url": "https://www.reddit.com/r/PlayerAuctions/comments/uyn9a8/i_will_say_good_goodbye_to_playerauction_the_fees/",
+              "claim": "Multiple community posts calling out high/complex seller fees and dissatisfaction with net payouts after disbursement charges."
+            },
+            {
+              "label": "Independent review / safety guide",
+              "url": "https://www.alidrop.co/blogs/is-playerauctions-legit",
+              "claim": "Third‑party guides highlight PlayerGuardian escrow as a strength but call out mixed user experiences and account‑ban risks."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "PlayerGuardian / Secure Buyer Delivery Agreement",
+              "url": "https://www.playerauctions.com/about/secure-buyer-delivery-agreement/",
+              "claim": "Describes PlayerGuardian escrow protections, holding buyer payments until PlayerAuctions determines order completion and dispute procedures."
+            },
+            {
+              "label": "After‑sale protection FAQ",
+              "url": "https://support.playerauctions.com/hc/en-us/articles/4402691743257-How-does-after-sale-protection-work",
+              "claim": "Explains after-sale protection/insurance for account orders and how disbursements are withheld during protection windows."
+            },
+            {
+              "label": "Homepage / product categories",
+              "url": "https://www.playerauctions.com/",
+              "claim": "Public marketplace listing for accounts, currency, items, power-leveling/boosting and other services across many game titles."
+            }
+          ]
+        },
+        "strengths": [
+          "PlayerGuardian escrow and after-sale protection that meaningfully reduces buyer fraud risk compared with direct trades",
+          "Large, global marketplace with listings across hundreds of games and many product categories (accounts, currency, boosts, coaching)",
+          "Low friction to list: free listings and an established seller ecosystem (power-sellers) that create liquidity",
+          "Multiple payout/disbursement options and operational experience handling two-sided payments and disputes"
+        ],
+        "weaknesses": [
+          "Complex and opaque fee stacking (platform fee + disbursement/provider fees + optional protection) that frustrates sellers and compresses net payouts",
+          "Reserve/hold periods and disbursement rules can delay seller cashflow and create uncertainty for high-value sales",
+          "Marketplace attracts risky listings (allegations of hacked/modded accounts) and faces legal pressure from publishers (recent lawsuits), which increases compliance and reputational risk",
+          "Mixed user reviews highlight disputes over returns, long support interactions, and cases where after-sale protection was insufficient for banned/reclaimed accounts",
+          "Lack of clear developer/B2B API or partner program limits integration opportunities (no official public API documented)"
+        ]
+      }
+    },
+    {
+      "id": "epicnpc",
+      "name": "EpicNPC",
+      "url": "https://www.epicnpc.com/",
+      "description": "A forum-style, consumer-to-consumer marketplace for buying, selling and trading game accounts, in-game items and services (boosting, coaching, carries).",
+      "status": "done",
+      "logoChar": "EP",
+      "logoColor": "#0ea5e9",
+      "logoBg": "#e0f2fe",
+      "tags": [
+        "gaming-marketplace",
+        "P2P-accounts",
+        "escrow"
+      ],
+      "pricing": "$10",
+      "pricingPeriod": "/yr",
+      "customers": "495K+",
+      "details": {
+        "founded": "Unknown",
+        "country": "US",
+        "funding": "Unknown",
+        "employees": "Unknown",
+        "business": "Consumer two-sided marketplace / forum",
+        "targetMarket": "Gamers and semi-professional sellers who buy/sell/trade game accounts, currency, boosting services and coaching",
+        "features": [
+          {
+            "category": "Marketplace & Discovery",
+            "items": [
+              "Forum-style listing threads organized by game and tags",
+              "Category and tag pages for ~1000+ supported games (search by game)",
+              "User feedback and thread bumping to surface active offers"
+            ]
+          },
+          {
+            "category": "Escrow & Trust",
+            "items": [
+              "Trade Guardian (site-hosted escrow / middleman service) with tiered paid options",
+              "Public feedback/reputation system and paid ‘upgrades’/verified badges",
+              "Phone verification (Twilio) and ID/photo verification options for users"
+            ]
+          },
+          {
+            "category": "Seller Tools & Monetization",
+            "items": [
+              "Paid account upgrades (Epic Member) to increase visibility and perks",
+              "Advertising and pinned/featured thread options",
+              "Built-in Trade Guardian fee handling and deposit workflows"
+            ]
+          },
+          {
+            "category": "Community & Support",
+            "items": [
+              "Large active forum community with dispute/reporting threads",
+              "Manual moderation and review for upgrades and verified status",
+              "Help center and extensive how-to threads (buying guide, trade guardian guides)"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No guaranteed chargeback/recovery insurance: Trade Guardian explicitly does not protect against payment chargebacks or account recalls, leaving buyers exposed for high-ticket purchases",
+          "No standardized service packages or SKU pricing: sellers list custom offers per thread which makes comparison and conversion harder for buyers seeking repeatable coaching or boosting packages",
+          "Limited identity/verification automation: verification relies on phone and manual ID review rather than a strong KYC/verified-vendor program with cryptographic identity or third-party attestations",
+          "Weak post-transaction protection and refunds: dispute resolution is manual and often only actionable when Trade Guardian is used, creating friction and risk for off-platform payments",
+          "No public seller analytics or performance dashboards to help buyers evaluate service quality beyond raw feedback counts",
+          "No documented API or B2B integrations for studios, platforms or payment partners to onboard verified pro sellers or offer in-platform protections"
+        ],
+        "pricingPlans": [
+          {
+            "name": "Browse (free)",
+            "price": "$0",
+            "period": "",
+            "note": "Anyone can browse listings and contact sellers for free; creating sale threads requires registration and verification.",
+            "highlight": false
+          },
+          {
+            "name": "Epic Member (upgrade)",
+            "price": "$10",
+            "period": "/yr",
+            "note": "Paid user upgrade (visibility/perks/verified badge). Price has changed historically; current community threads reference $10/yr as the Epic Member price.",
+            "highlight": true
+          },
+          {
+            "name": "Trade Guardian (escrow/middleman)",
+            "price": "Fee-based",
+            "period": "per-transaction",
+            "note": "Paid escrow/middleman service with variable fees (examples listed on site: flat + percentage fee structure). Protects against some scams but does not cover chargebacks or account recalls.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "https://www.epicnpc.com/infocenter/",
+          "pricing": "https://www.epicnpc.com/infocenter/upgrades.html",
+          "blog": "https://www.epicnpc.com/threads/",
+          "jobs": "https://www.epicnpc.com/misc/contact"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "Member upgrade announcement (forum thread)",
+              "url": "https://www.epicnpc.com/threads/major-changes-to-upgrades-and-verification.2236423/",
+              "claim": "Post explaining changes to paid upgrades and a cited Epic Member price of $10/yr for the main upgrade tier."
+            },
+            {
+              "label": "Trade Guardian page",
+              "url": "https://www.epicnpc.com/tradeguardian/",
+              "claim": "Explains Trade Guardian escrow/middleman options and fees (site lists flat + percentage fees for services)."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "Twilio customer story",
+              "url": "https://customers.twilio.com/en-us/epicnpc",
+              "claim": "Describes EpicNPC as a US-based marketplace, cites ~495K members, ~300K monthly visitors and usage of Twilio Verify for phone authentication."
+            },
+            {
+              "label": "EpicNPC Info Center (contact/about)",
+              "url": "https://www.epicnpc.com/infocenter/about.html",
+              "claim": "Site Info Center listing EpicNPC contact address in New Jersey and describing the marketplace/forum nature of the site."
+            },
+            {
+              "label": "Crunchbase company page",
+              "url": "https://www.crunchbase.com/organization/epicnpc-marketplace",
+              "claim": "Company listing on Crunchbase identifying EpicNPC Marketplace (no reliable public funding data listed)."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot reviews",
+              "url": "https://www.trustpilot.com/review/epicnpc.com",
+              "claim": "Multiple customer reviews citing slow/poor customer support and complaints about dispute handling when Trade Guardian is not used."
+            },
+            {
+              "label": "Reddit threads (community complaints)",
+              "url": "https://www.reddit.com/r/GenshinTrades/comments/14oqtly/epicnpc/",
+              "claim": "Community posts reporting scams, impersonation and skepticism about middlemen / Trade Guardian reliability."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Trade Guardian info",
+              "url": "https://www.epicnpc.com/infocenter/trade_guardian.html",
+              "claim": "Explains Trade Guardian services (free guidance vs paid middleman/escrow) and limitations (does not protect against chargebacks or account recalls)."
+            },
+            {
+              "label": "Buying & Selling Guide (help center)",
+              "url": "https://www.epicnpc.com/infocenter/buyingguide.html",
+              "claim": "Provides step-by-step guidance for buyers/sellers, recommended safety practices and advice to use Trade Guardian for risky transactions."
+            },
+            {
+              "label": "Twilio customer story",
+              "url": "https://customers.twilio.com/en-us/epicnpc",
+              "claim": "Describes site verification (Twilio Verify), scale metrics and claim that the site supports ~1000+ games and large volumes of postings/sales."
+            }
+          ]
+        },
+        "strengths": [
+          "High liquidity and category breadth: long-running forum with ~495K members and support for ~1000+ games, which provides supply and buyer depth for niche game items and accounts (Twilio case study).",
+          "Established community & moderation workflows: forum structure, reporting/dispute threads and a staffed Trade Guardian middleman program that can be used to reduce common scam vectors.",
+          "Low-friction discovery for niche items: forum thread model + tags/pinned posts makes it easy to find rare game-specific accounts or services that larger marketplaces don’t handle."
+        ],
+        "weaknesses": [
+          "Insufficient payment protections: Trade Guardian explicitly does not cover chargebacks or account recalls, leaving buyers of high-value accounts exposed and reducing trust for expensive transactions.",
+          "Uneven trust signals: reputation is primarily feedback-based and paid upgrades can be used to boost visibility, which makes it possible for experienced scammers to appear legitimate and for new honest sellers to struggle for visibility.",
+          "Fragmented productization: services and coaching are listed as free-form threads (no standardized SKUs, recurring booking, or subscription options), which increases buyer friction for repeat or B2B purchases.",
+          "Customer support and dispute handling complaints: multiple Trustpilot and Reddit posts cite slow responses or unsatisfactory outcomes unless the paid Trade Guardian flow was used."
+        ]
+      }
+    },
+    {
+      "id": "raidcarry",
+      "name": "RaidCarry",
+      "url": "https://raidcarry.com/",
+      "description": "Service provider offering paid game carries and coaching sessions across popular titles.",
+      "status": "pending"
+    },
+    {
+      "id": "eloking",
+      "name": "Eloking",
+      "url": "https://eloking.com/",
+      "description": "A consumer-focused boosting and coaching marketplace selling rank boosts, duo sessions, and coaching for competitive games (LoL, Valorant, CS2, Dota 2, etc.).",
+      "status": "done",
+      "logoChar": "EL",
+      "logoColor": "#FF4D6D",
+      "logoBg": "#FFF5F7",
+      "tags": [
+        "gaming-boosting",
+        "LoL-coaching",
+        "rank-boost",
+        "marketplace"
+      ],
+      "pricing": "€1.49",
+      "pricingPeriod": "",
+      "customers": "Unknown",
+      "details": {
+        "founded": "Unknown",
+        "country": "Latvia",
+        "funding": "Unknown",
+        "employees": "Unknown",
+        "business": "B2C marketplace / services",
+        "targetMarket": "Competitive gamers who want rank boosting, duo boosting, or one-off coaching (players of League of Legends, Valorant, CS2, Dota 2, Rocket League, etc.)",
+        "features": [
+          {
+            "category": "Core services",
+            "items": [
+              "Per-order rank boosting (division boosts, placement boosts, win boosts)",
+              "Play-with-booster / Duo boosting option",
+              "One-off coaching sessions and booster-led mentoring",
+              "Support for multiple games: League of Legends, Valorant, CS2, Dota 2, Rocket League, Overwatch 2, etc."
+            ]
+          },
+          {
+            "category": "Marketplace & trust",
+            "items": [
+              "Booster profiles with language, specialties and reviews",
+              "Booster screening/ID verification mentioned",
+              "Loyalty program (three-tier) and refund flexibility",
+              "24/7 live chat support"
+            ]
+          },
+          {
+            "category": "Commerce & UX",
+            "items": [
+              "Price calculators per game/order (dynamic pricing based on rank, server, add-ons)",
+              "Secure payments via Stripe (end-to-end encrypted checkout)",
+              "Automatic order assignment to boosters with optional booster selection"
+            ]
+          }
+        ],
+        "missingFeatures": [
+          "No standardized, subscription-style coaching packages or recurring billing for ongoing skill development (coaching is sold as one-off sessions), which prevents predictable ARPU from serious learners.",
+          "Lack of publicly verifiable per-booster performance metrics (no linked match history, replay proof, or mandatory livestream records) — makes objective quality comparison between boosters difficult.",
+          "No integrated recorded-session delivery or built-in replay-analysis tooling for coaching customers — progress tracking and deliverables are informal.",
+          "Pricing is highly custom per-order with many variables and regional differences but no clear standardized price tables for common boosts (e.g., Silver->Gold), making price comparison and conversion optimization harder for buyers.",
+          "No visible B2B or team/academy offerings or API for partners, limiting expansion into esports orgs, coaching academies, or platform integrations.",
+          "No explicit escrow/milestone workflow for high-value orders (payments appear collected up-front via Stripe), which is an opening for fraud-protection or escrow-first competitors."
+        ],
+        "pricingPlans": [
+          {
+            "name": "Per-order boost",
+            "price": "€1.49",
+            "period": "",
+            "note": "Entry-level order price shown on product pages; final price is calculated per-order by the website calculator and varies by game, rank, server and add-ons.",
+            "highlight": true
+          },
+          {
+            "name": "Coaching / Session",
+            "price": "Custom",
+            "period": "",
+            "note": "Coaching offered as one-off sessions or ad-hoc packages priced per booster; no public fixed coaching subscription shown.",
+            "highlight": false
+          }
+        ],
+        "links": {
+          "docs": "",
+          "pricing": "https://eloking.com/cs/rank-boost",
+          "blog": "https://eloking.com/blog",
+          "jobs": "https://eloking.com/contact"
+        },
+        "sources": {
+          "pricingEvidence": [
+            {
+              "label": "CS2 rank boost product page",
+              "url": "https://eloking.com/cs/rank-boost",
+              "claim": "Product page states a CS2 boost price can be as low as 1.49 EUR and that final cost is calculated by the on-site price calculator."
+            },
+            {
+              "label": "LoL pricing blog",
+              "url": "https://eloking.com/blog/league-of-legends-boost-price",
+              "claim": "Eloking's blog explains LoL boosting prices vary widely by boost type and rank and gives an example average price per division in Diamond."
+            }
+          ],
+          "companyEvidence": [
+            {
+              "label": "About page",
+              "url": "https://eloking.com/about",
+              "claim": "Eloking describes itself as an official company (Eloking Ltd.) and explains the company background and focus on boosting & coaching."
+            },
+            {
+              "label": "Company registry (Lursoft) entry",
+              "url": "https://company.lursoft.lv/en/eloking/40203354829",
+              "claim": "Public company data shows Eloking (SIA) registration details in Latvia, supporting the company's country of registration."
+            },
+            {
+              "label": "Crunchbase profile",
+              "url": "https://www.crunchbase.com/organization/eloking",
+              "claim": "Crunchbase lists Eloking and summarizes it as a platform for professional players to provide boosting and coaching services worldwide."
+            }
+          ],
+          "reviewEvidence": [
+            {
+              "label": "Trustpilot reviews",
+              "url": "https://www.trustpilot.com/review/eloking.com",
+              "claim": "Trustpilot hosts >1,400 reviews for Eloking, showing many positive reviews but also some negative ones about order delays or service issues."
+            },
+            {
+              "label": "Reddit complaint thread",
+              "url": "https://www.reddit.com/r/Lolboosting/comments/1auqf8g/buying_avoid_eloking_boosting/",
+              "claim": "User reports on Reddit describe long completion times and rude/unprofessional booster interactions for Eloking orders."
+            }
+          ],
+          "featureEvidence": [
+            {
+              "label": "Booster profile (example)",
+              "url": "https://eloking.com/booster/Lullaby",
+              "claim": "Booster profile pages list booster specialties, languages, and include 'Calculate Boost Price' and customer feedback, demonstrating the marketplace-style booster listings."
+            },
+            {
+              "label": "CS2 product page",
+              "url": "https://eloking.com/cs/rank-boost",
+              "claim": "Product page highlights features like 'Play with Booster' add-on, secure Stripe payments, and on-site price calculator for dynamic quotes."
+            },
+            {
+              "label": "Contact / refund policy mention",
+              "url": "https://eloking.com/contact",
+              "claim": "Contact page and site copy state flexible refund options (refunds if order not started, mid-way stops) and 24/7 live chat support."
+            }
+          ]
+        },
+        "strengths": [
+          "Wide game coverage and product breadth — supports major competitive titles (LoL, Valorant, CS2, Dota 2, Rocket League), increasing addressable market.",
+          "Dynamic on-site price calculator and low entry price (example: €1.49), allowing rapid purchase decisions for low-cost orders.",
+          "Strong customer-facing operations: 24/7 live chat, explicit refund flexibility, and visible booster profiles that reduce friction in ordering.",
+          "Noticeable third‑party footprint (Trustpilot reviews, SEO’d blog content) which drives organic trust and discovery in a price‑sensitive market."
+        ],
+        "weaknesses": [
+          "Inconsistent delivery & quality: community threads and Trustpilot include reports of long completion times, multiple booster reassignments, and rude communication — indicating variable operational quality.",
+          "Low transparency on verifiable booster outcomes: the site does not expose linked match replays or mandatory livestream proof per order, making objective verification hard for buyers.",
+          "Pricing complexity and lack of standardized packages: highly variable per-order pricing without clear published tables for common flows creates comparison friction and may deter conversions.",
+          "Legal/ethical exposure: boosting services contravene many game ToS; reliance on this model can pose long-term regulatory/partner risks and can lead to potential account-safety concerns despite site claims of safety."
+        ]
+      }
+    }
+  ],
+  "opportunity": {
+    "verdict": "crowded",
+    "confidence": "high",
+    "summary": "The paid gaming sessions and collaboration market is genuinely crowded: Fiverr (public, 3.3M+ active buyers, ~$111M pre-IPO) and E-Pal ($30M from a16z and Galaxy, 2M–4.2M users) already dominate the broad paid-session and companion space, while Metafy ($33M, Tiger Global) and Gamer Sensei (CORSAIR-acquired) own the coaching-marketplace vertical. A new entrant faces massive distribution disadvantages against these incumbents and will struggle to achieve marketplace liquidity from a standing start. That said, every competitor in the set shares the same concrete operational failures — no recurring session subscriptions, no outcome tracking, and no real buyer-protection guarantees — which may support a narrow, well-differentiated wedge, but not a broad-platform play.",
+    "dominantPlayers": [
+      "Fiverr",
+      "E-Pal",
+      "Metafy"
+    ],
+    "differentiators": [
+      {
+        "label": "Recurring subscription coaching with structured progress tracking",
+        "detail": "Every competitor — Metafy, ProGuides, Gamer Sensei, E-Pal, Fiverr, and Eloking — forces buyers to manually rebook individual sessions and provides zero standardized skill-progress dashboards. A platform built around weekly recurring bookings with milestone tracking and outcome proof could address the single most-cited purchase barrier across the entire set."
+      },
+      {
+        "label": "Transparent buyer protection with real cash refunds (not credits)",
+        "detail": "Metafy, ProGuides, Gamer Sensei, and E-Pal all route refunds to platform credits/wallets, generating widespread complaints on Trustpilot and Reddit. A platform that offers escrow-based payments with guaranteed fiat refunds for undelivered sessions could win trust in a market where buyers currently treat every purchase as a risk."
+      },
+      {
+        "label": "Verified skill credentialing beyond peer reviews",
+        "detail": "Across the full set, coach quality verification relies on self-reported bios and community ratings. Fiverr Pro is the closest attempt but is not gaming-specific. A credential layer tied to verifiable in-game rank (API-pulled), structured intake assessments, or third-party attestation would address a gap explicitly called out in five of nine competitor profiles."
+      },
+      {
+        "label": "Integrated collaboration + coaching (LFG-to-paid-session pipeline)",
+        "detail": "Gankster handles LFG and scrims but has no coaching marketplace. Metafy and ProGuides handle coaching but have no team-finding or collaborative-play features. E-Pal handles companions but not structured skill development. A platform combining LFG, scrim scheduling, and paid coaching in a single workflow could target competitive amateur teams who currently stitch together three or four tools."
+      }
+    ],
+    "risks": [
+      {
+        "label": "Marketplace liquidity cold-start against entrenched incumbents",
+        "detail": "Fiverr has 3.3M active buyers and deep gaming-coach supply. E-Pal claims 450K+ companions. Metafy covers 200+ games. A new two-sided marketplace must simultaneously recruit enough coaches/companions to satisfy buyers and enough buyers to retain coaches — both groups will default to established platforms with existing liquidity and search rankings."
+      },
+      {
+        "label": "Dominant platforms have structural distribution advantages",
+        "detail": "Fiverr is a public company with brand recognition and SEO authority across freelance categories. E-Pal is backed by a16z and Galaxy with a mobile app distribution pipeline. Metafy has Tiger Global runway. Customer acquisition costs for a new entrant will be high in a market where incumbents already own the relevant search terms and creator relationships."
+      },
+      {
+        "label": "Legal and ToS exposure for boosting-adjacent services",
+        "detail": "Several competitors (Eloking, PlayerAuctions, EpicNPC) face ongoing legal pressure from publishers whose game Terms of Service prohibit paid rank boosting. Any platform supporting paid sessions that overlap with boosting risks account bans for users, DMCA/TOS-related pressure from publishers, and reputational blowback — a risk the competitor set demonstrates is real and ongoing."
+      },
+      {
+        "label": "Thin margins and race-to-the-bottom pricing",
+        "detail": "ProGuides charges $7.99/mo, Fiverr gigs start at $5, and Eloking entry prices start at €1.49. The presence of a public company (Fiverr) and well-funded platforms willing to subsidize low prices makes it extremely hard for a new entrant to compete on price, while competing on premium quality requires a trust infrastructure that takes years to build."
+      }
+    ],
+    "marketGaps": [
+      {
+        "label": "No recurring session subscriptions or auto-rebook flows",
+        "detail": "Every platform in the set requires buyers to manually rebook individual sessions. None offer a weekly-recurring coaching subscription with automatic scheduling and billing. This creates churn, scheduling friction, and prevents buyers from committing to structured improvement programs. The gap is explicitly documented as a missing feature across six of nine competitors.",
+        "competitorCount": 6,
+        "competitors": [
+          "Metafy",
+          "ProGuides",
+          "Gamer Sensei",
+          "E-Pal",
+          "Fiverr",
+          "Eloking"
+        ],
+        "examples": [
+          "Metafy missing features: 'No standardized subscription or recurring lesson package for weekly coaching'",
+          "Gamer Sensei missing features: 'No standardized, platform-managed subscription or recurring lesson package'",
+          "E-Pal missing features: 'No built-in recurring booking/subscription flow for repeat coaching or regular sessions'",
+          "Fiverr missing features: 'No built-in recurring/subscription booking flow for repeat coaching'",
+          "Eloking missing features: 'No standardized, subscription-style coaching packages or recurring billing'"
+        ]
+      },
+      {
+        "label": "No standardized learner progress tracking or outcome proof",
+        "detail": "Buyers across all coaching-focused platforms cannot measure improvement over time. No competitor provides longitudinal skill dashboards, standardized milestone reporting, or verified before/after metrics. This prevents coaches from demonstrating ROI and prevents platforms from justifying repeat purchases. Reddit threads and Trustpilot reviews across Metafy, Gamer Sensei, and ProGuides explicitly cite the inability to measure coaching value.",
+        "competitorCount": 4,
+        "competitors": [
+          "Metafy",
+          "ProGuides",
+          "Gamer Sensei",
+          "E-Pal"
+        ],
+        "examples": [
+          "Metafy missing features: 'Advanced learner analytics and progress tracking (program-level KPIs, long-term progress dashboards) are minimal'",
+          "Gamer Sensei missing features: 'No robust progress analytics/dashboard for students (no standardized skill metrics, learning milestones, or longitudinal reporting)'",
+          "ProGuides weaknesses: 'Limited buyer protection and refund transparency for paid coaching sessions'",
+          "E-Pal missing features: 'Limited analytics and progression tools for sellers'"
+        ]
+      },
+      {
+        "label": "Refunds routed to platform credits instead of guaranteed cash returns",
+        "detail": "Metafy, ProGuides, Gamer Sensei, and E-Pal all route refunds into platform wallets or credits rather than offering transparent fiat refunds. This is a documented and repeated source of user complaints across Trustpilot and Reddit for all four platforms, and actively suppresses buyer willingness to transact on higher-ticket purchases.",
+        "competitorCount": 4,
+        "competitors": [
+          "Metafy",
+          "ProGuides",
+          "Gamer Sensei",
+          "E-Pal"
+        ],
+        "examples": [
+          "Gamer Sensei review evidence: 'User describes refund being routed to site credits and restrictive refund policy tied to coach response windows'",
+          "Metafy missing features: 'Limited buyer protection & refund guarantees: public user complaints describe unresolved refund or no-help scenarios'",
+          "E-Pal missing features: 'Refunds and payment flow rely on virtual currency (Buff) and wallet-credit rather than guaranteed fiat refunds'",
+          "ProGuides missing features: 'Limited buyer protection and refund transparency for paid coaching sessions'"
+        ]
+      },
+      {
+        "label": "No verifiable skill credentials for coaches beyond self-reported bios and peer ratings",
+        "detail": "Across the coaching-focused competitors (Metafy, Gamer Sensei, Fiverr, E-Pal, ProGuides), coach quality verification relies entirely on community reviews, self-reported credentials, or minimal badge programs. No platform pulls verifiable in-game rank data via API or requires third-party skill attestation. Buyers consistently report 'hit-or-miss' coach quality as a deterrent to high-ticket purchases.",
+        "competitorCount": 5,
+        "competitors": [
+          "Metafy",
+          "Gamer Sensei",
+          "Fiverr",
+          "E-Pal",
+          "ProGuides"
+        ],
+        "examples": [
+          "Metafy missing features: 'No strong, platform-level verification or outcomes layer — buyers must rely on coach bios/reviews'",
+          "Fiverr missing features: 'No verified-skill credentialing specific to gaming coaches — buyers can't filter reliably by objective coach metrics like rank'",
+          "E-Pal missing features: 'Limited verified identity/skill proof beyond a small set of Coach badges — no standardized credential verification or 3rd-party proof of skill'",
+          "Metafy review evidence: Reddit threads show the platform can be 'hit-or-miss' depending on coach selection"
+        ]
+      },
+      {
+        "label": "No unified collaboration + paid coaching workflow (LFG-to-session pipeline)",
+        "detail": "Gankster provides LFG and scrim scheduling but explicitly lacks a coaching marketplace and payment rails. Metafy and ProGuides provide coaching but have no team-finding or co-play features. E-Pal covers social companions but not structured coaching. No single platform connects the full amateur competitive workflow: find teammates → schedule scrims → book a coach → track improvement.",
+        "competitorCount": 3,
+        "competitors": [
+          "Gankster",
+          "Metafy",
+          "E-Pal"
+        ],
+        "examples": [
+          "Gankster missing features: 'Dedicated 1:1 coaching marketplace and coach booking workflow — Gankster focuses on team LFG/scrims rather than paid coaching discovery'",
+          "Metafy tags and features are coaching-only with no LFG, scrim, or collaborative-play integration",
+          "E-Pal covers companions and social play but missing features note 'No built-in recurring booking/subscription flow' and no structured skill development"
+        ]
+      }
+    ]
+  },
+  "completedAt": "2026-03-16T15:22:51.294Z"
+}

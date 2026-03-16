@@ -1,0 +1,132 @@
+{
+  "id": "metafy",
+  "name": "Metafy",
+  "url": "https://metafy.gg/",
+  "description": "A marketplace that connects gamers with paid 1:1 coaches, guides, events and creator communities — targeting players who want skill improvement and creators who want to monetize coaching.",
+  "logoChar": "M",
+  "logoColor": "#00C2FF",
+  "logoBg": "#F0FCFF",
+  "tags": ["gaming","creator-monetization","coaching","marketplace"],
+  "pricing": "$29.99",
+  "pricingPeriod": "/mo",
+  "customers": "Unknown",
+  "status": "done",
+  "details": {
+    "founded": "2020",
+    "country": "US",
+    "funding": "$25M Series A (Feb 2022); total disclosed funding ~$33M",
+    "employees": "51-200 (est.)",
+    "business": "Marketplace / Creator platform (consumer-facing, creator monetization)",
+    "targetMarket": "Amateur and semi-pro gamers who want paid coaching and creators/streamers who want to monetize teaching and communities",
+    "features": [
+      {
+        "category": "Core marketplace",
+        "items": ["1:1 live coaching sessions (bookable by slot)", "VOD / replay reviews", "Public coach profiles and ratings", "Search and discovery by game/title and coach"]
+      },
+      {
+        "category": "Creator monetization",
+        "items": ["Metafy Pro subscription for creators (tools + distribution)", "Sellable guides (video/written)", "Paid subscription tiers / Communities", "Events and group workshops"]
+      },
+      {
+        "category": "Scheduling & payments",
+        "items": ["Built-in scheduling with availability blocks and rescheduling", "Wallet & payments, cancellation fees configurable by coach", "Revenue metrics and basic analytics for creators"]
+      },
+      {
+        "category": "Product integrations",
+        "items": ["Discord linking for coordination and role gating", "Mobile-friendly web experience"]
+      }
+    ],
+    "missingFeatures": [
+      "No strong, platform-level verification or outcomes layer (no standardized proof of coaching outcomes or guaranteed improvement metrics) — buyers must rely on coach bios/reviews",
+      "Pricing and package standardization is weak: sessions are seller-priced with highly variable scopes and add-ons, making side-by-side comparison difficult for buyers",
+      "Limited buyer protection & refund guarantees: public user complaints describe unresolved refund or no-help scenarios when sessions are missed or coaches go inactive",
+      "Advanced learner analytics and progress tracking (program-level KPIs, long-term progress dashboards) are minimal — hard for students to measure ROI over multiple sessions",
+      "No public B2B / API product for partners or teams to manage coach bookings and reporting at scale (enterprise integrations appear limited)",
+      "Marketplace quality controls to prevent ‘hit-or-miss’ coaches (more curated onboarding, standardized trial/intake flows, or insurance-backed guarantees) are underdeveloped"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Metafy Pro (creator subscription)",
+        "price": "$29.99",
+        "period": "/mo",
+        "note": "Subscription for creators/partners that unlocks selling sessions, guides, communities and access to Pro tools; discounted annual rate available",
+        "highlight": true
+      },
+      {
+        "name": "Sessions (buyer-priced)",
+        "price": "Varies (commonly $8-$100+)",
+        "period": "per session",
+        "note": "Individual coaches set their own prices and bundles (VOD reviews, one-off sessions, multi-session programs)",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://help.metafy.gg/",
+      "pricing": "https://metafy.gg/pro",
+      "blog": "https://letters.metafy.gg/",
+      "jobs": "https://metafy.gg/careers"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "What is Metafy Pro? (Help Center)",
+          "url": "https://help.metafy.gg/en/articles/9300561-what-is-metafy-pro",
+          "claim": "Metafy Pro subscription costs $29.99 per month (or $19.99/mo billed annually) and provides creators with tools, billing, scheduling and distribution."
+        },
+        {
+          "label": "Metafy Pro product page",
+          "url": "https://metafy.gg/pro",
+          "claim": "Metafy Pro marketing page describing creator features and the Pro subscription offering."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "TechCrunch — Series A coverage",
+          "url": "https://techcrunch.com/2022/02/01/metafy-lands-25m-to-scale-its-gaming-coaching-platform/",
+          "claim": "Metafy closed a $25M Series A led by Tiger Global and Seven Seven Six in Feb 2022; company founded in 2020."
+        },
+        {
+          "label": "Esports Insider — Series A report",
+          "url": "https://esportsinsider.com/2022/02/metafy-series-a-round-25m",
+          "claim": "Reporting that Metafy raised $25M in a Series A to scale its esports coaching marketplace."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews for metafy.gg",
+          "url": "https://www.trustpilot.com/review/metafy.gg",
+          "claim": "Mixed reviews including complaints about refunds and support response in some cases."
+        },
+        {
+          "label": "Reddit discussions (user experiences)",
+          "url": "https://www.reddit.com/r/CompetitiveHalo/comments/1hslq21/i_spent_49099_on_metafy_coaching_in_2024_ask_me/",
+          "claim": "User reports and threads show a range of experiences; some users find coaching valuable while others warn the platform can be ‘hit-or-miss’ depending on coach selection."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Our Offerings (Help Center)",
+          "url": "https://help.metafy.gg/en/articles/11867539-our-offerings",
+          "claim": "Metafy offers Sessions, Events, Communities, and Guides as core product lines (1:1 coaching, group events, paid communities and sellable guides)."
+        },
+        {
+          "label": "Sessions — product pages",
+          "url": "https://metafy.gg/sessions",
+          "claim": "Marketplace listings for coach sessions, showing coach profiles, session types, durations and booking flow."
+        }
+      ]
+    },
+    "strengths": [
+      "Strong product-market fit in gaming coaching: broad catalog across 200+ games and clear demand for 1:1 coaching (marketplace depth for many titles).",
+      "Well-funded and credible: $25M Series A led by Tiger Global / Seven Seven Six gives distribution and hiring runway. (TechCrunch coverage)",
+      "Creator-first monetization: creators can sell sessions, guides, events and communities and (as Pro) keep session/guide revenue — attractive to streamers/creators)",
+      "Integrated scheduling, payments and Discord linking reduce friction for coach-student coordination (built-in workflows for bookings, cancellations, wallet)."
+    ],
+    "weaknesses": [
+      "Quality variance across coaches creates buyer uncertainty — platform reviews and Reddit threads report inconsistent coaching outcomes and occasional poor experiences.",
+      "Lack of strong platform-level verification or outcome guarantees; buyers rely on coach-provided evidence and reviews rather than standardized proof of efficacy.",
+      "Refunds & support pain points: Trustpilot and user threads cite unresolved refund issues or slow mediation when coaches become inactive or fail to deliver.",
+      "Packaging and price standardization are weak, making discovery and apples-to-apples comparison of offerings hard for consumers."
+    ]
+  }
+}

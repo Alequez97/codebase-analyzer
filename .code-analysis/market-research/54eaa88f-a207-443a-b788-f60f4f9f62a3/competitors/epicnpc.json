@@ -1,0 +1,164 @@
+{
+  "id": "epicnpc",
+  "name": "EpicNPC",
+  "url": "https://www.epicnpc.com/",
+  "description": "A forum-style, consumer-to-consumer marketplace for buying, selling and trading game accounts, in-game items and services (boosting, coaching, carries).",
+  "logoChar": "EP",
+  "logoColor": "#0ea5e9",
+  "logoBg": "#e0f2fe",
+  "tags": ["gaming-marketplace", "P2P-accounts", "escrow"],
+  "pricing": "$10",
+  "pricingPeriod": "/yr",
+  "customers": "495K+",
+  "status": "done",
+  "details": {
+    "founded": "Unknown",
+    "country": "US",
+    "funding": "Unknown",
+    "employees": "Unknown",
+    "business": "Consumer two-sided marketplace / forum",
+    "targetMarket": "Gamers and semi-professional sellers who buy/sell/trade game accounts, currency, boosting services and coaching",
+    "features": [
+      {
+        "category": "Marketplace & Discovery",
+        "items": [
+          "Forum-style listing threads organized by game and tags",
+          "Category and tag pages for ~1000+ supported games (search by game)",
+          "User feedback and thread bumping to surface active offers"
+        ]
+      },
+      {
+        "category": "Escrow & Trust",
+        "items": [
+          "Trade Guardian (site-hosted escrow / middleman service) with tiered paid options",
+          "Public feedback/reputation system and paid ‘upgrades’/verified badges",
+          "Phone verification (Twilio) and ID/photo verification options for users"
+        ]
+      },
+      {
+        "category": "Seller Tools & Monetization",
+        "items": [
+          "Paid account upgrades (Epic Member) to increase visibility and perks",
+          "Advertising and pinned/featured thread options",
+          "Built-in Trade Guardian fee handling and deposit workflows"
+        ]
+      },
+      {
+        "category": "Community & Support",
+        "items": [
+          "Large active forum community with dispute/reporting threads",
+          "Manual moderation and review for upgrades and verified status",
+          "Help center and extensive how-to threads (buying guide, trade guardian guides)"
+        ]
+      }
+    ],
+    "missingFeatures": [
+      "No guaranteed chargeback/recovery insurance: Trade Guardian explicitly does not protect against payment chargebacks or account recalls, leaving buyers exposed for high-ticket purchases",
+      "No standardized service packages or SKU pricing: sellers list custom offers per thread which makes comparison and conversion harder for buyers seeking repeatable coaching or boosting packages",
+      "Limited identity/verification automation: verification relies on phone and manual ID review rather than a strong KYC/verified-vendor program with cryptographic identity or third-party attestations",
+      "Weak post-transaction protection and refunds: dispute resolution is manual and often only actionable when Trade Guardian is used, creating friction and risk for off-platform payments",
+      "No public seller analytics or performance dashboards to help buyers evaluate service quality beyond raw feedback counts",
+      "No documented API or B2B integrations for studios, platforms or payment partners to onboard verified pro sellers or offer in-platform protections"
+    ],
+    "pricingPlans": [
+      {
+        "name": "Browse (free)",
+        "price": "$0",
+        "period": "",
+        "note": "Anyone can browse listings and contact sellers for free; creating sale threads requires registration and verification.",
+        "highlight": false
+      },
+      {
+        "name": "Epic Member (upgrade)",
+        "price": "$10",
+        "period": "/yr",
+        "note": "Paid user upgrade (visibility/perks/verified badge). Price has changed historically; current community threads reference $10/yr as the Epic Member price.",
+        "highlight": true
+      },
+      {
+        "name": "Trade Guardian (escrow/middleman)",
+        "price": "Fee-based",
+        "period": "per-transaction",
+        "note": "Paid escrow/middleman service with variable fees (examples listed on site: flat + percentage fee structure). Protects against some scams but does not cover chargebacks or account recalls.",
+        "highlight": false
+      }
+    ],
+    "links": {
+      "docs": "https://www.epicnpc.com/infocenter/",
+      "pricing": "https://www.epicnpc.com/infocenter/upgrades.html",
+      "blog": "https://www.epicnpc.com/threads/",
+      "jobs": "https://www.epicnpc.com/misc/contact"
+    },
+    "sources": {
+      "pricingEvidence": [
+        {
+          "label": "Member upgrade announcement (forum thread)",
+          "url": "https://www.epicnpc.com/threads/major-changes-to-upgrades-and-verification.2236423/",
+          "claim": "Post explaining changes to paid upgrades and a cited Epic Member price of $10/yr for the main upgrade tier."
+        },
+        {
+          "label": "Trade Guardian page",
+          "url": "https://www.epicnpc.com/tradeguardian/",
+          "claim": "Explains Trade Guardian escrow/middleman options and fees (site lists flat + percentage fees for services)."
+        }
+      ],
+      "companyEvidence": [
+        {
+          "label": "Twilio customer story",
+          "url": "https://customers.twilio.com/en-us/epicnpc",
+          "claim": "Describes EpicNPC as a US-based marketplace, cites ~495K members, ~300K monthly visitors and usage of Twilio Verify for phone authentication."
+        },
+        {
+          "label": "EpicNPC Info Center (contact/about)",
+          "url": "https://www.epicnpc.com/infocenter/about.html",
+          "claim": "Site Info Center listing EpicNPC contact address in New Jersey and describing the marketplace/forum nature of the site."
+        },
+        {
+          "label": "Crunchbase company page",
+          "url": "https://www.crunchbase.com/organization/epicnpc-marketplace",
+          "claim": "Company listing on Crunchbase identifying EpicNPC Marketplace (no reliable public funding data listed)."
+        }
+      ],
+      "reviewEvidence": [
+        {
+          "label": "Trustpilot reviews",
+          "url": "https://www.trustpilot.com/review/epicnpc.com",
+          "claim": "Multiple customer reviews citing slow/poor customer support and complaints about dispute handling when Trade Guardian is not used."
+        },
+        {
+          "label": "Reddit threads (community complaints)",
+          "url": "https://www.reddit.com/r/GenshinTrades/comments/14oqtly/epicnpc/",
+          "claim": "Community posts reporting scams, impersonation and skepticism about middlemen / Trade Guardian reliability."
+        }
+      ],
+      "featureEvidence": [
+        {
+          "label": "Trade Guardian info",
+          "url": "https://www.epicnpc.com/infocenter/trade_guardian.html",
+          "claim": "Explains Trade Guardian services (free guidance vs paid middleman/escrow) and limitations (does not protect against chargebacks or account recalls)."
+        },
+        {
+          "label": "Buying & Selling Guide (help center)",
+          "url": "https://www.epicnpc.com/infocenter/buyingguide.html",
+          "claim": "Provides step-by-step guidance for buyers/sellers, recommended safety practices and advice to use Trade Guardian for risky transactions."
+        },
+        {
+          "label": "Twilio customer story",
+          "url": "https://customers.twilio.com/en-us/epicnpc",
+          "claim": "Describes site verification (Twilio Verify), scale metrics and claim that the site supports ~1000+ games and large volumes of postings/sales."
+        }
+      ]
+    },
+    "strengths": [
+      "High liquidity and category breadth: long-running forum with ~495K members and support for ~1000+ games, which provides supply and buyer depth for niche game items and accounts (Twilio case study).",
+      "Established community & moderation workflows: forum structure, reporting/dispute threads and a staffed Trade Guardian middleman program that can be used to reduce common scam vectors.",
+      "Low-friction discovery for niche items: forum thread model + tags/pinned posts makes it easy to find rare game-specific accounts or services that larger marketplaces don’t handle."
+    ],
+    "weaknesses": [
+      "Insufficient payment protections: Trade Guardian explicitly does not cover chargebacks or account recalls, leaving buyers of high-value accounts exposed and reducing trust for expensive transactions.",
+      "Uneven trust signals: reputation is primarily feedback-based and paid upgrades can be used to boost visibility, which makes it possible for experienced scammers to appear legitimate and for new honest sellers to struggle for visibility.",
+      "Fragmented productization: services and coaching are listed as free-form threads (no standardized SKUs, recurring booking, or subscription options), which increases buyer friction for repeat or B2B purchases.",
+      "Customer support and dispute handling complaints: multiple Trustpilot and Reddit posts cite slow responses or unsatisfactory outcomes unless the paid Trade Guardian flow was used."
+    ]
+  }
+}
