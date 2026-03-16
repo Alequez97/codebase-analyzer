@@ -1,69 +1,70 @@
 import { Badge, Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
-import { Check, X, CheckCircle2 } from "lucide-react";
+import { Check, X, Clock } from "lucide-react";
 import { useMarketResearchStore } from "../../store/useMarketResearchStore";
 
-const IS_TEST_MODE = import.meta.env.VITE_PRICING_TEST_MODE === "true";
-
-export function PricingCard({ plan }) {
+export function PricingCard({ plan, isComingSoon = false }) {
   const goToInput = useMarketResearchStore((s) => s.goToInput);
-  const selectPlan = useMarketResearchStore((s) => s.selectPlan);
-  const selectedPlan = useMarketResearchStore((s) => s.selectedPlan);
-
-  const isSelected = selectedPlan?.name === plan.name;
 
   function handleCta() {
-    if (IS_TEST_MODE) {
-      selectPlan(plan);
-    }
+    if (isComingSoon) return;
     goToInput();
   }
 
   return (
     <Box
       position="relative"
-      bg={isSelected ? "#f5f3ff" : "white"}
+      bg="white"
       borderWidth="1px"
-      borderColor={
-        isSelected ? "#6366f1" : plan.featured ? "#6366f1" : "#e2e8f0"
-      }
+      borderColor={plan.featured ? "#6366f1" : "#e2e8f0"}
       borderRadius="14px"
       p={5}
-      transition="box-shadow 0.15s, border-color 0.15s"
-      _hover={{ boxShadow: "0 6px 20px rgba(0,0,0,.06)" }}
+      transition="box-shadow 0.15s"
+      _hover={{
+        boxShadow: isComingSoon ? "none" : "0 6px 20px rgba(0,0,0,.06)",
+      }}
       boxShadow={
-        isSelected
-          ? "0 0 0 4px rgba(99,102,241,.15), 0 8px 24px rgba(99,102,241,.18)"
-          : plan.featured
-            ? "0 0 0 4px rgba(99,102,241,.08), 0 8px 24px rgba(99,102,241,.12)"
-            : "none"
+        plan.featured
+          ? "0 0 0 4px rgba(99,102,241,.08), 0 8px 24px rgba(99,102,241,.12)"
+          : "none"
       }
+      overflow="hidden"
     >
-      {isSelected && (
-        <Badge
+      {isComingSoon && (
+        <Box
           position="absolute"
-          top="-11px"
-          left="50%"
-          transform="translateX(-50%)"
-          bg="linear-gradient(135deg, #16a34a, #15803d)"
-          color="white"
-          fontSize="10px"
-          fontWeight="700"
-          letterSpacing="0.06em"
-          textTransform="uppercase"
-          px={3}
-          py={0.5}
-          borderRadius="9999px"
-          whiteSpace="nowrap"
+          inset={0}
+          bg="rgba(255,255,255,0.72)"
+          backdropFilter="blur(2px)"
+          borderRadius="14px"
+          zIndex={1}
           display="flex"
           alignItems="center"
-          gap={1}
+          justifyContent="center"
         >
-          <CheckCircle2 size={10} />
-          Selected
-        </Badge>
+          <VStack gap={1.5}>
+            <Clock size={18} color="#6366f1" strokeWidth={2} />
+            <Text
+              fontSize="12px"
+              fontWeight="700"
+              color="#6366f1"
+              letterSpacing="0.04em"
+            >
+              Coming Soon
+            </Text>
+            <Text
+              fontSize="10px"
+              color="#94a3b8"
+              textAlign="center"
+              maxW="120px"
+              lineHeight="1.4"
+            >
+              Paid plans launch shortly.
+            </Text>
+          </VStack>
+        </Box>
       )}
 
-      {!isSelected && plan.featured && (
+      {plan.featured && (
         <Badge
           position="absolute"
           top="-11px"
@@ -129,45 +130,27 @@ export function PricingCard({ plan }) {
           fontSize="12px"
           fontWeight="600"
           bg={
-            isSelected
-              ? "linear-gradient(135deg, #16a34a, #15803d)"
-              : plan.ctaStyle === "primary"
-                ? "linear-gradient(135deg, #6366f1, #7c3aed)"
-                : "white"
+            plan.ctaStyle === "primary"
+              ? "linear-gradient(135deg, #6366f1, #7c3aed)"
+              : "white"
           }
-          color={
-            isSelected || plan.ctaStyle === "primary" ? "white" : "#374151"
-          }
-          borderWidth={!isSelected && plan.ctaStyle === "outline" ? "1px" : "0"}
+          color={plan.ctaStyle === "primary" ? "white" : "#374151"}
+          borderWidth={plan.ctaStyle === "outline" ? "1px" : "0"}
           borderColor="#e2e8f0"
           boxShadow={
-            isSelected
-              ? "0 2px 8px rgba(22,163,74,.3)"
-              : plan.ctaStyle === "primary"
-                ? "0 2px 8px rgba(99,102,241,.3)"
-                : "none"
+            plan.ctaStyle === "primary"
+              ? "0 2px 8px rgba(99,102,241,.3)"
+              : "none"
           }
           _hover={{
             opacity: 0.9,
-            bg:
-              !isSelected && plan.ctaStyle === "outline"
-                ? "#f8fafc"
-                : undefined,
-            borderColor:
-              !isSelected && plan.ctaStyle === "outline"
-                ? "#cbd5e1"
-                : undefined,
+            bg: plan.ctaStyle === "outline" ? "#f8fafc" : undefined,
+            borderColor: plan.ctaStyle === "outline" ? "#cbd5e1" : undefined,
           }}
           onClick={handleCta}
         >
-          {isSelected ? "Selected ✓" : plan.cta}
+          {plan.cta}
         </Button>
-
-        {IS_TEST_MODE && (
-          <Text fontSize="10px" color="#94a3b8" textAlign="center" w="full">
-            ~{plan.numCompetitors} competitors/report
-          </Text>
-        )}
 
         <Box h="1px" bg="#f1f5f9" w="full" my={1} />
 

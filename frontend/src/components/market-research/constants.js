@@ -38,7 +38,7 @@ const PLAN_FEATURES_FREE = [
   { text: "~10 competitors per report", included: true },
   { text: "Basic gap analysis", included: true },
   { text: "PDF export", included: false },
-  { text: "Report history", included: false },
+  { text: "Report history", included: true },
   { text: "Deep intelligence", included: false },
 ];
 
