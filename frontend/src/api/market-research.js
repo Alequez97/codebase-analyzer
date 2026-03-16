@@ -28,15 +28,18 @@ export const getMarketResearchSession = (sessionId) =>
  * @param {string} sessionId
  * @param {string} idea
  * @param {number} numCompetitors - How many competitors to analyze (plan-dependent)
+ * @param {string[]|null} regions - null for Worldwide, array of country codes otherwise
  */
 export const requestMarketResearchAnalysis = (
   sessionId,
   idea,
   numCompetitors,
+  regions,
 ) =>
   client.post(`/market-research/${sessionId}/analyze`, {
     idea,
     numCompetitors,
+    regions: regions ?? null,
   });
 
 /**

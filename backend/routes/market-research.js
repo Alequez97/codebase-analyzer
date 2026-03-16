@@ -131,11 +131,15 @@ router.post("/:sessionId/claim", requireAuth, async (req, res) => {
 // Queue an AI market research task for this session
 router.post("/:sessionId/analyze", async (req, res) => {
   const { sessionId } = req.params;
-  const { idea } = req.body;
+  const { idea, regions } = req.body;
 
   if (!idea || typeof idea !== "string" || !idea.trim()) {
     return res.status(400).json({ error: "idea is required" });
   }
+
+  // regions: null = Worldwide, string[] = specific country codes
+  const normalizedRegions =
+    Array.isArray(regions) && regions.length > 0 ? regions : null;
 
   const plan = await getSubscriptionPlanDetails(req.userId ?? null);
   const numCompetitors = plan.numCompetitors;
@@ -159,6 +163,7 @@ router.post("/:sessionId/analyze", async (req, res) => {
       sessionId,
       idea: idea.trim(),
       numCompetitors,
+      regions: normalizedRegions,
     });
 
     if (task?.success === false) {

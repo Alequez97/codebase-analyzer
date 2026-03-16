@@ -8,6 +8,11 @@ Your output will later be merged into a final market opportunity report. That me
 
 Research **{{COMPETITOR_NAME}}** (`{{COMPETITOR_URL}}`) and write a complete profile to `{{OUTPUT_FILE}}`.
 
+## Available Tools
+
+- `web_search`: Search the web for real-time information about this competitor
+- `write_file`: Write the completed competitor profile JSON to `{{OUTPUT_FILE}}`
+
 ## How to research — web search strategy
 
 You have access to `web_search`. Use it deliberately — **2-4 targeted queries is enough**. Each query should answer a specific question you cannot answer from memory alone.
@@ -142,12 +147,14 @@ Write a single valid JSON object:
 The user should be able to follow links and verify that the model did not invent key facts.
 
 For every competitor, collect evidence links for the most important claims:
+
 - `pricingEvidence`: 1-3 entries backing pricing or packaging claims
 - `companyEvidence`: 1-3 entries backing funding, founding year, employee count, or business model claims
 - `reviewEvidence`: 1-3 entries backing complaints, review sentiment, or trust issues when you mention them
 - `featureEvidence`: 1-3 entries backing standout product features or workflow claims
 
 Each evidence item must include:
+
 1. `label` - short source label such as `"Pricing page"`, `"Crunchbase"`, `"Trustpilot"`, `"Help center"`
 2. `url` - the direct source link
 3. `claim` - one short sentence describing exactly what that source supports
@@ -157,16 +164,19 @@ Do not dump irrelevant links. Include only links that support concrete facts use
 ### How to write good gap analysis
 
 Bad:
+
 - "Could improve UX"
 - "Needs more features"
 - "Could be better for users"
 
 Good:
+
 - "No built-in recurring booking flow for weekly coaching clients"
 - "Pricing is seller-by-seller with weak package standardization, which makes comparison harder for buyers"
 - "No verified skill or trust layer beyond basic ratings, creating risk for high-ticket purchases"
 
 Prefer gaps in these categories when they are real:
+
 - pricing clarity or packaging
 - onboarding and conversion friction
 - trust, verification, and guarantees
@@ -177,6 +187,7 @@ Prefer gaps in these categories when they are real:
 - B2B, API, or partnership expansion
 
 Every `missingFeatures` item must be:
+
 1. Specific
 2. Relevant to the startup idea's buyer
 3. Written as an actual market opening, not a vague complaint

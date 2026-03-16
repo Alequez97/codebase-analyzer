@@ -24,12 +24,8 @@ function createInitialMessage({ idea, sessionId, competitorProfilesJson }) {
 export function marketResearchInitialHandler(task, taskLogger) {
   const { sessionId, idea } = task.params || {};
 
-  const initialMessage = [
-    "Research the following startup idea and identify competitors to delegate to specialist agents.",
-    "",
-    `Idea: ${idea}`,
-    `Session ID: ${sessionId}`,
-  ].join("\n");
+  const initialMessage =
+    "Research the startup idea and identify competitors to delegate to specialist agents as specified in the instructions.";
 
   const onComplete = async () => {
     let competitorTasks;

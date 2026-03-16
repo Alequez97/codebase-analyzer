@@ -456,6 +456,10 @@ export async function buildTemplateVariables(task) {
         SESSION_ID: task.params?.sessionId || "",
         IDEA: task.params?.idea || "",
         NUM_COMPETITORS: String(task.params?.numCompetitors ?? 10),
+        TARGET_MARKETS:
+          Array.isArray(task.params?.regions) && task.params.regions.length > 0
+            ? task.params.regions.join(", ")
+            : "Worldwide",
         OUTPUT_FILE: task.outputFile || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };

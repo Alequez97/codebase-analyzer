@@ -23,6 +23,7 @@ export async function queueMarketResearchInitialTask({
   sessionId,
   idea,
   numCompetitors,
+  regions,
 } = {}) {
   if (!sessionId || !idea) {
     return { success: false, error: "sessionId and idea are required" };
@@ -45,6 +46,7 @@ export async function queueMarketResearchInitialTask({
       sessionId,
       idea,
       numCompetitors,
+      regions: regions ?? null,
       targetDirectory: config.target.directory,
     },
     agentConfig,

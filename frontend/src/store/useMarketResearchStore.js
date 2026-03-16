@@ -71,7 +71,7 @@ export const useMarketResearchStore = create(
 
       // --- Analysis actions ---
       startAnalysis: async () => {
-        const { idea, selectedPlan } = get();
+        const { idea, regions, selectedPlan } = get();
         const numCompetitors = selectedPlan?.numCompetitors ?? 10;
         const sessionId = crypto.randomUUID();
 
@@ -88,7 +88,12 @@ export const useMarketResearchStore = create(
         });
 
         try {
-          await requestMarketResearchAnalysis(sessionId, idea, numCompetitors);
+          await requestMarketResearchAnalysis(
+            sessionId,
+            idea,
+            numCompetitors,
+            regions,
+          );
         } catch {
           // Task queue failed — mark as complete with empty state so UI isn't stuck
           set({
