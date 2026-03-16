@@ -4,7 +4,6 @@ import { Server } from "socket.io";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import fs from "fs";
 import config from "./config.js";
 import { recoverOrphanedTasks } from "./orchestrators/task.js";
 import { startQueueProcessor } from "./orchestrators/queue-processor.js";
@@ -24,10 +23,7 @@ import {
   e2eConfigRoutes,
   reviewChangesRoutes,
   designRoutes,
-  marketResearchRoutes,
-  authRoutes,
 } from "./routes/index.js";
-import { startCleanupJob } from "./utils/market-research-cleanup.js";
 
 // Domain routes (modular structure)
 import * as domainRoutes from "./routes/domain/index.js";
@@ -96,23 +92,11 @@ app.use("/api/review-changes", reviewChangesRoutes);
 app.use("/api", domainSectionsChatRoutes);
 app.use("/api", codebaseChatRoutes);
 app.use("/api/design", designRoutes);
-app.use("/api/market-research", marketResearchRoutes);
-app.use("/api/auth", authRoutes);
 
 // ==================== Design Preview Static Files ====================
 
-const designDir = path.join(
-  config.target.directory,
-  ".code-analysis",
-  "design",
-);
-if (fs.existsSync(designDir)) {
-  app.use("/design-preview", express.static(designDir));
-} else {
-  app.get("/design-preview/*", (_req, res) =>
-    res.status(404).json({ error: "No design files found" }),
-  );
-}
+const designDir = path.join(config.target.directory, ".code-analysis", "design");
+app.use("/design-preview", express.static(designDir));
 
 // ==================== Error Handler ====================
 
@@ -162,6 +146,4 @@ httpServer.listen(config.port, async () => {
   // Start the queue processor — picks up recovered + any pre-existing pending tasks
   startQueueProcessor();
 
-  // Start the market research session cleanup job (removes sessions older than 2 days)
-  startCleanupJob();
 });

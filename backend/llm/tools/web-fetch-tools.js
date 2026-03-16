@@ -66,7 +66,7 @@ export class WebFetchToolExecutor {
         signal: controller.signal,
         headers: {
           "User-Agent":
-            "Mozilla/5.0 (compatible; MarketResearchBot/1.0; +https://github.com)",
+            "Mozilla/5.0 (compatible; CodebaseAnalyzerBot/1.0; +https://github.com)",
           Accept: "text/html,application/xhtml+xml,text/plain",
         },
         redirect: "follow",

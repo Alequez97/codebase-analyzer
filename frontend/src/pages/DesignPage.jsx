@@ -1,281 +1,256 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Center, Spinner, Text } from "@chakra-ui/react";
+import { toaster } from "../components/ui/toaster";
 import {
-  Box,
-  Button,
-  HStack,
-  Text,
-  VStack,
-  Spinner,
-  Center,
-} from "@chakra-ui/react";
-import {
-  Layers,
-  LayoutTemplate,
-  Monitor,
-  Tablet,
-  Smartphone,
-} from "lucide-react";
+  DesignEmptyState,
+  DesignPreviewPane,
+  DesignWorkspaceSidebar,
+} from "../components/design-studio";
+import { TASK_TYPES } from "../constants/task-types";
+import { useDesignStudioStore } from "../store/useDesignStudioStore";
+import { useTaskProgressStore } from "../store/useTaskProgressStore";
 
-const VIEWPORTS = [
-  { id: "desktop", label: "Desktop", icon: Monitor, width: null },
-  { id: "tablet", label: "Tablet", icon: Tablet, width: 768 },
-  { id: "mobile", label: "Mobile", icon: Smartphone, width: 375 },
-];
+const DESIGN_TASK_TYPES = new Set([
+  TASK_TYPES.DESIGN_BRAINSTORM,
+  TASK_TYPES.DESIGN_GENERATE,
+]);
 
-async function fetchManifest() {
-  const res = await fetch("/api/design/manifest");
-  if (!res.ok) throw new Error("Failed to load design manifest");
-  return res.json();
+function getFirstPreviewUrl(manifest, panel) {
+  if (panel === "components") {
+    return manifest.components[0]?.url ?? manifest.prototypes[0]?.url ?? null;
+  }
+  return manifest.prototypes[0]?.url ?? manifest.components[0]?.url ?? null;
 }
 
 export default function DesignPage() {
-  const [manifest, setManifest] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // "prototype" | "components"
   const [panel, setPanel] = useState("prototype");
   const [selectedUrl, setSelectedUrl] = useState(null);
   const [viewport, setViewport] = useState("desktop");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const iframeRef = useRef(null);
-  const activeViewport = VIEWPORTS.find((v) => v.id === viewport);
+  const {
+    manifest,
+    loadingManifest,
+    manifestError,
+    currentTaskId,
+    prompt,
+    brainstormResponse,
+    generationBrief,
+    taskMessages,
+    taskError,
+    setPrompt,
+    setGenerationBrief,
+    fetchManifest,
+    startBrainstorm,
+    startGeneration,
+    fetchTaskMessages,
+  } = useDesignStudioStore();
+
+  const progressByTaskId = useTaskProgressStore((state) => state.progressByTaskId);
+
+  const currentTask = currentTaskId ? progressByTaskId.get(currentTaskId) : null;
+  const allTaskEntries = useMemo(
+    () => Array.from(progressByTaskId.values()),
+    [progressByTaskId],
+  );
+
+  const hasDesignFiles =
+    manifest.prototypes.length > 0 || manifest.components.length > 0;
+
+  const hasActiveDesignGeneration = allTaskEntries.some(
+    (entry) =>
+      DESIGN_TASK_TYPES.has(entry.type) &&
+      entry.type !== TASK_TYPES.DESIGN_BRAINSTORM &&
+      (entry.status === "running" || entry.status === "pending"),
+  );
+
+  const latestAssistantMessage = useMemo(() => {
+    const assistantMessages = taskMessages.filter(
+      (message) => message.role === "assistant",
+    );
+    return assistantMessages.map((message) => message.content).join("\n\n").trim();
+  }, [taskMessages]);
 
   useEffect(() => {
-    fetchManifest()
-      .then((data) => {
-        setManifest(data);
-        const first =
-          data.prototypes[0]?.url ?? data.components[0]?.url ?? null;
-        setSelectedUrl(first);
-        if (data.components.length > 0 && data.prototypes.length === 0) {
-          setPanel("components");
+    let mounted = true;
+
+    fetchManifest().then((result) => {
+      if (!mounted) {
+        return;
+      }
+      if (result?.firstPreviewUrl) {
+        setSelectedUrl((previous) => previous || result.firstPreviewUrl);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchManifest]);
+
+  useEffect(() => {
+    const items = [...manifest.prototypes, ...manifest.components];
+    if (items.length === 0) {
+      setSelectedUrl(null);
+      return;
+    }
+
+    if (selectedUrl && items.some((item) => item.url === selectedUrl)) {
+      return;
+    }
+
+    setSelectedUrl(getFirstPreviewUrl(manifest, panel));
+  }, [manifest, panel, selectedUrl]);
+
+  useEffect(() => {
+    if (!currentTaskId) {
+      return;
+    }
+
+    fetchTaskMessages(currentTaskId);
+
+    const isRunning =
+      currentTask?.status === "running" || currentTask?.status === "pending";
+    if (!isRunning) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      fetchTaskMessages(currentTaskId);
+    }, 1500);
+
+    return () => window.clearInterval(intervalId);
+  }, [currentTaskId, currentTask?.status, fetchTaskMessages]);
+
+  useEffect(() => {
+    if (!hasActiveDesignGeneration) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      fetchManifest({ silent: true }).then((result) => {
+        if (result?.firstPreviewUrl) {
+          setSelectedUrl((previous) => previous || result.firstPreviewUrl);
         }
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
       });
-  }, []);
+    }, 3000);
 
-  const items =
-    manifest == null
-      ? []
-      : panel === "prototype"
-        ? manifest.prototypes
-        : manifest.components;
+    return () => window.clearInterval(intervalId);
+  }, [hasActiveDesignGeneration, fetchManifest]);
 
-  if (loading) {
+  const handleBrainstorm = async () => {
+    setIsSubmitting(true);
+    const result = await startBrainstorm();
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to start brainstorm",
+        description: result.error,
+        type: "error",
+      });
+    }
+  };
+
+  const handleGenerate = async () => {
+    setIsSubmitting(true);
+    const result = await startGeneration();
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to start design generation",
+        description: result.error,
+        type: "error",
+      });
+      return;
+    }
+
+    toaster.create({
+      title: "Design generation queued",
+      description: "The design orchestrator is preparing split design files.",
+      type: "success",
+    });
+  };
+
+  if (loadingManifest) {
     return (
       <Center h="60vh">
-        <Spinner size="lg" color="blue.500" />
+        <Spinner size="lg" color="orange.500" />
       </Center>
     );
   }
 
-  if (error) {
+  if (manifestError) {
     return (
       <Center h="60vh">
-        <Text color="red.500">{error}</Text>
+        <Text color="red.500">{manifestError}</Text>
       </Center>
     );
   }
 
-  const isEmpty =
-    manifest.prototypes.length === 0 && manifest.components.length === 0;
+  if (!hasDesignFiles) {
+    return (
+      <DesignEmptyState
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        onBrainstorm={handleBrainstorm}
+        onGenerate={handleGenerate}
+        isSubmitting={isSubmitting}
+        currentTask={currentTask}
+        brainstormResponse={latestAssistantMessage || brainstormResponse}
+        generationBrief={generationBrief}
+        onGenerationBriefChange={setGenerationBrief}
+        taskError={taskError}
+      />
+    );
+  }
 
   return (
-    <Box display="flex" h="calc(100vh - 49px)" overflow="hidden">
-      {/* Sidebar */}
-      <Box
-        w="200px"
-        flexShrink={0}
-        borderRightWidth="1px"
-        borderColor="gray.200"
-        bg="gray.50"
-        display="flex"
-        flexDirection="column"
-        py={3}
+    <Center
+      minH="calc(100vh - 49px)"
+      bg="linear-gradient(180deg, #fffaf3 0%, #f8fbff 42%, #eef4ff 100%)"
+      px={{ base: 0, md: 4 }}
+      py={{ base: 0, md: 4 }}
+    >
+      <Center
+        w="full"
+        maxW="1600px"
+        minH={{ base: "calc(100vh - 49px)", md: "calc(100vh - 81px)" }}
+        borderRadius={{ base: 0, md: "32px" }}
+        overflow="hidden"
+        borderWidth={{ base: 0, md: "1px" }}
+        borderColor="rgba(226, 232, 240, 0.9)"
+        boxShadow={{ base: "none", md: "0 30px 90px rgba(15, 23, 42, 0.1)" }}
+        bg="rgba(255,255,255,0.72)"
+        backdropFilter="blur(18px)"
+        alignItems="stretch"
+        flexDirection={{ base: "column", lg: "row" }}
       >
-        {/* Panel toggle */}
-        <HStack gap={1} px={3} mb={3}>
-          <Button
-            size="xs"
-            flex={1}
-            variant={panel === "prototype" ? "solid" : "ghost"}
-            colorPalette={panel === "prototype" ? "blue" : "gray"}
-            onClick={() => {
-              setPanel("prototype");
-              setSelectedUrl(manifest.prototypes[0]?.url ?? null);
-            }}
-          >
-            <LayoutTemplate size={11} />
-            Prototype
-          </Button>
-          <Button
-            size="xs"
-            flex={1}
-            variant={panel === "components" ? "solid" : "ghost"}
-            colorPalette={panel === "components" ? "blue" : "gray"}
-            onClick={() => {
-              setPanel("components");
-              setSelectedUrl(manifest.components[0]?.url ?? null);
-            }}
-          >
-            <Layers size={11} />
-            Components
-          </Button>
-        </HStack>
-
-        {/* Item list */}
-        <VStack gap={0} align="stretch" flex={1} overflowY="auto">
-          {items.length === 0 ? (
-            <Text fontSize="xs" color="gray.400" px={3}>
-              None found
-            </Text>
-          ) : (
-            items.map((item) => (
-              <Box
-                key={item.id}
-                px={3}
-                py={2}
-                cursor="pointer"
-                fontSize="sm"
-                fontWeight={selectedUrl === item.url ? "semibold" : "normal"}
-                color={selectedUrl === item.url ? "blue.700" : "gray.700"}
-                bg={selectedUrl === item.url ? "blue.50" : "transparent"}
-                borderLeftWidth="2px"
-                borderLeftColor={
-                  selectedUrl === item.url ? "blue.500" : "transparent"
-                }
-                _hover={{ bg: "gray.100" }}
-                onClick={() => setSelectedUrl(item.url)}
-              >
-                {item.label}
-              </Box>
-            ))
-          )}
-        </VStack>
-      </Box>
-
-      {/* Preview area */}
-      <Box flex={1} display="flex" flexDirection="column" overflow="hidden">
-        {/* Viewport toolbar */}
-        {!isEmpty && (
-          <HStack
-            gap={1}
-            px={3}
-            py={2}
-            borderBottomWidth="1px"
-            borderColor="gray.200"
-            bg="white"
-            justify="center"
-          >
-            {VIEWPORTS.map(({ id, label, icon: Icon, width }) => (
-              <Button
-                key={id}
-                size="xs"
-                variant={viewport === id ? "solid" : "ghost"}
-                colorPalette={viewport === id ? "blue" : "gray"}
-                onClick={() => setViewport(id)}
-                title={width ? `${width}px` : "Full width"}
-              >
-                <Icon size={12} />
-                {label}
-                {width && (
-                  <Text as="span" fontSize="10px" opacity={0.7} ml={1}>
-                    {width}px
-                  </Text>
-                )}
-              </Button>
-            ))}
-          </HStack>
-        )}
-
-        {/* Canvas */}
-        <Box flex={1} bg="gray.100" position="relative" overflow="auto">
-          {isEmpty ? (
-            <Center h="100%" flexDirection="column" gap={3}>
-              <Text fontSize="lg" fontWeight="semibold" color="gray.500">
-                No design files yet
-              </Text>
-              <Text
-                fontSize="sm"
-                color="gray.400"
-                maxW="320px"
-                textAlign="center"
-              >
-                Design prototypes and component previews will appear here once
-                generated. HTML files in{" "}
-                <Text as="span" fontFamily="mono" fontSize="xs">
-                  .code-analysis/design/
-                </Text>{" "}
-                are served automatically.
-              </Text>
-            </Center>
-          ) : selectedUrl ? (
-            <Center
-              h={activeViewport.width ? "auto" : "100%"}
-              minH="100%"
-              py={activeViewport.width ? 4 : 0}
-            >
-              <Box
-                w={activeViewport.width ? `${activeViewport.width}px` : "100%"}
-                h={activeViewport.width ? "calc(100vh - 120px)" : "100%"}
-                bg="white"
-                boxShadow={activeViewport.width ? "lg" : "none"}
-                borderRadius={activeViewport.width ? "md" : "none"}
-                overflow="hidden"
-                position="relative"
-                transition="width 0.2s ease"
-              >
-                {activeViewport.width && (
-                  <Box
-                    position="absolute"
-                    top={0}
-                    left={0}
-                    right={0}
-                    h="20px"
-                    bg="gray.200"
-                    display="flex"
-                    alignItems="center"
-                    px={2}
-                    gap={1}
-                    zIndex={1}
-                    borderTopRadius="md"
-                  >
-                    <Box w={2} h={2} borderRadius="full" bg="red.400" />
-                    <Box w={2} h={2} borderRadius="full" bg="yellow.400" />
-                    <Box w={2} h={2} borderRadius="full" bg="green.400" />
-                    <Text fontSize="10px" color="gray.500" ml={1}>
-                      {activeViewport.label} — {activeViewport.width}px
-                    </Text>
-                  </Box>
-                )}
-                <iframe
-                  ref={iframeRef}
-                  src={selectedUrl}
-                  title="Design Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                    display: "block",
-                    marginTop: activeViewport.width ? "20px" : "0",
-                  }}
-                />
-              </Box>
-            </Center>
-          ) : (
-            <Center h="100%">
-              <Text color="gray.400" fontSize="sm">
-                Select an item from the sidebar
-              </Text>
-            </Center>
-          )}
-        </Box>
-      </Box>
-    </Box>
+        <DesignWorkspaceSidebar
+          panel={panel}
+          onPanelChange={setPanel}
+          prototypes={manifest.prototypes}
+          components={manifest.components}
+          selectedUrl={selectedUrl}
+          onSelectUrl={setSelectedUrl}
+          prompt={prompt}
+          onPromptChange={setPrompt}
+          generationBrief={generationBrief}
+          onGenerationBriefChange={setGenerationBrief}
+          onBrainstorm={handleBrainstorm}
+          onGenerate={handleGenerate}
+          isSubmitting={isSubmitting}
+        />
+        <DesignPreviewPane
+          selectedUrl={selectedUrl}
+          viewport={viewport}
+          onViewportChange={setViewport}
+          currentTask={currentTask}
+          message={latestAssistantMessage}
+          error={taskError}
+        />
+      </Center>
+    </Center>
   );
 }

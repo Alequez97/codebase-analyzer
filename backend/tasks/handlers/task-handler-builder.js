@@ -1,38 +1,29 @@
 /**
  * Task Handler Factory
- * Creates task-specific handler configuration based on task type
+ * Creates task-specific handler configuration based on task type.
  */
 
+import fs from "fs/promises";
+import path from "path";
+import config from "../../config.js";
+import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadSystemInstructionForTask } from "../../utils/system-instruction-loader.js";
 import { loadDomainSectionChatHistory } from "../../utils/chat-history.js";
 import * as logger from "../../utils/logger.js";
-import fs from "fs/promises";
-import path from "path";
-import config from "../../config.js";
-import { editDocumentationHandler } from "./edit-documentation.js";
-import { editCodebaseAnalysisHandler } from "./edit-codebase-analysis.js";
-import { createEditSectionHandler } from "./edit-section.js";
-import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { analyzeDocumentationHandler } from "./analyze-documentation.js";
 import { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";
-import { implementTestHandler } from "./implement-test.js";
 import { applyRefactoringHandler } from "./apply-refactoring.js";
-import { implementFixHandler } from "./implement-fix.js";
+import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { defaultAnalysisHandler } from "./default-analysis.js";
+import { designTaskHandler } from "./design-task.js";
+import { editCodebaseAnalysisHandler } from "./edit-codebase-analysis.js";
+import { editDocumentationHandler } from "./edit-documentation.js";
+import { createEditSectionHandler } from "./edit-section.js";
+import { implementFixHandler } from "./implement-fix.js";
+import { implementTestHandler } from "./implement-test.js";
 import { reviewChangesHandler } from "./review-changes.js";
-import {
-  marketResearchInitialHandler,
-  marketResearchCompetitorHandler,
-  marketResearchSummaryHandler,
-} from "./market-research.js";
-import { queueMarketResearchCompetitorTask } from "../queue/market-research-competitor.js";
 
-import { SOCKET_EVENTS } from "../../constants/socket-events.js";
-
-/**
- * Map of edit task types to their createEditSectionHandler options
- */
 const EDIT_SECTION_HANDLER_OPTIONS = {
   [TASK_TYPES.EDIT_DIAGRAMS]: {
     componentName: "EditDiagrams",
@@ -60,20 +51,8 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
   },
 };
 
-/**
- * Configure all file-access permissions on the agent's fileToolExecutor for the given task.
- * This is the single source of truth for what the agent is allowed to read and write.
- *
- * - IMPLEMENT_FIX / IMPLEMENT_TEST / APPLY_REFACTORING : full project write access
- * - CUSTOM_CODEBASE_TASK                               : full project read + write access
- * - REVIEW_CHANGES                                     : full project read access only
- *                                                        (delegates edit tasks, writes only to .code-analysis/temp/)
- * - Edit tasks                                         : task.outputFile only
- * - Everything else                : empty list (analysis tasks only write to .code-analysis/,
- *                                    which is always permitted by the write gate)
- */
 function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
-  const EDIT_TASK_TYPES = [
+  const editTaskTypes = [
     TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
@@ -88,64 +67,54 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     task.type === TASK_TYPES.APPLY_REFACTORING
   ) {
     fileToolExecutor.setAllowAnyWrite(true);
-    taskLogger.info(`🔓 Full project write access granted (${task.type})`);
+    taskLogger.info(`Full project write access granted (${task.type})`);
     return;
   }
 
   if (
     task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
+    task.type === TASK_TYPES.DESIGN_BRAINSTORM ||
+    task.type === TASK_TYPES.DESIGN_GENERATE ||
     task.type === TASK_TYPES.REVIEW_CHANGES
   ) {
     if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
       fileToolExecutor.setAllowAnyWrite(true);
     }
     fileToolExecutor.setAllowAnyRead(true);
-    const access =
-      task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK
-        ? "read+write"
-        : "read-only";
-    taskLogger.info(`🔓 Full project ${access} access granted (${task.type})`);
+    taskLogger.info(
+      `Full project ${task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ? "read+write" : "read-only"} access granted (${task.type})`,
+    );
     return;
   }
 
-  let allowedPaths = [];
-
-  if (EDIT_TASK_TYPES.includes(task.type)) {
-    allowedPaths = task.outputFile ? [task.outputFile] : [];
-  }
+  const allowedPaths = editTaskTypes.includes(task.type)
+    ? task.outputFile
+      ? [task.outputFile]
+      : []
+    : [];
 
   fileToolExecutor.setAllowedWritePaths(allowedPaths);
 
   if (allowedPaths.length > 0) {
     taskLogger.info(
-      `🔓 Write access restricted to output file only (edit task): ${allowedPaths.join(", ")}`,
+      `Write access restricted to: ${allowedPaths.join(", ")}`,
     );
   } else {
     taskLogger.info(
-      `🔒 No explicit write paths set — analysis task writes only to .code-analysis/ (enforced by write gate)`,
+      "No explicit write paths set; analysis writes are limited to .code-analysis/",
     );
   }
 }
 
-/**
- * Enable git command tools for tasks that benefit from version control context.
- * Git commands are read-only, safe, and help agents understand:
- * - What changed recently (git diff, git log)
- * - File history and blame
- * - Current branch and status
- *
- * @param {LLMAgent} agent - The agent instance
- * @param {Object} task - The task object
- * @param {Object} taskLogger - Logger instance
- */
 function enableGitCommandsIfUseful(agent, task, taskLogger) {
-  // Tasks that benefit from git context
-  const GIT_ENABLED_TASK_TYPES = [
+  const gitEnabledTaskTypes = [
     TASK_TYPES.IMPLEMENT_FIX,
     TASK_TYPES.IMPLEMENT_TEST,
     TASK_TYPES.APPLY_REFACTORING,
     TASK_TYPES.REVIEW_CHANGES,
     TASK_TYPES.CUSTOM_CODEBASE_TASK,
+    TASK_TYPES.DESIGN_BRAINSTORM,
+    TASK_TYPES.DESIGN_GENERATE,
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
     TASK_TYPES.EDIT_REQUIREMENTS,
@@ -153,11 +122,10 @@ function enableGitCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
   ];
 
-  if (!GIT_ENABLED_TASK_TYPES.includes(task.type)) {
-    return; // Skip for pure analysis tasks
+  if (!gitEnabledTaskTypes.includes(task.type)) {
+    return;
   }
 
-  // Enable git commands (read-only, safe)
   agent.enableCommandTools({
     timeoutMs: 60_000,
     additionalAllowedPrefixes: [
@@ -170,25 +138,41 @@ function enableGitCommandsIfUseful(agent, task, taskLogger) {
     ],
   });
 
-  taskLogger.info("🔧 Git command tools enabled");
+  taskLogger.info("Git command tools enabled");
+}
+
+function buildSectionChatContext(task, fallbackMessage) {
+  return loadDomainSectionChatHistory(
+    task.params.domainId,
+    task.params.sectionType,
+    task.params.chatId,
+  ).then((chatHistory) => {
+    const messages = (chatHistory?.messages || []).filter(
+      (message) => message.role === "user" || message.role === "assistant",
+    );
+
+    return {
+      initialMessage: messages.at(-1)?.content || fallbackMessage,
+      priorMessages: messages.slice(0, -1).map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
+    };
+  });
 }
 
 export async function createTaskHandler(task, taskLogger, agent) {
-  // Configure file-access permissions for this task type (single source of truth).
   if (agent?.fileToolExecutor) {
     setTaskFileAccess(agent.fileToolExecutor, task, taskLogger);
   }
 
-  // Enable git commands for tasks that benefit from version control context
   if (agent) {
     enableGitCommandsIfUseful(agent, task, taskLogger);
   }
 
-  // Load task-specific system instructions
   const instructions = await loadSystemInstructionForTask(task);
-  taskLogger.info(`📝 Instructions loaded (${instructions.length} chars)`);
+  taskLogger.info(`Instructions loaded (${instructions.length} chars)`);
 
-  // Dump processed instruction to temp folder for debugging
   try {
     const dumpDir = path.join(config.paths.temp, "system-instructions");
     await fs.mkdir(dumpDir, { recursive: true });
@@ -197,73 +181,46 @@ export async function createTaskHandler(task, taskLogger, agent) {
       instructions,
       "utf-8",
     );
-  } catch (err) {
+  } catch (error) {
     logger.debug("Failed to write instruction dump", {
-      error: err.message,
+      error: error.message,
     });
   }
 
-  // Get default handler (complete with all callbacks)
   const defaults = defaultAnalysisHandler(task, taskLogger, agent);
-
-  // Get task-specific overrides
   let overrides = {};
 
   if (task.type === TASK_TYPES.EDIT_DOCUMENTATION) {
-    // Load the persisted session so the LLM gets full multi-turn context.
-    // The last message in the file is always the current user turn (it was
-    // written by the route handler before launching this task).
-    const chatHistory = await loadDomainSectionChatHistory(
-      task.params.domainId,
-      task.params.sectionType,
-      task.params.chatId,
+    const chatContext = await buildSectionChatContext(
+      task,
+      "Please help with the documentation.",
     );
-    const messages = (chatHistory?.messages || []).filter(
-      (m) => m.role === "user" || m.role === "assistant",
-    );
-    // Split: everything before the last entry is prior context;
-    // the last entry must be the current user message.
-    const initialMessage =
-      messages.at(-1)?.content || "Please help with the documentation.";
-    const priorMessages = messages.slice(0, -1).map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    overrides = editDocumentationHandler(task, taskLogger, agent, {
-      initialMessage,
-      priorMessages,
-    });
+    overrides = editDocumentationHandler(task, taskLogger, agent, chatContext);
   } else if (
     task.type === TASK_TYPES.EDIT_DIAGRAMS ||
     task.type === TASK_TYPES.EDIT_REQUIREMENTS ||
     task.type === TASK_TYPES.EDIT_BUGS_SECURITY ||
     task.type === TASK_TYPES.EDIT_REFACTORING_AND_TESTING
   ) {
-    const chatHistory = await loadDomainSectionChatHistory(
-      task.params.domainId,
-      task.params.sectionType,
-      task.params.chatId,
+    const chatContext = await buildSectionChatContext(
+      task,
+      "Please help with this section.",
     );
-    const messages = (chatHistory?.messages || []).filter(
-      (m) => m.role === "user" || m.role === "assistant",
-    );
-    const initialMessage =
-      messages.at(-1)?.content || "Please help with this section.";
-    const priorMessages = messages.slice(0, -1).map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-
     overrides = createEditSectionHandler(
       task,
       taskLogger,
       agent,
-      { initialMessage, priorMessages },
+      chatContext,
       EDIT_SECTION_HANDLER_OPTIONS[task.type],
     );
-  } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
-    overrides = customCodebaseTaskHandler(task, taskLogger, agent);
+  } else if (
+    task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
+    task.type === TASK_TYPES.DESIGN_BRAINSTORM
+  ) {
+    overrides =
+      task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK
+        ? customCodebaseTaskHandler(task, taskLogger, agent)
+        : designTaskHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {
@@ -278,30 +235,10 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = applyRefactoringHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
     overrides = implementFixHandler(task, taskLogger, agent);
-  } else if (task.type === TASK_TYPES.MARKET_RESEARCH_INITIAL) {
-    agent?.enableDelegationTools?.(task.id, {
-      "market-research-competitor": queueMarketResearchCompetitorTask,
-    });
-    if (agent && config.apiKeys.braveSearch) {
-      agent.enableWebSearchTools(config.apiKeys.braveSearch);
-      taskLogger.info("🔍 Web search tools enabled");
-    }
-    overrides = marketResearchInitialHandler(task, taskLogger);
-  } else if (task.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR) {
-    if (agent && config.apiKeys.braveSearch) {
-      agent.enableWebSearchTools(config.apiKeys.braveSearch);
-      taskLogger.info("🔍 Web search tools enabled");
-    }
-    if (agent) {
-      agent.enableWebFetchTools();
-      taskLogger.info("🌐 Web fetch tools enabled");
-    }
-    overrides = marketResearchCompetitorHandler(task, taskLogger);
-  } else if (task.type === TASK_TYPES.MARKET_RESEARCH_SUMMARY) {
-    overrides = await marketResearchSummaryHandler(task, taskLogger);
+  } else if (task.type === TASK_TYPES.DESIGN_GENERATE) {
+    overrides = designTaskHandler(task, taskLogger, agent);
   }
 
-  // Merge: defaults provide all callbacks, overrides replace what's needed
   return {
     systemPrompt: instructions,
     ...defaults,

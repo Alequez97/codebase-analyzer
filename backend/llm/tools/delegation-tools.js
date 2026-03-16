@@ -12,7 +12,6 @@ export const DELEGATABLE_TASK_TYPES = [
   "edit-requirements",
   "edit-bugs-security",
   "edit-refactoring-and-testing",
-  "market-research-competitor",
 ];
 
 /**
@@ -27,9 +26,6 @@ const SECTION_TYPE_BY_TASK_TYPE = {
   "edit-refactoring-and-testing": "refactoring-and-testing",
 };
 
-/**
- * Tool definitions for LLM — task delegation
- */
 export const DELEGATION_TOOLS = [
   {
     name: "delegate_task",
@@ -39,7 +35,7 @@ How to use:
   1. Use write_file to create a delegation request file under .code-analysis/temp/delegation-requests/ describing exactly what the delegated agent should do and why (include relevant context from your analysis).
   2. Call delegate_task with the path to that file, the target task type, and any required params.
 
-The delegation request file content becomes the user message (or briefing) for the delegated agent — treat it like a detailed chat message.`,
+The delegation request file content becomes the user message (or briefing) for the delegated agent. Treat it like a detailed chat message.`,
     parameters: {
       type: {
         type: "string",
@@ -54,34 +50,18 @@ The delegation request file content becomes the user message (or briefing) for t
       params: {
         type: "object",
         description:
-          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Market research competitor tasks require `sessionId`, `competitorId`, `competitorName`, `competitorUrl`, and optionally `competitorDescription`.",
+          "Additional parameters passed to the queue function. Edit tasks require `domainId`.",
       },
     },
     required: ["type", "requestFile"],
   },
 ];
 
-/**
- * Executor for delegation tools.
- *
- * Reads an instruction file written by the parent agent, then either:
- * - For edit-* types: creates a synthetic chat-history session so the target
- *   edit handler can load it unchanged, then calls the queue function.
- * - For market-research-competitor: calls the queue function directly with
- *   the merged params and competitorBriefing from the request file.
- *
- * @example
- * const executor = new DelegationToolExecutor(projectRoot, parentTaskId, {
- *   "edit-documentation": queueEditDocumentationTask,
- *   "market-research-competitor": queueMarketResearchCompetitorTask,
- * });
- */
 export class DelegationToolExecutor {
   /**
-   * @param {string} projectRoot - Absolute path to the analysed project root
-   * @param {string} parentTaskId - ID of the running task that is delegating
+   * @param {string} projectRoot
+   * @param {string} parentTaskId
    * @param {Object<string, Function>} queueFunctions
-   *   Map of task type string → queue function
    */
   constructor(projectRoot, parentTaskId, queueFunctions) {
     this.projectRoot = projectRoot;
@@ -89,36 +69,25 @@ export class DelegationToolExecutor {
     this.queueFunctions = queueFunctions;
   }
 
-  /**
-   * Dispatch a tool call by name.
-   * @param {string} toolName
-   * @param {Object} args
-   * @returns {Promise<Object>} { success, data } | { success: false, error }
-   */
   async execute(toolName, args) {
     if (toolName === "delegate_task") {
       return this._delegateTask(args);
     }
+
     return {
       success: false,
       error: { message: `Unknown delegation tool: ${toolName}` },
     };
   }
 
-  // ─── Private ───────────────────────────────────────────────────────────────
-
   async _delegateTask({ type, domainId, requestFile, params = {} } = {}) {
-    // Validate required args
     if (!type || !requestFile) {
       return {
         success: false,
-        error: {
-          message: "type and requestFile are required",
-        },
+        error: { message: "type and requestFile are required" },
       };
     }
 
-    // Validate task type
     if (!DELEGATABLE_TASK_TYPES.includes(type)) {
       return {
         success: false,
@@ -129,7 +98,6 @@ export class DelegationToolExecutor {
       };
     }
 
-    // Validate queue function is registered before reading the file
     const queueFn = this.queueFunctions[type];
     if (!queueFn) {
       return {
@@ -141,7 +109,6 @@ export class DelegationToolExecutor {
       };
     }
 
-    // Security: requestFile must live under .code-analysis/temp/
     const normalized = path.normalize(requestFile).replace(/\\/g, "/");
     if (!normalized.startsWith(".code-analysis/temp/")) {
       return {
@@ -154,7 +121,6 @@ export class DelegationToolExecutor {
       };
     }
 
-    // Read delegation request file
     const absPath = path.join(this.projectRoot, requestFile);
     let requestContent;
     try {
@@ -179,73 +145,24 @@ export class DelegationToolExecutor {
       };
     }
 
-    // Consume and discard — the file is only needed to pass instructions here
     fs.unlink(absPath).catch(() => {});
 
-    // Merge top-level domainId (backwards compat for old edit-task callers) with params
     const mergedParams = { ...(domainId ? { domainId } : {}), ...params };
 
-    // ── market-research-competitor ──────────────────────────────────────────
-    if (type === "market-research-competitor") {
-      logger.info("Delegating market-research-competitor task", {
-        component: "DelegationTools",
-        type,
-        competitorId: mergedParams.competitorId,
-        parentTaskId: this.parentTaskId,
-      });
-
-      const task = await queueFn({
-        ...mergedParams,
-        competitorBriefing: requestContent,
-        delegatedByTaskId: this.parentTaskId,
-      });
-
-      if (task?.success === false) {
-        return {
-          success: false,
-          error: {
-            message: task.error || "Failed to queue delegated competitor task",
-            code: task.code,
-          },
-        };
-      }
-
-      logger.info("Delegated competitor task queued", {
-        component: "DelegationTools",
-        taskId: task.id,
-        type: task.type,
-        competitorId: mergedParams.competitorId,
-      });
-
-      return {
-        success: true,
-        data: {
-          taskId: task.id,
-          type: task.type,
-          competitorId: mergedParams.competitorId,
-          message: `Queued market-research-competitor task for competitor '${mergedParams.competitorId}' (taskId: ${task.id})`,
-        },
-      };
-    }
-
-    // ── edit-* tasks (existing behaviour) ──────────────────────────────────
     const effectiveDomainId = mergedParams.domainId;
     if (!effectiveDomainId) {
       return {
         success: false,
         error: {
-          message: "domainId is required for edit task delegation (pass via params.domainId or top-level domainId)",
+          message:
+            "domainId is required for edit task delegation (pass via params.domainId or top-level domainId)",
         },
       };
     }
 
     const sectionType = SECTION_TYPE_BY_TASK_TYPE[type];
-
-    // Generate a unique synthetic chatId for this delegation.
     const syntheticChatId = `delegated-${this.parentTaskId}-${randomBytes(3).toString("hex")}`;
 
-    // Write a synthetic chat-history file so the edit handler loads the
-    // delegation request as a first user message — zero changes to handler code.
     await this._writeSyntheticChatHistory({
       domainId: effectiveDomainId,
       sectionType,
@@ -261,7 +178,6 @@ export class DelegationToolExecutor {
       syntheticChatId,
     });
 
-    // Queue the delegated task
     const task = await queueFn({
       domainId: effectiveDomainId,
       chatId: syntheticChatId,
@@ -296,11 +212,61 @@ export class DelegationToolExecutor {
     };
   }
 
-  /**
-   * Write a minimal domain-section chat-history file whose sole message is
-   * the delegation request content. The edit handler reads this file and uses
-   * the last message as the "current user turn" — making delegation transparent.
-   */
+  async _queueDirectDelegation({
+    type,
+    queueFn,
+    requestContent,
+    mergedParams,
+    extraPayload = {},
+    successMeta = {},
+    logMeta = {},
+    errorMessage,
+  }) {
+    logger.info("Delegating direct task", {
+      component: "DelegationTools",
+      type,
+      parentTaskId: this.parentTaskId,
+      ...logMeta,
+    });
+
+    const task = await queueFn({
+      ...mergedParams,
+      ...extraPayload,
+      designBriefing:
+        extraPayload.designBriefing ?? mergedParams.designBriefing ?? requestContent,
+      delegatedByTaskId: this.parentTaskId,
+    });
+
+    if (task?.success === false) {
+      return {
+        success: false,
+        error: {
+          message: task.error || errorMessage,
+          code: task.code,
+        },
+      };
+    }
+
+    logger.info("Delegated direct task queued", {
+      component: "DelegationTools",
+      taskId: task.id,
+      type: task.type,
+      ...logMeta,
+    });
+
+    const summaryKey = mergedParams.designId || mergedParams.domainId;
+
+    return {
+      success: true,
+      data: {
+        taskId: task.id,
+        type: task.type,
+        ...successMeta,
+        message: `Queued ${type} task for '${summaryKey}' (taskId: ${task.id})`,
+      },
+    };
+  }
+
   async _writeSyntheticChatHistory({ domainId, sectionType, chatId, content }) {
     const chatHistoryDir = path.join(
       this.projectRoot,

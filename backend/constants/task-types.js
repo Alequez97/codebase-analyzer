@@ -25,11 +25,10 @@ export const TASK_TYPES = {
   // Custom codebase task (floating agent chat)
   CUSTOM_CODEBASE_TASK: "custom-codebase-task",
 
-  // Review changes task (delegating agent — reviews a git diff)
+  // Review changes task (delegating agent, reviews a git diff)
   REVIEW_CHANGES: "review-changes",
 
-  // Market research tasks (project-level, no domainId)
-  MARKET_RESEARCH_INITIAL: "market-research-initial",
-  MARKET_RESEARCH_COMPETITOR: "market-research-competitor",
-  MARKET_RESEARCH_SUMMARY: "market-research-summary",
+  // Design tasks (project-level, no domainId)
+  DESIGN_BRAINSTORM: "design-brainstorm",
+  DESIGN_GENERATE: "design-generate",
 };

@@ -28,8 +28,7 @@ export const TASK_TYPES = {
   // Review git diff and delegate targeted edits
   REVIEW_CHANGES: "review-changes",
 
-  // Market research tasks (project-level, no domainId)
-  MARKET_RESEARCH_INITIAL: "market-research-initial",
-  MARKET_RESEARCH_COMPETITOR: "market-research-competitor",
-  MARKET_RESEARCH_SUMMARY: "market-research-summary",
+  // Design tasks
+  DESIGN_BRAINSTORM: "design-brainstorm",
+  DESIGN_GENERATE: "design-generate",
 };

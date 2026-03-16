@@ -7,18 +7,14 @@ import { FloatingAgentChat } from "./components/FloatingChat";
 import Dashboard from "./pages/Dashboard";
 import DomainDetailsPage from "./pages/DomainDetailsPage";
 import DesignPage from "./pages/DesignPage";
-import MarketResearchPage from "./pages/MarketResearchPage";
 import { useSocketStore } from "./store/useSocketStore";
-import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
   const { initSocket } = useSocketStore();
-  const rehydrate = useAuthStore((s) => s.rehydrate);
 
   useEffect(() => {
     initSocket();
-    rehydrate();
-  }, [initSocket, rehydrate]);
+  }, [initSocket]);
 
   return (
     <ChakraProvider value={defaultSystem}>
@@ -28,7 +24,6 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/domains/:domainId" element={<DomainDetailsPage />} />
             <Route path="/design" element={<DesignPage />} />
-            <Route path="/market-research" element={<MarketResearchPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

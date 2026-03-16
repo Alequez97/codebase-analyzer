@@ -9,6 +9,11 @@ import {
   getDomainSectionContentJsonRelativePath,
 } from "../persistence/domain-section-paths.js";
 import { getProgressFileRelativePath } from "./task-progress.js";
+import {
+  getDesignHtmlOutputPath,
+  getDesignCssOutputPath,
+  getDesignJsOutputPath,
+} from "../tasks/queue/design-shared.js";
 
 /**
  * Process a template string with variables
@@ -270,6 +275,28 @@ export function buildCodebaseTemplateVariables(task) {
   };
 }
 
+function buildDesignTemplateVariables(task) {
+  return {
+    CODEBASE_PATH: task.params?.targetDirectory || "",
+    PROMPT: task.params?.prompt || "",
+    BRIEF: task.params?.brief || "",
+    DESIGN_ID: task.params?.designId || "",
+    DESIGN_PATH: task.params?.designPath || "",
+    BRIEF_PATH: task.params?.briefPath || "",
+    TOKENS_PATH: task.params?.tokensPath || "",
+    HTML_OUTPUT_PATH: task.params?.designId
+      ? getDesignHtmlOutputPath(task.params.designId)
+      : "",
+    CSS_OUTPUT_PATH: task.params?.designId
+      ? getDesignCssOutputPath(task.params.designId)
+      : "",
+    JS_OUTPUT_PATH: task.params?.designId
+      ? getDesignJsOutputPath(task.params.designId)
+      : "",
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
+  };
+}
+
 /**
  * Build variables object for implement-fix task template
  * @param {Object} task - Task object
@@ -446,38 +473,12 @@ export async function buildTemplateVariables(task) {
         CODEBASE_PATH: task.params?.targetDirectory || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };
+    case TASK_TYPES.DESIGN_BRAINSTORM:
+    case TASK_TYPES.DESIGN_GENERATE:
+      return buildDesignTemplateVariables(task);
     case TASK_TYPES.REVIEW_CHANGES:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",
-        PROGRESS_FILE: getProgressFileRelativePath(task.id),
-      };
-    case TASK_TYPES.MARKET_RESEARCH_INITIAL:
-      return {
-        SESSION_ID: task.params?.sessionId || "",
-        IDEA: task.params?.idea || "",
-        NUM_COMPETITORS: String(task.params?.numCompetitors ?? 10),
-        TARGET_MARKETS:
-          Array.isArray(task.params?.regions) && task.params.regions.length > 0
-            ? task.params.regions.join(", ")
-            : "Worldwide",
-        OUTPUT_FILE: task.outputFile || "",
-        PROGRESS_FILE: getProgressFileRelativePath(task.id),
-      };
-    case TASK_TYPES.MARKET_RESEARCH_COMPETITOR:
-      return {
-        SESSION_ID: task.params?.sessionId || "",
-        COMPETITOR_ID: task.params?.competitorId || "",
-        COMPETITOR_NAME: task.params?.competitorName || "",
-        COMPETITOR_URL: task.params?.competitorUrl || "",
-        COMPETITOR_DESCRIPTION: task.params?.competitorDescription || "",
-        OUTPUT_FILE: task.outputFile || "",
-        PROGRESS_FILE: getProgressFileRelativePath(task.id),
-      };
-    case TASK_TYPES.MARKET_RESEARCH_SUMMARY:
-      return {
-        SESSION_ID: task.params?.sessionId || "",
-        IDEA: task.params?.idea || "",
-        OUTPUT_FILE: task.outputFile || "",
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };
     default:

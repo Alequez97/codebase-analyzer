@@ -30,6 +30,7 @@ export function Layout({ children }) {
 
   const isDomainPage = location.pathname.startsWith("/domains/");
   const isDesignPage = location.pathname === "/design";
+  const isEmptyProject = config?.target?.isEmpty === true;
   const showLogs = isDomainPage ? showDomainLogs : showDashboardLogs;
 
   const handleLogsToggle = () => {
@@ -70,15 +71,17 @@ export function Layout({ children }) {
                   <Text fontSize="sm">Codebase Analyzer</Text>
                 )}
               </Button>
-              <Button
-                size="sm"
-                variant={isDesignPage ? "solid" : "ghost"}
-                colorPalette={isDesignPage ? "purple" : "gray"}
-                onClick={() => navigate(isDesignPage ? "/" : "/design")}
-              >
-                <Palette size={13} />
-                {isDesignPage ? "Project" : "Design"}
-              </Button>
+              {!isEmptyProject && (
+                <Button
+                  size="sm"
+                  variant={isDesignPage ? "solid" : "ghost"}
+                  colorPalette={isDesignPage ? "purple" : "gray"}
+                  onClick={() => navigate(isDesignPage ? "/" : "/design")}
+                >
+                  <Palette size={13} />
+                  {isDesignPage ? "Project" : "Design"}
+                </Button>
+              )}
             </HStack>
           }
           rightContent={

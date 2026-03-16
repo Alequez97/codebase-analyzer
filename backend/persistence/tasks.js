@@ -87,25 +87,10 @@ export async function enqueueTask(task) {
     type: task.type,
     domainId: task.params?.domainId,
     delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
-    competitorName: task.params?.competitorName ?? null,
-    competitorId: task.params?.competitorId ?? null,
-    competitorUrl: task.params?.competitorUrl ?? null,
+    agent: task.agentConfig?.agent ?? null,
+    model: task.agentConfig?.model ?? null,
     timestamp: new Date().toISOString(),
   });
-
-  if (
-    task.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR &&
-    task.params?.competitorId
-  ) {
-    emitSocketEvent(SOCKET_EVENTS.MARKET_RESEARCH_COMPETITOR_FOUND, {
-      sessionId: task.params.sessionId,
-      taskId: task.id,
-      competitorId: task.params.competitorId,
-      competitorName: task.params.competitorName,
-      competitorUrl: task.params.competitorUrl,
-      competitorDescription: task.params.competitorDescription || "",
-    });
-  }
 }
 
 /**
@@ -362,6 +347,8 @@ export async function moveToCanceled(taskId) {
     taskId: task.id,
     type: task.type,
     domainId: task.params?.domainId,
+    agent: task.agentConfig?.agent ?? null,
+    model: task.agentConfig?.model ?? null,
     timestamp: new Date().toISOString(),
   });
 
@@ -504,6 +491,8 @@ export async function restartTask(taskId) {
     type: task.type,
     domainId: task.params?.domainId,
     delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
+    agent: task.agentConfig?.agent ?? null,
+    model: task.agentConfig?.model ?? null,
     timestamp: new Date().toISOString(),
   });
 

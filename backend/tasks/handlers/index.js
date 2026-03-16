@@ -13,8 +13,4 @@ export { applyRefactoringHandler } from "./apply-refactoring.js";
 export { implementTestHandler } from "./implement-test.js";
 export { implementFixHandler } from "./implement-fix.js";
 export { defaultAnalysisHandler } from "./default-analysis.js";
-export {
-  marketResearchInitialHandler,
-  marketResearchCompetitorHandler,
-  marketResearchSummaryHandler,
-} from "./market-research.js";
+export { designTaskHandler } from "./design-task.js";

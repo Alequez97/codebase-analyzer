@@ -17,11 +17,8 @@ export const SYSTEM_INSTRUCTION_NAMES = {
   EDIT_REFACTORING_AND_TESTING: "edit-refactoring-and-testing.md",
   CUSTOM_CODEBASE_TASK: "custom-codebase-task.md",
   REVIEW_CHANGES: "review-changes.md",
-
-  // Market research instructions (live in market-research/ subdirectory)
-  MARKET_RESEARCH_INITIAL: "market-research/market-research-initial.md",
-  MARKET_RESEARCH_COMPETITOR: "market-research/market-research-competitor.md",
-  MARKET_RESEARCH_SUMMARY: "market-research/market-research-summary.md",
+  DESIGN_BRAINSTORM: "design/design-brainstorm.md",
+  DESIGN_GENERATE: "design/design-generate.md",
 };
 
 export const SYSTEM_INSTRUCTION_PATHS = {
@@ -49,12 +46,6 @@ export const SYSTEM_INSTRUCTION_PATHS = {
     "backend/system-instructions/edit-refactoring-and-testing.md",
   CUSTOM_CODEBASE_TASK: "backend/system-instructions/custom-codebase-task.md",
   REVIEW_CHANGES: "backend/system-instructions/review-changes.md",
-
-  // Market research instructions
-  MARKET_RESEARCH_INITIAL:
-    "backend/system-instructions/market-research/market-research-initial.md",
-  MARKET_RESEARCH_COMPETITOR:
-    "backend/system-instructions/market-research/market-research-competitor.md",
-  MARKET_RESEARCH_SUMMARY:
-    "backend/system-instructions/market-research/market-research-summary.md",
+  DESIGN_BRAINSTORM: "backend/system-instructions/design/design-brainstorm.md",
+  DESIGN_GENERATE: "backend/system-instructions/design/design-generate.md",
 };

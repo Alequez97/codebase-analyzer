@@ -40,9 +40,8 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
   [TASK_TYPES.CUSTOM_CODEBASE_TASK]: "Custom Task",
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
-  [TASK_TYPES.MARKET_RESEARCH_INITIAL]: "Market Research",
-  [TASK_TYPES.MARKET_RESEARCH_COMPETITOR]: "Competitor Research",
-  [TASK_TYPES.MARKET_RESEARCH_SUMMARY]: "Market Summary",
+  [TASK_TYPES.DESIGN_BRAINSTORM]: "Design Brainstorm",
+  [TASK_TYPES.DESIGN_GENERATE]: "Design Generate",
 };
 
 function taskLabel(type) {
@@ -57,8 +56,8 @@ const TASK_TYPE_LABELS_SHORT = {
   [TASK_TYPES.EDIT_BUGS_SECURITY]: "Edit Bugs & Security",
   [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
-  [TASK_TYPES.MARKET_RESEARCH_INITIAL]: "Market Research",
-  [TASK_TYPES.MARKET_RESEARCH_SUMMARY]: "Market Summary",
+  [TASK_TYPES.DESIGN_BRAINSTORM]: "Design Brainstorm",
+  [TASK_TYPES.DESIGN_GENERATE]: "Design Generate",
 };
 
 function useDomainName(domainId) {
@@ -141,15 +140,8 @@ function TaskIcon({ bg, children }) {
 // When a task has a domain: domain name is the primary title and task type is the
 // subtitle. When there's no domain (e.g. review-changes), the task label is the
 // primary title and there is no subtitle.
-// For competitor tasks: competitor name is the primary title, task type is the subtitle.
 function useTaskTitles(entry) {
   const domainName = useDomainName(entry.domainId);
-  if (entry.type === TASK_TYPES.MARKET_RESEARCH_COMPETITOR && entry.competitorName) {
-    return {
-      primary: entry.competitorName,
-      subtitle: "Competitor Research",
-    };
-  }
   return {
     primary: domainName ?? taskLabel(entry.type),
     subtitle: domainName ? taskLabel(entry.type) : null,
