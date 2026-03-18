@@ -1,5 +1,13 @@
-import { Box, Button, HStack, Text, Textarea, VStack } from "@chakra-ui/react";
-import { Layers, LayoutTemplate, Lightbulb, Wand2 } from "lucide-react";
+import {
+  Badge,
+  Box,
+  Button,
+  HStack,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import { Layers, LayoutTemplate, Lightbulb, MessageSquare, Wand2 } from "lucide-react";
 
 export function DesignWorkspaceSidebar({
   panel,
@@ -15,8 +23,17 @@ export function DesignWorkspaceSidebar({
   onBrainstorm,
   onGenerate,
   isSubmitting,
+  taskMessages,
+  currentTask,
 }) {
   const items = panel === "prototype" ? prototypes : components;
+  const conversationMessages = taskMessages.filter(
+    (message) =>
+      (message.role === "user" || message.role === "assistant") &&
+      message.content?.trim(),
+  );
+  const isWorking =
+    currentTask?.status === "running" || currentTask?.status === "pending";
 
   return (
     <Box
@@ -33,9 +50,82 @@ export function DesignWorkspaceSidebar({
       gap={4}
     >
       <VStack align="stretch" gap={3}>
-        <Text fontSize="xs" fontWeight="800" color="gray.500" letterSpacing="wide" textTransform="uppercase">
-          Creative Direction
-        </Text>
+        <HStack justify="space-between" align="center">
+          <Text
+            fontSize="xs"
+            fontWeight="800"
+            color="gray.500"
+            letterSpacing="wide"
+            textTransform="uppercase"
+          >
+            Design Chat
+          </Text>
+          {isWorking ? (
+            <Badge bg="orange.100" color="orange.800" borderRadius="full" px={3} py={1}>
+              {currentTask?.type === "design-generate" ? "Generating" : "Brainstorming"}
+            </Badge>
+          ) : null}
+        </HStack>
+
+        <Box
+          maxH="240px"
+          overflowY="auto"
+          borderRadius="24px"
+          borderWidth="1px"
+          borderColor="rgba(226, 232, 240, 0.9)"
+          bg="rgba(248,250,252,0.88)"
+          px={3}
+          py={3}
+        >
+          {conversationMessages.length === 0 ? (
+            <HStack gap={3} align="start" color="gray.500" px={1} py={1}>
+              <MessageSquare size={15} />
+              <Text fontSize="sm" lineHeight="1.7">
+                Start with a prompt, then keep refining the design here with follow-up
+                instructions.
+              </Text>
+            </HStack>
+          ) : (
+            <VStack align="stretch" gap={3}>
+              {conversationMessages.map((message) => {
+                const isAssistant = message.role === "assistant";
+                return (
+                  <Box
+                    key={message.id}
+                    borderRadius="20px"
+                    bg={isAssistant ? "white" : "orange.50"}
+                    borderWidth="1px"
+                    borderColor={
+                      isAssistant ? "rgba(226, 232, 240, 0.9)" : "orange.100"
+                    }
+                    px={3}
+                    py={3}
+                  >
+                    <Text
+                      fontSize="10px"
+                      fontWeight="800"
+                      color={isAssistant ? "gray.500" : "orange.700"}
+                      textTransform="uppercase"
+                      letterSpacing="0.12em"
+                      mb={1.5}
+                    >
+                      {isAssistant ? "AI" : "You"}
+                    </Text>
+                    <Text
+                      fontSize="sm"
+                      color="gray.700"
+                      lineHeight="1.7"
+                      whiteSpace="pre-wrap"
+                    >
+                      {message.content}
+                    </Text>
+                  </Box>
+                );
+              })}
+            </VStack>
+          )}
+        </Box>
+
         <Textarea
           value={prompt}
           onChange={(event) => onPromptChange(event.target.value)}
@@ -46,6 +136,7 @@ export function DesignWorkspaceSidebar({
           bg="white"
           fontSize="sm"
           lineHeight="1.7"
+          placeholder="Ask for a fresh concept or refine the current design. Example: Keep the same direction, but make it feel more premium and add a denser hero with stronger social proof."
           _focusVisible={{
             borderColor: "orange.400",
             boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",

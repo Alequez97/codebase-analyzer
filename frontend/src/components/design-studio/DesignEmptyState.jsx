@@ -19,9 +19,14 @@ export function DesignEmptyState({
   onGenerate,
   isSubmitting,
   currentTask,
-  brainstormResponse,
+  taskMessages,
+  taskEvents,
   taskError,
+  currentTaskAgent,
+  currentTaskModel,
 }) {
+  const hasApprovedBrief = Boolean(generationBrief?.trim());
+
   return (
     <Box
       minH="calc(100vh - 49px)"
@@ -139,7 +144,7 @@ export function DesignEmptyState({
                 }}
               />
 
-              {brainstormResponse && (
+              {hasApprovedBrief && (
                 <Box mt={5}>
                   <Text
                     fontSize="xs"
@@ -229,8 +234,13 @@ export function DesignEmptyState({
           isRunning={
             currentTask?.status === "running" || currentTask?.status === "pending"
           }
-          message={brainstormResponse}
+          messages={taskMessages}
+          events={taskEvents}
           error={taskError}
+          agent={currentTaskAgent}
+          model={currentTaskModel}
+          mode={currentTask?.type === "design-generate" ? "generate" : "brainstorm"}
+          hasPreview={false}
         />
       </VStack>
     </Box>

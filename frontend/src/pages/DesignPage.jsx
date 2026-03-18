@@ -22,6 +22,14 @@ function getFirstPreviewUrl(manifest, panel) {
   return manifest.prototypes[0]?.url ?? manifest.components[0]?.url ?? null;
 }
 
+function getSelectedDesignId(selectedUrl, manifest) {
+  const match = selectedUrl?.match(/^\/design-preview\/([^/]+)\/index\.html$/);
+  if (match?.[1] && match[1] !== "components") {
+    return match[1];
+  }
+  return manifest.prototypes[0]?.id ?? null;
+}
+
 export default function DesignPage() {
   const [panel, setPanel] = useState("prototype");
   const [selectedUrl, setSelectedUrl] = useState(null);
@@ -33,17 +41,21 @@ export default function DesignPage() {
     loadingManifest,
     manifestError,
     currentTaskId,
+    currentTaskMode,
     prompt,
-    brainstormResponse,
     generationBrief,
     taskMessages,
+    taskEvents,
     taskError,
+    currentTaskAgent,
+    currentTaskModel,
     setPrompt,
     setGenerationBrief,
     fetchManifest,
     startBrainstorm,
     startGeneration,
     fetchTaskMessages,
+    recordTaskEvent,
   } = useDesignStudioStore();
 
   const progressByTaskId = useTaskProgressStore((state) => state.progressByTaskId);
@@ -64,12 +76,8 @@ export default function DesignPage() {
       (entry.status === "running" || entry.status === "pending"),
   );
 
-  const latestAssistantMessage = useMemo(() => {
-    const assistantMessages = taskMessages.filter(
-      (message) => message.role === "assistant",
-    );
-    return assistantMessages.map((message) => message.content).join("\n\n").trim();
-  }, [taskMessages]);
+  const shouldShowWorkspace =
+    hasDesignFiles || currentTaskMode === "generate" || hasActiveDesignGeneration;
 
   useEffect(() => {
     let mounted = true;
@@ -123,6 +131,25 @@ export default function DesignPage() {
   }, [currentTaskId, currentTask?.status, fetchTaskMessages]);
 
   useEffect(() => {
+    if (!currentTaskId || !currentTask?.message) {
+      return;
+    }
+
+    recordTaskEvent({
+      taskId: currentTaskId,
+      stage: currentTask?.stage ?? null,
+      message: currentTask.message,
+      status: currentTask.status,
+    });
+  }, [
+    currentTaskId,
+    currentTask?.message,
+    currentTask?.stage,
+    currentTask?.status,
+    recordTaskEvent,
+  ]);
+
+  useEffect(() => {
     if (!hasActiveDesignGeneration) {
       return;
     }
@@ -137,6 +164,18 @@ export default function DesignPage() {
 
     return () => window.clearInterval(intervalId);
   }, [hasActiveDesignGeneration, fetchManifest]);
+
+  useEffect(() => {
+    if (currentTaskMode !== "generate" || currentTask?.status !== "completed") {
+      return;
+    }
+
+    fetchManifest({ silent: true }).then((result) => {
+      if (result?.firstPreviewUrl) {
+        setSelectedUrl((previous) => previous || result.firstPreviewUrl);
+      }
+    });
+  }, [currentTask?.status, currentTaskMode, fetchManifest]);
 
   const handleBrainstorm = async () => {
     setIsSubmitting(true);
@@ -154,7 +193,9 @@ export default function DesignPage() {
 
   const handleGenerate = async () => {
     setIsSubmitting(true);
-    const result = await startGeneration();
+    const result = await startGeneration({
+      designId: getSelectedDesignId(selectedUrl, manifest),
+    });
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -189,7 +230,7 @@ export default function DesignPage() {
     );
   }
 
-  if (!hasDesignFiles) {
+  if (!shouldShowWorkspace) {
     return (
       <DesignEmptyState
         prompt={prompt}
@@ -198,10 +239,13 @@ export default function DesignPage() {
         onGenerate={handleGenerate}
         isSubmitting={isSubmitting}
         currentTask={currentTask}
-        brainstormResponse={latestAssistantMessage || brainstormResponse}
+        taskMessages={taskMessages}
+        taskEvents={taskEvents}
         generationBrief={generationBrief}
         onGenerationBriefChange={setGenerationBrief}
         taskError={taskError}
+        currentTaskAgent={currentTaskAgent}
+        currentTaskModel={currentTaskModel}
       />
     );
   }
@@ -210,22 +254,34 @@ export default function DesignPage() {
     <Center
       minH="calc(100vh - 49px)"
       bg="linear-gradient(180deg, #fffaf3 0%, #f8fbff 42%, #eef4ff 100%)"
-      px={{ base: 0, md: 4 }}
-      py={{ base: 0, md: 4 }}
+      px={0}
+      py={0}
     >
       <Center
         w="full"
-        maxW="1600px"
-        minH={{ base: "calc(100vh - 49px)", md: "calc(100vh - 81px)" }}
-        borderRadius={{ base: 0, md: "32px" }}
+        maxW="none"
+        minH="calc(100vh - 49px)"
+        borderRadius={0}
         overflow="hidden"
-        borderWidth={{ base: 0, md: "1px" }}
-        borderColor="rgba(226, 232, 240, 0.9)"
-        boxShadow={{ base: "none", md: "0 30px 90px rgba(15, 23, 42, 0.1)" }}
-        bg="rgba(255,255,255,0.72)"
-        backdropFilter="blur(18px)"
+        borderWidth={0}
+        boxShadow="none"
+        bg="rgba(255,255,255,0.66)"
+        backdropFilter="blur(14px)"
         alignItems="stretch"
         flexDirection={{ base: "column", lg: "row" }}
+        sx={{
+          "@keyframes designWorkspaceEnter": {
+            "0%": {
+              opacity: 0,
+              transform: "translateY(28px) scale(0.985)",
+            },
+            "100%": {
+              opacity: 1,
+              transform: "translateY(0) scale(1)",
+            },
+          },
+          animation: "designWorkspaceEnter 420ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        }}
       >
         <DesignWorkspaceSidebar
           panel={panel}
@@ -241,14 +297,21 @@ export default function DesignPage() {
           onBrainstorm={handleBrainstorm}
           onGenerate={handleGenerate}
           isSubmitting={isSubmitting}
+          taskMessages={taskMessages}
+          currentTask={currentTask}
         />
         <DesignPreviewPane
           selectedUrl={selectedUrl}
           viewport={viewport}
           onViewportChange={setViewport}
           currentTask={currentTask}
-          message={latestAssistantMessage}
+          messages={taskMessages}
+          events={taskEvents}
           error={taskError}
+          taskMode={currentTaskMode}
+          hasDesignFiles={hasDesignFiles}
+          agent={currentTaskAgent}
+          model={currentTaskModel}
         />
       </Center>
     </Center>
