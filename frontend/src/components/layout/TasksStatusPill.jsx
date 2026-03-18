@@ -41,7 +41,9 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.CUSTOM_CODEBASE_TASK]: "Custom Task",
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
   [TASK_TYPES.DESIGN_BRAINSTORM]: "Design Brainstorm",
-  [TASK_TYPES.DESIGN_GENERATE]: "Design Generate",
+  [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
+    "Design Plan & Style System",
+  [TASK_TYPES.DESIGN_GENERATE_PAGE]: "Design Page",
 };
 
 function taskLabel(type) {
@@ -57,7 +59,8 @@ const TASK_TYPE_LABELS_SHORT = {
   [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: "Edit Refactoring",
   [TASK_TYPES.REVIEW_CHANGES]: "Review Changes",
   [TASK_TYPES.DESIGN_BRAINSTORM]: "Design Brainstorm",
-  [TASK_TYPES.DESIGN_GENERATE]: "Design Generate",
+  [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: "Design Plan",
+  [TASK_TYPES.DESIGN_GENERATE_PAGE]: "Design Page",
 };
 
 function useDomainName(domainId) {
@@ -163,7 +166,6 @@ function DelegatedByBadge({ delegatedByTaskId, progressByTaskId }) {
 
 function RunningTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
-  const { progressByTaskId } = useTaskProgressStore();
   const { clearProgress } = useTaskProgressStore();
 
   const handleCancel = async () => {
@@ -945,3 +947,5 @@ export function TasksStatusPill() {
     </>
   );
 }
+
+

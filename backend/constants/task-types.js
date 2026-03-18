@@ -30,5 +30,7 @@ export const TASK_TYPES = {
 
   // Design tasks (project-level, no domainId)
   DESIGN_BRAINSTORM: "design-brainstorm",
-  DESIGN_GENERATE: "design-generate",
+  DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
+    "design-plan-and-style-system-generate",
+  DESIGN_GENERATE_PAGE: "design-generate-page",
 };

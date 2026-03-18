@@ -28,4 +28,5 @@ export { queueReviewChangesTask } from "./review-changes.js";
 
 // Design tasks
 export { queueDesignBrainstormTask } from "./design-brainstorm.js";
-export { queueDesignGenerateTask } from "./design-generate.js";
+export { queueDesignPlanAndStyleSystemGenerateTask } from "./design-plan-and-style-system-generate.js";
+export { queueDesignGeneratePageTask } from "./design-generate-page.js";

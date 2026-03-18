@@ -62,7 +62,9 @@ export function DesignWorkspaceSidebar({
           </Text>
           {isWorking ? (
             <Badge bg="orange.100" color="orange.800" borderRadius="full" px={3} py={1}>
-              {currentTask?.type === "design-generate" ? "Generating" : "Brainstorming"}
+              {currentTask?.type === "design-plan-and-style-system-generate"
+                ? "Generating"
+                : "Brainstorming"}
             </Badge>
           ) : null}
         </HStack>

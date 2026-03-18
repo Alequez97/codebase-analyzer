@@ -18,7 +18,9 @@ export const SYSTEM_INSTRUCTION_NAMES = {
   CUSTOM_CODEBASE_TASK: "custom-codebase-task.md",
   REVIEW_CHANGES: "review-changes.md",
   DESIGN_BRAINSTORM: "design/design-brainstorm.md",
-  DESIGN_GENERATE: "design/design-generate.md",
+  DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
+    "design/design-plan-and-style-system-generate.md",
+  DESIGN_GENERATE_PAGE: "design/design-generate-page.md",
 };
 
 export const SYSTEM_INSTRUCTION_PATHS = {
@@ -47,5 +49,8 @@ export const SYSTEM_INSTRUCTION_PATHS = {
   CUSTOM_CODEBASE_TASK: "backend/system-instructions/custom-codebase-task.md",
   REVIEW_CHANGES: "backend/system-instructions/review-changes.md",
   DESIGN_BRAINSTORM: "backend/system-instructions/design/design-brainstorm.md",
-  DESIGN_GENERATE: "backend/system-instructions/design/design-generate.md",
+  DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
+    "backend/system-instructions/design/design-plan-and-style-system-generate.md",
+  DESIGN_GENERATE_PAGE:
+    "backend/system-instructions/design/design-generate-page.md",
 };

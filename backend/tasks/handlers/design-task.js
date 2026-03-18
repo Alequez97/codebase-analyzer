@@ -1,9 +1,11 @@
 import fs from "fs/promises";
 import {
+  getDesignAppManifestRelativePath,
   getDesignBriefRelativePath,
   getDesignCssOutputPath,
   getDesignHtmlOutputPath,
   getDesignJsOutputPath,
+  getDesignSystemManifestRelativePath,
   getAbsoluteDesignPath,
 } from "../queue/design-shared.js";
 import { appendChatMessage } from "../../utils/chat-history.js";
@@ -92,6 +94,14 @@ function getPublicDesignProgress(progress) {
 export function designTaskHandler(task, taskLogger) {
   return {
     initialMessage: task.params.userInstruction,
+    priorMessages: Array.isArray(task.params?.history)
+      ? task.params.history.filter(
+          (message) =>
+            (message.role === "user" || message.role === "assistant") &&
+            typeof message.content === "string" &&
+            message.content.trim(),
+        )
+      : [],
 
     onStart: () => {
       ensureProgressDirectory(task.id).catch((error) =>
@@ -152,13 +162,34 @@ export function designTaskHandler(task, taskLogger) {
         publicLogText: "Finalizing the design preview...",
       });
 
-      if (task.type === TASK_TYPES.DESIGN_GENERATE) {
+      if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
         const designId = task.params?.designId;
         const expectedPaths = [
           getDesignBriefRelativePath(designId),
-          getDesignHtmlOutputPath(designId),
-          getDesignCssOutputPath(designId),
-          getDesignJsOutputPath(designId),
+          getDesignAppManifestRelativePath(designId),
+          getDesignSystemManifestRelativePath(designId),
+          task.params?.tokensPath,
+        ];
+
+        for (const relativePath of expectedPaths.filter(Boolean)) {
+          try {
+            await fs.access(getAbsoluteDesignPath(relativePath));
+          } catch {
+            return {
+              success: false,
+              error: `Design orchestration did not produce required file: ${relativePath}`,
+            };
+          }
+        }
+      }
+
+      if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
+        const designId = task.params?.designId;
+        const pageId = task.params?.pageId;
+        const expectedPaths = [
+          getDesignHtmlOutputPath(designId, pageId),
+          getDesignCssOutputPath(designId, pageId),
+          getDesignJsOutputPath(designId, pageId),
         ];
 
         for (const relativePath of expectedPaths) {
@@ -167,7 +198,7 @@ export function designTaskHandler(task, taskLogger) {
           } catch {
             return {
               success: false,
-              error: `Design generation did not produce required file: ${relativePath}`,
+              error: `Design page generation did not produce required file: ${relativePath}`,
             };
           }
         }
@@ -178,4 +209,5 @@ export function designTaskHandler(task, taskLogger) {
     },
   };
 }
+
 

@@ -563,12 +563,13 @@ describe("DelegationToolExecutor - DELEGATABLE_TASK_TYPES export", () => {
     expect(DELEGATABLE_TASK_TYPES).toContain("edit-requirements");
     expect(DELEGATABLE_TASK_TYPES).toContain("edit-bugs-security");
     expect(DELEGATABLE_TASK_TYPES).toContain("edit-refactoring-and-testing");
+    expect(DELEGATABLE_TASK_TYPES).toContain("design-generate-page");
   });
 
   test("does not include analyze-* or implement-* types", () => {
     // Assert – delegation targets only edit tasks
     const nonEditTypes = DELEGATABLE_TASK_TYPES.filter(
-      (t) => !t.startsWith("edit-"),
+      (t) => !t.startsWith("edit-") && t !== "design-generate-page",
     );
     expect(nonEditTypes).toHaveLength(0);
   });

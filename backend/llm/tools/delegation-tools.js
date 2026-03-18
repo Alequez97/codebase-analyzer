@@ -12,6 +12,7 @@ export const DELEGATABLE_TASK_TYPES = [
   "edit-requirements",
   "edit-bugs-security",
   "edit-refactoring-and-testing",
+  "design-generate-page",
 ];
 
 /**
@@ -25,6 +26,8 @@ const SECTION_TYPE_BY_TASK_TYPE = {
   "edit-bugs-security": "bugs-security",
   "edit-refactoring-and-testing": "refactoring-and-testing",
 };
+
+const DIRECT_DELEGATION_TASK_TYPES = new Set(["design-generate-page"]);
 
 export const DELEGATION_TOOLS = [
   {
@@ -50,7 +53,7 @@ The delegation request file content becomes the user message (or briefing) for t
       params: {
         type: "object",
         description:
-          "Additional parameters passed to the queue function. Edit tasks require `domainId`.",
+          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Direct design page tasks require `designId`, `pageId`, and `pageName`.",
       },
     },
     required: ["type", "requestFile"],
@@ -149,6 +152,15 @@ export class DelegationToolExecutor {
 
     const mergedParams = { ...(domainId ? { domainId } : {}), ...params };
 
+    if (DIRECT_DELEGATION_TASK_TYPES.has(type)) {
+      return this._delegateDirectTask({
+        type,
+        queueFn,
+        requestContent,
+        mergedParams,
+      });
+    }
+
     const effectiveDomainId = mergedParams.domainId;
     if (!effectiveDomainId) {
       return {
@@ -208,6 +220,50 @@ export class DelegationToolExecutor {
         type: task.type,
         domainId: effectiveDomainId,
         message: `Queued ${type} task for domain '${effectiveDomainId}' (taskId: ${task.id})`,
+      },
+    };
+  }
+
+  async _delegateDirectTask({ type, queueFn, requestContent, mergedParams }) {
+    if (type === "design-generate-page") {
+      const { designId, pageId, pageName, route = "" } = mergedParams;
+      if (!designId || !pageId || !pageName) {
+        return {
+          success: false,
+          error: {
+            message:
+              "designId, pageId, and pageName are required for design page delegation",
+          },
+        };
+      }
+
+      return this._queueDirectDelegation({
+        type,
+        queueFn,
+        requestContent,
+        mergedParams,
+        extraPayload: {
+          designId,
+          pageId,
+          pageName,
+          route,
+        },
+        successMeta: {
+          designId,
+          pageId,
+        },
+        logMeta: {
+          designId,
+          pageId,
+        },
+        errorMessage: "Failed to queue delegated design page task",
+      });
+    }
+
+    return {
+      success: false,
+      error: {
+        message: `Unsupported direct delegation type: ${type}`,
       },
     };
   }

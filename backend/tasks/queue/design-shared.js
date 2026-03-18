@@ -25,16 +25,36 @@ export function getDesignBriefRelativePath(designId) {
   return `${getDesignVariantRelativePath(designId)}/brief.md`;
 }
 
-export function getDesignHtmlOutputPath(designId) {
-  return `${getDesignVariantRelativePath(designId)}/index.html`;
+export function getDesignAppManifestRelativePath(designId) {
+  return `${getDesignVariantRelativePath(designId)}/app-manifest.json`;
 }
 
-export function getDesignCssOutputPath(designId) {
-  return `${getDesignVariantRelativePath(designId)}/styles.css`;
+export function getDesignSystemManifestRelativePath(designId) {
+  return `${getDesignVariantRelativePath(designId)}/design-system.json`;
 }
 
-export function getDesignJsOutputPath(designId) {
-  return `${getDesignVariantRelativePath(designId)}/app.js`;
+export function getDesignPagesRelativePath(designId) {
+  return `${getDesignVariantRelativePath(designId)}/pages`;
+}
+
+export function slugifyDesignPageId(value) {
+  return slugifyDesignId(value || "page");
+}
+
+export function getDesignPageRelativePath(designId, pageId) {
+  return `${getDesignPagesRelativePath(designId)}/${slugifyDesignPageId(pageId)}`;
+}
+
+export function getDesignHtmlOutputPath(designId, pageId = "index") {
+  return `${getDesignPageRelativePath(designId, pageId)}/index.html`;
+}
+
+export function getDesignCssOutputPath(designId, pageId = "index") {
+  return `${getDesignPageRelativePath(designId, pageId)}/styles.css`;
+}
+
+export function getDesignJsOutputPath(designId, pageId = "index") {
+  return `${getDesignPageRelativePath(designId, pageId)}/app.js`;
 }
 
 export function getDesignTokensOutputPath() {

@@ -12,7 +12,7 @@ import { useTaskProgressStore } from "../store/useTaskProgressStore";
 
 const DESIGN_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_BRAINSTORM,
-  TASK_TYPES.DESIGN_GENERATE,
+  TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
 ]);
 
 function getFirstPreviewUrl(manifest, panel) {
@@ -200,7 +200,7 @@ export default function DesignPage() {
 
     if (!result.success) {
       toaster.create({
-        title: "Failed to start design generation",
+        title: "Failed to start design planning",
         description: result.error,
         type: "error",
       });
@@ -208,8 +208,9 @@ export default function DesignPage() {
     }
 
     toaster.create({
-      title: "Design generation queued",
-      description: "The design orchestrator is preparing split design files.",
+      title: "Design planning queued",
+      description:
+        "The design orchestrator is planning the system and delegating page generation.",
       type: "success",
     });
   };
@@ -317,3 +318,4 @@ export default function DesignPage() {
     </Center>
   );
 }
+

@@ -226,7 +226,7 @@ export function DesignEmptyState({
 
         <DesignTaskConsole
           title={
-            currentTask?.type === "design-generate"
+            currentTask?.type === "design-plan-and-style-system-generate"
               ? "Generation Console"
               : "Brainstorm Console"
           }
@@ -239,7 +239,11 @@ export function DesignEmptyState({
           error={taskError}
           agent={currentTaskAgent}
           model={currentTaskModel}
-          mode={currentTask?.type === "design-generate" ? "generate" : "brainstorm"}
+          mode={
+            currentTask?.type === "design-plan-and-style-system-generate"
+              ? "generate"
+              : "brainstorm"
+          }
           hasPreview={false}
         />
       </VStack>

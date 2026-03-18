@@ -212,12 +212,19 @@ const config = {
       maxIterations: 40,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
-    [TASK_TYPES.DESIGN_GENERATE]: {
+    [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 80,
       reasoningEffort: REASONING_EFFORT.HIGH,
+    },
+    [TASK_TYPES.DESIGN_GENERATE_PAGE]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.GPT_5_2,
+      maxTokens: 64000,
+      maxIterations: 60,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
 
   },
@@ -278,3 +285,5 @@ dirs.forEach((dir) => {
 });
 
 export default config;
+
+

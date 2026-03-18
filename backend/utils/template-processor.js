@@ -10,9 +10,11 @@ import {
 } from "../persistence/domain-section-paths.js";
 import { getProgressFileRelativePath } from "./task-progress.js";
 import {
+  getDesignAppManifestRelativePath,
   getDesignHtmlOutputPath,
   getDesignCssOutputPath,
   getDesignJsOutputPath,
+  getDesignSystemManifestRelativePath,
 } from "../tasks/queue/design-shared.js";
 
 /**
@@ -276,21 +278,42 @@ export function buildCodebaseTemplateVariables(task) {
 }
 
 function buildDesignTemplateVariables(task) {
+  const designId = task.params?.designId || "";
+  const pageId = task.params?.pageId || "";
+
   return {
     CODEBASE_PATH: task.params?.targetDirectory || "",
     PROMPT: task.params?.prompt || "",
     BRIEF: task.params?.brief || "",
-    DESIGN_ID: task.params?.designId || "",
+    DESIGN_ID: designId,
+    PAGE_ID: pageId,
+    PAGE_NAME: task.params?.pageName || "",
+    PAGE_ROUTE: task.params?.route || "",
+    PAGE_BRIEFING: task.params?.designBriefing || "",
     DESIGN_PATH: task.params?.designPath || "",
     BRIEF_PATH: task.params?.briefPath || "",
+    APP_MANIFEST_PATH:
+      task.params?.appManifestPath || getDesignAppManifestRelativePath(designId),
+    DESIGN_SYSTEM_PATH:
+      task.params?.designSystemPath ||
+      getDesignSystemManifestRelativePath(designId),
     TOKENS_PATH: task.params?.tokensPath || "",
-    HTML_OUTPUT_PATH: task.params?.designId
+    HTML_OUTPUT_PATH:
+      task.params?.htmlOutputPath ||
+      (designId && pageId ? getDesignHtmlOutputPath(designId, pageId) : ""),
+    CSS_OUTPUT_PATH:
+      task.params?.cssOutputPath ||
+      (designId && pageId ? getDesignCssOutputPath(designId, pageId) : ""),
+    JS_OUTPUT_PATH:
+      task.params?.jsOutputPath ||
+      (designId && pageId ? getDesignJsOutputPath(designId, pageId) : ""),
+    LEGACY_HTML_OUTPUT_PATH: task.params?.designId
       ? getDesignHtmlOutputPath(task.params.designId)
       : "",
-    CSS_OUTPUT_PATH: task.params?.designId
+    LEGACY_CSS_OUTPUT_PATH: task.params?.designId
       ? getDesignCssOutputPath(task.params.designId)
       : "",
-    JS_OUTPUT_PATH: task.params?.designId
+    LEGACY_JS_OUTPUT_PATH: task.params?.designId
       ? getDesignJsOutputPath(task.params.designId)
       : "",
     PROGRESS_FILE: getProgressFileRelativePath(task.id),
@@ -474,7 +497,8 @@ export async function buildTemplateVariables(task) {
         PROGRESS_FILE: getProgressFileRelativePath(task.id),
       };
     case TASK_TYPES.DESIGN_BRAINSTORM:
-    case TASK_TYPES.DESIGN_GENERATE:
+    case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
+    case TASK_TYPES.DESIGN_GENERATE_PAGE:
       return buildDesignTemplateVariables(task);
     case TASK_TYPES.REVIEW_CHANGES:
       return {
@@ -487,3 +511,5 @@ export async function buildTemplateVariables(task) {
       };
   }
 }
+
+

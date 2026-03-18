@@ -23,6 +23,7 @@ import { createEditSectionHandler } from "./edit-section.js";
 import { implementFixHandler } from "./implement-fix.js";
 import { implementTestHandler } from "./implement-test.js";
 import { reviewChangesHandler } from "./review-changes.js";
+import { queueDesignGeneratePageTask } from "../queue/design-generate-page.js";
 
 const EDIT_SECTION_HANDLER_OPTIONS = {
   [TASK_TYPES.EDIT_DIAGRAMS]: {
@@ -51,6 +52,10 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
   },
 };
 
+const DESIGN_QUEUE_FUNCTIONS = {
+  "design-generate-page": queueDesignGeneratePageTask,
+};
+
 function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   const editTaskTypes = [
     TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
@@ -74,7 +79,8 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   if (
     task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
     task.type === TASK_TYPES.DESIGN_BRAINSTORM ||
-    task.type === TASK_TYPES.DESIGN_GENERATE ||
+    task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
+    task.type === TASK_TYPES.DESIGN_GENERATE_PAGE ||
     task.type === TASK_TYPES.REVIEW_CHANGES
   ) {
     if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
@@ -114,7 +120,8 @@ function enableGitCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.REVIEW_CHANGES,
     TASK_TYPES.CUSTOM_CODEBASE_TASK,
     TASK_TYPES.DESIGN_BRAINSTORM,
-    TASK_TYPES.DESIGN_GENERATE,
+    TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
+    TASK_TYPES.DESIGN_GENERATE_PAGE,
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
     TASK_TYPES.EDIT_REQUIREMENTS,
@@ -235,7 +242,13 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = applyRefactoringHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
     overrides = implementFixHandler(task, taskLogger, agent);
-  } else if (task.type === TASK_TYPES.DESIGN_GENERATE) {
+  } else if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
+    if (agent) {
+      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      taskLogger.info("Design page delegation tools enabled");
+    }
+    overrides = designTaskHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
     overrides = designTaskHandler(task, taskLogger, agent);
   }
 
@@ -245,3 +258,5 @@ export async function createTaskHandler(task, taskLogger, agent) {
     ...overrides,
   };
 }
+
+
