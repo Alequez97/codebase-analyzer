@@ -54,9 +54,13 @@ export default function DesignPage() {
     currentTaskAgent,
     currentTaskModel,
     selectedModel,
+    sidebarVisible,
+    sidebarTab,
     setPrompt,
     setGenerationBrief,
     setSelectedModel,
+    setSidebarVisible,
+    setSidebarTab,
     fetchManifest,
     loadLatestTaskAndHistory,
     startBrainstorm,
@@ -262,26 +266,33 @@ export default function DesignPage() {
             "designWorkspaceEnter 420ms cubic-bezier(0.2, 0.8, 0.2, 1)",
         }}
       >
-        <DesignWorkspaceSidebar
-          panel={panel}
-          onPanelChange={setPanel}
-          prototypes={manifest.prototypes}
-          components={manifest.components}
-          selectedUrl={selectedUrl}
-          onSelectUrl={setSelectedUrl}
-          prompt={prompt}
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
-          defaultModelLabel={defaultModelLabel}
-          onPromptChange={setPrompt}
-          generationBrief={generationBrief}
-          onGenerationBriefChange={setGenerationBrief}
-          onGenerate={handleGenerate}
-          isSubmitting={isSubmitting}
-          taskMessages={taskMessages}
-          taskEvents={taskEvents}
-          currentTask={currentTask}
-        />
+        {sidebarVisible && (
+          <DesignWorkspaceSidebar
+            panel={panel}
+            onPanelChange={setPanel}
+            prototypes={manifest.prototypes}
+            components={manifest.components}
+            selectedUrl={selectedUrl}
+            onSelectUrl={setSelectedUrl}
+            prompt={prompt}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+            defaultModelLabel={defaultModelLabel}
+            onPromptChange={setPrompt}
+            generationBrief={generationBrief}
+            onGenerationBriefChange={setGenerationBrief}
+            onGenerate={handleGenerate}
+            onBrainstorm={handleBrainstorm}
+            isSubmitting={isSubmitting}
+            taskMessages={taskMessages}
+            taskEvents={taskEvents}
+            currentTask={currentTask}
+            currentTaskMode={currentTaskMode}
+            activeTab={sidebarTab}
+            onTabChange={setSidebarTab}
+            onClose={() => setSidebarVisible(false)}
+          />
+        )}
         <DesignPreviewPane
           selectedUrl={selectedUrl}
           viewport={viewport}
@@ -294,6 +305,8 @@ export default function DesignPage() {
           hasDesignFiles={hasDesignFiles}
           agent={currentTaskAgent}
           model={currentTaskModel}
+          sidebarVisible={sidebarVisible}
+          onShowSidebar={() => setSidebarVisible(true)}
         />
       </Center>
     </Center>

@@ -13,4 +13,8 @@ export { applyRefactoringHandler } from "./apply-refactoring.js";
 export { implementTestHandler } from "./implement-test.js";
 export { implementFixHandler } from "./implement-fix.js";
 export { defaultAnalysisHandler } from "./default-analysis.js";
-export { designTaskHandler } from "./design-task.js";
+export {
+  designBrainstormHandler,
+  designPlanAndStyleSystemGenerateHandler,
+  designGeneratePageHandler,
+} from "./design/index.js";

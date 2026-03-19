@@ -1,5 +1,13 @@
-import { Box, Button, Center, HStack, Text, VStack } from "@chakra-ui/react";
-import { Monitor, Smartphone, Tablet, Wand2 } from "lucide-react";
+import {
+  Box,
+  Button,
+  Center,
+  HStack,
+  IconButton,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { Monitor, Smartphone, Tablet, Wand2, PanelLeft } from "lucide-react";
 import { useState } from "react";
 import { DesignTaskConsole } from "./DesignTaskConsole";
 
@@ -23,6 +31,8 @@ export function DesignPreviewPane({
   hasDesignFiles,
   agent,
   model,
+  sidebarVisible,
+  onShowSidebar,
 }) {
   const [activeView, setActiveView] = useState("preview");
   const activeViewport =
@@ -43,14 +53,27 @@ export function DesignPreviewPane({
         bg="rgba(255,255,255,0.7)"
         backdropFilter="blur(10px)"
       >
-        <VStack align="start" gap={0}>
-          <Text fontSize="sm" fontWeight="800" color="gray.900">
-            Live Preview
-          </Text>
-          <Text fontSize="xs" color="gray.500">
-            Review the latest generated direction and refine it in place.
-          </Text>
-        </VStack>
+        <HStack gap={3}>
+          {!sidebarVisible && (
+            <IconButton
+              size="sm"
+              variant="ghost"
+              borderRadius="full"
+              onClick={onShowSidebar}
+              aria-label="Show sidebar"
+            >
+              <PanelLeft size={16} />
+            </IconButton>
+          )}
+          <VStack align="start" gap={0}>
+            <Text fontSize="sm" fontWeight="800" color="gray.900">
+              Live Preview
+            </Text>
+            <Text fontSize="xs" color="gray.500">
+              Review the latest generated direction and refine it in place.
+            </Text>
+          </VStack>
+        </HStack>
 
         <HStack gap={2} flexWrap="wrap" justify="flex-end">
           <HStack

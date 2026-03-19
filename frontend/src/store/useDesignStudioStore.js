@@ -68,10 +68,14 @@ export const useDesignStudioStore = create((set, get) => ({
   taskEvents: [],
   loadingTaskMessages: false,
   taskError: null,
+  sidebarVisible: true,
+  sidebarTab: "chat",
 
   setPrompt: (prompt) => set({ prompt }),
   setGenerationBrief: (generationBrief) => set({ generationBrief }),
   setSelectedModel: (selectedModel) => set({ selectedModel }),
+  setSidebarVisible: (visible) => set({ sidebarVisible: visible }),
+  setSidebarTab: (tab) => set({ sidebarTab: tab }),
   clearTaskState: () =>
     set({
       currentTaskId: null,

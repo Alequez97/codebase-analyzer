@@ -146,7 +146,6 @@
         "backend/tasks/queue/edit-documentation.js",
         "backend/tasks/handlers/edit-documentation.js",
         "backend/tasks/handlers/edit-section.js",
-        "backend/system-instructions/edit-domain-section.md",
         "frontend/src/store/useAgentChatStore.js",
         "frontend/src/components/FloatingChat/ChatPanel.jsx"
       ],

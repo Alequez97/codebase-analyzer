@@ -16,7 +16,11 @@ import { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-t
 import { applyRefactoringHandler } from "./apply-refactoring.js";
 import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
 import { defaultAnalysisHandler } from "./default-analysis.js";
-import { designTaskHandler } from "./design-task.js";
+import {
+  designBrainstormHandler,
+  designPlanAndStyleSystemGenerateHandler,
+  designGeneratePageHandler,
+} from "./design/index.js";
 import { editCodebaseAnalysisHandler } from "./edit-codebase-analysis.js";
 import { editDocumentationHandler } from "./edit-documentation.js";
 import { createEditSectionHandler } from "./edit-section.js";
@@ -102,9 +106,7 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   fileToolExecutor.setAllowedWritePaths(allowedPaths);
 
   if (allowedPaths.length > 0) {
-    taskLogger.info(
-      `Write access restricted to: ${allowedPaths.join(", ")}`,
-    );
+    taskLogger.info(`Write access restricted to: ${allowedPaths.join(", ")}`);
   } else {
     taskLogger.info(
       "No explicit write paths set; analysis writes are limited to .code-analysis/",
@@ -220,14 +222,22 @@ export async function createTaskHandler(task, taskLogger, agent) {
       chatContext,
       EDIT_SECTION_HANDLER_OPTIONS[task.type],
     );
-  } else if (
-    task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
-    task.type === TASK_TYPES.DESIGN_BRAINSTORM
-  ) {
-    overrides =
-      task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK
-        ? customCodebaseTaskHandler(task, taskLogger, agent)
-        : designTaskHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
+    overrides = customCodebaseTaskHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.DESIGN_BRAINSTORM) {
+    overrides = designBrainstormHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
+    if (agent) {
+      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      taskLogger.info("Design page delegation tools enabled");
+    }
+    overrides = designPlanAndStyleSystemGenerateHandler(
+      task,
+      taskLogger,
+      agent,
+    );
+  } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
+    overrides = designGeneratePageHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {
@@ -242,14 +252,6 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = applyRefactoringHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.IMPLEMENT_FIX) {
     overrides = implementFixHandler(task, taskLogger, agent);
-  } else if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
-    if (agent) {
-      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
-      taskLogger.info("Design page delegation tools enabled");
-    }
-    overrides = designTaskHandler(task, taskLogger, agent);
-  } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
-    overrides = designTaskHandler(task, taskLogger, agent);
   }
 
   return {
@@ -258,5 +260,3 @@ export async function createTaskHandler(task, taskLogger, agent) {
     ...overrides,
   };
 }
-
-
