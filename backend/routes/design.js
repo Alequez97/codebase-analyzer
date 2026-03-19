@@ -5,11 +5,55 @@ import {
   queueDesignBrainstormTask,
   queueDesignPlanAndStyleSystemGenerateTask,
 } from "../tasks/queue/index.js";
+import { getTasks } from "../orchestrators/task.js";
+import { loadChatHistory } from "../utils/chat-history.js";
+import { TASK_TYPES } from "../constants/task-types.js";
 
 const router = express.Router();
 
+const DESIGN_TASK_TYPES = [
+  TASK_TYPES.DESIGN_BRAINSTORM,
+  TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
+  TASK_TYPES.DESIGN_GENERATE_PAGE,
+];
+
 router.get("/manifest", (_req, res) => {
   return res.json(loadDesignManifest());
+});
+
+router.get("/latest-task", async (_req, res) => {
+  try {
+    const allTasks = await getTasks();
+    const designTasks = allTasks.filter((task) =>
+      DESIGN_TASK_TYPES.includes(task.type),
+    );
+
+    if (designTasks.length === 0) {
+      return res.json({ task: null, chatHistory: null });
+    }
+
+    // Sort by creation date, newest first
+    designTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const latestTask = designTasks[0];
+
+    // Load chat history for this task
+    const chatHistory = await loadChatHistory(latestTask.id);
+
+    return res.json({
+      task: latestTask,
+      chatHistory,
+    });
+  } catch (error) {
+    logger.error("Failed to get latest design task", {
+      component: "DesignRoutes",
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      error: "Failed to get latest design task",
+      message: error.message,
+    });
+  }
 });
 
 router.post("/brainstorm", async (req, res) => {

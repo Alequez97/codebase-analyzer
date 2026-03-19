@@ -7,13 +7,7 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import {
-  Layers,
-  LayoutTemplate,
-  Lightbulb,
-  MessageSquare,
-  Wand2,
-} from "lucide-react";
+import { Layers, LayoutTemplate, Wand2 } from "lucide-react";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
 
 export function DesignWorkspaceSidebar({
@@ -27,10 +21,10 @@ export function DesignWorkspaceSidebar({
   onPromptChange,
   generationBrief,
   onGenerationBriefChange,
-  onBrainstorm,
   onGenerate,
   isSubmitting,
   taskMessages,
+  taskEvents,
   currentTask,
   selectedModel,
   onModelChange,
@@ -44,6 +38,9 @@ export function DesignWorkspaceSidebar({
   );
   const isWorking =
     currentTask?.status === "running" || currentTask?.status === "pending";
+  const hasConversationHistory = conversationMessages.length > 0;
+  const latestEvent =
+    taskEvents.length > 0 ? taskEvents[taskEvents.length - 1] : null;
 
   return (
     <Box
@@ -96,13 +93,9 @@ export function DesignWorkspaceSidebar({
           py={3}
         >
           {conversationMessages.length === 0 ? (
-            <HStack gap={3} align="start" color="gray.500" px={1} py={1}>
-              <MessageSquare size={15} />
-              <Text fontSize="sm" lineHeight="1.7">
-                Start with a prompt, then keep refining the design here with
-                follow-up instructions.
-              </Text>
-            </HStack>
+            <Text fontSize="sm" color="gray.400" px={3} py={3}>
+              No conversation yet
+            </Text>
           ) : (
             <VStack align="stretch" gap={3}>
               {conversationMessages.map((message) => {
@@ -144,6 +137,38 @@ export function DesignWorkspaceSidebar({
           )}
         </Box>
 
+        {isWorking && latestEvent?.message ? (
+          <Box
+            borderRadius="22px"
+            borderWidth="1px"
+            borderColor="orange.200"
+            bg="orange.50"
+            px={3}
+            py={3}
+          >
+            <HStack gap={2} mb={1}>
+              <Badge
+                bg="orange.100"
+                color="orange.800"
+                borderRadius="full"
+                px={2}
+                py={0.5}
+                fontSize="10px"
+                fontWeight="800"
+                textTransform="uppercase"
+                letterSpacing="0.12em"
+              >
+                {currentTask?.type === "design-plan-and-style-system-generate"
+                  ? "Generating"
+                  : "Brainstorming"}
+              </Badge>
+            </HStack>
+            <Text fontSize="sm" color="gray.700" lineHeight="1.7">
+              {latestEvent.message}
+            </Text>
+          </Box>
+        ) : null}
+
         <Textarea
           value={prompt}
           onChange={(event) => onPromptChange(event.target.value)}
@@ -155,9 +180,15 @@ export function DesignWorkspaceSidebar({
           fontSize="sm"
           lineHeight="1.7"
           placeholder="Ask for a fresh concept or refine the current design. Example: Keep the same direction, but make it feel more premium and add a denser hero with stronger social proof."
+          disabled={isWorking}
           _focusVisible={{
             borderColor: "orange.400",
             boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
+          }}
+          _disabled={{
+            opacity: 0.6,
+            cursor: "not-allowed",
+            bg: "gray.50",
           }}
         />
         {generationBrief ? (
@@ -191,32 +222,20 @@ export function DesignWorkspaceSidebar({
           />
         </VStack>
 
-        <HStack gap={2}>
-          <Button
-            size="sm"
-            variant="outline"
-            borderRadius="full"
-            flex={1}
-            onClick={onBrainstorm}
-            loading={isSubmitting}
-          >
-            <Lightbulb size={14} />
-            Brainstorm
-          </Button>
-          <Button
-            size="sm"
-            bg="gray.950"
-            color="white"
-            borderRadius="full"
-            flex={1}
-            _hover={{ bg: "black" }}
-            onClick={onGenerate}
-            loading={isSubmitting}
-          >
-            <Wand2 size={14} />
-            Generate
-          </Button>
-        </HStack>
+        <Button
+          size="sm"
+          bg="gray.950"
+          color="white"
+          borderRadius="full"
+          w="full"
+          _hover={{ bg: "black" }}
+          onClick={onGenerate}
+          loading={isSubmitting}
+          disabled={isWorking || isSubmitting}
+        >
+          <Wand2 size={14} />
+          {hasConversationHistory ? "Improve" : "Generate"}
+        </Button>
       </VStack>
 
       <VStack align="stretch" gap={3} flex={1} minH={0}>

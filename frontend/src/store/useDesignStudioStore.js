@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { brainstormDesign, generateDesign, getDesignManifest } from "../api";
+import {
+  brainstormDesign,
+  generateDesign,
+  getDesignManifest,
+  getLatestDesignTask,
+} from "../api";
 
 function getFirstPreviewUrl(manifest) {
   return (
@@ -200,6 +205,59 @@ export const useDesignStudioStore = create((set, get) => ({
     }
   },
 
+  loadLatestTaskAndHistory: async () => {
+    try {
+      const response = await getLatestDesignTask();
+      const { task, chatHistory } = response?.data ?? {};
+
+      if (!task || !chatHistory) {
+        return { success: true, hasTask: false };
+      }
+
+      // Restore task state
+      const taskMode =
+        task.type === "design-brainstorm" ? "brainstorm" : "generate";
+
+      // Restore messages from chat history
+      const messages = (chatHistory.messages || []).map((msg) => ({
+        id:
+          msg.id ||
+          `restored-${msg.role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp || new Date().toISOString(),
+      }));
+
+      // Extract brainstorm response if it exists (assistant messages)
+      const assistantMessages = messages.filter(
+        (msg) => msg.role === "assistant",
+      );
+      const brainstormResponse = assistantMessages
+        .map((msg) => msg.content)
+        .join("\n\n")
+        .trim();
+
+      set({
+        currentTaskId: task.id,
+        currentTaskMode: taskMode,
+        currentTaskAgent: task.agentConfig?.agent ?? null,
+        currentTaskModel: task.agentConfig?.model ?? null,
+        taskMessages: messages,
+        brainstormResponse: taskMode === "brainstorm" ? brainstormResponse : "",
+        generationBrief:
+          taskMode === "brainstorm"
+            ? brainstormResponse
+            : task.params?.brief || "",
+        loadingTaskMessages: false,
+      });
+
+      return { success: true, hasTask: true, taskId: task.id };
+    } catch (error) {
+      console.error("Failed to load latest design task:", error);
+      return { success: false, error: error.message };
+    }
+  },
+
   startBrainstorm: async () => {
     const prompt = get().prompt.trim();
     if (!prompt) {
@@ -228,6 +286,7 @@ export const useDesignStudioStore = create((set, get) => ({
         currentTaskMode: "brainstorm",
         currentTaskAgent: response?.data?.task?.agent ?? null,
         currentTaskModel: response?.data?.task?.model ?? null,
+        prompt: "",
       });
       get().recordTaskEvent({
         taskId,
@@ -283,6 +342,7 @@ export const useDesignStudioStore = create((set, get) => ({
         currentTaskMode: "generate",
         currentTaskAgent: response?.data?.task?.agent ?? null,
         currentTaskModel: response?.data?.task?.model ?? null,
+        prompt: "",
       });
       get().recordTaskEvent({
         taskId,

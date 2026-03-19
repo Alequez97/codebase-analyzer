@@ -58,6 +58,7 @@ export default function DesignPage() {
     setGenerationBrief,
     setSelectedModel,
     fetchManifest,
+    loadLatestTaskAndHistory,
     startBrainstorm,
     startGeneration,
     recordTaskEvent,
@@ -98,19 +99,24 @@ export default function DesignPage() {
   useEffect(() => {
     let mounted = true;
 
-    fetchManifest().then((result) => {
-      if (!mounted) {
-        return;
-      }
-      if (result?.firstPreviewUrl) {
-        setSelectedUrl((previous) => previous || result.firstPreviewUrl);
-      }
-    });
+    // Load manifest and latest task history in parallel
+    Promise.all([fetchManifest(), loadLatestTaskAndHistory()]).then(
+      ([manifestResult, taskResult]) => {
+        if (!mounted) {
+          return;
+        }
+        if (manifestResult?.firstPreviewUrl) {
+          setSelectedUrl(
+            (previous) => previous || manifestResult.firstPreviewUrl,
+          );
+        }
+      },
+    );
 
     return () => {
       mounted = false;
     };
-  }, [fetchManifest]);
+  }, [fetchManifest, loadLatestTaskAndHistory]);
 
   useEffect(() => {
     const items = [...manifest.prototypes, ...manifest.components];
@@ -270,10 +276,10 @@ export default function DesignPage() {
           onPromptChange={setPrompt}
           generationBrief={generationBrief}
           onGenerationBriefChange={setGenerationBrief}
-          onBrainstorm={handleBrainstorm}
           onGenerate={handleGenerate}
           isSubmitting={isSubmitting}
           taskMessages={taskMessages}
+          taskEvents={taskEvents}
           currentTask={currentTask}
         />
         <DesignPreviewPane

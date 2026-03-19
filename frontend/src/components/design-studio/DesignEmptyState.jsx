@@ -30,6 +30,14 @@ export function DesignEmptyState({
   defaultModelLabel,
 }) {
   const hasApprovedBrief = Boolean(generationBrief?.trim());
+  const isWorking =
+    currentTask?.status === "running" || currentTask?.status === "pending";
+  const conversationMessages = taskMessages.filter(
+    (message) =>
+      (message.role === "user" || message.role === "assistant") &&
+      message.content?.trim(),
+  );
+  const hasConversationHistory = conversationMessages.length > 0;
 
   return (
     <Box
@@ -142,9 +150,15 @@ export function DesignEmptyState({
                 py={4}
                 fontSize="md"
                 lineHeight="1.75"
+                disabled={isWorking}
                 _focusVisible={{
                   borderColor: "orange.400",
                   boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
+                }}
+                _disabled={{
+                  opacity: 0.6,
+                  cursor: "not-allowed",
+                  bg: "gray.50",
                 }}
               />
 
@@ -221,6 +235,7 @@ export function DesignEmptyState({
                     px={5}
                     onClick={onBrainstorm}
                     loading={isSubmitting}
+                    disabled={isWorking || isSubmitting}
                     flex={{ base: 1, md: "unset" }}
                   >
                     <Lightbulb size={15} />
@@ -234,10 +249,11 @@ export function DesignEmptyState({
                     _hover={{ bg: "black" }}
                     onClick={onGenerate}
                     loading={isSubmitting}
+                    disabled={isWorking || isSubmitting}
                     flex={{ base: 1, md: "unset" }}
                   >
                     <Wand2 size={15} />
-                    Start Generating
+                    {hasConversationHistory ? "Improve" : "Start Generating"}
                   </Button>
                 </HStack>
               </HStack>
@@ -253,7 +269,8 @@ export function DesignEmptyState({
           }
           statusText={currentTask?.message || null}
           isRunning={
-            currentTask?.status === "running" || currentTask?.status === "pending"
+            currentTask?.status === "running" ||
+            currentTask?.status === "pending"
           }
           messages={taskMessages}
           events={taskEvents}
