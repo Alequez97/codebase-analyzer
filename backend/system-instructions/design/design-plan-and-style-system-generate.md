@@ -161,6 +161,8 @@ It must include:
   - `id`
   - `name`
   - `route`
+  - `folderPath` — the actual folder path relative to design root (e.g., `pages/home` for home page)
+  - `urlPath` — the path for navigation from other pages (e.g., `index.html` for same folder, `../products/index.html` for products page)
   - `summary`
   - `primaryActions`
   - `linksTo`
@@ -168,12 +170,49 @@ It must include:
 - `navigation`
 - `globalUi`
 - `ctaPolicy`
+- `navigationMap` — object mapping page IDs to their relative paths from each page
 
-Important:
+**Navigation Map Structure:**
 
-- all real navigation targets must be listed here first
-- page agents should treat this file as the source of truth
-- page agents must not block on whether another target page has already been generated
+The `navigationMap` should help each page agent calculate relative paths to other pages.
+
+Example:
+
+```json
+{
+  "navigationMap": {
+    "home": {
+      "home": "./index.html",
+      "products": "../products/index.html",
+      "about": "../about/index.html",
+      "contact": "../contact/index.html"
+    },
+    "products": {
+      "home": "../home/index.html",
+      "products": "./index.html",
+      "about": "../about/index.html",
+      "contact": "../contact/index.html"
+    }
+  }
+}
+```
+
+**Page Structure:**
+
+All pages are organized as: `pages/{pageId}/index.html`
+
+For example:
+
+- Home page: `pages/home/index.html`
+- Products page: `pages/products/index.html`
+- Product detail: `pages/product-detail/index.html`
+
+**Important:**
+
+- Use relative paths (`../pageid/index.html`), NOT absolute paths (`/pageid.html`)
+- All pages must be listed in the navigation map
+- Page agents will use this map to generate correct links
+- This ensures navigation works in static preview without a server
 
 ## Delegation requirements
 
@@ -206,8 +245,11 @@ Create one file per page under `.code-analysis/temp/delegation-requests/` (e.g.,
 
 This page links to:
 
-- `[route]` — [page name]
-- `[route]` — [page name]
+- Products page (`../products/index.html`) — browse all products
+- About page (`../about/index.html`) — company information
+- Login CTA (inert) — would require backend authentication
+
+**Use the exact paths from navigationMap[home] in app-manifest.json**
 
 ## Transitions
 
@@ -255,9 +297,11 @@ Landing page showcasing platform features with hero, featured games, and CTA to 
 
 This page links to:
 
-- `/products` — Products page
-- `/product/foxhole-trade` — Product detail page
-- `/community` — Community page
+- Products page (`../products/index.html`) — browse all products
+- Product detail (`../product-foxhole-trade/index.html`) — Foxhole Trade Market detail
+- Community page (`../community/index.html`) — community hub
+
+**Use the exact paths from navigationMap["home"] in app-manifest.json**
 
 ## Transitions
 
@@ -274,13 +318,13 @@ This page links to:
 
 ## Interactive Behavior
 
-- Hero CTA: navigates to `/products` (real link)
+- Hero CTA: navigates to products using path from navigationMap (real link)
 - Featured game cards: use Alpine.js for hover effects and slide transitions
 - Newsletter signup: remains inert (backend required)
 
 ## Shared Contract
 
-Must implement against `app-manifest.json` — all navigation links must match defined routes.
+Must implement against `app-manifest.json` and use paths from `navigationMap["home"]` for all internal links.
 ```
 
 ### Step 2: Delegate task

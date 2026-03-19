@@ -35,10 +35,23 @@ This page must work as part of a living multi-page prototype.
 
 That means:
 
-- navigation links and page switches must follow the shared app manifest
-- target pages may be referenced even if their files are generated later
-- do not treat missing sibling pages as a blocker
-- only CTA actions that require a real backend may remain intentionally inert
+- **Navigation links MUST use the paths from the navigationMap** in the app manifest
+- Target pages may be referenced even if their files are generated later
+- Do not treat missing sibling pages as a blocker
+- Only CTA actions that require a real backend may remain intentionally inert
+
+**Critical Navigation Rule:**
+
+The app manifest contains a `navigationMap` object that provides the exact relative paths
+you must use for all internal links.
+
+Example:
+
+- If `navigationMap[{{PAGE_ID}}]["products"]` is `"../products/index.html"`, use that EXACT path
+- If it's `"./index.html"`, use that EXACT path
+- **Never** use absolute paths like `/products.html` or `/index.html`
+
+This ensures the prototype works as a static site without requiring a web server.
 
 ## Tools and workflow
 
@@ -141,19 +154,49 @@ Critical path requirements:
 1. Read the shared app manifest and design system first.
 2. Build this page to match the shared tokens and system rules.
 3. Implement the page-specific sections from the page briefing.
-4. Implement navigation using the shared contract:
-   - use real links for page-to-page navigation
-   - use relative paths that work inside the static preview
-   - preserve the intended transition/state cues in the page code
-5. Make interactions feel intentional and realistic.
-6. If a CTA would require a backend, it may remain inert, but it must be visually clear and not pretend to complete real data work.
+4. **Implement navigation using the navigation map from app manifest:**
+   - Load `{{APP_MANIFEST_PATH}}` and find the `navigationMap[{{PAGE_ID}}]` object
+   - Use the paths provided in the navigation map for ALL internal page links
+   - Example: if navigationMap says `"products": "../products/index.html"`, use that exact path
+   - **NEVER use absolute paths** like `/products.html` or `/index.html`
+   - **ALWAYS use relative paths** like `../products/index.html` or `./index.html`
+5. Apply navigation paths to:
+   - Header/navbar links
+   - Footer links
+   - In-page CTAs and buttons
+   - Mobile menu links
+   - Any JavaScript that stores page URLs (use paths from navigation map)
+6. Make interactions feel intentional and realistic.
+7. If a CTA would require a backend, it may remain inert, but it must be visually clear and not pretend to complete real data work.
 
 ## Navigation rule
 
-If this page links to another page that has not been generated yet, still implement
-the link according to the app manifest.
+The app manifest provides a `navigationMap[{{PAGE_ID}}]` object that contains the exact
+relative paths to use for each page.
 
-Do not remove or disable legitimate navigation just because the sibling page may be generated later.
+**You MUST use these paths exactly as provided.**
+
+Example navigation map for the home page:
+
+```json
+{
+  "home": "./index.html",
+  "products": "../products/index.html",
+  "about": "../about/index.html"
+}
+```
+
+If you're implementing the home page and need to link to products, use `../products/index.html`.
+
+**Why this matters:**
+
+- Pages are in a folder structure: `pages/{pageId}/index.html`
+- Relative paths work in static previews without a server
+- Absolute paths (`/products.html`) will break the preview
+
+If this page links to another page that has not been generated yet, still implement
+the link according to the navigation map. Do not remove or disable legitimate navigation
+just because the target page may be generated later.
 
 ## Quality bar
 
@@ -177,6 +220,14 @@ Do not remove or disable legitimate navigation just because the sibling page may
 When done, summarize:
 
 - what page was implemented
-- what navigation paths were wired
+- what navigation paths were wired (confirm they match navigationMap)
 - what interactions are live
 - which CTAs remain intentionally inert
+
+**Final checklist before submitting:**
+
+- [ ] All navigation links use paths from `navigationMap[{{PAGE_ID}}]` in app-manifest.json
+- [ ] No absolute paths (`/page.html`) — only relative paths (`../page/index.html`)
+- [ ] Header, footer, and in-page links all use correct relative paths
+- [ ] JavaScript/Alpine.js code uses navigationMap paths if storing URLs
+- [ ] Page works as part of a static multi-page prototype
