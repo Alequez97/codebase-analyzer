@@ -31,6 +31,12 @@ That means:
 - only CTA actions that would require a real backend may remain non-functional
 - page agents must implement against the shared contract even if another page has not been generated yet
 
+**External/Placeholder Links:**
+
+- For external links (Discord, Twitter, etc.) or placeholder links that don't go anywhere, use `href="#"`
+- Using `href="https://example.com"` or similar URLs navigates users away from the prototype — use `href="#"` instead
+- Use `href="#"` with `@click.prevent` in Alpine.js if you want to show a toast/modal instead
+
 ## Available libraries
 
 You have access to these pre-loaded CDN libraries in all generated pages:
@@ -300,8 +306,10 @@ This page links to:
 - Products page (`../products/index.html`) — browse all products
 - Product detail (`../product-foxhole-trade/index.html`) — Foxhole Trade Market detail
 - Community page (`../community/index.html`) — community hub
+- Discord/Twitter links (`#`) — external placeholder links
 
 **Use the exact paths from navigationMap["home"] in app-manifest.json**
+**Use `href="#"` for external/placeholder links**
 
 ## Transitions
 

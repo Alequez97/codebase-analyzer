@@ -47,9 +47,9 @@ you must use for all internal links.
 
 Example:
 
-- If `navigationMap[{{PAGE_ID}}]["products"]` is `"../products/index.html"`, use that EXACT path
-- If it's `"./index.html"`, use that EXACT path
-- **Never** use absolute paths like `/products.html` or `/index.html`
+- If `navigationMap[{{PAGE_ID}}]["products"]` is `"../products/index.html"`, use that exact path
+- If it's `"./index.html"`, use that exact path
+- Use only relative paths — absolute paths like `/products.html` or `/index.html` will break the static preview
 
 This ensures the prototype works as a static site without requiring a web server.
 
@@ -158,8 +158,8 @@ Critical path requirements:
    - Load `{{APP_MANIFEST_PATH}}` and find the `navigationMap[{{PAGE_ID}}]` object
    - Use the paths provided in the navigation map for ALL internal page links
    - Example: if navigationMap says `"products": "../products/index.html"`, use that exact path
-   - **NEVER use absolute paths** like `/products.html` or `/index.html`
-   - **ALWAYS use relative paths** like `../products/index.html` or `./index.html`
+   - Use relative paths like `../products/index.html` or `./index.html`
+   - Absolute paths like `/products.html` or `/index.html` break the static preview — avoid them
 5. Apply navigation paths to:
    - Header/navbar links
    - Footer links
@@ -226,8 +226,9 @@ When done, summarize:
 
 **Final checklist before submitting:**
 
-- [ ] All navigation links use paths from `navigationMap[{{PAGE_ID}}]` in app-manifest.json
+- [ ] All internal navigation links use paths from `navigationMap[{{PAGE_ID}}]` in app-manifest.json
 - [ ] No absolute paths (`/page.html`) — only relative paths (`../page/index.html`)
+- [ ] External/placeholder links use `href="#"` not `href="https://example.com"`
 - [ ] Header, footer, and in-page links all use correct relative paths
 - [ ] JavaScript/Alpine.js code uses navigationMap paths if storing URLs
 - [ ] Page works as part of a static multi-page prototype
