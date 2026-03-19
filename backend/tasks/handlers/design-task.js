@@ -13,8 +13,11 @@ import {
   ensureProgressDirectory,
   markProgressComplete,
 } from "../../utils/task-progress.js";
+import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../constants/progress-stages.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
+import { emitSocketEvent } from "../../utils/socket-emitter.js";
+import { loadDesignManifest } from "../../utils/design-manifest.js";
 
 function describeDesignToolCall(toolName) {
   if (
@@ -140,6 +143,13 @@ export function designTaskHandler(task, taskLogger) {
         return;
       }
 
+      emitSocketEvent(SOCKET_EVENTS.DESIGN_CHAT_MESSAGE, {
+        taskId: task.id,
+        role,
+        content,
+        timestamp: new Date().toISOString(),
+      });
+
       await appendChatMessage(task.id, { role, content }).catch((error) =>
         taskLogger.warn(`Failed to save design chat message: ${error.message}`),
       );
@@ -202,6 +212,17 @@ export function designTaskHandler(task, taskLogger) {
             };
           }
         }
+      }
+
+      if (
+        task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
+        task.type === TASK_TYPES.DESIGN_GENERATE_PAGE
+      ) {
+        emitSocketEvent(SOCKET_EVENTS.DESIGN_MANIFEST_UPDATED, {
+          taskId: task.id,
+          manifest: loadDesignManifest(),
+          timestamp: new Date().toISOString(),
+        });
       }
 
       await markProgressComplete(task.id).catch(() => {});

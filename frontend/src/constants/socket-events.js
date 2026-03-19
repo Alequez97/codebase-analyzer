@@ -34,10 +34,17 @@ export const SOCKET_EVENTS = {
   LOG_EDIT_BUGS_SECURITY: "log:edit-bugs-security",
   LOG_EDIT_REFACTORING_AND_TESTING: "log:edit-refactoring-and-testing",
   LOG_EDIT_CODEBASE_ANALYSIS: "log:edit-codebase-analysis",
+  LOG_DESIGN_TASK: "log:design-task",
 
   // Documentation analysis/edit result pushed directly via socket
   // isEdit: true when triggered by AI chat (shows diff), false for fresh analysis
   DOCUMENTATION_UPDATED: "documentation:updated",
+  DIAGRAMS_UPDATED: "diagrams:updated",
+  REQUIREMENTS_UPDATED: "requirements:updated",
+  BUGS_SECURITY_UPDATED: "bugs-security:updated",
+  REFACTORING_AND_TESTING_UPDATED: "refactoring-and-testing:updated",
+  DESIGN_MANIFEST_UPDATED: "design:manifest-updated",
+  DESIGN_CHAT_MESSAGE: "design:chat-message",
 
   // Generic AI chat message event - used by all section chat tasks
   // chatId links the message to the originating task

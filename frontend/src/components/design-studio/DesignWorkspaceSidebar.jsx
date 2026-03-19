@@ -7,7 +7,14 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { Layers, LayoutTemplate, Lightbulb, MessageSquare, Wand2 } from "lucide-react";
+import {
+  Layers,
+  LayoutTemplate,
+  Lightbulb,
+  MessageSquare,
+  Wand2,
+} from "lucide-react";
+import { ModelSelector } from "../FloatingChat/ModelSelector";
 
 export function DesignWorkspaceSidebar({
   panel,
@@ -25,6 +32,9 @@ export function DesignWorkspaceSidebar({
   isSubmitting,
   taskMessages,
   currentTask,
+  selectedModel,
+  onModelChange,
+  defaultModelLabel,
 }) {
   const items = panel === "prototype" ? prototypes : components;
   const conversationMessages = taskMessages.filter(
@@ -61,7 +71,13 @@ export function DesignWorkspaceSidebar({
             Design Chat
           </Text>
           {isWorking ? (
-            <Badge bg="orange.100" color="orange.800" borderRadius="full" px={3} py={1}>
+            <Badge
+              bg="orange.100"
+              color="orange.800"
+              borderRadius="full"
+              px={3}
+              py={1}
+            >
               {currentTask?.type === "design-plan-and-style-system-generate"
                 ? "Generating"
                 : "Brainstorming"}
@@ -83,8 +99,8 @@ export function DesignWorkspaceSidebar({
             <HStack gap={3} align="start" color="gray.500" px={1} py={1}>
               <MessageSquare size={15} />
               <Text fontSize="sm" lineHeight="1.7">
-                Start with a prompt, then keep refining the design here with follow-up
-                instructions.
+                Start with a prompt, then keep refining the design here with
+                follow-up instructions.
               </Text>
             </HStack>
           ) : (
@@ -157,6 +173,24 @@ export function DesignWorkspaceSidebar({
             lineHeight="1.7"
           />
         ) : null}
+
+        <VStack align="stretch" gap={2}>
+          <Text
+            fontSize="10px"
+            fontWeight="800"
+            color="gray.500"
+            textTransform="uppercase"
+            letterSpacing="0.12em"
+          >
+            Model
+          </Text>
+          <ModelSelector
+            value={selectedModel}
+            onChange={onModelChange}
+            defaultLabel={defaultModelLabel}
+          />
+        </VStack>
+
         <HStack gap={2}>
           <Button
             size="sm"

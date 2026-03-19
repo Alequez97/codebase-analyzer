@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { Lightbulb, Sparkles, Wand2 } from "lucide-react";
 import { DesignTaskConsole } from "./DesignTaskConsole";
+import { ModelSelector } from "../FloatingChat/ModelSelector";
 
 export function DesignEmptyState({
   prompt,
@@ -24,6 +25,9 @@ export function DesignEmptyState({
   taskError,
   currentTaskAgent,
   currentTaskModel,
+  selectedModel,
+  onModelChange,
+  defaultModelLabel,
 }) {
   const hasApprovedBrief = Boolean(generationBrief?.trim());
 
@@ -177,6 +181,23 @@ export function DesignEmptyState({
                   />
                 </Box>
               )}
+
+              <VStack align="stretch" gap={2} mt={5}>
+                <Text
+                  fontSize="10px"
+                  fontWeight="800"
+                  color="gray.500"
+                  textTransform="uppercase"
+                  letterSpacing="0.12em"
+                >
+                  Model
+                </Text>
+                <ModelSelector
+                  value={selectedModel}
+                  onChange={onModelChange}
+                  defaultLabel={defaultModelLabel}
+                />
+              </VStack>
 
               <HStack
                 justify="space-between"

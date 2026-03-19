@@ -16,6 +16,7 @@ import { useLogsStore } from "./useLogsStore";
 import { useRefactoringAndTestingStore } from "./useRefactoringAndTestingStore";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 import { useAgentChatStore } from "./useAgentChatStore";
+import { useDesignStudioStore } from "./useDesignStudioStore";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
 function computeTestChanges(oldMissingTests, newMissingTests) {
@@ -180,6 +181,12 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
+      } else if (
+        type === TASK_TYPES.DESIGN_BRAINSTORM ||
+        type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
+        type === TASK_TYPES.DESIGN_GENERATE_PAGE
+      ) {
+        useDesignStudioStore.getState().completeCurrentTask(taskId);
       }
     });
 
@@ -316,6 +323,14 @@ export const useSocketStore = create((set, get) => ({
             isError: true,
           });
         }
+      } else if (
+        type === TASK_TYPES.DESIGN_BRAINSTORM ||
+        type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
+        type === TASK_TYPES.DESIGN_GENERATE_PAGE
+      ) {
+        useDesignStudioStore
+          .getState()
+          .failCurrentTask(taskId, error || "Design task failed");
       }
     });
 
@@ -388,6 +403,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.LOG_EDIT_CODEBASE_ANALYSIS, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_CUSTOM_CODEBASE_TASK, handleLogEvent);
     socket.on(SOCKET_EVENTS.LOG_REVIEW_CHANGES, handleLogEvent);
+    socket.on(SOCKET_EVENTS.LOG_DESIGN_TASK, handleLogEvent);
 
     socket.on(SOCKET_EVENTS.CUSTOM_TASK_THINKING, ({ taskId }) => {
       const chatStore = useAgentChatStore.getState();
@@ -489,6 +505,19 @@ export const useSocketStore = create((set, get) => ({
           isError: true,
         });
       }
+    });
+
+    socket.on(
+      SOCKET_EVENTS.DESIGN_CHAT_MESSAGE,
+      ({ taskId, role, content, timestamp }) => {
+        useDesignStudioStore
+          .getState()
+          .appendTaskMessage({ taskId, role, content, timestamp });
+      },
+    );
+
+    socket.on(SOCKET_EVENTS.DESIGN_MANIFEST_UPDATED, ({ manifest }) => {
+      useDesignStudioStore.getState().applyManifestUpdate(manifest);
     });
 
     socket.on(

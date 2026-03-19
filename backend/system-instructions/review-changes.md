@@ -94,6 +94,12 @@ For each (domain, section) pair that needs updating:
 }
 ```
 
+**When `delegate_task` returns `success: true`:**
+
+- The task is queued successfully
+- Move on immediately to the next delegation — **do not** verify by checking folders or searching for task files
+- Delegated tasks run asynchronously
+
 ---
 
 ## Rules

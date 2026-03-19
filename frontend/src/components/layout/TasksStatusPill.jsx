@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Badge,
   Box,
@@ -164,9 +164,33 @@ function DelegatedByBadge({ delegatedByTaskId, progressByTaskId }) {
   );
 }
 
+function formatElapsedTime(milliseconds) {
+  const seconds = Math.floor(milliseconds / 1000);
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}m ${remainingSeconds}s`;
+}
+
 function RunningTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
   const { clearProgress } = useTaskProgressStore();
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    if (!entry.startTime) return;
+
+    const updateElapsed = () => {
+      setElapsedTime(Date.now() - entry.startTime);
+    };
+
+    updateElapsed();
+    const interval = setInterval(updateElapsed, 1000);
+
+    return () => clearInterval(interval);
+  }, [entry.startTime]);
 
   const handleCancel = async () => {
     clearProgress(taskId);
@@ -190,9 +214,25 @@ function RunningTaskRow({ taskId, entry }) {
       </TaskIcon>
 
       <Box flex={1} minW={0}>
-        <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
-          {primary}
-        </Text>
+        <HStack gap={2} align="baseline">
+          <Text fontSize="12px" fontWeight="600" color="gray.800" truncate>
+            {primary}
+          </Text>
+          {elapsedTime > 0 && (
+            <Badge
+              bg="blue.50"
+              color="blue.700"
+              borderRadius="full"
+              px={2}
+              py={0.5}
+              fontSize="10px"
+              fontWeight="600"
+              flexShrink={0}
+            >
+              {formatElapsedTime(elapsedTime)}
+            </Badge>
+          )}
+        </HStack>
         {subtitle && (
           <Text fontSize="11px" color="gray.500" mt="1px">
             {subtitle}
@@ -947,5 +987,3 @@ export function TasksStatusPill() {
     </>
   );
 }
-
-

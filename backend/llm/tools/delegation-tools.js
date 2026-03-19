@@ -37,6 +37,7 @@ export const DELEGATION_TOOLS = [
 How to use:
   1. Use write_file to create a delegation request file under .code-analysis/temp/delegation-requests/ describing exactly what the delegated agent should do and why (include relevant context from your analysis).
   2. Call delegate_task with the path to that file, the target task type, and any required params.
+  3. When this returns success: true, the task is queued successfully — move on immediately. Do NOT check folders, search for files, or verify. Delegated tasks run asynchronously.
 
 The delegation request file content becomes the user message (or briefing) for the delegated agent. Treat it like a detailed chat message.`,
     parameters: {
@@ -53,7 +54,7 @@ The delegation request file content becomes the user message (or briefing) for t
       params: {
         type: "object",
         description:
-          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Direct design page tasks require `designId`, `pageId`, and `pageName`.",
+          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Direct design page tasks require `designId`, `pageId`, `pageName`, and optionally `route`.",
       },
     },
     required: ["type", "requestFile"],
@@ -289,7 +290,9 @@ export class DelegationToolExecutor {
       ...mergedParams,
       ...extraPayload,
       designBriefing:
-        extraPayload.designBriefing ?? mergedParams.designBriefing ?? requestContent,
+        extraPayload.designBriefing ??
+        mergedParams.designBriefing ??
+        requestContent,
       delegatedByTaskId: this.parentTaskId,
     });
 

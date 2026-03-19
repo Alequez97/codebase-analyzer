@@ -1,11 +1,5 @@
-import {
-  Badge,
-  Box,
-  HStack,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Badge, Box, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 const STAGE_LABELS = {
@@ -27,6 +21,14 @@ function formatStage(stage) {
       .join(" ")
   );
 }
+function formatElapsedTime(seconds) {
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}m ${remainingSeconds}s`;
+}
 
 export function DesignTaskConsole({
   title,
@@ -42,6 +44,27 @@ export function DesignTaskConsole({
   maxW = "820px",
   showWhenEmpty = false,
 }) {
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // Calculate elapsed time from the first event timestamp
+  const firstEventTimestamp = events[0]?.timestamp ?? null;
+
+  useEffect(() => {
+    if (!isRunning || !firstEventTimestamp) {
+      return;
+    }
+
+    const startTime = new Date(firstEventTimestamp).getTime();
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      setElapsedSeconds(elapsed);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, firstEventTimestamp]);
+
   if (
     !showWhenEmpty &&
     !statusText &&
@@ -57,17 +80,20 @@ export function DesignTaskConsole({
   );
   const latestAssistantMessage =
     assistantMessages[assistantMessages.length - 1]?.content ?? null;
-  const hasStageData = events.length > 0 || Boolean(statusText) || Boolean(error);
+  const hasStageData =
+    events.length > 0 || Boolean(statusText) || Boolean(error);
 
   const stageItems = [
     { id: "queued", label: "Queued" },
     {
       id: "processing",
-      label: mode === "brainstorm" ? "Sharpening brief" : "Thinking through layout",
+      label:
+        mode === "brainstorm" ? "Sharpening brief" : "Thinking through layout",
     },
     {
       id: "writing",
-      label: mode === "brainstorm" ? "Drafting notes" : "Producing design files",
+      label:
+        mode === "brainstorm" ? "Drafting notes" : "Producing design files",
     },
     {
       id: "complete",
@@ -120,11 +146,28 @@ export function DesignTaskConsole({
           )}
         </VStack>
         <HStack gap={2} flexWrap="wrap" justify="flex-end">
-          {agent || model ? (
-            <Badge bg="gray.100" color="gray.700" borderRadius="full" px={3} py={1}>
-              {[agent, model].filter(Boolean).join(" · ")}
+          {model && (
+            <Badge
+              bg="gray.100"
+              color="gray.700"
+              borderRadius="full"
+              px={3}
+              py={1}
+            >
+              {model}
             </Badge>
-          ) : null}
+          )}
+          {isRunning && elapsedSeconds > 0 && (
+            <Badge
+              bg="blue.100"
+              color="blue.800"
+              borderRadius="full"
+              px={3}
+              py={1}
+            >
+              {formatElapsedTime(elapsedSeconds)}
+            </Badge>
+          )}
           {isRunning ? (
             <HStack gap={2}>
               <Spinner size="sm" color="orange.500" />
@@ -166,7 +209,9 @@ export function DesignTaskConsole({
                 borderRadius="18px"
                 borderWidth="1px"
                 borderColor={
-                  isComplete ? "rgba(251, 146, 60, 0.38)" : "rgba(226, 232, 240, 0.9)"
+                  isComplete
+                    ? "rgba(251, 146, 60, 0.38)"
+                    : "rgba(226, 232, 240, 0.9)"
                 }
                 bg={
                   isCurrent
@@ -267,17 +312,9 @@ export function DesignTaskConsole({
                     >
                       {formatStage(event.stage || event.status)}
                     </Badge>
-                    <VStack align="start" gap={0}>
-                      <Text fontSize="sm" color="gray.800">
-                        {event.message}
-                      </Text>
-                      <Text fontSize="xs" color="gray.400">
-                        {new Date(event.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Text>
-                    </VStack>
+                    <Text fontSize="sm" color="gray.800">
+                      {event.message}
+                    </Text>
                   </HStack>
                 ))}
             </VStack>
@@ -303,8 +340,8 @@ export function DesignTaskConsole({
             </Text>
             <Text fontSize="sm" color="gray.700" lineHeight="1.8">
               This panel shows the live generation flow once the model starts
-              working, including current status, high-level stages, and the latest
-              AI notes.
+              working, including current status, high-level stages, and the
+              latest AI notes.
             </Text>
           </Box>
         )}

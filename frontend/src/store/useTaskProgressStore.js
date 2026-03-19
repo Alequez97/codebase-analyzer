@@ -78,6 +78,7 @@ export const useTaskProgressStore = create((set, get) => ({
     set((state) => {
       const next = new Map(state.progressByTaskId);
       const existing = next.get(taskId) ?? {};
+      const wasRunning = existing.status === "running";
       next.set(taskId, {
         ...existing,
         domainId,
@@ -85,6 +86,7 @@ export const useTaskProgressStore = create((set, get) => ({
         stage,
         message,
         status: "running",
+        startTime: wasRunning ? existing.startTime : Date.now(),
       });
       return { progressByTaskId: next };
     });

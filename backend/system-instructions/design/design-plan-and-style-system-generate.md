@@ -31,9 +31,39 @@ That means:
 - only CTA actions that would require a real backend may remain non-functional
 - page agents must implement against the shared contract even if another page has not been generated yet
 
+## Available libraries
+
+You have access to these pre-loaded CDN libraries in all generated pages:
+
+- **Tailwind CSS**: Use for all utility styling (layout, spacing, colors, typography, responsive design)
+- **Alpine.js**: Use for interactive components (modals, dropdowns, tabs, state management, transitions)
+- **Animate.css**: Use for entrance/exit animations
+
+These are automatically injected via CDN script tags. Do not regenerate their functionality.
+
 ## Tools and workflow
 
-Use the available tools directly:
+### High-level workflow:
+
+1. **Create shared foundation** (iterations 1-10):
+   - Write `{{BRIEF_PATH}}`
+   - Write `{{TOKENS_PATH}}`
+   - Write `{{DESIGN_SYSTEM_PATH}}`
+   - Write `{{APP_MANIFEST_PATH}}`
+
+2. **Delegate all pages** (iterations 11-20):
+   - For each page in app manifest:
+     - Write delegation request file
+     - Call `delegate_task`
+     - Move to next page immediately after `success: true`
+
+3. **Summarize and finish** (iteration 21):
+   - Write final summary
+   - Stop
+
+**Expected total: ~15-25 iterations** (not 80!)
+
+### Available tools:
 
 - `list_directory`, `search_files`, `read_file` to inspect relevant project and design context
 - `write_file` to create the shared design artifacts and delegation request files
@@ -70,28 +100,53 @@ Write a practical implementation brief with:
 
 ### `{{TOKENS_PATH}}`
 
-Write shared design tokens for:
+Write a minimal CSS file with brand-specific design tokens that override or extend Tailwind defaults:
 
-- colors
-- typography
-- spacing
-- radii
-- shadows
-- motion timing
-- breakpoints
+- custom brand colors (as CSS variables)
+- custom fonts and font loading
+- brand-specific spacing overrides (if needed)
+- unique shadows or effects not in Tailwind
+- custom motion timing curves
+
+Do not recreate spacing scales, basic colors, or typography scales that Tailwind already provides.
+Focus on what makes this design distinctive.
+
+Example structure:
+
+```css
+/* Brand Colors */
+:root {
+  --brand-primary: #your-color;
+  --brand-secondary: #your-color;
+  --brand-accent: #your-color;
+}
+
+/* Custom Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Your+Font");
+
+/* Tailwind Overrides */
+@layer base {
+  body {
+    font-family: "Your Font", sans-serif;
+  }
+}
+```
+
+This file should be ~20-50 lines, not hundreds.
 
 ### `{{DESIGN_SYSTEM_PATH}}`
 
 Write a JSON document that defines:
 
-- typography scale
-- color roles
-- spacing scale
-- layout rules
-- responsive breakpoints
-- component behavior rules
-- motion rules
+- custom typography scale (if extending Tailwind's defaults)
+- semantic color roles (mapping to Tailwind classes or custom CSS variables)
+- layout composition rules
+- component behavior rules (when to use Alpine.js vs custom JS)
+- motion and transition philosophy (Tailwind transitions, Animate.css classes, or custom)
 - accessibility expectations
+- Tailwind utility patterns specific to this design
+
+Page agents will use this as guidance for applying Tailwind classes consistently.
 
 ### `{{APP_MANIFEST_PATH}}`
 
@@ -122,26 +177,134 @@ Important:
 
 ## Delegation requirements
 
-After writing the shared files:
+After writing the shared files, delegate page generation in a simple two-step process per page:
 
-1. Decide the required pages.
-2. For each page, write a delegation request file under:
-   `.code-analysis/temp/delegation-requests/`
-3. Each request file must include:
-   - page purpose
-   - route
-   - key sections
-   - required navigation targets
-   - transition behavior
-   - shared design system expectations
-   - what interactions must work locally
-   - what CTA actions may remain inert
-4. Queue a delegated page-generation task with `delegate_task` using:
-   - `type: "design-generate-page"`
-   - `params.designId`
-   - `params.pageId`
-   - `params.pageName`
-   - `params.route`
+### Step 1: Write delegation request file
+
+Create one file per page under `.code-analysis/temp/delegation-requests/` (e.g., `home-page.md`).
+
+**Format** (markdown with clear sections):
+
+```markdown
+# Page: [Page Name]
+
+## Purpose
+
+[1-2 sentences: what this page does]
+
+## Route
+
+`[/route/path]`
+
+## Key Sections
+
+- **[Section Name]**: [what it contains]
+- **[Section Name]**: [what it contains]
+  ...
+
+## Navigation Targets
+
+This page links to:
+
+- `[route]` — [page name]
+- `[route]` — [page name]
+
+## Transitions
+
+- Entry: [Animate.css class or Tailwind transition]
+- Exit: [Animate.css class or Tailwind transition]
+
+## Design System Usage
+
+- Colors: [which CSS variables or Tailwind classes]
+- Typography: [specific Tailwind classes]
+- Layout: [grid/flex patterns]
+- Components: [which components use Alpine.js vs plain HTML]
+
+## Interactive Behavior
+
+- [Component]: [Alpine.js state management pattern]
+- [CTA]: [remains inert — requires backend]
+
+## Shared Contract
+
+Must implement against `app-manifest.json` even if target pages don't exist yet.
+```
+
+**Example:**
+
+```markdown
+# Page: Home
+
+## Purpose
+
+Landing page showcasing platform features with hero, featured games, and CTA to browse products.
+
+## Route
+
+`/`
+
+## Key Sections
+
+- **Hero**: Large title, subtitle, primary CTA ("Explore Games"), background video or image
+- **Featured Games**: 3-card carousel with game screenshots, titles, "Learn More" links
+- **Features**: 3-column grid explaining platform benefits
+- **Footer**: Links to Products, Roadmap, Community
+
+## Navigation Targets
+
+This page links to:
+
+- `/products` — Products page
+- `/product/foxhole-trade` — Product detail page
+- `/community` — Community page
+
+## Transitions
+
+- Entry: `animate__fadeIn` (Animate.css)
+- Exit: `animate__fadeOut`
+- Card hovers: Tailwind `transition-transform duration-300 hover:scale-105`
+
+## Design System Usage
+
+- Colors: `var(--brand-primary)` for CTA, `bg-gray-900` for dark sections
+- Typography: `font-display text-5xl` for hero, `text-lg text-gray-300` for body
+- Layout: `max-w-7xl mx-auto px-8` container, `grid grid-cols-3 gap-8` for features
+- Components: Featured games carousel uses Alpine.js `x-data` for slide state
+
+## Interactive Behavior
+
+- Hero CTA: navigates to `/products` (real link)
+- Featured game cards: use Alpine.js for hover effects and slide transitions
+- Newsletter signup: remains inert (backend required)
+
+## Shared Contract
+
+Must implement against `app-manifest.json` — all navigation links must match defined routes.
+```
+
+### Step 2: Delegate task
+
+Call `delegate_task` with:
+
+```json
+{
+  "type": "design-generate-page",
+  "requestFile": ".code-analysis/temp/delegation-requests/home-page.md",
+  "params": {
+    "designId": "[your design id]",
+    "pageId": "home",
+    "pageName": "Home",
+    "route": "/"
+  }
+}
+```
+
+**When `delegate_task` returns `success: true`:**
+
+- The page task is queued successfully
+- Move on immediately to the next page – **do not** check folders, search for task files, or verify
+- Delegation is asynchronous; pages will generate in parallel
 
 Delegate every page needed for a coherent prototype.
 

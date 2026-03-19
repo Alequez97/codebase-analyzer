@@ -19,6 +19,16 @@ The orchestrator already defined the shared design system and navigation contrac
 - CSS output: `{{CSS_OUTPUT_PATH}}`
 - JS output: `{{JS_OUTPUT_PATH}}`
 
+## Available libraries
+
+You have access to these pre-loaded CDN libraries:
+
+- **Tailwind CSS**: Use for 90% of styling (layout, spacing, colors, typography, responsive)
+- **Alpine.js**: Use for standard interactions (modals, dropdowns, tabs, x-data, x-show, x-transition)
+- **Animate.css**: Use for entrance/exit animations (animate**fadeIn, animate**slideInUp, etc.)
+
+These are automatically injected. Do not recreate their functionality in custom CSS/JS.
+
 ## Core principle
 
 This page must work as part of a living multi-page prototype.
@@ -57,6 +67,75 @@ The page must use split files:
 
 Do not inline the stylesheet or main JavaScript into the HTML.
 
+## HTML template structure
+
+Your `index.html` must follow this exact structure:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{PAGE_NAME}}</title>
+
+    <!-- CDN Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+
+    <!-- Shared tokens (relative to design root) -->
+    <link rel="stylesheet" href="../../tokens.css" />
+
+    <!-- Page-specific styles -->
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- Your page content here -->
+
+    <!-- Alpine.js (defer to load after DOM) -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- Page-specific JavaScript -->
+    <script src="./app.js"></script>
+  </body>
+</html>
+```
+
+Critical path requirements:
+
+- Tailwind and Animate.css must load before page content
+- Alpine.js must use `defer` to load after DOM is ready
+- Tokens file path: `../../tokens.css` (two levels up from pages/{{PAGE_ID}}/)
+- Local files: `./styles.css` and `./app.js` (same directory as index.html)
+
+## CSS generation strategy
+
+1. Use Tailwind utility classes for all standard styling (90% of the page)
+2. Write `styles.css` only for:
+   - Complex custom components not achievable with utilities
+   - Unique animations or effects
+   - Brand-specific overrides
+3. Reference the shared tokens file for custom CSS variables
+
+## JS generation strategy
+
+1. Use Alpine.js for standard interactions:
+   - Modals: `x-data="{ open: false }"` + `x-show="open"`
+   - Tabs: `x-data="{ tab: 'home' }"` + `:class="tab === 'home' ? 'active' : ''"`
+   - Dropdowns: `x-data="{ expanded: false }"` + `@click.away="expanded = false"`
+   - Transitions: `x-transition:enter` / `x-transition:leave`
+2. Write `app.js` only for:
+   - Complex business logic
+   - Custom animations not in Animate.css
+   - API integrations or data fetching
+   - Navigation state management beyond Alpine's scope
+
 ## Required implementation behavior
 
 1. Read the shared app manifest and design system first.
@@ -82,6 +161,9 @@ Do not remove or disable legitimate navigation just because the sibling page may
 - Preserve hierarchy, usability, and responsiveness.
 - Navigation must feel deliberate.
 - Motion should support transitions and wayfinding, not decoration only.
+- Use Tailwind to achieve distinctive design through creative compositions, not generic utilities.
+- Leverage Alpine.js for clean, declarative interactions without verbose vanilla JS.
+- Keep custom CSS and JS minimal - only write what libraries cannot provide.
 
 ## Constraints
 

@@ -216,17 +216,16 @@ const config = {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
-      maxIterations: 80,
+      maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.HIGH,
     },
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
-      maxIterations: 60,
+      maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
-
   },
 
   // Default agent config
@@ -261,7 +260,6 @@ const config = {
     enabled: process.env.FILE_WATCH !== "false",
     debounceMs: parseInt(process.env.FILE_WATCH_DEBOUNCE || "500", 10),
   },
-
 };
 
 // Ensure required directories exist
@@ -285,5 +283,3 @@ dirs.forEach((dir) => {
 });
 
 export default config;
-
-

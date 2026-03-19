@@ -79,28 +79,29 @@ export function DesignPreviewPane({
               onClick={() => setActiveView("thinking")}
             >
               <Wand2 size={12} />
-              Thinking
+              Generation Log
             </Button>
           </HStack>
 
-          {VIEWPORTS.map(({ id, label, icon: Icon, width }) => (
-            <Button
-              key={id}
-              size="xs"
-              borderRadius="full"
-              variant={viewport === id ? "solid" : "ghost"}
-              colorPalette={viewport === id ? "orange" : "gray"}
-              onClick={() => onViewportChange(id)}
-            >
-              <Icon size={12} />
-              {label}
-              {width && (
-                <Text as="span" fontSize="10px" opacity={0.7}>
-                  {width}px
-                </Text>
-              )}
-            </Button>
-          ))}
+          {hasDesignFiles &&
+            VIEWPORTS.map(({ id, label, icon: Icon, width }) => (
+              <Button
+                key={id}
+                size="xs"
+                borderRadius="full"
+                variant={viewport === id ? "solid" : "ghost"}
+                colorPalette={viewport === id ? "orange" : "gray"}
+                onClick={() => onViewportChange(id)}
+              >
+                <Icon size={12} />
+                {label}
+                {width && (
+                  <Text as="span" fontSize="10px" opacity={0.7}>
+                    {width}px
+                  </Text>
+                )}
+              </Button>
+            ))}
         </HStack>
       </HStack>
 
@@ -196,7 +197,13 @@ export function DesignPreviewPane({
                   animation="designPulse 5.4s ease-in-out infinite"
                 />
 
-                <VStack align="start" justify="center" h="100%" gap={6} position="relative">
+                <VStack
+                  align="start"
+                  justify="center"
+                  h="100%"
+                  gap={6}
+                  position="relative"
+                >
                   <VStack align="start" gap={2} maxW="520px">
                     <Text
                       fontSize="xs"
@@ -230,9 +237,15 @@ export function DesignPreviewPane({
 
                   <HStack gap={3} flexWrap="wrap">
                     {[
-                      isGenerating ? "Thinking through structure" : "Workspace idle",
-                      isGenerating ? "Writing HTML/CSS/JS" : "Waiting for generation",
-                      isGenerating ? "Preparing preview frame" : "Ready for next iteration",
+                      isGenerating
+                        ? "Thinking through structure"
+                        : "Workspace idle",
+                      isGenerating
+                        ? "Writing HTML/CSS/JS"
+                        : "Waiting for generation",
+                      isGenerating
+                        ? "Preparing preview frame"
+                        : "Ready for next iteration",
                     ].map((label) => (
                       <Box
                         key={label}

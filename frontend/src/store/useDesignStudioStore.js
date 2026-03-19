@@ -1,13 +1,10 @@
 import { create } from "zustand";
-import {
-  brainstormDesign,
-  generateDesign,
-  getDesignManifest,
-  getTaskChatHistory,
-} from "../api";
+import { brainstormDesign, generateDesign, getDesignManifest } from "../api";
 
 function getFirstPreviewUrl(manifest) {
-  return manifest?.prototypes?.[0]?.url ?? manifest?.components?.[0]?.url ?? null;
+  return (
+    manifest?.prototypes?.[0]?.url ?? manifest?.components?.[0]?.url ?? null
+  );
 }
 
 function createLocalMessage(role, content) {
@@ -58,6 +55,7 @@ export const useDesignStudioStore = create((set, get) => ({
   currentTaskMode: null,
   currentTaskAgent: null,
   currentTaskModel: null,
+  selectedModel: null,
   prompt: "",
   brainstormResponse: "",
   generationBrief: "",
@@ -68,6 +66,7 @@ export const useDesignStudioStore = create((set, get) => ({
 
   setPrompt: (prompt) => set({ prompt }),
   setGenerationBrief: (generationBrief) => set({ generationBrief }),
+  setSelectedModel: (selectedModel) => set({ selectedModel }),
   clearTaskState: () =>
     set({
       currentTaskId: null,
@@ -109,22 +108,90 @@ export const useDesignStudioStore = create((set, get) => ({
       };
     });
   },
+  applyManifestUpdate: (manifest) => {
+    const nextManifest = manifest ?? { prototypes: [], components: [] };
+    set({
+      manifest: nextManifest,
+      loadingManifest: false,
+      manifestError: null,
+    });
+    return {
+      manifest: nextManifest,
+      firstPreviewUrl: getFirstPreviewUrl(nextManifest),
+    };
+  },
+  appendTaskMessage: ({ taskId, role, content, timestamp }) => {
+    if (role !== "assistant" || !content?.trim()) {
+      return;
+    }
+
+    set((state) => {
+      if (state.currentTaskId && state.currentTaskId !== taskId) {
+        return state;
+      }
+
+      const taskMessages = mergeMessages(state.taskMessages, [
+        {
+          id: `socket-${taskId}-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 8)}`,
+          role,
+          content,
+          timestamp: timestamp ?? new Date().toISOString(),
+        },
+      ]);
+      const brainstormResponse = taskMessages
+        .filter((message) => message.role === "assistant")
+        .map((message) => message.content)
+        .join("\n\n")
+        .trim();
+
+      return {
+        taskMessages,
+        brainstormResponse:
+          state.currentTaskMode === "brainstorm" && brainstormResponse
+            ? brainstormResponse
+            : state.brainstormResponse,
+        generationBrief:
+          state.currentTaskMode === "brainstorm" && brainstormResponse
+            ? brainstormResponse
+            : state.generationBrief,
+        loadingTaskMessages: false,
+      };
+    });
+  },
+  completeCurrentTask: (taskId) => {
+    set((state) =>
+      state.currentTaskId === taskId
+        ? { loadingTaskMessages: false, taskError: null }
+        : state,
+    );
+  },
+  failCurrentTask: (taskId, taskError) => {
+    set((state) =>
+      state.currentTaskId === taskId
+        ? { loadingTaskMessages: false, taskError }
+        : state,
+    );
+  },
 
   fetchManifest: async ({ silent = false } = {}) => {
     const hasManifestData =
-      get().manifest.prototypes.length > 0 || get().manifest.components.length > 0;
+      get().manifest.prototypes.length > 0 ||
+      get().manifest.components.length > 0;
     set({
-      loadingManifest: silent ? get().loadingManifest : hasManifestData ? false : true,
+      loadingManifest: silent
+        ? get().loadingManifest
+        : hasManifestData
+          ? false
+          : true,
       manifestError: null,
     });
     try {
       const response = await getDesignManifest();
-      const manifest = response?.data ?? { prototypes: [], components: [] };
-      set({ manifest, loadingManifest: false });
-      return {
-        manifest,
-        firstPreviewUrl: getFirstPreviewUrl(manifest),
-      };
+      return get().applyManifestUpdate(
+        response?.data ?? { prototypes: [], components: [] },
+      );
     } catch (error) {
       const manifestError =
         error?.response?.data?.error || "Failed to load design manifest";
@@ -142,6 +209,7 @@ export const useDesignStudioStore = create((set, get) => ({
     const previousMessages = get().taskMessages;
     const history = getHistoryMessages(previousMessages);
     const userMessage = createLocalMessage("user", prompt);
+    const model = get().selectedModel;
 
     set({
       taskError: null,
@@ -153,7 +221,7 @@ export const useDesignStudioStore = create((set, get) => ({
     });
 
     try {
-      const response = await brainstormDesign({ prompt, history });
+      const response = await brainstormDesign({ prompt, history, model });
       const taskId = response?.data?.task?.id ?? null;
       set({
         currentTaskId: taskId,
@@ -182,7 +250,8 @@ export const useDesignStudioStore = create((set, get) => ({
 
   startGeneration: async ({ designId = null } = {}) => {
     const prompt = get().prompt.trim();
-    const brief = get().generationBrief.trim() || get().brainstormResponse.trim();
+    const brief =
+      get().generationBrief.trim() || get().brainstormResponse.trim();
 
     if (!prompt) {
       return { success: false, error: "Prompt is required" };
@@ -191,6 +260,7 @@ export const useDesignStudioStore = create((set, get) => ({
     const previousMessages = get().taskMessages;
     const history = getHistoryMessages(previousMessages);
     const userMessage = createLocalMessage("user", prompt);
+    const model = get().selectedModel;
 
     set({
       taskError: null,
@@ -200,7 +270,13 @@ export const useDesignStudioStore = create((set, get) => ({
     });
 
     try {
-      const response = await generateDesign({ prompt, brief, history, designId });
+      const response = await generateDesign({
+        prompt,
+        brief,
+        history,
+        designId,
+        model,
+      });
       const taskId = response?.data?.task?.id ?? null;
       set({
         currentTaskId: taskId,
@@ -224,43 +300,6 @@ export const useDesignStudioStore = create((set, get) => ({
         taskMessages: previousMessages,
       });
       return { success: false, error: taskError };
-    }
-  },
-
-  fetchTaskMessages: async (taskId) => {
-    if (!taskId) {
-      return;
-    }
-
-    try {
-      const response = await getTaskChatHistory(taskId);
-      const messages = response?.data?.messages ?? [];
-      const assistantMessages = messages.filter(
-        (message) => message.role === "assistant",
-      );
-      const brainstormResponse = assistantMessages
-        .map((message) => message.content)
-        .join("\n\n")
-        .trim();
-
-      set((state) => ({
-        taskMessages: mergeMessages(state.taskMessages, assistantMessages),
-        brainstormResponse:
-          state.currentTaskMode === "brainstorm" && brainstormResponse
-            ? brainstormResponse
-            : state.brainstormResponse,
-        generationBrief:
-          state.currentTaskMode === "brainstorm" && brainstormResponse
-            ? brainstormResponse
-            : state.generationBrief,
-        loadingTaskMessages: false,
-      }));
-    } catch (error) {
-      set({
-        loadingTaskMessages: false,
-        taskError:
-          error?.response?.data?.error || "Failed to load task conversation",
-      });
     }
   },
 }));

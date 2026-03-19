@@ -7,8 +7,10 @@ import {
   DesignWorkspaceSidebar,
 } from "../components/design-studio";
 import { TASK_TYPES } from "../constants/task-types";
+import { MODEL_LABELS } from "../constants/models";
 import { useDesignStudioStore } from "../store/useDesignStudioStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
+import { useConfigStore } from "../store/useConfigStore";
 
 const DESIGN_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_BRAINSTORM,
@@ -36,6 +38,8 @@ export default function DesignPage() {
   const [viewport, setViewport] = useState("desktop");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { config } = useConfigStore();
+
   const {
     manifest,
     loadingManifest,
@@ -49,18 +53,28 @@ export default function DesignPage() {
     taskError,
     currentTaskAgent,
     currentTaskModel,
+    selectedModel,
     setPrompt,
     setGenerationBrief,
+    setSelectedModel,
     fetchManifest,
     startBrainstorm,
     startGeneration,
-    fetchTaskMessages,
     recordTaskEvent,
   } = useDesignStudioStore();
 
-  const progressByTaskId = useTaskProgressStore((state) => state.progressByTaskId);
+  const progressByTaskId = useTaskProgressStore(
+    (state) => state.progressByTaskId,
+  );
 
-  const currentTask = currentTaskId ? progressByTaskId.get(currentTaskId) : null;
+  const defaultModelLabel = config?.tasks?.["design-generate"]?.model
+    ? (MODEL_LABELS[config.tasks["design-generate"].model] ??
+      config.tasks["design-generate"].model)
+    : null;
+
+  const currentTask = currentTaskId
+    ? progressByTaskId.get(currentTaskId)
+    : null;
   const allTaskEntries = useMemo(
     () => Array.from(progressByTaskId.values()),
     [progressByTaskId],
@@ -77,7 +91,9 @@ export default function DesignPage() {
   );
 
   const shouldShowWorkspace =
-    hasDesignFiles || currentTaskMode === "generate" || hasActiveDesignGeneration;
+    hasDesignFiles ||
+    currentTaskMode === "generate" ||
+    hasActiveDesignGeneration;
 
   useEffect(() => {
     let mounted = true;
@@ -111,26 +127,6 @@ export default function DesignPage() {
   }, [manifest, panel, selectedUrl]);
 
   useEffect(() => {
-    if (!currentTaskId) {
-      return;
-    }
-
-    fetchTaskMessages(currentTaskId);
-
-    const isRunning =
-      currentTask?.status === "running" || currentTask?.status === "pending";
-    if (!isRunning) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      fetchTaskMessages(currentTaskId);
-    }, 1500);
-
-    return () => window.clearInterval(intervalId);
-  }, [currentTaskId, currentTask?.status, fetchTaskMessages]);
-
-  useEffect(() => {
     if (!currentTaskId || !currentTask?.message) {
       return;
     }
@@ -148,34 +144,6 @@ export default function DesignPage() {
     currentTask?.status,
     recordTaskEvent,
   ]);
-
-  useEffect(() => {
-    if (!hasActiveDesignGeneration) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      fetchManifest({ silent: true }).then((result) => {
-        if (result?.firstPreviewUrl) {
-          setSelectedUrl((previous) => previous || result.firstPreviewUrl);
-        }
-      });
-    }, 3000);
-
-    return () => window.clearInterval(intervalId);
-  }, [hasActiveDesignGeneration, fetchManifest]);
-
-  useEffect(() => {
-    if (currentTaskMode !== "generate" || currentTask?.status !== "completed") {
-      return;
-    }
-
-    fetchManifest({ silent: true }).then((result) => {
-      if (result?.firstPreviewUrl) {
-        setSelectedUrl((previous) => previous || result.firstPreviewUrl);
-      }
-    });
-  }, [currentTask?.status, currentTaskMode, fetchManifest]);
 
   const handleBrainstorm = async () => {
     setIsSubmitting(true);
@@ -247,6 +215,9 @@ export default function DesignPage() {
         taskError={taskError}
         currentTaskAgent={currentTaskAgent}
         currentTaskModel={currentTaskModel}
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+        defaultModelLabel={defaultModelLabel}
       />
     );
   }
@@ -281,7 +252,8 @@ export default function DesignPage() {
               transform: "translateY(0) scale(1)",
             },
           },
-          animation: "designWorkspaceEnter 420ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+          animation:
+            "designWorkspaceEnter 420ms cubic-bezier(0.2, 0.8, 0.2, 1)",
         }}
       >
         <DesignWorkspaceSidebar
@@ -292,6 +264,9 @@ export default function DesignPage() {
           selectedUrl={selectedUrl}
           onSelectUrl={setSelectedUrl}
           prompt={prompt}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          defaultModelLabel={defaultModelLabel}
           onPromptChange={setPrompt}
           generationBrief={generationBrief}
           onGenerationBriefChange={setGenerationBrief}
@@ -318,4 +293,3 @@ export default function DesignPage() {
     </Center>
   );
 }
-
