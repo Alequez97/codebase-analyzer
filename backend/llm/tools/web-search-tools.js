@@ -34,16 +34,23 @@ export class WebSearchToolExecutor {
   }
 
   /**
-   * Execute a tool call
-   * @param {string} toolName
+   * Get human-readable description for progress display
+   * @param {string} _toolName - Tool name (ignored, we only handle one tool)
+   * @param {Object} args - Tool arguments
+   * @returns {string} Human-readable description
+   */
+  getToolDescription(_toolName, args) {
+    return `Searching: ${args?.query || "..."}`;
+  }
+
+  /**
+   * Execute web_search tool
+   * @param {string} _toolName - Tool name (ignored, we only handle web_search)
    * @param {Object} args
    * @returns {Promise<string>}
    */
-  async executeTool(toolName, args) {
-    if (toolName === "web_search") {
-      return this._search(args.query);
-    }
-    throw new Error(`Unknown web search tool: ${toolName}`);
+  async execute(_toolName, args) {
+    return this._search(args.query);
   }
 
   async _search(query) {

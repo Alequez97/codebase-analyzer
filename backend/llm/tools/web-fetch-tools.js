@@ -27,16 +27,23 @@ export const WEB_FETCH_TOOLS = [
  */
 export class WebFetchToolExecutor {
   /**
-   * Execute a tool call
-   * @param {string} toolName
+   * Get human-readable description of a tool call for progress display
+   * @param {string} _toolName - Tool name (ignored, we only handle one tool)
+   * @param {Object} args - Tool arguments
+   * @returns {string} Human-readable description
+   */
+  getToolDescription(_toolName, args) {
+    return `Fetching: ${args?.url || "..."}`;
+  }
+
+  /**
+   * Execute fetch_url tool
+   * @param {string} _toolName - Tool name (ignored, we only handle fetch_url)
    * @param {Object} args
    * @returns {Promise<string>}
    */
-  async executeTool(toolName, args) {
-    if (toolName === "fetch_url") {
-      return this._fetch(args.url);
-    }
-    throw new Error(`Unknown web fetch tool: ${toolName}`);
+  async execute(_toolName, args) {
+    return this._fetch(args.url);
   }
 
   async _fetch(url) {
@@ -93,14 +100,16 @@ export class WebFetchToolExecutor {
     // If not HTML, return raw text directly (truncated)
     if (!contentType.includes("html")) {
       return text.length > MAX_OUTPUT_CHARS
-        ? text.slice(0, MAX_OUTPUT_CHARS) + `\n\n[Truncated — ${text.length - MAX_OUTPUT_CHARS} chars omitted]`
+        ? text.slice(0, MAX_OUTPUT_CHARS) +
+            `\n\n[Truncated — ${text.length - MAX_OUTPUT_CHARS} chars omitted]`
         : text;
     }
 
     const plain = _htmlToText(text);
 
     return plain.length > MAX_OUTPUT_CHARS
-      ? plain.slice(0, MAX_OUTPUT_CHARS) + `\n\n[Truncated — ${plain.length - MAX_OUTPUT_CHARS} chars omitted]`
+      ? plain.slice(0, MAX_OUTPUT_CHARS) +
+          `\n\n[Truncated — ${plain.length - MAX_OUTPUT_CHARS} chars omitted]`
       : plain;
   }
 }
@@ -115,26 +124,31 @@ export class WebFetchToolExecutor {
  * @returns {string}
  */
 function _htmlToText(html) {
-  return html
-    // Remove non-content blocks entirely
-    .replace(/<(script|style|nav|footer|head|header|aside)[^>]*>[\s\S]*?<\/\1>/gi, "")
-    // Block elements → newline
-    .replace(/<\/(p|div|li|tr|h[1-6]|section|article|blockquote)>/gi, "\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    // Strip all remaining tags
-    .replace(/<[^>]+>/g, "")
-    // Decode common HTML entities
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    // Collapse runs of blank lines to max 2
-    .replace(/\n{3,}/g, "\n\n")
-    // Trim leading/trailing whitespace per line
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0)
-    .join("\n");
+  return (
+    html
+      // Remove non-content blocks entirely
+      .replace(
+        /<(script|style|nav|footer|head|header|aside)[^>]*>[\s\S]*?<\/\1>/gi,
+        "",
+      )
+      // Block elements → newline
+      .replace(/<\/(p|div|li|tr|h[1-6]|section|article|blockquote)>/gi, "\n")
+      .replace(/<br\s*\/?>/gi, "\n")
+      // Strip all remaining tags
+      .replace(/<[^>]+>/g, "")
+      // Decode common HTML entities
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ")
+      // Collapse runs of blank lines to max 2
+      .replace(/\n{3,}/g, "\n\n")
+      // Trim leading/trailing whitespace per line
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0)
+      .join("\n")
+  );
 }

@@ -1200,7 +1200,7 @@ describe("FileToolExecutor - Read, Search & Rename Tests", () => {
   });
 });
 
-describe("FileToolExecutor - executeTool", () => {
+describe("FileToolExecutor - execute", () => {
   let executor;
   let tempDir;
 
@@ -1222,7 +1222,7 @@ describe("FileToolExecutor - executeTool", () => {
 
   test("read_file returns numbered file content as string", async () => {
     // Arrange / Act
-    const result = await executor.executeTool("read_file", {
+    const result = await executor.execute("read_file", {
       path: "src/app.js",
     });
 
@@ -1234,7 +1234,7 @@ describe("FileToolExecutor - executeTool", () => {
 
   test("write_file returns success message as string", async () => {
     // Arrange / Act
-    const result = await executor.executeTool("write_file", {
+    const result = await executor.execute("write_file", {
       path: ".code-analysis/out.json",
       content: '{"ok":true}',
     });
@@ -1246,7 +1246,7 @@ describe("FileToolExecutor - executeTool", () => {
 
   test("read_file on missing file returns error message as string", async () => {
     // Arrange / Act
-    const result = await executor.executeTool("read_file", {
+    const result = await executor.execute("read_file", {
       path: "src/missing.js",
     });
 
@@ -1257,7 +1257,7 @@ describe("FileToolExecutor - executeTool", () => {
 
   test("unknown tool returns error message as string", async () => {
     // Arrange / Act
-    const result = await executor.executeTool("nonexistent_tool", {});
+    const result = await executor.execute("nonexistent_tool", {});
 
     // Assert
     expect(typeof result).toBe("string");

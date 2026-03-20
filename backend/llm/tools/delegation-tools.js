@@ -73,15 +73,28 @@ export class DelegationToolExecutor {
     this.queueFunctions = queueFunctions;
   }
 
-  async execute(toolName, args) {
-    if (toolName === "delegate_task") {
-      return this._delegateTask(args);
-    }
+  /**
+   * Get human-readable description for progress display
+   * @param {string} _toolName - Tool name (ignored, we only handle one tool)
+   * @param {Object} args - Tool arguments
+   * @returns {string} Human-readable description
+   */
+  getToolDescription(_toolName, args) {
+    const delType = args?.type || "task";
+    const delName = args?.params?.competitorName || args?.params?.domainId;
+    return delName
+      ? `Delegating ${delType}: ${delName}`
+      : `Delegating ${delType}`;
+  }
 
-    return {
-      success: false,
-      error: { message: `Unknown delegation tool: ${toolName}` },
-    };
+  /**
+   * Execute delegate_task tool
+   * @param {string} _toolName - Tool name (ignored, we only handle delegate_task)
+   * @param {Object} args - { type, params }
+   * @returns {Promise<Object>} { taskId, status, message }
+   */
+  async execute(_toolName, args) {
+    return this._delegateTask(args);
   }
 
   async _delegateTask({ type, domainId, requestFile, params = {} } = {}) {

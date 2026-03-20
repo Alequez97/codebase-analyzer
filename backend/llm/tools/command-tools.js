@@ -111,16 +111,23 @@ export class CommandToolExecutor {
   }
 
   /**
-   * Execute a tool call
-   * @param {string} toolName
-   * @param {Object} args
+   * Get human-readable description for progress display
+   * @param {string} _toolName - Tool name (ignored, we only handle one tool)
+   * @param {Object} args - Tool arguments
+   * @returns {string} Human-readable description
+   */
+  getToolDescription(_toolName, args) {
+    return `Running: ${args?.command || "command"}`;
+  }
+
+  /**
+   * Execute execute_command tool
+   * @param {string} _toolName - Tool name (ignored, we only handle execute_command)
+   * @param {Object} args - Tool arguments
    * @returns {Promise<string>}
    */
-  async executeTool(toolName, args) {
-    if (toolName === "execute_command") {
-      return this.executeCommand(args.command);
-    }
-    throw new Error(`Unknown command tool: ${toolName}`);
+  async execute(_toolName, args) {
+    return this.executeCommand(args.command);
   }
 
   /**

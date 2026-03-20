@@ -228,12 +228,43 @@ export class FileToolExecutor {
   }
 
   /**
+   * Get human-readable description of a tool call for progress display
+   * @param {string} toolName - Name of the tool
+   * @param {Object} args - Tool arguments
+   * @returns {string} Human-readable description
+   */
+  getToolDescription(toolName, args) {
+    const rawPath = args?.path || args?.file_path || "";
+    const filePath = rawPath === "." ? "(project root)" : rawPath || "unknown";
+    const startLine = args?.start_line;
+    const endLine = args?.end_line;
+
+    switch (toolName) {
+      case "read_file":
+        return startLine && endLine
+          ? `Reading ${filePath} (lines ${startLine}-${endLine})`
+          : `Reading ${filePath}`;
+      case "list_directory":
+        return `Listing directory ${filePath}`;
+      case "write_file":
+        return `Writing ${filePath}`;
+      case "replace_lines":
+        return `Editing ${filePath} (lines ${startLine}-${endLine})`;
+      case "search_files":
+        const pattern = args?.pattern || args?.query || "";
+        return pattern ? `Searching for "${pattern}"` : "Searching files";
+      default:
+        return toolName;
+    }
+  }
+
+  /**
    * Execute a tool call and return string result for LLM consumption.
    * @param {string} toolName - Name of the tool to execute
    * @param {Object} args - Tool arguments
    * @returns {Promise<string>} String result of tool execution
    */
-  async executeTool(toolName, args) {
+  async execute(toolName, args) {
     let result;
     switch (toolName) {
       case "read_file":

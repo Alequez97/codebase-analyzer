@@ -49,19 +49,22 @@ export class MessageToolExecutor {
   }
 
   /**
-   * Execute a message tool
-   * @param {string} toolName - Name of the tool
+   * Get human-readable description for progress display
+   * @param {string} _toolName - Tool name (ignored, we only handle one tool)
+   * @param {Object} args - Tool arguments
+   * @returns {string} Human-readable description
+   */
+  getToolDescription(_toolName, args) {
+    return "Asking user a question...";
+  }
+
+  /**
+   * Execute message_user tool
+   * @param {string} _toolName - Tool name (ignored, we only handle message_user)
    * @param {Object} args - Tool arguments
    * @returns {Promise<string>} Tool result
    */
-  async execute(toolName, args) {
-    if (toolName !== "message_user") {
-      const error = new Error(`Unknown message tool: ${toolName}`);
-      error.code = TOOL_ERROR_CODES.UNKNOWN_TOOL;
-      error.type = TOOL_ERROR_TYPES.VALIDATION;
-      throw error;
-    }
-
+  async execute(_toolName, args) {
     return this.messageUser(args);
   }
 

@@ -518,34 +518,27 @@ describe("CommandToolExecutor - Execution behavior (mocked spawn)", () => {
 
 // ---------------------------------------------------------------------------
 
-describe("CommandToolExecutor - executeTool dispatch", () => {
+describe("CommandToolExecutor - execute dispatch", () => {
   let executor;
 
   beforeEach(() => {
     executor = new CommandToolExecutor("/fake/project");
   });
 
-  test("routes execute_command to executeCommand", async () => {
+  test("routes to executeCommand", async () => {
     // Arrange
     const spy = vi
       .spyOn(executor, "executeCommand")
       .mockResolvedValue("✅ PASSED\n");
 
     // Act
-    const result = await executor.executeTool("execute_command", {
+    const result = await executor.execute({
       command: "npm test",
     });
 
     // Assert
     expect(spy).toHaveBeenCalledWith("npm test");
     expect(result).toBe("✅ PASSED\n");
-  });
-
-  test("throws for an unknown tool name", async () => {
-    // Arrange + Act + Assert
-    await expect(
-      executor.executeTool("rm_everything", { path: "/" }),
-    ).rejects.toThrow("Unknown command tool");
   });
 });
 

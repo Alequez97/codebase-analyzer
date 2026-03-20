@@ -1,24 +1,4 @@
-import { FileToolExecutor, FILE_TOOLS } from "../llm/tools/file-tools.js";
-import {
-  CommandToolExecutor,
-  COMMAND_TOOLS,
-} from "../llm/tools/command-tools.js";
-import {
-  DelegationToolExecutor,
-  DELEGATION_TOOLS,
-} from "../llm/tools/delegation-tools.js";
-import {
-  WebSearchToolExecutor,
-  WEB_SEARCH_TOOLS,
-} from "../llm/tools/web-search-tools.js";
-import {
-  WebFetchToolExecutor,
-  WEB_FETCH_TOOLS,
-} from "../llm/tools/web-fetch-tools.js";
-import {
-  MessageToolExecutor,
-  MESSAGE_TOOLS,
-} from "../llm/tools/message-tools.js";
+import { ToolRegistry } from "../llm/tools/index.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 
@@ -46,12 +26,7 @@ export class LLMAgent {
     this.workingDirectory = options.workingDirectory;
     this.maxIterations = options.maxIterations || 30;
     this.maxTokens = options.maxTokens || client.config?.maxTokens || 4096;
-    this.fileToolExecutor = new FileToolExecutor(this.workingDirectory);
-    this.commandToolExecutor = null; // Enabled per-task via enableCommandTools()
-    this.delegationToolExecutor = null; // Enabled per-task via enableDelegationTools()
-    this.webSearchToolExecutor = null; // Enabled per-task via enableWebSearchTools()
-    this.webFetchToolExecutor = null; // Enabled per-task via enableWebFetchTools()
-    this.messageToolExecutor = null; // Enabled per-task via enableMessageTools()
+    this.tools = new ToolRegistry(this.workingDirectory);
     this.conversationLog = [];
   }
 
@@ -64,10 +39,7 @@ export class LLMAgent {
    * @param {string[]} [options.additionalAllowedPrefixes] - Extra safe command prefixes
    */
   enableCommandTools(options = {}) {
-    this.commandToolExecutor = new CommandToolExecutor(
-      this.workingDirectory,
-      options,
-    );
+    this.tools.enableCommandTools(options);
     logger.info("Command tools enabled for agent session", {
       component: "LLMAgent",
       timeoutMs: options.timeoutMs,
@@ -82,11 +54,7 @@ export class LLMAgent {
    * @param {Object<string, Function>} queueFunctions - Map of task-type → queue function
    */
   enableDelegationTools(parentTaskId, queueFunctions) {
-    this.delegationToolExecutor = new DelegationToolExecutor(
-      this.workingDirectory,
-      parentTaskId,
-      queueFunctions,
-    );
+    this.tools.enableDelegationTools(parentTaskId, queueFunctions);
     logger.info("Delegation tools enabled for agent session", {
       component: "LLMAgent",
       parentTaskId,
@@ -101,7 +69,7 @@ export class LLMAgent {
    * @param {string} apiKey - Brave Search API key
    */
   enableWebSearchTools(apiKey) {
-    this.webSearchToolExecutor = new WebSearchToolExecutor(apiKey);
+    this.tools.enableWebSearchTools(apiKey);
     logger.info("Web search tools enabled for agent session", {
       component: "LLMAgent",
     });
@@ -112,7 +80,7 @@ export class LLMAgent {
    * Must be called before run() to take effect.
    */
   enableWebFetchTools() {
-    this.webFetchToolExecutor = new WebFetchToolExecutor();
+    this.tools.enableWebFetchTools();
     logger.info("Web fetch tools enabled for agent session", {
       component: "LLMAgent",
     });
@@ -126,25 +94,11 @@ export class LLMAgent {
    * @param {Function} responseHandler.waitForResponse - Async function that waits for user response
    */
   enableMessageTools(taskId, responseHandler) {
-    this.messageToolExecutor = new MessageToolExecutor(taskId, responseHandler);
+    this.tools.enableMessageTools(taskId, responseHandler);
     logger.info("Message tools enabled for agent session", {
       component: "LLMAgent",
       taskId,
     });
-  }
-
-  /**
-   * Get the full list of tools available in this session
-   * @private
-   */
-  _getAvailableTools() {
-    const tools = [...FILE_TOOLS];
-    if (this.commandToolExecutor) tools.push(...COMMAND_TOOLS);
-    if (this.delegationToolExecutor) tools.push(...DELEGATION_TOOLS);
-    if (this.webSearchToolExecutor) tools.push(...WEB_SEARCH_TOOLS);
-    if (this.messageToolExecutor) tools.push(...MESSAGE_TOOLS);
-    if (this.webFetchToolExecutor) tools.push(...WEB_FETCH_TOOLS);
-    return tools;
   }
 
   /**
@@ -239,7 +193,7 @@ export class LLMAgent {
 
       // Send message to LLM
       const response = await this.client.sendMessage(this.state.getMessages(), {
-        tools: this._getAvailableTools(),
+        tools: this.tools.getAvailableTools(),
         maxTokens: this.maxTokens,
         signal: abortSignal,
       });
@@ -388,113 +342,36 @@ export class LLMAgent {
 
     // Execute each tool
     for (const toolCall of toolCalls) {
-      const rawPath =
-        toolCall.arguments?.path || toolCall.arguments?.file_path || "";
-      const filePath =
-        rawPath === "." ? "(project root)" : rawPath || "unknown";
-      const startLine = toolCall.arguments?.start_line;
-      const endLine = toolCall.arguments?.end_line;
-
-      let toolDescription = toolCall.name;
-      if (toolCall.name === "read_file") {
-        toolDescription =
-          startLine && endLine
-            ? `Reading ${filePath} (lines ${startLine}-${endLine})`
-            : `Reading ${filePath}`;
-      } else if (toolCall.name === "list_directory") {
-        toolDescription = `Listing directory ${filePath}`;
-      } else if (toolCall.name === "write_file") {
-        toolDescription = `Writing ${filePath}`;
-      } else if (toolCall.name === "replace_lines") {
-        toolDescription = `Editing ${filePath} (lines ${startLine}-${endLine})`;
-      } else if (toolCall.name === "search_files") {
-        const pattern =
-          toolCall.arguments?.pattern || toolCall.arguments?.query || "";
-        toolDescription = pattern
-          ? `Searching for "${pattern}"`
-          : "Searching files";
-      } else if (toolCall.name === "execute_command") {
-        toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
-      } else if (toolCall.name === "delegate_task") {
-        const delType = toolCall.arguments?.type || "task";
-        const delName =
-          toolCall.arguments?.params?.competitorName ||
-          toolCall.arguments?.params?.domainId;
-        toolDescription = delName
-          ? `Delegating ${delType}: ${delName}`
-          : `Delegating ${delType}`;
-      }
-
-      logger.debug(`Executing tool: ${toolDescription}`, {
-        component: "LLMAgent",
-        tool: toolCall.name,
-      });
-
-      onProgress({
-        stage: PROGRESS_STAGES.TOOL_EXECUTION,
-        message: toolDescription,
-        iteration,
-        tool: toolCall.name,
-      });
-
       try {
-        // Route to the appropriate executor based on tool name
-        const isDelegationTool =
-          this.delegationToolExecutor &&
-          DELEGATION_TOOLS.some((t) => t.name === toolCall.name);
-        const isCommandTool =
-          !isDelegationTool &&
-          this.commandToolExecutor &&
-          COMMAND_TOOLS.some((t) => t.name === toolCall.name);
-        const isWebSearchTool =
-          !isDelegationTool &&
-          !isCommandTool &&
-          this.webSearchToolExecutor &&
-          WEB_SEARCH_TOOLS.some((t) => t.name === toolCall.name);
-        const isWebFetchTool =
-          !isDelegationTool &&
-          !isCommandTool &&
-          !isWebSearchTool &&
-          this.webFetchToolExecutor &&
-          WEB_FETCH_TOOLS.some((t) => t.name === toolCall.name);
-        const isMessageTool =
-          !isDelegationTool &&
-          !isCommandTool &&
-          !isWebSearchTool &&
-          !isWebFetchTool &&
-          this.messageToolExecutor &&
-          MESSAGE_TOOLS.some((t) => t.name === toolCall.name);
+        // Route to the appropriate executor
+        const match = this.tools.findExecutor(toolCall.name);
 
-        let result;
-        if (isDelegationTool) {
-          const delegationResult = await this.delegationToolExecutor.execute(
-            toolCall.name,
-            toolCall.arguments,
-          );
-          result = JSON.stringify(delegationResult, null, 2);
-        } else if (isWebSearchTool) {
-          result = await this.webSearchToolExecutor.executeTool(
-            toolCall.name,
-            toolCall.arguments,
-          );
-        } else if (isWebFetchTool) {
-          result = await this.webFetchToolExecutor.executeTool(
-            toolCall.name,
-            toolCall.arguments,
-          );
-        } else if (isMessageTool) {
-          result = await this.messageToolExecutor.execute(
-            toolCall.name,
-            toolCall.arguments,
-          );
-        } else {
-          const executor = isCommandTool
-            ? this.commandToolExecutor
-            : this.fileToolExecutor;
-          result = await executor.executeTool(
-            toolCall.name,
-            toolCall.arguments,
-          );
+        if (!match) {
+          throw new Error(`No executor found for tool: ${toolCall.name}`);
+        }
+
+        const { executor, stringifyResult } = match;
+        const toolDescription = executor.getToolDescription(
+          toolCall.name,
+          toolCall.arguments,
+        );
+
+        logger.debug(`Executing tool: ${toolDescription}`, {
+          component: "LLMAgent",
+          tool: toolCall.name,
+        });
+
+        onProgress({
+          stage: PROGRESS_STAGES.TOOL_EXECUTION,
+          message: toolDescription,
+          iteration,
+          tool: toolCall.name,
+        });
+
+        let result = await executor.execute(toolCall.name, toolCall.arguments);
+
+        if (stringifyResult) {
+          result = JSON.stringify(result, null, 2);
         }
 
         this.state.addToolResult(toolCall.id, toolCall.name, result);
