@@ -1,16 +1,23 @@
 import fs from "fs";
 import path from "path";
 import config from "../config.js";
-import { slugifyDesignPageId } from "../tasks/queue/design-shared.js";
+import { slugifyDesignPageId } from "../tasks/queue/design/shared.js";
 
 function designDir() {
   return path.join(config.target.directory, ".code-analysis", "design");
 }
 
 function formatLabel(id) {
-  return id
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return id.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatVersionLabel(designId) {
+  // Format v1, v2, v3 etc as "Version 1", "Version 2", "Version 3"
+  const versionMatch = designId.match(/^v(\d+)$/);
+  if (versionMatch) {
+    return `Version ${versionMatch[1]}`;
+  }
+  return formatLabel(designId);
 }
 
 function readJsonIfExists(filePath) {
@@ -29,70 +36,59 @@ export function loadDesignManifest() {
   const base = designDir();
 
   if (!fs.existsSync(base)) {
-    return { prototypes: [], components: [] };
+    return { versions: [] };
   }
 
-  const prototypes = [];
-  const components = [];
+  const versions = [];
 
   for (const entry of fs.readdirSync(base, { withFileTypes: true })) {
     if (!entry.isDirectory()) {
       continue;
     }
 
-    if (entry.name === "components") {
-      const componentsDir = path.join(base, "components");
-      for (const file of fs.readdirSync(componentsDir, { withFileTypes: true })) {
-        if (!file.isFile() || !file.name.endsWith(".html")) {
-          continue;
-        }
+    // First check for root index.html
+    let indexPath = path.join(base, entry.name, "index.html");
+    let url = `/design-preview/${entry.name}/index.html`;
 
-        const id = file.name.replace(".html", "");
-        components.push({
-          id,
-          label: formatLabel(id),
-          url: `/design-preview/components/${file.name}`,
-        });
+    // If no root index.html, check for first page's index.html
+    if (!fs.existsSync(indexPath)) {
+      const manifestPath = path.join(base, entry.name, "app-manifest.json");
+      const appManifest = readJsonIfExists(manifestPath);
+
+      if (appManifest?.pages?.length) {
+        const firstPage = appManifest.pages[0];
+        const pageId = slugifyDesignPageId(firstPage.id || firstPage.name);
+        indexPath = path.join(base, entry.name, "pages", pageId, "index.html");
+        url = `/design-preview/${entry.name}/pages/${pageId}/index.html`;
       }
-      continue;
     }
 
-    const manifestPath = path.join(base, entry.name, "app-manifest.json");
-    const appManifest = readJsonIfExists(manifestPath);
-
-    if (appManifest?.pages?.length) {
-      for (const page of appManifest.pages) {
-        const pageId = slugifyDesignPageId(page.id || page.name);
-        const indexPath = path.join(base, entry.name, "pages", pageId, "index.html");
-        if (!fs.existsSync(indexPath)) {
-          continue;
-        }
-
-        prototypes.push({
-          id: `${entry.name}:${pageId}`,
-          label: page.name || formatLabel(pageId),
-          url: `/design-preview/${entry.name}/pages/${pageId}/index.html`,
-          designId: entry.name,
-          pageId,
-        });
-      }
-      continue;
-    }
-
-    const indexPath = path.join(base, entry.name, "index.html");
+    // Only add version if we found an index.html
     if (fs.existsSync(indexPath)) {
-      prototypes.push({
+      versions.push({
         id: entry.name,
-        label: formatLabel(entry.name),
-        url: `/design-preview/${entry.name}/index.html`,
+        label: formatVersionLabel(entry.name),
+        url,
         designId: entry.name,
+        designLabel: formatVersionLabel(entry.name),
         pageId: null,
       });
     }
   }
 
-  prototypes.sort((a, b) => a.label.localeCompare(b.label));
-  components.sort((a, b) => a.label.localeCompare(b.label));
+  // Sort versions: v1, v2, v3, etc., then alphabetically by other names
+  versions.sort((a, b) => {
+    const aVersion = a.designId.match(/^v(\d+)$/);
+    const bVersion = b.designId.match(/^v(\d+)$/);
 
-  return { prototypes, components };
+    if (aVersion && bVersion) {
+      return parseInt(aVersion[1]) - parseInt(bVersion[1]);
+    }
+    if (aVersion) return -1; // v1, v2 come before other names
+    if (bVersion) return 1;
+    return a.label.localeCompare(b.label);
+  });
+
+  return { versions };
 }
+

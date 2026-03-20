@@ -19,10 +19,7 @@ import {
 import { ModelSelector } from "../FloatingChat/ModelSelector";
 
 export function DesignWorkspaceSidebar({
-  panel,
-  onPanelChange,
-  prototypes,
-  components,
+  versions,
   selectedUrl,
   onSelectUrl,
   prompt,
@@ -42,8 +39,11 @@ export function DesignWorkspaceSidebar({
   activeTab,
   onTabChange,
   onClose,
+  designMode,
+  onDesignModeChange,
+  nextVersionId,
+  latestVersionId,
 }) {
-  const items = panel === "prototype" ? prototypes : components;
   const conversationMessages = taskMessages.filter(
     (message) =>
       (message.role === "user" || message.role === "assistant") &&
@@ -97,8 +97,8 @@ export function DesignWorkspaceSidebar({
             borderRadius="full"
             onClick={() => onTabChange("files")}
           >
-            <LayoutTemplate size={14} />
-            Files
+            <Layers size={14} />
+            Versions
           </Button>
         </HStack>
         <IconButton
@@ -199,6 +199,50 @@ export function DesignWorkspaceSidebar({
 
           {/* Input and controls at bottom */}
           <VStack align="stretch" gap={3} flexShrink={0}>
+            {/* Version Mode Selector */}
+            {versions.length > 0 && (
+              <VStack align="stretch" gap={2}>
+                <Text
+                  fontSize="10px"
+                  fontWeight="800"
+                  color="gray.500"
+                  textTransform="uppercase"
+                  letterSpacing="0.12em"
+                >
+                  Design Mode
+                </Text>
+                <HStack gap={2}>
+                  <Button
+                    size="sm"
+                    flex={1}
+                    variant={designMode === "improve" ? "solid" : "outline"}
+                    colorPalette={designMode === "improve" ? "blue" : "gray"}
+                    borderRadius="full"
+                    onClick={() =>
+                      onDesignModeChange("improve", latestVersionId)
+                    }
+                    disabled={isWorking}
+                  >
+                    Improve{" "}
+                    {latestVersionId
+                      ? latestVersionId.toUpperCase()
+                      : "Current"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    flex={1}
+                    variant={designMode === "new" ? "solid" : "outline"}
+                    colorPalette={designMode === "new" ? "green" : "gray"}
+                    borderRadius="full"
+                    onClick={() => onDesignModeChange("new", null)}
+                    disabled={isWorking}
+                  >
+                    New Version ({nextVersionId?.toUpperCase() || "V1"})
+                  </Button>
+                </HStack>
+              </VStack>
+            )}
+
             {isWorking && latestEvent?.message && (
               <Box
                 borderRadius="22px"
@@ -321,30 +365,16 @@ export function DesignWorkspaceSidebar({
       {/* Files Tab Content */}
       {activeTab === "files" && (
         <VStack align="stretch" gap={3} p={4} flex={1} minH={0}>
-          <HStack gap={1}>
-            <Button
-              size="xs"
-              flex={1}
-              variant={panel === "prototype" ? "solid" : "ghost"}
-              colorPalette={panel === "prototype" ? "orange" : "gray"}
-              borderRadius="full"
-              onClick={() => onPanelChange("prototype")}
-            >
-              <LayoutTemplate size={12} />
-              Prototypes
-            </Button>
-            <Button
-              size="xs"
-              flex={1}
-              variant={panel === "components" ? "solid" : "ghost"}
-              colorPalette={panel === "components" ? "orange" : "gray"}
-              borderRadius="full"
-              onClick={() => onPanelChange("components")}
-            >
-              <Layers size={12} />
-              Components
-            </Button>
-          </HStack>
+          <Text
+            fontSize="xs"
+            fontWeight="800"
+            color="gray.500"
+            letterSpacing="wide"
+            textTransform="uppercase"
+            px={2}
+          >
+            Design Versions
+          </Text>
 
           <Box
             flex={1}
@@ -356,13 +386,13 @@ export function DesignWorkspaceSidebar({
             bg="rgba(248, 250, 252, 0.88)"
             p={2}
           >
-            {items.length === 0 ? (
+            {versions.length === 0 ? (
               <Text fontSize="sm" color="gray.400" px={3} py={3}>
-                Nothing generated in this panel yet.
+                No design versions yet. Generate your first design.
               </Text>
             ) : (
               <VStack align="stretch" gap={1}>
-                {items.map((item) => {
+                {versions.map((item) => {
                   const selected = selectedUrl === item.url;
                   return (
                     <Box
@@ -377,13 +407,18 @@ export function DesignWorkspaceSidebar({
                       onClick={() => onSelectUrl(item.url)}
                       _hover={{ bg: selected ? "orange.50" : "white" }}
                     >
-                      <Text
-                        fontSize="sm"
-                        fontWeight={selected ? "800" : "600"}
-                        color={selected ? "orange.800" : "gray.700"}
-                      >
-                        {item.label}
-                      </Text>
+                      <HStack justify="space-between">
+                        <HStack gap={2}>
+                          <Layers size={16} />
+                          <Text
+                            fontSize="sm"
+                            fontWeight={selected ? "700" : "600"}
+                            color={selected ? "orange.800" : "gray.700"}
+                          >
+                            {item.label}
+                          </Text>
+                        </HStack>
+                      </HStack>
                     </Box>
                   );
                 })}

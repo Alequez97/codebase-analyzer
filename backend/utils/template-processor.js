@@ -15,7 +15,7 @@ import {
   getDesignCssOutputPath,
   getDesignJsOutputPath,
   getDesignSystemManifestRelativePath,
-} from "../tasks/queue/design-shared.js";
+} from "../tasks/queue/design/shared.js";
 
 /**
  * Process a template string with variables
@@ -293,7 +293,8 @@ function buildDesignTemplateVariables(task) {
     DESIGN_PATH: task.params?.designPath || "",
     BRIEF_PATH: task.params?.briefPath || "",
     APP_MANIFEST_PATH:
-      task.params?.appManifestPath || getDesignAppManifestRelativePath(designId),
+      task.params?.appManifestPath ||
+      getDesignAppManifestRelativePath(designId),
     DESIGN_SYSTEM_PATH:
       task.params?.designSystemPath ||
       getDesignSystemManifestRelativePath(designId),
@@ -511,5 +512,3 @@ export async function buildTemplateVariables(task) {
       };
   }
 }
-
-

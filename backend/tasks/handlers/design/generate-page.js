@@ -7,7 +7,7 @@ import {
   getDesignCssOutputPath,
   getDesignJsOutputPath,
   getAbsoluteDesignPath,
-} from "../../queue/design-shared.js";
+} from "../../queue/design/shared.js";
 import { appendChatMessage } from "../../../utils/chat-history.js";
 import {
   ensureProgressDirectory,

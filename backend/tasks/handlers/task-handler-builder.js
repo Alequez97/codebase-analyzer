@@ -11,23 +11,23 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadSystemInstructionForTask } from "../../utils/system-instruction-loader.js";
 import { loadDomainSectionChatHistory } from "../../utils/chat-history.js";
 import * as logger from "../../utils/logger.js";
-import { analyzeDocumentationHandler } from "./analyze-documentation.js";
-import { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";
-import { applyRefactoringHandler } from "./apply-refactoring.js";
-import { customCodebaseTaskHandler } from "./custom-codebase-task.js";
-import { defaultAnalysisHandler } from "./default-analysis.js";
+import { analyzeDocumentationHandler } from "./analysis/documentation.js";
+import { analyzeRefactoringAndTestingHandler } from "./analysis/refactoring-and-testing.js";
+import { applyRefactoringHandler } from "./application/refactoring.js";
+import { customCodebaseTaskHandler } from "./custom/codebase-task.js";
+import { defaultAnalysisHandler } from "./analysis/default.js";
 import {
   designBrainstormHandler,
   designPlanAndStyleSystemGenerateHandler,
   designGeneratePageHandler,
 } from "./design/index.js";
-import { editCodebaseAnalysisHandler } from "./edit-codebase-analysis.js";
-import { editDocumentationHandler } from "./edit-documentation.js";
-import { createEditSectionHandler } from "./edit-section.js";
-import { implementFixHandler } from "./implement-fix.js";
-import { implementTestHandler } from "./implement-test.js";
-import { reviewChangesHandler } from "./review-changes.js";
-import { queueDesignGeneratePageTask } from "../queue/design-generate-page.js";
+import { editCodebaseAnalysisHandler } from "./editing/codebase-analysis.js";
+import { editDocumentationHandler } from "./editing/documentation.js";
+import { createEditSectionHandler } from "./editing/section.js";
+import { implementFixHandler } from "./implementation/fix.js";
+import { implementTestHandler } from "./implementation/test.js";
+import { reviewChangesHandler } from "./review/changes.js";
+import { queueDesignGeneratePageTask } from "../queue/design/generate-page.js";
 
 const EDIT_SECTION_HANDLER_OPTIONS = {
   [TASK_TYPES.EDIT_DIAGRAMS]: {

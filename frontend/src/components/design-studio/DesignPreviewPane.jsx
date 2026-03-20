@@ -253,7 +253,7 @@ export function DesignPreviewPane({
                       {isGenerating
                         ? "Stay in the workspace while the model sharpens the direction, writes the files, and prepares the first live version."
                         : hasDesignFiles
-                          ? "Pick a generated prototype or component from the sidebar."
+                          ? "Pick a design version from the sidebar to preview."
                           : "Start a generation to open a live preview and continue iterating from chat."}
                     </Text>
                   </VStack>

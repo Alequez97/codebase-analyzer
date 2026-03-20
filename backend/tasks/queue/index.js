@@ -2,31 +2,44 @@
  * Task Queue - Central exports for all task queuing functions
  */
 
-export { queueCodebaseAnalysisTask } from "./codebase.js";
-export { queueAnalyzeDocumentationTask } from "./documentation.js";
-export { queueAnalyzeRequirementsTask } from "./requirements.js";
-export { queueAnalyzeBugsSecurityTask } from "./bugs-security.js";
-export { queueAnalyzeDiagramsTask } from "./diagrams.js";
-export { queueAnalyzeRefactoringAndTestingTask } from "./refactoring-and-testing.js";
-export { queueImplementFixTask } from "./implement-fix.js";
-export { queueImplementTestTask } from "./implement-test.js";
-export { queueApplyRefactoringTask } from "./apply-refactoring.js";
+// Analysis tasks
+export {
+  queueCodebaseAnalysisTask,
+  queueAnalyzeDocumentationTask,
+  queueAnalyzeRequirementsTask,
+  queueAnalyzeBugsSecurityTask,
+  queueAnalyzeDiagramsTask,
+  queueAnalyzeRefactoringAndTestingTask,
+} from "./analysis/index.js";
 
-// Edit tasks
-export { queueEditCodebaseAnalysisTask } from "./edit-codebase-analysis.js";
-export { queueEditDocumentationTask } from "./edit-documentation.js";
-export { queueEditDiagramsTask } from "./edit-diagrams.js";
-export { queueEditRequirementsTask } from "./edit-requirements.js";
-export { queueEditBugsSecurityTask } from "./edit-bugs-security.js";
-export { queueEditRefactoringAndTestingTask } from "./edit-refactoring-and-testing.js";
+// Editing tasks
+export {
+  queueEditCodebaseAnalysisTask,
+  queueEditDocumentationTask,
+  queueEditDiagramsTask,
+  queueEditRequirementsTask,
+  queueEditBugsSecurityTask,
+  queueEditRefactoringAndTestingTask,
+} from "./editing/index.js";
 
-// Custom codebase task
-export { queueCustomCodebaseTask } from "./custom-codebase-task.js";
+// Implementation tasks
+export {
+  queueImplementFixTask,
+  queueImplementTestTask,
+} from "./implementation/index.js";
 
-// Review changes task
-export { queueReviewChangesTask } from "./review-changes.js";
+// Application tasks
+export { queueApplyRefactoringTask } from "./application/index.js";
+
+// Review tasks
+export { queueReviewChangesTask } from "./review/index.js";
+
+// Custom tasks
+export { queueCustomCodebaseTask } from "./custom/index.js";
 
 // Design tasks
-export { queueDesignBrainstormTask } from "./design-brainstorm.js";
-export { queueDesignPlanAndStyleSystemGenerateTask } from "./design-plan-and-style-system-generate.js";
-export { queueDesignGeneratePageTask } from "./design-generate-page.js";
+export {
+  queueDesignBrainstormTask,
+  queueDesignPlanAndStyleSystemGenerateTask,
+  queueDesignGeneratePageTask,
+} from "./design/index.js";

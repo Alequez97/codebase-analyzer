@@ -4,15 +4,37 @@
  */
 
 export { createTaskHandler } from "./task-handler-builder.js";
-export { editDocumentationHandler } from "./edit-documentation.js";
-export { createEditSectionHandler } from "./edit-section.js";
-export { customCodebaseTaskHandler } from "./custom-codebase-task.js";
-export { analyzeDocumentationHandler } from "./analyze-documentation.js";
-export { analyzeRefactoringAndTestingHandler } from "./analyze-refactoring-and-testing.js";
-export { applyRefactoringHandler } from "./apply-refactoring.js";
-export { implementTestHandler } from "./implement-test.js";
-export { implementFixHandler } from "./implement-fix.js";
-export { defaultAnalysisHandler } from "./default-analysis.js";
+
+// Analysis handlers
+export {
+  analyzeDocumentationHandler,
+  analyzeRefactoringAndTestingHandler,
+  defaultAnalysisHandler,
+} from "./analysis/index.js";
+
+// Editing handlers
+export {
+  editCodebaseAnalysisHandler,
+  editDocumentationHandler,
+  createEditSectionHandler,
+} from "./editing/index.js";
+
+// Implementation handlers
+export {
+  implementFixHandler,
+  implementTestHandler,
+} from "./implementation/index.js";
+
+// Application handlers
+export { applyRefactoringHandler } from "./application/index.js";
+
+// Review handlers
+export { reviewChangesHandler } from "./review/index.js";
+
+// Custom handlers
+export { customCodebaseTaskHandler } from "./custom/index.js";
+
+// Design handlers
 export {
   designBrainstormHandler,
   designPlanAndStyleSystemGenerateHandler,

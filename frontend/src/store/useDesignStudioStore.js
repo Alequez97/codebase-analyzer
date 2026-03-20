@@ -7,9 +7,7 @@ import {
 } from "../api";
 
 function getFirstPreviewUrl(manifest) {
-  return (
-    manifest?.prototypes?.[0]?.url ?? manifest?.components?.[0]?.url ?? null
-  );
+  return manifest?.versions?.[0]?.url ?? null;
 }
 
 function createLocalMessage(role, content) {
@@ -52,8 +50,53 @@ function mergeMessages(existingMessages, incomingMessages) {
   return merged;
 }
 
+function getNextVersionNumber(manifest) {
+  if (!manifest?.versions?.length) {
+    return "v1";
+  }
+
+  // Find the highest version number
+  const versionNumbers = manifest.versions
+    .map((v) => {
+      const match = v.designId.match(/^v(\d+)$/);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .filter((n) => n > 0);
+
+  if (versionNumbers.length === 0) {
+    return "v1";
+  }
+
+  const maxVersion = Math.max(...versionNumbers);
+  return `v${maxVersion + 1}`;
+}
+
+function getLatestVersionId(manifest) {
+  if (!manifest?.versions?.length) {
+    return null;
+  }
+
+  // Get all v1, v2, v3 etc versions
+  const versionEntries = manifest.versions
+    .map((v) => {
+      const match = v.designId.match(/^v(\d+)$/);
+      return match
+        ? { designId: v.designId, number: parseInt(match[1], 10) }
+        : null;
+    })
+    .filter((entry) => entry !== null);
+
+  if (versionEntries.length === 0) {
+    return manifest.versions[0].designId;
+  }
+
+  // Sort by version number descending and return the highest
+  versionEntries.sort((a, b) => b.number - a.number);
+  return versionEntries[0].designId;
+}
+
 export const useDesignStudioStore = create((set, get) => ({
-  manifest: { prototypes: [], components: [] },
+  manifest: { versions: [] },
   loadingManifest: true,
   manifestError: null,
   currentTaskId: null,
@@ -61,6 +104,8 @@ export const useDesignStudioStore = create((set, get) => ({
   currentTaskAgent: null,
   currentTaskModel: null,
   selectedModel: null,
+  designMode: "new", // "new" or "improve"
+  targetDesignId: null, // null for new, or specific version ID for improvement
   prompt: "",
   brainstormResponse: "",
   generationBrief: "",
@@ -76,6 +121,10 @@ export const useDesignStudioStore = create((set, get) => ({
   setSelectedModel: (selectedModel) => set({ selectedModel }),
   setSidebarVisible: (visible) => set({ sidebarVisible: visible }),
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
+  setDesignMode: (mode, targetId = null) =>
+    set({ designMode: mode, targetDesignId: targetId }),
+  getNextVersionId: () => getNextVersionNumber(get().manifest),
+  getLatestVersionId: () => getLatestVersionId(get().manifest),
   clearTaskState: () =>
     set({
       currentTaskId: null,
@@ -118,7 +167,7 @@ export const useDesignStudioStore = create((set, get) => ({
     });
   },
   applyManifestUpdate: (manifest) => {
-    const nextManifest = manifest ?? { prototypes: [], components: [] };
+    const nextManifest = manifest ?? { versions: [] };
     set({
       manifest: nextManifest,
       loadingManifest: false,
@@ -185,9 +234,7 @@ export const useDesignStudioStore = create((set, get) => ({
   },
 
   fetchManifest: async ({ silent = false } = {}) => {
-    const hasManifestData =
-      get().manifest.prototypes.length > 0 ||
-      get().manifest.components.length > 0;
+    const hasManifestData = get().manifest.versions.length > 0;
     set({
       loadingManifest: silent
         ? get().loadingManifest
@@ -198,9 +245,7 @@ export const useDesignStudioStore = create((set, get) => ({
     });
     try {
       const response = await getDesignManifest();
-      return get().applyManifestUpdate(
-        response?.data ?? { prototypes: [], components: [] },
-      );
+      return get().applyManifestUpdate(response?.data ?? { versions: [] });
     } catch (error) {
       const manifestError =
         error?.response?.data?.error || "Failed to load design manifest";
@@ -320,6 +365,18 @@ export const useDesignStudioStore = create((set, get) => ({
       return { success: false, error: "Prompt is required" };
     }
 
+    // Determine which design ID to use
+    const { designMode, targetDesignId } = get();
+    let finalDesignId = designId; // Allow explicit override
+
+    if (!finalDesignId) {
+      if (designMode === "improve" && targetDesignId) {
+        finalDesignId = targetDesignId;
+      } else if (designMode === "new") {
+        finalDesignId = getNextVersionNumber(get().manifest);
+      }
+    }
+
     const previousMessages = get().taskMessages;
     const history = getHistoryMessages(previousMessages);
     const userMessage = createLocalMessage("user", prompt);
@@ -337,7 +394,7 @@ export const useDesignStudioStore = create((set, get) => ({
         prompt,
         brief,
         history,
-        designId,
+        designId: finalDesignId,
         model,
       });
       const taskId = response?.data?.task?.id ?? null;

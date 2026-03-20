@@ -17,23 +17,19 @@ const DESIGN_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
 ]);
 
-function getFirstPreviewUrl(manifest, panel) {
-  if (panel === "components") {
-    return manifest.components[0]?.url ?? manifest.prototypes[0]?.url ?? null;
-  }
-  return manifest.prototypes[0]?.url ?? manifest.components[0]?.url ?? null;
+function getFirstPreviewUrl(manifest) {
+  return manifest.versions[0]?.url ?? null;
 }
 
 function getSelectedDesignId(selectedUrl, manifest) {
   const match = selectedUrl?.match(/^\/design-preview\/([^/]+)\/index\.html$/);
-  if (match?.[1] && match[1] !== "components") {
+  if (match?.[1]) {
     return match[1];
   }
-  return manifest.prototypes[0]?.id ?? null;
+  return manifest.versions[0]?.id ?? null;
 }
 
 export default function DesignPage() {
-  const [panel, setPanel] = useState("prototype");
   const [selectedUrl, setSelectedUrl] = useState(null);
   const [viewport, setViewport] = useState("desktop");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,11 +52,16 @@ export default function DesignPage() {
     selectedModel,
     sidebarVisible,
     sidebarTab,
+    designMode,
+    targetDesignId,
     setPrompt,
     setGenerationBrief,
     setSelectedModel,
     setSidebarVisible,
     setSidebarTab,
+    setDesignMode,
+    getNextVersionId,
+    getLatestVersionId,
     fetchManifest,
     loadLatestTaskAndHistory,
     startBrainstorm,
@@ -85,8 +86,7 @@ export default function DesignPage() {
     [progressByTaskId],
   );
 
-  const hasDesignFiles =
-    manifest.prototypes.length > 0 || manifest.components.length > 0;
+  const hasDesignFiles = manifest.versions.length > 0;
 
   const hasActiveDesignGeneration = allTaskEntries.some(
     (entry) =>
@@ -99,6 +99,9 @@ export default function DesignPage() {
     hasDesignFiles ||
     currentTaskMode === "generate" ||
     hasActiveDesignGeneration;
+
+  const nextVersionId = useMemo(() => getNextVersionId(), [manifest]);
+  const latestVersionId = useMemo(() => getLatestVersionId(), [manifest]);
 
   useEffect(() => {
     let mounted = true;
@@ -123,18 +126,20 @@ export default function DesignPage() {
   }, [fetchManifest, loadLatestTaskAndHistory]);
 
   useEffect(() => {
-    const items = [...manifest.prototypes, ...manifest.components];
-    if (items.length === 0) {
+    if (manifest.versions.length === 0) {
       setSelectedUrl(null);
       return;
     }
 
-    if (selectedUrl && items.some((item) => item.url === selectedUrl)) {
+    if (
+      selectedUrl &&
+      manifest.versions.some((item) => item.url === selectedUrl)
+    ) {
       return;
     }
 
-    setSelectedUrl(getFirstPreviewUrl(manifest, panel));
-  }, [manifest, panel, selectedUrl]);
+    setSelectedUrl(getFirstPreviewUrl(manifest));
+  }, [manifest, selectedUrl]);
 
   useEffect(() => {
     if (!currentTaskId || !currentTask?.message) {
@@ -268,10 +273,7 @@ export default function DesignPage() {
       >
         {sidebarVisible && (
           <DesignWorkspaceSidebar
-            panel={panel}
-            onPanelChange={setPanel}
-            prototypes={manifest.prototypes}
-            components={manifest.components}
+            versions={manifest.versions}
             selectedUrl={selectedUrl}
             onSelectUrl={setSelectedUrl}
             prompt={prompt}
@@ -291,6 +293,10 @@ export default function DesignPage() {
             activeTab={sidebarTab}
             onTabChange={setSidebarTab}
             onClose={() => setSidebarVisible(false)}
+            designMode={designMode}
+            onDesignModeChange={setDesignMode}
+            nextVersionId={nextVersionId}
+            latestVersionId={latestVersionId}
           />
         )}
         <DesignPreviewPane
