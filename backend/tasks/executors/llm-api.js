@@ -118,11 +118,12 @@ export function createLLMAgent(agentConfig) {
 
 /**
  * Execute a task using the LLM API agent.
- * @param {Object} task - The task object
+ * @param {Object} task -The task object
  * @param {AbortSignal} [signal] - Optional cancellation signal
+ * @param {Object} [responseHandler] - Optional response handler for message tools
  * @returns {Promise<Object>} Execution result
  */
-export async function execute(task, signal) {
+export async function execute(task, signal, responseHandler = null) {
   logger.info(`Executing LLM API task: ${task.type}`, {
     component: "LLM-API",
     taskId: task.id,
@@ -143,6 +144,11 @@ export async function execute(task, signal) {
     });
     const agent = createLLMAgent(task.agentConfig);
     taskLogger.info("✅ LLM client initialized", { component: "LLM-API" });
+
+    // Attach response handler to task for use by task-handler-builder
+    if (responseHandler) {
+      task.responseHandler = responseHandler;
+    }
 
     // Get task handler (merged default + specific + instructions)
     const taskHandler = await createTaskHandler(task, taskLogger, agent);

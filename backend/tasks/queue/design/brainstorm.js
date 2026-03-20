@@ -9,12 +9,21 @@ import {
   ensureProgressDirectory,
   getProgressFileRelativePath,
 } from "../../../utils/task-progress.js";
+import { getNextDesignVersion } from "./shared.js";
 
-export async function queueDesignBrainstormTask({ prompt, history = [], model = null }) {
+export async function queueDesignBrainstormTask({
+  prompt,
+  history = [],
+  model = null,
+  designId = null,
+}) {
   const agentConfigResult = getAgentConfig(TASK_TYPES.DESIGN_BRAINSTORM, model);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
+
+  // Determine design version: use provided designId or auto-generate next version
+  const targetDesignId = designId || (await getNextDesignVersion());
 
   const taskId = generateTaskId(TASK_TYPES.DESIGN_BRAINSTORM);
   const task = {
@@ -26,6 +35,7 @@ export async function queueDesignBrainstormTask({ prompt, history = [], model = 
       prompt,
       history,
       userInstruction: prompt,
+      designId: targetDesignId,
     },
     agentConfig: agentConfigResult.agentConfig,
     systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.DESIGN_BRAINSTORM,
@@ -38,3 +48,4 @@ export async function queueDesignBrainstormTask({ prompt, history = [], model = 
 
   return task;
 }
+

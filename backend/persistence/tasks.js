@@ -31,6 +31,12 @@ export async function readTask(taskId) {
     path.join(
       config.paths.targetAnalysis,
       "tasks",
+      TASK_FOLDERS.WAITING_FOR_USER,
+      `${taskId}.json`,
+    ),
+    path.join(
+      config.paths.targetAnalysis,
+      "tasks",
       TASK_FOLDERS.COMPLETED,
       `${taskId}.json`,
     ),
@@ -604,4 +610,145 @@ export async function deleteTask(taskId) {
   }
 
   return { success: true };
+}
+
+/**
+ * Move task from running to waiting_for_user (agent is waiting for user response)
+ * @param {string} taskId - The task ID
+ * @param {Object} waitingMetadata - Metadata about what the agent is waiting for
+ * @returns {Promise<Object>} The waiting task
+ */
+export async function moveToWaitingForUser(taskId, waitingMetadata = {}) {
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
+  const waitingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.WAITING_FOR_USER,
+    `${taskId}.json`,
+  );
+
+  const content = await fs.readFile(runningPath, "utf-8");
+  const task = JSON.parse(content);
+  task.status = TASK_STATUS.WAITING_FOR_USER;
+  task.waitingSince = new Date().toISOString();
+  task.waitingMetadata = {
+    ...waitingMetadata,
+    timestamp: new Date().toISOString(),
+  };
+
+  await fs.mkdir(path.dirname(waitingPath), { recursive: true });
+  await fs.writeFile(waitingPath, JSON.stringify(task, null, 2), "utf-8");
+  await fs.unlink(runningPath);
+
+  emitSocketEvent(SOCKET_EVENTS.TASK_WAITING_FOR_USER, {
+    taskId: task.id,
+    type: task.type,
+    domainId: task.params?.domainId,
+    waitingMetadata: task.waitingMetadata,
+    timestamp: new Date().toISOString(),
+  });
+
+  return task;
+}
+
+/**
+ * Resume a task from waiting_for_user back to running
+ * @param {string} taskId - The task ID
+ * @param {string} userResponse - The user's response
+ * @returns {Promise<Object>} The resumed task
+ */
+export async function resumeFromWaitingForUser(taskId, userResponse) {
+  const waitingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.WAITING_FOR_USER,
+    `${taskId}.json`,
+  );
+  const runningPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.RUNNING,
+    `${taskId}.json`,
+  );
+
+  const content = await fs.readFile(waitingPath, "utf-8");
+  const task = JSON.parse(content);
+  task.status = TASK_STATUS.RUNNING;
+  task.resumedAt = new Date().toISOString();
+
+  // Store the user response in task metadata for reference
+  if (!task.userResponses) {
+    task.userResponses = [];
+  }
+  task.userResponses.push({
+    messageId: task.waitingMetadata?.messageId,
+    message: task.waitingMetadata?.message,
+    response: userResponse,
+    respondedAt: new Date().toISOString(),
+  });
+
+  // Clear waiting metadata
+  delete task.waitingSince;
+  delete task.waitingMetadata;
+
+  await fs.mkdir(path.dirname(runningPath), { recursive: true });
+  await fs.writeFile(runningPath, JSON.stringify(task, null, 2), "utf-8");
+  await fs.unlink(waitingPath);
+
+  emitSocketEvent(SOCKET_EVENTS.TASK_RESUMED, {
+    taskId: task.id,
+    type: task.type,
+    domainId: task.params?.domainId,
+    timestamp: new Date().toISOString(),
+  });
+
+  return task;
+}
+
+/**
+ * Update task metadata in place without moving it
+ * Useful for storing state (e.g., design version) during execution
+ * @param {string} taskId - The task ID
+ * @param {Object} updates - Fields to update in task.params or root
+ * @returns {Promise<Object>} The updated task
+ */
+export async function updateTask(taskId, updates) {
+  const folders = Object.values(TASK_FOLDERS);
+  let taskPath = null;
+  let task = null;
+
+  // Find the task in any folder
+  for (const folder of folders) {
+    const filePath = path.join(
+      config.paths.targetAnalysis,
+      "tasks",
+      folder,
+      `${taskId}.json`,
+    );
+    try {
+      const content = await fs.readFile(filePath, "utf-8");
+      task = JSON.parse(content);
+      taskPath = filePath;
+      break;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+
+  if (!task) {
+    throw new Error(`Task ${taskId} not found`);
+  }
+
+  // Apply updates
+  Object.assign(task, updates);
+
+  // Write back to the same location
+  await fs.writeFile(taskPath, JSON.stringify(task, null, 2), "utf-8");
+
+  return task;
 }

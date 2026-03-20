@@ -57,9 +57,10 @@ export function designBrainstormHandler(task, taskLogger) {
         return;
       }
 
-      // Emit brainstorm messages to chat
-      emitSocketEvent(SOCKET_EVENTS.DESIGN_CHAT_MESSAGE, {
+      // Emit AI message to chat UI (generic event, routed by taskType on frontend)
+      emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE, {
         taskId: task.id,
+        taskType: task.type,
         role,
         content,
         timestamp: new Date().toISOString(),

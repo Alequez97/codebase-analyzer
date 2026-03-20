@@ -44,7 +44,9 @@ export const SOCKET_EVENTS = {
   BUGS_SECURITY_UPDATED: "bugs-security:updated",
   REFACTORING_AND_TESTING_UPDATED: "refactoring-and-testing:updated",
   DESIGN_MANIFEST_UPDATED: "design:manifest-updated",
-  DESIGN_CHAT_MESSAGE: "design:chat-message",
+
+  // Generic task message events (routed by taskType on frontend)
+  TASK_MESSAGE: "task:message",
 
   // Generic AI chat message event - used by all section chat tasks
   // chatId links the message to the originating task
@@ -66,4 +68,9 @@ export const SOCKET_EVENTS = {
   // Review changes task log
   LOG_REVIEW_CHANGES: "log:review-changes",
 
+  // Task-user conversation events (generic, routed by taskType on frontend)
+  TASK_MESSAGE_TO_USER: "task:message-to-user",
+  TASK_MESSAGE_FROM_USER: "task:message-from-user",
+  TASK_WAITING_FOR_USER: "task:waiting-for-user",
+  TASK_RESUMED: "task:resumed",
 };

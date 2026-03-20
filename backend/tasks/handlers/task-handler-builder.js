@@ -225,6 +225,11 @@ export async function createTaskHandler(task, taskLogger, agent) {
   } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
     overrides = customCodebaseTaskHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_BRAINSTORM) {
+    // Enable message tools for conversational brainstorming
+    if (agent && task.responseHandler) {
+      agent.enableMessageTools(task.id, task.responseHandler);
+      taskLogger.info("Message tools enabled for conversational brainstorming");
+    }
     overrides = designBrainstormHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
     if (agent) {

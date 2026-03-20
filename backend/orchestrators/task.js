@@ -5,6 +5,10 @@ import * as tasksPersistence from "../persistence/tasks.js";
 
 /** AbortControllers for in-flight tasks, keyed by taskId */
 const runningTaskControllers = new Map();
+
+/** Pending user response handlers, keyed by taskId -> { resolve, reject, messageId } */
+const pendingUserResponses = new Map();
+
 import { appendRevision } from "../persistence/utils.js";
 import { getAgent } from "../tasks/executors/index.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
@@ -219,6 +223,9 @@ export async function executeTask(taskId) {
   const controller = new AbortController();
   runningTaskControllers.set(taskId, controller);
 
+  // Create response handler for tasks that support user interaction
+  const responseHandler = createUserResponseHandler(taskId);
+
   let result;
   try {
     const agentResult = await getAgent(task.agentConfig?.agent);
@@ -247,7 +254,11 @@ export async function executeTask(taskId) {
       };
     }
 
-    result = await agentResult.agent.execute(task, controller.signal);
+    result = await agentResult.agent.execute(
+      task,
+      controller.signal,
+      responseHandler,
+    );
   } catch (error) {
     // Task was cancelled — skip moveToFailed/TASK_FAILED since the task file
     // was already removed by deleteTask() before the abort was triggered.
@@ -446,4 +457,106 @@ export async function recoverOrphanedTasks() {
     });
     return { recovered: 0, tasks: [], error: error.message };
   }
+}
+
+/**
+ * Create a response handler for agent message tools.
+ * This allows the agent to pause and wait for user responses.
+ * @param {string} taskId - The task ID
+ * @returns {Object} Response handler with waitForResponse method
+ */
+export function createUserResponseHandler(taskId) {
+  return {
+    /**
+     * Wait for user response (blocks until response arrives or timeout)
+     * @param {string} messageId - The message ID we're waiting for
+     * @returns {Promise<string>} The user's response
+     */
+    async waitForResponse(messageId) {
+      logger.info(`Task ${taskId} waiting for user response`, {
+        component: "TaskOrchestrator",
+        messageId,
+      });
+
+      // Move task to WAITING_FOR_USER status
+      await tasksPersistence.moveToWaitingForUser(taskId, {
+        messageId,
+        waitingFor: "user_response",
+      });
+
+      // Create a promise that will be resolved when user responds
+      return new Promise((resolve, reject) => {
+        // Store the resolver
+        pendingUserResponses.set(taskId, { resolve, reject, messageId });
+
+        // Timeout after 10 minutes (adjustable based on use case)
+        const timeout = setTimeout(() => {
+          if (pendingUserResponses.has(taskId)) {
+            pendingUserResponses.delete(taskId);
+            reject(
+              new Error(
+                "User response timeout (10 minutes). Task remains paused and can be resumed later.",
+              ),
+            );
+          }
+        }, 600000); // 10 minutes
+
+        // Clean up timeout when promise resolves/rejects
+        const originalResolve = resolve;
+        const originalReject = reject;
+
+        const wrappedResolve = (value) => {
+          clearTimeout(timeout);
+          originalResolve(value);
+        };
+
+        const wrappedReject = (error) => {
+          clearTimeout(timeout);
+          originalReject(error);
+        };
+
+        pendingUserResponses.set(taskId, {
+          resolve: wrappedResolve,
+          reject: wrappedReject,
+          messageId,
+        });
+      });
+    },
+  };
+}
+
+/**
+ * Provide user response to a waiting task and resume execution.
+ * This is called by the API endpoint when user responds.
+ * @param {string} taskId - The task ID
+ * @param {string} response - The user's response
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function provideUserResponse(taskId, response) {
+  const pending = pendingUserResponses.get(taskId);
+
+  if (!pending) {
+    logger.warn(`No pending response handler for task ${taskId}`, {
+      component: "TaskOrchestrator",
+    });
+    return {
+      success: false,
+      error: "No pending response request for this task",
+    };
+  }
+
+  logger.info(`User response received for task ${taskId}`, {
+    component: "TaskOrchestrator",
+    messageId: pending.messageId,
+    responseLength: response?.length,
+  });
+
+  // Resume task from waiting_for_user back to running
+  await tasksPersistence.resumeFromWaitingForUser(taskId, response);
+
+  // Resolve the promise that agent is waiting on
+  pending.resolve(response);
+  pendingUserResponses.delete(taskId);
+
+  return { success: true };
 }

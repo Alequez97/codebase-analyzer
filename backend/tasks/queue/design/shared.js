@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs/promises";
 import config from "../../../config.js";
 
 export function slugifyDesignId(value) {
@@ -9,6 +10,38 @@ export function slugifyDesignId(value) {
       .replace(/^-+|-+$/g, "")
       .slice(0, 64) || "new-concept"
   );
+}
+
+/**
+ * Get the next available design version (v1, v2, v3, etc.)
+ * Scans .code-analysis/design/ for existing versions
+ * @returns {Promise<string>} Next version ID (e.g., "v2")
+ */
+export async function getNextDesignVersion() {
+  const designRoot = path.join(
+    config.target.directory,
+    ".code-analysis",
+    "design",
+  );
+
+  try {
+    const entries = await fs.readdir(designRoot, { withFileTypes: true });
+    const versions = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => /^v\d+$/.test(name)) // Match v1, v2, v3, etc.
+      .map((name) => parseInt(name.substring(1))) // Extract number
+      .filter((num) => !isNaN(num));
+
+    const maxVersion = versions.length > 0 ? Math.max(...versions) : 0;
+    return `v${maxVersion + 1}`;
+  } catch (error) {
+    // If directory doesn't exist or error reading, start with v1
+    if (error.code === "ENOENT") {
+      return "v1";
+    }
+    throw error;
+  }
 }
 
 export function getDesignRootRelativePath() {

@@ -226,4 +226,52 @@ router.delete("/:id/chat-history", async (req, res) => {
   }
 });
 
+/**
+ * Provide user response to a waiting task
+ * POST /tasks/:id/respond
+ *
+ * This endpoint is called when a user responds to a message_user tool call.
+ * It resumes the task execution with the user's response.
+ */
+router.post("/:id/respond", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { response } = req.body;
+
+    if (!response || typeof response !== "string") {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "response string is required",
+      });
+    }
+
+    logger.info(`User response received for task ${id}`, {
+      component: "API",
+      responseLength: response.length,
+    });
+
+    const result = await taskOrchestrator.provideUserResponse(
+      id,
+      response.trim(),
+    );
+
+    if (!result.success) {
+      return res.status(404).json({
+        error: result.error || "No pending response request for this task",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Response delivered, task resumed",
+    });
+  } catch (error) {
+    logger.error(`Error providing user response for task ${req.params.id}`, {
+      error,
+      component: "API",
+    });
+    res.status(500).json({ error: "Failed to deliver user response" });
+  }
+});
+
 export default router;

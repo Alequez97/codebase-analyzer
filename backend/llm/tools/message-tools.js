@@ -1,0 +1,159 @@
+import { emitSocketEvent } from "../../utils/socket-emitter.js";
+import { SOCKET_EVENTS } from "../../constants/socket-events.js";
+import * as logger from "../../utils/logger.js";
+import {
+  TOOL_ERROR_CODES,
+  TOOL_ERROR_TYPES,
+} from "../../constants/tool-error-codes.js";
+
+/**
+ * Message tools that LLM can use to communicate with users
+ */
+
+/**
+ * Tool definitions for LLM
+ */
+export const MESSAGE_TOOLS = [
+  {
+    name: "message_user",
+    description:
+      "Send a message or question to the user and wait for their response. Use this to present options, clarify requirements, or gather feedback before proceeding. The user's response will be returned as the tool result. This is blocking - the agent will pause until the user responds.",
+    parameters: {
+      message: {
+        type: "string",
+        description:
+          "The message or question to send to the user. Be clear and specific. If presenting options, format them clearly (e.g., bullet points or numbered list).",
+      },
+      expectResponse: {
+        type: "boolean",
+        description:
+          "If true (default), wait for user response. If false, just notify without blocking.",
+      },
+    },
+    required: ["message"],
+  },
+];
+
+/**
+ * MessageToolExecutor - Handles user communication tools
+ */
+export class MessageToolExecutor {
+  /**
+   * @param {string} taskId - Current task ID (for correlation)
+   * @param {Object} responseHandler - Handler for waiting for user responses
+   * @param {Function} responseHandler.waitForResponse - Function that returns a promise resolving to user's response
+   */
+  constructor(taskId, responseHandler) {
+    this.taskId = taskId;
+    this.responseHandler = responseHandler;
+  }
+
+  /**
+   * Execute a message tool
+   * @param {string} toolName - Name of the tool
+   * @param {Object} args - Tool arguments
+   * @returns {Promise<string>} Tool result
+   */
+  async execute(toolName, args) {
+    if (toolName !== "message_user") {
+      const error = new Error(`Unknown message tool: ${toolName}`);
+      error.code = TOOL_ERROR_CODES.UNKNOWN_TOOL;
+      error.type = TOOL_ERROR_TYPES.VALIDATION;
+      throw error;
+    }
+
+    return this.messageUser(args);
+  }
+
+  /**
+   * Send a message to the user (optionally wait for response)
+   * @private
+   */
+  async messageUser(args) {
+    const { message, expectResponse = true } = args;
+
+    if (!message || typeof message !== "string" || !message.trim()) {
+      const error = new Error(
+        "message parameter is required and must be non-empty",
+      );
+      error.code = TOOL_ERROR_CODES.INVALID_ARGUMENTS;
+      error.type = TOOL_ERROR_TYPES.VALIDATION;
+      throw error;
+    }
+
+    logger.info("Agent sending message to user", {
+      component: "MessageToolExecutor",
+      taskId: this.taskId,
+      expectResponse,
+      messageLength: message.length,
+    });
+
+    const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    // Emit message to frontend via socket
+    emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE_TO_USER, {
+      taskId: this.taskId,
+      messageId,
+      message: message.trim(),
+      expectResponse,
+      timestamp: new Date().toISOString(),
+    });
+
+    // If not expecting a response, return immediately
+    if (!expectResponse) {
+      logger.debug("Message sent (no response expected)", {
+        component: "MessageToolExecutor",
+        taskId: this.taskId,
+      });
+
+      return JSON.stringify({
+        success: true,
+        notified: true,
+        message: "Message sent to user (no response expected)",
+      });
+    }
+
+    // Wait for user response
+    logger.info("Waiting for user response...", {
+      component: "MessageToolExecutor",
+      taskId: this.taskId,
+      messageId,
+    });
+
+    try {
+      const userResponse =
+        await this.responseHandler.waitForResponse(messageId);
+
+      logger.info("User response received", {
+        component: "MessageToolExecutor",
+        taskId: this.taskId,
+        messageId,
+        responseLength: userResponse?.length,
+      });
+
+      // Return the user's response as the tool result
+      // The LLM will see this in the next iteration
+      return JSON.stringify({
+        success: true,
+        userResponse: userResponse.trim(),
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error("Error waiting for user response", {
+        component: "MessageToolExecutor",
+        taskId: this.taskId,
+        messageId,
+        error: error.message,
+      });
+
+      // If timeout or other error, return an error result
+      // The LLM can decide how to proceed
+      return JSON.stringify({
+        success: false,
+        error: error.message || "Failed to receive user response",
+        message:
+          "User did not respond in time. Consider proceeding with defaults or asking again differently.",
+      });
+    }
+  }
+}

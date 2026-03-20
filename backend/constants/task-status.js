@@ -4,6 +4,7 @@
 export const TASK_STATUS = {
   PENDING: "pending",
   RUNNING: "running",
+  WAITING_FOR_USER: "waiting_for_user",
   COMPLETED: "completed",
   FAILED: "failed",
   CANCELED: "canceled",
@@ -15,6 +16,7 @@ export const TASK_STATUS = {
 export const TASK_FOLDERS = {
   PENDING: "pending",
   RUNNING: "running",
+  WAITING_FOR_USER: "waiting_for_user",
   COMPLETED: "completed",
   FAILED: "failed",
   CANCELED: "canceled",

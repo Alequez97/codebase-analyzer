@@ -15,6 +15,10 @@ import {
   WebFetchToolExecutor,
   WEB_FETCH_TOOLS,
 } from "../llm/tools/web-fetch-tools.js";
+import {
+  MessageToolExecutor,
+  MESSAGE_TOOLS,
+} from "../llm/tools/message-tools.js";
 import { PROGRESS_STAGES } from "../constants/progress-stages.js";
 import * as logger from "../utils/logger.js";
 
@@ -46,7 +50,8 @@ export class LLMAgent {
     this.commandToolExecutor = null; // Enabled per-task via enableCommandTools()
     this.delegationToolExecutor = null; // Enabled per-task via enableDelegationTools()
     this.webSearchToolExecutor = null; // Enabled per-task via enableWebSearchTools()
-    this.webFetchToolExecutor = null;  // Enabled per-task via enableWebFetchTools()
+    this.webFetchToolExecutor = null; // Enabled per-task via enableWebFetchTools()
+    this.messageToolExecutor = null; // Enabled per-task via enableMessageTools()
     this.conversationLog = [];
   }
 
@@ -113,6 +118,21 @@ export class LLMAgent {
     });
   }
 
+  /**Enable message tools for this agent session (for conversational agents).
+   * Must be called before run() to take effect.
+   *
+   * @param {string} taskId - ID of the current task (for correlation)
+   * @param {Object} responseHandler - Handler for waiting for user responses
+   * @param {Function} responseHandler.waitForResponse - Async function that waits for user response
+   */
+  enableMessageTools(taskId, responseHandler) {
+    this.messageToolExecutor = new MessageToolExecutor(taskId, responseHandler);
+    logger.info("Message tools enabled for agent session", {
+      component: "LLMAgent",
+      taskId,
+    });
+  }
+
   /**
    * Get the full list of tools available in this session
    * @private
@@ -122,6 +142,7 @@ export class LLMAgent {
     if (this.commandToolExecutor) tools.push(...COMMAND_TOOLS);
     if (this.delegationToolExecutor) tools.push(...DELEGATION_TOOLS);
     if (this.webSearchToolExecutor) tools.push(...WEB_SEARCH_TOOLS);
+    if (this.messageToolExecutor) tools.push(...MESSAGE_TOOLS);
     if (this.webFetchToolExecutor) tools.push(...WEB_FETCH_TOOLS);
     return tools;
   }
@@ -396,8 +417,12 @@ export class LLMAgent {
         toolDescription = `Running: ${toolCall.arguments?.command || "command"}`;
       } else if (toolCall.name === "delegate_task") {
         const delType = toolCall.arguments?.type || "task";
-        const delName = toolCall.arguments?.params?.competitorName || toolCall.arguments?.params?.domainId;
-        toolDescription = delName ? `Delegating ${delType}: ${delName}` : `Delegating ${delType}`;
+        const delName =
+          toolCall.arguments?.params?.competitorName ||
+          toolCall.arguments?.params?.domainId;
+        toolDescription = delName
+          ? `Delegating ${delType}: ${delName}`
+          : `Delegating ${delType}`;
       }
 
       logger.debug(`Executing tool: ${toolDescription}`, {
@@ -432,6 +457,13 @@ export class LLMAgent {
           !isWebSearchTool &&
           this.webFetchToolExecutor &&
           WEB_FETCH_TOOLS.some((t) => t.name === toolCall.name);
+        const isMessageTool =
+          !isDelegationTool &&
+          !isCommandTool &&
+          !isWebSearchTool &&
+          !isWebFetchTool &&
+          this.messageToolExecutor &&
+          MESSAGE_TOOLS.some((t) => t.name === toolCall.name);
 
         let result;
         if (isDelegationTool) {
@@ -447,6 +479,11 @@ export class LLMAgent {
           );
         } else if (isWebFetchTool) {
           result = await this.webFetchToolExecutor.executeTool(
+            toolCall.name,
+            toolCall.arguments,
+          );
+        } else if (isMessageTool) {
+          result = await this.messageToolExecutor.execute(
             toolCall.name,
             toolCall.arguments,
           );
