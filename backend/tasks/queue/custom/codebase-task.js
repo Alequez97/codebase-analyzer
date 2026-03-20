@@ -4,7 +4,10 @@ import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
 import { generateTaskId } from "../../utils.js";
-import { initChatHistory } from "../../../utils/chat-history.js";
+import {
+  initChatHistory,
+  appendChatMessage,
+} from "../../../utils/chat-history.js";
 import {
   getProgressFileRelativePath,
   ensureProgressDirectory,
@@ -56,6 +59,12 @@ export async function queueCustomCodebaseTask({
   await initChatHistory(taskId, {
     taskType: TASK_TYPES.CUSTOM_CODEBASE_TASK,
     domainId,
+  });
+
+  // Store the user's initial message
+  await appendChatMessage(taskId, {
+    role: "user",
+    content: userInstruction.trim(),
   });
 
   await ensureProgressDirectory(taskId);

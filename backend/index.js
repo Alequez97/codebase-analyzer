@@ -95,13 +95,23 @@ app.use("/api/design", designRoutes);
 
 // ==================== Design Preview Static Files ====================
 
-const designDir = path.join(config.target.directory, ".code-analysis", "design");
+const designDir = path.join(
+  config.target.directory,
+  ".code-analysis",
+  "design",
+);
 app.use("/design-preview", express.static(designDir));
 
 // ==================== Error Handler ====================
 
-app.use((err, req, res) => {
-  logger.error("Unhandled error", { error: err, component: "API" });
+app.use((err, req, res, next) => {
+  logger.error("Unhandled error", {
+    error: err.message,
+    stack: err.stack,
+    name: err.name,
+    code: err.code,
+    component: "API",
+  });
   res.status(500).json({
     error: "Internal server error",
     message: err.message,
@@ -145,5 +155,4 @@ httpServer.listen(config.port, async () => {
 
   // Start the queue processor — picks up recovered + any pre-existing pending tasks
   startQueueProcessor();
-
 });

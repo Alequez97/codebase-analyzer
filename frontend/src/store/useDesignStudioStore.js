@@ -221,14 +221,28 @@ export const useDesignStudioStore = create((set, get) => ({
   completeCurrentTask: (taskId) => {
     set((state) =>
       state.currentTaskId === taskId
-        ? { loadingTaskMessages: false, taskError: null }
+        ? {
+            currentTaskId: null,
+            currentTaskMode: null,
+            currentTaskAgent: null,
+            currentTaskModel: null,
+            loadingTaskMessages: false,
+            taskError: null,
+          }
         : state,
     );
   },
   failCurrentTask: (taskId, taskError) => {
     set((state) =>
       state.currentTaskId === taskId
-        ? { loadingTaskMessages: false, taskError }
+        ? {
+            currentTaskId: null,
+            currentTaskMode: null,
+            currentTaskAgent: null,
+            currentTaskModel: null,
+            loadingTaskMessages: false,
+            taskError,
+          }
         : state,
     );
   },
@@ -286,11 +300,20 @@ export const useDesignStudioStore = create((set, get) => ({
         .join("\n\n")
         .trim();
 
+      // Only set as current task if it's actually running or pending
+      // If the task is completed/failed, just restore the conversation history
+      const isActiveTask =
+        task.status === "running" || task.status === "pending";
+
       set({
-        currentTaskId: task.id,
-        currentTaskMode: taskMode,
-        currentTaskAgent: task.agentConfig?.agent ?? null,
-        currentTaskModel: task.agentConfig?.model ?? null,
+        currentTaskId: isActiveTask ? task.id : null,
+        currentTaskMode: isActiveTask ? taskMode : null,
+        currentTaskAgent: isActiveTask
+          ? (task.agentConfig?.agent ?? null)
+          : null,
+        currentTaskModel: isActiveTask
+          ? (task.agentConfig?.model ?? null)
+          : null,
         taskMessages: messages,
         brainstormResponse: taskMode === "brainstorm" ? brainstormResponse : "",
         generationBrief:
@@ -300,7 +323,12 @@ export const useDesignStudioStore = create((set, get) => ({
         loadingTaskMessages: false,
       });
 
-      return { success: true, hasTask: true, taskId: task.id };
+      return {
+        success: true,
+        hasTask: true,
+        taskId: task.id,
+        isActive: isActiveTask,
+      };
     } catch (error) {
       console.error("Failed to load latest design task:", error);
       return { success: false, error: error.message };

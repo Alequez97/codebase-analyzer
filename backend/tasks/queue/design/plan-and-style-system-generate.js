@@ -4,7 +4,10 @@ import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
 import { generateTaskId } from "../../utils.js";
-import { initChatHistory } from "../../../utils/chat-history.js";
+import {
+  initChatHistory,
+  appendChatMessage,
+} from "../../../utils/chat-history.js";
 import {
   ensureProgressDirectory,
   getProgressFileRelativePath,
@@ -63,6 +66,13 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
   await initChatHistory(taskId, {
     taskType: TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
   });
+
+  // Store the user's initial message
+  await appendChatMessage(taskId, {
+    role: "user",
+    content: prompt.trim(),
+  });
+
   await ensureProgressDirectory(taskId);
   await tasksPersistence.enqueueTask(task);
 

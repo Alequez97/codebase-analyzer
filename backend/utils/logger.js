@@ -30,8 +30,17 @@ export function configure(options) {
 
 /**
  * Serialize Error objects to plain objects for JSON stringification
+ * Uses a WeakSet to track visited objects and prevent circular references
+ * Includes depth limiting to prevent excessive recursion
  */
-function serializeErrors(obj) {
+function serializeErrors(obj, visited = new WeakSet(), depth = 0) {
+  const MAX_DEPTH = 10;
+
+  // Prevent excessive depth
+  if (depth > MAX_DEPTH) {
+    return "[Max Depth Reached]";
+  }
+
   if (obj instanceof Error) {
     return {
       message: obj.message,
@@ -42,10 +51,18 @@ function serializeErrors(obj) {
   }
 
   if (obj && typeof obj === "object") {
+    // Check for circular reference
+    if (visited.has(obj)) {
+      return "[Circular Reference]";
+    }
+
+    // Mark this object as visited
+    visited.add(obj);
+
     const serialized = {};
     for (const key in obj) {
       if (Object.hasOwn(obj, key)) {
-        serialized[key] = serializeErrors(obj[key]);
+        serialized[key] = serializeErrors(obj[key], visited, depth + 1);
       }
     }
     return serialized;

@@ -214,14 +214,14 @@ const config = {
     },
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.DEEPSEEK_REASONER,
+      model: MODELS.CLAUDE_SONNET_4_6,
       maxTokens: 64000,
       maxIterations: 200,
-      reasoningEffort: REASONING_EFFORT.HIGH,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_MINI,
+      model: MODELS.CLAUDE_SONNET_4_6,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,

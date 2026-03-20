@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Button,
   HStack,
@@ -54,8 +53,6 @@ export function DesignWorkspaceSidebar({
   const isBrainstorming = currentTaskMode === "brainstorm" && isWorking;
   const isGenerating = currentTaskMode === "generate" && isWorking;
   const hasConversationHistory = conversationMessages.length > 0;
-  const latestEvent =
-    taskEvents.length > 0 ? taskEvents[taskEvents.length - 1] : null;
 
   return (
     <Box
@@ -126,17 +123,6 @@ export function DesignWorkspaceSidebar({
             >
               Conversation
             </Text>
-            {isWorking && (
-              <Badge
-                bg="orange.100"
-                color="orange.800"
-                borderRadius="full"
-                px={3}
-                py={1}
-              >
-                {isBrainstorming ? "Brainstorming" : "Generating"}
-              </Badge>
-            )}
           </HStack>
 
           {/* Conversation Box - Expands to fill space */}
@@ -241,36 +227,6 @@ export function DesignWorkspaceSidebar({
                   </Button>
                 </HStack>
               </VStack>
-            )}
-
-            {isWorking && latestEvent?.message && (
-              <Box
-                borderRadius="22px"
-                borderWidth="1px"
-                borderColor="orange.200"
-                bg="orange.50"
-                px={3}
-                py={3}
-              >
-                <HStack gap={2} mb={1}>
-                  <Badge
-                    bg="orange.100"
-                    color="orange.800"
-                    borderRadius="full"
-                    px={2}
-                    py={0.5}
-                    fontSize="10px"
-                    fontWeight="800"
-                    textTransform="uppercase"
-                    letterSpacing="0.12em"
-                  >
-                    {isBrainstorming ? "Brainstorming" : "Generating"}
-                  </Badge>
-                </HStack>
-                <Text fontSize="sm" color="gray.700" lineHeight="1.7">
-                  {latestEvent.message}
-                </Text>
-              </Box>
             )}
 
             <Textarea
