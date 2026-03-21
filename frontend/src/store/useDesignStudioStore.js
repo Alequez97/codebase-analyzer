@@ -110,7 +110,8 @@ export const useDesignStudioStore = create((set, get) => ({
   prompt: "",
   brainstormResponse: "",
   generationBrief: "",
-  taskMessages: [],
+  brainstormMessages: [], // Messages from brainstorm flow only
+  generationMessages: [], // Messages from generation flow only
   taskEvents: [],
   loadingTaskMessages: false,
   taskError: null,
@@ -119,6 +120,14 @@ export const useDesignStudioStore = create((set, get) => ({
   pendingQuestion: null, // { messageId, message, taskId } | null
   isWaitingForUser: false,
   brainstormComplete: false, // true once DESIGN_BRAINSTORM_COMPLETE is received
+
+  // Computed getter: returns the right messages based on current mode
+  getTaskMessages: () => {
+    const state = get();
+    return state.currentTaskMode === "brainstorm"
+      ? state.brainstormMessages
+      : state.generationMessages;
+  },
 
   setBrainstormComplete: (designId) =>
     set({
@@ -147,17 +156,27 @@ export const useDesignStudioStore = create((set, get) => ({
   clearPendingQuestion: () =>
     set({ pendingQuestion: null, isWaitingForUser: false }),
   sendUserResponse: async (response) => {
-    const { pendingQuestion } = get();
+    const { pendingQuestion, currentTaskMode } = get();
     if (!pendingQuestion) {
       return { success: false, error: "No pending question" };
     }
 
     const userMessage = createLocalMessage("user", response);
-    set((state) => ({
-      taskMessages: [...state.taskMessages, userMessage],
-      pendingQuestion: null,
-      isWaitingForUser: false,
-    }));
+
+    // Add to the appropriate message array based on mode
+    if (currentTaskMode === "brainstorm") {
+      set((state) => ({
+        brainstormMessages: [...state.brainstormMessages, userMessage],
+        pendingQuestion: null,
+        isWaitingForUser: false,
+      }));
+    } else {
+      set((state) => ({
+        generationMessages: [...state.generationMessages, userMessage],
+        pendingQuestion: null,
+        isWaitingForUser: false,
+      }));
+    }
 
     try {
       await respondToTask(pendingQuestion.taskId, response);
@@ -176,7 +195,8 @@ export const useDesignStudioStore = create((set, get) => ({
     set({ designMode: mode, targetDesignId: targetId }),
   clearBrainstorm: () =>
     set({
-      taskMessages: [],
+      brainstormMessages: [],
+      generationMessages: [],
       brainstormResponse: "",
       generationBrief: "",
       pendingQuestion: null,
@@ -254,7 +274,12 @@ export const useDesignStudioStore = create((set, get) => ({
         return state;
       }
 
-      const taskMessages = mergeMessages(state.taskMessages, [
+      const isBrainstormMode = state.currentTaskMode === "brainstorm";
+      const existingMessages = isBrainstormMode
+        ? state.brainstormMessages
+        : state.generationMessages;
+
+      const newMessages = mergeMessages(existingMessages, [
         {
           id: `socket-${taskId}-${Date.now()}-${Math.random()
             .toString(36)
@@ -264,20 +289,23 @@ export const useDesignStudioStore = create((set, get) => ({
           timestamp: timestamp ?? new Date().toISOString(),
         },
       ]);
-      const brainstormResponse = taskMessages
+
+      const brainstormResponse = newMessages
         .filter((message) => message.role === "assistant")
         .map((message) => message.content)
         .join("\n\n")
         .trim();
 
       return {
-        taskMessages,
+        ...(isBrainstormMode
+          ? { brainstormMessages: newMessages }
+          : { generationMessages: newMessages }),
         brainstormResponse:
-          state.currentTaskMode === "brainstorm" && brainstormResponse
+          isBrainstormMode && brainstormResponse
             ? brainstormResponse
             : state.brainstormResponse,
         generationBrief:
-          state.currentTaskMode === "brainstorm" && brainstormResponse
+          isBrainstormMode && brainstormResponse
             ? brainstormResponse
             : state.generationBrief,
         loadingTaskMessages: false,
@@ -387,7 +415,10 @@ export const useDesignStudioStore = create((set, get) => ({
         currentTaskModel: isActiveTask
           ? (task.agentConfig?.model ?? null)
           : null,
-        taskMessages: messages,
+        // Store messages in the appropriate array based on task mode
+        ...(taskMode === "brainstorm"
+          ? { brainstormMessages: messages }
+          : { generationMessages: messages }),
         brainstormResponse: taskMode === "brainstorm" ? brainstormResponse : "",
         generationBrief:
           taskMode === "brainstorm"
@@ -418,7 +449,7 @@ export const useDesignStudioStore = create((set, get) => ({
       return { success: false, error: "Prompt is required" };
     }
 
-    const previousMessages = get().taskMessages;
+    const previousMessages = get().brainstormMessages;
     const history = getHistoryMessages(previousMessages);
     const userMessage = createLocalMessage("user", prompt);
     const model = get().selectedModel;
@@ -427,7 +458,7 @@ export const useDesignStudioStore = create((set, get) => ({
       taskError: null,
       brainstormResponse: "",
       generationBrief: "",
-      taskMessages: [...previousMessages, userMessage],
+      brainstormMessages: [...previousMessages, userMessage],
       taskEvents: [],
       loadingTaskMessages: true,
     });
@@ -455,7 +486,7 @@ export const useDesignStudioStore = create((set, get) => ({
       set({
         taskError,
         loadingTaskMessages: false,
-        taskMessages: previousMessages,
+        brainstormMessages: previousMessages,
       });
       return { success: false, error: taskError };
     }
@@ -485,8 +516,11 @@ export const useDesignStudioStore = create((set, get) => ({
       }
     }
 
-    const previousMessages = get().taskMessages;
+    // When starting generation, we use generation messages only
+    // Do NOT carry over brainstorm messages into the generation chat
+    const previousMessages = get().generationMessages;
     const history = getHistoryMessages(previousMessages);
+
     // When coming from brainstorm, prompt is cleared — use brief as the effective prompt
     const effectivePrompt = prompt || brief.slice(0, 200).replace(/\n/g, " ");
     const userMessage = createLocalMessage("user", effectivePrompt);
@@ -494,7 +528,8 @@ export const useDesignStudioStore = create((set, get) => ({
 
     set({
       taskError: null,
-      taskMessages: [...previousMessages, userMessage],
+      // Start with fresh generation messages (don't include brainstorm)
+      generationMessages: [...previousMessages, userMessage],
       taskEvents: [],
       loadingTaskMessages: true,
     });
@@ -528,7 +563,7 @@ export const useDesignStudioStore = create((set, get) => ({
       set({
         taskError,
         loadingTaskMessages: false,
-        taskMessages: previousMessages,
+        generationMessages: previousMessages,
       });
       return { success: false, error: taskError };
     }

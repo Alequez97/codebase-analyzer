@@ -15,6 +15,22 @@
     "open-ai-developer-docs": {
       "type": "http",
       "url": "https://developers.openai.com/mcp"
+    },
+    "anytype": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anyproto/anytype-mcp"],
+      "env": {
+        "OPENAPI_MCP_HEADERS": "{\"Authorization\":\"Bearer ${input:anytypeApiKey}\",\"Anytype-Version\":\"2025-11-08\"}"
+      }
     }
-  }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "anytypeApiKey",
+      "description": "Anytype API Key",
+      "password": true
+    }
+  ]
 }

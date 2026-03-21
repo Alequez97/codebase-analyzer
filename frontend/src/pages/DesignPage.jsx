@@ -44,7 +44,7 @@ export default function DesignPage() {
     currentTaskMode,
     prompt,
     generationBrief,
-    taskMessages,
+    getTaskMessages,
     taskEvents,
     taskError,
     currentTaskAgent,
@@ -72,6 +72,9 @@ export default function DesignPage() {
     recordTaskEvent,
     clearBrainstorm,
   } = useDesignStudioStore();
+
+  // Get the appropriate messages based on current mode
+  const taskMessages = getTaskMessages();
 
   const progressByTaskId = useTaskProgressStore(
     (state) => state.progressByTaskId,
@@ -245,15 +248,16 @@ export default function DesignPage() {
 
   return (
     <Center
-      minH="calc(100vh - 49px)"
+      h="calc(100vh - 52px)"
       bg="linear-gradient(180deg, #fffaf3 0%, #f8fbff 42%, #eef4ff 100%)"
       px={0}
       py={0}
+      overflow="hidden"
     >
       <Center
         w="full"
         maxW="none"
-        minH="calc(100vh - 49px)"
+        h="100%"
         borderRadius={0}
         overflow="hidden"
         borderWidth={0}

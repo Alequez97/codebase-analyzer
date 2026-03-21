@@ -6,3 +6,4 @@ analysis-output/
 *.aider*
 .DS_Store
 package-lock.json
+.env
