@@ -227,7 +227,7 @@ export async function createTaskHandler(task, taskLogger, agent) {
   } else if (task.type === TASK_TYPES.DESIGN_BRAINSTORM) {
     // Enable message tools for conversational brainstorming
     if (agent && task.responseHandler) {
-      agent.enableMessageTools(task.id, task.responseHandler);
+      agent.enableMessageTools(task.responseHandler);
       taskLogger.info("Message tools enabled for conversational brainstorming");
     }
     overrides = designBrainstormHandler(task, taskLogger, agent);

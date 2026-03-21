@@ -27,7 +27,7 @@ export function DesignPreviewPane({
   messages,
   events,
   error,
-  taskMode,
+
   hasDesignFiles,
   agent,
   model,
@@ -39,7 +39,7 @@ export function DesignPreviewPane({
     VIEWPORTS.find((item) => item.id === viewport) ?? VIEWPORTS[0];
   const isRunning =
     currentTask?.status === "running" || currentTask?.status === "pending";
-  const isGenerating = taskMode === "generate" && isRunning;
+  const isGenerating = isRunning;
   const showThinkingView = activeView === "thinking";
 
   return (
@@ -145,7 +145,7 @@ export function DesignPreviewPane({
             error={error}
             agent={agent}
             model={model}
-            mode={taskMode}
+            mode="generate"
             hasPreview={hasDesignFiles}
             maxW="none"
             showWhenEmpty

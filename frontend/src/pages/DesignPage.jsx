@@ -7,8 +7,8 @@ import {
   DesignWorkspaceSidebar,
 } from "../components/design-studio";
 import { TASK_TYPES } from "../constants/task-types";
-import { MODEL_LABELS } from "../constants/models";
 import { useDesignStudioStore } from "../store/useDesignStudioStore";
+import { useDesignBrainstormStore } from "../store/useDesignBrainstormStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useConfigStore } from "../store/useConfigStore";
 
@@ -34,17 +34,31 @@ export default function DesignPage() {
   const [viewport, setViewport] = useState("desktop");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { config } = useConfigStore();
+  const { getTaskDefaultModel } = useConfigStore();
 
+  // Design brainstorm store (separate from main studio store)
+  const {
+    brainstormComplete,
+    brainstormResponse,
+    brainstormMessages,
+    brainstormTaskId,
+    targetDesignId,
+    loadingBrainstorm,
+    pendingQuestion: brainstormPendingQuestion,
+    sendUserResponse: sendBrainstormResponse,
+    startBrainstorm: startBrainstormInStore,
+    loadLatestBrainstorm,
+  } = useDesignBrainstormStore();
+
+  // Main design studio store
   const {
     manifest,
     loadingManifest,
     manifestError,
     currentTaskId,
-    currentTaskMode,
     prompt,
     generationBrief,
-    getTaskMessages,
+    generationMessages,
     taskEvents,
     taskError,
     currentTaskAgent,
@@ -53,9 +67,7 @@ export default function DesignPage() {
     sidebarVisible,
     sidebarTab,
     designMode,
-    targetDesignId,
     pendingQuestion,
-    brainstormComplete,
     sendUserResponse,
     setPrompt,
     setGenerationBrief,
@@ -66,28 +78,31 @@ export default function DesignPage() {
     getNextVersionId,
     getLatestVersionId,
     fetchManifest,
-    loadLatestTaskAndHistory,
-    startBrainstorm,
+    loadLatestGeneration,
     startGeneration,
     recordTaskEvent,
-    clearBrainstorm,
+    clearAll,
   } = useDesignStudioStore();
-
-  // Get the appropriate messages based on current mode
-  const taskMessages = getTaskMessages();
 
   const progressByTaskId = useTaskProgressStore(
     (state) => state.progressByTaskId,
   );
 
-  const defaultModelLabel = config?.tasks?.["design-generate"]?.model
-    ? (MODEL_LABELS[config.tasks["design-generate"].model] ??
-      config.tasks["design-generate"].model)
+  // Task progress — brainstorm and generation are tracked separately
+  const brainstormTask = brainstormTaskId
+    ? progressByTaskId.get(brainstormTaskId)
     : null;
-
   const currentTask = currentTaskId
     ? progressByTaskId.get(currentTaskId)
     : null;
+
+  // Default model labels per task type (from server config)
+  const brainstormModelLabel = getTaskDefaultModel(
+    TASK_TYPES.DESIGN_BRAINSTORM,
+  );
+  const generationModelLabel = getTaskDefaultModel(
+    TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
+  );
   const allTaskEntries = useMemo(
     () => Array.from(progressByTaskId.values()),
     [progressByTaskId],
@@ -103,9 +118,7 @@ export default function DesignPage() {
   );
 
   const shouldShowWorkspace =
-    hasDesignFiles ||
-    currentTaskMode === "generate" ||
-    hasActiveDesignGeneration;
+    hasDesignFiles || !!currentTaskId || hasActiveDesignGeneration;
 
   const nextVersionId = useMemo(() => getNextVersionId(), [manifest]);
   const latestVersionId = useMemo(() => getLatestVersionId(), [manifest]);
@@ -113,24 +126,26 @@ export default function DesignPage() {
   useEffect(() => {
     let mounted = true;
 
-    // Load manifest and latest task history in parallel
-    Promise.all([fetchManifest(), loadLatestTaskAndHistory()]).then(
-      ([manifestResult, taskResult]) => {
-        if (!mounted) {
-          return;
-        }
-        if (manifestResult?.firstPreviewUrl) {
-          setSelectedUrl(
-            (previous) => previous || manifestResult.firstPreviewUrl,
-          );
-        }
-      },
-    );
+    // Load manifest, generation history, and brainstorm history in parallel
+    Promise.all([
+      fetchManifest(),
+      loadLatestGeneration(),
+      loadLatestBrainstorm(),
+    ]).then(([manifestResult]) => {
+      if (!mounted) {
+        return;
+      }
+      if (manifestResult?.firstPreviewUrl) {
+        setSelectedUrl(
+          (previous) => previous || manifestResult.firstPreviewUrl,
+        );
+      }
+    });
 
     return () => {
       mounted = false;
     };
-  }, [fetchManifest, loadLatestTaskAndHistory]);
+  }, [fetchManifest, loadLatestGeneration, loadLatestBrainstorm]);
 
   useEffect(() => {
     if (manifest.versions.length === 0) {
@@ -169,7 +184,7 @@ export default function DesignPage() {
 
   const handleBrainstorm = async () => {
     setIsSubmitting(true);
-    const result = await startBrainstorm();
+    const result = await startBrainstormInStore(selectedModel);
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -183,8 +198,11 @@ export default function DesignPage() {
 
   const handleGenerate = async () => {
     setIsSubmitting(true);
+    const designId =
+      targetDesignId || getSelectedDesignId(selectedUrl, manifest);
     const result = await startGeneration({
-      designId: getSelectedDesignId(selectedUrl, manifest),
+      designId,
+      brief: brainstormResponse || generationBrief,
     });
     setIsSubmitting(false);
 
@@ -203,6 +221,12 @@ export default function DesignPage() {
         "The design orchestrator is planning the system and delegating page generation.",
       type: "success",
     });
+  };
+
+  const handleClearBrainstorm = () => {
+    // Clear both stores independently
+    useDesignBrainstormStore.getState().clearBrainstorm();
+    clearAll();
   };
 
   if (loadingManifest) {
@@ -227,20 +251,19 @@ export default function DesignPage() {
         prompt={prompt}
         onPromptChange={setPrompt}
         onBrainstorm={handleBrainstorm}
-        onGenerate={handleGenerate}
+        onStartOver={handleClearBrainstorm}
         isSubmitting={isSubmitting}
-        currentTask={currentTask}
-        taskMessages={taskMessages}
+        currentTask={brainstormTask}
+        taskMessages={brainstormMessages}
         generationBrief={generationBrief}
         onGenerationBriefChange={setGenerationBrief}
         taskError={taskError}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
-        defaultModelLabel={defaultModelLabel}
-        pendingQuestion={pendingQuestion}
-        onSendUserResponse={sendUserResponse}
-        onStartOver={clearBrainstorm}
-        currentTaskModel={currentTaskModel}
+        defaultModelLabel={brainstormModelLabel}
+        pendingQuestion={brainstormPendingQuestion || brainstormResponse}
+        onSendUserResponse={sendBrainstormResponse}
+        currentTaskModel={brainstormTask?.model ?? null}
         brainstormComplete={brainstormComplete}
       />
     );
@@ -289,17 +312,17 @@ export default function DesignPage() {
             prompt={prompt}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
-            defaultModelLabel={defaultModelLabel}
+            defaultModelLabel={generationModelLabel}
             onPromptChange={setPrompt}
             generationBrief={generationBrief}
             onGenerationBriefChange={setGenerationBrief}
             onGenerate={handleGenerate}
             onBrainstorm={handleBrainstorm}
             isSubmitting={isSubmitting}
-            taskMessages={taskMessages}
+            taskMessages={generationMessages}
             taskEvents={taskEvents}
             currentTask={currentTask}
-            currentTaskMode={currentTaskMode}
+            isBrainstorming={loadingBrainstorm}
             activeTab={sidebarTab}
             onTabChange={setSidebarTab}
             onClose={() => setSidebarVisible(false)}
@@ -314,10 +337,9 @@ export default function DesignPage() {
           viewport={viewport}
           onViewportChange={setViewport}
           currentTask={currentTask}
-          messages={taskMessages}
+          messages={generationMessages}
           events={taskEvents}
           error={taskError}
-          taskMode={currentTaskMode}
           hasDesignFiles={hasDesignFiles}
           agent={currentTaskAgent}
           model={currentTaskModel}

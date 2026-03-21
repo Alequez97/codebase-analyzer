@@ -93,11 +93,10 @@ export class LLMAgent {
    * @param {Object} responseHandler - Handler for waiting for user responses
    * @param {Function} responseHandler.waitForResponse - Async function that waits for user response
    */
-  enableMessageTools(taskId, responseHandler) {
-    this.tools.enableMessageTools(taskId, responseHandler);
+  enableMessageTools(responseHandler) {
+    this.tools.enableMessageTools(responseHandler);
     logger.info("Message tools enabled for agent session", {
       component: "LLMAgent",
-      taskId,
     });
   }
 

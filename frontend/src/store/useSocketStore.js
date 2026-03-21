@@ -17,6 +17,7 @@ import { useRefactoringAndTestingStore } from "./useRefactoringAndTestingStore";
 import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./useRefactoringAndTestingEditorStore";
 import { useAgentChatStore } from "./useAgentChatStore";
 import { useDesignStudioStore } from "./useDesignStudioStore";
+import { useDesignBrainstormStore } from "./useDesignBrainstormStore";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
 function computeTestChanges(oldMissingTests, newMissingTests) {
@@ -525,8 +526,12 @@ export const useSocketStore = create((set, get) => ({
     socket.on(
       SOCKET_EVENTS.TASK_MESSAGE,
       ({ taskId, taskType, role, content, timestamp }) => {
-        if (
-          taskType === TASK_TYPES.DESIGN_BRAINSTORM ||
+        // Route messages to appropriate store based on task type
+        if (taskType === TASK_TYPES.DESIGN_BRAINSTORM) {
+          useDesignBrainstormStore
+            .getState()
+            .appendBrainstormMessage({ taskId, role, content, timestamp });
+        } else if (
           taskType === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE
         ) {
           useDesignStudioStore
@@ -544,48 +549,60 @@ export const useSocketStore = create((set, get) => ({
       SOCKET_EVENTS.TASK_MESSAGE_TO_USER,
       ({
         taskId,
+        taskType,
         messageId,
         message,
         expectResponse,
         user_options,
         selectionType,
       }) => {
-        const store = useDesignStudioStore.getState();
-        if (!store.currentTaskId || store.currentTaskId !== taskId) {
-          return;
-        }
-        // Always add the question as an assistant message bubble
-        store.appendTaskMessage({
-          taskId,
-          role: "assistant",
-          content: message,
-        });
-        if (expectResponse !== false) {
-          store.setPendingQuestion({
-            messageId,
-            message,
+        if (taskType === TASK_TYPES.DESIGN_BRAINSTORM) {
+          const brainstormStore = useDesignBrainstormStore.getState();
+          brainstormStore.appendBrainstormMessage({
             taskId,
-            user_options,
-            selectionType,
+            role: "assistant",
+            content: message,
           });
+          if (expectResponse !== false) {
+            brainstormStore.setPendingQuestion({
+              messageId,
+              message,
+              taskId,
+              user_options,
+              selectionType,
+            });
+          }
+        } else if (
+          taskType === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE
+        ) {
+          const store = useDesignStudioStore.getState();
+          store.appendTaskMessage({
+            taskId,
+            role: "assistant",
+            content: message,
+          });
+          if (expectResponse !== false) {
+            store.setPendingQuestion({
+              messageId,
+              message,
+              taskId,
+              user_options,
+              selectionType,
+            });
+          }
         }
       },
     );
 
     socket.on(SOCKET_EVENTS.TASK_RESUMED, ({ taskId }) => {
-      const store = useDesignStudioStore.getState();
-      if (store.currentTaskId === taskId) {
-        store.clearPendingQuestion();
-      }
+      useDesignStudioStore.getState().clearPendingQuestion();
+      useDesignBrainstormStore.getState().clearPendingQuestion();
     });
 
     socket.on(
       SOCKET_EVENTS.DESIGN_BRAINSTORM_COMPLETE,
       ({ taskId, designId }) => {
-        const store = useDesignStudioStore.getState();
-        if (store.currentTaskId === taskId || !store.currentTaskId) {
-          store.setBrainstormComplete(designId);
-        }
+        useDesignBrainstormStore.getState().setBrainstormComplete(designId);
       },
     );
 

@@ -224,7 +224,7 @@ export async function executeTask(taskId) {
   runningTaskControllers.set(taskId, controller);
 
   // Create response handler for tasks that support user interaction
-  const responseHandler = createUserResponseHandler(taskId);
+  const responseHandler = createUserResponseHandler(task);
 
   let result;
   try {
@@ -462,11 +462,25 @@ export async function recoverOrphanedTasks() {
 /**
  * Create a response handler for agent message tools.
  * This allows the agent to pause and wait for user responses.
- * @param {string} taskId - The task ID
- * @returns {Object} Response handler with waitForResponse method
+ * @param {Object} task - The task object
+ * @returns {Object} Response handler with sendMessage and waitForResponse methods
  */
-export function createUserResponseHandler(taskId) {
+export function createUserResponseHandler(task) {
+  const { id: taskId, type: taskType } = task;
   return {
+    /**
+     * Send a message to the user via socket.
+     * The tool executor calls this instead of emitting directly.
+     * @param {Object} messageData - Message payload fields
+     */
+    sendMessage(messageData) {
+      emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE_TO_USER, {
+        ...messageData,
+        taskId,
+        taskType,
+      });
+    },
+
     /**
      * Wait for user response (blocks until response arrives or timeout)
      * @param {string} messageId - The message ID we're waiting for

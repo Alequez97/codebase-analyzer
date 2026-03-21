@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import {
-  brainstormDesign,
   generateDesign,
   getDesignManifest,
-  getLatestDesignTask,
+  getLatestGenerationTask,
   respondToTask,
 } from "../api";
 
@@ -101,41 +100,23 @@ export const useDesignStudioStore = create((set, get) => ({
   loadingManifest: true,
   manifestError: null,
   currentTaskId: null,
-  currentTaskMode: null,
   currentTaskAgent: null,
   currentTaskModel: null,
   selectedModel: null,
   designMode: "new", // "new" or "improve"
-  targetDesignId: null, // null for new, or specific version ID for improvement
   prompt: "",
-  brainstormResponse: "",
   generationBrief: "",
-  brainstormMessages: [], // Messages from brainstorm flow only
   generationMessages: [], // Messages from generation flow only
   taskEvents: [],
   loadingTaskMessages: false,
   taskError: null,
   sidebarVisible: true,
   sidebarTab: "chat",
-  pendingQuestion: null, // { messageId, message, taskId } | null
+  pendingQuestion: null, // { messageId, message, taskId, user_options, selectionType } | null
   isWaitingForUser: false,
-  brainstormComplete: false, // true once DESIGN_BRAINSTORM_COMPLETE is received
 
-  // Computed getter: returns the right messages based on current mode
-  getTaskMessages: () => {
-    const state = get();
-    return state.currentTaskMode === "brainstorm"
-      ? state.brainstormMessages
-      : state.generationMessages;
-  },
-
-  setBrainstormComplete: (designId) =>
-    set({
-      brainstormComplete: true,
-      targetDesignId: designId ?? get().targetDesignId,
-    }),
-  setPrompt: (prompt) => set({ prompt }),
   setGenerationBrief: (generationBrief) => set({ generationBrief }),
+
   setPendingQuestion: ({
     messageId,
     message,
@@ -153,85 +134,63 @@ export const useDesignStudioStore = create((set, get) => ({
       },
       isWaitingForUser: true,
     }),
+
   clearPendingQuestion: () =>
     set({ pendingQuestion: null, isWaitingForUser: false }),
+
   sendUserResponse: async (response) => {
-    const { pendingQuestion, currentTaskMode } = get();
+    const { pendingQuestion, currentTaskId } = get();
     if (!pendingQuestion) {
       return { success: false, error: "No pending question" };
     }
 
     const userMessage = createLocalMessage("user", response);
-
-    // Add to the appropriate message array based on mode
-    if (currentTaskMode === "brainstorm") {
-      set((state) => ({
-        brainstormMessages: [...state.brainstormMessages, userMessage],
-        pendingQuestion: null,
-        isWaitingForUser: false,
-      }));
-    } else {
-      set((state) => ({
-        generationMessages: [...state.generationMessages, userMessage],
-        pendingQuestion: null,
-        isWaitingForUser: false,
-      }));
-    }
+    set((state) => ({
+      generationMessages: [...state.generationMessages, userMessage],
+      pendingQuestion: null,
+      isWaitingForUser: false,
+    }));
 
     try {
-      await respondToTask(pendingQuestion.taskId, response);
+      await respondToTask(currentTaskId, response);
       return { success: true };
     } catch (error) {
-      return {
-        success: false,
-        error: error?.response?.data?.error || error.message,
-      };
+      const errorMessage =
+        error?.response?.data?.error || "Failed to send response";
+      return { success: false, error: errorMessage };
     }
   },
+
   setSelectedModel: (selectedModel) => set({ selectedModel }),
   setSidebarVisible: (visible) => set({ sidebarVisible: visible }),
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
-  setDesignMode: (mode, targetId = null) =>
-    set({ designMode: mode, targetDesignId: targetId }),
-  clearBrainstorm: () =>
+  setDesignMode: (mode) => set({ designMode: mode }),
+
+  clearAll: () =>
     set({
-      brainstormMessages: [],
       generationMessages: [],
-      brainstormResponse: "",
       generationBrief: "",
       pendingQuestion: null,
       isWaitingForUser: false,
-      brainstormComplete: false,
       taskError: null,
       currentTaskId: null,
-      currentTaskMode: null,
       currentTaskAgent: null,
       currentTaskModel: null,
       prompt: "",
+      taskEvents: [],
     }),
-  getNextVersionId: () => getNextVersionNumber(get().manifest),
-  getLatestVersionId: () => getLatestVersionId(get().manifest),
-  clearTaskState: () =>
-    set({
-      currentTaskId: null,
-      currentTaskMode: null,
-      currentTaskAgent: null,
-      currentTaskModel: null,
-      taskError: null,
-    }),
-  recordTaskEvent: ({ taskId, stage, message, status = "running" }) => {
-    if (!taskId || !message?.trim()) {
-      return;
-    }
 
+  getNextVersionId: () => {
+    return getNextVersionNumber(get().manifest);
+  },
+
+  getLatestVersionId: () => {
+    return getLatestVersionId(get().manifest);
+  },
+
+  recordTaskEvent: ({ taskId, stage, message, status }) => {
     set((state) => {
-      const previousEvent = state.taskEvents[state.taskEvents.length - 1];
-      if (
-        previousEvent?.taskId === taskId &&
-        previousEvent?.stage === stage &&
-        previousEvent?.message === message &&
-        previousEvent?.status === status
-      ) {
+      if (state.currentTaskId && state.currentTaskId !== taskId) {
         return state;
       }
 
@@ -252,6 +211,7 @@ export const useDesignStudioStore = create((set, get) => ({
       };
     });
   },
+
   applyManifestUpdate: (manifest) => {
     const nextManifest = manifest ?? { versions: [] };
     set({
@@ -259,27 +219,16 @@ export const useDesignStudioStore = create((set, get) => ({
       loadingManifest: false,
       manifestError: null,
     });
-    return {
-      manifest: nextManifest,
-      firstPreviewUrl: getFirstPreviewUrl(nextManifest),
-    };
   },
+
   appendTaskMessage: ({ taskId, role, content, timestamp }) => {
-    if (role !== "assistant" || !content?.trim()) {
+    const state = get();
+    if (state.currentTaskId && state.currentTaskId !== taskId) {
       return;
     }
 
     set((state) => {
-      if (state.currentTaskId && state.currentTaskId !== taskId) {
-        return state;
-      }
-
-      const isBrainstormMode = state.currentTaskMode === "brainstorm";
-      const existingMessages = isBrainstormMode
-        ? state.brainstormMessages
-        : state.generationMessages;
-
-      const newMessages = mergeMessages(existingMessages, [
+      const newMessages = mergeMessages(state.generationMessages, [
         {
           id: `socket-${taskId}-${Date.now()}-${Math.random()
             .toString(36)
@@ -290,50 +239,31 @@ export const useDesignStudioStore = create((set, get) => ({
         },
       ]);
 
-      const brainstormResponse = newMessages
-        .filter((message) => message.role === "assistant")
-        .map((message) => message.content)
-        .join("\n\n")
-        .trim();
-
       return {
-        ...(isBrainstormMode
-          ? { brainstormMessages: newMessages }
-          : { generationMessages: newMessages }),
-        brainstormResponse:
-          isBrainstormMode && brainstormResponse
-            ? brainstormResponse
-            : state.brainstormResponse,
-        generationBrief:
-          isBrainstormMode && brainstormResponse
-            ? brainstormResponse
-            : state.generationBrief,
+        generationMessages: newMessages,
         loadingTaskMessages: false,
       };
     });
   },
+
   completeCurrentTask: (taskId) => {
     set((state) =>
       state.currentTaskId === taskId
         ? {
             currentTaskId: null,
-            currentTaskMode: null,
             currentTaskAgent: null,
             currentTaskModel: null,
             loadingTaskMessages: false,
-            taskError: null,
-            pendingQuestion: null,
-            isWaitingForUser: false,
           }
         : state,
     );
   },
+
   failCurrentTask: (taskId, taskError) => {
     set((state) =>
       state.currentTaskId === taskId
         ? {
             currentTaskId: null,
-            currentTaskMode: null,
             currentTaskAgent: null,
             currentTaskModel: null,
             loadingTaskMessages: false,
@@ -366,20 +296,15 @@ export const useDesignStudioStore = create((set, get) => ({
     }
   },
 
-  loadLatestTaskAndHistory: async () => {
+  loadLatestGeneration: async () => {
     try {
-      const response = await getLatestDesignTask();
+      const response = await getLatestGenerationTask();
       const { task, chatHistory } = response?.data ?? {};
 
       if (!task || !chatHistory) {
         return { success: true, hasTask: false };
       }
 
-      // Restore task state
-      const taskMode =
-        task.type === "design-brainstorm" ? "brainstorm" : "generate";
-
-      // Restore messages from chat history
       const messages = (chatHistory.messages || []).map((msg) => ({
         id:
           msg.id ||
@@ -389,45 +314,19 @@ export const useDesignStudioStore = create((set, get) => ({
         timestamp: msg.timestamp || new Date().toISOString(),
       }));
 
-      // Extract brainstorm response if it exists (assistant messages)
-      const assistantMessages = messages.filter(
-        (msg) => msg.role === "assistant",
-      );
-      const brainstormResponse = assistantMessages
-        .map((msg) => msg.content)
-        .join("\n\n")
-        .trim();
-
-      // Only set as current task if it's actually running or pending
-      // If the task is completed/failed, just restore the conversation history
       const isActiveTask =
         task.status === "running" || task.status === "pending";
-      // Brainstorm is "complete" (ready for generation) if a completed brainstorm task exists
-      const isBrainstormDone =
-        taskMode === "brainstorm" && task.status === "completed";
 
       set({
+        generationMessages: messages,
+        generationBrief: task.params?.brief || "",
         currentTaskId: isActiveTask ? task.id : null,
-        currentTaskMode: isActiveTask ? taskMode : null,
         currentTaskAgent: isActiveTask
           ? (task.agentConfig?.agent ?? null)
           : null,
         currentTaskModel: isActiveTask
           ? (task.agentConfig?.model ?? null)
           : null,
-        // Store messages in the appropriate array based on task mode
-        ...(taskMode === "brainstorm"
-          ? { brainstormMessages: messages }
-          : { generationMessages: messages }),
-        brainstormResponse: taskMode === "brainstorm" ? brainstormResponse : "",
-        generationBrief:
-          taskMode === "brainstorm"
-            ? brainstormResponse
-            : task.params?.brief || "",
-        brainstormComplete: isBrainstormDone,
-        targetDesignId: isBrainstormDone
-          ? (task.params?.designId ?? null)
-          : get().targetDesignId,
         loadingTaskMessages: false,
       });
 
@@ -438,97 +337,41 @@ export const useDesignStudioStore = create((set, get) => ({
         isActive: isActiveTask,
       };
     } catch (error) {
-      console.error("Failed to load latest design task:", error);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error?.response?.data?.error || "Failed to load generation history";
+      set({ taskError: errorMessage, loadingTaskMessages: false });
+      return { success: false, error: errorMessage };
     }
   },
 
-  startBrainstorm: async () => {
+  startGeneration: async ({ designId = null, brief = "" } = {}) => {
     const prompt = get().prompt.trim();
-    if (!prompt) {
-      return { success: false, error: "Prompt is required" };
-    }
+    const effectiveBrief = brief || get().generationBrief.trim();
 
-    const previousMessages = get().brainstormMessages;
-    const history = getHistoryMessages(previousMessages);
-    const userMessage = createLocalMessage("user", prompt);
-    const model = get().selectedModel;
-
-    set({
-      taskError: null,
-      brainstormResponse: "",
-      generationBrief: "",
-      brainstormMessages: [...previousMessages, userMessage],
-      taskEvents: [],
-      loadingTaskMessages: true,
-    });
-
-    try {
-      const response = await brainstormDesign({ prompt, history, model });
-      const taskId = response?.data?.task?.id ?? null;
-      set({
-        currentTaskId: taskId,
-        currentTaskMode: "brainstorm",
-        currentTaskAgent: response?.data?.task?.agent ?? null,
-        currentTaskModel: response?.data?.task?.model ?? null,
-        prompt: "",
-      });
-      get().recordTaskEvent({
-        taskId,
-        stage: "queued",
-        message: "Brainstorm queued. Preparing the first pass.",
-        status: "pending",
-      });
-      return { success: true, taskId };
-    } catch (error) {
-      const taskError =
-        error?.response?.data?.error || "Failed to start brainstorm";
-      set({
-        taskError,
-        loadingTaskMessages: false,
-        brainstormMessages: previousMessages,
-      });
-      return { success: false, error: taskError };
-    }
-  },
-
-  startGeneration: async ({ designId = null } = {}) => {
-    const prompt = get().prompt.trim();
-    const brief =
-      get().generationBrief.trim() || get().brainstormResponse.trim();
-
-    if (!prompt && !brief) {
+    if (!prompt && !effectiveBrief) {
       return { success: false, error: "Prompt or approved brief is required" };
     }
 
     // Determine which design ID to use
-    const { designMode, targetDesignId, brainstormComplete } = get();
+    const { designMode } = get();
     let finalDesignId = designId; // Allow explicit override
 
-    if (!finalDesignId) {
-      if (brainstormComplete && targetDesignId) {
-        // Use the same design ID that was established during brainstorm
-        finalDesignId = targetDesignId;
-      } else if (designMode === "improve" && targetDesignId) {
-        finalDesignId = targetDesignId;
-      } else if (designMode === "new") {
-        finalDesignId = getNextVersionNumber(get().manifest);
-      }
+    if (!finalDesignId && designMode === "new") {
+      finalDesignId = getNextVersionNumber(get().manifest);
+    } else if (!finalDesignId && designMode === "improve") {
+      finalDesignId = getLatestVersionId(get().manifest);
     }
 
-    // When starting generation, we use generation messages only
-    // Do NOT carry over brainstorm messages into the generation chat
     const previousMessages = get().generationMessages;
     const history = getHistoryMessages(previousMessages);
 
-    // When coming from brainstorm, prompt is cleared — use brief as the effective prompt
-    const effectivePrompt = prompt || brief.slice(0, 200).replace(/\n/g, " ");
+    const effectivePrompt =
+      prompt || effectiveBrief.slice(0, 200).replace(/\n/g, " ");
     const userMessage = createLocalMessage("user", effectivePrompt);
     const model = get().selectedModel;
 
     set({
       taskError: null,
-      // Start with fresh generation messages (don't include brainstorm)
       generationMessages: [...previousMessages, userMessage],
       taskEvents: [],
       loadingTaskMessages: true,
@@ -537,35 +380,37 @@ export const useDesignStudioStore = create((set, get) => ({
     try {
       const response = await generateDesign({
         prompt: effectivePrompt,
-        brief,
+        brief: effectiveBrief,
         history,
         designId: finalDesignId,
         model,
       });
+
       const taskId = response?.data?.task?.id ?? null;
+
       set({
         currentTaskId: taskId,
-        currentTaskMode: "generate",
         currentTaskAgent: response?.data?.task?.agent ?? null,
         currentTaskModel: response?.data?.task?.model ?? null,
         prompt: "",
       });
+
+      // TODO: This can be updated from socket store on task queue event
       get().recordTaskEvent({
         taskId,
         stage: "queued",
         message: "Design generation queued. Opening the workspace.",
         status: "pending",
       });
+
       return { success: true, taskId };
     } catch (error) {
-      const taskError =
+      const errorMessage =
         error?.response?.data?.error || "Failed to start design generation";
-      set({
-        taskError,
-        loadingTaskMessages: false,
-        generationMessages: previousMessages,
-      });
-      return { success: false, error: taskError };
+      set({ taskError: errorMessage, loadingTaskMessages: false });
+      return { success: false, error: errorMessage };
     }
   },
+
+  setPrompt: (prompt) => set({ prompt }),
 }));

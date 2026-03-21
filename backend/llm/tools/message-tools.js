@@ -1,5 +1,3 @@
-import { emitSocketEvent } from "../../utils/socket-emitter.js";
-import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import * as logger from "../../utils/logger.js";
 import {
   TOOL_ERROR_CODES,
@@ -51,12 +49,11 @@ export const MESSAGE_TOOLS = [
  */
 export class MessageToolExecutor {
   /**
-   * @param {string} taskId - Current task ID (for correlation)
-   * @param {Object} responseHandler - Handler for waiting for user responses
-   * @param {Function} responseHandler.waitForResponse - Function that returns a promise resolving to user's response
+   * @param {Object} responseHandler - Handler for sending messages and waiting for user responses
+   * @param {Function} responseHandler.sendMessage - Delivers the message to the user (transport agnostic)
+   * @param {Function} responseHandler.waitForResponse - Returns a promise resolving to user's response
    */
-  constructor(taskId, responseHandler) {
-    this.taskId = taskId;
+  constructor(responseHandler) {
     this.responseHandler = responseHandler;
   }
 
@@ -103,16 +100,14 @@ export class MessageToolExecutor {
 
     logger.info("Agent sending message to user", {
       component: "MessageToolExecutor",
-      taskId: this.taskId,
       expectResponse,
       messageLength: message.length,
     });
 
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-    // Emit message to frontend via socket
-    emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE_TO_USER, {
-      taskId: this.taskId,
+    // Deliver message via response handler (transport agnostic)
+    this.responseHandler.sendMessage({
       messageId,
       message: message.trim(),
       expectResponse,
@@ -126,7 +121,6 @@ export class MessageToolExecutor {
     if (!expectResponse) {
       logger.debug("Message sent (no response expected)", {
         component: "MessageToolExecutor",
-        taskId: this.taskId,
       });
 
       return JSON.stringify({
@@ -139,7 +133,6 @@ export class MessageToolExecutor {
     // Wait for user response
     logger.info("Waiting for user response...", {
       component: "MessageToolExecutor",
-      taskId: this.taskId,
       messageId,
     });
 
@@ -149,7 +142,6 @@ export class MessageToolExecutor {
 
       logger.info("User response received", {
         component: "MessageToolExecutor",
-        taskId: this.taskId,
         messageId,
         responseLength: userResponse?.length,
       });
@@ -164,7 +156,6 @@ export class MessageToolExecutor {
     } catch (error) {
       logger.error("Error waiting for user response", {
         component: "MessageToolExecutor",
-        taskId: this.taskId,
         messageId,
         error: error.message,
       });

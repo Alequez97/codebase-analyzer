@@ -31,7 +31,7 @@ export function DesignWorkspaceSidebar({
   taskMessages,
   taskEvents,
   currentTask,
-  currentTaskMode,
+  isBrainstorming,
   selectedModel,
   onModelChange,
   defaultModelLabel,
@@ -50,8 +50,7 @@ export function DesignWorkspaceSidebar({
   );
   const isWorking =
     currentTask?.status === "running" || currentTask?.status === "pending";
-  const isBrainstorming = currentTaskMode === "brainstorm" && isWorking;
-  const isGenerating = currentTaskMode === "generate" && isWorking;
+  const isGenerating = isWorking && !isBrainstorming;
   const hasConversationHistory = conversationMessages.length > 0;
 
   return (

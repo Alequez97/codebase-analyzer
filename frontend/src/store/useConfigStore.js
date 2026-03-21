@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "../api";
+import { MODEL_LABELS } from "../constants/models";
 
 /**
  * Store for server configuration and connection status
@@ -53,6 +54,15 @@ export const useConfigStore = create((set, get) => ({
   isConnected: () => {
     const state = get();
     return !state.configError && !!state.config;
+  },
+
+  /**
+   * Get the display label for the default model of a given task type.
+   * Falls back to the raw model ID if no label is found.
+   */
+  getTaskDefaultModel: (taskType) => {
+    const modelId = get().config?.taskModels?.[taskType];
+    return modelId ? (MODEL_LABELS[modelId] ?? modelId) : null;
   },
 }));
 

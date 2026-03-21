@@ -55,8 +55,8 @@ export class ToolRegistry {
     this.webFetchToolExecutor = new WebFetchToolExecutor();
   }
 
-  enableMessageTools(taskId, responseHandler) {
-    this.messageToolExecutor = new MessageToolExecutor(taskId, responseHandler);
+  enableMessageTools(responseHandler) {
+    this.messageToolExecutor = new MessageToolExecutor(responseHandler);
   }
 
   findExecutor(toolName) {
