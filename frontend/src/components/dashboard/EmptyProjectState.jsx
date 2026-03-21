@@ -99,20 +99,6 @@ export function EmptyProjectState() {
 
       <VStack gap={10} w="full" maxW="980px" position="relative">
         <VStack gap={3} textAlign="center">
-          <Badge
-            bg="whiteAlpha.900"
-            color="orange.700"
-            borderRadius="full"
-            px={4}
-            py={1.5}
-            fontSize="xs"
-            fontWeight="700"
-            letterSpacing="wide"
-            textTransform="uppercase"
-            boxShadow="0 10px 30px rgba(15, 23, 42, 0.05)"
-          >
-            Fresh workspace
-          </Badge>
           <Heading
             size="2xl"
             fontWeight="900"
@@ -175,7 +161,11 @@ export function EmptyProjectState() {
                   </Box>
                   <VStack align="start" gap={1}>
                     <HStack gap={2} flexWrap="wrap">
-                      <Text fontWeight="900" fontSize="lg" letterSpacing="-0.3px">
+                      <Text
+                        fontWeight="900"
+                        fontSize="lg"
+                        letterSpacing="-0.3px"
+                      >
                         Start New Project
                       </Text>
                       <Badge
@@ -269,7 +259,10 @@ export function EmptyProjectState() {
             boxShadow="0 18px 50px rgba(15, 23, 42, 0.08)"
             backdropFilter="blur(10px)"
           >
-            <Box h="4px" bg="linear-gradient(90deg, #93c5fd 0%, #dbeafe 100%)" />
+            <Box
+              h="4px"
+              bg="linear-gradient(90deg, #93c5fd 0%, #dbeafe 100%)"
+            />
 
             <Box p={6}>
               <VStack align="start" gap={5}>
@@ -340,3 +333,4 @@ export function EmptyProjectState() {
     </Box>
   );
 }
+

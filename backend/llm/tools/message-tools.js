@@ -22,12 +22,24 @@ export const MESSAGE_TOOLS = [
       message: {
         type: "string",
         description:
-          "The message or question to send to the user. Be clear and specific. If presenting options, format them clearly (e.g., bullet points or numbered list).",
+          "The message or question to send to the user. Be clear and specific. When providing user_options, keep this message concise — the options themselves carry the detail.",
       },
       expectResponse: {
         type: "boolean",
         description:
           "If true (default), wait for user response. If false, just notify without blocking.",
+      },
+      user_options: {
+        type: "array",
+        description:
+          "Optional list of predefined choices to present to the user as clickable buttons. Each entry is a short label string (e.g. 'Deep Professional', 'Bright Focus'). When provided, the UI renders these as interactive options instead of a free-text input.",
+        items: { type: "string" },
+      },
+      selectionType: {
+        type: "string",
+        enum: ["single", "multiple"],
+        description:
+          "When user_options is provided: 'single' (default) means the user picks exactly one option; 'multiple' means the user can pick several before confirming.",
       },
     },
     required: ["message"],
@@ -73,7 +85,12 @@ export class MessageToolExecutor {
    * @private
    */
   async messageUser(args) {
-    const { message, expectResponse = true } = args;
+    const {
+      message,
+      expectResponse = true,
+      user_options,
+      selectionType = "single",
+    } = args;
 
     if (!message || typeof message !== "string" || !message.trim()) {
       const error = new Error(
@@ -100,6 +117,9 @@ export class MessageToolExecutor {
       message: message.trim(),
       expectResponse,
       timestamp: new Date().toISOString(),
+      ...(Array.isArray(user_options) && user_options.length > 0
+        ? { user_options, selectionType }
+        : {}),
     });
 
     // If not expecting a response, return immediately

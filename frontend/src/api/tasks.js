@@ -20,3 +20,6 @@ export const appendTaskChatMessage = (taskId, { role, content }) =>
 
 export const deleteTaskChatHistory = (taskId) =>
   client.delete(`/tasks/${taskId}/chat-history`);
+
+export const respondToTask = (taskId, response) =>
+  client.post(`/tasks/${taskId}/respond`, { response });

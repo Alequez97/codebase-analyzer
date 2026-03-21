@@ -413,12 +413,15 @@ export const useSocketStore = create((set, get) => ({
       }
     });
 
-    socket.on(SOCKET_EVENTS.CUSTOM_TASK_MESSAGE, ({ taskId, content, role }) => {
-      const chatStore = useAgentChatStore.getState();
-      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
-        chatStore.addMessage({ role: role || "assistant", content });
-      }
-    });
+    socket.on(
+      SOCKET_EVENTS.CUSTOM_TASK_MESSAGE,
+      ({ taskId, content, role }) => {
+        const chatStore = useAgentChatStore.getState();
+        if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+          chatStore.addMessage({ role: role || "assistant", content });
+        }
+      },
+    );
 
     socket.on(SOCKET_EVENTS.CUSTOM_TASK_PROGRESS, ({ taskId, message }) => {
       const chatStore = useAgentChatStore.getState();
@@ -431,16 +434,19 @@ export const useSocketStore = create((set, get) => ({
       }
     });
 
-    socket.on(SOCKET_EVENTS.CUSTOM_TASK_FILE_UPDATED, ({ taskId, filePath }) => {
-      const chatStore = useAgentChatStore.getState();
-      if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
-        chatStore.addMessage({
-          role: "system",
-          content: `ðŸ“ Updated: \`${filePath}\``,
-          isProgress: true,
-        });
-      }
-    });
+    socket.on(
+      SOCKET_EVENTS.CUSTOM_TASK_FILE_UPDATED,
+      ({ taskId, filePath }) => {
+        const chatStore = useAgentChatStore.getState();
+        if (chatStore.currentTaskId === taskId || !chatStore.currentTaskId) {
+          chatStore.addMessage({
+            role: "system",
+            content: `ðŸ“ Updated: \`${filePath}\``,
+            isProgress: true,
+          });
+        }
+      },
+    );
 
     socket.on(SOCKET_EVENTS.CUSTOM_TASK_DOC_UPDATED, ({ taskId, filePath }) => {
       const chatStore = useAgentChatStore.getState();
@@ -519,6 +525,55 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.DESIGN_MANIFEST_UPDATED, ({ manifest }) => {
       useDesignStudioStore.getState().applyManifestUpdate(manifest);
     });
+
+    socket.on(
+      SOCKET_EVENTS.TASK_MESSAGE_TO_USER,
+      ({
+        taskId,
+        messageId,
+        message,
+        expectResponse,
+        user_options,
+        selectionType,
+      }) => {
+        const store = useDesignStudioStore.getState();
+        if (!store.currentTaskId || store.currentTaskId !== taskId) {
+          return;
+        }
+        // Always add the question as an assistant message bubble
+        store.appendTaskMessage({
+          taskId,
+          role: "assistant",
+          content: message,
+        });
+        if (expectResponse !== false) {
+          store.setPendingQuestion({
+            messageId,
+            message,
+            taskId,
+            user_options,
+            selectionType,
+          });
+        }
+      },
+    );
+
+    socket.on(SOCKET_EVENTS.TASK_RESUMED, ({ taskId }) => {
+      const store = useDesignStudioStore.getState();
+      if (store.currentTaskId === taskId) {
+        store.clearPendingQuestion();
+      }
+    });
+
+    socket.on(
+      SOCKET_EVENTS.DESIGN_BRAINSTORM_COMPLETE,
+      ({ taskId, designId }) => {
+        const store = useDesignStudioStore.getState();
+        if (store.currentTaskId === taskId || !store.currentTaskId) {
+          store.setBrainstormComplete(designId);
+        }
+      },
+    );
 
     socket.on(
       SOCKET_EVENTS.DOCUMENTATION_UPDATED,
@@ -638,3 +693,4 @@ export const useSocketStore = create((set, get) => ({
     set({ socket: null, socketConnected: false });
   },
 }));
+

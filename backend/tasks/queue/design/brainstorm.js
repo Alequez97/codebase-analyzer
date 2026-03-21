@@ -12,7 +12,7 @@ import {
   ensureProgressDirectory,
   getProgressFileRelativePath,
 } from "../../../utils/task-progress.js";
-import { getNextDesignVersion } from "./shared.js";
+import { getDesignBriefRelativePath, getNextDesignVersion } from "./shared.js";
 
 export async function queueDesignBrainstormTask({
   prompt,
@@ -39,6 +39,7 @@ export async function queueDesignBrainstormTask({
       history,
       userInstruction: prompt,
       designId: targetDesignId,
+      briefPath: getDesignBriefRelativePath(targetDesignId),
     },
     agentConfig: agentConfigResult.agentConfig,
     systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.DESIGN_BRAINSTORM,

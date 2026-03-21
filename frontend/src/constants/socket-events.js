@@ -45,6 +45,7 @@ export const SOCKET_EVENTS = {
   REFACTORING_AND_TESTING_UPDATED: "refactoring-and-testing:updated",
   DESIGN_MANIFEST_UPDATED: "design:manifest-updated",
   DESIGN_CHAT_MESSAGE: "design:chat-message",
+  DESIGN_BRAINSTORM_COMPLETE: "design:brainstorm-complete",
 
   // Generic AI chat message event - used by all section chat tasks
   // chatId links the message to the originating task
@@ -65,4 +66,10 @@ export const SOCKET_EVENTS = {
 
   // Review changes task log
   LOG_REVIEW_CHANGES: "log:review-changes",
+
+  // Task-user conversation events
+  TASK_MESSAGE_TO_USER: "task:message-to-user",
+  TASK_WAITING_FOR_USER: "task:waiting-for-user",
+  TASK_RESUMED: "task:resumed",
 };
+

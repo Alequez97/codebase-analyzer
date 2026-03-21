@@ -89,6 +89,12 @@ export function designBrainstormHandler(task, taskLogger) {
       });
 
       await markProgressComplete(task.id).catch(() => {});
+
+      emitSocketEvent(SOCKET_EVENTS.DESIGN_BRAINSTORM_COMPLETE, {
+        taskId: task.id,
+        designId: task.params?.designId ?? null,
+      });
+
       return { success: true };
     },
   };

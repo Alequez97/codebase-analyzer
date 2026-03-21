@@ -209,7 +209,7 @@ const config = {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
-      maxIterations: 40,
+      maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: {

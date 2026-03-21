@@ -54,6 +54,9 @@ export default function DesignPage() {
     sidebarTab,
     designMode,
     targetDesignId,
+    pendingQuestion,
+    brainstormComplete,
+    sendUserResponse,
     setPrompt,
     setGenerationBrief,
     setSelectedModel,
@@ -67,6 +70,7 @@ export default function DesignPage() {
     startBrainstorm,
     startGeneration,
     recordTaskEvent,
+    clearBrainstorm,
   } = useDesignStudioStore();
 
   const progressByTaskId = useTaskProgressStore(
@@ -224,15 +228,17 @@ export default function DesignPage() {
         isSubmitting={isSubmitting}
         currentTask={currentTask}
         taskMessages={taskMessages}
-        taskEvents={taskEvents}
         generationBrief={generationBrief}
         onGenerationBriefChange={setGenerationBrief}
         taskError={taskError}
-        currentTaskAgent={currentTaskAgent}
-        currentTaskModel={currentTaskModel}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
         defaultModelLabel={defaultModelLabel}
+        pendingQuestion={pendingQuestion}
+        onSendUserResponse={sendUserResponse}
+        onStartOver={clearBrainstorm}
+        currentTaskModel={currentTaskModel}
+        brainstormComplete={brainstormComplete}
       />
     );
   }

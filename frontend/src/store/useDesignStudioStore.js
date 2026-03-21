@@ -4,6 +4,7 @@ import {
   generateDesign,
   getDesignManifest,
   getLatestDesignTask,
+  respondToTask,
 } from "../api";
 
 function getFirstPreviewUrl(manifest) {
@@ -115,14 +116,79 @@ export const useDesignStudioStore = create((set, get) => ({
   taskError: null,
   sidebarVisible: true,
   sidebarTab: "chat",
+  pendingQuestion: null, // { messageId, message, taskId } | null
+  isWaitingForUser: false,
+  brainstormComplete: false, // true once DESIGN_BRAINSTORM_COMPLETE is received
 
+  setBrainstormComplete: (designId) =>
+    set({
+      brainstormComplete: true,
+      targetDesignId: designId ?? get().targetDesignId,
+    }),
   setPrompt: (prompt) => set({ prompt }),
   setGenerationBrief: (generationBrief) => set({ generationBrief }),
+  setPendingQuestion: ({
+    messageId,
+    message,
+    taskId,
+    user_options,
+    selectionType,
+  }) =>
+    set({
+      pendingQuestion: {
+        messageId,
+        message,
+        taskId,
+        user_options: user_options ?? null,
+        selectionType: selectionType ?? "single",
+      },
+      isWaitingForUser: true,
+    }),
+  clearPendingQuestion: () =>
+    set({ pendingQuestion: null, isWaitingForUser: false }),
+  sendUserResponse: async (response) => {
+    const { pendingQuestion } = get();
+    if (!pendingQuestion) {
+      return { success: false, error: "No pending question" };
+    }
+
+    const userMessage = createLocalMessage("user", response);
+    set((state) => ({
+      taskMessages: [...state.taskMessages, userMessage],
+      pendingQuestion: null,
+      isWaitingForUser: false,
+    }));
+
+    try {
+      await respondToTask(pendingQuestion.taskId, response);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.response?.data?.error || error.message,
+      };
+    }
+  },
   setSelectedModel: (selectedModel) => set({ selectedModel }),
   setSidebarVisible: (visible) => set({ sidebarVisible: visible }),
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
   setDesignMode: (mode, targetId = null) =>
     set({ designMode: mode, targetDesignId: targetId }),
+  clearBrainstorm: () =>
+    set({
+      taskMessages: [],
+      brainstormResponse: "",
+      generationBrief: "",
+      pendingQuestion: null,
+      isWaitingForUser: false,
+      brainstormComplete: false,
+      taskError: null,
+      currentTaskId: null,
+      currentTaskMode: null,
+      currentTaskAgent: null,
+      currentTaskModel: null,
+      prompt: "",
+    }),
   getNextVersionId: () => getNextVersionNumber(get().manifest),
   getLatestVersionId: () => getLatestVersionId(get().manifest),
   clearTaskState: () =>
@@ -228,6 +294,8 @@ export const useDesignStudioStore = create((set, get) => ({
             currentTaskModel: null,
             loadingTaskMessages: false,
             taskError: null,
+            pendingQuestion: null,
+            isWaitingForUser: false,
           }
         : state,
     );
@@ -242,6 +310,8 @@ export const useDesignStudioStore = create((set, get) => ({
             currentTaskModel: null,
             loadingTaskMessages: false,
             taskError,
+            pendingQuestion: null,
+            isWaitingForUser: false,
           }
         : state,
     );
@@ -304,6 +374,9 @@ export const useDesignStudioStore = create((set, get) => ({
       // If the task is completed/failed, just restore the conversation history
       const isActiveTask =
         task.status === "running" || task.status === "pending";
+      // Brainstorm is "complete" (ready for generation) if a completed brainstorm task exists
+      const isBrainstormDone =
+        taskMode === "brainstorm" && task.status === "completed";
 
       set({
         currentTaskId: isActiveTask ? task.id : null,
@@ -320,6 +393,10 @@ export const useDesignStudioStore = create((set, get) => ({
           taskMode === "brainstorm"
             ? brainstormResponse
             : task.params?.brief || "",
+        brainstormComplete: isBrainstormDone,
+        targetDesignId: isBrainstormDone
+          ? (task.params?.designId ?? null)
+          : get().targetDesignId,
         loadingTaskMessages: false,
       });
 
@@ -389,16 +466,19 @@ export const useDesignStudioStore = create((set, get) => ({
     const brief =
       get().generationBrief.trim() || get().brainstormResponse.trim();
 
-    if (!prompt) {
-      return { success: false, error: "Prompt is required" };
+    if (!prompt && !brief) {
+      return { success: false, error: "Prompt or approved brief is required" };
     }
 
     // Determine which design ID to use
-    const { designMode, targetDesignId } = get();
+    const { designMode, targetDesignId, brainstormComplete } = get();
     let finalDesignId = designId; // Allow explicit override
 
     if (!finalDesignId) {
-      if (designMode === "improve" && targetDesignId) {
+      if (brainstormComplete && targetDesignId) {
+        // Use the same design ID that was established during brainstorm
+        finalDesignId = targetDesignId;
+      } else if (designMode === "improve" && targetDesignId) {
         finalDesignId = targetDesignId;
       } else if (designMode === "new") {
         finalDesignId = getNextVersionNumber(get().manifest);
@@ -407,7 +487,9 @@ export const useDesignStudioStore = create((set, get) => ({
 
     const previousMessages = get().taskMessages;
     const history = getHistoryMessages(previousMessages);
-    const userMessage = createLocalMessage("user", prompt);
+    // When coming from brainstorm, prompt is cleared — use brief as the effective prompt
+    const effectivePrompt = prompt || brief.slice(0, 200).replace(/\n/g, " ");
+    const userMessage = createLocalMessage("user", effectivePrompt);
     const model = get().selectedModel;
 
     set({
@@ -419,7 +501,7 @@ export const useDesignStudioStore = create((set, get) => ({
 
     try {
       const response = await generateDesign({
-        prompt,
+        prompt: effectivePrompt,
         brief,
         history,
         designId: finalDesignId,

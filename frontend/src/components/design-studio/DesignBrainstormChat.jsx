@@ -1,0 +1,464 @@
+import {
+  Box,
+  Button,
+  HStack,
+  Spinner,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, CheckSquare, Send, Square, Wand2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+
+const DOT_DELAY = ["0s", "0.18s", "0.36s"];
+
+function ThinkingDots() {
+  return (
+    <Box
+      alignSelf="flex-start"
+      display="flex"
+      gap={1.5}
+      px={4}
+      py={3}
+      borderRadius="20px 20px 20px 6px"
+      bg="white"
+      borderWidth="1px"
+      borderColor="rgba(226,232,240,0.9)"
+    >
+      {DOT_DELAY.map((delay, i) => (
+        <Box
+          key={i}
+          w="7px"
+          h="7px"
+          borderRadius="full"
+          bg="gray.300"
+          sx={{
+            "@keyframes thinkBounce": {
+              "0%, 100%": { transform: "translateY(0)", opacity: 0.5 },
+              "50%": { transform: "translateY(-5px)", opacity: 1 },
+            },
+            animation: `thinkBounce 1s ease infinite`,
+            animationDelay: delay,
+          }}
+        />
+      ))}
+    </Box>
+  );
+}
+
+function MessageBubble({ message }) {
+  const isUser = message.role === "user";
+  return (
+    <Box
+      alignSelf={isUser ? "flex-end" : "flex-start"}
+      maxW="85%"
+      borderRadius={isUser ? "20px 20px 6px 20px" : "20px 20px 20px 6px"}
+      bg={isUser ? "gray.900" : "white"}
+      color={isUser ? "white" : "gray.800"}
+      borderWidth={isUser ? 0 : "1px"}
+      borderColor="rgba(226,232,240,0.9)"
+      px={4}
+      py={3}
+      fontSize="sm"
+      lineHeight="1.75"
+      sx={{
+        "& p": { margin: 0, marginBottom: "0.5em" },
+        "& p:last-child": { marginBottom: 0 },
+        "& ul, & ol": { paddingLeft: "1.4em", margin: "0.4em 0" },
+        "& li": { marginBottom: "0.25em" },
+        "& strong": { fontWeight: 700 },
+        "& h1, & h2, & h3": {
+          fontWeight: 700,
+          marginBottom: "0.4em",
+          marginTop: "0.6em",
+        },
+        "& h3": { fontSize: "0.95em" },
+        "& code": {
+          bg: isUser ? "whiteAlpha.300" : "gray.100",
+          px: 1,
+          borderRadius: "4px",
+          fontSize: "0.85em",
+        },
+        "& pre": {
+          bg: isUser ? "whiteAlpha.200" : "gray.50",
+          borderRadius: "8px",
+          p: 3,
+          my: 2,
+          overflow: "auto",
+        },
+      }}
+    >
+      {isUser ? (
+        <Text whiteSpace="pre-wrap">{message.content}</Text>
+      ) : (
+        <ReactMarkdown>{message.content}</ReactMarkdown>
+      )}
+    </Box>
+  );
+}
+
+/**
+ * Try to parse a color-option entry.
+ * Returns { label, colors, description } if valid JSON with colors, else null.
+ */
+function parseColorOption(raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.colors) && parsed.colors.length > 0) {
+      return parsed;
+    }
+  } catch {}
+  return null;
+}
+
+function OptionButton({ opt, isSelected, isMultiple, onClick }) {
+  const colorData = parseColorOption(opt);
+  const label = colorData ? colorData.label : opt;
+  const description = colorData?.description ?? null;
+  const colors = colorData?.colors ?? [];
+
+  return (
+    <Button
+      variant="outline"
+      justifyContent="flex-start"
+      textAlign="left"
+      whiteSpace="normal"
+      h="auto"
+      py={2.5}
+      px={4}
+      borderRadius="14px"
+      fontSize="sm"
+      fontWeight={isSelected ? 700 : 400}
+      borderColor={isSelected ? "blue.400" : "rgba(148,163,184,0.35)"}
+      bg={isSelected ? "blue.50" : "white"}
+      color={isSelected ? "blue.700" : "gray.700"}
+      _hover={{ borderColor: "blue.300", bg: "blue.50", color: "blue.700" }}
+      onClick={onClick}
+    >
+      {isMultiple && (
+        <Box
+          mr={2.5}
+          color={isSelected ? "blue.500" : "gray.400"}
+          flexShrink={0}
+        >
+          {isSelected ? <CheckSquare size={15} /> : <Square size={15} />}
+        </Box>
+      )}
+      <HStack gap={3} align="center" flex={1}>
+        {colors.length > 0 && (
+          <HStack gap={1} flexShrink={0}>
+            {colors.map((hex) => (
+              <Box
+                key={hex}
+                w="18px"
+                h="18px"
+                borderRadius="5px"
+                bg={hex}
+                borderWidth="1px"
+                borderColor="rgba(0,0,0,0.12)"
+                flexShrink={0}
+              />
+            ))}
+          </HStack>
+        )}
+        <Box>
+          <Text
+            fontSize="sm"
+            fontWeight={isSelected ? 700 : 500}
+            lineHeight="1.4"
+          >
+            {label}
+          </Text>
+          {description && (
+            <Text
+              fontSize="xs"
+              color={isSelected ? "blue.500" : "gray.400"}
+              fontWeight={400}
+              lineHeight="1.4"
+              mt={0.5}
+            >
+              {description}
+            </Text>
+          )}
+        </Box>
+      </HStack>
+    </Button>
+  );
+}
+
+function QuestionWithOptions({ pendingQuestion, onSend }) {
+  const { user_options, selectionType } = pendingQuestion;
+  const isMultiple = selectionType === "multiple";
+  const [selected, setSelected] = useState([]);
+
+  const toggleOption = (opt) => {
+    if (isMultiple) {
+      setSelected((prev) =>
+        prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt],
+      );
+    } else {
+      const colorData = parseColorOption(opt);
+      onSend(colorData ? colorData.label : opt);
+    }
+  };
+
+  const confirmMultiple = () => {
+    if (selected.length === 0) return;
+    const labels = selected.map((opt) => {
+      const colorData = parseColorOption(opt);
+      return colorData ? colorData.label : opt;
+    });
+    onSend(labels.join(", "));
+  };
+
+  return (
+    <VStack align="stretch" gap={2} alignSelf="flex-end" maxW="90%">
+      {user_options.map((opt) => {
+        const isSelected = selected.includes(opt);
+        return (
+          <OptionButton
+            key={opt}
+            opt={opt}
+            isSelected={isSelected}
+            isMultiple={isMultiple}
+            onClick={() => toggleOption(opt)}
+          />
+        );
+      })}
+
+      {isMultiple && (
+        <Button
+          size="sm"
+          bg="gray.900"
+          color="white"
+          borderRadius="full"
+          px={5}
+          alignSelf="flex-end"
+          mt={1}
+          disabled={selected.length === 0}
+          _hover={{ bg: "black" }}
+          _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+          onClick={confirmMultiple}
+        >
+          Confirm selection
+        </Button>
+      )}
+    </VStack>
+  );
+}
+
+export function DesignBrainstormChat({
+  messages,
+  isThinking,
+  pendingQuestion,
+  onSendMessage,
+  onGenerate,
+  onStartOver,
+  taskError,
+  model,
+  brainstormComplete,
+}) {
+  const [input, setInput] = useState("");
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isThinking, pendingQuestion]);
+
+  const handleSend = () => {
+    const trimmed = input.trim();
+    if (!trimmed || (isThinking && !pendingQuestion)) return;
+    setInput("");
+    onSendMessage(trimmed);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const placeholder = pendingQuestion
+    ? "Or type a free-form reply…"
+    : "Refine the direction, ask follow-ups…";
+
+  return (
+    <Box
+      w="full"
+      maxW="820px"
+      display="flex"
+      flexDirection="column"
+      h="calc(100vh - 120px)"
+      borderRadius="32px"
+      bg="rgba(255,255,255,0.88)"
+      borderWidth="1px"
+      borderColor="rgba(148,163,184,0.24)"
+      boxShadow="0 35px 90px rgba(15,23,42,0.1)"
+      backdropFilter="blur(18px)"
+      overflow="hidden"
+    >
+      {/* Header */}
+      <HStack
+        justify="space-between"
+        px={5}
+        py={4}
+        borderBottomWidth="1px"
+        borderColor="rgba(226,232,240,0.9)"
+        flexShrink={0}
+      >
+        <HStack gap={2}>
+          <Button
+            variant="ghost"
+            size="sm"
+            borderRadius="full"
+            color="gray.500"
+            px={3}
+            onClick={onStartOver}
+            _hover={{ bg: "gray.100", color: "gray.800" }}
+          >
+            <ArrowLeft size={15} />
+            Start over
+          </Button>
+          {isThinking && (
+            <HStack gap={1.5} color="gray.400">
+              <Spinner size="xs" />
+              <Text fontSize="xs">Thinking…</Text>
+            </HStack>
+          )}
+          {model && !isThinking && (
+            <Box
+              px={2.5}
+              py={0.5}
+              borderRadius="full"
+              bg="gray.100"
+              borderWidth="1px"
+              borderColor="gray.200"
+            >
+              <Text
+                fontSize="11px"
+                fontWeight="600"
+                color="gray.500"
+                letterSpacing="0.01em"
+              >
+                {model}
+              </Text>
+            </Box>
+          )}
+        </HStack>
+      </HStack>
+
+      {/* Messages */}
+      <VStack
+        ref={scrollRef}
+        align="stretch"
+        gap={3}
+        flex={1}
+        overflowY="auto"
+        px={6}
+        py={5}
+        sx={{
+          "&::-webkit-scrollbar": { width: "4px" },
+          "&::-webkit-scrollbar-track": { bg: "transparent" },
+          "&::-webkit-scrollbar-thumb": {
+            bg: "gray.200",
+            borderRadius: "full",
+          },
+        }}
+      >
+        {messages.map((msg) => (
+          <MessageBubble key={msg.id} message={msg} />
+        ))}
+        {isThinking && !pendingQuestion && <ThinkingDots />}
+        {pendingQuestion?.user_options?.length > 0 && (
+          <QuestionWithOptions
+            pendingQuestion={pendingQuestion}
+            onSend={onSendMessage}
+          />
+        )}
+        {taskError && (
+          <Box
+            alignSelf="flex-start"
+            maxW="85%"
+            borderRadius="20px"
+            bg="red.50"
+            borderWidth="1px"
+            borderColor="red.100"
+            px={4}
+            py={3}
+          >
+            <Text fontSize="sm" color="red.700">
+              {taskError}
+            </Text>
+          </Box>
+        )}
+      </VStack>
+
+      {/* Input — replaced by proceed button once brainstorm is complete */}
+      <Box
+        px={5}
+        py={4}
+        borderTopWidth="1px"
+        borderColor="rgba(226,232,240,0.9)"
+        flexShrink={0}
+      >
+        {brainstormComplete ? (
+          <Button
+            w="full"
+            size="lg"
+            bg="gray.950"
+            color="white"
+            borderRadius="18px"
+            h="52px"
+            fontSize="sm"
+            fontWeight="600"
+            onClick={onGenerate}
+            _hover={{ bg: "black" }}
+          >
+            <Wand2 size={16} />
+            Proceed to Design Generation
+          </Button>
+        ) : (
+          <HStack gap={2} align="flex-end">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              minH="52px"
+              maxH="140px"
+              resize="none"
+              borderRadius="18px"
+              borderColor="rgba(148,163,184,0.3)"
+              bg="white"
+              px={4}
+              py={3}
+              fontSize="sm"
+              _focusVisible={{
+                borderColor: "orange.400",
+                boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
+              }}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || (isThinking && !pendingQuestion)}
+              bg="gray.900"
+              color="white"
+              borderRadius="14px"
+              h="48px"
+              px={4}
+              flexShrink={0}
+              _hover={{ bg: "black" }}
+              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+            >
+              <Send size={16} />
+            </Button>
+          </HStack>
+        )}
+      </Box>
+    </Box>
+  );
+}
