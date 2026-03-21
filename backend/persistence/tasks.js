@@ -93,6 +93,7 @@ export async function enqueueTask(task) {
     type: task.type,
     domainId: task.params?.domainId,
     delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
+    pageName: task.params?.pageName ?? null,
     agent: task.agentConfig?.agent ?? null,
     model: task.agentConfig?.model ?? null,
     timestamp: new Date().toISOString(),

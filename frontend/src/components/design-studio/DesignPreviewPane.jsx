@@ -174,6 +174,19 @@ export function DesignPreviewPane({
                     border: "none",
                     display: "block",
                   }}
+                  onLoad={(e) => {
+                    try {
+                      const body = e.target.contentDocument?.body;
+                      if (
+                        body &&
+                        window.getComputedStyle(body).overflowY === "hidden"
+                      ) {
+                        body.style.overflowY = "auto";
+                      }
+                    } catch {
+                      // cross-origin or document not ready
+                    }
+                  }}
                 />
               </Box>
             </Center>

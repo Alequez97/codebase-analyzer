@@ -44,7 +44,6 @@ export const SOCKET_EVENTS = {
   BUGS_SECURITY_UPDATED: "bugs-security:updated",
   REFACTORING_AND_TESTING_UPDATED: "refactoring-and-testing:updated",
   DESIGN_MANIFEST_UPDATED: "design:manifest-updated",
-  DESIGN_CHAT_MESSAGE: "design:chat-message",
   DESIGN_BRAINSTORM_COMPLETE: "design:brainstorm-complete",
 
   // Generic AI chat message event - used by all section chat tasks

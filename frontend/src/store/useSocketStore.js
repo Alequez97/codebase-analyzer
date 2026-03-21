@@ -104,12 +104,21 @@ export const useSocketStore = create((set, get) => ({
     });
 
     socket.on(SOCKET_EVENTS.TASK_QUEUED, (data) => {
-      const { taskId, type, domainId, delegatedByTaskId, agent, model } = data;
+      const {
+        taskId,
+        type,
+        domainId,
+        delegatedByTaskId,
+        pageName,
+        agent,
+        model,
+      } = data;
       if (taskId) {
         useTaskProgressStore.getState().setPending(taskId, {
           domainId,
           type,
           delegatedByTaskId,
+          pageName,
           agent,
           model,
         });
@@ -514,11 +523,16 @@ export const useSocketStore = create((set, get) => ({
     });
 
     socket.on(
-      SOCKET_EVENTS.DESIGN_CHAT_MESSAGE,
-      ({ taskId, role, content, timestamp }) => {
-        useDesignStudioStore
-          .getState()
-          .appendTaskMessage({ taskId, role, content, timestamp });
+      SOCKET_EVENTS.TASK_MESSAGE,
+      ({ taskId, taskType, role, content, timestamp }) => {
+        if (
+          taskType === TASK_TYPES.DESIGN_BRAINSTORM ||
+          taskType === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE
+        ) {
+          useDesignStudioStore
+            .getState()
+            .appendTaskMessage({ taskId, role, content, timestamp });
+        }
       },
     );
 

@@ -8,7 +8,14 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckSquare, Send, Square, Wand2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckSquare,
+  RefreshCw,
+  Send,
+  Square,
+  Wand2,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const DOT_DELAY = ["0s", "0.18s", "0.36s"];
@@ -192,6 +199,10 @@ function QuestionWithOptions({ pendingQuestion, onSend }) {
   const isMultiple = selectionType === "multiple";
   const [selected, setSelected] = useState([]);
 
+  const isColorQuestion = user_options.every(
+    (opt) => parseColorOption(opt) !== null,
+  );
+
   const toggleOption = (opt) => {
     if (isMultiple) {
       setSelected((prev) =>
@@ -227,23 +238,37 @@ function QuestionWithOptions({ pendingQuestion, onSend }) {
         );
       })}
 
-      {isMultiple && (
-        <Button
-          size="sm"
-          bg="gray.900"
-          color="white"
-          borderRadius="full"
-          px={5}
-          alignSelf="flex-end"
-          mt={1}
-          disabled={selected.length === 0}
-          _hover={{ bg: "black" }}
-          _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-          onClick={confirmMultiple}
-        >
-          Confirm selection
-        </Button>
-      )}
+      <HStack justify="flex-end" gap={2} mt={1}>
+        {isColorQuestion && (
+          <Button
+            size="sm"
+            variant="ghost"
+            borderRadius="full"
+            px={3}
+            color="gray.500"
+            _hover={{ bg: "gray.100", color: "gray.700" }}
+            onClick={() => onSend("Suggest other color palettes")}
+          >
+            <RefreshCw size={13} />
+            Suggest others
+          </Button>
+        )}
+        {isMultiple && (
+          <Button
+            size="sm"
+            bg="gray.900"
+            color="white"
+            borderRadius="full"
+            px={5}
+            disabled={selected.length === 0}
+            _hover={{ bg: "black" }}
+            _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+            onClick={confirmMultiple}
+          >
+            Confirm selection
+          </Button>
+        )}
+      </HStack>
     </VStack>
   );
 }

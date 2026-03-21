@@ -65,9 +65,10 @@ export function designPlanAndStyleSystemGenerateHandler(task, taskLogger) {
         return;
       }
 
-      // Emit orchestrator messages to chat
-      emitSocketEvent(SOCKET_EVENTS.DESIGN_CHAT_MESSAGE, {
+      // Emit orchestrator messages to chat (routed by taskType on frontend)
+      emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE, {
         taskId: task.id,
+        taskType: task.type,
         role,
         content,
         timestamp: new Date().toISOString(),

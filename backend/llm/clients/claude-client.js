@@ -71,19 +71,37 @@ export class ClaudeClient extends BaseLLMClient {
       }
     }
 
-    try {
-      const response = await this.client.messages.create(
-        requestParams,
-        options.signal ? { signal: options.signal } : undefined,
-      );
-      return this.normalizeResponse(response);
-    } catch (error) {
-      if (error.name === "AbortError" || options.signal?.aborted) {
-        const cancelled = new Error("Task cancelled");
-        cancelled.code = "TASK_CANCELLED";
-        throw cancelled;
+    const MAX_RETRIES = 4;
+    const RETRYABLE_STATUSES = new Set([429, 500, 529]);
+    let attempt = 0;
+
+    for (;;) {
+      try {
+        const response = await this.client.messages.create(
+          requestParams,
+          options.signal ? { signal: options.signal } : undefined,
+        );
+        return this.normalizeResponse(response);
+      } catch (error) {
+        if (error.name === "AbortError" || options.signal?.aborted) {
+          const cancelled = new Error("Task cancelled");
+          cancelled.code = "TASK_CANCELLED";
+          throw cancelled;
+        }
+
+        const status = error.status ?? error.statusCode ?? null;
+        const isRetryable = status !== null && RETRYABLE_STATUSES.has(status);
+
+        if (isRetryable && attempt < MAX_RETRIES) {
+          attempt++;
+          // Exponential backoff: 2s, 4s, 8s, 16s
+          const delayMs = Math.min(2000 * Math.pow(2, attempt - 1), 30000);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          continue;
+        }
+
+        throw new Error(`Claude API error: ${error.message}`);
       }
-      throw new Error(`Claude API error: ${error.message}`);
     }
   }
 

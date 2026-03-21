@@ -145,9 +145,11 @@ function TaskIcon({ bg, children }) {
 // primary title and there is no subtitle.
 function useTaskTitles(entry) {
   const domainName = useDomainName(entry.domainId);
+  const primary = domainName ?? entry.pageName ?? taskLabel(entry.type);
+  const hasContext = Boolean(domainName || entry.pageName);
   return {
-    primary: domainName ?? taskLabel(entry.type),
-    subtitle: domainName ? taskLabel(entry.type) : null,
+    primary,
+    subtitle: hasContext ? taskLabel(entry.type) : null,
   };
 }
 

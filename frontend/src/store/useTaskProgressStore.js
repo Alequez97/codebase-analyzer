@@ -43,6 +43,7 @@ export const useTaskProgressStore = create((set, get) => ({
       domainId,
       type,
       delegatedByTaskId,
+      pageName,
       competitorName,
       competitorId,
       competitorUrl,
@@ -59,6 +60,7 @@ export const useTaskProgressStore = create((set, get) => ({
         type,
         status: "pending",
         delegatedByTaskId: delegatedByTaskId ?? null,
+        pageName: pageName ?? null,
         competitorName: competitorName ?? null,
         competitorId: competitorId ?? null,
         competitorUrl: competitorUrl ?? null,
@@ -87,6 +89,7 @@ export const useTaskProgressStore = create((set, get) => ({
         message,
         status: "running",
         startTime: wasRunning ? existing.startTime : Date.now(),
+        pageName: existing.pageName ?? null,
       });
       return { progressByTaskId: next };
     });
@@ -152,10 +155,13 @@ export const useTaskProgressStore = create((set, get) => ({
             next.set(id, entry);
           }
         }
+        const FINAL_STATUSES = new Set(["completed", "failed", "canceled"]);
         for (const task of tasks) {
-          // Don't overwrite a running socket entry with stale server data
+          // Don't downgrade a socket-driven running task back to pending via REST.
+          // But do allow definitive final states (completed/failed/canceled) to
+          // overwrite a stuck running entry (e.g. TASK_COMPLETED event missed).
           const existing = next.get(task.id);
-          if (existing?.status === "running" && task.status !== "running") {
+          if (existing?.status === "running" && task.status === "pending") {
             continue;
           }
           next.set(task.id, {
@@ -163,9 +169,10 @@ export const useTaskProgressStore = create((set, get) => ({
             type: task.type,
             status: task.status,
             error: task.error,
-            stage: existing?.stage,
-            message: existing?.message,
+            stage: FINAL_STATUSES.has(task.status) ? null : existing?.stage,
+            message: FINAL_STATUSES.has(task.status) ? null : existing?.message,
             delegatedByTaskId: task.params?.delegatedByTaskId ?? null,
+            pageName: task.params?.pageName ?? existing?.pageName ?? null,
             competitorName: task.params?.competitorName ?? null,
             competitorId: task.params?.competitorId ?? null,
             competitorUrl: task.params?.competitorUrl ?? null,
