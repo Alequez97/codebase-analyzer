@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { CheckSquare, Plus, RefreshCw, Send, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
+import { DesignTechnologySelector } from "./DesignTechnologySelector";
 
 const DOT_DELAY = ["0s", "0.18s", "0.36s"];
 
@@ -274,7 +275,9 @@ export function DesignEditChat({
   model,
   isInSidebar = false,
   selectedModel = null,
+  selectedTechnology = null,
   onModelChange = null,
+  onTechnologyChange = null,
   defaultModelLabel = null,
 }) {
   const [input, setInput] = useState("");
@@ -432,80 +435,85 @@ export function DesignEditChat({
         borderColor="rgba(226,232,240,0.9)"
         flexShrink={0}
       >
-        <HStack gap={2} align="flex-end">
-          <Box
-            flex={1}
-            borderRadius="18px"
-            borderWidth="1px"
-            borderColor="rgba(148,163,184,0.3)"
-            bg="white"
-            overflow="hidden"
-            _focusWithin={{
-              borderColor: "orange.400",
-              boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
-            }}
-          >
+        <Box
+          borderRadius="18px"
+          borderWidth="1px"
+          borderColor="rgba(148,163,184,0.3)"
+          bg="white"
+          overflow="hidden"
+          _focusWithin={{
+            borderColor: "orange.400",
+            boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
+          }}
+        >
+          <Box position="relative">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              minH="52px"
+              minH="80px"
               maxH="140px"
               resize="none"
               borderRadius="0"
               borderWidth="0"
               bg="transparent"
               px={4}
-              pt={3}
-              pb={2}
+              pr="72px"
+              pt={4}
+              pb={3}
               fontSize="sm"
               _focusVisible={{
                 boxShadow: "none",
               }}
             />
-            {onModelChange && (
-              <HStack
-                px={3}
-                py={2}
-                borderTopWidth="1px"
-                borderColor="rgba(226,232,240,0.9)"
-                justify="space-between"
-              >
-                <Text
-                  fontSize="10px"
-                  fontWeight="800"
-                  color="gray.500"
-                  textTransform="uppercase"
-                  letterSpacing="0.12em"
-                >
-                  Model
-                </Text>
-                <Box minW="220px" maxW="100%">
+            <Button
+              position="absolute"
+              right={3}
+              bottom={3}
+              onClick={handleSend}
+              disabled={!input.trim() || (isEditing && !editPendingQuestion)}
+              bg="gray.900"
+              color="white"
+              borderRadius="14px"
+              h="40px"
+              minW="40px"
+              px={0}
+              _hover={{ bg: "black" }}
+              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+            >
+              <Send size={16} />
+            </Button>
+          </Box>
+          {(onModelChange || onTechnologyChange) && (
+            <HStack
+              px={3}
+              py={2}
+              borderTopWidth="1px"
+              borderColor="rgba(226,232,240,0.9)"
+              align="center"
+              justify="space-between"
+              gap={3}
+              flexWrap="wrap"
+            >
+              {onTechnologyChange && selectedTechnology && (
+                <DesignTechnologySelector
+                  value={selectedTechnology}
+                  onChange={onTechnologyChange}
+                />
+              )}
+              {onModelChange && (
+                <Box flex="1" minW="220px" maxW="280px" ml="auto">
                   <ModelSelector
                     value={selectedModel}
                     onChange={onModelChange}
                     defaultLabel={defaultModelLabel}
                   />
                 </Box>
-              </HStack>
-            )}
-          </Box>
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || (isEditing && !editPendingQuestion)}
-            bg="gray.900"
-            color="white"
-            borderRadius="14px"
-            h="48px"
-            px={4}
-            flexShrink={0}
-            _hover={{ bg: "black" }}
-            _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-          >
-            <Send size={16} />
-          </Button>
-        </HStack>
+              )}
+            </HStack>
+          )}
+        </Box>
       </Box>
     </Box>
   );

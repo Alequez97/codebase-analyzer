@@ -125,7 +125,16 @@ app.use("/design-preview", async (req, res, next) => {
     res.status(500).send("Failed to prepare design preview");
   }
 });
-app.use("/design-preview", express.static(designDir));
+app.use(
+  "/design-preview",
+  express.static(designDir, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".jsx")) {
+        res.setHeader("Content-Type", "application/javascript");
+      }
+    },
+  }),
+);
 
 // ==================== Error Handler ====================
 

@@ -8,9 +8,19 @@
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Monitor, Smartphone, Tablet, Wand2, PanelLeft } from "lucide-react";
+import {
+  Monitor,
+  Smartphone,
+  Tablet,
+  Wand2,
+  PanelLeft,
+  Globe,
+  ExternalLink,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { DesignTaskConsole } from "./DesignTaskConsole";
+import { toaster } from "../ui/toaster";
 
 const VIEWPORTS = [
   { id: "desktop", label: "Desktop", icon: Monitor, width: null },
@@ -34,9 +44,18 @@ export function DesignPreviewPane({
   model,
   sidebarVisible,
   onShowSidebar,
+
+  // Ngrok publish props
+  publishedUrl,
+  isPublishing,
+  publishError,
+  onPublish,
+  onUnpublish,
 }) {
   const [activeView, setActiveView] = useState("preview");
-  const [isPreviewLoading, setIsPreviewLoading] = useState(Boolean(selectedUrl));
+  const [isPreviewLoading, setIsPreviewLoading] = useState(
+    Boolean(selectedUrl),
+  );
   const [previewLoadError, setPreviewLoadError] = useState(null);
   const activeViewport =
     VIEWPORTS.find((item) => item.id === viewport) ?? VIEWPORTS[0];
@@ -44,7 +63,15 @@ export function DesignPreviewPane({
     currentTask?.status === "running" || currentTask?.status === "pending";
   const isGenerating = isRunning;
   const showThinkingView = activeView === "thinking";
-  const showPreviewLoader = !showThinkingView && selectedUrl && isPreviewLoading;
+  const showPreviewLoader =
+    !showThinkingView && selectedUrl && isPreviewLoading;
+
+  // Extract design ID from selectedUrl
+  const currentDesignId = (() => {
+    if (!selectedUrl) return null;
+    const match = selectedUrl.match(/^\/design-preview\/([^/]+)(?:\/.*)?$/);
+    return match?.[1] ?? null;
+  })();
 
   useEffect(() => {
     if (!selectedUrl) {
@@ -56,6 +83,57 @@ export function DesignPreviewPane({
     setIsPreviewLoading(true);
     setPreviewLoadError(null);
   }, [selectedUrl]);
+
+  const handlePublishToggle = async () => {
+    if (!currentDesignId) {
+      toaster.create({
+        title: "Cannot publish",
+        description: "No design selected",
+        type: "error",
+      });
+      return;
+    }
+
+    if (publishedUrl) {
+      // Unpublish
+      const result = await onUnpublish(currentDesignId);
+      if (result.success) {
+        toaster.create({
+          title: "Design unpublished",
+          description: "The ngrok tunnel has been closed",
+          type: "success",
+        });
+      } else {
+        toaster.create({
+          title: "Failed to unpublish",
+          description: result.error,
+          type: "error",
+        });
+      }
+    } else {
+      // Publish
+      const result = await onPublish(currentDesignId);
+      if (result.success) {
+        toaster.create({
+          title: "Design published!",
+          description: "Your design is now publicly accessible",
+          type: "success",
+        });
+      } else {
+        toaster.create({
+          title: "Failed to publish",
+          description: result.error,
+          type: "error",
+        });
+      }
+    }
+  };
+
+  const handleOpenPublicUrl = () => {
+    if (publishedUrl) {
+      window.open(publishedUrl, "_blank", "noopener,noreferrer");
+    }
+  };
 
   return (
     <Box flex={1} display="flex" flexDirection="column" minW={0}>
@@ -79,6 +157,45 @@ export function DesignPreviewPane({
             >
               <PanelLeft size={16} />
             </IconButton>
+          )}
+
+          {hasDesignFiles && currentDesignId && (
+            <HStack gap={1}>
+              <Button
+                size="xs"
+                borderRadius="full"
+                variant={publishedUrl ? "solid" : "outline"}
+                colorPalette={publishedUrl ? "purple" : "gray"}
+                onClick={handlePublishToggle}
+                disabled={isPublishing || !currentDesignId}
+              >
+                {isPublishing ? (
+                  <Spinner size="xs" />
+                ) : publishedUrl ? (
+                  <X size={12} />
+                ) : (
+                  <Globe size={12} />
+                )}
+                {isPublishing
+                  ? "Publishing..."
+                  : publishedUrl
+                    ? "Unpublish"
+                    : "Publish"}
+              </Button>
+
+              {publishedUrl && (
+                <IconButton
+                  size="xs"
+                  variant="ghost"
+                  borderRadius="full"
+                  onClick={handleOpenPublicUrl}
+                  aria-label="Open public URL"
+                  title={publishedUrl}
+                >
+                  <ExternalLink size={12} />
+                </IconButton>
+              )}
+            </HStack>
           )}
 
           <HStack
@@ -409,3 +526,4 @@ export function DesignPreviewPane({
     </Box>
   );
 }
+

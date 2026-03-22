@@ -99,6 +99,12 @@ export default function DesignPage() {
     startGeneration,
     recordTaskEvent,
     clearAll,
+    publishedUrl,
+    isPublishing,
+    publishError,
+    publishDesign,
+    unpublishDesign,
+    checkPublishStatus,
   } = useDesignStudioStore();
 
   const progressByTaskId = useTaskProgressStore(
@@ -429,6 +435,11 @@ export default function DesignPage() {
           model={currentTaskModel}
           sidebarVisible={sidebarVisible}
           onShowSidebar={() => setSidebarVisible(true)}
+          publishedUrl={publishedUrl}
+          isPublishing={isPublishing}
+          publishError={publishError}
+          onPublish={publishDesign}
+          onUnpublish={unpublishDesign}
         />
       </Center>
     </Center>

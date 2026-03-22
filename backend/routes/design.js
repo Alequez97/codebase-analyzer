@@ -10,6 +10,8 @@ import {
 import { getTasks } from "../orchestrators/task.js";
 import { loadChatHistory } from "../utils/chat-history.js";
 import { TASK_TYPES } from "../constants/task-types.js";
+import ngrokManager from "../utils/ngrok-manager.js";
+import config from "../config.js";
 
 const router = express.Router();
 
@@ -251,6 +253,131 @@ router.post("/generate", async (req, res) => {
     });
     return res.status(500).json({
       error: "Failed to start design planning",
+      message: error.message,
+    });
+  }
+});
+
+// ==================== Ngrok Publish/Unpublish ====================
+
+router.post("/publish/:designId", async (req, res) => {
+  try {
+    const { designId } = req.params;
+
+    if (!designId || typeof designId !== "string" || !designId.trim()) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "designId is required",
+      });
+    }
+
+    logger.info("Publishing design via ngrok", {
+      component: "DesignRoutes",
+      designId,
+    });
+
+    const publicUrl = await ngrokManager.startTunnel(designId, config.port);
+
+    logger.info("Design published successfully", {
+      component: "DesignRoutes",
+      designId,
+      url: publicUrl,
+    });
+
+    return res.json({
+      success: true,
+      designId,
+      url: publicUrl,
+    });
+  } catch (error) {
+    logger.error("Failed to publish design", {
+      component: "DesignRoutes",
+      designId: req.params.designId,
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      error: "Failed to publish design",
+      message: error.message,
+    });
+  }
+});
+
+router.delete("/publish/:designId", async (req, res) => {
+  try {
+    const { designId } = req.params;
+
+    if (!designId || typeof designId !== "string" || !designId.trim()) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "designId is required",
+      });
+    }
+
+    logger.info("Unpublishing design", {
+      component: "DesignRoutes",
+      designId,
+    });
+
+    const stopped = await ngrokManager.stopTunnel(designId);
+
+    if (!stopped) {
+      return res.status(404).json({
+        error: "Tunnel not found",
+        message: `No active tunnel found for design: ${designId}`,
+      });
+    }
+
+    logger.info("Design unpublished successfully", {
+      component: "DesignRoutes",
+      designId,
+    });
+
+    return res.json({
+      success: true,
+      designId,
+    });
+  } catch (error) {
+    logger.error("Failed to unpublish design", {
+      component: "DesignRoutes",
+      designId: req.params.designId,
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      error: "Failed to unpublish design",
+      message: error.message,
+    });
+  }
+});
+
+router.get("/publish/:designId", async (req, res) => {
+  try {
+    const { designId } = req.params;
+
+    if (!designId || typeof designId !== "string" || !designId.trim()) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "designId is required",
+      });
+    }
+
+    const url = ngrokManager.getTunnelUrl(designId);
+
+    return res.json({
+      designId,
+      url,
+      isPublished: url !== null,
+    });
+  } catch (error) {
+    logger.error("Failed to get publish status", {
+      component: "DesignRoutes",
+      designId: req.params.designId,
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      error: "Failed to get publish status",
       message: error.message,
     });
   }

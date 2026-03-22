@@ -141,7 +141,9 @@ export function DesignWorkspaceSidebar({
           editTaskError={editTaskError}
           model={editTask?.model ?? null}
           selectedModel={selectedModel}
+          selectedTechnology={selectedTechnology}
           onModelChange={onModelChange}
+          onTechnologyChange={onTechnologyChange}
           defaultModelLabel={defaultModelLabel}
           isInSidebar={true}
         />

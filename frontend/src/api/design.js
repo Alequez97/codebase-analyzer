@@ -39,3 +39,14 @@ export const generateDesign = ({
     technology,
     agentsOverrides: model ? { model } : null,
   });
+
+// Ngrok publish/unpublish
+export const publishDesign = (designId) =>
+  client.post(`/design/publish/${designId}`);
+
+export const unpublishDesign = (designId) =>
+  client.delete(`/design/publish/${designId}`);
+
+export const getPublishStatus = (designId) =>
+  client.get(`/design/publish/${designId}`);
+

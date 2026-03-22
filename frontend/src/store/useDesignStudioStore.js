@@ -5,6 +5,9 @@ import {
   getLatestGenerationTask,
   respondToTask,
   cancelTask,
+  publishDesign,
+  unpublishDesign,
+  getPublishStatus,
 } from "../api";
 import { DESIGN_TECHNOLOGIES } from "../constants/design-technologies";
 
@@ -117,6 +120,11 @@ export const useDesignStudioStore = create((set, get) => ({
   sidebarTab: "chat",
   pendingQuestion: null, // { messageId, message, taskId, user_options, selectionType } | null
   isWaitingForUser: false,
+
+  // Ngrok publish state
+  publishedUrl: null,
+  isPublishing: false,
+  publishError: null,
 
   setGenerationBrief: (generationBrief) => set({ generationBrief }),
 
@@ -425,6 +433,97 @@ export const useDesignStudioStore = create((set, get) => ({
       const errorMessage =
         error?.response?.data?.error || "Failed to start design generation";
       set({ taskError: errorMessage, loadingTaskMessages: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  // ==================== Ngrok Publish Actions ====================
+
+  publishDesign: async (designId) => {
+    if (!designId) {
+      return { success: false, error: "Design ID is required" };
+    }
+
+    set({ isPublishing: true, publishError: null });
+
+    try {
+      const response = await publishDesign(designId);
+      const url = response?.data?.url ?? null;
+
+      set({
+        publishedUrl: url,
+        isPublishing: false,
+        publishError: null,
+      });
+
+      return { success: true, url };
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to publish design";
+      set({
+        publishedUrl: null,
+        isPublishing: false,
+        publishError: errorMessage,
+      });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  unpublishDesign: async (designId) => {
+    if (!designId) {
+      return { success: false, error: "Design ID is required" };
+    }
+
+    set({ isPublishing: true, publishError: null });
+
+    try {
+      await unpublishDesign(designId);
+
+      set({
+        publishedUrl: null,
+        isPublishing: false,
+        publishError: null,
+      });
+
+      return { success: true };
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to unpublish design";
+      set({
+        isPublishing: false,
+        publishError: errorMessage,
+      });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  checkPublishStatus: async (designId) => {
+    if (!designId) {
+      return { success: false, error: "Design ID is required" };
+    }
+
+    try {
+      const response = await getPublishStatus(designId);
+      const url = response?.data?.url ?? null;
+
+      set({
+        publishedUrl: url,
+        publishError: null,
+      });
+
+      return { success: true, url, isPublished: url !== null };
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to check publish status";
+      set({
+        publishError: errorMessage,
+      });
       return { success: false, error: errorMessage };
     }
   },
