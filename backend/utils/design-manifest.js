@@ -26,10 +26,55 @@ function readJsonIfExists(filePath) {
   }
 
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    const raw = fs.readFileSync(filePath, "utf-8").replace(/^\uFEFF/, "");
+    return JSON.parse(raw);
   } catch {
     return null;
   }
+}
+
+function normalizePreviewUrl(designId, relativePath) {
+  const normalizedPath = String(relativePath || "")
+    .replace(/\\/g, "/")
+    .replace(/^\.?\//, "");
+
+  return `/design-preview/${designId}/${normalizedPath}`;
+}
+
+function resolvePreviewEntry(base, designId) {
+  const manifestPath = path.join(base, designId, "app-manifest.json");
+  const appManifest = readJsonIfExists(manifestPath);
+
+  if (appManifest?.preview?.entryHtml) {
+    const previewPath = path.join(base, designId, appManifest.preview.entryHtml);
+    if (fs.existsSync(previewPath)) {
+      return {
+        indexPath: previewPath,
+        url: normalizePreviewUrl(designId, appManifest.preview.entryHtml),
+        appManifest,
+      };
+    }
+  }
+
+  let indexPath = path.join(base, designId, "index.html");
+  let url = `/design-preview/${designId}/index.html`;
+
+  if (fs.existsSync(indexPath)) {
+    return { indexPath, url, appManifest };
+  }
+
+  if (appManifest?.pages?.length) {
+    const firstPage = appManifest.pages[0];
+    const pageId = slugifyDesignPageId(firstPage.id || firstPage.name);
+    indexPath = path.join(base, designId, "pages", pageId, "index.html");
+    url = `/design-preview/${designId}/pages/${pageId}/index.html`;
+
+    if (fs.existsSync(indexPath)) {
+      return { indexPath, url, appManifest };
+    }
+  }
+
+  return null;
 }
 
 export function loadDesignManifest() {
@@ -46,32 +91,22 @@ export function loadDesignManifest() {
       continue;
     }
 
-    // First check for root index.html
-    let indexPath = path.join(base, entry.name, "index.html");
-    let url = `/design-preview/${entry.name}/index.html`;
+    const previewEntry = resolvePreviewEntry(base, entry.name);
 
-    // If no root index.html, check for first page's index.html
-    if (!fs.existsSync(indexPath)) {
-      const manifestPath = path.join(base, entry.name, "app-manifest.json");
-      const appManifest = readJsonIfExists(manifestPath);
-
-      if (appManifest?.pages?.length) {
-        const firstPage = appManifest.pages[0];
-        const pageId = slugifyDesignPageId(firstPage.id || firstPage.name);
-        indexPath = path.join(base, entry.name, "pages", pageId, "index.html");
-        url = `/design-preview/${entry.name}/pages/${pageId}/index.html`;
-      }
-    }
-
-    // Only add version if we found an index.html
-    if (fs.existsSync(indexPath)) {
+    if (previewEntry) {
       versions.push({
         id: entry.name,
         label: formatVersionLabel(entry.name),
-        url,
+        url: previewEntry.url,
         designId: entry.name,
         designLabel: formatVersionLabel(entry.name),
         pageId: null,
+        prototypeType: previewEntry.appManifest?.prototypeType ?? "static-html",
+        previewType: previewEntry.appManifest?.preview?.type ?? "static-html",
+        previewEntryHtml: previewEntry.appManifest?.preview?.entryHtml ?? null,
+        needsServerBuild:
+          previewEntry.appManifest?.prototypeType === "react-static-build" ||
+          previewEntry.appManifest?.preview?.type === "static-dist",
       });
     }
   }
@@ -91,4 +126,3 @@ export function loadDesignManifest() {
 
   return { versions };
 }
-

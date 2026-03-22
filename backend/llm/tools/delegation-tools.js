@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { randomBytes } from "crypto";
 import * as logger from "../../utils/logger.js";
+import { DESIGN_TECHNOLOGIES } from "../../constants/design-technologies.js";
 
 /**
  * Task types that can be targeted by delegate_task.
@@ -54,7 +55,7 @@ The delegation request file content becomes the user message (or briefing) for t
       params: {
         type: "object",
         description:
-          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Direct design page tasks require `designId`, `pageId`, `pageName`, and optionally `route`.",
+          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Direct design page tasks require `designId`, `pageId`, `pageName`, and optionally `route` and `technology`.",
       },
     },
     required: ["type", "requestFile"],
@@ -240,7 +241,13 @@ export class DelegationToolExecutor {
 
   async _delegateDirectTask({ type, queueFn, requestContent, mergedParams }) {
     if (type === "design-generate-page") {
-      const { designId, pageId, pageName, route = "" } = mergedParams;
+      const {
+        designId,
+        pageId,
+        pageName,
+        route = "",
+        technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
+      } = mergedParams;
       if (!designId || !pageId || !pageName) {
         return {
           success: false,
@@ -261,6 +268,7 @@ export class DelegationToolExecutor {
           pageId,
           pageName,
           route,
+          technology,
         },
         successMeta: {
           designId,

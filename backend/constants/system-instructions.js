@@ -21,6 +21,10 @@ export const SYSTEM_INSTRUCTION_NAMES = {
   DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     "design/design-plan-and-style-system-generate.md",
   DESIGN_GENERATE_PAGE: "design/design-generate-page.md",
+  DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE_REACT_VITE:
+    "design/design-plan-and-style-system-generate-react-vite.md",
+  DESIGN_GENERATE_PAGE_REACT_VITE:
+    "design/design-generate-page-react-vite.md",
   EDIT_DESIGN_LATEST: "design/edit-design-latest-version.md",
 };
 
@@ -61,6 +65,10 @@ export const SYSTEM_INSTRUCTION_PATHS = {
     "backend/system-instructions/design/design-plan-and-style-system-generate.md",
   DESIGN_GENERATE_PAGE:
     "backend/system-instructions/design/design-generate-page.md",
+  DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE_REACT_VITE:
+    "backend/system-instructions/design/design-plan-and-style-system-generate-react-vite.md",
+  DESIGN_GENERATE_PAGE_REACT_VITE:
+    "backend/system-instructions/design/design-generate-page-react-vite.md",
   EDIT_DESIGN_LATEST:
     "backend/system-instructions/design/edit-design-latest-version.md",
 };

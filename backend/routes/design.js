@@ -1,6 +1,7 @@
 import express from "express";
 import * as logger from "../utils/logger.js";
 import { loadDesignManifest } from "../utils/design-manifest.js";
+import { DESIGN_TECHNOLOGY_VALUES } from "../constants/design-technologies.js";
 import {
   queueDesignBrainstormTask,
   queueDesignPlanAndStyleSystemGenerateTask,
@@ -192,6 +193,7 @@ router.post("/generate", async (req, res) => {
       brief = "",
       history = [],
       designId = null,
+      technology = null,
       agentsOverrides = null,
     } = req.body ?? {};
     const model = agentsOverrides?.model || null;
@@ -203,11 +205,19 @@ router.post("/generate", async (req, res) => {
       });
     }
 
+    if (technology && !DESIGN_TECHNOLOGY_VALUES.includes(technology)) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: `technology must be one of: ${DESIGN_TECHNOLOGY_VALUES.join(", ")}`,
+      });
+    }
+
     const task = await queueDesignPlanAndStyleSystemGenerateTask({
       prompt: prompt.trim(),
       brief: typeof brief === "string" ? brief.trim() : "",
       history,
       designId,
+      technology,
       model,
     });
 

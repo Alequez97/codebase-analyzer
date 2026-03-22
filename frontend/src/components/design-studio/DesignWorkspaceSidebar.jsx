@@ -1,4 +1,4 @@
-import {
+﻿import {
   Box,
   Button,
   HStack,
@@ -31,7 +31,9 @@ export function DesignWorkspaceSidebar({
   currentTask,
   isBrainstorming,
   selectedModel,
+  selectedTechnology,
   onModelChange,
+  onTechnologyChange,
   defaultModelLabel,
   activeTab,
   onTabChange,
@@ -73,7 +75,6 @@ export function DesignWorkspaceSidebar({
       display="flex"
       flexDirection="column"
     >
-      {/* Header with tabs and close button */}
       <HStack
         justify="space-between"
         px={4}
@@ -124,7 +125,6 @@ export function DesignWorkspaceSidebar({
         </IconButton>
       </HStack>
 
-      {/* Chat Tab Content */}
       {activeTab === "chat" && (
         <DesignEditChat
           editMessages={editMessages}
@@ -132,7 +132,6 @@ export function DesignWorkspaceSidebar({
           onClearEdit={onClearEdit}
           onSendEditResponse={(msg) => {
             if (editMessages.length === 0 && !isEditing) {
-              // User directly sends a message starting edit
               onStartEdit(msg);
             } else {
               onSendEditResponse(msg);
@@ -148,7 +147,6 @@ export function DesignWorkspaceSidebar({
         />
       )}
 
-      {/* Files Tab Content */}
       {activeTab === "files" && (
         <VStack align="stretch" gap={3} p={4} flex={1} minH={0}>
           <HStack justify="space-between" align="center" px={2}>
@@ -228,7 +226,6 @@ export function DesignWorkspaceSidebar({
         </VStack>
       )}
 
-      {/* Brainstorm Tab Content */}
       {activeTab === "brainstorm" && (
         <VStack align="stretch" p={0} flex={1} minH={0} h="full">
           <DesignBrainstormChat
@@ -248,7 +245,6 @@ export function DesignWorkspaceSidebar({
             pendingQuestion={brainstormPendingQuestion}
             onSendMessage={(msg) => {
               if (brainstormMessages.length === 0 && !isBrainstorming) {
-                // user directly sends a message starting brainstorm
                 onPromptChange(msg);
                 onBrainstorm(msg);
               } else {
@@ -262,7 +258,9 @@ export function DesignWorkspaceSidebar({
             brainstormComplete={brainstormComplete}
             isInSidebar={true}
             selectedModel={selectedModel}
+            selectedTechnology={selectedTechnology}
             onModelChange={onModelChange}
+            onTechnologyChange={onTechnologyChange}
             defaultModelLabel={defaultModelLabel}
           />
         </VStack>

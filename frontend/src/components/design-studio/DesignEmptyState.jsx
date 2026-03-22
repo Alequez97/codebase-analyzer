@@ -1,6 +1,7 @@
-import { Box, Button, HStack, Text, Textarea, VStack } from "@chakra-ui/react";
+﻿import { Box, Button, HStack, Text, Textarea, VStack } from "@chakra-ui/react";
 import { Lightbulb, Sparkles, Wand2 } from "lucide-react";
 import { DesignBrainstormChat } from "./DesignBrainstormChat";
+import { DesignTechnologySelector } from "./DesignTechnologySelector";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
 
 export function DesignEmptyState({
@@ -15,7 +16,9 @@ export function DesignEmptyState({
   taskMessages,
   taskError,
   selectedModel,
+  selectedTechnology,
   onModelChange,
+  onTechnologyChange,
   defaultModelLabel,
   pendingQuestion,
   onSendUserResponse,
@@ -35,8 +38,6 @@ export function DesignEmptyState({
     currentTask?.type === "design-brainstorm" ||
     conversationMessages.length > 0;
 
-  // Route a message from the chat input: if pending question → reply to agent,
-  // otherwise treat it as a follow-up brainstorm prompt.
   const handleChatMessage = async (text) => {
     if (pendingQuestion) {
       await onSendUserResponse(text);
@@ -48,7 +49,6 @@ export function DesignEmptyState({
 
   const bg = "linear-gradient(180deg, #fffaf3 0%, #f7fbff 44%, #eef5ff 100%)";
 
-  // ── Brainstorm chat view ──────────────────────────────────────────────────
   if (isBrainstormMode) {
     return (
       <Box
@@ -71,14 +71,15 @@ export function DesignEmptyState({
           model={currentTaskModel}
           brainstormComplete={brainstormComplete}
           selectedModel={selectedModel}
+          selectedTechnology={selectedTechnology}
           onModelChange={onModelChange}
+          onTechnologyChange={onTechnologyChange}
           defaultModelLabel={defaultModelLabel}
         />
       </Box>
     );
   }
 
-  // ── Setup / idle form view ────────────────────────────────────────────────
   return (
     <Box
       minH="calc(100vh - 49px)"
@@ -195,7 +196,7 @@ export function DesignEmptyState({
                 />
                 <HStack
                   justify="space-between"
-                  align="center"
+                  align="start"
                   px={4}
                   py={3}
                   borderTopWidth="1px"
@@ -204,16 +205,23 @@ export function DesignEmptyState({
                   flexWrap="wrap"
                   gap={3}
                 >
-                  <Text
-                    fontSize="10px"
-                    fontWeight="800"
-                    color="gray.500"
-                    textTransform="uppercase"
-                    letterSpacing="0.12em"
-                  >
-                    Model
-                  </Text>
+                  <Box minW={{ base: "100%", sm: "280px" }} flex="1">
+                    <DesignTechnologySelector
+                      value={selectedTechnology}
+                      onChange={onTechnologyChange}
+                    />
+                  </Box>
                   <Box minW={{ base: "100%", sm: "260px" }} flex="1">
+                    <Text
+                      fontSize="10px"
+                      fontWeight="800"
+                      color="gray.500"
+                      textTransform="uppercase"
+                      letterSpacing="0.12em"
+                      mb={2}
+                    >
+                      Model
+                    </Text>
                     <ModelSelector
                       value={selectedModel}
                       onChange={onModelChange}

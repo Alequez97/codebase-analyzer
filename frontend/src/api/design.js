@@ -28,6 +28,7 @@ export const generateDesign = ({
   brief,
   history = [],
   designId = null,
+  technology = null,
   model = null,
 }) =>
   client.post("/design/generate", {
@@ -35,6 +36,6 @@ export const generateDesign = ({
     brief,
     history,
     designId,
+    technology,
     agentsOverrides: model ? { model } : null,
   });
-

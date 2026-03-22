@@ -4,6 +4,7 @@
  */
 
 import { TASK_TYPES } from "../constants/task-types.js";
+import { DESIGN_TECHNOLOGIES } from "../constants/design-technologies.js";
 import {
   getDomainSectionContentMdRelativePath,
   getDomainSectionContentJsonRelativePath,
@@ -280,11 +281,18 @@ export function buildCodebaseTemplateVariables(task) {
 function buildDesignTemplateVariables(task) {
   const designId = task.params?.designId || "";
   const pageId = task.params?.pageId || "";
+  const technology =
+    task.params?.technology || DESIGN_TECHNOLOGIES.STATIC_HTML;
 
   return {
     CODEBASE_PATH: task.params?.targetDirectory || "",
     PROMPT: task.params?.prompt || "",
     BRIEF: task.params?.brief || "",
+    TECHNOLOGY: technology,
+    IS_REACT_VITE:
+      technology === DESIGN_TECHNOLOGIES.REACT_VITE ? "true" : "",
+    IS_STATIC_HTML:
+      technology === DESIGN_TECHNOLOGIES.STATIC_HTML ? "true" : "",
     DESIGN_ID: designId,
     PAGE_ID: pageId,
     PAGE_NAME: task.params?.pageName || "",

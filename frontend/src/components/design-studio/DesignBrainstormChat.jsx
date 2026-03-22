@@ -1,4 +1,4 @@
-import {
+﻿import {
   Box,
   Button,
   HStack,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
+import { DesignTechnologySelector } from "./DesignTechnologySelector";
 
 const DOT_DELAY = ["0s", "0.18s", "0.36s"];
 
@@ -106,10 +107,6 @@ function MessageBubble({ message }) {
   );
 }
 
-/**
- * Try to parse a color-option entry.
- * Returns { label, colors, description } if valid JSON with colors, else null.
- */
 function parseColorOption(raw) {
   try {
     const parsed = JSON.parse(raw);
@@ -286,7 +283,9 @@ export function DesignBrainstormChat({
   brainstormComplete,
   isInSidebar = false,
   selectedModel = null,
+  selectedTechnology = null,
   onModelChange = null,
+  onTechnologyChange = null,
   defaultModelLabel = null,
 }) {
   const [input, setInput] = useState("");
@@ -331,7 +330,6 @@ export function DesignBrainstormChat({
       backdropFilter={isInSidebar ? "none" : "blur(18px)"}
       overflow="hidden"
     >
-      {/* Header */}
       <HStack
         justify="space-between"
         px={5}
@@ -382,7 +380,6 @@ export function DesignBrainstormChat({
         </Button>
       </HStack>
 
-      {/* Messages */}
       <VStack
         ref={scrollRef}
         align="stretch"
@@ -428,7 +425,6 @@ export function DesignBrainstormChat({
         )}
       </VStack>
 
-      {/* Input — replaced by proceed button once brainstorm is complete */}
       <Box
         px={5}
         py={4}
@@ -437,21 +433,29 @@ export function DesignBrainstormChat({
         flexShrink={0}
       >
         {brainstormComplete ? (
-          <Button
-            w="full"
-            size="lg"
-            bg="gray.950"
-            color="white"
-            borderRadius="18px"
-            h="52px"
-            fontSize="sm"
-            fontWeight="600"
-            onClick={() => onGenerate("new")}
-            _hover={{ bg: "black" }}
-          >
-            <Wand2 size={16} />
-            Proceed to Design Generation
-          </Button>
+          <VStack align="stretch" gap={3}>
+            {onTechnologyChange && selectedTechnology && (
+              <DesignTechnologySelector
+                value={selectedTechnology}
+                onChange={onTechnologyChange}
+              />
+            )}
+            <Button
+              w="full"
+              size="lg"
+              bg="gray.950"
+              color="white"
+              borderRadius="18px"
+              h="52px"
+              fontSize="sm"
+              fontWeight="600"
+              onClick={() => onGenerate("new")}
+              _hover={{ bg: "black" }}
+            >
+              <Wand2 size={16} />
+              Proceed to Design Generation
+            </Button>
+          </VStack>
         ) : (
           <HStack gap={2} align="flex-end">
             <Box
@@ -485,31 +489,43 @@ export function DesignBrainstormChat({
                   boxShadow: "none",
                 }}
               />
-              {onModelChange && (
-                <HStack
+              {(onModelChange || onTechnologyChange) && (
+                <VStack
+                  align="stretch"
                   px={3}
                   py={2}
                   borderTopWidth="1px"
                   borderColor="rgba(226,232,240,0.9)"
-                  justify="space-between"
+                  gap={3}
                 >
-                  <Text
-                    fontSize="10px"
-                    fontWeight="800"
-                    color="gray.500"
-                    textTransform="uppercase"
-                    letterSpacing="0.12em"
-                  >
-                    Model
-                  </Text>
-                  <Box minW="220px" maxW="100%">
-                    <ModelSelector
-                      value={selectedModel}
-                      onChange={onModelChange}
-                      defaultLabel={defaultModelLabel}
+                  {onTechnologyChange && selectedTechnology && (
+                    <DesignTechnologySelector
+                      value={selectedTechnology}
+                      onChange={onTechnologyChange}
                     />
-                  </Box>
-                </HStack>
+                  )}
+                  {onModelChange && (
+                    <HStack justify="space-between" align="start">
+                      <Text
+                        fontSize="10px"
+                        fontWeight="800"
+                        color="gray.500"
+                        textTransform="uppercase"
+                        letterSpacing="0.12em"
+                        mt={1}
+                      >
+                        Model
+                      </Text>
+                      <Box minW="220px" maxW="100%">
+                        <ModelSelector
+                          value={selectedModel}
+                          onChange={onModelChange}
+                          defaultLabel={defaultModelLabel}
+                        />
+                      </Box>
+                    </HStack>
+                  )}
+                </VStack>
               )}
             </Box>
             <Button

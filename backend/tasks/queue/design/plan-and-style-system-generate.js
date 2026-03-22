@@ -1,8 +1,9 @@
 import * as tasksPersistence from "../../../persistence/tasks.js";
 import { getAgentConfig } from "../../executors/index.js";
-import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions.js";
+import { getDesignPlanSystemInstructionPath } from "../../../constants/design-system-instructions.js";
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
+import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
 import { generateTaskId } from "../../utils.js";
 import {
   initChatHistory,
@@ -26,6 +27,7 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
   brief,
   history = [],
   designId = null,
+  technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
   model = null,
 }) {
   const agentConfigResult = getAgentConfig(
@@ -50,6 +52,7 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
       brief,
       history,
       designId: normalizedDesignId,
+      technology,
       designPath: getDesignVariantRelativePath(normalizedDesignId),
       briefPath: getDesignBriefRelativePath(normalizedDesignId),
       appManifestPath: getDesignAppManifestRelativePath(normalizedDesignId),
@@ -58,8 +61,7 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
       userInstruction: brief || prompt,
     },
     agentConfig: agentConfigResult.agentConfig,
-    systemInstructionFile:
-      SYSTEM_INSTRUCTION_PATHS.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
+    systemInstructionFile: getDesignPlanSystemInstructionPath(technology),
     progressFile: getProgressFileRelativePath(taskId),
   };
 

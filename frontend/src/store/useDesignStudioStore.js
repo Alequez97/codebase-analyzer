@@ -6,6 +6,7 @@ import {
   respondToTask,
   cancelTask,
 } from "../api";
+import { DESIGN_TECHNOLOGIES } from "../constants/design-technologies";
 
 function getFirstPreviewUrl(manifest) {
   return manifest?.versions?.[0]?.url ?? null;
@@ -104,6 +105,7 @@ export const useDesignStudioStore = create((set, get) => ({
   currentTaskAgent: null,
   currentTaskModel: null,
   selectedModel: null,
+  selectedTechnology: DESIGN_TECHNOLOGIES.STATIC_HTML,
   designMode: "new", // "new" or "improve"
   prompt: "",
   generationBrief: "",
@@ -163,6 +165,7 @@ export const useDesignStudioStore = create((set, get) => ({
   },
 
   setSelectedModel: (selectedModel) => set({ selectedModel }),
+  setSelectedTechnology: (selectedTechnology) => set({ selectedTechnology }),
   setSidebarVisible: (visible) => set({ sidebarVisible: visible }),
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
   setDesignMode: (mode) => set({ designMode: mode }),
@@ -330,6 +333,8 @@ export const useDesignStudioStore = create((set, get) => ({
       set({
         generationMessages: messages,
         generationBrief: task.params?.brief || "",
+        selectedTechnology:
+          task.params?.technology || DESIGN_TECHNOLOGIES.STATIC_HTML,
         currentTaskId: isActiveTask ? task.id : null,
         currentTaskAgent: isActiveTask
           ? (task.agentConfig?.agent ?? null)
@@ -379,6 +384,7 @@ export const useDesignStudioStore = create((set, get) => ({
       prompt || effectiveBrief.slice(0, 200).replace(/\n/g, " ");
     const userMessage = createLocalMessage("user", effectivePrompt);
     const model = get().selectedModel;
+    const technology = get().selectedTechnology;
 
     set({
       taskError: null,
@@ -393,6 +399,7 @@ export const useDesignStudioStore = create((set, get) => ({
         brief: effectiveBrief,
         history,
         designId: finalDesignId,
+        technology,
         model,
       });
 

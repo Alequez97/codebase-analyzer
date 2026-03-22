@@ -10,6 +10,7 @@ import { startQueueProcessor } from "./orchestrators/queue-processor.js";
 import { SOCKET_EVENTS } from "./constants/socket-events.js";
 import * as logger from "./utils/logger.js";
 import { initSocketEmitter } from "./utils/socket-emitter.js";
+import { ensureDesignPreviewReady } from "./utils/design-preview-builder.js";
 
 // Route imports
 import {
@@ -100,6 +101,30 @@ const designDir = path.join(
   ".code-analysis",
   "design",
 );
+app.use("/design-preview", async (req, res, next) => {
+  try {
+    const [designId] = req.path
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => decodeURIComponent(segment));
+
+    if (!designId) {
+      next();
+      return;
+    }
+
+    await ensureDesignPreviewReady(designId);
+    next();
+  } catch (error) {
+    logger.error("Failed to prepare design preview", {
+      component: "DesignPreview",
+      path: req.path,
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).send("Failed to prepare design preview");
+  }
+});
 app.use("/design-preview", express.static(designDir));
 
 // ==================== Error Handler ====================

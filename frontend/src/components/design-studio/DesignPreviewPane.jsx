@@ -1,14 +1,15 @@
-import {
+﻿import {
   Box,
   Button,
   Center,
   HStack,
   IconButton,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { Monitor, Smartphone, Tablet, Wand2, PanelLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DesignTaskConsole } from "./DesignTaskConsole";
 
 const VIEWPORTS = [
@@ -35,12 +36,26 @@ export function DesignPreviewPane({
   onShowSidebar,
 }) {
   const [activeView, setActiveView] = useState("preview");
+  const [isPreviewLoading, setIsPreviewLoading] = useState(Boolean(selectedUrl));
+  const [previewLoadError, setPreviewLoadError] = useState(null);
   const activeViewport =
     VIEWPORTS.find((item) => item.id === viewport) ?? VIEWPORTS[0];
   const isRunning =
     currentTask?.status === "running" || currentTask?.status === "pending";
   const isGenerating = isRunning;
   const showThinkingView = activeView === "thinking";
+  const showPreviewLoader = !showThinkingView && selectedUrl && isPreviewLoading;
+
+  useEffect(() => {
+    if (!selectedUrl) {
+      setIsPreviewLoading(false);
+      setPreviewLoadError(null);
+      return;
+    }
+
+    setIsPreviewLoading(true);
+    setPreviewLoadError(null);
+  }, [selectedUrl]);
 
   return (
     <Box flex={1} display="flex" flexDirection="column" minW={0}>
@@ -144,6 +159,7 @@ export function DesignPreviewPane({
           />
         ) : selectedUrl ? (
           <Box
+            position="relative"
             w={activeViewport.width ? `${activeViewport.width}px` : "100%"}
             h="100%"
             borderRadius="0"
@@ -155,7 +171,83 @@ export function DesignPreviewPane({
             maxW="100%"
             mx={activeViewport.width ? "auto" : 0}
           >
+            {showPreviewLoader && (
+              <Center
+                position="absolute"
+                inset={0}
+                zIndex={1}
+                bg="rgba(248, 250, 252, 0.96)"
+                backdropFilter="blur(8px)"
+              >
+                <VStack gap={4} maxW="420px" px={8} textAlign="center">
+                  <Spinner size="lg" color="orange.500" />
+                  <VStack gap={1}>
+                    <Text
+                      fontSize="xs"
+                      fontWeight="800"
+                      color="orange.700"
+                      textTransform="uppercase"
+                      letterSpacing="0.14em"
+                    >
+                      Preparing Preview
+                    </Text>
+                    <Text
+                      fontSize={{ base: "2xl", md: "3xl" }}
+                      lineHeight="1.02"
+                      letterSpacing="-0.04em"
+                      fontWeight="700"
+                      fontFamily="'Iowan Old Style', 'Palatino Linotype', serif"
+                      color="gray.900"
+                    >
+                      The selected version is loading.
+                    </Text>
+                    <Text fontSize="sm" color="gray.600" lineHeight="1.8">
+                      If this is a React-based prototype, the server may need to
+                      install dependencies and build the preview before it can
+                      be shown.
+                    </Text>
+                  </VStack>
+                </VStack>
+              </Center>
+            )}
+
+            {previewLoadError && (
+              <Center
+                position="absolute"
+                inset={0}
+                zIndex={2}
+                bg="rgba(255, 247, 237, 0.98)"
+                px={8}
+              >
+                <VStack gap={3} maxW="420px" textAlign="center">
+                  <Text
+                    fontSize="xs"
+                    fontWeight="800"
+                    color="red.700"
+                    textTransform="uppercase"
+                    letterSpacing="0.14em"
+                  >
+                    Preview Error
+                  </Text>
+                  <Text
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    lineHeight="1.02"
+                    letterSpacing="-0.04em"
+                    fontWeight="700"
+                    fontFamily="'Iowan Old Style', 'Palatino Linotype', serif"
+                    color="gray.900"
+                  >
+                    The preview could not be prepared.
+                  </Text>
+                  <Text fontSize="sm" color="gray.700" lineHeight="1.8">
+                    {previewLoadError}
+                  </Text>
+                </VStack>
+              </Center>
+            )}
+
             <iframe
+              key={selectedUrl}
               src={selectedUrl}
               title="Design Preview"
               style={{
@@ -163,19 +255,41 @@ export function DesignPreviewPane({
                 height: "100%",
                 border: "none",
                 display: "block",
+                visibility:
+                  showPreviewLoader || previewLoadError ? "hidden" : "visible",
               }}
               onLoad={(e) => {
                 try {
                   const body = e.target.contentDocument?.body;
+                  const bodyText = body?.innerText?.trim() || "";
+
+                  if (bodyText === "Failed to prepare design preview") {
+                    setPreviewLoadError(
+                      "The server could not install or build the selected preview.",
+                    );
+                    setIsPreviewLoading(false);
+                    return;
+                  }
+
                   if (
                     body &&
                     window.getComputedStyle(body).overflowY === "hidden"
                   ) {
                     body.style.overflowY = "auto";
                   }
+
+                  setPreviewLoadError(null);
+                  setIsPreviewLoading(false);
                 } catch {
-                  // cross-origin or document not ready
+                  setPreviewLoadError(null);
+                  setIsPreviewLoading(false);
                 }
+              }}
+              onError={() => {
+                setPreviewLoadError(
+                  "The preview frame failed to load the selected version.",
+                );
+                setIsPreviewLoading(false);
               }}
             />
           </Box>

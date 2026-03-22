@@ -23,7 +23,7 @@ function getFirstPreviewUrl(manifest) {
 }
 
 function getSelectedDesignId(selectedUrl, manifest) {
-  const match = selectedUrl?.match(/^\/design-preview\/([^/]+)\/index\.html$/);
+  const match = selectedUrl?.match(/^\/design-preview\/([^/]+)(?:\/.*)?$/);
   if (match?.[1]) {
     return match[1];
   }
@@ -79,6 +79,7 @@ export default function DesignPage() {
     currentTaskAgent,
     currentTaskModel,
     selectedModel,
+    selectedTechnology,
     sidebarVisible,
     sidebarTab,
     designMode,
@@ -87,6 +88,7 @@ export default function DesignPage() {
     setPrompt,
     setGenerationBrief,
     setSelectedModel,
+    setSelectedTechnology,
     setSidebarVisible,
     setSidebarTab,
     setDesignMode,
@@ -321,7 +323,9 @@ export default function DesignPage() {
         onGenerationBriefChange={setGenerationBrief}
         taskError={taskError}
         selectedModel={selectedModel}
+        selectedTechnology={selectedTechnology}
         onModelChange={setSelectedModel}
+        onTechnologyChange={setSelectedTechnology}
         defaultModelLabel={brainstormModelLabel}
         pendingQuestion={brainstormPendingQuestion || brainstormResponse}
         onSendUserResponse={sendBrainstormResponse}
@@ -373,7 +377,9 @@ export default function DesignPage() {
             onSelectUrl={setSelectedUrl}
             prompt={prompt}
             selectedModel={selectedModel}
+            selectedTechnology={selectedTechnology}
             onModelChange={setSelectedModel}
+            onTechnologyChange={setSelectedTechnology}
             defaultModelLabel={generationModelLabel}
             onPromptChange={setPrompt}
             generationBrief={generationBrief}

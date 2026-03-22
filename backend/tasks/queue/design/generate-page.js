@@ -1,8 +1,9 @@
 import * as tasksPersistence from "../../../persistence/tasks.js";
 import { getAgentConfig } from "../../executors/index.js";
-import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions.js";
+import { getDesignPageSystemInstructionPath } from "../../../constants/design-system-instructions.js";
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
+import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
 import { generateTaskId } from "../../utils.js";
 import { initChatHistory } from "../../../utils/chat-history.js";
 import {
@@ -26,6 +27,7 @@ export async function queueDesignGeneratePageTask({
   pageName,
   route = "",
   designBriefing,
+  technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
   model = null,
   delegatedByTaskId = null,
 }) {
@@ -52,6 +54,7 @@ export async function queueDesignGeneratePageTask({
       pageName: pageName || normalizedPageId,
       route,
       designBriefing: designBriefing || "",
+      technology,
       appManifestPath: getDesignAppManifestRelativePath(normalizedDesignId),
       designSystemPath: getDesignSystemManifestRelativePath(normalizedDesignId),
       tokensPath: getDesignTokensOutputPath(normalizedDesignId),
@@ -68,7 +71,7 @@ export async function queueDesignGeneratePageTask({
       delegatedByTaskId,
     },
     agentConfig: agentConfigResult.agentConfig,
-    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.DESIGN_GENERATE_PAGE,
+    systemInstructionFile: getDesignPageSystemInstructionPath(technology),
     progressFile: getProgressFileRelativePath(taskId),
   };
 
