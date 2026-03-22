@@ -4,11 +4,6 @@ import { BaseLLMClient } from "./base-client.js";
 /**
  * Google Gemini LLM Client Implementation
  * Uses the @google/generative-ai SDK for Gemini models
- *
- * Supports:
- *   - gemini-2.0-flash-exp (experimental, fast responses)
- *   - gemini-1.5-pro (production, balanced performance)
- *   - gemini-1.5-flash (fast, cost-effective)
  */
 export class GeminiClient extends BaseLLMClient {
   constructor(config) {
