@@ -65,17 +65,7 @@ export function DesignPreviewPane({
               <PanelLeft size={16} />
             </IconButton>
           )}
-          <VStack align="start" gap={0}>
-            <Text fontSize="sm" fontWeight="800" color="gray.900">
-              Live Preview
-            </Text>
-            <Text fontSize="xs" color="gray.500">
-              Review the latest generated direction and refine it in place.
-            </Text>
-          </VStack>
-        </HStack>
 
-        <HStack gap={2} flexWrap="wrap" justify="flex-end">
           <HStack
             gap={1}
             p={1}
@@ -105,6 +95,9 @@ export function DesignPreviewPane({
               Generation Log
             </Button>
           </HStack>
+        </HStack>
+
+        <HStack gap={2} flexWrap="wrap" justify="flex-end">
 
           {hasDesignFiles &&
             VIEWPORTS.map(({ id, label, icon: Icon, width }) => (
