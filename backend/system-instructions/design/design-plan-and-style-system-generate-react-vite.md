@@ -36,20 +36,24 @@ That means:
 You must produce these shared files yourself:
 
 ### Core scaffold files
+
 1. `{{BRIEF_PATH}}`
 2. `{{DESIGN_SYSTEM_PATH}}`
 3. `{{APP_MANIFEST_PATH}}`
 4. `{{DESIGN_PATH}}/index.html`
 5. `{{DESIGN_PATH}}/package.json`
-6. `{{DESIGN_PATH}}/vite.config.js`
-7. `{{DESIGN_PATH}}/src/main.jsx`
-8. `{{DESIGN_PATH}}/src/app/App.jsx`
+6. `{{DESIGN_PATH}}/jsconfig.json` (for path aliases)
+7. `{{DESIGN_PATH}}/vite.config.js`
+8. `{{DESIGN_PATH}}/src/main.jsx`
+9. `{{DESIGN_PATH}}/src/app/App.jsx`
 
 ### Design system files
+
 9. `{{DESIGN_PATH}}/src/styles/tokens.css` (comprehensive design tokens)
 10. `{{DESIGN_PATH}}/src/styles/global.css` (reset/base styles)
 
 ### UI component library (mandatory)
+
 11. `{{DESIGN_PATH}}/src/components/ui/Typography/Heading.jsx`
 12. `{{DESIGN_PATH}}/src/components/ui/Typography/Heading.module.css`
 13. `{{DESIGN_PATH}}/src/components/ui/Typography/Text.jsx`
@@ -68,7 +72,9 @@ You must produce these shared files yourself:
 
 Optionally create a README documenting the design system at `{{DESIGN_PATH}}/src/components/ui/README.md`.
 
-`vite.config.js` must configure `base: "./"` so the generated preview works when `dist/index.html` is hosted from nested paths like `/design-preview/<version>/dist/index.html`.
+`vite.config.js` must configure `base: "./"` so the generated preview works when `dist/index.html` is hosted from nested paths like `/design-preview/<version>/dist/index.html`. It must also configure a path alias mapping `@/` to `src/`.
+
+You must generate a `jsconfig.json` file configuring `compilerOptions.paths` mapping `@/*` to `["src/*"]` to ensure correct editor Intellisense.
 
 Do not directly generate every page implementation yourself.
 Delegate each page after the shared React contract exists.
@@ -138,42 +144,61 @@ Define CSS custom properties for:
 Create a foundational component library that eliminates the need for page agents to write custom typography or basic layout code:
 
 #### Typography components (mandatory)
+
 - **Heading.jsx + Heading.module.css**: Component for h1-h6 with props: `level`, `size`, `weight`, `color`, `align`, `transform`
 - **Text.jsx + Text.module.css**: Body text component with props: `as`, `size`, `weight`, `color`, `align`, `leading`
 - **Display.jsx + Display.module.css**: Large display/hero text with responsive sizing, props: `size`, `weight`, `color`, `align`, `shadow`
 
 #### Layout components (mandatory)
+
 - **Stack.jsx + Stack.module.css**: Flexbox container with `direction` (column/row), `gap` (0-12), `align`, `justify`
 - **Container.jsx + Container.module.css**: Max-width container with `size` (xs/sm/md/lg/xl/2xl/full), `padding`, `center`
 
 #### Utility components (recommended)
+
 - **Divider.jsx + Divider.module.css**: Horizontal divider with optional label and color variants
 - **AnimatedLink.jsx + AnimatedLink.module.css**: Link with arrow or underline animation
 
 #### Organization
+
 - Each component in its own folder with colocated CSS module
 - Barrel export at `src/components/ui/index.js` for convenient imports
 - All components must use design tokens, not hardcoded values
 - Components should be prop-driven and composable
 
 **Why this matters**: Page agents will import and compose these components instead of writing repetitive typography CSS, leading to:
+
 - Consistent visual language across all pages
 - Faster page implementation
 - Easier maintenance and design updates
 - Reduced CSS duplication
 
 **Example usage pattern for page agents:**
+
 ```jsx
-import { Display, Text, Stack, Container, Divider, AnimatedLink } from "../../../../components/ui/index.js";
+import {
+  Display,
+  Text,
+  Stack,
+  Container,
+  Divider,
+  AnimatedLink,
+} from "@/components/ui/index.js";
 
 <Container size="md" padding center>
   <Stack gap={6} align="center">
-    <Display size="xl" weight="black" shadow>Hero Title</Display>
-    <Text size="lg" color="secondary" leading="relaxed">Subtitle text</Text>
+    <Display size="xl" weight="black" shadow>
+      Hero Title
+    </Display>
+    <Text size="lg" color="secondary" leading="relaxed">
+      Subtitle text
+    </Text>
     <Divider label="or" />
-    <AnimatedLink to="/next" arrow>Continue</AnimatedLink>
+    <AnimatedLink to="/next" arrow>
+      Continue
+    </AnimatedLink>
   </Stack>
-</Container>
+</Container>;
 ```
 
 ## Routing requirements
@@ -188,7 +213,7 @@ import { Display, Text, Stack, Container, Divider, AnimatedLink } from "../../..
 
 - add `zustand` to `package.json`
 - if state must be shared across routes or reused by multiple components, model it in a store
-- if state should survive refresh during the preview session, use Zustand persistence with `sessionStorage`, not `localStorage`
+- avoid using Zustand `persist` middleware unless strictly necessary; default to standard in-memory state to prevent syncing bugs
 - keep stores focused by domain instead of creating one monolithic global store
 - keep routing concerns out of stores unless the store is exposing domain actions that a routed page consumes
 
@@ -227,10 +252,11 @@ When delegating page generation:
 
 Summarize:
 
-- what shared React scaffold was created (index.html, package.json, vite.config.js, main.jsx, App.jsx)
+- what shared React scaffold was created (index.html, package.json, vite.config.js, jsconfig.json, main.jsx, App.jsx)
 - what design tokens were established (colors, typography, spacing, shadows, etc.)
 - which UI components were created (Typography, Layout, Utilities)
 - what routing/app-shell contract was defined
 - which Zustand stores were established (if any)
 - whether the shared scaffold build passed before delegation
 - which page tasks were delegated
+

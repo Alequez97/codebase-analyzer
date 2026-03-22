@@ -53,12 +53,13 @@ All design values are defined as CSS custom properties:
 A comprehensive set of building blocks is available. Import from `src/components/ui/index.js`:
 
 #### Typography components
+
 - **Heading**: Semantic headings with props: `level` (1-6), `size`, `weight`, `color`, `align`, `transform`
 - **Text**: Body text with props: `as`, `size`, `weight`, `color`, `align`, `leading`
 - **Display**: Large hero/display text with props: `size`, `weight`, `color`, `align`, `shadow`
 
 ```jsx
-import { Heading, Text, Display } from "../../components/ui/index.js";
+import { Heading, Text, Display } from "@/components/ui/index.js";
 
 <Display size="xl" weight="black" color="inverse" shadow>
   Hero Title
@@ -68,25 +69,27 @@ import { Heading, Text, Display } from "../../components/ui/index.js";
 ```
 
 #### Layout components
+
 - **Stack**: Flexbox container with props: `direction` (column/row), `gap` (0-12), `align`, `justify`
 - **Container**: Max-width container with props: `size` (xs/sm/md/lg/xl/2xl/full), `padding`, `center`
 
 ```jsx
-import { Stack, Container } from "../../components/ui/index.js";
+import { Stack, Container } from "@/components/ui/index.js";
 
 <Container size="md" padding center>
   <Stack direction="column" gap={6} align="center">
     {/* children */}
   </Stack>
-</Container>
+</Container>;
 ```
 
 #### Utility components
+
 - **Divider**: Horizontal divider with optional `label` and `color` props
 - **AnimatedLink**: Link with animated arrow or underline with props: `to`, `href`, `arrow`, `underline`, `color`
 
 ```jsx
-import { Divider, AnimatedLink } from "../../components/ui/index.js";
+import { Divider, AnimatedLink } from "@/components/ui/index.js";
 
 <Divider label="or" color="inverse" />
 <AnimatedLink to="/next" arrow color="accent">Continue</AnimatedLink>
@@ -95,6 +98,7 @@ import { Divider, AnimatedLink } from "../../components/ui/index.js";
 ### When to use UI components vs custom components
 
 **MUST use UI components for:**
+
 - All headings, titles, and display text → Use `Heading` or `Display`
 - All body text, labels, captions → Use `Text`
 - Vertical/horizontal spacing and layout → Use `Stack`
@@ -103,11 +107,13 @@ import { Divider, AnimatedLink } from "../../components/ui/index.js";
 - Navigation links → Use `AnimatedLink`
 
 **Create custom components only for:**
+
 - Domain-specific interactive elements (buttons with special behavior, form inputs, cards)
 - Complex composite patterns unique to your page/feature
 - Components that combine multiple UI elements with specialized logic
 
 **Example - WRONG way (hardcoded styles):**
+
 ```jsx
 <h1 style={{fontSize: '48px', fontWeight: 900, color: 'white'}}>Title</h1>
 <div style={{display: 'flex', gap: '16px', flexDirection: 'column'}}>
@@ -116,6 +122,7 @@ import { Divider, AnimatedLink } from "../../components/ui/index.js";
 ```
 
 **Example - CORRECT way (using design system):**
+
 ```jsx
 <Display size="xl" weight="black" color="inverse">Title</Display>
 <Stack direction="column" gap={4}>
@@ -128,6 +135,7 @@ import { Divider, AnimatedLink } from "../../components/ui/index.js";
 When page-specific styling is needed:
 
 1. **Reference design tokens**, never hardcode values:
+
    ```css
    .myComponent {
      padding: var(--space-4);
@@ -143,12 +151,22 @@ When page-specific styling is needed:
 
 ### Import pattern
 
-Always import from the barrel export:
-```jsx
-import { Heading, Text, Display, Stack, Container, Divider, AnimatedLink } from "../../../../components/ui/index.js";
-```
+Always use the `@/` path alias pointing to the `src/` directory to avoid deep relative paths (`../../../../`).
 
-Adjust the relative path depth based on your page location.
+Always import from the barrel export for UI components:
+
+```jsx
+import {
+  Heading,
+  Text,
+  Display,
+  Stack,
+  Container,
+  Divider,
+  AnimatedLink,
+} from "@/components/ui/index.js";
+import { useMyStore } from "@/features/myFeature/store/useMyStore.js";
+```
 
 ## Required outputs
 
@@ -171,7 +189,7 @@ Do not write page-local `index.html`, `styles.css`, or `app.js` files for this t
 - avoid building page navigation around local view-state when a route should express it
 - use Zustand for business logic, derived working state, and interactions shared across components
 - use `useState` only for truly local visual state
-- if persistence is needed, use Zustand persistence with `sessionStorage`
+- avoid using Zustand `persist` middleware unless strictly necessary due to syncing bugs; default to standard in-memory stores
 - prefer props and local mock data seams over hardcoded backend assumptions
 - keep the page realistic and interactive enough for preview
 - prefer CSS modules over global class names for page and component styling
@@ -205,3 +223,4 @@ Summarize:
 - whether the build passed after your changes
 - what interactions are live
 - which actions remain intentionally inert
+
