@@ -4,6 +4,7 @@ import {
   brainstormDesign,
   getLatestBrainstormTask,
   respondToTask,
+  cancelTask,
 } from "../api";
 
 function createLocalMessage(role, content) {
@@ -160,8 +161,8 @@ export const useDesignBrainstormStore = create(
         });
       },
 
-      startBrainstorm: async (selectedModel) => {
-        const prompt = get().prompt.trim();
+      startBrainstorm: async (promptOverride, selectedModel) => {
+        const prompt = (promptOverride || get().prompt).trim();
         if (!prompt) {
           return { success: false, error: "Prompt is required" };
         }
@@ -206,7 +207,15 @@ export const useDesignBrainstormStore = create(
         }
       },
 
-      clearBrainstorm: () =>
+      clearBrainstorm: async () => {
+        const { brainstormTaskId } = get();
+        if (brainstormTaskId) {
+          try {
+            await cancelTask(brainstormTaskId);
+          } catch (e) {
+            console.error("Failed to cancel brainstorm task", e);
+          }
+        }
         set({
           prompt: "",
           brainstormMessages: [],
@@ -218,7 +227,8 @@ export const useDesignBrainstormStore = create(
           brainstormTaskId: null,
           pendingQuestion: null,
           isWaitingForUser: false,
-        }),
+        });
+      },
 
       loadLatestBrainstorm: async () => {
         try {

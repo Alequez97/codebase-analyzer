@@ -309,6 +309,12 @@ export async function moveToCanceled(taskId) {
     TASK_FOLDERS.PENDING,
     `${taskId}.json`,
   );
+  const waitingPath = path.join(
+    config.paths.targetAnalysis,
+    "tasks",
+    TASK_FOLDERS.WAITING_FOR_USER,
+    `${taskId}.json`,
+  );
   const canceledPath = path.join(
     config.paths.targetAnalysis,
     "tasks",
@@ -316,11 +322,11 @@ export async function moveToCanceled(taskId) {
     `${taskId}.json`,
   );
 
-  // Find the task in running or pending
+  // Find the task in running, pending, or waiting_for_user
   let sourcePath = null;
   let task = null;
 
-  for (const taskPath of [runningPath, pendingPath]) {
+  for (const taskPath of [runningPath, pendingPath, waitingPath]) {
     try {
       const content = await fs.readFile(taskPath, "utf-8");
       task = JSON.parse(content);

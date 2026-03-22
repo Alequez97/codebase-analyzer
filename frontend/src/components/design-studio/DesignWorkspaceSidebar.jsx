@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
+import { DesignBrainstormChat } from "./DesignBrainstormChat";
 
 export function DesignWorkspaceSidebar({
   versions,
@@ -42,6 +43,12 @@ export function DesignWorkspaceSidebar({
   onDesignModeChange,
   nextVersionId,
   latestVersionId,
+  brainstormTask,
+  brainstormMessages,
+  brainstormPendingQuestion,
+  onSendBrainstormResponse,
+  brainstormComplete,
+  onClearBrainstorm,
 }) {
   const conversationMessages = taskMessages.filter(
     (message) =>
@@ -95,6 +102,16 @@ export function DesignWorkspaceSidebar({
           >
             <Layers size={14} />
             Versions
+          </Button>
+          <Button
+            size="sm"
+            variant={activeTab === "brainstorm" ? "solid" : "ghost"}
+            colorPalette={activeTab === "brainstorm" ? "orange" : "gray"}
+            borderRadius="full"
+            onClick={() => onTabChange("brainstorm")}
+          >
+            <Sparkles size={14} />
+            Brainstorm
           </Button>
         </HStack>
         <IconButton
@@ -184,72 +201,6 @@ export function DesignWorkspaceSidebar({
 
           {/* Input and controls at bottom */}
           <VStack align="stretch" gap={3} flexShrink={0}>
-            {/* Version Mode Selector */}
-            {versions.length > 0 && (
-              <VStack align="stretch" gap={2}>
-                <Text
-                  fontSize="10px"
-                  fontWeight="800"
-                  color="gray.500"
-                  textTransform="uppercase"
-                  letterSpacing="0.12em"
-                >
-                  Design Mode
-                </Text>
-                <HStack gap={2}>
-                  <Button
-                    size="sm"
-                    flex={1}
-                    variant={designMode === "improve" ? "solid" : "outline"}
-                    colorPalette={designMode === "improve" ? "blue" : "gray"}
-                    borderRadius="full"
-                    onClick={() =>
-                      onDesignModeChange("improve", latestVersionId)
-                    }
-                    disabled={isWorking}
-                  >
-                    Improve{" "}
-                    {latestVersionId
-                      ? latestVersionId.toUpperCase()
-                      : "Current"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    flex={1}
-                    variant={designMode === "new" ? "solid" : "outline"}
-                    colorPalette={designMode === "new" ? "green" : "gray"}
-                    borderRadius="full"
-                    onClick={() => onDesignModeChange("new", null)}
-                    disabled={isWorking}
-                  >
-                    New Version ({nextVersionId?.toUpperCase() || "V1"})
-                  </Button>
-                </HStack>
-              </VStack>
-            )}
-
-            <Textarea
-              value={prompt}
-              onChange={(event) => onPromptChange(event.target.value)}
-              minH="120px"
-              resize="vertical"
-              borderRadius="22px"
-              borderColor="rgba(148, 163, 184, 0.28)"
-              bg="white"
-              fontSize="sm"
-              lineHeight="1.7"
-              placeholder="Describe your design idea or ask the AI to refine the current direction. Example: 'Create a modern SaaS landing page with a hero section and pricing table' or 'Keep the same direction, but make it feel more premium'."
-              disabled={isWorking}
-              _focusVisible={{
-                borderColor: "orange.400",
-                boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
-              }}
-              _disabled={{
-                opacity: 0.6,
-                cursor: "not-allowed",
-                bg: "gray.50",
-              }}
-            />
             {generationBrief && (
               <Textarea
                 value={generationBrief}
@@ -267,52 +218,65 @@ export function DesignWorkspaceSidebar({
               />
             )}
 
-            <VStack align="stretch" gap={2}>
-              <Text
-                fontSize="10px"
-                fontWeight="800"
-                color="gray.500"
-                textTransform="uppercase"
-                letterSpacing="0.12em"
-              >
-                Model
-              </Text>
-              <ModelSelector
-                value={selectedModel}
-                onChange={onModelChange}
-                defaultLabel={defaultModelLabel}
+            <Box
+              position="relative"
+              borderRadius="22px"
+              borderWidth="1px"
+              borderColor="rgba(148, 163, 184, 0.28)"
+              bg="white"
+              _focusWithin={{
+                borderColor: "orange.400",
+                boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
+              }}
+            >
+              <Textarea
+                value={prompt}
+                onChange={(event) => onPromptChange(event.target.value)}
+                minH="120px"
+                resize="vertical"
+                border="none"
+                bg="transparent"
+                fontSize="sm"
+                lineHeight="1.7"
+                placeholder="Describe your design idea or ask the AI to refine the current direction. Example: 'Create a modern SaaS landing page with a hero section and pricing table' or 'Keep the same direction, but make it feel more premium'."
+                disabled={isWorking}
+                _focusVisible={{ outline: "none" }}
+                _disabled={{
+                  opacity: 0.6,
+                  cursor: "not-allowed",
+                  bg: "gray.50",
+                }}
+                pb="48px"
               />
-            </VStack>
-
-            <HStack gap={2}>
-              <Button
-                size="sm"
-                variant="outline"
-                colorPalette="gray"
-                borderRadius="full"
-                flex={1}
-                onClick={onBrainstorm}
-                loading={isBrainstorming}
-                disabled={isWorking || isSubmitting || !prompt.trim()}
+              <HStack
+                position="absolute"
+                bottom="8px"
+                left="12px"
+                right="12px"
+                justify="space-between"
               >
-                <Sparkles size={14} />
-                Brainstorm
-              </Button>
-              <Button
-                size="sm"
-                bg="gray.950"
-                color="white"
-                borderRadius="full"
-                flex={1}
-                _hover={{ bg: "black" }}
-                onClick={onGenerate}
-                loading={isGenerating}
-                disabled={isWorking || isSubmitting || !prompt.trim()}
-              >
-                <Wand2 size={14} />
-                {hasConversationHistory ? "Improve" : "Generate"}
-              </Button>
-            </HStack>
+                <Box w="200px">
+                  <ModelSelector
+                    value={selectedModel}
+                    onChange={onModelChange}
+                    defaultLabel={defaultModelLabel}
+                  />
+                </Box>
+                <Button
+                  size="sm"
+                  bg="gray.950"
+                  color="white"
+                  borderRadius="full"
+                  _hover={{ bg: "black" }}
+                  onClick={() => onGenerate("improve-latest")}
+                  loading={isGenerating}
+                  disabled={isWorking || isSubmitting || !prompt.trim()}
+                >
+                  <Wand2 size={14} />
+                  Improve
+                </Button>
+              </HStack>
+            </Box>
           </VStack>
         </VStack>
       )}
@@ -320,16 +284,30 @@ export function DesignWorkspaceSidebar({
       {/* Files Tab Content */}
       {activeTab === "files" && (
         <VStack align="stretch" gap={3} p={4} flex={1} minH={0}>
-          <Text
-            fontSize="xs"
-            fontWeight="800"
-            color="gray.500"
-            letterSpacing="wide"
-            textTransform="uppercase"
-            px={2}
-          >
-            Design Versions
-          </Text>
+          <HStack justify="space-between" align="center" px={2}>
+            <Text
+              fontSize="xs"
+              fontWeight="800"
+              color="gray.500"
+              letterSpacing="wide"
+              textTransform="uppercase"
+            >
+              Design Versions
+            </Text>
+            <Button
+              size="xs"
+              variant="outline"
+              colorPalette="green"
+              borderRadius="full"
+              onClick={() => {
+                onClearBrainstorm(true);
+                onTabChange("brainstorm");
+              }}
+            >
+              <Sparkles size={12} style={{ marginRight: 4 }} />
+              New Version
+            </Button>
+          </HStack>
 
           <Box
             flex={1}
@@ -380,6 +358,43 @@ export function DesignWorkspaceSidebar({
               </VStack>
             )}
           </Box>
+        </VStack>
+      )}
+
+      {/* Brainstorm Tab Content */}
+      {activeTab === "brainstorm" && (
+        <VStack align="stretch" p={0} flex={1} minH={0} h="full">
+          <DesignBrainstormChat
+            messages={
+              brainstormMessages.length > 0
+                ? brainstormMessages
+                : [
+                    {
+                      id: "welcome-brainstorm",
+                      role: "assistant",
+                      content:
+                        "Hello! What aspect of your design would you like to brainstorm about today?",
+                    },
+                  ]
+            }
+            isThinking={isBrainstorming}
+            pendingQuestion={brainstormPendingQuestion}
+            onSendMessage={(msg) => {
+              if (brainstormMessages.length === 0 && !isBrainstorming) {
+                // user directly sends a message starting brainstorm
+                onPromptChange(msg);
+                onBrainstorm(msg);
+              } else {
+                onSendBrainstormResponse(msg);
+              }
+            }}
+            onGenerate={() => onGenerate("new")}
+            onStartOver={() => onClearBrainstorm(true)}
+            taskError={null}
+            model={brainstormTask?.model ?? null}
+            brainstormComplete={brainstormComplete}
+            isInSidebar={true}
+          />
         </VStack>
       )}
     </Box>

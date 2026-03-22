@@ -182,9 +182,11 @@ export default function DesignPage() {
     recordTaskEvent,
   ]);
 
-  const handleBrainstorm = async () => {
+  const handleBrainstorm = async (promptOverride) => {
     setIsSubmitting(true);
-    const result = await startBrainstormInStore(selectedModel);
+    const textToUse =
+      typeof promptOverride === "string" ? promptOverride : prompt;
+    const result = await startBrainstormInStore(textToUse, selectedModel);
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -196,10 +198,25 @@ export default function DesignPage() {
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (forceDesignMode) => {
     setIsSubmitting(true);
-    const designId =
-      targetDesignId || getSelectedDesignId(selectedUrl, manifest);
+
+    // Determine the design ID based on mode or state
+    let designId;
+
+    if (forceDesignMode === "new") {
+      designId = nextVersionId;
+    } else if (forceDesignMode === "improve-latest") {
+      designId = latestVersionId;
+    } else {
+      designId = targetDesignId || getSelectedDesignId(selectedUrl, manifest);
+    }
+
+    // Safety fallback
+    if (!designId) {
+      designId = latestVersionId || "v1";
+    }
+
     const result = await startGeneration({
       designId,
       brief: brainstormResponse || generationBrief,
@@ -223,10 +240,12 @@ export default function DesignPage() {
     });
   };
 
-  const handleClearBrainstorm = () => {
+  const handleClearBrainstorm = (onlyBrainstorm = false) => {
     // Clear both stores independently
     useDesignBrainstormStore.getState().clearBrainstorm();
-    clearAll();
+    if (!onlyBrainstorm) {
+      clearAll();
+    }
   };
 
   if (loadingManifest) {
@@ -330,6 +349,14 @@ export default function DesignPage() {
             onDesignModeChange={setDesignMode}
             nextVersionId={nextVersionId}
             latestVersionId={latestVersionId}
+            brainstormTask={brainstormTask}
+            brainstormMessages={brainstormMessages}
+            brainstormPendingQuestion={
+              brainstormPendingQuestion || brainstormResponse
+            }
+            onSendBrainstormResponse={sendBrainstormResponse}
+            brainstormComplete={brainstormComplete}
+            onClearBrainstorm={handleClearBrainstorm}
           />
         )}
         <DesignPreviewPane

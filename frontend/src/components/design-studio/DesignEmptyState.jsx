@@ -66,7 +66,7 @@ export function DesignEmptyState({
           pendingQuestion={pendingQuestion}
           onSendMessage={handleChatMessage}
           onGenerate={onGenerate}
-          onStartOver={onStartOver}
+          onStartOver={() => onStartOver(false)}
           taskError={taskError}
           model={currentTaskModel}
           brainstormComplete={brainstormComplete}

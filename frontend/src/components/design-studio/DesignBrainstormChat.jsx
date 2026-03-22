@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   CheckSquare,
+  Plus,
   RefreshCw,
   Send,
   Square,
@@ -283,6 +284,7 @@ export function DesignBrainstormChat({
   taskError,
   model,
   brainstormComplete,
+  isInSidebar = false,
 }) {
   const [input, setInput] = useState("");
   const scrollRef = useRef(null);
@@ -314,16 +316,16 @@ export function DesignBrainstormChat({
   return (
     <Box
       w="full"
-      maxW="820px"
+      maxW={isInSidebar ? "none" : "820px"}
       display="flex"
       flexDirection="column"
-      h="calc(100vh - 120px)"
-      borderRadius="32px"
-      bg="rgba(255,255,255,0.88)"
-      borderWidth="1px"
-      borderColor="rgba(148,163,184,0.24)"
-      boxShadow="0 35px 90px rgba(15,23,42,0.1)"
-      backdropFilter="blur(18px)"
+      h={isInSidebar ? "full" : "calc(100vh - 120px)"}
+      borderRadius={isInSidebar ? "0" : "32px"}
+      bg={isInSidebar ? "transparent" : "rgba(255,255,255,0.88)"}
+      borderWidth={isInSidebar ? "0" : "1px"}
+      borderColor={isInSidebar ? "transparent" : "rgba(148,163,184,0.24)"}
+      boxShadow={isInSidebar ? "none" : "0 35px 90px rgba(15,23,42,0.1)"}
+      backdropFilter={isInSidebar ? "none" : "blur(18px)"}
       overflow="hidden"
     >
       {/* Header */}
@@ -336,18 +338,6 @@ export function DesignBrainstormChat({
         flexShrink={0}
       >
         <HStack gap={2}>
-          <Button
-            variant="ghost"
-            size="sm"
-            borderRadius="full"
-            color="gray.500"
-            px={3}
-            onClick={onStartOver}
-            _hover={{ bg: "gray.100", color: "gray.800" }}
-          >
-            <ArrowLeft size={15} />
-            Start over
-          </Button>
           {isThinking && (
             <HStack gap={1.5} color="gray.400">
               <Spinner size="xs" />
@@ -374,6 +364,19 @@ export function DesignBrainstormChat({
             </Box>
           )}
         </HStack>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          borderRadius="full"
+          color="gray.500"
+          px={3}
+          onClick={onStartOver}
+          _hover={{ bg: "gray.100", color: "gray.800" }}
+        >
+          <Plus size={15} />
+          New Brainstorm
+        </Button>
       </HStack>
 
       {/* Messages */}

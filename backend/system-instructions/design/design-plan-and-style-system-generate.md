@@ -86,11 +86,35 @@ You must produce these shared files yourself:
 2. `{{TOKENS_PATH}}`
 3. `{{DESIGN_SYSTEM_PATH}}`
 4. `{{APP_MANIFEST_PATH}}`
+5. `index.html` (in the design root)
 
 You must not directly generate all page files yourself.
 Instead, you must delegate page generation after writing the shared contract.
 
 ## Shared contract requirements
+
+### `index.html` (Servable Root)
+
+Write a root-level `index.html` file in the design folder (e.g. `{{DESIGN_PATH}}/index.html`) that automatically redirects to the entry page defined in the app manifest.
+This ensures the design directory acts as a fully standalone, servable static website out of the box, making prototypes easy to publish.
+Use a trailing slash instead of exactly specifying `index.html` (e.g. `pages/home/`) to prevent path resolution bugs when served via local HTTP servers.
+
+Example:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="0; url=pages/home/" />
+    <title>App Prototype</title>
+  </head>
+  <body>
+    <p>Redirecting to <a href="pages/home/">the prototype</a>...</p>
+  </body>
+</html>
+```
 
 ### `{{BRIEF_PATH}}`
 
@@ -168,19 +192,11 @@ It must include:
   - `name`
   - `route`
   - `folderPath` — the actual folder path relative to design root (e.g., `pages/home` for home page)
-  - `urlPath` — the path for navigation from other pages (e.g., `index.html` for same folder, `../products/index.html` for products page)
-  - `summary`
-  - `primaryActions`
-  - `linksTo`
-  - `transition`
-- `navigation`
-- `globalUi`
-- `ctaPolicy`
-- `navigationMap` — object mapping page IDs to their relative paths from each page
+  - `urlPath` — the path for navigation from other pages (in a clean static context, this should be empty string `""` so we just route to trailing slashes)
 
 **Navigation Map Structure:**
 
-The `navigationMap` should help each page agent calculate relative paths to other pages.
+The `navigationMap` should help each page agent calculate relative paths to other pages. **CRITICAL: Use trailing slashes (`/`), NOT `index.html`!** This ensures clean URL setups (like `npx serve`, Netlify, etc.) resolve relative CSS links properly.
 
 Example:
 
@@ -188,16 +204,16 @@ Example:
 {
   "navigationMap": {
     "home": {
-      "home": "./index.html",
-      "products": "../products/index.html",
-      "about": "../about/index.html",
-      "contact": "../contact/index.html"
+      "home": "./",
+      "products": "../products/",
+      "about": "../about/",
+      "contact": "../contact/"
     },
     "products": {
-      "home": "../home/index.html",
-      "products": "./index.html",
-      "about": "../about/index.html",
-      "contact": "../contact/index.html"
+      "home": "../home/",
+      "products": "./",
+      "about": "../about/",
+      "contact": "../contact/"
     }
   }
 }
@@ -215,7 +231,7 @@ For example:
 
 **Important:**
 
-- Use relative paths (`../pageid/index.html`), NOT absolute paths (`/pageid.html`)
+- Use relative folder paths WITH trailing slashes (`../pageid/`), NOT absolute paths (`/pageid.html`) or exact index paths (`../pageid/index.html`).
 - All pages must be listed in the navigation map
 - Page agents will use this map to generate correct links
 - This ensures navigation works in static preview without a server
@@ -251,8 +267,8 @@ Create one file per page under `.code-analysis/temp/delegation-requests/` (e.g.,
 
 This page links to:
 
-- Products page (`../products/index.html`) — browse all products
-- About page (`../about/index.html`) — company information
+- Products page (`../products/`) — browse all products
+- About page (`../about/`) — company information
 - Login CTA (inert) — would require backend authentication
 
 **Use the exact paths from navigationMap[home] in app-manifest.json**
@@ -303,9 +319,9 @@ Landing page showcasing platform features with hero, featured games, and CTA to 
 
 This page links to:
 
-- Products page (`../products/index.html`) — browse all products
-- Product detail (`../product-foxhole-trade/index.html`) — Foxhole Trade Market detail
-- Community page (`../community/index.html`) — community hub
+- Products page (`../products/`) — browse all products
+- Product detail (`../product-foxhole-trade/`) — Foxhole Trade Market detail
+- Community page (`../community/`) — community hub
 - Discord/Twitter links (`#`) — external placeholder links
 
 **Use the exact paths from navigationMap["home"] in app-manifest.json**

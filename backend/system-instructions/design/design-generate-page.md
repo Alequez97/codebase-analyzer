@@ -43,13 +43,13 @@ That means:
 **Critical Navigation Rule:**
 
 The app manifest contains a `navigationMap` object that provides the exact relative paths
-you must use for all internal links.
+you must use for all internal links. Ensure all paths use trailing slashes natively (e.g. `../products/` not `../products/index.html`) to support clean URLs.
 
 Example:
 
-- If `navigationMap[{{PAGE_ID}}]["products"]` is `"../products/index.html"`, use that exact path
-- If it's `"./index.html"`, use that exact path
-- Use only relative paths — absolute paths like `/products.html` or `/index.html` will break the static preview
+- If `navigationMap[{{PAGE_ID}}]["products"]` is `"../products/"`, use that exact path
+- If it's `"./"`, use that exact path
+- Use only relative paths — absolute paths like `/` or `/products/` will break the static preview
 
 This ensures the prototype works as a static site without requiring a web server.
 
@@ -157,9 +157,10 @@ Critical path requirements:
 4. **Implement navigation using the navigation map from app manifest:**
    - Load `{{APP_MANIFEST_PATH}}` and find the `navigationMap[{{PAGE_ID}}]` object
    - Use the paths provided in the navigation map for ALL internal page links
-   - Example: if navigationMap says `"products": "../products/index.html"`, use that exact path
-   - Use relative paths like `../products/index.html` or `./index.html`
-   - Absolute paths like `/products.html` or `/index.html` break the static preview — avoid them
+   - Example: if navigationMap says `"products": "../products/"`, use that exact path
+   - ALWAYS use trailing slashes natively like `../products/` or `./`.
+   - NEVER add `.html` or `index.html` to the path! This breaks static previews when served cleanly.
+   - Absolute paths like `/products/` will break the static preview — avoid them
 5. Apply navigation paths to:
    - Header/navbar links
    - Footer links
@@ -180,19 +181,19 @@ Example navigation map for the home page:
 
 ```json
 {
-  "home": "./index.html",
-  "products": "../products/index.html",
-  "about": "../about/index.html"
+  "home": "./",
+  "products": "../products/",
+  "about": "../about/"
 }
 ```
 
-If you're implementing the home page and need to link to products, use `../products/index.html`.
+If you're implementing the home page and need to link to products, use `../products/`.
 
 **Why this matters:**
 
-- Pages are in a folder structure: `pages/{pageId}/index.html`
-- Relative paths work in static previews without a server
-- Absolute paths (`/products.html`) will break the preview
+- Pages are in a folder structure: `pages/{pageId}/index.html` (but we navigate to directories for clean URLs!)
+- Specifying `index.html` breaks clean paths and styling on static servers.
+- Absolute paths (`/products/`) will break the static preview.
 
 If this page links to another page that has not been generated yet, still implement
 the link according to the navigation map. Do not remove or disable legitimate navigation
@@ -227,7 +228,7 @@ When done, summarize:
 **Final checklist before submitting:**
 
 - [ ] All internal navigation links use paths from `navigationMap[{{PAGE_ID}}]` in app-manifest.json
-- [ ] No absolute paths (`/page.html`) — only relative paths (`../page/index.html`)
+  - [ ] No absolute paths (`/page/`) or exact index files (`../page/index.html`) — ONLY clean relative directory paths (`../page/`)
 - [ ] External/placeholder links use `href="#"` not `href="https://example.com"`
 - [ ] Header, footer, and in-page links all use correct relative paths
 - [ ] JavaScript/Alpine.js code uses navigationMap paths if storing URLs

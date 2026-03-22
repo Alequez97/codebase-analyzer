@@ -4,6 +4,7 @@ import {
   getDesignManifest,
   getLatestGenerationTask,
   respondToTask,
+  cancelTask,
 } from "../api";
 
 function getFirstPreviewUrl(manifest) {
@@ -166,7 +167,15 @@ export const useDesignStudioStore = create((set, get) => ({
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
   setDesignMode: (mode) => set({ designMode: mode }),
 
-  clearAll: () =>
+  clearAll: async () => {
+    const { currentTaskId } = get();
+    if (currentTaskId) {
+      try {
+        await cancelTask(currentTaskId);
+      } catch (e) {
+        console.error("Failed to cancel generation task", e);
+      }
+    }
     set({
       generationMessages: [],
       generationBrief: "",
@@ -178,7 +187,8 @@ export const useDesignStudioStore = create((set, get) => ({
       currentTaskModel: null,
       prompt: "",
       taskEvents: [],
-    }),
+    });
+  },
 
   getNextVersionId: () => {
     return getNextVersionNumber(get().manifest);
