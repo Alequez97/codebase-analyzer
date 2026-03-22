@@ -98,7 +98,6 @@ export function DesignPreviewPane({
         </HStack>
 
         <HStack gap={2} flexWrap="wrap" justify="flex-end">
-
           {hasDesignFiles &&
             VIEWPORTS.map(({ id, label, icon: Icon, width }) => (
               <Button
