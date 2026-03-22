@@ -18,6 +18,7 @@ import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./
 import { useAgentChatStore } from "./useAgentChatStore";
 import { useDesignStudioStore } from "./useDesignStudioStore";
 import { useDesignBrainstormStore } from "./useDesignBrainstormStore";
+import { useDesignEditStore } from "./useDesignEditStore";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
 function computeTestChanges(oldMissingTests, newMissingTests) {
@@ -194,7 +195,8 @@ export const useSocketStore = create((set, get) => ({
       } else if (
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
-        type === TASK_TYPES.DESIGN_GENERATE_PAGE
+        type === TASK_TYPES.DESIGN_GENERATE_PAGE ||
+        type === TASK_TYPES.EDIT_DESIGN_LATEST
       ) {
         useDesignStudioStore.getState().completeCurrentTask(taskId);
       }
@@ -336,7 +338,8 @@ export const useSocketStore = create((set, get) => ({
       } else if (
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
-        type === TASK_TYPES.DESIGN_GENERATE_PAGE
+        type === TASK_TYPES.DESIGN_GENERATE_PAGE ||
+        type === TASK_TYPES.EDIT_DESIGN_LATEST
       ) {
         useDesignStudioStore
           .getState()
@@ -531,6 +534,10 @@ export const useSocketStore = create((set, get) => ({
           useDesignBrainstormStore
             .getState()
             .appendBrainstormMessage({ taskId, role, content, timestamp });
+        } else if (taskType === TASK_TYPES.EDIT_DESIGN_LATEST) {
+          useDesignEditStore
+            .getState()
+            .appendEditMessage({ taskId, role, content, timestamp });
         } else if (
           taskType === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE
         ) {
@@ -572,6 +579,22 @@ export const useSocketStore = create((set, get) => ({
               selectionType,
             });
           }
+        } else if (taskType === TASK_TYPES.EDIT_DESIGN_LATEST) {
+          const editStore = useDesignEditStore.getState();
+          editStore.appendEditMessage({
+            taskId,
+            role: "assistant",
+            content: message,
+          });
+          if (expectResponse !== false) {
+            editStore.setPendingQuestion({
+              messageId,
+              message,
+              taskId,
+              user_options,
+              selectionType,
+            });
+          }
         } else if (
           taskType === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE
         ) {
@@ -597,6 +620,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_RESUMED, ({ taskId }) => {
       useDesignStudioStore.getState().clearPendingQuestion();
       useDesignBrainstormStore.getState().clearPendingQuestion();
+      useDesignEditStore.getState().clearPendingQuestion();
     });
 
     socket.on(

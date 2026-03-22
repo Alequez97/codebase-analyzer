@@ -45,6 +45,7 @@ export const SOCKET_EVENTS = {
   REFACTORING_AND_TESTING_UPDATED: "refactoring-and-testing:updated",
   DESIGN_MANIFEST_UPDATED: "design:manifest-updated",
   DESIGN_BRAINSTORM_COMPLETE: "design:brainstorm-complete",
+  DESIGN_EDIT_COMPLETE: "design:edit-complete",
 
   // Generic task message events (routed by taskType on frontend)
   TASK_MESSAGE: "task:message",

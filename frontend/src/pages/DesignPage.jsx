@@ -9,6 +9,7 @@ import {
 import { TASK_TYPES } from "../constants/task-types";
 import { useDesignStudioStore } from "../store/useDesignStudioStore";
 import { useDesignBrainstormStore } from "../store/useDesignBrainstormStore";
+import { useDesignEditStore } from "../store/useDesignEditStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useConfigStore } from "../store/useConfigStore";
 
@@ -49,6 +50,20 @@ export default function DesignPage() {
     startBrainstorm: startBrainstormInStore,
     loadLatestBrainstorm,
   } = useDesignBrainstormStore();
+
+  const {
+    editComplete,
+    editResponse,
+    editMessages,
+    editTaskId,
+    loadingEdit,
+    pendingQuestion: editPendingQuestion,
+    sendUserResponse: sendEditResponse,
+    startEdit,
+    loadLatestEdit,
+    editError,
+    clearEdit,
+  } = useDesignEditStore();
 
   // Main design studio store
   const {
@@ -92,6 +107,7 @@ export default function DesignPage() {
   const brainstormTask = brainstormTaskId
     ? progressByTaskId.get(brainstormTaskId)
     : null;
+  const editTask = editTaskId ? progressByTaskId.get(editTaskId) : null;
   const currentTask = currentTaskId
     ? progressByTaskId.get(currentTaskId)
     : null;
@@ -131,6 +147,7 @@ export default function DesignPage() {
       fetchManifest(),
       loadLatestGeneration(),
       loadLatestBrainstorm(),
+      loadLatestEdit(),
     ]).then(([manifestResult]) => {
       if (!mounted) {
         return;
@@ -145,7 +162,12 @@ export default function DesignPage() {
     return () => {
       mounted = false;
     };
-  }, [fetchManifest, loadLatestGeneration, loadLatestBrainstorm]);
+  }, [
+    fetchManifest,
+    loadLatestGeneration,
+    loadLatestBrainstorm,
+    loadLatestEdit,
+  ]);
 
   useEffect(() => {
     if (manifest.versions.length === 0) {
@@ -196,6 +218,26 @@ export default function DesignPage() {
         type: "error",
       });
     }
+  };
+
+  const handleStartEdit = async (promptOverride) => {
+    setIsSubmitting(true);
+    const textToUse =
+      typeof promptOverride === "string" ? promptOverride : prompt;
+    const result = await startEdit(textToUse, selectedModel);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to start edit",
+        description: result.error,
+        type: "error",
+      });
+    }
+  };
+
+  const handleClearEdit = () => {
+    clearEdit();
   };
 
   const handleGenerate = async (forceDesignMode) => {
@@ -270,6 +312,7 @@ export default function DesignPage() {
         prompt={prompt}
         onPromptChange={setPrompt}
         onBrainstorm={handleBrainstorm}
+        onGenerate={handleGenerate}
         onStartOver={handleClearBrainstorm}
         isSubmitting={isSubmitting}
         currentTask={brainstormTask}
@@ -357,6 +400,14 @@ export default function DesignPage() {
             onSendBrainstormResponse={sendBrainstormResponse}
             brainstormComplete={brainstormComplete}
             onClearBrainstorm={handleClearBrainstorm}
+            editTask={editTask}
+            editMessages={editMessages}
+            editPendingQuestion={editPendingQuestion || editResponse}
+            onStartEdit={handleStartEdit}
+            onSendEditResponse={sendEditResponse}
+            onClearEdit={handleClearEdit}
+            isEditing={isSubmitting || loadingEdit}
+            editTaskError={editError}
           />
         )}
         <DesignPreviewPane

@@ -4,7 +4,6 @@ import {
   HStack,
   IconButton,
   Text,
-  Textarea,
   VStack,
 } from "@chakra-ui/react";
 import {
@@ -15,8 +14,8 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-import { ModelSelector } from "../FloatingChat/ModelSelector";
 import { DesignBrainstormChat } from "./DesignBrainstormChat";
+import { DesignEditChat } from "./DesignEditChat";
 
 export function DesignWorkspaceSidebar({
   versions,
@@ -29,8 +28,6 @@ export function DesignWorkspaceSidebar({
   onGenerate,
   onBrainstorm,
   isSubmitting,
-  taskMessages,
-  taskEvents,
   currentTask,
   isBrainstorming,
   selectedModel,
@@ -49,16 +46,18 @@ export function DesignWorkspaceSidebar({
   onSendBrainstormResponse,
   brainstormComplete,
   onClearBrainstorm,
+  editTask,
+  editMessages,
+  editPendingQuestion,
+  onStartEdit,
+  onSendEditResponse,
+  onClearEdit,
+  isEditing,
+  editTaskError,
 }) {
-  const conversationMessages = taskMessages.filter(
-    (message) =>
-      (message.role === "user" || message.role === "assistant") &&
-      message.content?.trim(),
-  );
   const isWorking =
     currentTask?.status === "running" || currentTask?.status === "pending";
   const isGenerating = isWorking && !isBrainstorming;
-  const hasConversationHistory = conversationMessages.length > 0;
 
   return (
     <Box
@@ -127,158 +126,26 @@ export function DesignWorkspaceSidebar({
 
       {/* Chat Tab Content */}
       {activeTab === "chat" && (
-        <VStack align="stretch" gap={3} p={4} flex={1} minH={0}>
-          {/* Conversation Header */}
-          <HStack justify="space-between" align="center" flexShrink={0}>
-            <Text
-              fontSize="xs"
-              fontWeight="800"
-              color="gray.500"
-              letterSpacing="wide"
-              textTransform="uppercase"
-            >
-              Conversation
-            </Text>
-          </HStack>
-
-          {/* Conversation Box - Expands to fill space */}
-          <Box
-            flex={1}
-            minH={0}
-            overflowY="auto"
-            borderRadius="24px"
-            borderWidth="1px"
-            borderColor="rgba(226, 232, 240, 0.9)"
-            bg="rgba(248,250,252,0.88)"
-            px={3}
-            py={3}
-          >
-            {conversationMessages.length === 0 ? (
-              <Text fontSize="sm" color="gray.400" px={3} py={3}>
-                No conversation yet. Start by brainstorming or generating a
-                design.
-              </Text>
-            ) : (
-              <VStack align="stretch" gap={3}>
-                {conversationMessages.map((message) => {
-                  const isAssistant = message.role === "assistant";
-                  return (
-                    <Box
-                      key={message.id}
-                      borderRadius="20px"
-                      bg={isAssistant ? "white" : "orange.50"}
-                      borderWidth="1px"
-                      borderColor={
-                        isAssistant ? "rgba(226, 232, 240, 0.9)" : "orange.100"
-                      }
-                      px={3}
-                      py={3}
-                    >
-                      <Text
-                        fontSize="10px"
-                        fontWeight="800"
-                        color={isAssistant ? "gray.500" : "orange.700"}
-                        textTransform="uppercase"
-                        letterSpacing="0.12em"
-                        mb={1.5}
-                      >
-                        {isAssistant ? "AI" : "You"}
-                      </Text>
-                      <Text
-                        fontSize="sm"
-                        color="gray.700"
-                        lineHeight="1.7"
-                        whiteSpace="pre-wrap"
-                      >
-                        {message.content}
-                      </Text>
-                    </Box>
-                  );
-                })}
-              </VStack>
-            )}
-          </Box>
-
-          {/* Input and controls at bottom */}
-          <VStack align="stretch" gap={3} flexShrink={0}>
-            {generationBrief && (
-              <Textarea
-                value={generationBrief}
-                onChange={(event) =>
-                  onGenerationBriefChange(event.target.value)
-                }
-                minH="110px"
-                resize="vertical"
-                borderRadius="22px"
-                borderColor="rgba(148, 163, 184, 0.2)"
-                bg="rgba(248,250,252,0.92)"
-                fontSize="sm"
-                lineHeight="1.7"
-                placeholder="Edit the brief if needed..."
-              />
-            )}
-
-            <Box
-              position="relative"
-              borderRadius="22px"
-              borderWidth="1px"
-              borderColor="rgba(148, 163, 184, 0.28)"
-              bg="white"
-              _focusWithin={{
-                borderColor: "orange.400",
-                boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
-              }}
-            >
-              <Textarea
-                value={prompt}
-                onChange={(event) => onPromptChange(event.target.value)}
-                minH="120px"
-                resize="vertical"
-                border="none"
-                bg="transparent"
-                fontSize="sm"
-                lineHeight="1.7"
-                placeholder="Describe your design idea or ask the AI to refine the current direction. Example: 'Create a modern SaaS landing page with a hero section and pricing table' or 'Keep the same direction, but make it feel more premium'."
-                disabled={isWorking}
-                _focusVisible={{ outline: "none" }}
-                _disabled={{
-                  opacity: 0.6,
-                  cursor: "not-allowed",
-                  bg: "gray.50",
-                }}
-                pb="48px"
-              />
-              <HStack
-                position="absolute"
-                bottom="8px"
-                left="12px"
-                right="12px"
-                justify="space-between"
-              >
-                <Box w="200px">
-                  <ModelSelector
-                    value={selectedModel}
-                    onChange={onModelChange}
-                    defaultLabel={defaultModelLabel}
-                  />
-                </Box>
-                <Button
-                  size="sm"
-                  bg="gray.950"
-                  color="white"
-                  borderRadius="full"
-                  _hover={{ bg: "black" }}
-                  onClick={() => onGenerate("improve-latest")}
-                  loading={isGenerating}
-                  disabled={isWorking || isSubmitting || !prompt.trim()}
-                >
-                  <Wand2 size={14} />
-                  Improve
-                </Button>
-              </HStack>
-            </Box>
-          </VStack>
-        </VStack>
+        <DesignEditChat
+          editMessages={editMessages}
+          editPendingQuestion={editPendingQuestion}
+          onClearEdit={onClearEdit}
+          onSendEditResponse={(msg) => {
+            if (editMessages.length === 0 && !isEditing) {
+              // User directly sends a message starting edit
+              onStartEdit(msg);
+            } else {
+              onSendEditResponse(msg);
+            }
+          }}
+          isEditing={isEditing}
+          editTaskError={editTaskError}
+          model={editTask?.model ?? null}
+          selectedModel={selectedModel}
+          onModelChange={onModelChange}
+          defaultModelLabel={defaultModelLabel}
+          isInSidebar={true}
+        />
       )}
 
       {/* Files Tab Content */}
@@ -394,6 +261,9 @@ export function DesignWorkspaceSidebar({
             model={brainstormTask?.model ?? null}
             brainstormComplete={brainstormComplete}
             isInSidebar={true}
+            selectedModel={selectedModel}
+            onModelChange={onModelChange}
+            defaultModelLabel={defaultModelLabel}
           />
         </VStack>
       )}

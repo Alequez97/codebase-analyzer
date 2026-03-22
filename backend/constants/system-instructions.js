@@ -21,6 +21,7 @@ export const SYSTEM_INSTRUCTION_NAMES = {
   DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     "design/design-plan-and-style-system-generate.md",
   DESIGN_GENERATE_PAGE: "design/design-generate-page.md",
+  EDIT_DESIGN_LATEST: "design/edit-design-latest-version.md",
 };
 
 export const SYSTEM_INSTRUCTION_PATHS = {
@@ -60,4 +61,6 @@ export const SYSTEM_INSTRUCTION_PATHS = {
     "backend/system-instructions/design/design-plan-and-style-system-generate.md",
   DESIGN_GENERATE_PAGE:
     "backend/system-instructions/design/design-generate-page.md",
+  EDIT_DESIGN_LATEST:
+    "backend/system-instructions/design/edit-design-latest-version.md",
 };

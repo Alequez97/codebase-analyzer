@@ -70,6 +70,9 @@ export function DesignEmptyState({
           taskError={taskError}
           model={currentTaskModel}
           brainstormComplete={brainstormComplete}
+          selectedModel={selectedModel}
+          onModelChange={onModelChange}
+          defaultModelLabel={defaultModelLabel}
         />
       </Box>
     );
@@ -155,30 +158,70 @@ export function DesignEmptyState({
                 </VStack>
               </HStack>
 
-              <Textarea
-                value={prompt}
-                onChange={(event) => onPromptChange(event.target.value)}
-                minH="180px"
-                resize="vertical"
-                placeholder="Describe the product, screen, or experience you want. The first AI pass sharpens the direction, then turns it into something tangible you can review and refine."
+              <Box
                 borderRadius="24px"
+                borderWidth="1px"
                 borderColor="rgba(148, 163, 184, 0.28)"
                 bg="white"
-                px={5}
-                py={4}
-                fontSize="md"
-                lineHeight="1.75"
-                disabled={isWorking}
-                _focusVisible={{
+                overflow="hidden"
+                _focusWithin={{
                   borderColor: "orange.400",
                   boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
                 }}
-                _disabled={{
-                  opacity: 0.6,
-                  cursor: "not-allowed",
-                  bg: "gray.50",
-                }}
-              />
+              >
+                <Textarea
+                  value={prompt}
+                  onChange={(event) => onPromptChange(event.target.value)}
+                  minH="180px"
+                  resize="vertical"
+                  placeholder="Describe the product, screen, or experience you want. The first AI pass sharpens the direction, then turns it into something tangible you can review and refine."
+                  borderRadius="0"
+                  borderWidth="0"
+                  bg="transparent"
+                  px={5}
+                  pt={4}
+                  pb={3}
+                  fontSize="md"
+                  lineHeight="1.75"
+                  disabled={isWorking}
+                  _focusVisible={{
+                    boxShadow: "none",
+                  }}
+                  _disabled={{
+                    opacity: 0.6,
+                    cursor: "not-allowed",
+                    bg: "gray.50",
+                  }}
+                />
+                <HStack
+                  justify="space-between"
+                  align="center"
+                  px={4}
+                  py={3}
+                  borderTopWidth="1px"
+                  borderColor="rgba(226, 232, 240, 0.9)"
+                  bg="rgba(248,250,252,0.72)"
+                  flexWrap="wrap"
+                  gap={3}
+                >
+                  <Text
+                    fontSize="10px"
+                    fontWeight="800"
+                    color="gray.500"
+                    textTransform="uppercase"
+                    letterSpacing="0.12em"
+                  >
+                    Model
+                  </Text>
+                  <Box minW={{ base: "100%", sm: "260px" }} flex="1">
+                    <ModelSelector
+                      value={selectedModel}
+                      onChange={onModelChange}
+                      defaultLabel={defaultModelLabel}
+                    />
+                  </Box>
+                </HStack>
+              </Box>
 
               {hasApprovedBrief && (
                 <Box mt={5}>
@@ -213,23 +256,6 @@ export function DesignEmptyState({
                   />
                 </Box>
               )}
-
-              <VStack align="stretch" gap={2} mt={5}>
-                <Text
-                  fontSize="10px"
-                  fontWeight="800"
-                  color="gray.500"
-                  textTransform="uppercase"
-                  letterSpacing="0.12em"
-                >
-                  Model
-                </Text>
-                <ModelSelector
-                  value={selectedModel}
-                  onChange={onModelChange}
-                  defaultLabel={defaultModelLabel}
-                />
-              </VStack>
 
               <HStack
                 justify="space-between"

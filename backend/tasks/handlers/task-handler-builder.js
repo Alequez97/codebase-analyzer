@@ -20,6 +20,7 @@ import {
   designBrainstormHandler,
   designPlanAndStyleSystemGenerateHandler,
   designGeneratePageHandler,
+  editDesignLatestVersionHandler,
 } from "./design/index.js";
 import { editCodebaseAnalysisHandler } from "./editing/codebase-analysis.js";
 import { editDocumentationHandler } from "./editing/documentation.js";
@@ -243,6 +244,15 @@ export async function createTaskHandler(task, taskLogger, agent) {
     );
   } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
     overrides = designGeneratePageHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+    // Enable message tools for conversational design editing
+    if (agent && task.responseHandler) {
+      agent.enableMessageTools(task.responseHandler);
+      taskLogger.info(
+        "Message tools enabled for conversational design editing",
+      );
+    }
+    overrides = editDesignLatestVersionHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {

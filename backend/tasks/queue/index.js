@@ -42,4 +42,5 @@ export {
   queueDesignBrainstormTask,
   queueDesignPlanAndStyleSystemGenerateTask,
   queueDesignGeneratePageTask,
+  queueDesignEditLatestVersionTask,
 } from "./design/index.js";

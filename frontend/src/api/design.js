@@ -7,8 +7,21 @@ export const getLatestGenerationTask = () =>
 export const getLatestBrainstormTask = () =>
   client.get("/design/latest-brainstorm-task");
 
+export const getLatestEditTask = () => client.get("/design/latest-edit-task");
+
 export const brainstormDesign = ({ prompt, history = [], model = null }) =>
-  client.post("/design/brainstorm", { prompt, history, model });
+  client.post("/design/brainstorm", {
+    prompt,
+    history,
+    agentsOverrides: model ? { model } : null,
+  });
+
+export const editDesign = ({ prompt, history = [], model = null }) =>
+  client.post("/design/edit", {
+    prompt,
+    history,
+    agentsOverrides: model ? { model } : null,
+  });
 
 export const generateDesign = ({
   prompt,
@@ -17,5 +30,11 @@ export const generateDesign = ({
   designId = null,
   model = null,
 }) =>
-  client.post("/design/generate", { prompt, brief, history, designId, model });
+  client.post("/design/generate", {
+    prompt,
+    brief,
+    history,
+    designId,
+    agentsOverrides: model ? { model } : null,
+  });
 

@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Center,
   HStack,
   Spinner,
   Text,
@@ -8,14 +9,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import {
-  CheckSquare,
-  Plus,
-  RefreshCw,
-  Send,
-  Square,
-  Wand2,
-} from "lucide-react";
+import { CheckSquare, Plus, RefreshCw, Send, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
 
@@ -106,10 +100,6 @@ function MessageBubble({ message }) {
   );
 }
 
-/**
- * Try to parse a color-option entry.
- * Returns { label, colors, description } if valid JSON with colors, else null.
- */
 function parseColorOption(raw) {
   try {
     const parsed = JSON.parse(raw);
@@ -274,16 +264,14 @@ function QuestionWithOptions({ pendingQuestion, onSend }) {
   );
 }
 
-export function DesignBrainstormChat({
-  messages,
-  isThinking,
-  pendingQuestion,
-  onSendMessage,
-  onGenerate,
-  onStartOver,
-  taskError,
+export function DesignEditChat({
+  editMessages = [],
+  isEditing,
+  editPendingQuestion,
+  onSendEditResponse,
+  onClearEdit,
+  editTaskError,
   model,
-  brainstormComplete,
   isInSidebar = false,
   selectedModel = null,
   onModelChange = null,
@@ -296,13 +284,13 @@ export function DesignBrainstormChat({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isThinking, pendingQuestion]);
+  }, [editMessages, isEditing, editPendingQuestion]);
 
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed || (isThinking && !pendingQuestion)) return;
+    if (!trimmed || (isEditing && !editPendingQuestion)) return;
     setInput("");
-    onSendMessage(trimmed);
+    onSendEditResponse(trimmed);
   };
 
   const handleKeyDown = (e) => {
@@ -312,9 +300,9 @@ export function DesignBrainstormChat({
     }
   };
 
-  const placeholder = pendingQuestion
+  const placeholder = editPendingQuestion
     ? "Or type a free-form reply…"
-    : "Refine the direction, ask follow-ups…";
+    : "Tell us about the design...";
 
   return (
     <Box
@@ -341,13 +329,13 @@ export function DesignBrainstormChat({
         flexShrink={0}
       >
         <HStack gap={2}>
-          {isThinking && (
+          {isEditing && (
             <HStack gap={1.5} color="gray.400">
               <Spinner size="xs" />
               <Text fontSize="xs">Thinking…</Text>
             </HStack>
           )}
-          {model && !isThinking && (
+          {model && !isEditing && (
             <Box
               px={2.5}
               py={0.5}
@@ -374,61 +362,69 @@ export function DesignBrainstormChat({
           borderRadius="full"
           color="gray.500"
           px={3}
-          onClick={onStartOver}
+          onClick={onClearEdit}
           _hover={{ bg: "gray.100", color: "gray.800" }}
         >
           <Plus size={15} />
-          New Brainstorm
+          New Conversation
         </Button>
       </HStack>
 
       {/* Messages */}
-      <VStack
-        ref={scrollRef}
-        align="stretch"
-        gap={3}
-        flex={1}
-        overflowY="auto"
-        px={6}
-        py={5}
-        sx={{
-          "&::-webkit-scrollbar": { width: "4px" },
-          "&::-webkit-scrollbar-track": { bg: "transparent" },
-          "&::-webkit-scrollbar-thumb": {
-            bg: "gray.200",
-            borderRadius: "full",
-          },
-        }}
-      >
-        {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} />
-        ))}
-        {isThinking && !pendingQuestion && <ThinkingDots />}
-        {pendingQuestion?.user_options?.length > 0 && (
-          <QuestionWithOptions
-            pendingQuestion={pendingQuestion}
-            onSend={onSendMessage}
-          />
-        )}
-        {taskError && (
-          <Box
-            alignSelf="flex-start"
-            maxW="85%"
-            borderRadius="20px"
-            bg="red.50"
-            borderWidth="1px"
-            borderColor="red.100"
-            px={4}
-            py={3}
-          >
-            <Text fontSize="sm" color="red.700">
-              {taskError}
-            </Text>
-          </Box>
-        )}
-      </VStack>
+      {editMessages.length === 0 ? (
+        <Center flex={1} px={6}>
+          <Text color="gray.500" fontSize="sm">
+            Start new conversation to edit the actual version
+          </Text>
+        </Center>
+      ) : (
+        <VStack
+          ref={scrollRef}
+          align="stretch"
+          gap={3}
+          flex={1}
+          overflowY="auto"
+          px={6}
+          py={5}
+          sx={{
+            "&::-webkit-scrollbar": { width: "4px" },
+            "&::-webkit-scrollbar-track": { bg: "transparent" },
+            "&::-webkit-scrollbar-thumb": {
+              bg: "gray.200",
+              borderRadius: "full",
+            },
+          }}
+        >
+          {editMessages.map((msg) => (
+            <MessageBubble key={msg.id} message={msg} />
+          ))}
+          {isEditing && !editPendingQuestion && <ThinkingDots />}
+          {editPendingQuestion?.user_options?.length > 0 && (
+            <QuestionWithOptions
+              pendingQuestion={editPendingQuestion}
+              onSend={onSendEditResponse}
+            />
+          )}
+          {editTaskError && (
+            <Box
+              alignSelf="flex-start"
+              maxW="85%"
+              borderRadius="20px"
+              bg="red.50"
+              borderWidth="1px"
+              borderColor="red.100"
+              px={4}
+              py={3}
+            >
+              <Text fontSize="sm" color="red.700">
+                {editTaskError}
+              </Text>
+            </Box>
+          )}
+        </VStack>
+      )}
 
-      {/* Input — replaced by proceed button once brainstorm is complete */}
+      {/* Input */}
       <Box
         px={5}
         py={4}
@@ -436,98 +432,80 @@ export function DesignBrainstormChat({
         borderColor="rgba(226,232,240,0.9)"
         flexShrink={0}
       >
-        {brainstormComplete ? (
-          <Button
-            w="full"
-            size="lg"
-            bg="gray.950"
-            color="white"
+        <HStack gap={2} align="flex-end">
+          <Box
+            flex={1}
             borderRadius="18px"
-            h="52px"
-            fontSize="sm"
-            fontWeight="600"
-            onClick={() => onGenerate("new")}
-            _hover={{ bg: "black" }}
+            borderWidth="1px"
+            borderColor="rgba(148,163,184,0.3)"
+            bg="white"
+            overflow="hidden"
+            _focusWithin={{
+              borderColor: "orange.400",
+              boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
+            }}
           >
-            <Wand2 size={16} />
-            Proceed to Design Generation
-          </Button>
-        ) : (
-          <HStack gap={2} align="flex-end">
-            <Box
-              flex={1}
-              borderRadius="18px"
-              borderWidth="1px"
-              borderColor="rgba(148,163,184,0.3)"
-              bg="white"
-              overflow="hidden"
-              _focusWithin={{
-                borderColor: "orange.400",
-                boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)",
-              }}
-            >
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                minH="52px"
-                maxH="140px"
-                resize="none"
-                borderRadius="0"
-                borderWidth="0"
-                bg="transparent"
-                px={4}
-                pt={3}
-                pb={2}
-                fontSize="sm"
-                _focusVisible={{
-                  boxShadow: "none",
-                }}
-              />
-              {onModelChange && (
-                <HStack
-                  px={3}
-                  py={2}
-                  borderTopWidth="1px"
-                  borderColor="rgba(226,232,240,0.9)"
-                  justify="space-between"
-                >
-                  <Text
-                    fontSize="10px"
-                    fontWeight="800"
-                    color="gray.500"
-                    textTransform="uppercase"
-                    letterSpacing="0.12em"
-                  >
-                    Model
-                  </Text>
-                  <Box minW="220px" maxW="100%">
-                    <ModelSelector
-                      value={selectedModel}
-                      onChange={onModelChange}
-                      defaultLabel={defaultModelLabel}
-                    />
-                  </Box>
-                </HStack>
-              )}
-            </Box>
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim() || (isThinking && !pendingQuestion)}
-              bg="gray.900"
-              color="white"
-              borderRadius="14px"
-              h="48px"
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              minH="52px"
+              maxH="140px"
+              resize="none"
+              borderRadius="0"
+              borderWidth="0"
+              bg="transparent"
               px={4}
-              flexShrink={0}
-              _hover={{ bg: "black" }}
-              _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-            >
-              <Send size={16} />
-            </Button>
-          </HStack>
-        )}
+              pt={3}
+              pb={2}
+              fontSize="sm"
+              _focusVisible={{
+                boxShadow: "none",
+              }}
+            />
+            {onModelChange && (
+              <HStack
+                px={3}
+                py={2}
+                borderTopWidth="1px"
+                borderColor="rgba(226,232,240,0.9)"
+                justify="space-between"
+              >
+                <Text
+                  fontSize="10px"
+                  fontWeight="800"
+                  color="gray.500"
+                  textTransform="uppercase"
+                  letterSpacing="0.12em"
+                >
+                  Model
+                </Text>
+                <Box minW="220px" maxW="100%">
+                  <ModelSelector
+                    value={selectedModel}
+                    onChange={onModelChange}
+                    defaultLabel={defaultModelLabel}
+                  />
+                </Box>
+              </HStack>
+            )}
+          </Box>
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim() || (isEditing && !editPendingQuestion)}
+            bg="gray.900"
+            color="white"
+            borderRadius="14px"
+            h="48px"
+            px={4}
+            flexShrink={0}
+            _hover={{ bg: "black" }}
+            _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+          >
+            <Send size={16} />
+          </Button>
+        </HStack>
       </Box>
     </Box>
   );
