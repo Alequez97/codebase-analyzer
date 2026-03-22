@@ -34,6 +34,39 @@ export const MODELS_BY_PROVIDER = [
       { value: "deepseek-chat", label: "DeepSeek Chat" },
     ],
   },
+  {
+    provider: "google",
+    label: "Google",
+    models: [
+      {
+        value: "gemini-3.1-pro-preview",
+        label: "Gemini 3.1 Pro Preview",
+      },
+      {
+        value: "gemini-2.5-pro-preview",
+        label: "Gemini 2.5 Pro Preview",
+      },
+      {
+        value: "gemini-2.5-flash-preview",
+        label: "Gemini 2.5 Flash Preview",
+      },
+      {
+        value: "gemini-2.0-flash-exp",
+        label: "Gemini 2.0 Flash (Experimental)",
+      },
+      {
+        value: "gemini-2.0-flash-thinking-exp-1219",
+        label: "Gemini 2.0 Flash Thinking (Experimental)",
+      },
+      {
+        value: "gemini-exp-1206",
+        label: "Gemini Experimental 1206",
+      },
+      { value: "gemini-1.5-pro-latest", label: "Gemini 1.5 Pro" },
+      { value: "gemini-1.5-flash-latest", label: "Gemini 1.5 Flash" },
+      { value: "gemini-1.5-flash-8b-latest", label: "Gemini 1.5 Flash-8B" },
+    ],
+  },
 ];
 
 /**

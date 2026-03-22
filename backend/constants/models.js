@@ -19,6 +19,11 @@ export const MODELS = {
   // DeepSeek models
   DEEPSEEK_CHAT: "deepseek-chat",
   DEEPSEEK_REASONER: "deepseek-reasoner",
+
+  // Google Gemini models
+  GEMINI_3_1_PRO_PREVIEW: "gemini-3.1-pro-preview",
+  GEMINI_2_5_PRO: "gemini-2.5-pro",
+  GEMINI_2_5_FLASH: "gemini-2.5-flash",
 };
 
 /**
@@ -37,4 +42,14 @@ export const MODEL_NAMES = {
   [MODELS.CLAUDE_HAIKU_3_5]: "Claude Haiku 3.5",
   [MODELS.DEEPSEEK_CHAT]: "DeepSeek Chat",
   [MODELS.DEEPSEEK_REASONER]: "DeepSeek Reasoner",
+  [MODELS.GEMINI_3_1_PRO_PREVIEW]: "Gemini 3.1 Pro Preview",
+  [MODELS.GEMINI_2_5_PRO]: "Gemini 2.5 Pro Preview",
+  [MODELS.GEMINI_2_5_FLASH]: "Gemini 2.5 Flash Preview",
+  [MODELS.GEMINI_2_0_FLASH_EXP]: "Gemini 2.0 Flash (Experimental)",
+  [MODELS.GEMINI_2_0_FLASH_THINKING_EXP]:
+    "Gemini 2.0 Flash Thinking (Experimental)",
+  [MODELS.GEMINI_EXP_1206]: "Gemini Experimental 1206",
+  [MODELS.GEMINI_1_5_PRO]: "Gemini 1.5 Pro",
+  [MODELS.GEMINI_1_5_FLASH]: "Gemini 1.5 Flash",
+  [MODELS.GEMINI_1_5_FLASH_8B]: "Gemini 1.5 Flash-8B",
 };

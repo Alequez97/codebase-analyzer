@@ -48,10 +48,12 @@ ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
 # or
 DEEPSEEK_API_KEY=sk-...
+# or
+GOOGLE_API_KEY=...
 
 # Optional: Choose your AI model
 LLM_MODEL=sonnet
-# Options: sonnet, gpt-4, deepseek, etc.
+# Options: sonnet, gpt-4, deepseek, gemini-1.5-pro, etc.
 
 # Optional: Server port
 PORT=3001

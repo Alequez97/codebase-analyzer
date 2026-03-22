@@ -6,6 +6,7 @@ export const PROVIDERS = {
   ANTHROPIC: "anthropic",
   DEEPSEEK: "deepseek",
   OPENROUTER: "openrouter",
+  GOOGLE: "google",
 };
 
 /**
@@ -16,6 +17,7 @@ export const PROVIDER_NAMES = {
   [PROVIDERS.ANTHROPIC]: "Anthropic",
   [PROVIDERS.DEEPSEEK]: "DeepSeek",
   [PROVIDERS.OPENROUTER]: "OpenRouter",
+  [PROVIDERS.GOOGLE]: "Google",
 };
 
 /**
@@ -26,4 +28,5 @@ export const PROVIDER_URLS = {
   [PROVIDERS.ANTHROPIC]: "https://api.anthropic.com/v1",
   [PROVIDERS.DEEPSEEK]: "https://api.deepseek.com",
   [PROVIDERS.OPENROUTER]: "https://openrouter.ai/api/v1",
+  [PROVIDERS.GOOGLE]: "https://generativelanguage.googleapis.com/v1",
 };
