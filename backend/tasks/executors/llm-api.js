@@ -2,6 +2,7 @@ import config from "../../config.js";
 import { ClaudeClient } from "../../llm/clients/claude-client.js";
 import { OpenAIClient } from "../../llm/clients/openai-client.js";
 import { DeepSeekClient } from "../../llm/clients/deepseek-client.js";
+import { KimiClient } from "../../llm/clients/kimi-client.js";
 import { GeminiClient } from "../../llm/clients/gemini-client.js";
 import { ChatState } from "../../llm/state/chat-state.js";
 import { OpenAIChatState } from "../../llm/state/openai-chat-state.js";
@@ -28,6 +29,7 @@ export async function detect() {
     apiKeys.anthropic ||
     apiKeys.openai ||
     apiKeys.deepseek ||
+    apiKeys.kimi ||
     apiKeys.openrouter ||
     apiKeys.google,
   );
@@ -58,7 +60,7 @@ export function createLLMAgent(agentConfig) {
 
   if (!provider) {
     throw new Error(
-      `Unable to determine provider from model "${model}". Supported: OpenAI (gpt-*, o1-*, o3-*), Anthropic (claude-*, sonnet), DeepSeek (deepseek-*), Google (gemini-*)`,
+      `Unable to determine provider from model "${model}". Supported: OpenAI (gpt-*, o1-*, o3-*), Anthropic (claude-*, sonnet), DeepSeek (deepseek-*), Kimi (kimi-*), Google (gemini-*)`,
     );
   }
 
@@ -104,6 +106,18 @@ export function createLLMAgent(agentConfig) {
       maxTokens,
     });
     state = new OpenAIChatState(client);
+  } else if (provider === "kimi") {
+    if (!apiKeys.kimi) {
+      throw new Error(
+        `Kimi model "${model}" is selected but MOONSHOT_API_KEY is not configured`,
+      );
+    }
+    client = new KimiClient({
+      apiKey: apiKeys.kimi,
+      model,
+      maxTokens,
+    });
+    state = new OpenAIChatState(client);
   } else if (provider === "google") {
     if (!apiKeys.google) {
       throw new Error(
@@ -118,7 +132,7 @@ export function createLLMAgent(agentConfig) {
     state = new ChatState(client);
   } else {
     throw new Error(
-      `Unsupported provider "${provider}". Supported providers: openai, anthropic, deepseek, google`,
+      `Unsupported provider "${provider}". Supported providers: openai, anthropic, deepseek, kimi, google`,
     );
   }
 

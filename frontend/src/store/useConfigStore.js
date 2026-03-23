@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import api from "../api";
-import { MODEL_LABELS } from "../constants/models";
 
 /**
  * Store for server configuration and connection status
@@ -62,7 +61,10 @@ export const useConfigStore = create((set, get) => ({
    */
   getTaskDefaultModel: (taskType) => {
     const modelId = get().config?.taskModels?.[taskType];
-    return modelId ? (MODEL_LABELS[modelId] ?? modelId) : null;
+    if (!modelId) return null;
+
+    const modelLabels = get().config?.availableModelLabels || {};
+    return modelLabels[modelId] ?? modelId;
   },
 }));
 

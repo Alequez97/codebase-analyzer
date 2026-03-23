@@ -5,8 +5,8 @@
 
 /**
  * Get the provider name from a model string
- * @param {string} model - The model name (e.g., "deepseek-chat", "claude-sonnet-4")
- * @returns {string|null} The provider name (e.g., "openai", "anthropic", "deepseek")
+ * @param {string} model - The model name (e.g., "deepseek-chat", "claude-sonnet-4", "kimi-k2.5")
+ * @returns {string|null} The provider name (e.g., "openai", "anthropic", "deepseek", "kimi")
  */
 export function getProviderFromModel(model) {
   if (!model) return null;
@@ -17,6 +17,9 @@ export function getProviderFromModel(model) {
 
   const providerMap = {
     deepseek: "deepseek",
+    kimi: "kimi",
+    moonshot: "kimi",
+    "moonshot-v1": "kimi",
     sonnet: "anthropic",
     "claude-3": "anthropic",
     claude: "anthropic",

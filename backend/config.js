@@ -73,6 +73,7 @@ const config = {
     [PROVIDERS.OPENAI]: process.env.OPENAI_API_KEY,
     [PROVIDERS.ANTHROPIC]: process.env.ANTHROPIC_API_KEY,
     [PROVIDERS.DEEPSEEK]: process.env.DEEPSEEK_API_KEY,
+    [PROVIDERS.KIMI]: process.env.MOONSHOT_API_KEY,
     [PROVIDERS.OPENROUTER]: process.env.OPENROUTER_API_KEY,
     [PROVIDERS.GOOGLE]: process.env.GOOGLE_API_KEY,
     braveSearch: process.env.BRAVE_SEARCH_API_KEY,

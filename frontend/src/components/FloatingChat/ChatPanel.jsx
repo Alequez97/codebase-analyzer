@@ -31,7 +31,6 @@ import { ModelSelector } from "./ModelSelector";
 import { AgentOverridesPopover } from "./AgentOverridesPopover";
 import { useAgentChatStore } from "../../store/useAgentChatStore";
 import { useConfigStore } from "../../store/useConfigStore";
-import { MODEL_LABELS } from "../../constants/models";
 import { SECTION_TYPES } from "../../constants/section-types";
 import { TASK_TYPES } from "../../constants/task-types";
 
@@ -164,11 +163,9 @@ export function ChatPanel({ onClose, posRef, registerPositionUpdate }) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const { config } = useConfigStore();
-  const defaultModelId = config?.taskModels?.[selectedTaskType] ?? null;
-  const defaultModelLabel = defaultModelId
-    ? (MODEL_LABELS[defaultModelId] ?? null)
-    : null;
+  const defaultModelLabel = useConfigStore((state) =>
+    selectedTaskType ? state.getTaskDefaultModel(selectedTaskType) : null,
+  );
 
   // Auto-scroll when new messages arrive
   useEffect(() => {

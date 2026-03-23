@@ -1,5 +1,5 @@
 import { NativeSelect } from "@chakra-ui/react";
-import { MODELS_BY_PROVIDER } from "../../constants/models";
+import { useConfigStore } from "../../store/useConfigStore";
 
 /**
  * ModelSelector - Compact model chooser for the chat input area.
@@ -13,6 +13,8 @@ import { MODELS_BY_PROVIDER } from "../../constants/models";
  * @param {string|null} defaultLabel - Display name of the server default model for this task
  */
 export function ModelSelector({ value, onChange, defaultLabel }) {
+  const modelsByProvider =
+    useConfigStore((state) => state.config?.availableModelsByProvider) || [];
   const isOverridden = !!value;
   const defaultOptionLabel = defaultLabel
     ? `Default (${defaultLabel})`
@@ -40,7 +42,7 @@ export function ModelSelector({ value, onChange, defaultLabel }) {
         _focus={{ outline: "none", boxShadow: "none" }}
       >
         <option value="default">{defaultOptionLabel}</option>
-        {MODELS_BY_PROVIDER.map(({ provider, label, models }) => (
+        {modelsByProvider.map(({ provider, label, models }) => (
           <optgroup key={provider} label={label}>
             {models.map(({ value: v, label: l }) => (
               <option key={v} value={v}>

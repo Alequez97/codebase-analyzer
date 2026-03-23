@@ -20,6 +20,11 @@ export const MODELS = {
   DEEPSEEK_CHAT: "deepseek-chat",
   DEEPSEEK_REASONER: "deepseek-reasoner",
 
+  // Kimi (Moonshot) models
+  KIMI_K2_5: "kimi-k2.5",
+  KIMI_K2_THINKING: "kimi-k2-thinking",
+  KIMI_K2_THINKING_TURBO: "kimi-k2-thinking-turbo",
+
   // Google Gemini models
   GEMINI_3_1_PRO_PREVIEW: "gemini-3.1-pro-preview",
   GEMINI_2_5_PRO: "gemini-2.5-pro",
@@ -42,6 +47,9 @@ export const MODEL_NAMES = {
   [MODELS.CLAUDE_HAIKU_3_5]: "Claude Haiku 3.5",
   [MODELS.DEEPSEEK_CHAT]: "DeepSeek Chat",
   [MODELS.DEEPSEEK_REASONER]: "DeepSeek Reasoner",
+  [MODELS.KIMI_K2_5]: "Kimi K2.5",
+  [MODELS.KIMI_K2_THINKING]: "Kimi K2 Thinking",
+  [MODELS.KIMI_K2_THINKING_TURBO]: "Kimi K2 Thinking Turbo",
   [MODELS.GEMINI_3_1_PRO_PREVIEW]: "Gemini 3.1 Pro Preview",
   [MODELS.GEMINI_2_5_PRO]: "Gemini 2.5 Pro Preview",
   [MODELS.GEMINI_2_5_FLASH]: "Gemini 2.5 Flash Preview",
