@@ -221,27 +221,157 @@ import {
 
 ## Build verification requirements
 
-- before delegating page tasks, ensure the shared React scaffold builds successfully
+- **Verify shared scaffold ONLY** - before delegating page tasks, ensure the shared React scaffold (without pages) builds successfully
 - use the command tool from `{{DESIGN_PATH}}`
 - ensure the produced `dist/index.html` references assets relatively, not with root-relative `/assets/...` paths
 - if dependencies are missing, run `npm install --no-fund --no-audit`
 - then run `npm run build -- --base=./`
 - if the build fails, fix the scaffold until the build succeeds
 - do not proceed to page delegation while the shared scaffold still has build errors
-- because delegated page tasks run asynchronously, you cannot prove final combined build health after they finish inside this same task
-- your responsibility is to hand off a buildable shared foundation and delegate page tasks with a clear contract that they must preserve build success
+- **Do NOT verify full build with pages** - pages are built by subagents asynchronously; final build verification is handled by the post-processing task with `dependsOn`
 
-## Delegation requirements
+## Delegation Workflow
 
-After writing the shared files, delegate one page task per manifest page.
+After writing the shared files, you MUST delegate each page implementation to a specialized page-generation agent. Do NOT write page implementations yourself.
+
+### Delegation Pattern
+
+Use the `delegate_task` tool to spawn page-generation agents. Each subagent receives:
+
+**Required context to pass:**
+- `designId`: The design identifier
+- `pageId`: Unique page identifier from manifest
+- `pageName`: Human-readable page name
+- `route`: Route path for this page
+- `pageSummary`: Brief description of what this page does
+- `technology`: `"react-vite"`
+- `designSystemPath`: Path to the design system file
+- `tokensPath`: Path to `tokens.css`
+- `appManifestPath`: Path to `app-manifest.json`
+- `briefPath`: Path to approved brief
+- `outputPath`: Where to write the page component (e.g., `src/features/auth/pages/LoginPage/`)
+- `dependencies`: List of shared components/stores this page can import from
+
+### Subagent Scope (Feature-Isolated)
+
+Each page-generation subagent:
+
+1. **Works in ONE feature scope only** - only writes files under `src/features/<feature>/` or `src/pages/<page>/`
+2. **Never touches shared files** - cannot modify `src/components/ui/`, `src/styles/`, `src/stores/` (global)
+3. **Imports from shared, never exports to shared** - uses the design system but doesn't modify it
+4. **Owns its feature folder** - creates local components, local stores, and local utilities within its scope
+
+### Subagent Responsibilities
+
+Each page-generation subagent must:
+
+1. **Create the page component** at the specified `outputPath` with proper folder structure:
+   ```
+   src/features/<feature>/pages/<PageName>/
+   ├── <PageName>.jsx           # Main page component
+   ├── <PageName>.module.css    # Page-specific styles
+   ├── index.js                 # Barrel export
+   └── components/              # Page-local components (if needed)
+       ├── FeatureCard/
+       │   ├── FeatureCard.jsx
+       │   ├── FeatureCard.module.css
+       │   └── index.js
+       └── ...
+   ```
+
+2. **Extract complex UI into local components** - Senior-level code organization:
+   - Any JSX block exceeding ~30 lines with distinct visual identity → extract to component
+   - Repeating visual patterns (cards, rows, item displays) → extract to reusable local component
+   - Complex conditional rendering blocks → extract to sub-component
+   - Form sections with multiple fields → extract to form-section components
+
+3. **Build with shared UI primitives** - Import and compose from `src/components/ui/`:
+   ```jsx
+   import { Heading, Text, Stack, Container, AnimatedLink } from "@/components/ui/index.js";
+   ```
+   - Never re-create typography components
+   - Never re-create layout primitives (Stack, Container)
+   - Use design tokens via CSS variables, never hardcode values
+
+4. **Create local state if needed** - Use Zustand for feature-local stores:
+   ```
+   src/features/<feature>/store/
+   └── use<Feature>Store.js
+   ```
+   - Keep state close to where it's used
+   - Don't create global stores for single-page concerns
+
+5. **Handle loading/error states** - Professional error boundaries and loading UI
+
+6. **Follow the routing contract** - Export the page as default, accept no route params unless specified
+
+### Component Extraction Guidelines for Subagents
+
+Subagents must write senior-level code with proper component extraction:
+
+**Always extract when:**
+- A visual element repeats 2+ times (lists, cards, grid items)
+- A section has self-contained logic (form section, filter panel, data table)
+- JSX exceeds ~30 lines for a single conceptual unit
+- There's conditional rendering that obscures the main layout
+- A component needs local state but the parent doesn't
+
+**Naming conventions:**
+- PascalCase for components matching their purpose: `UserProfileCard`, `FilterSidebar`, `DataTableRow`
+- Component folders match component name: `UserProfileCard/UserProfileCard.jsx`
+- Barrel exports for clean imports: `components/UserProfileCard/index.js`
+
+**Local component structure:**
+```jsx
+// FeatureCard.jsx
+import styles from "./FeatureCard.module.css";
+import { Heading, Text } from "@/components/ui/index.js";
+
+export function FeatureCard({ title, description, icon, onAction }) {
+  return (
+    <div className={styles.card}>
+      <div className={styles.iconWrapper}>{icon}</div>
+      <Heading level="3" size="md" className={styles.title}>
+        {title}
+      </Heading>
+      <Text size="sm" color="secondary" className={styles.description}>
+        {description}
+      </Text>
+      <button onClick={onAction} className={styles.action}>
+        Learn more
+      </button>
+    </div>
+  );
+}
+
+// index.js
+export { FeatureCard } from "./FeatureCard.jsx";
+```
+
+### Delegation Requirements
 
 When delegating page generation:
 
-- include `designId`
-- include `pageId`
-- include `pageName`
-- include `route`
-- include `technology: "react-vite"`
+- **One task per page** - Never combine multiple pages in one delegation
+- **Parallel delegation** - Spawn all page tasks concurrently after scaffold is ready
+- **Clear boundaries** - Each subagent knows exactly which files it owns
+- **No cross-dependencies** - Pages should not depend on other pages' internal components
+- **Do NOT wait for completion** - Queue page tasks and return immediately; the task queue will handle completion
+
+### Subagent System Instructions
+
+Page-generation subagents should use the system instruction:
+```
+backend/system-instructions/design/page-generate-react-vite.md
+```
+
+If that file doesn't exist, include these rules in the delegation prompt:
+- You are a senior React developer implementing ONE page
+- Work ONLY in your assigned feature folder
+- Extract complex UI into local components with proper folder structure
+- Use shared UI primitives from `@/components/ui/`
+- Use design tokens, never hardcode colors/sizes
+- Follow the existing code style and patterns
 
 ## Constraints
 
@@ -249,8 +379,23 @@ When delegating page generation:
 - Do not require external backend services
 - Do not generate `dist/` yourself
 - Do not mix static HTML page output with React page output
+- **Do NOT write page implementations yourself** - always delegate to subagents
+- **Do NOT modify files within a subagent's scope** once delegated
 
-## Final response
+## Post-Processing Task (dependsOn)
+
+DO NOT verify subagent results in this task. 
+
+The verification will be handled by a separate task handler with `dependsOn` parameter that references the page task IDs. This post-processing task will:
+
+1. **Verify page files exist** - Check that each page component was created at the expected path
+2. **Check for build conflicts** - Ensure no subagent modified shared files  
+3. **Verify imports** - Quick check that pages import from `@/components/ui/` correctly
+4. **Report per-page status** - Success or failure for each delegated task
+
+Your responsibility ends after queueing page tasks. The queue system will execute the verification task only when all `dependsOn` tasks are completed.
+
+## Final Response
 
 Summarize:
 
@@ -260,4 +405,9 @@ Summarize:
 - what routing/app-shell contract was defined
 - which Zustand stores were established (if any)
 - whether the shared scaffold build passed before delegation
-- which page tasks were delegated
+- **delegation summary**:
+  - how many pages were queued for generation
+  - which feature scopes were assigned to each page
+  - task IDs of queued page tasks (for dependsOn reference)
+
+**Important**: You are only reporting what was queued. Do not report page task completion status - that will be handled by the post-processing task.

@@ -217,21 +217,21 @@ const config = {
     },
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_ASSISTANT]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GPT_5_2,
+      model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
@@ -293,4 +293,3 @@ dirs.forEach((dir) => {
 });
 
 export default config;
-
