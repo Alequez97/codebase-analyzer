@@ -210,7 +210,7 @@ const config = {
 
     [TASK_TYPES.DESIGN_BRAINSTORM]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.DEEPSEEK_REASONER,
+      model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
