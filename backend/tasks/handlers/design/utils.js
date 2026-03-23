@@ -80,11 +80,18 @@ export function getPublicDesignProgress(progress) {
 
 export function getHistoryMessages(history) {
   return Array.isArray(history)
-    ? history.filter(
-        (message) =>
-          (message.role === "user" || message.role === "assistant") &&
-          typeof message.content === "string" &&
-          message.content.trim(),
-      )
+    ? history
+        .filter(
+          (message) =>
+            (message.role === "user" || message.role === "assistant") &&
+            typeof message.content === "string" &&
+            message.content.trim(),
+        )
+        .map((message) => ({
+          role: message.role,
+          content: message.content,
+          // Preserve reasoning_content for Kimi/DeepSeek thinking mode
+          reasoning_content: message.reasoning_content ?? null,
+        }))
     : [];
 }

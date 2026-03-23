@@ -141,7 +141,10 @@ export class LLMAgent {
       if (msg.role === "user") {
         this.state.addUserMessage(msg.content);
       } else if (msg.role === "assistant") {
-        this.state.addAssistantMessage(msg.content);
+        // Pass reasoning_content if present (required for Kimi/DeepSeek thinking mode)
+        this.state.addAssistantMessage(msg.content, {
+          reasoningContent: msg.reasoning_content ?? null,
+        });
       }
     }
 

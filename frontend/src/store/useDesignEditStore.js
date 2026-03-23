@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import {
   editDesign,
   getLatestEditTask,
@@ -70,8 +69,7 @@ function buildSessionTitle(task) {
 }
 
 export const useDesignEditStore = create(
-  persist(
-    (set, get) => ({
+  (set, get) => ({
       // State
       prompt: "",
       editMessages: [],
@@ -144,7 +142,7 @@ export const useDesignEditStore = create(
             : [];
 
           const sessions = tasks
-            .filter((task) => task.type === TASK_TYPES.EDIT_DESIGN_LATEST)
+            .filter((task) => task.type === TASK_TYPES.DESIGN_ASSISTANT)
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
             .map((task) => ({
               id: task.id,
@@ -382,16 +380,5 @@ export const useDesignEditStore = create(
         }
       },
     }),
-    {
-      name: "design-edit-store",
-      storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({
-        editMessages: state.editMessages,
-        editResponse: state.editResponse,
-        editComplete: state.editComplete,
-        targetDesignId: state.targetDesignId,
-        editTaskId: state.editTaskId,
-      }),
-    },
-  ),
 );
+

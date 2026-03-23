@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import {
   brainstormDesign,
   getLatestBrainstormTask,
@@ -48,8 +47,7 @@ function mergeMessages(existingMessages, incomingMessages) {
 }
 
 export const useDesignBrainstormStore = create(
-  persist(
-    (set, get) => ({
+  (set, get) => ({
       // State
       prompt: "",
       brainstormMessages: [],
@@ -271,16 +269,4 @@ export const useDesignBrainstormStore = create(
         }
       },
     }),
-    {
-      name: "design-brainstorm-store",
-      storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({
-        brainstormMessages: state.brainstormMessages,
-        brainstormResponse: state.brainstormResponse,
-        brainstormComplete: state.brainstormComplete,
-        targetDesignId: state.targetDesignId,
-        brainstormTaskId: state.brainstormTaskId,
-      }),
-    },
-  ),
 );

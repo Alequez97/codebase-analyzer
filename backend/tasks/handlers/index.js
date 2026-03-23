@@ -39,5 +39,6 @@ export {
   designBrainstormHandler,
   designPlanAndStyleSystemGenerateHandler,
   designGeneratePageHandler,
-  editDesignLatestVersionHandler,
+  designAssistantHandler,
 } from "./design/index.js";
+

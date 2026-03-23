@@ -13,6 +13,7 @@ export const DELEGATABLE_TASK_TYPES = [
   "edit-requirements",
   "edit-bugs-security",
   "edit-refactoring-and-testing",
+  "design-plan-and-style-system-generate",
   "design-generate-page",
 ];
 
@@ -28,7 +29,10 @@ const SECTION_TYPE_BY_TASK_TYPE = {
   "edit-refactoring-and-testing": "refactoring-and-testing",
 };
 
-const DIRECT_DELEGATION_TASK_TYPES = new Set(["design-generate-page"]);
+const DIRECT_DELEGATION_TASK_TYPES = new Set([
+  "design-plan-and-style-system-generate",
+  "design-generate-page",
+]);
 
 export const DELEGATION_TOOLS = [
   {
@@ -55,7 +59,7 @@ The delegation request file content becomes the user message (or briefing) for t
       params: {
         type: "object",
         description:
-          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Direct design page tasks require `designId`, `pageId`, `pageName`, and optionally `route` and `technology`.",
+          "Additional parameters passed to the queue function. Edit tasks require `domainId`. Design plan delegation requires `designId` and should include `technology`; `prompt`/`brief` are optional (request file content is used as fallback prompt). Design page delegation requires `designId`, `pageId`, `pageName`, and optionally `route` and `technology`.",
       },
     },
     required: ["type", "requestFile"],
@@ -240,6 +244,56 @@ export class DelegationToolExecutor {
   }
 
   async _delegateDirectTask({ type, queueFn, requestContent, mergedParams }) {
+    if (type === "design-plan-and-style-system-generate") {
+      const {
+        designId,
+        prompt = requestContent,
+        brief = "",
+        technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
+      } = mergedParams;
+
+      if (!designId) {
+        return {
+          success: false,
+          error: {
+            message:
+              "designId is required for design plan delegation (prevents accidental prompt-slug design IDs)",
+          },
+        };
+      }
+
+      if (!prompt?.trim()) {
+        return {
+          success: false,
+          error: {
+            message:
+              "prompt is required for design plan delegation (or provide content in requestFile)",
+          },
+        };
+      }
+
+      return this._queueDirectDelegation({
+        type,
+        queueFn,
+        mergedParams,
+        extraPayload: {
+          designId,
+          prompt: prompt.trim(),
+          brief: typeof brief === "string" ? brief : "",
+          technology,
+        },
+        successMeta: {
+          designId,
+          technology,
+        },
+        logMeta: {
+          designId,
+          technology,
+        },
+        errorMessage: "Failed to queue delegated design planning task",
+      });
+    }
+
     if (type === "design-generate-page") {
       const {
         designId,
@@ -261,7 +315,6 @@ export class DelegationToolExecutor {
       return this._queueDirectDelegation({
         type,
         queueFn,
-        requestContent,
         mergedParams,
         extraPayload: {
           designId,
@@ -269,6 +322,7 @@ export class DelegationToolExecutor {
           pageName,
           route,
           technology,
+          designBriefing: mergedParams.designBriefing ?? requestContent,
         },
         successMeta: {
           designId,
@@ -293,7 +347,6 @@ export class DelegationToolExecutor {
   async _queueDirectDelegation({
     type,
     queueFn,
-    requestContent,
     mergedParams,
     extraPayload = {},
     successMeta = {},
@@ -310,10 +363,6 @@ export class DelegationToolExecutor {
     const task = await queueFn({
       ...mergedParams,
       ...extraPayload,
-      designBriefing:
-        extraPayload.designBriefing ??
-        mergedParams.designBriefing ??
-        requestContent,
       delegatedByTaskId: this.parentTaskId,
     });
 

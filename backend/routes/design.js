@@ -5,7 +5,7 @@ import { DESIGN_TECHNOLOGY_VALUES } from "../constants/design-technologies.js";
 import {
   queueDesignBrainstormTask,
   queueDesignPlanAndStyleSystemGenerateTask,
-  queueDesignEditLatestVersionTask,
+  queueDesignAssistantTask,
 } from "../tasks/queue/index.js";
 import { getTasks } from "../orchestrators/task.js";
 import { loadChatHistory } from "../utils/chat-history.js";
@@ -71,16 +71,16 @@ router.get("/latest-brainstorm-task", async (_req, res) => {
 router.get("/latest-edit-task", async (_req, res) => {
   try {
     return res.json(
-      await getLatestTaskByTypes([TASK_TYPES.EDIT_DESIGN_LATEST]),
+      await getLatestTaskByTypes([TASK_TYPES.DESIGN_ASSISTANT]),
     );
   } catch (error) {
-    logger.error("Failed to get latest edit task", {
+    logger.error("Failed to get latest design assistant task", {
       component: "DesignRoutes",
       error: error.message,
       stack: error.stack,
     });
     return res.status(500).json({
-      error: "Failed to get latest edit task",
+      error: "Failed to get latest design assistant task",
       message: error.message,
     });
   }
@@ -149,7 +149,7 @@ router.post("/edit", async (req, res) => {
       });
     }
 
-    const task = await queueDesignEditLatestVersionTask({
+    const task = await queueDesignAssistantTask({
       prompt: prompt.trim(),
       history,
       model,
@@ -157,12 +157,12 @@ router.post("/edit", async (req, res) => {
 
     if (task?.success === false) {
       return res.status(500).json({
-        error: task.error || "Failed to queue design edit task",
+        error: task.error || "Failed to queue design assistant task",
         code: task.code,
       });
     }
 
-    logger.info("Design edit task queued", {
+    logger.info("Design assistant task queued", {
       component: "DesignRoutes",
       taskId: task.id,
     });
@@ -176,13 +176,13 @@ router.post("/edit", async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error("Failed to queue design edit task", {
+    logger.error("Failed to queue design assistant task", {
       component: "DesignRoutes",
       error: error.message,
       stack: error.stack,
     });
     return res.status(500).json({
-      error: "Failed to start design edit",
+      error: "Failed to start design assistant task",
       message: error.message,
     });
   }
@@ -384,3 +384,4 @@ router.get("/publish/:designId", async (req, res) => {
 });
 
 export default router;
+

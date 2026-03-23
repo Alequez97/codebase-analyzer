@@ -13,23 +13,23 @@ import {
   getProgressFileRelativePath,
 } from "../../../utils/task-progress.js";
 
-export async function queueDesignEditLatestVersionTask({
+export async function queueDesignAssistantTask({
   prompt,
   history = [],
   model = null,
 }) {
   const agentConfigResult = getAgentConfig(
-    TASK_TYPES.EDIT_DESIGN_LATEST,
+    TASK_TYPES.DESIGN_ASSISTANT,
     model,
   );
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }
 
-  const taskId = generateTaskId(TASK_TYPES.EDIT_DESIGN_LATEST);
+  const taskId = generateTaskId(TASK_TYPES.DESIGN_ASSISTANT);
   const task = {
     id: taskId,
-    type: TASK_TYPES.EDIT_DESIGN_LATEST,
+    type: TASK_TYPES.DESIGN_ASSISTANT,
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
@@ -38,11 +38,11 @@ export async function queueDesignEditLatestVersionTask({
       userInstruction: prompt,
     },
     agentConfig: agentConfigResult.agentConfig,
-    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.EDIT_DESIGN_LATEST,
+    systemInstructionFile: SYSTEM_INSTRUCTION_PATHS.DESIGN_ASSISTANT,
     progressFile: getProgressFileRelativePath(taskId),
   };
 
-  await initChatHistory(taskId, { taskType: TASK_TYPES.EDIT_DESIGN_LATEST });
+  await initChatHistory(taskId, { taskType: TASK_TYPES.DESIGN_ASSISTANT });
 
   // Store the user's initial message
   await appendChatMessage(taskId, {
@@ -55,3 +55,4 @@ export async function queueDesignEditLatestVersionTask({
 
   return task;
 }
+

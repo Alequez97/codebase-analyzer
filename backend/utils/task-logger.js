@@ -41,7 +41,7 @@ export function getLogEventForTaskType(taskType) {
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
       SOCKET_EVENTS.LOG_DESIGN_TASK,
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: SOCKET_EVENTS.LOG_DESIGN_TASK,
-    [TASK_TYPES.EDIT_DESIGN_LATEST]: SOCKET_EVENTS.LOG_DESIGN_TASK,
+    [TASK_TYPES.DESIGN_ASSISTANT]: SOCKET_EVENTS.LOG_DESIGN_TASK,
   };
 
   const event = eventMap[taskType];
@@ -181,3 +181,4 @@ export function logTaskError(taskLogger, task, error) {
 
   taskLogger.log(`\n${"=".repeat(80)}\n❌ [FAILED] ${error.message}\n${"=".repeat(80)}\n`);
 }
+

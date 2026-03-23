@@ -20,7 +20,7 @@ import {
   designBrainstormHandler,
   designPlanAndStyleSystemGenerateHandler,
   designGeneratePageHandler,
-  editDesignLatestVersionHandler,
+  designAssistantHandler,
 } from "./design/index.js";
 import { editCodebaseAnalysisHandler } from "./editing/codebase-analysis.js";
 import { editDocumentationHandler } from "./editing/documentation.js";
@@ -29,6 +29,8 @@ import { implementFixHandler } from "./implementation/fix.js";
 import { implementTestHandler } from "./implementation/test.js";
 import { reviewChangesHandler } from "./review/changes.js";
 import { queueDesignGeneratePageTask } from "../queue/design/generate-page.js";
+import { queueDesignAssistantTask } from "../queue/design/design-assistant.js";
+import { queueDesignPlanAndStyleSystemGenerateTask } from "../queue/design/plan-and-style-system-generate.js";
 
 const EDIT_SECTION_HANDLER_OPTIONS = {
   [TASK_TYPES.EDIT_DIAGRAMS]: {
@@ -58,12 +60,15 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
 };
 
 const DESIGN_QUEUE_FUNCTIONS = {
+  "design-assistant": queueDesignAssistantTask,
+  "design-plan-and-style-system-generate":
+    queueDesignPlanAndStyleSystemGenerateTask,
   "design-generate-page": queueDesignGeneratePageTask,
 };
 
 const MESSAGE_TOOL_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_BRAINSTORM,
-  TASK_TYPES.EDIT_DESIGN_LATEST,
+  TASK_TYPES.DESIGN_ASSISTANT,
 ]);
 
 function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
@@ -171,6 +176,8 @@ function buildSectionChatContext(task, fallbackMessage) {
       priorMessages: messages.slice(0, -1).map((message) => ({
         role: message.role,
         content: message.content,
+        // Preserve reasoning_content for Kimi/DeepSeek thinking mode
+        reasoning_content: message.reasoning_content ?? null,
       })),
     };
   });
@@ -253,8 +260,12 @@ export async function createTaskHandler(task, taskLogger, agent) {
     );
   } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
     overrides = designGeneratePageHandler(task, taskLogger, agent);
-  } else if (task.type === TASK_TYPES.EDIT_DESIGN_LATEST) {
-    overrides = editDesignLatestVersionHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.DESIGN_ASSISTANT) {
+    if (agent) {
+      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      taskLogger.info("Design assistant delegation tools enabled");
+    }
+    overrides = designAssistantHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {
@@ -277,3 +288,4 @@ export async function createTaskHandler(task, taskLogger, agent) {
     ...overrides,
   };
 }
+

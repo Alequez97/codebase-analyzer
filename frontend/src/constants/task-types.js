@@ -33,5 +33,6 @@ export const TASK_TYPES = {
   DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     "design-plan-and-style-system-generate",
   DESIGN_GENERATE_PAGE: "design-generate-page",
-  EDIT_DESIGN_LATEST: "edit-design-latest-version",
+  DESIGN_ASSISTANT: "design-assistant",
 };
+

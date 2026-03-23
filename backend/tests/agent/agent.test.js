@@ -217,7 +217,10 @@ describe("LLMAgent", () => {
 
       // Assert
       expect(state.addUserMessage).toHaveBeenNthCalledWith(1, "prior user");
-      expect(state.addAssistantMessage).toHaveBeenCalledWith("prior assistant");
+      expect(state.addAssistantMessage).toHaveBeenCalledWith(
+        "prior assistant",
+        { reasoningContent: null },
+      );
       expect(state.addUserMessage).toHaveBeenNthCalledWith(2, "Hello");
     });
   });

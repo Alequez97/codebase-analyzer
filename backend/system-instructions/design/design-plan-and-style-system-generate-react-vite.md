@@ -213,7 +213,9 @@ import {
 
 - add `zustand` to `package.json`
 - if state must be shared across routes or reused by multiple components, model it in a store
-- avoid using Zustand `persist` middleware unless strictly necessary; default to standard in-memory state to prevent syncing bugs
+- default to in-memory Zustand stores (no browser storage)
+- do not use `localStorage` or `sessionStorage` for store data unless the data is explicit user config/preferences that must persist
+- avoid using Zustand `persist` middleware unless strictly necessary for explicit config/preferences persistence
 - keep stores focused by domain instead of creating one monolithic global store
 - keep routing concerns out of stores unless the store is exposing domain actions that a routed page consumes
 
@@ -259,4 +261,3 @@ Summarize:
 - which Zustand stores were established (if any)
 - whether the shared scaffold build passed before delegation
 - which page tasks were delegated
-

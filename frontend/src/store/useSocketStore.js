@@ -192,7 +192,7 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
-      } else if (type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+      } else if (type === TASK_TYPES.DESIGN_ASSISTANT) {
         useDesignEditStore
           .getState()
           .setEditComplete(data.params?.designId ?? null);
@@ -200,7 +200,7 @@ export const useSocketStore = create((set, get) => ({
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
         type === TASK_TYPES.DESIGN_GENERATE_PAGE ||
-        type === TASK_TYPES.EDIT_DESIGN_LATEST
+        type === TASK_TYPES.DESIGN_ASSISTANT
       ) {
         useDesignStudioStore.getState().completeCurrentTask(taskId);
       }
@@ -339,13 +339,13 @@ export const useSocketStore = create((set, get) => ({
             isError: true,
           });
         }
-      } else if (type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+      } else if (type === TASK_TYPES.DESIGN_ASSISTANT) {
         useDesignEditStore.getState().clearActiveEditTask(taskId, error);
       } else if (
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
         type === TASK_TYPES.DESIGN_GENERATE_PAGE ||
-        type === TASK_TYPES.EDIT_DESIGN_LATEST
+        type === TASK_TYPES.DESIGN_ASSISTANT
       ) {
         useDesignStudioStore
           .getState()
@@ -385,7 +385,7 @@ export const useSocketStore = create((set, get) => ({
         if (findingId) {
           useDomainBugsSecurityStore.getState().clearImplementingFix(findingId);
         }
-      } else if (type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+      } else if (type === TASK_TYPES.DESIGN_ASSISTANT) {
         useDesignEditStore.getState().clearActiveEditTask(taskId);
       }
     });
@@ -542,7 +542,7 @@ export const useSocketStore = create((set, get) => ({
           useDesignBrainstormStore
             .getState()
             .appendBrainstormMessage({ taskId, role, content, timestamp });
-        } else if (taskType === TASK_TYPES.EDIT_DESIGN_LATEST) {
+        } else if (taskType === TASK_TYPES.DESIGN_ASSISTANT) {
           useDesignEditStore
             .getState()
             .appendEditMessage({ taskId, role, content, timestamp });
@@ -587,7 +587,7 @@ export const useSocketStore = create((set, get) => ({
               selectionType,
             });
           }
-        } else if (taskType === TASK_TYPES.EDIT_DESIGN_LATEST) {
+        } else if (taskType === TASK_TYPES.DESIGN_ASSISTANT) {
           const editStore = useDesignEditStore.getState();
           editStore.appendEditMessage({
             taskId,
@@ -756,3 +756,4 @@ export const useSocketStore = create((set, get) => ({
     set({ socket: null, socketConnected: false });
   },
 }));
+

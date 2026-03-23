@@ -87,6 +87,7 @@ export class KimiClient extends BaseLLMClient {
 
     const result = {
       content: message.content || "",
+      reasoningContent: message.reasoning_content || null,
       toolCalls: [],
       stopReason: choice?.finish_reason || "stop",
       usage: {

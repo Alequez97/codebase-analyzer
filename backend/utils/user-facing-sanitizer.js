@@ -4,7 +4,7 @@ const DESIGN_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_BRAINSTORM,
   TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
   TASK_TYPES.DESIGN_GENERATE_PAGE,
-  TASK_TYPES.EDIT_DESIGN_LATEST,
+  TASK_TYPES.DESIGN_ASSISTANT,
 ]);
 
 /**
@@ -38,3 +38,4 @@ export function sanitizeDesignUserFacingText(text) {
       "the project workspace",
     );
 }
+

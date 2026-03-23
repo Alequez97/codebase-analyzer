@@ -189,7 +189,9 @@ Do not write page-local `index.html`, `styles.css`, or `app.js` files for this t
 - avoid building page navigation around local view-state when a route should express it
 - use Zustand for business logic, derived working state, and interactions shared across components
 - use `useState` only for truly local visual state
-- avoid using Zustand `persist` middleware unless strictly necessary due to syncing bugs; default to standard in-memory stores
+- default to in-memory Zustand stores (no browser storage)
+- do not use `localStorage` or `sessionStorage` for store data unless it is explicit config/preferences that must persist
+- avoid Zustand `persist` middleware unless strictly necessary for explicit config/preferences persistence
 - prefer props and local mock data seams over hardcoded backend assumptions
 - keep the page realistic and interactive enough for preview
 - prefer CSS modules over global class names for page and component styling

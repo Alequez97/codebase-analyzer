@@ -44,7 +44,7 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
     "Design Plan & Style System",
   [TASK_TYPES.DESIGN_GENERATE_PAGE]: "Design Page",
-  [TASK_TYPES.EDIT_DESIGN_LATEST]: "Edit Latest Design",
+  [TASK_TYPES.DESIGN_ASSISTANT]: "Design Assistant",
 };
 
 function taskLabel(type) {
@@ -62,7 +62,7 @@ const TASK_TYPE_LABELS_SHORT = {
   [TASK_TYPES.DESIGN_BRAINSTORM]: "Design Brainstorm",
   [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: "Design Plan",
   [TASK_TYPES.DESIGN_GENERATE_PAGE]: "Design Page",
-  [TASK_TYPES.EDIT_DESIGN_LATEST]: "Edit Latest Design",
+  [TASK_TYPES.DESIGN_ASSISTANT]: "Design Assistant",
 };
 
 function useDomainName(domainId) {
@@ -1011,3 +1011,4 @@ export function TasksStatusPill() {
     </>
   );
 }
+

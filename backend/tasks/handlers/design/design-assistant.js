@@ -1,5 +1,5 @@
 /**
- * Handler for edit design latest version tasks
+ * Handler for design assistant tasks
  */
 import { appendChatMessage } from "../../../utils/chat-history.js";
 import {
@@ -16,7 +16,7 @@ import {
   getHistoryMessages,
 } from "./utils.js";
 
-export function editDesignLatestVersionHandler(task, taskLogger) {
+export function designAssistantHandler(task, taskLogger) {
   return {
     initialMessage: task.params.userInstruction,
     priorMessages: getHistoryMessages(task.params?.history),
@@ -29,12 +29,12 @@ export function editDesignLatestVersionHandler(task, taskLogger) {
       );
       taskLogger.progress("Thinking...", {
         stage: PROGRESS_STAGES.PROCESSING,
-        publicLogText: "Analyzing latest design version...",
+        publicLogText: "Analyzing design request...",
       });
     },
 
     onProgress: (progress) => {
-      const internalMessage = progress.message || "Editing design...";
+      const internalMessage = progress.message || "Working on design...";
       const publicProgress = getPublicDesignProgress(progress);
       taskLogger.progress(internalMessage, {
         stage: publicProgress.stage,
@@ -45,8 +45,8 @@ export function editDesignLatestVersionHandler(task, taskLogger) {
     onCompaction: (phase, _tokensAfter) => {
       const message =
         phase === "complete"
-          ? "Refreshing design edit context..."
-          : "Compacting design edit conversation...";
+          ? "Refreshing design assistant context..."
+          : "Compacting design assistant conversation...";
       taskLogger.progress(message, {
         stage: PROGRESS_STAGES.COMPACTING,
         publicLogText: message,
@@ -89,9 +89,9 @@ export function editDesignLatestVersionHandler(task, taskLogger) {
     },
 
     onComplete: async () => {
-      taskLogger.progress("Design edits complete", {
+      taskLogger.progress("Design task complete", {
         stage: PROGRESS_STAGES.COMPLETING,
-        publicLogText: "Design edits complete",
+        publicLogText: "Design task complete",
       });
 
       await markProgressComplete(task.id).catch(() => {});
@@ -106,3 +106,4 @@ export function editDesignLatestVersionHandler(task, taskLogger) {
     },
   };
 }
+

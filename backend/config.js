@@ -229,7 +229,7 @@ const config = {
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
-    [TASK_TYPES.EDIT_DESIGN_LATEST]: {
+    [TASK_TYPES.DESIGN_ASSISTANT]: {
       agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
@@ -293,3 +293,4 @@ dirs.forEach((dir) => {
 });
 
 export default config;
+

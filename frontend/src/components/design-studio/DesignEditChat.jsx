@@ -16,7 +16,7 @@ import { DesignTechnologySelector } from "./DesignTechnologySelector";
 
 const DOT_DELAY = ["0s", "0.18s", "0.36s"];
 const EDIT_CHAT_STARTER_MESSAGE =
-  "I can help edit your latest design. What should we change?";
+  "I can help improve your design, discuss best practices, or create a new version. What should we do?";
 
 function ThinkingDots() {
   return (
