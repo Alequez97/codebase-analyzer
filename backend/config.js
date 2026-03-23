@@ -76,6 +76,7 @@ const config = {
     [PROVIDERS.KIMI]: process.env.MOONSHOT_API_KEY,
     [PROVIDERS.OPENROUTER]: process.env.OPENROUTER_API_KEY,
     [PROVIDERS.GOOGLE]: process.env.GOOGLE_API_KEY,
+    [PROVIDERS.GLM]: process.env.GLM_API_KEY,
     braveSearch: process.env.BRAVE_SEARCH_API_KEY,
   },
 
@@ -216,21 +217,21 @@ const config = {
     },
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GEMINI_2_5_PRO,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GEMINI_2_5_PRO,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.EDIT_DESIGN_LATEST]: {
       agent: AGENTS.LLM_API,
-      model: MODELS.GEMINI_2_5_PRO,
+      model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,

@@ -61,6 +61,11 @@ const DESIGN_QUEUE_FUNCTIONS = {
   "design-generate-page": queueDesignGeneratePageTask,
 };
 
+const MESSAGE_TOOL_TASK_TYPES = new Set([
+  TASK_TYPES.DESIGN_BRAINSTORM,
+  TASK_TYPES.EDIT_DESIGN_LATEST,
+]);
+
 function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   const editTaskTypes = [
     TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
@@ -180,6 +185,15 @@ export async function createTaskHandler(task, taskLogger, agent) {
     enableGitCommandsIfUseful(agent, task, taskLogger);
   }
 
+  if (
+    agent &&
+    task.responseHandler &&
+    MESSAGE_TOOL_TASK_TYPES.has(task.type)
+  ) {
+    agent.enableMessageTools(task.responseHandler);
+    taskLogger.info(`Message tools enabled (${task.type})`);
+  }
+
   const instructions = await loadSystemInstructionForTask(task);
   taskLogger.info(`Instructions loaded (${instructions.length} chars)`);
 
@@ -226,11 +240,6 @@ export async function createTaskHandler(task, taskLogger, agent) {
   } else if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
     overrides = customCodebaseTaskHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_BRAINSTORM) {
-    // Enable message tools for conversational brainstorming
-    if (agent && task.responseHandler) {
-      agent.enableMessageTools(task.responseHandler);
-      taskLogger.info("Message tools enabled for conversational brainstorming");
-    }
     overrides = designBrainstormHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
     if (agent) {
@@ -245,13 +254,6 @@ export async function createTaskHandler(task, taskLogger, agent) {
   } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
     overrides = designGeneratePageHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.EDIT_DESIGN_LATEST) {
-    // Enable message tools for conversational design editing
-    if (agent && task.responseHandler) {
-      agent.enableMessageTools(task.responseHandler);
-      taskLogger.info(
-        "Message tools enabled for conversational design editing",
-      );
-    }
     overrides = editDesignLatestVersionHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);

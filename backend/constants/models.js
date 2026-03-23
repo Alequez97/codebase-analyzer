@@ -29,6 +29,13 @@ export const MODELS = {
   GEMINI_3_1_PRO_PREVIEW: "gemini-3.1-pro-preview",
   GEMINI_2_5_PRO: "gemini-2.5-pro",
   GEMINI_2_5_FLASH: "gemini-2.5-flash",
+
+  // GLM (Z.AI) models
+  GLM_5: "glm-5",
+  GLM_5_TURBO: "glm-5-turbo",
+  GLM_4_7: "glm-4.7",
+  GLM_4_6: "glm-4.6",
+  GLM_4_5: "glm-4.5",
 };
 
 /**
@@ -60,4 +67,9 @@ export const MODEL_NAMES = {
   [MODELS.GEMINI_1_5_PRO]: "Gemini 1.5 Pro",
   [MODELS.GEMINI_1_5_FLASH]: "Gemini 1.5 Flash",
   [MODELS.GEMINI_1_5_FLASH_8B]: "Gemini 1.5 Flash-8B",
+  [MODELS.GLM_5]: "GLM-5",
+  [MODELS.GLM_5_TURBO]: "GLM-5 Turbo",
+  [MODELS.GLM_4_7]: "GLM-4.7",
+  [MODELS.GLM_4_6]: "GLM-4.6",
+  [MODELS.GLM_4_5]: "GLM-4.5",
 };

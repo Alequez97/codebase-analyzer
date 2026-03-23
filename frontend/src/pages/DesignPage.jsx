@@ -53,14 +53,17 @@ export default function DesignPage() {
 
   const {
     editComplete,
-    editResponse,
     editMessages,
     editTaskId,
     loadingEdit,
+    editSessions,
+    loadingEditSessions,
     pendingQuestion: editPendingQuestion,
     sendUserResponse: sendEditResponse,
     startEdit,
     loadLatestEdit,
+    fetchEditSessions,
+    openEditSession,
     editError,
     clearEdit,
   } = useDesignEditStore();
@@ -148,6 +151,12 @@ export default function DesignPage() {
   const latestVersionId = useMemo(() => getLatestVersionId(), [manifest]);
 
   useEffect(() => {
+    if (sidebarTab === "brainstorm") {
+      setSidebarTab("chat");
+    }
+  }, [sidebarTab, setSidebarTab]);
+
+  useEffect(() => {
     let mounted = true;
 
     // Load manifest, generation history, and brainstorm history in parallel
@@ -156,6 +165,7 @@ export default function DesignPage() {
       loadLatestGeneration(),
       loadLatestBrainstorm(),
       loadLatestEdit(),
+      fetchEditSessions(),
     ]).then(([manifestResult]) => {
       if (!mounted) {
         return;
@@ -175,6 +185,7 @@ export default function DesignPage() {
     loadLatestGeneration,
     loadLatestBrainstorm,
     loadLatestEdit,
+    fetchEditSessions,
   ]);
 
   useEffect(() => {
@@ -418,10 +429,15 @@ export default function DesignPage() {
             brainstormComplete={brainstormComplete}
             onClearBrainstorm={handleClearBrainstorm}
             editTask={editTask}
+            editTaskId={editTaskId}
             editMessages={editMessages}
-            editPendingQuestion={editPendingQuestion || editResponse}
+            editSessions={editSessions}
+            loadingEditSessions={loadingEditSessions}
+            editPendingQuestion={editPendingQuestion}
             onStartEdit={handleStartEdit}
             onSendEditResponse={sendEditResponse}
+            onOpenEditHistory={openEditSession}
+            onRefreshEditHistory={fetchEditSessions}
             onClearEdit={handleClearEdit}
             isEditing={isSubmitting || loadingEdit}
             editTaskError={editError}

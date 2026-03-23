@@ -192,6 +192,10 @@ export const useSocketStore = create((set, get) => ({
             isAwaitingResponse: false,
           });
         }
+      } else if (type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+        useDesignEditStore
+          .getState()
+          .setEditComplete(data.params?.designId ?? null);
       } else if (
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
@@ -335,6 +339,8 @@ export const useSocketStore = create((set, get) => ({
             isError: true,
           });
         }
+      } else if (type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+        useDesignEditStore.getState().clearActiveEditTask(taskId, error);
       } else if (
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
@@ -379,6 +385,8 @@ export const useSocketStore = create((set, get) => ({
         if (findingId) {
           useDomainBugsSecurityStore.getState().clearImplementingFix(findingId);
         }
+      } else if (type === TASK_TYPES.EDIT_DESIGN_LATEST) {
+        useDesignEditStore.getState().clearActiveEditTask(taskId);
       }
     });
 
@@ -617,7 +625,7 @@ export const useSocketStore = create((set, get) => ({
       },
     );
 
-    socket.on(SOCKET_EVENTS.TASK_RESUMED, ({ taskId }) => {
+    socket.on(SOCKET_EVENTS.TASK_RESUMED, ({ taskId: _taskId }) => {
       useDesignStudioStore.getState().clearPendingQuestion();
       useDesignBrainstormStore.getState().clearPendingQuestion();
       useDesignEditStore.getState().clearPendingQuestion();
@@ -625,7 +633,7 @@ export const useSocketStore = create((set, get) => ({
 
     socket.on(
       SOCKET_EVENTS.DESIGN_BRAINSTORM_COMPLETE,
-      ({ taskId, designId }) => {
+      ({ taskId: _taskId, designId }) => {
         useDesignBrainstormStore.getState().setBrainstormComplete(designId);
       },
     );
@@ -748,4 +756,3 @@ export const useSocketStore = create((set, get) => ({
     set({ socket: null, socketConnected: false });
   },
 }));
-

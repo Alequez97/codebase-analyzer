@@ -8,6 +8,7 @@ export const PROVIDERS = {
   KIMI: "kimi",
   OPENROUTER: "openrouter",
   GOOGLE: "google",
+  GLM: "glm",
 };
 
 /**
@@ -20,6 +21,7 @@ export const PROVIDER_NAMES = {
   [PROVIDERS.KIMI]: "Kimi (Moonshot)",
   [PROVIDERS.OPENROUTER]: "OpenRouter",
   [PROVIDERS.GOOGLE]: "Google",
+  [PROVIDERS.GLM]: "GLM (Z.AI)",
 };
 
 /**
@@ -32,4 +34,5 @@ export const PROVIDER_URLS = {
   [PROVIDERS.KIMI]: "https://api.moonshot.ai/v1",
   [PROVIDERS.OPENROUTER]: "https://openrouter.ai/api/v1",
   [PROVIDERS.GOOGLE]: "https://generativelanguage.googleapis.com/v1",
+  [PROVIDERS.GLM]: "https://api.z.ai/api/paas/v4",
 };

@@ -20,6 +20,10 @@ import { emitSocketEvent } from "../utils/socket-emitter.js";
 import { deleteProgressFile } from "../utils/task-progress.js";
 import * as domainBugsSecurityPersistence from "../persistence/domain-bugs-security.js";
 import * as logger from "../utils/logger.js";
+import {
+  isDesignTaskType,
+  sanitizeDesignUserFacingText,
+} from "../utils/user-facing-sanitizer.js";
 
 /**
  * Get all pending tasks
@@ -474,8 +478,23 @@ export function createUserResponseHandler(task) {
      * @param {Object} messageData - Message payload fields
      */
     sendMessage(messageData) {
+      const isDesignTask = isDesignTaskType(taskType);
+      const sanitizedMessage = isDesignTask
+        ? sanitizeDesignUserFacingText(messageData?.message)
+        : messageData?.message;
+      const sanitizedUserOptions =
+        isDesignTask && Array.isArray(messageData?.user_options)
+          ? messageData.user_options.map((option) =>
+              sanitizeDesignUserFacingText(option),
+            )
+          : messageData?.user_options;
+
       emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE_TO_USER, {
         ...messageData,
+        message: sanitizedMessage,
+        ...(Array.isArray(sanitizedUserOptions)
+          ? { user_options: sanitizedUserOptions }
+          : {}),
         taskId,
         taskType,
       });

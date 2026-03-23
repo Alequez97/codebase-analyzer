@@ -9,12 +9,14 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { CheckSquare, Plus, RefreshCw, Send, Square } from "lucide-react";
+import { CheckSquare, History, Plus, RefreshCw, Send, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
 import { DesignTechnologySelector } from "./DesignTechnologySelector";
 
 const DOT_DELAY = ["0s", "0.18s", "0.36s"];
+const EDIT_CHAT_STARTER_MESSAGE =
+  "I can help edit your latest design. What should we change?";
 
 function ThinkingDots() {
   return (
@@ -107,7 +109,9 @@ function parseColorOption(raw) {
     if (parsed && Array.isArray(parsed.colors) && parsed.colors.length > 0) {
       return parsed;
     }
-  } catch {}
+  } catch (error) {
+    void error;
+  }
   return null;
 }
 
@@ -267,10 +271,14 @@ function QuestionWithOptions({ pendingQuestion, onSend }) {
 
 export function DesignEditChat({
   editMessages = [],
+  editSessions = [],
+  loadingEditSessions = false,
   isEditing,
   editPendingQuestion,
   onSendEditResponse,
   onClearEdit,
+  onOpenHistory,
+  onRefreshHistory,
   editTaskError,
   model,
   isInSidebar = false,
@@ -281,18 +289,37 @@ export function DesignEditChat({
   defaultModelLabel = null,
 }) {
   const [input, setInput] = useState("");
+  const [historyMode, setHistoryMode] = useState(false);
+  const [hasStartedConversation, setHasStartedConversation] = useState(false);
   const scrollRef = useRef(null);
-
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [editMessages, isEditing, editPendingQuestion]);
 
+  useEffect(() => {
+    if (editMessages.length === 0) {
+      setHistoryMode(false);
+      setHasStartedConversation(false);
+      return;
+    }
+    setHasStartedConversation(true);
+  }, [editMessages.length]);
+
+  useEffect(() => {
+    if (isEditing || editPendingQuestion) {
+      setHasStartedConversation(true);
+    }
+  }, [isEditing, editPendingQuestion]);
+
+  const displayedMessages = editMessages;
+
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed || (isEditing && !editPendingQuestion)) return;
+    if (!trimmed) return;
     setInput("");
+    setHasStartedConversation(true);
     onSendEditResponse(trimmed);
   };
 
@@ -304,8 +331,13 @@ export function DesignEditChat({
   };
 
   const placeholder = editPendingQuestion
-    ? "Or type a free-form reply…"
+    ? "Or type a free-form reply..."
     : "Tell us about the design...";
+  const starterAssistantMessage = {
+    id: "starter-assistant-message",
+    role: "assistant",
+    content: EDIT_CHAT_STARTER_MESSAGE,
+  };
 
   return (
     <Box
@@ -332,10 +364,30 @@ export function DesignEditChat({
         flexShrink={0}
       >
         <HStack gap={2}>
+          <Button
+            variant="ghost"
+            size="sm"
+            borderRadius="full"
+            color="gray.500"
+            px={3}
+            onClick={() => {
+              if (!historyMode && onRefreshHistory) {
+                onRefreshHistory();
+              }
+              setHistoryMode((prev) => !prev);
+            }}
+            bg={historyMode ? "orange.50" : "transparent"}
+            borderWidth="1px"
+            borderColor={historyMode ? "orange.200" : "transparent"}
+            _hover={{ bg: historyMode ? "orange.50" : "gray.100", color: "gray.800" }}
+          >
+            <History size={14} />
+            History
+          </Button>
           {isEditing && (
             <HStack gap={1.5} color="gray.400">
               <Spinner size="xs" />
-              <Text fontSize="xs">Thinking…</Text>
+              <Text fontSize="xs">Thinking...</Text>
             </HStack>
           )}
           {model && !isEditing && (
@@ -365,7 +417,11 @@ export function DesignEditChat({
           borderRadius="full"
           color="gray.500"
           px={3}
-          onClick={onClearEdit}
+          onClick={() => {
+            setHistoryMode(false);
+            setHasStartedConversation(false);
+            onClearEdit();
+          }}
           _hover={{ bg: "gray.100", color: "gray.800" }}
         >
           <Plus size={15} />
@@ -374,12 +430,71 @@ export function DesignEditChat({
       </HStack>
 
       {/* Messages */}
-      {editMessages.length === 0 ? (
-        <Center flex={1} px={6}>
-          <Text color="gray.500" fontSize="sm">
-            Start new conversation to edit the actual version
+      {historyMode ? (
+        <VStack
+          align="stretch"
+          gap={2}
+          flex={1}
+          overflowY="auto"
+          px={4}
+          py={4}
+          sx={{
+            "&::-webkit-scrollbar": { width: "4px" },
+            "&::-webkit-scrollbar-track": { bg: "transparent" },
+            "&::-webkit-scrollbar-thumb": { bg: "gray.200", borderRadius: "full" },
+          }}
+        >
+          <Text fontSize="xs" fontWeight="700" color="gray.500" textTransform="uppercase" px={2}>
+            Previous Chats
           </Text>
-        </Center>
+          {loadingEditSessions ? (
+            <Center py={8}>
+              <Spinner size="sm" />
+            </Center>
+          ) : editSessions.length === 0 ? (
+            <Center py={8}>
+              <Text fontSize="sm" color="gray.500">
+                No previous edit chats
+              </Text>
+            </Center>
+          ) : (
+            <VStack align="stretch" gap={1}>
+              {editSessions.map((session) => (
+                <Button
+                  key={session.id}
+                  variant="ghost"
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  h="auto"
+                  py={3}
+                  px={3}
+                  borderRadius="12px"
+                  onClick={() => {
+                    onOpenHistory?.(session.id);
+                    setHasStartedConversation(true);
+                    setHistoryMode(false);
+                  }}
+                >
+                  <Box textAlign="left" maxW="80%">
+                    <Text fontSize="sm" color="gray.700" fontWeight="600" lineClamp={1}>
+                      {session.title || "Untitled conversation"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.400">
+                      {new Date(session.createdAt).toLocaleString()}
+                    </Text>
+                  </Box>
+                  <Text fontSize="xs" color="gray.400" textTransform="capitalize">
+                    {session.status}
+                  </Text>
+                </Button>
+              ))}
+            </VStack>
+          )}
+        </VStack>
+      ) : !hasStartedConversation && editMessages.length === 0 ? (
+        <VStack align="stretch" gap={3} flex={1} overflowY="auto" px={6} py={5}>
+          <MessageBubble message={starterAssistantMessage} />
+        </VStack>
       ) : (
         <VStack
           ref={scrollRef}
@@ -398,7 +513,7 @@ export function DesignEditChat({
             },
           }}
         >
-          {editMessages.map((msg) => (
+          {displayedMessages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} />
           ))}
           {isEditing && !editPendingQuestion && <ThinkingDots />}
@@ -472,7 +587,7 @@ export function DesignEditChat({
               right={3}
               bottom={3}
               onClick={handleSend}
-              disabled={!input.trim() || (isEditing && !editPendingQuestion)}
+              disabled={historyMode || !input.trim()}
               bg="gray.900"
               color="white"
               borderRadius="14px"

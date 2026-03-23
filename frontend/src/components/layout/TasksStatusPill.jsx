@@ -44,6 +44,7 @@ const TASK_TYPE_LABELS = {
   [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
     "Design Plan & Style System",
   [TASK_TYPES.DESIGN_GENERATE_PAGE]: "Design Page",
+  [TASK_TYPES.EDIT_DESIGN_LATEST]: "Edit Latest Design",
 };
 
 function taskLabel(type) {
@@ -61,6 +62,7 @@ const TASK_TYPE_LABELS_SHORT = {
   [TASK_TYPES.DESIGN_BRAINSTORM]: "Design Brainstorm",
   [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: "Design Plan",
   [TASK_TYPES.DESIGN_GENERATE_PAGE]: "Design Page",
+  [TASK_TYPES.EDIT_DESIGN_LATEST]: "Edit Latest Design",
 };
 
 function useDomainName(domainId) {
@@ -562,6 +564,23 @@ function CanceledTaskRow({ taskId, entry }) {
 function CompletedTaskRow({ taskId, entry }) {
   const { primary, subtitle } = useTaskTitles(entry);
   const { clearProgress, progressByTaskId } = useTaskProgressStore();
+  const handleDelete = async () => {
+    try {
+      await api.deleteTask(taskId);
+      clearProgress(taskId);
+      toaster.create({
+        title: "Task deleted",
+        type: "success",
+      });
+    } catch (error) {
+      const message = error.response?.data?.error || "Failed to delete task";
+      toaster.create({
+        title: "Failed to delete task",
+        description: message,
+        type: "error",
+      });
+    }
+  };
 
   return (
     <HStack
@@ -596,12 +615,15 @@ function CompletedTaskRow({ taskId, entry }) {
       <Button
         size="xs"
         variant="ghost"
-        colorPalette="gray"
+        colorPalette="red"
+        px={2}
         flexShrink={0}
         mt="2px"
-        onClick={() => clearProgress(taskId)}
+        onClick={handleDelete}
+        title="Delete task"
+        aria-label="Delete task"
       >
-        Clear
+        <Trash2 size={14} />
       </Button>
     </HStack>
   );

@@ -6,30 +6,13 @@
   Text,
   VStack,
 } from "@chakra-ui/react";
-import {
-  Layers,
-  LayoutTemplate,
-  MessageSquare,
-  Sparkles,
-  Wand2,
-  X,
-} from "lucide-react";
-import { DesignBrainstormChat } from "./DesignBrainstormChat";
+import { Layers, MessageSquare, Sparkles, X } from "lucide-react";
 import { DesignEditChat } from "./DesignEditChat";
 
 export function DesignWorkspaceSidebar({
   versions,
   selectedUrl,
   onSelectUrl,
-  prompt,
-  onPromptChange,
-  generationBrief,
-  onGenerationBriefChange,
-  onGenerate,
-  onBrainstorm,
-  isSubmitting,
-  currentTask,
-  isBrainstorming,
   selectedModel,
   selectedTechnology,
   onModelChange,
@@ -38,29 +21,20 @@ export function DesignWorkspaceSidebar({
   activeTab,
   onTabChange,
   onClose,
-  designMode,
-  onDesignModeChange,
-  nextVersionId,
-  latestVersionId,
-  brainstormTask,
-  brainstormMessages,
-  brainstormPendingQuestion,
-  onSendBrainstormResponse,
-  brainstormComplete,
-  onClearBrainstorm,
   editTask,
+  editTaskId,
   editMessages,
+  editSessions,
+  loadingEditSessions,
   editPendingQuestion,
   onStartEdit,
   onSendEditResponse,
+  onOpenEditHistory,
+  onRefreshEditHistory,
   onClearEdit,
   isEditing,
   editTaskError,
 }) {
-  const isWorking =
-    currentTask?.status === "running" || currentTask?.status === "pending";
-  const isGenerating = isWorking && !isBrainstorming;
-
   return (
     <Box
       w={{ base: "100%", lg: "480px" }}
@@ -103,16 +77,6 @@ export function DesignWorkspaceSidebar({
             <Layers size={14} />
             Versions
           </Button>
-          <Button
-            size="sm"
-            variant={activeTab === "brainstorm" ? "solid" : "ghost"}
-            colorPalette={activeTab === "brainstorm" ? "orange" : "gray"}
-            borderRadius="full"
-            onClick={() => onTabChange("brainstorm")}
-          >
-            <Sparkles size={14} />
-            Brainstorm
-          </Button>
         </HStack>
         <IconButton
           size="sm"
@@ -131,7 +95,11 @@ export function DesignWorkspaceSidebar({
           editPendingQuestion={editPendingQuestion}
           onClearEdit={onClearEdit}
           onSendEditResponse={(msg) => {
-            if (editMessages.length === 0 && !isEditing) {
+            const hasActiveEditTask = Boolean(editTaskId) || Boolean(editTask);
+            const shouldStartEditTask =
+              !isEditing && !editPendingQuestion && !hasActiveEditTask;
+
+            if (shouldStartEditTask) {
               onStartEdit(msg);
             } else {
               onSendEditResponse(msg);
@@ -139,6 +107,10 @@ export function DesignWorkspaceSidebar({
           }}
           isEditing={isEditing}
           editTaskError={editTaskError}
+          editSessions={editSessions}
+          loadingEditSessions={loadingEditSessions}
+          onOpenHistory={onOpenEditHistory}
+          onRefreshHistory={onRefreshEditHistory}
           model={editTask?.model ?? null}
           selectedModel={selectedModel}
           selectedTechnology={selectedTechnology}
@@ -167,8 +139,8 @@ export function DesignWorkspaceSidebar({
               colorPalette="green"
               borderRadius="full"
               onClick={() => {
-                onClearBrainstorm(true);
-                onTabChange("brainstorm");
+                onClearEdit();
+                onTabChange("chat");
               }}
             >
               <Sparkles size={12} style={{ marginRight: 4 }} />
@@ -225,46 +197,6 @@ export function DesignWorkspaceSidebar({
               </VStack>
             )}
           </Box>
-        </VStack>
-      )}
-
-      {activeTab === "brainstorm" && (
-        <VStack align="stretch" p={0} flex={1} minH={0} h="full">
-          <DesignBrainstormChat
-            messages={
-              brainstormMessages.length > 0
-                ? brainstormMessages
-                : [
-                    {
-                      id: "welcome-brainstorm",
-                      role: "assistant",
-                      content:
-                        "Hello! What aspect of your design would you like to brainstorm about today?",
-                    },
-                  ]
-            }
-            isThinking={isBrainstorming}
-            pendingQuestion={brainstormPendingQuestion}
-            onSendMessage={(msg) => {
-              if (brainstormMessages.length === 0 && !isBrainstorming) {
-                onPromptChange(msg);
-                onBrainstorm(msg);
-              } else {
-                onSendBrainstormResponse(msg);
-              }
-            }}
-            onGenerate={() => onGenerate("new")}
-            onStartOver={() => onClearBrainstorm(true)}
-            taskError={null}
-            model={brainstormTask?.model ?? null}
-            brainstormComplete={brainstormComplete}
-            isInSidebar={true}
-            selectedModel={selectedModel}
-            selectedTechnology={selectedTechnology}
-            onModelChange={onModelChange}
-            onTechnologyChange={onTechnologyChange}
-            defaultModelLabel={defaultModelLabel}
-          />
         </VStack>
       )}
     </Box>

@@ -50,12 +50,10 @@ export class OpenAIChatState {
     const message = {
       role: "assistant",
       content,
+      // DeepSeek/Kimi thinking mode requires reasoning_content to be present
+      // on every assistant message, even if null.
+      reasoning_content: reasoningContent ?? null,
     };
-    // DeepSeek thinking mode requires reasoning_content on every assistant
-    // message in the conversation history, not only on tool-call turns.
-    if (reasoningContent) {
-      message.reasoning_content = reasoningContent;
-    }
     this.messages.push(message);
   }
 
@@ -81,13 +79,10 @@ export class OpenAIChatState {
       role: "assistant",
       content: "", // OpenAI uses empty content when there are tool calls
       tool_calls: formattedToolCalls,
+      // DeepSeek/Kimi thinking mode requires reasoning_content to be present
+      // on every assistant message, even if null.
+      reasoning_content: reasoningContent ?? null,
     };
-
-    // DeepSeek thinking mode requires reasoning_content to be echoed back on
-    // every assistant message within a tool-call turn, otherwise the API returns 400.
-    if (reasoningContent) {
-      message.reasoning_content = reasoningContent;
-    }
 
     this.messages.push(message);
   }

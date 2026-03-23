@@ -3,9 +3,12 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import {
   editDesign,
   getLatestEditTask,
+  getTasks,
+  getTaskChatHistory,
   respondToTask,
   cancelTask,
 } from "../api";
+import { TASK_TYPES } from "../constants/task-types";
 
 function createLocalMessage(role, content) {
   return {
@@ -47,6 +50,25 @@ function mergeMessages(existingMessages, incomingMessages) {
   return merged;
 }
 
+function mapChatHistoryMessages(messages) {
+  return (messages || []).map((msg) => ({
+    id:
+      msg.id ||
+      `restored-${msg.role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    role: msg.role,
+    content: msg.content,
+    timestamp: msg.timestamp || new Date().toISOString(),
+  }));
+}
+
+function buildSessionTitle(task) {
+  const promptTitle = task?.params?.prompt?.trim();
+  const explicitTitle = task?.title?.trim();
+  const fallbackLabel = `Conversation ${new Date(task.createdAt).toLocaleDateString()}`;
+  const baseTitle = explicitTitle || promptTitle || fallbackLabel;
+  return baseTitle.length > 90 ? `${baseTitle.slice(0, 90)}...` : baseTitle;
+}
+
 export const useDesignEditStore = create(
   persist(
     (set, get) => ({
@@ -61,14 +83,35 @@ export const useDesignEditStore = create(
       editTaskId: null, // Active task ID (for responding to AI questions)
       pendingQuestion: null, // { messageId, message, taskId, user_options, selectionType } | null
       isWaitingForUser: false,
+      editSessions: [],
+      loadingEditSessions: false,
 
       // Actions
       setPrompt: (prompt) => set({ prompt }),
 
       setEditComplete: (designId) =>
-        set({
+        set((state) => ({
           editComplete: true,
-          targetDesignId: designId ?? get().targetDesignId,
+          targetDesignId: designId ?? state.targetDesignId,
+          loadingEdit: false,
+          editTaskId: null,
+          pendingQuestion: null,
+          isWaitingForUser: false,
+        })),
+
+      clearActiveEditTask: (taskId, editError = null) =>
+        set((state) => {
+          if (taskId && state.editTaskId && state.editTaskId !== taskId) {
+            return {};
+          }
+
+          return {
+            loadingEdit: false,
+            editTaskId: null,
+            pendingQuestion: null,
+            isWaitingForUser: false,
+            ...(editError ? { editError } : {}),
+          };
         }),
 
       setPendingQuestion: ({
@@ -91,6 +134,71 @@ export const useDesignEditStore = create(
 
       clearPendingQuestion: () =>
         set({ pendingQuestion: null, isWaitingForUser: false }),
+
+      fetchEditSessions: async () => {
+        set({ loadingEditSessions: true });
+        try {
+          const response = await getTasks();
+          const tasks = Array.isArray(response?.data?.tasks)
+            ? response.data.tasks
+            : [];
+
+          const sessions = tasks
+            .filter((task) => task.type === TASK_TYPES.EDIT_DESIGN_LATEST)
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((task) => ({
+              id: task.id,
+              status: task.status,
+              createdAt: task.createdAt,
+              model: task.agentConfig?.model ?? null,
+              title: buildSessionTitle(task),
+            }));
+
+          set({ editSessions: sessions, loadingEditSessions: false });
+          return { success: true, sessions };
+        } catch (error) {
+          set({ loadingEditSessions: false });
+          return {
+            success: false,
+            error:
+              error?.response?.data?.error || "Failed to load edit sessions",
+          };
+        }
+      },
+
+      openEditSession: async (taskId) => {
+        if (!taskId) {
+          return { success: false, error: "Task ID is required" };
+        }
+
+        try {
+          const [taskResponse, historyResponse] = await Promise.all([
+            getTasks(),
+            getTaskChatHistory(taskId),
+          ]);
+
+          const tasks = Array.isArray(taskResponse?.data?.tasks)
+            ? taskResponse.data.tasks
+            : [];
+          const task = tasks.find((entry) => entry.id === taskId) || null;
+          const messages = mapChatHistoryMessages(historyResponse?.data?.messages);
+          const isActiveTask =
+            task?.status === "running" || task?.status === "pending";
+
+          get().restoreEdit({
+            messages,
+            taskId: isActiveTask ? taskId : null,
+          });
+
+          return { success: true };
+        } catch (error) {
+          return {
+            success: false,
+            error:
+              error?.response?.data?.error || "Failed to open edit session",
+          };
+        }
+      },
 
       sendUserResponse: async (response) => {
         const { pendingQuestion, editTaskId } = get();
@@ -227,6 +335,8 @@ export const useDesignEditStore = create(
           editTaskId: null,
           pendingQuestion: null,
           isWaitingForUser: false,
+          editSessions: [],
+          loadingEditSessions: false,
         });
       },
 
@@ -239,26 +349,28 @@ export const useDesignEditStore = create(
             return { success: true, hasTask: false };
           }
 
-          const messages = (chatHistory.messages || []).map((msg) => ({
-            id:
-              msg.id ||
-              `restored-${msg.role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            role: msg.role,
-            content: msg.content,
-            timestamp: msg.timestamp || new Date().toISOString(),
-          }));
-
           const isActiveTask =
             task.status === "running" || task.status === "pending";
 
+          if (!isActiveTask) {
+            // Do not auto-open completed/failed history in chat.
+            set({
+              editMessages: [],
+              editResponse: "",
+              loadingEdit: false,
+              editTaskId: null,
+              pendingQuestion: null,
+              isWaitingForUser: false,
+            });
+            return { success: true, hasTask: false };
+          }
+
+          const messages = mapChatHistoryMessages(chatHistory.messages);
+
           get().restoreEdit({
             messages,
-            taskId: isActiveTask ? task.id : null,
+            taskId: task.id,
           });
-
-          if (task.status === "completed") {
-            get().setEditComplete(task.params?.designId ?? null);
-          }
 
           return { success: true, hasTask: true };
         } catch (error) {

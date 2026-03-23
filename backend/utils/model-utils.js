@@ -28,6 +28,7 @@ export function getProviderFromModel(model) {
     o3: "openai",
     codex: "openai",
     gemini: "google",
+    glm: "glm",
   };
 
   for (const [prefix, provider] of Object.entries(providerMap)) {

@@ -9,6 +9,7 @@ import {
 import { SOCKET_EVENTS } from "../../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
 import { emitSocketEvent } from "../../../utils/socket-emitter.js";
+import { sanitizeDesignUserFacingText } from "../../../utils/user-facing-sanitizer.js";
 import {
   describeDesignToolCall,
   getPublicDesignProgress,
@@ -57,16 +58,21 @@ export function editDesignLatestVersionHandler(task, taskLogger) {
         return;
       }
 
+      const userFacingContent = sanitizeDesignUserFacingText(content);
+
       // Emit AI message to chat UI (generic event, routed by taskType on frontend)
       emitSocketEvent(SOCKET_EVENTS.TASK_MESSAGE, {
         taskId: task.id,
         taskType: task.type,
         role,
-        content,
+        content: userFacingContent,
         timestamp: new Date().toISOString(),
       });
 
-      await appendChatMessage(task.id, { role, content }).catch((error) =>
+      await appendChatMessage(task.id, {
+        role,
+        content: userFacingContent,
+      }).catch((error) =>
         taskLogger.warn(`Failed to save chat message: ${error.message}`),
       );
     },
