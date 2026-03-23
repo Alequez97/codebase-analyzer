@@ -58,7 +58,7 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
       briefPath: getDesignBriefRelativePath(normalizedDesignId),
       appManifestPath: getDesignAppManifestRelativePath(normalizedDesignId),
       designSystemPath: getDesignSystemManifestRelativePath(normalizedDesignId),
-      tokensPath: getDesignTokensOutputPath(normalizedDesignId),
+      tokensPath: getDesignTokensOutputPath(normalizedDesignId, technology),
       userInstruction: brief || prompt,
       ...(delegatedByTaskId && { delegatedByTaskId }),
     },

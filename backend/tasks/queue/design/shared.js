@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs/promises";
 import config from "../../../config.js";
+import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
 
 export function slugifyDesignId(value) {
   return (
@@ -92,7 +93,10 @@ export function getDesignJsOutputPath(designId, pageId = "index") {
   return `${getDesignPageRelativePath(designId, pageId)}/app.js`;
 }
 
-export function getDesignTokensOutputPath(designId) {
+export function getDesignTokensOutputPath(designId, technology = DESIGN_TECHNOLOGIES.STATIC_HTML) {
+  if (technology === DESIGN_TECHNOLOGIES.REACT_VITE) {
+    return `${getDesignVariantRelativePath(designId)}/src/styles/tokens.css`;
+  }
   return `${getDesignFoundationRelativePath(designId)}/tokens.css`;
 }
 

@@ -101,40 +101,56 @@ Each page entry must include:
 - Keep pure visual state local with `useState` only when it is truly component-internal
 - Put shared cross-feature stores under `src/stores/`, but prefer domain-local stores under `src/features/<feature>/store/` when the state belongs to one feature
 - Global styles live under `src/styles/`, with tokens in `src/styles/tokens.css` and base/reset styles in `src/styles/global.css`
-- Page agents should create page modules where it makes sense—under `src/pages/`, `src/features/<feature>/pages/`, or directly in `src/pages/<PageName>/` based on complexity
-- Shared reusable pieces should live under `src/components/`
-- Feature-specific pieces should live under `src/features/<feature>/components/`
-- **Flexible file organization**: Each component/page can be a single file (`.jsx`) or a folder with colocated CSS—whatever makes sense for its complexity
-- Prefer CSS modules for component and page styling; keep global CSS limited to tokens, resets, and truly app-wide rules
-- Prefer local mock data in source files or store seed data over backend coupling
+- Use **feature-based folder structure**—organize by domain/feature, not by technical type
+- Each feature lives under `src/features/<feature-name>/` with its own pages, components, utils, and stores
+- Example structure:
+  ```
+  src/features/
+  ├── auth/
+  │   ├── components/       # LoginForm, SignupForm
+  │   ├── pages/            # LoginPage, SignupPage
+  │   ├── utils/            # auth-helpers.js
+  │   └── store/            # useAuthStore.js
+  ├── dashboard/
+  │   ├── components/       # DashboardHeader, StatsCard
+  │   ├── pages/            # DashboardPage
+  │   └── utils/
+  ```
+- **Truly shared** components (used by 2+ features) live at `src/components/`
+- **Feature-specific** components stay within their feature folder
+- Keep CSS modules colocated with components
+- Prefer local mock data in feature folders over backend coupling
 
 ### App.jsx Structure (Created by Orchestrator)
 
 The orchestrator MUST create `src/app/App.jsx` with:
 
 1. **Actual import statements** for all pages (NOT placeholder functions):
+
    ```jsx
-   import { LandingPage } from '@/pages/LandingPage'
-   import { LoginPage } from '@/pages/LoginPage'
-   import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
+   import { LandingPage } from "@/features/landing/pages/LandingPage";
+   import { LoginPage } from "@/features/auth/pages/LoginPage";
+   import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
+   import { ProfilePage } from "@/features/profile/pages/ProfilePage";
    ```
 
 2. **Complete route configuration** using imported page components:
    ```jsx
    const router = createMemoryRouter([
      {
-       path: '/',
+       path: "/",
        element: <AppShell />,
        children: [
          { index: true, element: <LandingPage /> },
-         { path: 'login', element: <LoginPage /> },
-         { path: 'dashboard', element: <DashboardPage /> },
+         { path: "login", element: <LoginPage /> },
+         { path: "dashboard", element: <DashboardPage /> },
        ],
      },
-   ])
+   ]);
    ```
 
-**CRITICAL**: 
+**CRITICAL**:
+
 - Use REAL import statements pointing to where subagents will create pages
 - DO NOT use placeholder `const LandingPage = () => <div>...</div>` functions
 - The imports will resolve once subagents create the page files
@@ -143,51 +159,60 @@ The orchestrator MUST create `src/app/App.jsx` with:
 
 ## Design system philosophy
 
-**The design system is a toolkit, not a cage.**
+**Define a strong, cohesive design system that all pages MUST follow.**
 
-Your job is to provide:
-1. **Design tokens** (colors, typography, spacing scales) as CSS variables for consistency when desired
-2. **Optional primitives** that pages CAN use, not MUST use
-3. **Freedom to deviate** when creativity calls for it
+Your job is to establish:
 
-### Design tokens (available in `src/styles/tokens.css`)
+1. **A comprehensive visual identity** (colors, typography, spacing) defined in tokens
+2. **Mandatory design tokens** that pages MUST use for core styling
+3. **UI primitives** that provide consistent components across all pages
+4. **Freedom in layout/content** while staying within the visual system
 
-Define CSS custom properties that pages CAN use:
+### Design tokens (REQUIRED in `src/styles/tokens.css`)
 
-- **Colors**: Primary palette (50-900 scale), neutral scale, semantic colors (`--primary`, `--text-primary`, `--background`, `--surface`, `--border`, etc.)
-- **Typography scales**: Font families, sizes, weights, line heights as available options
-- **Spacing scale**: `--space-1` through `--space-24` for consistent rhythm when needed
-- **Shadows, radius, transitions, z-index**: Available as utilities
-- **Breakpoints**: `--breakpoint-sm: 640px` through `--breakpoint-2xl: 1536px`
+Define a complete, cohesive color palette and design system. Pages MUST use these tokens.
 
-**IMPORTANT**: Tokens are available for use, not required. Pages can:
-- Use tokens for consistency: `color: var(--primary)`
-- Use custom values for effect: `color: #ff6b6b`
-- Mix both approaches as needed
+**CRITICAL: Define specific colors, not just scales. For example:**
 
-### Optional UI primitives
+**Required token categories:**
 
-Create UI primitives ONLY if they genuinely help this prototype:
+- **Colors**: Complete palette with specific hex values (primary, backgrounds, surfaces, text, semantic)
+- **Typography**: Font families, sizes (xs-7xl), weights, line heights
+- **Spacing**: `--space-1` through `--space-24`
+- **Shadows**: For elevated surfaces
+- **Radius**: Border radius scale
+- **Breakpoints**: Standard responsive breakpoints
 
-**When to create primitives:**
-- The prototype has repeated visual patterns (cards, buttons, typography)
-- Multiple pages need consistent layout behaviors
-- The design brief explicitly calls for a component library
+**Page agents MUST use these tokens. No custom colors for:**
 
-**When NOT to create primitives:**
-- Each page has a unique visual identity
-- The prototype is experimental/artistic
-- A simple flat structure works better
+- Background colors
+- Text colors
+- Primary/semantic colors
+- Border colors
 
-If you create primitives, keep them minimal:
+### UI primitives (REQUIRED)
+
+Create a foundational set of UI primitives that all pages will use:
 
 ```
 src/components/ui/
-├── tokens.css          # Already at src/styles/tokens.css
-├── Layout.jsx          # Optional: Stack, Container if needed
-├── Typography.jsx      # Optional: Text helpers if needed
-└── index.js            # Barrel export only what exists
+├── index.js            # Barrel export
+├── tokens.css          # Import in main app
+├── Button.jsx          # Primary, secondary, ghost variants
+├── Card.jsx            # Standard card component
+├── Badge.jsx           # For labels/tags
+├── Typography.jsx      # Heading, Text components
+└── Layout.jsx          # Container, Stack, Grid
 ```
+
+These primitives ensure:
+
+- Consistent button styles across all pages
+- Consistent card styling
+- Consistent typography
+- Consistent spacing
+
+**Pages MUST use these primitives** - do not create one-off buttons or cards with different styles.
 
 **No mandatory component list.** Don't force 20+ UI files if 3 suffice.
 
@@ -198,15 +223,17 @@ The prototype should work across devices, but the approach is flexible:
 ### Breakpoints (available, not enforced)
 
 Define these in `tokens.css` for reference:
+
 ```css
---breakpoint-sm: 640px;   /* Mobile landscape */
---breakpoint-md: 768px;   /* Tablet */
---breakpoint-lg: 1024px;  /* Desktop */
---breakpoint-xl: 1280px;  /* Large desktop */
+--breakpoint-sm: 640px; /* Mobile landscape */
+--breakpoint-md: 768px; /* Tablet */
+--breakpoint-lg: 1024px; /* Desktop */
+--breakpoint-xl: 1280px; /* Large desktop */
 --breakpoint-2xl: 1536px; /* Extra large */
 ```
 
 Pages can:
+
 - Use mobile-first with `min-width` media queries
 - Use desktop-first if that fits the design
 - Use container queries for component-level responsiveness
@@ -254,6 +281,7 @@ After setting up App.jsx with imports, you MUST delegate each page implementatio
 Use the `delegate_task` tool to spawn page-generation agents. Each subagent receives:
 
 **Required context to pass:**
+
 - `designId`: The design identifier
 - `pageId`: Unique page identifier from manifest
 - `pageName`: Human-readable page name
@@ -267,77 +295,96 @@ Use the `delegate_task` tool to spawn page-generation agents. Each subagent rece
 - `outputPath`: Where to write the page component (e.g., `src/pages/LandingPage/`)
 - `dependencies`: List of shared components/stores this page can import from (if any exist)
 
-### Subagent Scope (Flexible)
+### Subagent Scope (Feature-Based)
 
-Each page-generation subagent:
+Each page-generation subagent works within ONE feature folder:
 
-1. **Works in ONE page scope** - only writes files under their assigned page folder
-2. **Can use shared files** - imports from `src/components/ui/`, `src/styles/` as needed
-3. **Can create local components** - creates local components within its scope as needed
-4. **Owns its output folder** - organizes files as makes sense (flat or nested)
+1. **Works in ONE feature scope** - writes files under `src/features/<feature-name>/`
+2. **Creates page at** `src/features/<feature-name>/pages/<PageName>/`
+3. **Creates feature components at** `src/features/<feature-name>/components/`
+4. **Can use shared files** - imports from `src/components/ui/`, `src/styles/`, `src/components/` as needed
+5. **Can create truly shared components** at `src/components/<ComponentName>/` only when used by 2+ features
 
 ### Subagent Responsibilities
 
 Each page-generation subagent must:
 
-1. **Create the page component** at the specified `outputPath`:
+1. **Create the feature folder structure** at `src/features/<feature-name>/`:
+
+   ```
+   src/features/<feature-name>/
+   ├── pages/
+   │   └── <PageName>/
+   │       ├── <PageName>.jsx
+   │       ├── <PageName>.module.css
+   │       └── index.js
+   ├── components/          # Feature-specific components
+   │   ├── ComponentA.jsx
+   │   ├── ComponentA.module.css
+   │   └── index.js
+   ├── utils/               # Feature-specific utilities (optional)
+   └── store/               # Feature-specific store (optional)
+       └── use<Feature>Store.js
+   ```
+
+2. **Create the page component** at `src/features/<feature-name>/pages/<PageName>/`:
    - Create folder: `{{OUTPUT_PATH}}`
    - Create `{{OUTPUT_PATH}}<PageName>.jsx` with full implementation
-   - Create `{{OUTPUT_PATH}}<PageName>.module.css` with page-specific styles (only if needed)
-   - Create `{{OUTPUT_PATH}}index.js` with barrel export (optional but recommended)
-   - Add local components in `{{OUTPUT_PATH}}/components/` folder as needed (optional)
+   - Create `{{OUTPUT_PATH}}<PageName>.module.css` with page-specific styles
+   - Create `{{OUTPUT_PATH}}index.js` with barrel export
 
-2. **Flexible structure** - Choose organization based on complexity:
-   ```
-   # Simple page - flat structure
-   src/pages/LandingPage/
-   ├── LandingPage.jsx
-   └── index.js
-   
-   # Complex page - nested structure
-   src/pages/Dashboard/
-   ├── Dashboard.jsx
-   ├── Dashboard.module.css
-   ├── index.js
-   └── components/
-       ├── Sidebar.jsx
-       ├── StatsCard.jsx
-       └── index.js
-   ```
+3. **Create feature-specific components** at `src/features/<feature-name>/components/`:
+   - Components used only by this feature belong here
+   - Structure: `src/features/dashboard/components/StatsCard/StatsCard.jsx`
+   - Import in page: `import { StatsCard } from "@/features/dashboard/components/StatsCard"`
 
-3. **Component extraction** - Extract when it helps readability:
-   - Any JSX block exceeding ~40 lines with distinct visual identity → consider extracting
-   - Repeating visual patterns → extract to reusable component
+4. **Create TRULY shared components at src/components/ ONLY when**:
+   - The component is used by 2 or more features
+   - Structure: `src/components/Button/Button.jsx`, `Button.module.css`, `index.js`
+   - Import: `import { Button } from "@/components/Button"`
+
+5. **Component extraction** - Extract when it helps readability:
+   - Any JSX block exceeding ~40 lines with distinct visual identity → extract to component
+   - Repeating visual patterns → extract to feature components folder
    - Complex conditional rendering → extract for clarity
    - **BUT**: Simple inline JSX is fine too—don't over-engineer
 
-4. **Design system usage** - Use shared UI primitives if they exist and fit:
+   **Placement decision by scope:**
+   - Used only in this feature → `src/features/<feature>/components/`
+   - Used by 2+ features → `src/components/<ComponentName>/`
+   - Used only on this page → keep in page folder or feature components
+
+6. **Design system usage** - Use shared UI primitives if they exist and fit:
+
    ```jsx
    import { Heading, Text, Stack } from "@/components/ui/index.js";
    ```
+
    - Import only what you need
    - Skip if custom components work better
    - Mix and match freely
 
-5. **Styling flexibility**:
+7. **Styling flexibility**:
    - Use design tokens when consistency helps: `color: var(--primary)`
    - Use custom values when creativity demands: `background: linear-gradient(...)`
    - Use CSS modules for scoped styles
    - Use inline styles sparingly for dynamic values
    - Use global styles for truly shared patterns
 
-6. **Create local state if needed** - Use Zustand for feature-local stores:
+8. **Create local state if needed** - Use Zustand for feature-local stores:
+
    ```
    src/pages/Dashboard/
    └── store/
        └── useDashboardStore.js
    ```
+
    - Keep state close to where it's used
    - Don't create global stores for single-page concerns
 
-7. **Handle loading/error states** - Professional error boundaries and loading UI
+9. **Handle loading/error states** - Professional error boundaries and loading UI
 
-8. **Follow the routing contract** - Export the page as named export matching the component name in App.jsx
+10. **Follow the routing contract** - Export the page as named export matching the component name in App.jsx
 
 ### Delegation Requirements
 
@@ -352,16 +399,21 @@ When delegating page generation:
 ### Subagent System Instructions
 
 Page-generation subagents should use the system instruction:
+
 ```
 backend/system-instructions/design/design-generate-page-react-vite.md
 ```
 
 If that file doesn't exist, include these rules in the delegation prompt:
+
 - You are a senior React developer implementing ONE page
-- Work ONLY in your assigned page folder
-- Organize code as makes sense for the complexity (flat or nested)
-- Use shared UI primitives only if they help—custom components are fine
-- Use design tokens when consistency helps, custom values when creativity demands
+- Work in your assigned feature folder: `src/features/<feature-name>/`
+- Place page at `src/features/<feature-name>/pages/<PageName>/`
+- Place feature-specific components at `src/features/<feature-name>/components/`
+- Place TRULY shared components (used by 2+ features) at `src/components/<ComponentName>/`
+- **MUST use design tokens** for all colors, spacing, and typography - no hardcoded colors
+- **MUST use shared UI primitives** (Button, Card, Badge, etc.) - don't create custom styled components
+- **MUST maintain visual consistency** with the design system defined in tokens.css
 - Follow the existing code style and patterns
 
 ## Constraints
@@ -375,12 +427,12 @@ If that file doesn't exist, include these rules in the delegation prompt:
 
 ## Post-Processing Task (dependsOn)
 
-DO NOT verify subagent results in this task. 
+DO NOT verify subagent results in this task.
 
 The verification will be handled by a separate task handler with `dependsOn` parameter that references the page task IDs. This post-processing task will:
 
 1. **Verify page files exist** - Check that each page component was created at the expected path
-2. **Check for build conflicts** - Ensure no subagent modified shared files  
+2. **Check for build conflicts** - Ensure no subagent modified shared files
 3. **Verify imports** - Quick check that pages import correctly
 4. **Report per-page status** - Success or failure for each delegated task
 
