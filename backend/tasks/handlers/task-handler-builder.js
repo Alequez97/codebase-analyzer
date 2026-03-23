@@ -11,6 +11,12 @@ import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadSystemInstructionForTask } from "../../utils/system-instruction-loader.js";
 import { loadDomainSectionChatHistory } from "../../utils/chat-history.js";
 import * as logger from "../../utils/logger.js";
+import {
+  getAllowedReadPaths,
+  hasUnrestrictedReadAccess,
+  hasUnrestrictedWriteAccess,
+  DEFAULT_WRITE_DIRECTORY,
+} from "../../utils/task-file-access.js";
 import { analyzeDocumentationHandler } from "./analysis/documentation.js";
 import { analyzeRefactoringAndTestingHandler } from "./analysis/refactoring-and-testing.js";
 import { applyRefactoringHandler } from "./application/refactoring.js";
@@ -60,10 +66,10 @@ const EDIT_SECTION_HANDLER_OPTIONS = {
 };
 
 const DESIGN_QUEUE_FUNCTIONS = {
-  "design-assistant": queueDesignAssistantTask,
-  "design-plan-and-style-system-generate":
+  [TASK_TYPES.DESIGN_ASSISTANT]: queueDesignAssistantTask,
+  [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
     queueDesignPlanAndStyleSystemGenerateTask,
-  "design-generate-page": queueDesignGeneratePageTask,
+  [TASK_TYPES.DESIGN_GENERATE_PAGE]: queueDesignGeneratePageTask,
 };
 
 const MESSAGE_TOOL_TASK_TYPES = new Set([
@@ -81,33 +87,34 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
   ];
 
-  if (
-    task.type === TASK_TYPES.IMPLEMENT_FIX ||
-    task.type === TASK_TYPES.IMPLEMENT_TEST ||
-    task.type === TASK_TYPES.APPLY_REFACTORING
-  ) {
+  // Check for unrestricted write access (full project read+write)
+  if (hasUnrestrictedWriteAccess(task.type)) {
     fileToolExecutor.setAllowAnyWrite(true);
-    taskLogger.info(`Full project write access granted (${task.type})`);
+    fileToolExecutor.setAllowAnyRead(true);
+    taskLogger.info(`Full project read+write access granted (${task.type})`);
     return;
   }
 
-  if (
-    task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ||
-    task.type === TASK_TYPES.DESIGN_BRAINSTORM ||
-    task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
-    task.type === TASK_TYPES.DESIGN_GENERATE_PAGE ||
-    task.type === TASK_TYPES.REVIEW_CHANGES
-  ) {
-    if (task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK) {
-      fileToolExecutor.setAllowAnyWrite(true);
-    }
+  // Check for unrestricted read access (full project read-only, limited write)
+  if (hasUnrestrictedReadAccess(task.type)) {
     fileToolExecutor.setAllowAnyRead(true);
     taskLogger.info(
-      `Full project ${task.type === TASK_TYPES.CUSTOM_CODEBASE_TASK ? "read+write" : "read-only"} access granted (${task.type})`,
+      `Full project read access granted (${task.type})`,
     );
     return;
   }
 
+  // Check for restricted read paths
+  const restrictedReadPaths = getAllowedReadPaths(task.type);
+  if (restrictedReadPaths) {
+    fileToolExecutor.setAllowedReadPaths(restrictedReadPaths);
+    taskLogger.info(
+      `${task.type}: read access restricted to ${restrictedReadPaths.join(", ")}`,
+    );
+    return;
+  }
+
+  // Default: use explicit write paths for edit tasks
   const allowedPaths = editTaskTypes.includes(task.type)
     ? task.outputFile
       ? [task.outputFile]
@@ -120,7 +127,7 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     taskLogger.info(`Write access restricted to: ${allowedPaths.join(", ")}`);
   } else {
     taskLogger.info(
-      "No explicit write paths set; analysis writes are limited to .code-analysis/",
+      `No explicit write paths set; writes are limited to ${DEFAULT_WRITE_DIRECTORY}/`,
     );
   }
 }

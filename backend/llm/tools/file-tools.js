@@ -173,6 +173,7 @@ export class FileToolExecutor {
     this.projectRoot = projectRoot;
     this.maxFileSize = 500 * 1024; // 500KB limit per file
     this.allowedWritePaths = new Set();
+    this.allowedReadPaths = new Set();
     this.allowAnyWrite = false;
     this.allowAnyRead = false;
   }
@@ -205,6 +206,19 @@ export class FileToolExecutor {
       .map((p) => p.replace(/\\/g, "/"));
 
     this.allowedWritePaths = new Set(normalizedPaths);
+  }
+
+  /**
+   * Allow reading from specific project-relative paths (directories or files).
+   * When set, read_file will only allow paths that start with one of these prefixes.
+   * @param {string[]} paths - Project-relative paths that can be read
+   */
+  setAllowedReadPaths(paths) {
+    const normalizedPaths = (paths || [])
+      .filter((p) => typeof p === "string" && p.trim().length > 0)
+      .map((p) => p.replace(/\\/g, "/"));
+
+    this.allowedReadPaths = new Set(normalizedPaths);
   }
 
   /**
@@ -525,6 +539,22 @@ export class FileToolExecutor {
     const normalizedPath = relativePath.replace(/\\/g, "/");
     const isExplicitlyAllowedReadPath =
       this.allowedWritePaths.has(normalizedPath);
+
+    // Check if read paths are restricted to specific prefixes
+    if (this.allowedReadPaths.size > 0 && !this.allowAnyRead) {
+      const isAllowedPath = Array.from(this.allowedReadPaths).some(
+        (allowedPrefix) => normalizedPath.startsWith(allowedPrefix),
+      );
+      if (!isAllowedPath) {
+        return this._error(
+          `Access denied: can only read from allowed directories (${Array.from(this.allowedReadPaths).join(", ")})`,
+          TOOL_ERROR_CODES.ACCESS_DENIED,
+          TOOL_ERROR_TYPES.SECURITY,
+          { path: relativePath },
+        );
+      }
+    }
+
     if (
       normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`) &&
       !isExplicitlyAllowedReadPath &&
@@ -607,6 +637,22 @@ export class FileToolExecutor {
         TOOL_ERROR_TYPES.SECURITY,
         { path: relativePath },
       );
+    }
+
+    // Check if read paths are restricted to specific prefixes
+    const normalizedPath = relativePath.replace(/\\/g, "/");
+    if (this.allowedReadPaths.size > 0 && !this.allowAnyRead) {
+      const isAllowedPath = Array.from(this.allowedReadPaths).some(
+        (allowedPrefix) => normalizedPath.startsWith(allowedPrefix),
+      );
+      if (!isAllowedPath) {
+        return this._error(
+          `Access denied: can only list allowed directories (${Array.from(this.allowedReadPaths).join(", ")})`,
+          TOOL_ERROR_CODES.ACCESS_DENIED,
+          TOOL_ERROR_TYPES.SECURITY,
+          { path: relativePath },
+        );
+      }
     }
 
     try {
@@ -724,6 +770,22 @@ export class FileToolExecutor {
         TOOL_ERROR_TYPES.SECURITY,
         { directory },
       );
+    }
+
+    // Check if read paths are restricted to specific prefixes
+    const normalizedPath = directory.replace(/\\/g, "/");
+    if (this.allowedReadPaths.size > 0 && !this.allowAnyRead) {
+      const isAllowedPath = Array.from(this.allowedReadPaths).some(
+        (allowedPrefix) => normalizedPath.startsWith(allowedPrefix),
+      );
+      if (!isAllowedPath) {
+        return this._error(
+          `Access denied: can only search in allowed directories (${Array.from(this.allowedReadPaths).join(", ")})`,
+          TOOL_ERROR_CODES.ACCESS_DENIED,
+          TOOL_ERROR_TYPES.SECURITY,
+          { directory },
+        );
+      }
     }
 
     const matches = [];
