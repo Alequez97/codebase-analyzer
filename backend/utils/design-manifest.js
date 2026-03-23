@@ -20,6 +20,15 @@ function formatVersionLabel(designId) {
   return formatLabel(designId);
 }
 
+function getVersionSortValue(designId) {
+  const versionMatch = designId.match(/^v(\d+)$/);
+  if (!versionMatch) {
+    return null;
+  }
+
+  return parseInt(versionMatch[1], 10);
+}
+
 function readJsonIfExists(filePath) {
   if (!fs.existsSync(filePath)) {
     return null;
@@ -81,7 +90,12 @@ export function loadDesignManifest() {
   const base = designDir();
 
   if (!fs.existsSync(base)) {
-    return { versions: [] };
+    return {
+      versions: [],
+      latestVersionId: null,
+      latestVersionUrl: null,
+      latestVersionLabel: null,
+    };
   }
 
   const versions = [];
@@ -113,16 +127,39 @@ export function loadDesignManifest() {
 
   // Sort versions: v1, v2, v3, etc., then alphabetically by other names
   versions.sort((a, b) => {
-    const aVersion = a.designId.match(/^v(\d+)$/);
-    const bVersion = b.designId.match(/^v(\d+)$/);
+    const aVersion = getVersionSortValue(a.designId);
+    const bVersion = getVersionSortValue(b.designId);
 
-    if (aVersion && bVersion) {
-      return parseInt(aVersion[1]) - parseInt(bVersion[1]);
+    if (aVersion !== null && bVersion !== null) {
+      return aVersion - bVersion;
     }
-    if (aVersion) return -1; // v1, v2 come before other names
-    if (bVersion) return 1;
+    if (aVersion !== null) return -1; // v1, v2 come before other names
+    if (bVersion !== null) return 1;
     return a.label.localeCompare(b.label);
   });
 
-  return { versions };
+  const latestVersion =
+    versions.length === 0
+      ? null
+      : versions.reduce((latest, current) => {
+          const latestSortValue = getVersionSortValue(latest.designId);
+          const currentSortValue = getVersionSortValue(current.designId);
+
+          if (latestSortValue === null) {
+            return current;
+          }
+
+          if (currentSortValue === null) {
+            return latest;
+          }
+
+          return currentSortValue > latestSortValue ? current : latest;
+        });
+
+  return {
+    versions,
+    latestVersionId: latestVersion?.designId ?? null,
+    latestVersionUrl: latestVersion?.url ?? null,
+    latestVersionLabel: latestVersion?.label ?? null,
+  };
 }

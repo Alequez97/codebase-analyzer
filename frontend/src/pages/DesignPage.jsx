@@ -27,7 +27,7 @@ function getSelectedDesignId(selectedUrl, manifest) {
   if (match?.[1]) {
     return match[1];
   }
-  return manifest.versions[0]?.id ?? null;
+  return manifest.latestVersionId ?? manifest.versions[0]?.id ?? null;
 }
 
 export default function DesignPage() {
@@ -160,9 +160,9 @@ export default function DesignPage() {
       if (!mounted) {
         return;
       }
-      if (manifestResult?.firstPreviewUrl) {
+      if (manifestResult?.latestPreviewUrl) {
         setSelectedUrl(
-          (previous) => previous || manifestResult.firstPreviewUrl,
+          (previous) => previous || manifestResult.latestPreviewUrl,
         );
       }
     });
@@ -190,8 +190,13 @@ export default function DesignPage() {
       return;
     }
 
-    setSelectedUrl(getFirstPreviewUrl(manifest));
+    setSelectedUrl(manifest.latestVersionUrl ?? getFirstPreviewUrl(manifest));
   }, [manifest, selectedUrl]);
+
+  const currentVersionLabel = useMemo(
+    () => manifest.versions.find((item) => item.url === selectedUrl)?.label,
+    [manifest, selectedUrl],
+  );
 
   useEffect(() => {
     if (!currentTaskId || !currentTask?.message) {
@@ -438,6 +443,7 @@ export default function DesignPage() {
           publishedUrl={publishedUrl}
           isPublishing={isPublishing}
           publishError={publishError}
+          currentVersionLabel={currentVersionLabel ?? null}
           onPublish={publishDesign}
           onUnpublish={unpublishDesign}
         />

@@ -15,6 +15,10 @@ function getFirstPreviewUrl(manifest) {
   return manifest?.versions?.[0]?.url ?? null;
 }
 
+function getLatestPreviewUrl(manifest) {
+  return manifest?.latestVersionUrl ?? getFirstPreviewUrl(manifest);
+}
+
 function createLocalMessage(role, content) {
   return {
     id: `local-${role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -101,7 +105,12 @@ function getLatestVersionId(manifest) {
 }
 
 export const useDesignStudioStore = create((set, get) => ({
-  manifest: { versions: [] },
+  manifest: {
+    versions: [],
+    latestVersionId: null,
+    latestVersionUrl: null,
+    latestVersionLabel: null,
+  },
   loadingManifest: true,
   manifestError: null,
   currentTaskId: null,
@@ -234,12 +243,22 @@ export const useDesignStudioStore = create((set, get) => ({
   },
 
   applyManifestUpdate: (manifest) => {
-    const nextManifest = manifest ?? { versions: [] };
+    const nextManifest = manifest ?? {
+      versions: [],
+      latestVersionId: null,
+      latestVersionUrl: null,
+      latestVersionLabel: null,
+    };
     set({
       manifest: nextManifest,
       loadingManifest: false,
       manifestError: null,
     });
+    return {
+      manifest: nextManifest,
+      firstPreviewUrl: getFirstPreviewUrl(nextManifest),
+      latestPreviewUrl: getLatestPreviewUrl(nextManifest),
+    };
   },
 
   appendTaskMessage: ({ taskId, role, content, timestamp }) => {
@@ -313,7 +332,12 @@ export const useDesignStudioStore = create((set, get) => ({
       const manifestError =
         error?.response?.data?.error || "Failed to load design manifest";
       set({ manifestError, loadingManifest: false });
-      return { manifest: null, firstPreviewUrl: null, error: manifestError };
+      return {
+        manifest: null,
+        firstPreviewUrl: null,
+        latestPreviewUrl: null,
+        error: manifestError,
+      };
     }
   },
 

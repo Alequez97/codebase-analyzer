@@ -1,4 +1,5 @@
-﻿import {
+import {
+  Badge,
   Box,
   Button,
   Center,
@@ -49,6 +50,7 @@ export function DesignPreviewPane({
   publishedUrl,
   isPublishing,
   publishError,
+  currentVersionLabel,
   onPublish,
   onUnpublish,
 }) {
@@ -161,6 +163,21 @@ export function DesignPreviewPane({
 
           {hasDesignFiles && currentDesignId && (
             <HStack gap={1}>
+              {currentVersionLabel ? (
+                <Badge
+                  colorPalette="orange"
+                  variant="subtle"
+                  borderRadius="full"
+                  px={3}
+                  py={1.5}
+                  fontSize="10px"
+                  fontWeight="800"
+                  letterSpacing="0.08em"
+                  textTransform="uppercase"
+                >
+                  {currentVersionLabel}
+                </Badge>
+              ) : null}
               <Button
                 size="xs"
                 borderRadius="full"
