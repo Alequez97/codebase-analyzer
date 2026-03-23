@@ -222,6 +222,24 @@ export class FileToolExecutor {
   }
 
   /**
+   * Check if a path is allowed for writing
+   * @private
+   */
+  _isWritePathAllowed(normalizedPath) {
+    // Check exact match first
+    if (this.allowedWritePaths.has(normalizedPath)) {
+      return true;
+    }
+    // Check prefix match (for directory prefixes)
+    for (const allowedPath of this.allowedWritePaths) {
+      if (normalizedPath.startsWith(allowedPath)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Create a success result
    * @private
    */
@@ -356,7 +374,7 @@ export class FileToolExecutor {
     }
 
     const normalizedPath = relativePath.replace(/\\/g, "/");
-    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+    const isExplicitlyAllowedPath = this._isWritePathAllowed(normalizedPath);
 
     if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
       return this._error(
@@ -475,7 +493,7 @@ export class FileToolExecutor {
 
     const normalizedPath = relativePath.replace(/\\/g, "/");
     const isAnalysisPath = normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`);
-    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+    const isExplicitlyAllowedPath = this._isWritePathAllowed(normalizedPath);
 
     if (!isAnalysisPath && !isExplicitlyAllowedPath && !this.allowAnyWrite) {
       return this._error(
@@ -537,8 +555,6 @@ export class FileToolExecutor {
     }
 
     const normalizedPath = relativePath.replace(/\\/g, "/");
-    const isExplicitlyAllowedReadPath =
-      this.allowedWritePaths.has(normalizedPath);
 
     // Check if read paths are restricted to specific prefixes
     if (this.allowedReadPaths.size > 0 && !this.allowAnyRead) {
@@ -554,6 +570,11 @@ export class FileToolExecutor {
         );
       }
     }
+
+    // Check if path is explicitly allowed for reading (for analysis output directory override)
+    const isExplicitlyAllowedReadPath = Array.from(this.allowedReadPaths).some(
+      (allowedPrefix) => normalizedPath.startsWith(allowedPrefix),
+    );
 
     if (
       normalizedPath.startsWith(`${ANALYSIS_OUTPUT_DIR}/`) &&
@@ -702,7 +723,7 @@ export class FileToolExecutor {
    * List directory (non-recursive)
    * @private
    */
-  async _listFlat(fullPath, relativePath) {
+  async _listFlat(fullPath, _relativePath) {
     const entries = await fs.readdir(fullPath, { withFileTypes: true });
 
     const items = entries.map((entry) => {
@@ -859,7 +880,7 @@ export class FileToolExecutor {
    */
   async insertLines(relativePath, position, lineNumber, content) {
     const normalizedPath = relativePath.replace(/\\/g, "/");
-    const isExplicitlyAllowedPath = this.allowedWritePaths.has(normalizedPath);
+    const isExplicitlyAllowedPath = this._isWritePathAllowed(normalizedPath);
 
     if (!isExplicitlyAllowedPath && !this.allowAnyWrite) {
       return this._error(
@@ -1004,8 +1025,8 @@ export class FileToolExecutor {
     const normalizedOldPath = oldRelativePath.replace(/\\/g, "/");
     const normalizedNewPath = newRelativePath.replace(/\\/g, "/");
 
-    const isOldPathAllowed = this.allowedWritePaths.has(normalizedOldPath);
-    const isNewPathAllowed = this.allowedWritePaths.has(normalizedNewPath);
+    const isOldPathAllowed = this._isWritePathAllowed(normalizedOldPath);
+    const isNewPathAllowed = this._isWritePathAllowed(normalizedNewPath);
 
     if (!isOldPathAllowed && !this.allowAnyWrite) {
       return this._error(
@@ -1111,7 +1132,7 @@ export class FileToolExecutor {
           { cwd: this.projectRoot },
         );
         usedGitMv = true;
-      } catch (gitError) {
+      } catch {
         // Not a git repo or git command failed - use fs.rename as fallback
         await fs.rename(oldFullPath, newFullPath);
       }

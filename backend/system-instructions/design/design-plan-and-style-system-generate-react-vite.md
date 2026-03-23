@@ -68,7 +68,13 @@ You must produce these shared files yourself:
 22. `{{DESIGN_PATH}}/src/components/ui/Divider/Divider.module.css`
 23. `{{DESIGN_PATH}}/src/components/ui/AnimatedLink/AnimatedLink.jsx`
 24. `{{DESIGN_PATH}}/src/components/ui/AnimatedLink/AnimatedLink.module.css`
-25. `{{DESIGN_PATH}}/src/components/ui/index.js` (barrel export)
+25. `{{DESIGN_PATH}}/src/components/ui/Grid/Grid.jsx`
+26. `{{DESIGN_PATH}}/src/components/ui/Grid/Grid.module.css`
+27. `{{DESIGN_PATH}}/src/components/ui/Hide/Hide.jsx`
+28. `{{DESIGN_PATH}}/src/components/ui/Hide/Hide.module.css`
+29. `{{DESIGN_PATH}}/src/components/ui/Show/Show.jsx`
+30. `{{DESIGN_PATH}}/src/components/ui/Show/Show.module.css`
+31. `{{DESIGN_PATH}}/src/components/ui/index.js` (barrel export)
 
 Optionally create a README documenting the design system at `{{DESIGN_PATH}}/src/components/ui/README.md`.
 
@@ -76,8 +82,7 @@ Optionally create a README documenting the design system at `{{DESIGN_PATH}}/src
 
 You must generate a `jsconfig.json` file configuring `compilerOptions.paths` mapping `@/*` to `["src/*"]` to ensure correct editor Intellisense.
 
-Do not directly generate every page implementation yourself.
-Delegate each page after the shared React contract exists.
+Do not write full page implementations yourself - delegate page creation to subagents.
 
 ## App manifest requirements
 
@@ -118,6 +123,39 @@ Each page entry must include:
 - prefer CSS modules for component and page styling; keep global CSS limited to tokens, resets, and truly app-wide rules
 - prefer local mock data in source files or store seed data over backend coupling
 
+### App.jsx Structure (Created by Orchestrator)
+
+The orchestrator MUST create `src/app/App.jsx` with:
+
+1. **Actual import statements** for all pages (NOT placeholder functions):
+   ```jsx
+   import { LandingPage } from '@/pages/LandingPage/LandingPage.jsx'
+   import { LoginPage } from '@/pages/LoginPage/LoginPage.jsx'
+   import { DashboardPage } from '@/features/dashboard/pages/DashboardPage/DashboardPage.jsx'
+   ```
+
+2. **Complete route configuration** using imported page components:
+   ```jsx
+   const router = createMemoryRouter([
+     {
+       path: '/',
+       element: <AppShell />,
+       children: [
+         { index: true, element: <LandingPage /> },
+         { path: 'login', element: <LoginPage /> },
+         { path: 'dashboard', element: <DashboardPage /> },
+       ],
+     },
+   ])
+   ```
+
+**CRITICAL**: 
+- Use REAL import statements pointing to where subagents will create pages
+- DO NOT use placeholder `const LandingPage = () => <div>...</div>` functions
+- The imports will resolve once subagents create the page files
+- Subagents create page files from scratch (JSX + CSS + barrel export)
+- App.jsx defines the routing contract that subagents must follow
+
 ## Design system requirements
 
 You must establish a comprehensive design system that page agents will use:
@@ -138,6 +176,7 @@ Define CSS custom properties for:
 - **Border radius**: `--radius-sm` through `--radius-2xl`, `--radius-full`
 - **Transitions**: `--transition-fast/base/slow` with cubic-bezier easing
 - **Z-index layers**: `--z-base`, `--z-dropdown`, `--z-sticky`, `--z-overlay`, `--z-modal`, `--z-toast`
+- **Breakpoints**: `--breakpoint-sm: 640px`, `--breakpoint-md: 768px`, `--breakpoint-lg: 1024px`, `--breakpoint-xl: 1280px`, `--breakpoint-2xl: 1536px`
 
 ### UI component library (required in `src/components/ui/`)
 
@@ -159,12 +198,27 @@ Create a foundational component library that eliminates the need for page agents
 - **Divider.jsx + Divider.module.css**: Horizontal divider with optional label and color variants
 - **AnimatedLink.jsx + AnimatedLink.module.css**: Link with arrow or underline animation
 
+#### Responsive Design Components (mandatory)
+
+- **Grid.jsx + Grid.module.css**: CSS Grid container with responsive props:
+  - `cols`: number of columns (1-12) or responsive object `{ sm: 1, md: 2, lg: 3 }`
+  - `gap`: spacing between grid items (uses spacing scale)
+  - `colMinWidth`: minimum column width for auto-fill grids
+  - Supports `auto-fit` and `auto-fill` responsive patterns
+- **Hide.jsx + Hide.module.css**: Conditionally hide content at breakpoints:
+  - Props: `below` (hide below breakpoint), `above` (hide above breakpoint)
+  - Example: `<Hide below="md">Desktop-only content</Hide>`
+- **Show.jsx + Show.module.css**: Conditionally show content at breakpoints:
+  - Props: `below` (show only below breakpoint), `above` (show only above breakpoint)
+  - Example: `<Show below="md">Mobile-only content</Show>`
+
 #### Organization
 
 - Each component in its own folder with colocated CSS module
 - Barrel export at `src/components/ui/index.js` for convenient imports
 - All components must use design tokens, not hardcoded values
 - Components should be prop-driven and composable
+- **All UI components must be fully responsive and mobile-first**
 
 **Why this matters**: Page agents will import and compose these components instead of writing repetitive typography CSS, leading to:
 
@@ -181,6 +235,9 @@ import {
   Text,
   Stack,
   Container,
+  Grid,
+  Hide,
+  Show,
   Divider,
   AnimatedLink,
 } from "@/components/ui/index.js";
@@ -193,6 +250,17 @@ import {
     <Text size="lg" color="secondary" leading="relaxed">
       Subtitle text
     </Text>
+    <Grid cols={{ sm: 1, md: 2, lg: 3 }} gap={4}>
+      <FeatureCard />
+      <FeatureCard />
+      <FeatureCard />
+    </Grid>
+    <Hide below="md">
+      <DesktopNavigation />
+    </Hide>
+    <Show below="md">
+      <MobileMenuButton />
+    </Show>
     <Divider label="or" />
     <AnimatedLink to="/next" arrow>
       Continue
@@ -200,6 +268,103 @@ import {
   </Stack>
 </Container>;
 ```
+
+## Responsive Design Requirements (CRITICAL)
+
+The design system MUST be fully responsive and mobile-first. This is not optional.
+
+### Required Breakpoints
+
+Define these breakpoints in `tokens.css`:
+```css
+--breakpoint-sm: 640px;   /* Mobile landscape */
+--breakpoint-md: 768px;   /* Tablet */
+--breakpoint-lg: 1024px;  /* Desktop */
+--breakpoint-xl: 1280px;  /* Large desktop */
+--breakpoint-2xl: 1536px; /* Extra large */
+```
+
+### Mobile-First CSS Approach
+
+ALL CSS must be written mobile-first:
+- Base styles target mobile (0px and up)
+- Use `@media (min-width: ...)` to add styles for larger screens
+- NEVER use `max-width` media queries as the primary approach
+
+```css
+/* ✅ CORRECT - Mobile first */
+.myComponent {
+  padding: var(--space-4);        /* Mobile base */
+}
+
+@media (min-width: 768px) {
+  .myComponent {
+    padding: var(--space-6);      /* Tablet+ */
+  }
+}
+
+/* ❌ WRONG - Desktop first */
+.myComponent {
+  padding: var(--space-6);        /* Desktop */
+}
+
+@media (max-width: 767px) {
+  .myComponent {
+    padding: var(--space-4);      /* Mobile override */
+  }
+}
+```
+
+### Responsive Typography
+
+Typography must scale responsively:
+- Hero/display text: `clamp()` for fluid sizing or stepped breakpoints
+- Body text: comfortable reading size (16px minimum on mobile)
+- Line height: tighter on mobile (1.4), more spacious on desktop (1.6)
+
+### Touch Targets
+
+All interactive elements must meet accessibility standards:
+- Minimum touch target size: **44x44px** (iOS) / **48x48px** (Material Design)
+- Button padding: at least 12px vertical on mobile
+- Link spacing: adequate gaps between adjacent links
+- Form inputs: min-height 44px, adequate padding
+
+### Responsive Layout Patterns
+
+The Grid component must support these patterns:
+- Single column on mobile (stacked content)
+- 2 columns on tablet
+- 3-4 columns on desktop
+- Auto-fit grids that reflow based on available space
+
+The Container component must have responsive max-widths:
+- Mobile: padding only, full width content
+- Tablet: max-width 720px
+- Desktop: max-width 1200px
+- Large: max-width 1400px
+
+### Responsive Spacing
+
+Spacing must adapt to screen size:
+- Section padding: smaller on mobile, larger on desktop
+- Stack gaps: reduce on mobile screens
+- Grid gaps: tighter on mobile, more breathing room on desktop
+
+### Mobile Navigation Pattern
+
+Provide a responsive navigation solution:
+- Horizontal nav on desktop
+- Hamburger menu or bottom nav on mobile
+- Show/Hide components for conditional rendering
+
+### Testing Requirements
+
+Before delegating page tasks:
+- Verify Grid component handles responsive columns correctly
+- Verify Container has responsive sizing
+- Verify typography scales appropriately
+- Test with browser DevTools at 320px, 768px, 1024px, 1440px widths
 
 ## Routing requirements
 
@@ -232,7 +397,7 @@ import {
 
 ## Delegation Workflow
 
-After writing the shared files, you MUST delegate each page implementation to a specialized page-generation agent. Do NOT write page implementations yourself.
+After setting up App.jsx with imports, you MUST delegate each page implementation to a specialized page-generation agent. Do NOT write the page implementations yourself.
 
 ### Delegation Pattern
 
@@ -265,27 +430,30 @@ Each page-generation subagent:
 
 Each page-generation subagent must:
 
-1. **Create the page component** at the specified `outputPath` with proper folder structure:
+1. **Create the page component** at the specified `outputPath` from scratch:
+   - Create folder: `{{OUTPUT_PATH}}`
+   - Create `{{OUTPUT_PATH}}<PageName>.jsx` with full implementation
+   - Create `{{OUTPUT_PATH}}<PageName>.module.css` with page-specific styles
+   - Create `{{OUTPUT_PATH}}index.js` with barrel export
+   - Add local components in `{{OUTPUT_PATH}}components/` folder as needed
+
+2. **Expected structure**:
    ```
-   src/features/<feature>/pages/<PageName>/
-   ├── <PageName>.jsx           # Main page component
-   ├── <PageName>.module.css    # Page-specific styles
+   src/pages/<PageName>/
+   ├── <PageName>.jsx           # Full implementation
+   ├── <PageName>.module.css    # Page styles
    ├── index.js                 # Barrel export
    └── components/              # Page-local components (if needed)
-       ├── FeatureCard/
-       │   ├── FeatureCard.jsx
-       │   ├── FeatureCard.module.css
-       │   └── index.js
        └── ...
    ```
 
-2. **Extract complex UI into local components** - Senior-level code organization:
+3. **Extract complex UI into local components** - Senior-level code organization:
    - Any JSX block exceeding ~30 lines with distinct visual identity → extract to component
    - Repeating visual patterns (cards, rows, item displays) → extract to reusable local component
    - Complex conditional rendering blocks → extract to sub-component
    - Form sections with multiple fields → extract to form-section components
 
-3. **Build with shared UI primitives** - Import and compose from `src/components/ui/`:
+4. **Build with shared UI primitives** - Import and compose from `src/components/ui/`:
    ```jsx
    import { Heading, Text, Stack, Container, AnimatedLink } from "@/components/ui/index.js";
    ```
@@ -293,7 +461,7 @@ Each page-generation subagent must:
    - Never re-create layout primitives (Stack, Container)
    - Use design tokens via CSS variables, never hardcode values
 
-4. **Create local state if needed** - Use Zustand for feature-local stores:
+5. **Create local state if needed** - Use Zustand for feature-local stores:
    ```
    src/features/<feature>/store/
    └── use<Feature>Store.js
@@ -301,9 +469,9 @@ Each page-generation subagent must:
    - Keep state close to where it's used
    - Don't create global stores for single-page concerns
 
-5. **Handle loading/error states** - Professional error boundaries and loading UI
+6. **Handle loading/error states** - Professional error boundaries and loading UI
 
-6. **Follow the routing contract** - Export the page as default, accept no route params unless specified
+7. **Follow the routing contract** - Export the page as named export matching the component name in App.jsx
 
 ### Component Extraction Guidelines for Subagents
 
@@ -400,9 +568,10 @@ Your responsibility ends after queueing page tasks. The queue system will execut
 Summarize:
 
 - what shared React scaffold was created (index.html, package.json, vite.config.js, jsconfig.json, main.jsx, App.jsx)
-- what design tokens were established (colors, typography, spacing, shadows, etc.)
-- which UI components were created (Typography, Layout, Utilities)
-- what routing/app-shell contract was defined
+- what design tokens were established (colors, typography, spacing, shadows, **breakpoints**)
+- which UI components were created (Typography, Layout, Utilities, **Grid/Hide/Show for responsive**)
+- **responsive design system established** (mobile-first approach, responsive Grid/Hide/Show components, breakpoint tokens)
+- what routing/app-shell contract was defined (with real imports, not placeholders)
 - which Zustand stores were established (if any)
 - whether the shared scaffold build passed before delegation
 - **delegation summary**:
@@ -411,3 +580,10 @@ Summarize:
   - task IDs of queued page tasks (for dependsOn reference)
 
 **Important**: You are only reporting what was queued. Do not report page task completion status - that will be handled by the post-processing task.
+
+**Responsive Design Checklist**: Before completing, verify:
+- [ ] Breakpoint tokens defined (sm:640px, md:768px, lg:1024px, xl:1280px, 2xl:1536px)
+- [ ] Grid component supports responsive `cols` prop
+- [ ] Hide/Show components for conditional rendering
+- [ ] Container has responsive sizing
+- [ ] Typography components support responsive sizing

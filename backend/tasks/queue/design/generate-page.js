@@ -17,6 +17,7 @@ import {
   getDesignJsOutputPath,
   getDesignSystemManifestRelativePath,
   getDesignTokensOutputPath,
+  getDesignVariantRelativePath,
   slugifyDesignId,
   slugifyDesignPageId,
 } from "./shared.js";
@@ -30,6 +31,7 @@ export async function queueDesignGeneratePageTask({
   technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
   model = null,
   delegatedByTaskId = null,
+  outputPath = null, // For React Vite: e.g., "src/features/auth/pages/LoginPage"
 }) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.DESIGN_GENERATE_PAGE,
@@ -43,6 +45,14 @@ export async function queueDesignGeneratePageTask({
   const normalizedPageId = slugifyDesignPageId(pageId || pageName);
 
   const taskId = generateTaskId(TASK_TYPES.DESIGN_GENERATE_PAGE);
+
+  // Build output path for React Vite if not provided
+  let finalOutputPath = outputPath;
+  if (technology === DESIGN_TECHNOLOGIES.REACT_VITE && !finalOutputPath) {
+    // Default to src/pages/<PageName>/ if no output path specified
+    finalOutputPath = `src/pages/${normalizedPageId.charAt(0).toUpperCase() + normalizedPageId.slice(1)}/`;
+  }
+
   const task = {
     id: taskId,
     type: TASK_TYPES.DESIGN_GENERATE_PAGE,
@@ -58,6 +68,7 @@ export async function queueDesignGeneratePageTask({
       appManifestPath: getDesignAppManifestRelativePath(normalizedDesignId),
       designSystemPath: getDesignSystemManifestRelativePath(normalizedDesignId),
       tokensPath: getDesignTokensOutputPath(normalizedDesignId),
+      // For static HTML
       htmlOutputPath: getDesignHtmlOutputPath(
         normalizedDesignId,
         normalizedPageId,
@@ -67,6 +78,9 @@ export async function queueDesignGeneratePageTask({
         normalizedPageId,
       ),
       jsOutputPath: getDesignJsOutputPath(normalizedDesignId, normalizedPageId),
+      // For React Vite
+      outputPath: finalOutputPath,
+      designRootPath: getDesignVariantRelativePath(normalizedDesignId),
       userInstruction: designBriefing || pageName || normalizedPageId,
       delegatedByTaskId,
     },

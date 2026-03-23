@@ -72,14 +72,18 @@ function serializeErrors(obj, visited = new WeakSet(), depth = 0) {
 }
 
 /**
- * Format log message with optional timestamp
+ * Format log message with optional timestamp and prefix
  * Context is only included for ERROR level to keep output clean
  */
-function format(level, message, context) {
+function format(level, message, context, prefix = null) {
   let formatted = "";
 
   if (config.enableTimestamps) {
     formatted += `${new Date().toISOString()} `;
+  }
+
+  if (prefix) {
+    formatted += `[${prefix}] `;
   }
 
   formatted += `[${level}] ${message}`;
@@ -180,16 +184,19 @@ export function log(message) {
  * Create a scoped logger instance that writes to multiple outputs
  * Useful for task-specific logging (console + file)
  * @param {Array} additionalOutputs - Additional output streams (e.g., file streams)
+ * @param {Object} options - Logger options
+ * @param {string} options.prefix - Prefix to add to all log messages (e.g., task ID)
  * @returns {Object} Logger instance with all logging methods
  */
-export function createLogger(additionalOutputs = []) {
+export function createLogger(additionalOutputs = [], options = {}) {
+  const { prefix = null } = options;
   const scopedConfig = {
     ...config,
     outputs: [...config.outputs, ...additionalOutputs],
   };
 
   function scopedWrite(level, message, context, method = "log") {
-    const formatted = format(level, message, context);
+    const formatted = format(level, message, context, prefix);
 
     scopedConfig.outputs.forEach((output) => {
       if (output[method]) {

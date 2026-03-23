@@ -47,16 +47,33 @@ export function getAnalysisRootPath() {
 }
 
 /**
- * Get allowed read paths for a specific task type
- * @param {string} taskType - The task type
+ * Get allowed read paths for a specific task
+ * @param {Object} task - The task object
  * @returns {string[]|null} Array of allowed path prefixes, or null if no restrictions
  */
-export function getAllowedReadPaths(taskType) {
-  switch (taskType) {
+export function getAllowedReadPaths(task) {
+  switch (task?.type) {
     case TASK_TYPES.DESIGN_ASSISTANT:
       return [
         `${getDesignFolderPath()}/`, // Existing designs
+        `${DEFAULT_WRITE_DIRECTORY}/temp/`, // Temp files (progress, delegation requests)
         "backend/constants/", // Technology resolution
+      ];
+
+    case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
+    case TASK_TYPES.DESIGN_GENERATE_PAGE:
+      // Design tasks should ONLY read from their specific design folder
+      // to avoid mixing up different design versions
+      // Also allow reading temp folder for delegation requests
+      if (task?.params?.designId) {
+        return [
+          `${getDesignFolderPath()}/${task.params.designId}/`,
+          `${DEFAULT_WRITE_DIRECTORY}/temp/`,
+        ];
+      }
+      return [
+        `${getDesignFolderPath()}/`,
+        `${DEFAULT_WRITE_DIRECTORY}/temp/`,
       ];
 
     default:
@@ -73,9 +90,9 @@ export function hasUnrestrictedReadAccess(taskType) {
   const unrestrictedTypes = [
     TASK_TYPES.CUSTOM_CODEBASE_TASK,
     TASK_TYPES.DESIGN_BRAINSTORM,
-    TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
-    TASK_TYPES.DESIGN_GENERATE_PAGE,
     TASK_TYPES.REVIEW_CHANGES,
+    // Note: DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE and DESIGN_GENERATE_PAGE
+    // are NOT here - they have restricted read paths via getAllowedReadPaths()
   ];
 
   return unrestrictedTypes.includes(taskType);
@@ -95,4 +112,33 @@ export function hasUnrestrictedWriteAccess(taskType) {
   ];
 
   return unrestrictedTypes.includes(taskType);
+}
+
+/**
+ * Get allowed write paths for a specific task
+ * @param {Object} task - The task object
+ * @returns {string[]|null} Array of allowed path prefixes, or null to use default behavior
+ */
+export function getAllowedWritePaths(task) {
+  switch (task?.type) {
+    case TASK_TYPES.DESIGN_GENERATE_PAGE:
+    case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
+    case TASK_TYPES.DESIGN_ASSISTANT:
+      // Design tasks need to write to:
+      // 1. Their specific design folder
+      // 2. Temp folder for progress files and delegation requests
+      if (task?.params?.designId) {
+        return [
+          `${getDesignFolderPath()}/${task.params.designId}/`,
+          `${DEFAULT_WRITE_DIRECTORY}/temp/`,
+        ];
+      }
+      return [
+        `${getDesignFolderPath()}/`,
+        `${DEFAULT_WRITE_DIRECTORY}/temp/`,
+      ];
+
+    default:
+      return null; // Use default behavior
+  }
 }

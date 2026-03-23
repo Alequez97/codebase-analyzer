@@ -78,7 +78,13 @@ export async function setupTaskLogger(task) {
 
   const fsSync = await import("fs");
   const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
-  const taskLogger = logger.createLogger([logStream]);
+  
+  // Create logger with task ID as prefix for console output
+  // Format: [2026-03-23T20:05:57.704Z] [task-abc123] [INFO] Message
+  const shortTaskId = task.id.slice(0, 8);
+  const taskType = task.type.replace(/^DESIGN_/, "").toLowerCase();
+  const prefix = `${taskType}:${shortTaskId}`;
+  const taskLogger = logger.createLogger([logStream], { prefix });
 
   taskLogger.log = (message, { publicLogText, kind } = {}) => {
     emitTaskLog(task, { log: message, publicLogText, kind });

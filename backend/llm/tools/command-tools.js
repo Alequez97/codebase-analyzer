@@ -30,43 +30,51 @@ const MAX_OUTPUT_LENGTH = 8_000;
 const SHELL_INJECTION_PATTERN = /[;&|><`$\n\r]/;
 
 /**
- * Prefixes of commands that are safe to execute.
- * Includes test-runner commands and package installation commands.
+ * Command categories - handlers must explicitly enable what they need
+ * No commands are enabled by default
  */
-const SAFE_COMMAND_PREFIXES = [
-  // Package configuration
-  "npm pkg set",
-  // Package installation
-  "npm install",
-  "npm ci",
+const GIT_COMMANDS = [
+  "git diff",
+  "git log",
+  "git status",
+  "git show",
+  "git branch",
+  "git blame",
+  "git checkout",
+];
+
+const NPM_INSTALL_COMMANDS = ["npm install", "npm ci", "npm pkg set"];
+const NPM_BUILD_COMMANDS = ["npm run build", "npm run dev", "npm run preview"];
+const NPM_TEST_COMMANDS = ["npm test", "npm run test", "npx jest", "npx vitest"];
+
+const YARN_COMMANDS = [
   "yarn install",
   "yarn add",
-  "pnpm install",
-  "pnpm add",
-  // Test runners
-  "npm test",
-  "npm run test",
-  "npx jest",
-  "npx vitest",
-  "npx mocha",
-  "npx jasmine",
   "yarn test",
   "yarn run test",
+];
+
+const PNPM_COMMANDS = [
+  "pnpm install",
+  "pnpm add",
   "pnpm test",
   "pnpm run test",
+];
+
+const PYTHON_COMMANDS = [
+  "pip install",
+  "pip3 install",
   "pytest",
   "python -m pytest",
   "python3 -m pytest",
-  "pip install",
-  "pip3 install",
-  "go test",
-  "cargo test",
-  "dotnet test",
-  "mvn test",
-  "gradle test",
-  "rake test",
-  "bundle exec rspec",
-  "bundle install",
+];
+
+const GO_COMMANDS = ["go test"];
+const RUST_COMMANDS = ["cargo test"];
+const DOTNET_COMMANDS = ["dotnet test"];
+const JAVA_COMMANDS = ["mvn test", "gradle test"];
+const RUBY_COMMANDS = ["rake test", "bundle exec rspec", "bundle install"];
+const PHP_COMMANDS = [
   "php artisan test",
   "vendor/bin/phpunit",
   "composer install",
@@ -79,7 +87,7 @@ export const COMMAND_TOOLS = [
   {
     name: "execute_command",
     description:
-      "Execute a safe command in the project root directory. Supported commands: (1) Git commands for context: 'git diff', 'git log', 'git status', 'git show', 'git blame', 'git branch'. (2) Package/test commands: install dependencies (e.g., 'npm install mongodb-memory-server --save-dev'), configure package.json (e.g., 'npm pkg set scripts.test=jest'), or run tests (e.g., 'npx jest path/to/test.js'). Use git commands to understand what changed, file history, and current state. Use package commands to set up and run tests.",
+      "Execute a safe command in the project root directory. Commands must be explicitly enabled by the task handler - only git and package manager commands are supported. Use git commands to understand what changed, file history, and current state. Use package commands to set up and run tests or builds.",
     parameters: {
       command: {
         type: "string",
@@ -99,15 +107,127 @@ export class CommandToolExecutor {
    * @param {string} workingDirectory - Directory to run commands in (project root)
    * @param {Object} [options]
    * @param {number} [options.timeoutMs] - Command timeout in milliseconds
-   * @param {string[]} [options.additionalAllowedPrefixes] - Extra safe command prefixes
    */
   constructor(workingDirectory, options = {}) {
     this.workingDirectory = workingDirectory;
     this.timeoutMs = options.timeoutMs || DEFAULT_TIMEOUT_MS;
-    this.allowedPrefixes = [
-      ...SAFE_COMMAND_PREFIXES,
-      ...(options.additionalAllowedPrefixes || []),
-    ];
+    this.allowedPrefixes = [];
+  }
+
+  /**
+   * Enable Git commands (diff, log, status, etc.)
+   */
+  enableGitCommands() {
+    this._addPrefixes(GIT_COMMANDS, "Git");
+  }
+
+  /**
+   * Enable npm install commands
+   */
+  enableNpmInstallCommands() {
+    this._addPrefixes(NPM_INSTALL_COMMANDS, "npm install");
+  }
+
+  /**
+   * Enable npm build commands (build, dev, preview)
+   */
+  enableNpmBuildCommands() {
+    this._addPrefixes(NPM_BUILD_COMMANDS, "npm build");
+  }
+
+  /**
+   * Enable npm test commands
+   */
+  enableNpmTestCommands() {
+    this._addPrefixes(NPM_TEST_COMMANDS, "npm test");
+  }
+
+  /**
+   * Enable Yarn commands
+   */
+  enableYarnCommands() {
+    this._addPrefixes(YARN_COMMANDS, "Yarn");
+  }
+
+  /**
+   * Enable pnpm commands
+   */
+  enablePnpmCommands() {
+    this._addPrefixes(PNPM_COMMANDS, "pnpm");
+  }
+
+  /**
+   * Enable Python commands (pip, pytest)
+   */
+  enablePythonCommands() {
+    this._addPrefixes(PYTHON_COMMANDS, "Python");
+  }
+
+  /**
+   * Enable Go test commands
+   */
+  enableGoCommands() {
+    this._addPrefixes(GO_COMMANDS, "Go");
+  }
+
+  /**
+   * Enable Rust/Cargo commands
+   */
+  enableRustCommands() {
+    this._addPrefixes(RUST_COMMANDS, "Rust");
+  }
+
+  /**
+   * Enable .NET test commands
+   */
+  enableDotnetCommands() {
+    this._addPrefixes(DOTNET_COMMANDS, ".NET");
+  }
+
+  /**
+   * Enable Java (Maven/Gradle) commands
+   */
+  enableJavaCommands() {
+    this._addPrefixes(JAVA_COMMANDS, "Java");
+  }
+
+  /**
+   * Enable Ruby commands
+   */
+  enableRubyCommands() {
+    this._addPrefixes(RUBY_COMMANDS, "Ruby");
+  }
+
+  /**
+   * Enable PHP commands
+   */
+  enablePhpCommands() {
+    this._addPrefixes(PHP_COMMANDS, "PHP");
+  }
+
+  /**
+   * Set command timeout
+   * @param {number} timeoutMs - Timeout in milliseconds
+   */
+  setTimeout(timeoutMs) {
+    this.timeoutMs = timeoutMs;
+  }
+
+  /**
+   * Helper to add prefixes and log
+   * @private
+   */
+  _addPrefixes(prefixes, category) {
+    const newPrefixes = prefixes.filter(
+      (p) => !this.allowedPrefixes.includes(p)
+    );
+    if (newPrefixes.length > 0) {
+      this.allowedPrefixes.push(...newPrefixes);
+      logger.info(`${category} commands enabled`, {
+        component: "CommandToolExecutor",
+        count: newPrefixes.length,
+      });
+    }
   }
 
   /**
@@ -143,8 +263,8 @@ export class CommandToolExecutor {
     const trimmed = command.trim();
 
     if (!this._isSafeCommand(trimmed)) {
-      const allowed = this.allowedPrefixes.join(", ");
-      return `Error: Command not allowed for security reasons. Only safe commands are permitted (git, package managers, test runners). Allowed prefixes: ${allowed}`;
+      const allowed = this.allowedPrefixes.join(", ") || "(none enabled)";
+      return `Error: Command not allowed. Enabled prefixes: ${allowed}`;
     }
 
     logger.info(`Executing command: ${trimmed}`, {
@@ -167,7 +287,7 @@ export class CommandToolExecutor {
         timedOut = true;
         child.kill("SIGTERM");
         resolve(
-          `Error: Command timed out after ${this.timeoutMs / 1000}s\n\nPartial stdout:\n${stdout}\n\nPartial stderr:\n${stderr}`,
+          `Error: Command timed out after ${this.timeoutMs / 1000}s\n\nPartial stdout:\n${stdout}\n\nPartial stderr:\n${stderr}`
         );
       }, this.timeoutMs);
 
@@ -190,7 +310,7 @@ export class CommandToolExecutor {
         if (combined.length > MAX_OUTPUT_LENGTH) {
           resolve(
             combined.slice(0, MAX_OUTPUT_LENGTH) +
-              `\n\n[Output truncated — ${combined.length - MAX_OUTPUT_LENGTH} chars omitted]`,
+              `\n\n[Output truncated — ${combined.length - MAX_OUTPUT_LENGTH} chars omitted]`
           );
         } else {
           resolve(combined);
@@ -220,9 +340,15 @@ export class CommandToolExecutor {
     if (SHELL_INJECTION_PATTERN.test(command)) {
       return false;
     }
+
+    // If no prefixes are enabled, no commands are allowed
+    if (this.allowedPrefixes.length === 0) {
+      return false;
+    }
+
     const lower = command.toLowerCase();
     return this.allowedPrefixes.some((prefix) =>
-      lower.startsWith(prefix.toLowerCase()),
+      lower.startsWith(prefix.toLowerCase())
     );
   }
 }

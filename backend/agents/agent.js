@@ -47,6 +47,51 @@ export class LLMAgent {
   }
 
   /**
+   * Enable Git commands for this agent session.
+   * Must be called after enableCommandTools() or will auto-enable commands.
+   */
+  enableGitCommands() {
+    this.tools.enableGitCommands();
+    logger.info("Git commands enabled for agent session", {
+      component: "LLMAgent",
+    });
+  }
+
+  /**
+   * Enable npm build commands (build, dev, preview) for this agent session.
+   * Must be called after enableCommandTools() or will auto-enable commands.
+   */
+  enableNpmBuildCommands() {
+    this.tools.enableNpmBuildCommands();
+    logger.info("NPM build commands enabled for agent session", {
+      component: "LLMAgent",
+    });
+  }
+
+  /**
+   * Enable all npm commands (install, build, test) for this agent session.
+   * Must be called after enableCommandTools() or will auto-enable commands.
+   */
+  enableAllNpmCommands() {
+    this.tools.enableAllNpmCommands();
+    logger.info("All NPM commands enabled for agent session", {
+      component: "LLMAgent",
+    });
+  }
+
+  /**
+   * Set command execution timeout
+   * @param {number} timeoutMs - Timeout in milliseconds
+   */
+  setCommandTimeout(timeoutMs) {
+    this.tools.setCommandTimeout(timeoutMs);
+    logger.info("Command timeout set", {
+      component: "LLMAgent",
+      timeoutMs,
+    });
+  }
+
+  /**
    * Enable task-delegation tools for this agent session.
    * Must be called before run() to take effect.
    *

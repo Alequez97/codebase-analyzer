@@ -13,6 +13,7 @@ import { loadDomainSectionChatHistory } from "../../utils/chat-history.js";
 import * as logger from "../../utils/logger.js";
 import {
   getAllowedReadPaths,
+  getAllowedWritePaths,
   hasUnrestrictedReadAccess,
   hasUnrestrictedWriteAccess,
   DEFAULT_WRITE_DIRECTORY,
@@ -77,7 +78,7 @@ const MESSAGE_TOOL_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_ASSISTANT,
 ]);
 
-function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
+export function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
   const editTaskTypes = [
     TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
     TASK_TYPES.EDIT_DOCUMENTATION,
@@ -95,23 +96,32 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
     return;
   }
 
+  // Check for task-specific write paths (e.g., design folder for page generation)
+  const taskWritePaths = getAllowedWritePaths(task);
+  if (taskWritePaths) {
+    fileToolExecutor.setAllowedWritePaths(taskWritePaths);
+    taskLogger.info(
+      `${task.type}: write access restricted to ${taskWritePaths.join(", ")}`,
+    );
+  }
+
   // Check for unrestricted read access (full project read-only, limited write)
   if (hasUnrestrictedReadAccess(task.type)) {
     fileToolExecutor.setAllowAnyRead(true);
-    taskLogger.info(
-      `Full project read access granted (${task.type})`,
-    );
+    taskLogger.info(`Full project read access granted (${task.type})`);
     return;
   }
 
   // Check for restricted read paths
-  const restrictedReadPaths = getAllowedReadPaths(task.type);
+  const restrictedReadPaths = getAllowedReadPaths(task);
   if (restrictedReadPaths) {
     fileToolExecutor.setAllowedReadPaths(restrictedReadPaths);
     taskLogger.info(
       `${task.type}: read access restricted to ${restrictedReadPaths.join(", ")}`,
     );
     return;
+  } else {
+    taskLogger.info(`${task.type}: no read path restrictions applied`);
   }
 
   // Default: use explicit write paths for edit tasks
@@ -125,15 +135,16 @@ function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
 
   if (allowedPaths.length > 0) {
     taskLogger.info(`Write access restricted to: ${allowedPaths.join(", ")}`);
-  } else {
+  } else if (!taskWritePaths) {
     taskLogger.info(
       `No explicit write paths set; writes are limited to ${DEFAULT_WRITE_DIRECTORY}/`,
     );
   }
 }
 
-function enableGitCommandsIfUseful(agent, task, taskLogger) {
-  const gitEnabledTaskTypes = [
+function enableCommandsIfUseful(agent, task, taskLogger) {
+  // Task types that need Git commands
+  const gitTaskTypes = [
     TASK_TYPES.IMPLEMENT_FIX,
     TASK_TYPES.IMPLEMENT_TEST,
     TASK_TYPES.APPLY_REFACTORING,
@@ -142,30 +153,61 @@ function enableGitCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.DESIGN_BRAINSTORM,
     TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
     TASK_TYPES.DESIGN_GENERATE_PAGE,
+    TASK_TYPES.DESIGN_ASSISTANT,
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
     TASK_TYPES.EDIT_REQUIREMENTS,
     TASK_TYPES.EDIT_BUGS_SECURITY,
     TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
+    TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
   ];
 
-  if (!gitEnabledTaskTypes.includes(task.type)) {
+  // Task types that need npm build commands (any task that modifies code)
+  const npmBuildTaskTypes = [
+    // Design tasks
+    TASK_TYPES.DESIGN_BRAINSTORM,
+    TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
+    TASK_TYPES.DESIGN_GENERATE_PAGE,
+    TASK_TYPES.DESIGN_ASSISTANT,
+    // Implementation tasks
+    TASK_TYPES.IMPLEMENT_FIX,
+    TASK_TYPES.IMPLEMENT_TEST,
+    TASK_TYPES.APPLY_REFACTORING,
+    // Custom tasks
+    TASK_TYPES.CUSTOM_CODEBASE_TASK,
+    TASK_TYPES.REVIEW_CHANGES,
+    // Edit tasks (might modify code)
+    TASK_TYPES.EDIT_DOCUMENTATION,
+    TASK_TYPES.EDIT_DIAGRAMS,
+    TASK_TYPES.EDIT_REQUIREMENTS,
+    TASK_TYPES.EDIT_BUGS_SECURITY,
+    TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
+    TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
+  ];
+
+  const needsGit = gitTaskTypes.includes(task.type);
+  const needsNpmBuild = npmBuildTaskTypes.includes(task.type);
+
+  if (!needsGit && !needsNpmBuild) {
     return;
   }
 
-  agent.enableCommandTools({
-    timeoutMs: 60_000,
-    additionalAllowedPrefixes: [
-      "git diff",
-      "git log",
-      "git status",
-      "git show",
-      "git branch",
-      "git blame",
-    ],
-  });
+  // Enable specific command categories
+  if (needsGit) {
+    agent.enableGitCommands();
+  }
 
-  taskLogger.info("Git command tools enabled");
+  if (needsNpmBuild) {
+    agent.enableAllNpmCommands();
+  }
+
+  // Set longer timeout for tasks that need builds (installs/compilations take time)
+  agent.setCommandTimeout(needsNpmBuild ? 120_000 : 60_000);
+
+  taskLogger.info("Command tools enabled", {
+    git: needsGit,
+    npmBuild: needsNpmBuild,
+  });
 }
 
 function buildSectionChatContext(task, fallbackMessage) {
@@ -191,19 +233,15 @@ function buildSectionChatContext(task, fallbackMessage) {
 }
 
 export async function createTaskHandler(task, taskLogger, agent) {
-  if (agent?.fileToolExecutor) {
-    setTaskFileAccess(agent.fileToolExecutor, task, taskLogger);
+  if (agent?.tools?.fileToolExecutor) {
+    setTaskFileAccess(agent.tools.fileToolExecutor, task, taskLogger);
   }
 
   if (agent) {
-    enableGitCommandsIfUseful(agent, task, taskLogger);
+    enableCommandsIfUseful(agent, task, taskLogger);
   }
 
-  if (
-    agent &&
-    task.responseHandler &&
-    MESSAGE_TOOL_TASK_TYPES.has(task.type)
-  ) {
+  if (agent && task.responseHandler && MESSAGE_TOOL_TASK_TYPES.has(task.type)) {
     agent.enableMessageTools(task.responseHandler);
     taskLogger.info(`Message tools enabled (${task.type})`);
   }
@@ -295,4 +333,3 @@ export async function createTaskHandler(task, taskLogger, agent) {
     ...overrides,
   };
 }
-

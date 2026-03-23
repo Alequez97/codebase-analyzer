@@ -29,6 +29,7 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
   designId = null,
   technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
   model = null,
+  delegatedByTaskId = null,
 }) {
   const agentConfigResult = getAgentConfig(
     TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
@@ -59,6 +60,7 @@ export async function queueDesignPlanAndStyleSystemGenerateTask({
       designSystemPath: getDesignSystemManifestRelativePath(normalizedDesignId),
       tokensPath: getDesignTokensOutputPath(normalizedDesignId),
       userInstruction: brief || prompt,
+      ...(delegatedByTaskId && { delegatedByTaskId }),
     },
     agentConfig: agentConfigResult.agentConfig,
     systemInstructionFile: getDesignPlanSystemInstructionPath(technology),

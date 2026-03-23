@@ -17,6 +17,7 @@ import { SOCKET_EVENTS } from "../../../constants/socket-events.js";
 import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
 import { emitSocketEvent } from "../../../utils/socket-emitter.js";
 import { loadDesignManifest } from "../../../utils/design-manifest.js";
+import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
 import {
   describeDesignToolCall,
   getPublicDesignProgress,
@@ -90,6 +91,26 @@ export function designGeneratePageHandler(task, taskLogger) {
 
       const designId = task.params?.designId;
       const pageId = task.params?.pageId;
+      const technology = task.params?.technology;
+
+      // For React Vite, we don't check for specific files here
+      // The post-processing task (with dependsOn) will verify the build
+      if (technology === DESIGN_TECHNOLOGIES.REACT_VITE) {
+        taskLogger.info(
+          `React Vite page generation completed for ${pageId}. Skipping file verification - will be handled by post-processing task.`,
+        );
+
+        emitSocketEvent(SOCKET_EVENTS.DESIGN_MANIFEST_UPDATED, {
+          taskId: task.id,
+          manifest: loadDesignManifest(),
+          timestamp: new Date().toISOString(),
+        });
+
+        await markProgressComplete(task.id).catch(() => {});
+        return { success: true };
+      }
+
+      // For static HTML, verify the expected files exist
       const expectedPaths = [
         getDesignHtmlOutputPath(designId, pageId),
         getDesignCssOutputPath(designId, pageId),

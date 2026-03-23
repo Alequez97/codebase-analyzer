@@ -997,9 +997,9 @@ describe("FileToolExecutor - Read, Search & Rename Tests", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.data.listing).toContain("app.js");
-      expect(result.data.listing).toContain("index.js");
-      expect(result.data.listing).toContain("components/");
+      expect(result.data.content).toContain("app.js");
+      expect(result.data.content).toContain("index.js");
+      expect(result.data.content).toContain("components/");
       expect(result.data.entries).toBe(3); // 2 files + 1 directory
     });
 
@@ -1012,8 +1012,8 @@ describe("FileToolExecutor - Read, Search & Rename Tests", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.data.listing).toContain("app.js");
-      expect(result.data.listing).toContain("Button.jsx");
+      expect(result.data.content).toContain("app.js");
+      expect(result.data.content).toContain("Button.jsx");
       expect(result.data.entries).toBeGreaterThanOrEqual(3);
     });
 
@@ -1026,8 +1026,8 @@ describe("FileToolExecutor - Read, Search & Rename Tests", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.data.listing).toContain("src/");
-      expect(result.data.listing).toContain("tests/");
+      expect(result.data.content).toContain("src/");
+      expect(result.data.content).toContain("tests/");
     });
 
     test("returns error for non-existent directory", async () => {
@@ -1052,6 +1052,195 @@ describe("FileToolExecutor - Read, Search & Rename Tests", () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.error.code).toBe(TOOL_ERROR_CODES.NOT_A_DIRECTORY);
+    });
+
+    test("lists empty directory correctly", async () => {
+      // Arrange
+      const emptyDir = "empty-dir";
+      await fs.mkdir(path.join(tempDir, emptyDir), { recursive: true });
+
+      // Act
+      const result = await executor.listDirectory(emptyDir, false);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.entries).toBe(0);
+      expect(result.data.content).toBe("");
+    });
+
+    test("recursive listing respects max depth limit", async () => {
+      // Arrange - create deeply nested structure
+      await fs.mkdir(path.join(tempDir, "src", "level1", "level2", "level3", "level4", "level5", "level6"), { recursive: true });
+      await fs.writeFile(path.join(tempDir, "src", "level1", "level2", "level3", "level4", "level5", "level6", "deep.txt"), "deep");
+
+      // Act
+      const result = await executor.listDirectory("src", true);
+
+      // Assert
+      expect(result.success).toBe(true);
+      // Deep file beyond max depth should not appear
+      expect(result.data.content).not.toContain("deep.txt");
+    });
+
+    test("recursive listing skips ignored directories", async () => {
+      // Arrange
+      await fs.mkdir(path.join(tempDir, "src", "node_modules"), { recursive: true });
+      await fs.writeFile(path.join(tempDir, "src", "node_modules", "package.js"), "// package");
+
+      // Act
+      const result = await executor.listDirectory("src", true);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.content).not.toContain("node_modules");
+      expect(result.data.content).not.toContain("package.js");
+    });
+
+    test("directory entries end with / to indicate directories", async () => {
+      // Arrange
+      const dirPath = ".";
+
+      // Act
+      const result = await executor.listDirectory(dirPath, false);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.content).toContain("src/");
+      expect(result.data.content).toContain("tests/");
+      // Files should NOT end with /
+      const lines = result.data.content.split("\n");
+      const appJsEntry = lines.find(line => line.includes(".js") && !line.includes(".jsx") && !line.includes("/"));
+      if (appJsEntry) {
+        expect(appJsEntry.endsWith("/")).toBe(false);
+      }
+    });
+
+    test("rejects path traversal in list_directory", async () => {
+      // Arrange
+      const maliciousPath = "../../../etc";
+
+      // Act
+      const result = await executor.listDirectory(maliciousPath, false);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(result.error.code).toBe(TOOL_ERROR_CODES.ACCESS_DENIED);
+      expect(result.error.type).toBe(TOOL_ERROR_TYPES.SECURITY);
+    });
+
+    test("rejects path outside project root via path traversal", async () => {
+      // Arrange - try to access parent directory
+      const outsidePath = "..";
+
+      // Act
+      const result = await executor.listDirectory(outsidePath, false);
+
+      // Assert
+      expect(result.success).toBe(false);
+      expect(result.error.code).toBe(TOOL_ERROR_CODES.ACCESS_DENIED);
+      expect(result.error.type).toBe(TOOL_ERROR_TYPES.SECURITY);
+    });
+
+    test("respects allowedReadPaths restriction for list_directory", async () => {
+      // Arrange
+      const restrictedExecutor = new FileToolExecutor(tempDir);
+      restrictedExecutor.setAllowAnyRead(true); // First allow any read to verify setup
+      
+      // Verify directories exist and are readable
+      const verifyResult = await restrictedExecutor.listDirectory("tests", false);
+      expect(verifyResult.success).toBe(true);
+      
+      // Now restrict to only tests directory
+      restrictedExecutor.setAllowAnyRead(false);
+      restrictedExecutor.setAllowedReadPaths(["tests"]);
+
+      // Act - try to list allowed path
+      const allowedResult = await restrictedExecutor.listDirectory("tests", false);
+      
+      // Act - try to list disallowed path
+      const deniedResult = await restrictedExecutor.listDirectory("src", false);
+
+      // Assert
+      expect(allowedResult.success).toBe(true);
+      expect(deniedResult.success).toBe(false);
+      expect(deniedResult.error.code).toBe(TOOL_ERROR_CODES.ACCESS_DENIED);
+    });
+
+    test("allowAnyRead bypasses allowedReadPaths restriction", async () => {
+      // Arrange
+      const restrictedExecutor = new FileToolExecutor(tempDir);
+      restrictedExecutor.setAllowedReadPaths(["tests/"]);
+      restrictedExecutor.setAllowAnyRead(true);
+
+      // Act - try to list path not in allowedReadPaths
+      const result = await restrictedExecutor.listDirectory("src", false);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.content).toContain("app.js");
+    });
+
+    test("returns correct entry count for directory with many files", async () => {
+      // Arrange
+      const manyFilesDir = "many-files";
+      await fs.mkdir(path.join(tempDir, manyFilesDir), { recursive: true });
+      for (let i = 0; i < 10; i++) {
+        await fs.writeFile(path.join(tempDir, manyFilesDir, `file${i}.txt`), `content${i}`);
+      }
+
+      // Act
+      const result = await executor.listDirectory(manyFilesDir, false);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.entries).toBe(10);
+    });
+
+    test("recursive listing returns correct hierarchical format", async () => {
+      // Arrange
+      const dirPath = "src";
+
+      // Act
+      const result = await executor.listDirectory(dirPath, true);
+
+      // Assert
+      expect(result.success).toBe(true);
+      // Should have indentation for nested items (components is at depth 0)
+      expect(result.data.content).toContain("📁 components");
+      // Should have file emoji for files
+      expect(result.data.content).toContain("📄");
+      // Should have folder emoji for directories
+      expect(result.data.content).toContain("📁");
+    });
+
+    test("list_directory returns correct metadata", async () => {
+      // Arrange
+      const dirPath = "src";
+
+      // Act
+      const result = await executor.listDirectory(dirPath, false);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.path).toBe(dirPath);
+      expect(result.data.recursive).toBe(false);
+      expect(typeof result.data.entries).toBe("number");
+    });
+
+    test("handles directory with special characters in names", async () => {
+      // Arrange
+      const specialDir = "special-chars";
+      await fs.mkdir(path.join(tempDir, specialDir), { recursive: true });
+      await fs.writeFile(path.join(tempDir, specialDir, "file-with-dashes.txt"), "content");
+      await fs.writeFile(path.join(tempDir, specialDir, "file_with_underscores.txt"), "content");
+
+      // Act
+      const result = await executor.listDirectory(specialDir, false);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.data.content).toContain("file-with-dashes.txt");
+      expect(result.data.content).toContain("file_with_underscores.txt");
     });
   });
 

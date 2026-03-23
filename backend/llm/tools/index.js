@@ -39,6 +39,114 @@ export class ToolRegistry {
     );
   }
 
+  // Git commands
+  enableGitCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableGitCommands();
+  }
+
+  // NPM commands
+  enableNpmInstallCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableNpmInstallCommands();
+  }
+
+  enableNpmBuildCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableNpmBuildCommands();
+  }
+
+  enableNpmTestCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableNpmTestCommands();
+  }
+
+  // Package manager shortcuts
+  enableAllNpmCommands() {
+    this.enableNpmInstallCommands();
+    this.enableNpmBuildCommands();
+    this.enableNpmTestCommands();
+  }
+
+  enableYarnCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableYarnCommands();
+  }
+
+  enablePnpmCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enablePnpmCommands();
+  }
+
+  // Language-specific test commands
+  enablePythonCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enablePythonCommands();
+  }
+
+  enableGoCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableGoCommands();
+  }
+
+  enableRustCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableRustCommands();
+  }
+
+  enableDotnetCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableDotnetCommands();
+  }
+
+  enableJavaCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableJavaCommands();
+  }
+
+  enableRubyCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enableRubyCommands();
+  }
+
+  enablePhpCommands() {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.enablePhpCommands();
+  }
+
+  setCommandTimeout(timeoutMs) {
+    if (!this.commandToolExecutor) {
+      this.enableCommandTools();
+    }
+    this.commandToolExecutor.setTimeout(timeoutMs);
+  }
+
   enableDelegationTools(parentTaskId, queueFunctions) {
     this.delegationToolExecutor = new DelegationToolExecutor(
       this._workingDirectory,
