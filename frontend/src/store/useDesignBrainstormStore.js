@@ -165,21 +165,24 @@ export const useDesignBrainstormStore = create(
           return { success: false, error: "Prompt is required" };
         }
 
-        const previousMessages = get().brainstormMessages;
-        const history = getHistoryMessages(previousMessages);
+        // Start fresh - clear any previous conversation state
         const userMessage = createLocalMessage("user", prompt);
 
         set({
           brainstormError: null,
           brainstormResponse: "",
-          brainstormMessages: [...previousMessages, userMessage],
+          brainstormMessages: [userMessage],
+          brainstormComplete: false,
+          brainstormTaskId: null,
+          pendingQuestion: null,
+          isWaitingForUser: false,
           loadingBrainstorm: true,
         });
 
         try {
           const response = await brainstormDesign({
             prompt,
-            history,
+            history: [], // Start fresh - no prior history for new session
             model: selectedModel,
           });
           const taskId = response?.data?.task?.id ?? null;
@@ -199,7 +202,6 @@ export const useDesignBrainstormStore = create(
           set({
             brainstormError,
             loadingBrainstorm: false,
-            brainstormMessages: previousMessages,
           });
           return { success: false, error: brainstormError };
         }

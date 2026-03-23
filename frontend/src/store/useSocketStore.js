@@ -18,7 +18,7 @@ import { useRefactoringAndTestingEditorStore as useTestingEditorStore } from "./
 import { useAgentChatStore } from "./useAgentChatStore";
 import { useDesignStudioStore } from "./useDesignStudioStore";
 import { useDesignBrainstormStore } from "./useDesignBrainstormStore";
-import { useDesignEditStore } from "./useDesignEditStore";
+import { useDesignAssistantStore } from "./useDesignAssistantStore";
 
 /** Produces a Map<testId, "added"|"modified"|"removed"> by comparing two missingTests objects. */
 function computeTestChanges(oldMissingTests, newMissingTests) {
@@ -193,7 +193,7 @@ export const useSocketStore = create((set, get) => ({
           });
         }
       } else if (type === TASK_TYPES.DESIGN_ASSISTANT) {
-        useDesignEditStore
+        useDesignAssistantStore
           .getState()
           .setEditComplete(data.params?.designId ?? null);
       } else if (
@@ -340,7 +340,7 @@ export const useSocketStore = create((set, get) => ({
           });
         }
       } else if (type === TASK_TYPES.DESIGN_ASSISTANT) {
-        useDesignEditStore.getState().clearActiveEditTask(taskId, error);
+        useDesignAssistantStore.getState().clearActiveEditTask(taskId, error);
       } else if (
         type === TASK_TYPES.DESIGN_BRAINSTORM ||
         type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE ||
@@ -386,7 +386,7 @@ export const useSocketStore = create((set, get) => ({
           useDomainBugsSecurityStore.getState().clearImplementingFix(findingId);
         }
       } else if (type === TASK_TYPES.DESIGN_ASSISTANT) {
-        useDesignEditStore.getState().clearActiveEditTask(taskId);
+        useDesignAssistantStore.getState().clearActiveEditTask(taskId);
       }
     });
 
@@ -543,7 +543,7 @@ export const useSocketStore = create((set, get) => ({
             .getState()
             .appendBrainstormMessage({ taskId, role, content, timestamp });
         } else if (taskType === TASK_TYPES.DESIGN_ASSISTANT) {
-          useDesignEditStore
+          useDesignAssistantStore
             .getState()
             .appendEditMessage({ taskId, role, content, timestamp });
         } else if (
@@ -588,7 +588,7 @@ export const useSocketStore = create((set, get) => ({
             });
           }
         } else if (taskType === TASK_TYPES.DESIGN_ASSISTANT) {
-          const editStore = useDesignEditStore.getState();
+          const editStore = useDesignAssistantStore.getState();
           editStore.appendEditMessage({
             taskId,
             role: "assistant",
@@ -628,7 +628,7 @@ export const useSocketStore = create((set, get) => ({
     socket.on(SOCKET_EVENTS.TASK_RESUMED, ({ taskId: _taskId }) => {
       useDesignStudioStore.getState().clearPendingQuestion();
       useDesignBrainstormStore.getState().clearPendingQuestion();
-      useDesignEditStore.getState().clearPendingQuestion();
+      useDesignAssistantStore.getState().clearPendingQuestion();
     });
 
     socket.on(

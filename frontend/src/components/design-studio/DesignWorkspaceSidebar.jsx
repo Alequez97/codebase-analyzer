@@ -7,16 +7,14 @@
   VStack,
 } from "@chakra-ui/react";
 import { Layers, MessageSquare, Sparkles, X } from "lucide-react";
-import { DesignEditChat } from "./DesignEditChat";
+import { DesignAssistantChat } from "./DesignAssistantChat";
 
 export function DesignWorkspaceSidebar({
   versions,
   selectedUrl,
   onSelectUrl,
   selectedModel,
-  selectedTechnology,
   onModelChange,
-  onTechnologyChange,
   defaultModelLabel,
   activeTab,
   onTabChange,
@@ -90,7 +88,7 @@ export function DesignWorkspaceSidebar({
       </HStack>
 
       {activeTab === "chat" && (
-        <DesignEditChat
+        <DesignAssistantChat
           editMessages={editMessages}
           editPendingQuestion={editPendingQuestion}
           onClearEdit={onClearEdit}
@@ -113,9 +111,7 @@ export function DesignWorkspaceSidebar({
           onRefreshHistory={onRefreshEditHistory}
           model={editTask?.model ?? null}
           selectedModel={selectedModel}
-          selectedTechnology={selectedTechnology}
           onModelChange={onModelChange}
-          onTechnologyChange={onTechnologyChange}
           defaultModelLabel={defaultModelLabel}
           isInSidebar={true}
         />

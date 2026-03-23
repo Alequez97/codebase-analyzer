@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from "react";
 import { CheckSquare, History, Plus, RefreshCw, Send, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ModelSelector } from "../FloatingChat/ModelSelector";
-import { DesignTechnologySelector } from "./DesignTechnologySelector";
 
 const DOT_DELAY = ["0s", "0.18s", "0.36s"];
 const EDIT_CHAT_STARTER_MESSAGE =
@@ -269,7 +268,7 @@ function QuestionWithOptions({ pendingQuestion, onSend }) {
   );
 }
 
-export function DesignEditChat({
+export function DesignAssistantChat({
   editMessages = [],
   editSessions = [],
   loadingEditSessions = false,
@@ -283,9 +282,7 @@ export function DesignEditChat({
   model,
   isInSidebar = false,
   selectedModel = null,
-  selectedTechnology = null,
   onModelChange = null,
-  onTechnologyChange = null,
   defaultModelLabel = null,
 }) {
   const [input, setInput] = useState("");
@@ -600,32 +597,24 @@ export function DesignEditChat({
               <Send size={16} />
             </Button>
           </Box>
-          {(onModelChange || onTechnologyChange) && (
+          {onModelChange && (
             <HStack
               px={3}
               py={2}
               borderTopWidth="1px"
               borderColor="rgba(226,232,240,0.9)"
               align="center"
-              justify="space-between"
+              justify="flex-end"
               gap={3}
               flexWrap="wrap"
             >
-              {onTechnologyChange && selectedTechnology && (
-                <DesignTechnologySelector
-                  value={selectedTechnology}
-                  onChange={onTechnologyChange}
+              <Box flex="1" minW="220px" maxW="280px">
+                <ModelSelector
+                  value={selectedModel}
+                  onChange={onModelChange}
+                  defaultLabel={defaultModelLabel}
                 />
-              )}
-              {onModelChange && (
-                <Box flex="1" minW="220px" maxW="280px" ml="auto">
-                  <ModelSelector
-                    value={selectedModel}
-                    onChange={onModelChange}
-                    defaultLabel={defaultModelLabel}
-                  />
-                </Box>
-              )}
+              </Box>
             </HStack>
           )}
         </Box>

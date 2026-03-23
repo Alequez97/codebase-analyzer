@@ -507,10 +507,10 @@ export function DesignBrainstormChat({
                 <Send size={16} />
               </Button>
             </Box>
-            {(onModelChange || onTechnologyChange) && (
+            {onModelChange && (
               <HStack
                 align="center"
-                justify="space-between"
+                justify="flex-end"
                 px={3}
                 py={2}
                 borderTopWidth="1px"
@@ -518,21 +518,13 @@ export function DesignBrainstormChat({
                 gap={3}
                 flexWrap="wrap"
               >
-                {onTechnologyChange && selectedTechnology && (
-                  <DesignTechnologySelector
-                    value={selectedTechnology}
-                    onChange={onTechnologyChange}
+                <Box flex="1" minW="220px" maxW="280px">
+                  <ModelSelector
+                    value={selectedModel}
+                    onChange={onModelChange}
+                    defaultLabel={defaultModelLabel}
                   />
-                )}
-                {onModelChange && (
-                  <Box flex="1" minW="220px" maxW="280px" ml="auto">
-                    <ModelSelector
-                      value={selectedModel}
-                      onChange={onModelChange}
-                      defaultLabel={defaultModelLabel}
-                    />
-                  </Box>
-                )}
+                </Box>
               </HStack>
             )}
           </Box>

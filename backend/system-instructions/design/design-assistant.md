@@ -58,7 +58,18 @@ If user intent is already explicit in `{{PROMPT}}`, you may confirm and proceed 
 
 - Inspect `.code-analysis/design` and relevant project files.
 - If editing existing design, identify the current active/latest version and read its key files.
-- If creating a new version, read the reference prompts above first, then gather scope, style direction, and technology expectations from the user.
+- If creating a new version, read the reference prompts above first.
+
+**Important**: If you need to ask clarifying questions (technology choice, scope, style direction), **always use `message_user`** — do not just return text. This ensures the conversation pauses and waits for the user's answer before proceeding.
+
+Example technology question:
+```json
+{
+  "message": "Which technology would you prefer for this design?",
+  "user_options": ["Static HTML (Alpine.js + Tailwind)", "React + Vite (full component system)"],
+  "selectionType": "single"
+}
+```
 
 ### 2. Execute by Intent
 

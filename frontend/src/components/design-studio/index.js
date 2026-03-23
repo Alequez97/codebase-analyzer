@@ -1,5 +1,5 @@
 export { DesignBrainstormChat } from "./DesignBrainstormChat";
-export { DesignEditChat } from "./DesignEditChat";
+export { DesignAssistantChat } from "./DesignAssistantChat";
 export { DesignEmptyState } from "./DesignEmptyState";
 export { DesignPreviewPane } from "./DesignPreviewPane";
 export { DesignTaskConsole } from "./DesignTaskConsole";

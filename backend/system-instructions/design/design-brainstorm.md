@@ -39,6 +39,17 @@ Have a conversational UX discovery session with the user. **Use the `message_use
 - If there are existing designs, proactively offer to review them as natural user features ("version 1").
 - If the user references an existing version, use `read_file` to review its code/HTML and brief to understand what was done. Ask the user what they liked and disliked about that specific previous version.
 - Understand the product (README, package.json, key files), existing design language, and technical constraints.
+- **Ask about technology preference**: If creating a new version or starting fresh, use `message_user` to ask which technology they prefer:
+
+```json
+{
+  "message": "Which technology stack would you like for this design?",
+  "user_options": ["Static HTML (simple, fast, CDN-ready)", "React + Vite (component-based, interactive)"],
+  "selectionType": "single"
+}
+```
+
+Record their choice in the brief under **Technology Stack**.
 
 ### 2. **Interactive UX & Design Discovery** (Use `message_user` extensively!)
 

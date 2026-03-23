@@ -68,7 +68,7 @@ function buildSessionTitle(task) {
   return baseTitle.length > 90 ? `${baseTitle.slice(0, 90)}...` : baseTitle;
 }
 
-export const useDesignEditStore = create(
+export const useDesignAssistantStore = create(
   (set, get) => ({
       // State
       prompt: "",
@@ -273,21 +273,24 @@ export const useDesignEditStore = create(
           return { success: false, error: "Prompt is required" };
         }
 
-        const previousMessages = get().editMessages;
-        const history = getHistoryMessages(previousMessages);
+        // Start fresh - clear any previous conversation state
         const userMessage = createLocalMessage("user", prompt);
 
         set({
           editError: null,
           editResponse: "",
-          editMessages: [...previousMessages, userMessage],
+          editMessages: [userMessage],
+          editComplete: false,
+          editTaskId: null,
+          pendingQuestion: null,
+          isWaitingForUser: false,
           loadingEdit: true,
         });
 
         try {
           const response = await editDesign({
             prompt,
-            history,
+            history: [], // Start fresh - no prior history for new session
             model: selectedModel,
           });
           const taskId = response?.data?.task?.id ?? null;
@@ -307,7 +310,6 @@ export const useDesignEditStore = create(
           set({
             editError,
             loadingEdit: false,
-            editMessages: previousMessages,
           });
           return { success: false, error: editError };
         }

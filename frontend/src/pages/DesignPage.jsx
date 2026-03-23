@@ -9,7 +9,7 @@ import {
 import { TASK_TYPES } from "../constants/task-types";
 import { useDesignStudioStore } from "../store/useDesignStudioStore";
 import { useDesignBrainstormStore } from "../store/useDesignBrainstormStore";
-import { useDesignEditStore } from "../store/useDesignEditStore";
+import { useDesignAssistantStore } from "../store/useDesignAssistantStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useConfigStore } from "../store/useConfigStore";
 
@@ -66,7 +66,7 @@ export default function DesignPage() {
     openEditSession,
     editError,
     clearEdit,
-  } = useDesignEditStore();
+  } = useDesignAssistantStore();
 
   // Main design studio store
   const {
@@ -399,9 +399,7 @@ export default function DesignPage() {
             onSelectUrl={setSelectedUrl}
             prompt={prompt}
             selectedModel={selectedModel}
-            selectedTechnology={selectedTechnology}
             onModelChange={setSelectedModel}
-            onTechnologyChange={setSelectedTechnology}
             defaultModelLabel={generationModelLabel}
             onPromptChange={setPrompt}
             generationBrief={generationBrief}
