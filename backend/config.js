@@ -236,6 +236,13 @@ const config = {
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
+    [TASK_TYPES.DESIGN_REVERSE_ENGINEER]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.KIMI_K2_5,
+      maxTokens: 64000,
+      maxIterations: 200,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
   },
 
   // Default agent config

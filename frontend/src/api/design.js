@@ -40,6 +40,17 @@ export const generateDesign = ({
     agentsOverrides: model ? { model } : null,
   });
 
+export const reverseEngineerDesign = ({
+  pages,
+  designId = null,
+  model = null,
+}) =>
+  client.post("/design/reverse-engineer", {
+    pages,
+    designId,
+    agentsOverrides: model ? { model } : null,
+  });
+
 // Ngrok publish/unpublish
 export const publishDesign = (designId) =>
   client.post(`/design/publish/${designId}`);
@@ -49,4 +60,3 @@ export const unpublishDesign = (designId) =>
 
 export const getPublishStatus = (designId) =>
   client.get(`/design/publish/${designId}`);
-

@@ -4,6 +4,7 @@ import { toaster } from "../components/ui/toaster";
 import {
   DesignEmptyState,
   DesignPreviewPane,
+  DesignReverseEngineerSetup,
   DesignWorkspaceSidebar,
 } from "../components/design-studio";
 import { TASK_TYPES } from "../constants/task-types";
@@ -12,10 +13,12 @@ import { useDesignBrainstormStore } from "../store/useDesignBrainstormStore";
 import { useDesignAssistantStore } from "../store/useDesignAssistantStore";
 import { useTaskProgressStore } from "../store/useTaskProgressStore";
 import { useConfigStore } from "../store/useConfigStore";
+import { useProjectFilesStore } from "../store/useProjectFilesStore";
 
 const DESIGN_TASK_TYPES = new Set([
   TASK_TYPES.DESIGN_BRAINSTORM,
   TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
+  TASK_TYPES.DESIGN_REVERSE_ENGINEER,
 ]);
 
 function getFirstPreviewUrl(manifest) {
@@ -34,8 +37,10 @@ export default function DesignPage() {
   const [selectedUrl, setSelectedUrl] = useState(null);
   const [viewport, setViewport] = useState("desktop");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [forceFromScratch, setForceFromScratch] = useState(false);
 
   const { getTaskDefaultModel } = useConfigStore();
+  const { files: projectFiles, fetchProjectFiles } = useProjectFilesStore();
 
   // Design brainstorm store (separate from main studio store)
   const {
@@ -100,6 +105,7 @@ export default function DesignPage() {
     fetchManifest,
     loadLatestGeneration,
     startGeneration,
+    startReverseEngineer,
     recordTaskEvent,
     clearAll,
     publishedUrl,
@@ -137,6 +143,9 @@ export default function DesignPage() {
 
   const hasDesignFiles = manifest.versions.length > 0;
 
+  // Existing project: project has source files on disk
+  const isExistingProject = projectFiles.length > 0 && !forceFromScratch;
+
   const hasActiveDesignGeneration = allTaskEntries.some(
     (entry) =>
       DESIGN_TASK_TYPES.has(entry.type) &&
@@ -166,6 +175,7 @@ export default function DesignPage() {
       loadLatestBrainstorm(),
       loadLatestEdit(),
       fetchEditSessions(),
+      fetchProjectFiles(),
     ]).then(([manifestResult]) => {
       if (!mounted) {
         return;
@@ -186,6 +196,7 @@ export default function DesignPage() {
     loadLatestBrainstorm,
     loadLatestEdit,
     fetchEditSessions,
+    fetchProjectFiles,
   ]);
 
   useEffect(() => {
@@ -234,6 +245,28 @@ export default function DesignPage() {
     currentTask?.status,
     recordTaskEvent,
   ]);
+
+  const handleReverseEngineer = async (pages) => {
+    setIsSubmitting(true);
+    const result = await startReverseEngineer({ pages });
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      toaster.create({
+        title: "Failed to start reverse engineering",
+        description: result.error,
+        type: "error",
+      });
+      return;
+    }
+
+    toaster.create({
+      title: "Reverse engineering queued",
+      description:
+        "The AI is scanning your source files and generating a standalone prototype.",
+      type: "success",
+    });
+  };
 
   const handleBrainstorm = async (promptOverride) => {
     setIsSubmitting(true);
@@ -338,6 +371,21 @@ export default function DesignPage() {
   }
 
   if (!shouldShowWorkspace) {
+    if (isExistingProject) {
+      return (
+        <DesignReverseEngineerSetup
+          isSubmitting={isSubmitting}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          defaultModelLabel={getTaskDefaultModel(
+            TASK_TYPES.DESIGN_REVERSE_ENGINEER,
+          )}
+          onReverseEngineer={handleReverseEngineer}
+          onDesignFromScratch={() => setForceFromScratch(true)}
+        />
+      );
+    }
+
     return (
       <DesignEmptyState
         prompt={prompt}

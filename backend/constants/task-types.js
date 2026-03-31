@@ -34,5 +34,5 @@ export const TASK_TYPES = {
     "design-plan-and-style-system-generate",
   DESIGN_GENERATE_PAGE: "design-generate-page",
   DESIGN_ASSISTANT: "design-assistant",
+  DESIGN_REVERSE_ENGINEER: "design-reverse-engineer",
 };
-

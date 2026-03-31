@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   generateDesign,
+  reverseEngineerDesign,
   getDesignManifest,
   getLatestGenerationTask,
   respondToTask,
@@ -456,6 +457,46 @@ export const useDesignStudioStore = create((set, get) => ({
     } catch (error) {
       const errorMessage =
         error?.response?.data?.error || "Failed to start design generation";
+      set({ taskError: errorMessage, loadingTaskMessages: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  startReverseEngineer: async ({ pages = [], designId = null } = {}) => {
+    if (!pages.length) {
+      return { success: false, error: "At least one page is required" };
+    }
+
+    const model = get().selectedModel;
+
+    set({
+      taskError: null,
+      taskEvents: [],
+      generationMessages: [],
+      loadingTaskMessages: true,
+    });
+
+    try {
+      const response = await reverseEngineerDesign({ pages, designId, model });
+      const taskId = response?.data?.task?.id ?? null;
+
+      set({
+        currentTaskId: taskId,
+        currentTaskAgent: response?.data?.task?.agent ?? null,
+        currentTaskModel: response?.data?.task?.model ?? null,
+      });
+
+      get().recordTaskEvent({
+        taskId,
+        stage: "queued",
+        message: "Reverse engineering queued. Scanning your source files…",
+        status: "pending",
+      });
+
+      return { success: true, taskId };
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.error || "Failed to start reverse engineering";
       set({ taskError: errorMessage, loadingTaskMessages: false });
       return { success: false, error: errorMessage };
     }

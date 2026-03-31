@@ -6,6 +6,7 @@ import {
   queueDesignBrainstormTask,
   queueDesignPlanAndStyleSystemGenerateTask,
   queueDesignAssistantTask,
+  queueDesignReverseEngineerTask,
 } from "../tasks/queue/index.js";
 import { getTasks } from "../orchestrators/task.js";
 import { loadChatHistory } from "../utils/chat-history.js";
@@ -18,6 +19,7 @@ const router = express.Router();
 const GENERATION_TASK_TYPES = [
   TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
   TASK_TYPES.DESIGN_GENERATE_PAGE,
+  TASK_TYPES.DESIGN_REVERSE_ENGINEER,
 ];
 
 async function getLatestTaskByTypes(types) {
@@ -70,9 +72,7 @@ router.get("/latest-brainstorm-task", async (_req, res) => {
 
 router.get("/latest-edit-task", async (_req, res) => {
   try {
-    return res.json(
-      await getLatestTaskByTypes([TASK_TYPES.DESIGN_ASSISTANT]),
-    );
+    return res.json(await getLatestTaskByTypes([TASK_TYPES.DESIGN_ASSISTANT]));
   } catch (error) {
     logger.error("Failed to get latest design assistant task", {
       component: "DesignRoutes",
@@ -260,6 +260,83 @@ router.post("/generate", async (req, res) => {
 
 // ==================== Ngrok Publish/Unpublish ====================
 
+router.post("/reverse-engineer", async (req, res) => {
+  try {
+    const { pages, designId = null, agentsOverrides = null } = req.body ?? {};
+    const model = agentsOverrides?.model || null;
+
+    if (!Array.isArray(pages) || pages.length === 0) {
+      return res.status(400).json({
+        error: "Invalid request",
+        message: "pages array is required and must not be empty",
+      });
+    }
+
+    for (const page of pages) {
+      if (!page.name || typeof page.name !== "string") {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "Each page must have a name string",
+        });
+      }
+      if (!page.route || typeof page.route !== "string") {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "Each page must have a route string",
+        });
+      }
+      if (!Array.isArray(page.sourcePaths) || page.sourcePaths.length === 0) {
+        return res.status(400).json({
+          error: "Invalid request",
+          message: "Each page must have a non-empty sourcePaths array",
+        });
+      }
+    }
+
+    const task = await queueDesignReverseEngineerTask({
+      pages,
+      designId,
+      model,
+    });
+
+    if (task?.success === false) {
+      return res.status(500).json({
+        error: task.error || "Failed to queue reverse-engineer task",
+        code: task.code,
+      });
+    }
+
+    logger.info("Design reverse-engineer task queued", {
+      component: "DesignRoutes",
+      taskId: task.id,
+      designId: task.params.designId,
+      pageCount: pages.length,
+    });
+
+    return res.json({
+      task: {
+        id: task.id,
+        type: task.type,
+        designId: task.params.designId,
+        agent: task.agentConfig?.agent ?? null,
+        model: task.agentConfig?.model ?? null,
+      },
+    });
+  } catch (error) {
+    logger.error("Failed to queue reverse-engineer task", {
+      component: "DesignRoutes",
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      error: "Failed to start reverse engineering",
+      message: error.message,
+    });
+  }
+});
+
+// ==================== Ngrok Publish/Unpublish ====================
+
 router.post("/publish/:designId", async (req, res) => {
   try {
     const { designId } = req.params;
@@ -384,4 +461,3 @@ router.get("/publish/:designId", async (req, res) => {
 });
 
 export default router;
-

@@ -43,5 +43,5 @@ export {
   queueDesignPlanAndStyleSystemGenerateTask,
   queueDesignGeneratePageTask,
   queueDesignAssistantTask,
+  queueDesignReverseEngineerTask,
 } from "./design/index.js";
-

@@ -28,6 +28,7 @@ import {
   designPlanAndStyleSystemGenerateHandler,
   designGeneratePageHandler,
   designAssistantHandler,
+  designReverseEngineerHandler,
 } from "./design/index.js";
 import { editCodebaseAnalysisHandler } from "./editing/codebase-analysis.js";
 import { editDocumentationHandler } from "./editing/documentation.js";
@@ -35,6 +36,7 @@ import { createEditSectionHandler } from "./editing/section.js";
 import { implementFixHandler } from "./implementation/fix.js";
 import { implementTestHandler } from "./implementation/test.js";
 import { reviewChangesHandler } from "./review/changes.js";
+import { queueDesignReverseEngineerTask } from "../queue/design/reverse-engineer.js";
 import { queueDesignGeneratePageTask } from "../queue/design/generate-page.js";
 import { queueDesignAssistantTask } from "../queue/design/design-assistant.js";
 import { queueDesignPlanAndStyleSystemGenerateTask } from "../queue/design/plan-and-style-system-generate.js";
@@ -71,6 +73,7 @@ const DESIGN_QUEUE_FUNCTIONS = {
   [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
     queueDesignPlanAndStyleSystemGenerateTask,
   [TASK_TYPES.DESIGN_GENERATE_PAGE]: queueDesignGeneratePageTask,
+  [TASK_TYPES.DESIGN_REVERSE_ENGINEER]: queueDesignReverseEngineerTask,
 };
 
 const MESSAGE_TOOL_TASK_TYPES = new Set([
@@ -154,6 +157,7 @@ function enableCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
     TASK_TYPES.DESIGN_GENERATE_PAGE,
     TASK_TYPES.DESIGN_ASSISTANT,
+    TASK_TYPES.DESIGN_REVERSE_ENGINEER,
     TASK_TYPES.EDIT_DOCUMENTATION,
     TASK_TYPES.EDIT_DIAGRAMS,
     TASK_TYPES.EDIT_REQUIREMENTS,
@@ -169,6 +173,7 @@ function enableCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
     TASK_TYPES.DESIGN_GENERATE_PAGE,
     TASK_TYPES.DESIGN_ASSISTANT,
+    TASK_TYPES.DESIGN_REVERSE_ENGINEER,
     // Implementation tasks
     TASK_TYPES.IMPLEMENT_FIX,
     TASK_TYPES.IMPLEMENT_TEST,
@@ -311,6 +316,12 @@ export async function createTaskHandler(task, taskLogger, agent) {
       taskLogger.info("Design assistant delegation tools enabled");
     }
     overrides = designAssistantHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.DESIGN_REVERSE_ENGINEER) {
+    if (agent) {
+      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      taskLogger.info("Design reverse-engineer delegation tools enabled");
+    }
+    overrides = designReverseEngineerHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.REVIEW_CHANGES) {
     overrides = reviewChangesHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.EDIT_CODEBASE_ANALYSIS) {

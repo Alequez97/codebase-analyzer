@@ -71,10 +71,7 @@ export function getAllowedReadPaths(task) {
           `${DEFAULT_WRITE_DIRECTORY}/temp/`,
         ];
       }
-      return [
-        `${getDesignFolderPath()}/`,
-        `${DEFAULT_WRITE_DIRECTORY}/temp/`,
-      ];
+      return [`${getDesignFolderPath()}/`, `${DEFAULT_WRITE_DIRECTORY}/temp/`];
 
     default:
       return null; // No restrictions - use default behavior
@@ -91,6 +88,7 @@ export function hasUnrestrictedReadAccess(taskType) {
     TASK_TYPES.CUSTOM_CODEBASE_TASK,
     TASK_TYPES.DESIGN_BRAINSTORM,
     TASK_TYPES.REVIEW_CHANGES,
+    TASK_TYPES.DESIGN_REVERSE_ENGINEER, // Needs full project read to scan source pages
     // Note: DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE and DESIGN_GENERATE_PAGE
     // are NOT here - they have restricted read paths via getAllowedReadPaths()
   ];
@@ -124,6 +122,7 @@ export function getAllowedWritePaths(task) {
     case TASK_TYPES.DESIGN_GENERATE_PAGE:
     case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     case TASK_TYPES.DESIGN_ASSISTANT:
+    case TASK_TYPES.DESIGN_REVERSE_ENGINEER:
       // Design tasks need to write to:
       // 1. Their specific design folder
       // 2. Temp folder for progress files and delegation requests
@@ -133,10 +132,7 @@ export function getAllowedWritePaths(task) {
           `${DEFAULT_WRITE_DIRECTORY}/temp/`,
         ];
       }
-      return [
-        `${getDesignFolderPath()}/`,
-        `${DEFAULT_WRITE_DIRECTORY}/temp/`,
-      ];
+      return [`${getDesignFolderPath()}/`, `${DEFAULT_WRITE_DIRECTORY}/temp/`];
 
     default:
       return null; // Use default behavior

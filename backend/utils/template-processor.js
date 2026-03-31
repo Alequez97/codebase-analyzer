@@ -281,16 +281,14 @@ export function buildCodebaseTemplateVariables(task) {
 function buildDesignTemplateVariables(task) {
   const designId = task.params?.designId || "";
   const pageId = task.params?.pageId || "";
-  const technology =
-    task.params?.technology || DESIGN_TECHNOLOGIES.STATIC_HTML;
+  const technology = task.params?.technology || DESIGN_TECHNOLOGIES.STATIC_HTML;
 
   return {
     CODEBASE_PATH: task.params?.targetDirectory || "",
     PROMPT: task.params?.prompt || "",
     BRIEF: task.params?.brief || "",
     TECHNOLOGY: technology,
-    IS_REACT_VITE:
-      technology === DESIGN_TECHNOLOGIES.REACT_VITE ? "true" : "",
+    IS_REACT_VITE: technology === DESIGN_TECHNOLOGIES.REACT_VITE ? "true" : "",
     IS_STATIC_HTML:
       technology === DESIGN_TECHNOLOGIES.STATIC_HTML ? "true" : "",
     DESIGN_ID: designId,
@@ -470,6 +468,37 @@ export async function buildEditTemplateVariables(task) {
   };
 }
 
+function buildDesignReverseEngineerTemplateVariables(task) {
+  const designId = task.params?.designId || "";
+  const pages = task.params?.pages || [];
+
+  const pagesJson = JSON.stringify(
+    pages.map((p) => ({
+      name: p.name,
+      route: p.route,
+      sourcePaths: p.sourcePaths || [],
+    })),
+    null,
+    2,
+  );
+
+  return {
+    CODEBASE_PATH: task.params?.targetDirectory || "",
+    DESIGN_ID: designId,
+    DESIGN_PATH: task.params?.designPath || "",
+    BRIEF_PATH: task.params?.briefPath || "",
+    APP_MANIFEST_PATH:
+      task.params?.appManifestPath ||
+      getDesignAppManifestRelativePath(designId),
+    DESIGN_SYSTEM_PATH:
+      task.params?.designSystemPath ||
+      getDesignSystemManifestRelativePath(designId),
+    TOKENS_PATH: task.params?.tokensPath || "",
+    PAGES_JSON: pagesJson,
+    PROGRESS_FILE: getProgressFileRelativePath(task.id),
+  };
+}
+
 /**
  * Build template variables based on task type
  * @param {Object} task - Task object
@@ -509,6 +538,8 @@ export async function buildTemplateVariables(task) {
     case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     case TASK_TYPES.DESIGN_GENERATE_PAGE:
       return buildDesignTemplateVariables(task);
+    case TASK_TYPES.DESIGN_REVERSE_ENGINEER:
+      return buildDesignReverseEngineerTemplateVariables(task);
     case TASK_TYPES.REVIEW_CHANGES:
       return {
         CODEBASE_PATH: task.params?.targetDirectory || "",

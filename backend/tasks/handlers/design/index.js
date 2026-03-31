@@ -7,4 +7,4 @@ export { designBrainstormHandler } from "./brainstorm.js";
 export { designPlanAndStyleSystemGenerateHandler } from "./plan-and-style-system-generate.js";
 export { designGeneratePageHandler } from "./generate-page.js";
 export { designAssistantHandler } from "./design-assistant.js";
-
+export { designReverseEngineerHandler } from "./reverse-engineer.js";

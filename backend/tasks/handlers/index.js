@@ -40,5 +40,5 @@ export {
   designPlanAndStyleSystemGenerateHandler,
   designGeneratePageHandler,
   designAssistantHandler,
+  designReverseEngineerHandler,
 } from "./design/index.js";
-
