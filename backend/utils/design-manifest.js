@@ -55,7 +55,11 @@ function resolvePreviewEntry(base, designId) {
   const appManifest = readJsonIfExists(manifestPath);
 
   if (appManifest?.preview?.entryHtml) {
-    const previewPath = path.join(base, designId, appManifest.preview.entryHtml);
+    const previewPath = path.join(
+      base,
+      designId,
+      appManifest.preview.entryHtml,
+    );
     if (fs.existsSync(previewPath)) {
       return {
         indexPath: previewPath,
@@ -108,6 +112,54 @@ export function loadDesignManifest() {
     const previewEntry = resolvePreviewEntry(base, entry.name);
 
     if (previewEntry) {
+      const rawPages = previewEntry.appManifest?.pages ?? [];
+      const isReactBuild =
+        previewEntry.appManifest?.prototypeType === "react-static-build" ||
+        previewEntry.appManifest?.preview?.type === "static-dist";
+
+      const pages = rawPages
+        .map((page) => {
+          const pageId = slugifyDesignPageId(page.id || page.name);
+
+          if (isReactBuild) {
+            // React Vite: SPA with hash-based routing.
+            // Each page gets a unique URL via the hash fragment so the iframe
+            // navigates to the correct route on click.
+            const sourcePath = page.sourcePath
+              ? path.join(base, entry.name, page.sourcePath)
+              : null;
+            const exists = sourcePath ? fs.existsSync(sourcePath) : true;
+            const route = page.route || "/";
+            const hash = route.startsWith("/") ? route : `/${route}`;
+            return {
+              id: pageId,
+              name: page.name || formatLabel(pageId),
+              route,
+              url: `${previewEntry.url}#${hash}`,
+              isRoute: false,
+              exists,
+            };
+          }
+
+          // Static HTML: each page has its own index.html
+          const pagePath = path.join(
+            base,
+            entry.name,
+            "pages",
+            pageId,
+            "index.html",
+          );
+          return {
+            id: pageId,
+            name: page.name || formatLabel(pageId),
+            route: page.route || "",
+            url: `/design-preview/${entry.name}/pages/${pageId}/index.html`,
+            isRoute: false,
+            exists: fs.existsSync(pagePath),
+          };
+        })
+        .filter((page) => page.exists);
+
       versions.push({
         id: entry.name,
         label: formatVersionLabel(entry.name),
@@ -115,6 +167,7 @@ export function loadDesignManifest() {
         designId: entry.name,
         designLabel: formatVersionLabel(entry.name),
         pageId: null,
+        pages,
         prototypeType: previewEntry.appManifest?.prototypeType ?? "static-html",
         previewType: previewEntry.appManifest?.preview?.type ?? "static-html",
         previewEntryHtml: previewEntry.appManifest?.preview?.entryHtml ?? null,

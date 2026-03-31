@@ -196,7 +196,11 @@ export default function DesignPage() {
 
     if (
       selectedUrl &&
-      manifest.versions.some((item) => item.url === selectedUrl)
+      manifest.versions.some(
+        (item) =>
+          item.url === selectedUrl ||
+          item.pages?.some((page) => page.url === selectedUrl),
+      )
     ) {
       return;
     }
@@ -204,10 +208,13 @@ export default function DesignPage() {
     setSelectedUrl(manifest.latestVersionUrl ?? getFirstPreviewUrl(manifest));
   }, [manifest, selectedUrl]);
 
-  const currentVersionLabel = useMemo(
-    () => manifest.versions.find((item) => item.url === selectedUrl)?.label,
-    [manifest, selectedUrl],
-  );
+  const currentVersionLabel = useMemo(() => {
+    const direct = manifest.versions.find((item) => item.url === selectedUrl);
+    if (direct) return direct.label;
+    return manifest.versions.find((item) =>
+      item.pages?.some((page) => page.url === selectedUrl),
+    )?.label;
+  }, [manifest, selectedUrl]);
 
   useEffect(() => {
     if (!currentTaskId || !currentTask?.message) {

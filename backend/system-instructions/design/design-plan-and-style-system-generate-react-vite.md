@@ -95,7 +95,7 @@ Each page entry must include:
 - `src/main.jsx` mounts the React app
 - `src/app/App.jsx` owns the shared shell and top-level routing/composition
 - Use `react-router-dom`, not a custom route switcher
-- Use `createMemoryRouter` plus `RouterProvider` for preview/runtime routing
+- Use `createHashRouter` plus `RouterProvider` for routing — this enables direct page navigation from the preview sidebar via hash URLs (e.g. `dist/index.html#/dashboard`)
 - Structure routes so switching to `createBrowserRouter` later is straightforward
 - Use Zustand for business logic, shared working state, and mutable UI data that affects app behavior
 - Keep pure visual state local with `useState` only when it is truly component-internal
@@ -136,7 +136,7 @@ The orchestrator MUST create `src/app/App.jsx` with:
 
 2. **Complete route configuration** using imported page components:
    ```jsx
-   const router = createMemoryRouter([
+   const router = createHashRouter([
      {
        path: "/",
        element: <AppShell />,

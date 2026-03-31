@@ -6,7 +6,16 @@
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Layers, MessageSquare, Sparkles, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Layers,
+  MessageSquare,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 import { DesignAssistantChat } from "./DesignAssistantChat";
 
 export function DesignWorkspaceSidebar({
@@ -33,6 +42,27 @@ export function DesignWorkspaceSidebar({
   isEditing,
   editTaskError,
 }) {
+  const [expandedVersionIds, setExpandedVersionIds] = useState(() => {
+    // Auto-expand the version whose page (or entry url) is currently selected
+    return new Set();
+  });
+
+  function toggleVersion(versionId) {
+    setExpandedVersionIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(versionId)) {
+        next.delete(versionId);
+      } else {
+        next.add(versionId);
+      }
+      return next;
+    });
+  }
+
+  function isVersionSelected(version) {
+    if (selectedUrl === version.url) return true;
+    return version.pages?.some((page) => page.url === selectedUrl) ?? false;
+  }
   return (
     <Box
       w={{ base: "100%", lg: "480px" }}
@@ -161,32 +191,146 @@ export function DesignWorkspaceSidebar({
             ) : (
               <VStack align="stretch" gap={1}>
                 {versions.map((item) => {
-                  const selected = selectedUrl === item.url;
+                  const hasPages = item.pages?.length > 0;
+                  const isExpanded = expandedVersionIds.has(item.id);
+                  const versionActive = isVersionSelected(item);
+
                   return (
-                    <Box
-                      key={item.id}
-                      px={3}
-                      py={3}
-                      borderRadius="18px"
-                      cursor="pointer"
-                      bg={selected ? "orange.50" : "transparent"}
-                      borderWidth="1px"
-                      borderColor={selected ? "orange.200" : "transparent"}
-                      onClick={() => onSelectUrl(item.url)}
-                      _hover={{ bg: selected ? "orange.50" : "white" }}
-                    >
-                      <HStack justify="space-between">
+                    <Box key={item.id}>
+                      {/* Version row */}
+                      <HStack
+                        px={3}
+                        py={2.5}
+                        borderRadius="18px"
+                        cursor="pointer"
+                        bg={
+                          versionActive && !hasPages
+                            ? "orange.50"
+                            : "transparent"
+                        }
+                        borderWidth="1px"
+                        borderColor={
+                          versionActive && !hasPages
+                            ? "orange.200"
+                            : "transparent"
+                        }
+                        onClick={() => {
+                          if (hasPages) {
+                            toggleVersion(item.id);
+                          } else {
+                            onSelectUrl(item.url);
+                          }
+                        }}
+                        _hover={{
+                          bg:
+                            versionActive && !hasPages ? "orange.50" : "white",
+                        }}
+                        justify="space-between"
+                      >
                         <HStack gap={2}>
-                          <Layers size={16} />
+                          <Layers
+                            size={16}
+                            color={
+                              versionActive
+                                ? "var(--chakra-colors-orange-600)"
+                                : undefined
+                            }
+                          />
                           <Text
                             fontSize="sm"
-                            fontWeight={selected ? "700" : "600"}
-                            color={selected ? "orange.800" : "gray.700"}
+                            fontWeight={versionActive ? "700" : "600"}
+                            color={versionActive ? "orange.800" : "gray.700"}
                           >
                             {item.label}
                           </Text>
+                          {hasPages && (
+                            <Text
+                              fontSize="xs"
+                              color="gray.400"
+                              fontWeight="500"
+                            >
+                              {item.pages.length}{" "}
+                              {item.pages.length === 1 ? "page" : "pages"}
+                            </Text>
+                          )}
                         </HStack>
+                        {hasPages &&
+                          (isExpanded ? (
+                            <ChevronDown
+                              size={14}
+                              color="var(--chakra-colors-gray-400)"
+                            />
+                          ) : (
+                            <ChevronRight
+                              size={14}
+                              color="var(--chakra-colors-gray-400)"
+                            />
+                          ))}
                       </HStack>
+
+                      {/* Pages sub-list */}
+                      {hasPages && isExpanded && (
+                        <VStack
+                          align="stretch"
+                          gap={0.5}
+                          pl={4}
+                          pt={0.5}
+                          pb={1}
+                        >
+                          {item.pages.map((page) => {
+                            const pageSelected = selectedUrl === page.url;
+                            return (
+                              <HStack
+                                key={page.id}
+                                px={3}
+                                py={2}
+                                borderRadius="14px"
+                                cursor="pointer"
+                                bg={pageSelected ? "orange.50" : "transparent"}
+                                borderWidth="1px"
+                                borderColor={
+                                  pageSelected ? "orange.200" : "transparent"
+                                }
+                                onClick={() => onSelectUrl(page.url)}
+                                _hover={{
+                                  bg: pageSelected ? "orange.50" : "gray.50",
+                                }}
+                                gap={2}
+                              >
+                                <FileText
+                                  size={13}
+                                  color={
+                                    pageSelected
+                                      ? "var(--chakra-colors-orange-600)"
+                                      : "var(--chakra-colors-gray-400)"
+                                  }
+                                />
+                                <VStack align="start" gap={0} flex={1}>
+                                  <Text
+                                    fontSize="sm"
+                                    fontWeight={pageSelected ? "700" : "500"}
+                                    color={
+                                      pageSelected ? "orange.800" : "gray.600"
+                                    }
+                                    lineHeight="1.3"
+                                  >
+                                    {page.name}
+                                  </Text>
+                                  {page.route && (
+                                    <Text
+                                      fontSize="10px"
+                                      color="gray.400"
+                                      fontFamily="mono"
+                                    >
+                                      {page.route}
+                                    </Text>
+                                  )}
+                                </VStack>
+                              </HStack>
+                            );
+                          })}
+                        </VStack>
+                      )}
                     </Box>
                   );
                 })}
