@@ -295,6 +295,13 @@ Use the `delegate_task` tool to spawn page-generation agents. Each subagent rece
 - `outputPath`: Where to write the page component (e.g., `src/pages/LandingPage/`)
 - `dependencies`: List of shared components/stores this page can import from (if any exist)
 
+**Critical reminders for page subagents (include in delegation prompt if needed):**
+
+- **Images**: Use `https://picsum.photos` for all decorative images (thumbnails, avatars, hero images) with appropriate dimensions and seeds for variety. Never use local file paths or API endpoints.
+- **Mock data**: Create realistic mock data (minimum 5-8 items for lists/tables, 3-4 for grids) with complete field structures. Use Zustand stores for complex data or module constants for simple data.
+- **No API calls**: All data must be inline mock — no fetch, axios, or environment variables.
+- **Design tokens mandatory**: All colors must use `var(--token)` from tokens.css — no hardcoded hex values for backgrounds or text.
+
 ### Subagent Scope (Feature-Based)
 
 Each page-generation subagent works within ONE feature folder:

@@ -127,6 +127,96 @@ Critical path requirements:
 - Tokens file path: `../../tokens.css` (two levels up from pages/{{PAGE_ID}}/)
 - Local files: `./styles.css` and `./app.js` (same directory as index.html)
 
+## Images and media
+
+The prototype must be standalone and work when opened as static HTML files. Handle images properly:
+
+**For decorative images, photos, thumbnails:**
+
+Use placeholder images from `https://picsum.photos`:
+
+```html
+<!-- Product/content thumbnails -->
+<img
+  src="https://picsum.photos/400/300"
+  alt="Product image"
+  class="rounded-lg"
+/>
+
+<!-- User avatars -->
+<img src="https://picsum.photos/48/48" alt="User avatar" class="rounded-full" />
+
+<!-- Hero/banner images -->
+<img src="https://picsum.photos/1200/400" alt="Hero banner" />
+
+<!-- Use seeds for variety across multiple images -->
+<img src="https://picsum.photos/seed/photo1/300/200" alt="Gallery photo 1" />
+<img src="https://picsum.photos/seed/photo2/300/200" alt="Gallery photo 2" />
+<img src="https://picsum.photos/seed/photo3/300/200" alt="Gallery photo 3" />
+```
+
+**For icons:**
+
+Use inline SVG icons:
+
+```html
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    d="M5 13l4 4L19 7"
+  ></path>
+</svg>
+```
+
+**NEVER use:**
+
+- ❌ Local image paths (`./images/photo.jpg`)
+- ❌ API endpoints (`/api/uploads/...`)
+- ❌ External CDN URLs that may not resolve
+
+## Mock data for dynamic content
+
+Pages with dynamic content (tables, lists, cards) need realistic mock data:
+
+**For data-driven sections, use Alpine.js with inline data:**
+
+```html
+<div
+  x-data="{
+  products: [
+    { id: 1, name: 'Wireless Headphones', price: 79.99, stock: 45, image: 'https://picsum.photos/seed/prod1/150/150' },
+    { id: 2, name: 'Smart Watch', price: 199.99, stock: 23, image: 'https://picsum.photos/seed/prod2/150/150' },
+    { id: 3, name: 'Laptop Stand', price: 49.99, stock: 67, image: 'https://picsum.photos/seed/prod3/150/150' },
+    { id: 4, name: 'USB-C Hub', price: 39.99, stock: 89, image: 'https://picsum.photos/seed/prod4/150/150' },
+    { id: 5, name: 'Desk Lamp', price: 34.99, stock: 34, image: 'https://picsum.photos/seed/prod5/150/150' },
+    { id: 6, name: 'Keyboard', price: 129.99, stock: 12, image: 'https://picsum.photos/seed/prod6/150/150' }
+  ]
+}"
+>
+  <template x-for="product in products" :key="product.id">
+    <div class="border rounded-lg p-4">
+      <img
+        :src="product.image"
+        :alt="product.name"
+        class="w-full h-32 object-cover rounded"
+      />
+      <h3 x-text="product.name" class="font-semibold mt-2"></h3>
+      <p x-text="'$' + product.price" class="text-gray-600"></p>
+      <p x-text="product.stock + ' in stock'" class="text-sm text-gray-500"></p>
+    </div>
+  </template>
+</div>
+```
+
+**Mock data quality requirements:**
+
+- ✅ **Realistic volume**: Minimum 5-8 items for lists/tables, 3-4 for card grids
+- ✅ **Complete structure**: Every field the UI displays must exist in the data
+- ✅ **Variety**: Different values, statuses, categories for realistic feel
+- ❌ **Never leave empty**: No TODO comments or incomplete data
+
 ## CSS generation strategy
 
 1. Use Tailwind utility classes for all standard styling (90% of the page)
@@ -169,6 +259,21 @@ Critical path requirements:
    - Any JavaScript that stores page URLs (use paths from navigation map)
 6. Make interactions feel intentional and realistic.
 7. If a CTA would require a backend, it may remain inert, but it must be visually clear and not pretend to complete real data work.
+
+## Quality checklist
+
+Before finishing, verify:
+
+- [ ] **Images working**: All images use `https://picsum.photos` with seeds for variety — no broken image icons
+- [ ] **Mock data complete**: Lists/tables have 5-8 complete items with all required fields
+- [ ] **Navigation paths**: All internal links use exact paths from `navigationMap` with trailing slashes
+- [ ] **No inline styles**: HTML uses Tailwind classes, complex CSS in `styles.css`
+- [ ] **Alpine.js used**: Standard interactions (modals, tabs, dropdowns) use Alpine, not custom JS
+- [ ] **Design tokens**: Custom CSS uses variables from `tokens.css`
+- [ ] **Responsive**: Page works at 375px (mobile) and 1440px (desktop) widths
+- [ ] **Touch targets**: All buttons/links are large enough for mobile tapping (44px min)
+- [ ] **No backend calls**: No fetch/API calls, all content is inline
+- [ ] **Files split correctly**: HTML, CSS, JS in separate files as specified
 
 ## Navigation rule
 

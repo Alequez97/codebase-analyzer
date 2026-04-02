@@ -162,17 +162,18 @@ If you skip reading a source file, you will invent details instead of reproducin
 
 After reading the source files, write a mental inventory (you do not need to output this explicitly):
 
-| Item type                | Exact value(s) from source |
-| ------------------------ | -------------------------- |
-| Page title / heading     | (exact text)               |
-| Section headings         | (exact text per section)   |
-| Table columns (in order) | (exact header labels)      |
-| Button labels            | (exact text)               |
-| Badge / status values    | (exact values)             |
-| Navigation items         | (exact labels + routes)    |
-| Form field labels        | (exact labels)             |
-| Empty state messages     | (exact text)               |
-| Mock data field names    | (exact keys)               |
+| Item type                | Exact value(s) from source                                              |
+| ------------------------ | ----------------------------------------------------------------------- |
+| Page title / heading     | (exact text)                                                            |
+| Section headings         | (exact text per section)                                                |
+| Table columns (in order) | (exact header labels)                                                   |
+| Button labels            | (exact text)                                                            |
+| Badge / status values    | (exact values)                                                          |
+| Navigation items         | (exact labels + routes)                                                 |
+| Form field labels        | (exact labels)                                                          |
+| Empty state messages     | (exact text)                                                            |
+| Mock data field names    | (exact keys)                                                            |
+| Images used              | (note: avatars, thumbnails, hero images — will use placeholder service) |
 
 This inventory is your checklist. Every item must appear in your output.
 
@@ -225,6 +226,52 @@ within this feature folder.
 - Field names must match the source exactly (Law 3)
 - Provide enough rows to make the page look realistic (minimum 5–8 rows for tables; 4 items for card grids)
 
+### Images and media
+
+The prototype is standalone and cannot access images from the source app's API or CDN. Handle images as follows:
+
+**For decorative images, thumbnails, avatars, product photos:**
+
+Use placeholder images from `https://picsum.photos`:
+
+```jsx
+// Card thumbnails (exact size)
+<img src="https://picsum.photos/400/300" alt="Tutorial thumbnail" />
+
+// Avatars (small, circular)
+<img src="https://picsum.photos/48/48" alt="User avatar" />
+
+// Hero images (large)
+<img src="https://picsum.photos/1200/400" alt="Hero image" />
+
+// Add different seed for variety
+<img src="https://picsum.photos/seed/tutorial1/400/300" alt="Thumbnail" />
+<img src="https://picsum.photos/seed/tutorial2/400/300" alt="Thumbnail" />
+```
+
+**For icons and UI graphics:**
+
+Use inline SVG or data URIs instead of external files:
+
+```jsx
+// Simple icon as inline SVG
+<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
+</svg>
+```
+
+**For charts, graphs, visualizations:**
+
+Preserve the chart component from source but use mock data.
+
+**CRITICAL:** Never use:
+
+- Relative paths to local images (`./assets/image.png`)
+- API endpoints for images (`/api/uploads/...`)
+- Environment variable image URLs (`process.env.IMAGE_CDN`)
+
+All images must work in a standalone HTML file opened in a browser.
+
 ### Routing
 
 - Use the route defined in your briefing and the app manifest
@@ -244,6 +291,7 @@ Before finishing, verify:
 
 - [ ] **Table columns:** Same count, same names, same order as source (not renamed, not reordered, not removed)
 - [ ] **Data field names:** Mock data uses exact field names from source code (e.g., `createdAt` not `date`)
+- [ ] **Images:** All images use placeholder services (picsum.photos) or inline SVG — no broken image links
 - [ ] Every button label from source is present with exact wording (Law 1)
 - [ ] Every navigation item is present with exact label and route (Law 1)
 - [ ] Page layout matches source structure (Law 2)

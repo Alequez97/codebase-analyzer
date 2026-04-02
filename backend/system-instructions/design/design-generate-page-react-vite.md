@@ -403,6 +403,117 @@ import { Modal } from "@/components/Modal";
 import { Heading, Stack } from "@/components/ui/index.js";
 ```
 
+## Images and media
+
+The prototype must be standalone and cannot access external APIs or CDN resources. Handle images as follows:
+
+**For decorative images, thumbnails, avatars, product photos:**
+
+Use placeholder images from `https://picsum.photos`:
+
+```jsx
+// Card thumbnails (exact size)
+<img src="https://picsum.photos/400/300" alt="Product thumbnail" />
+
+// Avatars (small, circular)
+<img src="https://picsum.photos/48/48" alt="User avatar" />
+
+// Hero images (large)
+<img src="https://picsum.photos/1200/400" alt="Hero banner" />
+
+// Add different seed for variety across multiple images
+<img src="https://picsum.photos/seed/product1/400/300" alt="Product 1" />
+<img src="https://picsum.photos/seed/product2/400/300" alt="Product 2" />
+<img src="https://picsum.photos/seed/product3/400/300" alt="Product 3" />
+```
+
+**For icons and UI graphics:**
+
+Use inline SVG or icon libraries (if available):
+
+```jsx
+// Simple icon as inline SVG
+<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
+</svg>;
+
+// Or use react-icons if available
+import { FiCheck, FiX } from "react-icons/fi";
+<FiCheck size={24} />;
+```
+
+**For charts, graphs, visualizations:**
+
+Use charting libraries with mock data (ApexCharts, Recharts, Chart.js).
+
+**CRITICAL - Never use:**
+
+- ❌ Relative paths to local images (`./assets/image.png`)
+- ❌ API endpoints for images (`/api/uploads/...`)
+- ❌ Environment variable URLs (`process.env.IMAGE_CDN`)
+- ❌ External CDN dependencies that may not resolve
+
+All images must work in a standalone HTML file opened in a browser.
+
+## Mock data structure
+
+Every page needs realistic data to be functional. Implement mock data properly:
+
+**Option 1: Zustand store (recommended for complex data)**
+
+```jsx
+// src/features/products/store/useProductsStore.js
+import { create } from "zustand";
+
+export const useProductsStore = create((set) => ({
+  products: [
+    {
+      id: 1,
+      name: "Wireless Headphones",
+      price: 79.99,
+      category: "Audio",
+      stock: 45,
+      image: "https://picsum.photos/seed/product1/200/200",
+      rating: 4.5,
+    },
+    // ... more items (minimum 6-8 for realistic feel)
+  ],
+
+  addProduct: (product) =>
+    set((state) => ({
+      products: [...state.products, product],
+    })),
+
+  deleteProduct: (id) =>
+    set((state) => ({
+      products: state.products.filter((p) => p.id !== id),
+    })),
+}));
+```
+
+**Option 2: Module-level constant (simple data)**
+
+```jsx
+// src/features/products/data/mockProducts.js
+export const MOCK_PRODUCTS = [
+  {
+    id: 1,
+    name: "Product A",
+    price: 29.99,
+    // ... complete structure
+  },
+  // ... minimum 5-8 items
+];
+```
+
+**Mock data quality requirements:**
+
+- ✅ **Realistic volume** - Minimum 5-8 items for lists/tables, 3-4 for card grids
+- ✅ **Complete structure** - Every field that UI displays must exist in mock data
+- ✅ **Variety** - Different values, statuses, categories for realistic feel
+- ✅ **Consistency** - Use consistent field names (camelCase, descriptive)
+- ❌ **Never leave TODOs** - All data must be fully populated
+
 ## Required outputs
 
 You must CREATE the page files at {{DESIGN_ROOT_PATH}}/{{OUTPUT_PATH}}:
@@ -457,6 +568,23 @@ CRITICAL:
 - Prefer CSS modules over global class names for page and component styling
 - Do not leave component JSX and CSS as sibling loose files in a crowded folder; tighten each piece into its own folder
 - DO NOT modify src/app/App.jsx or any routing setup - focus only on your page implementation
+
+## Quality checklist
+
+Before finishing, verify:
+
+- [ ] **Design tokens used** - All colors use `var(--token)`, no hardcoded hex values for backgrounds/text
+- [ ] **Images working** - All images use placeholder services (picsum.photos) or inline SVG — no broken links
+- [ ] **Mock data complete** - Every table/list has 5-8 items with complete field structure
+- [ ] **Responsive verified** - Tested at 320px, 768px, 1024px, 1440px widths
+- [ ] **Touch targets** - All buttons/links are 44px+ for mobile accessibility
+- [ ] **No API calls** - No fetch/axios calls, all data from mock
+- [ ] **Imports compile** - No missing files or broken import paths
+- [ ] **UI primitives used** - Button, Card, Badge from src/components/ui/ (not custom implementations)
+- [ ] **Feature folders** - Components organized in src/features/<feature>/ structure
+- [ ] **CSS modules** - Styles in .module.css files, not global classes
+
+**Final sanity check:** Open the page in browser at mobile width (375px) and desktop (1440px). Does it look good and work properly at both sizes?
 
 ## Build verification requirements
 

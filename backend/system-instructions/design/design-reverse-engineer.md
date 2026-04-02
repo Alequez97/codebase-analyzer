@@ -301,6 +301,10 @@ Mock data to use:
 - revenueData: [{month, revenue, target}] — 12 months
 - activities: [{id, user, avatar, action, target, timestamp}] — 8 items
 
+Images:
+- User avatars: use https://picsum.photos/48/48 with different seeds
+- Card thumbnails: use https://picsum.photos/300/200 with seeds
+
 Navigation: links to /users, /products, /settings
 ```
 
@@ -309,6 +313,7 @@ Navigation: links to /users, /products, /settings
 - **Match the existing visual design** — do NOT invent a new design language. Extract colors, typography, spacing, and component patterns from source faithfully.
 - **Improve the code structure** — the source may be messy. Split large components, use feature folders, extract shared primitives. The prototype should be better structured than the original.
 - **Zero API calls** — every data dependency must be served from inline mock JSON.
+- **Standalone images** — use placeholder image services (https://picsum.photos) or inline SVG. Never reference local files or API endpoints.
 - **Hash routing** — always use `createHashRouter` (enables sidebar page navigation in preview).
 - **Real imports in App.jsx** — use actual import paths where subagents will write files. Never use placeholder inline components.
 - **Feature folders** — organize by feature domain; don't force unrelated code together.

@@ -240,6 +240,13 @@ For example:
 
 After writing the shared files, delegate page generation in a simple two-step process per page:
 
+**Critical reminders for page subagents:**
+
+- **Images**: All decorative images, thumbnails, hero backgrounds, and avatars MUST use `https://picsum.photos/<width>/<height>` or with seeds for variety. Never use local paths, API endpoints, or CDN URLs. Icons should be inline SVG.
+- **Mock data**: Provide realistic, substantial mock data (5-8 items for lists/tables, 3-4 for grids) with complete field structures. Use Alpine.js inline data for static HTML pages.
+- **No API calls**: All data must be inline/static. No fetch(), no axios, no backend dependencies.
+- **Design tokens mandatory**: Always use CSS variables from `tokens.css` (e.g., `var(--brand-primary)`, never hardcoded colors like `#3B82F6`).
+
 ### Step 1: Write delegation request file
 
 Create one file per page under `.code-analysis/temp/delegation-requests/` (e.g., `home-page.md`).
