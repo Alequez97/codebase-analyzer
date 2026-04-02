@@ -29,6 +29,7 @@ import {
   designGeneratePageHandler,
   designAssistantHandler,
   designReverseEngineerHandler,
+  designReverseEngineerPageHandler,
 } from "./design/index.js";
 import { editCodebaseAnalysisHandler } from "./editing/codebase-analysis.js";
 import { editDocumentationHandler } from "./editing/documentation.js";
@@ -37,6 +38,7 @@ import { implementFixHandler } from "./implementation/fix.js";
 import { implementTestHandler } from "./implementation/test.js";
 import { reviewChangesHandler } from "./review/changes.js";
 import { queueDesignReverseEngineerTask } from "../queue/design/reverse-engineer.js";
+import { queueDesignReverseEngineerPageTask } from "../queue/design/reverse-engineer-page.js";
 import { queueDesignGeneratePageTask } from "../queue/design/generate-page.js";
 import { queueDesignAssistantTask } from "../queue/design/design-assistant.js";
 import { queueDesignPlanAndStyleSystemGenerateTask } from "../queue/design/plan-and-style-system-generate.js";
@@ -74,6 +76,7 @@ const DESIGN_QUEUE_FUNCTIONS = {
     queueDesignPlanAndStyleSystemGenerateTask,
   [TASK_TYPES.DESIGN_GENERATE_PAGE]: queueDesignGeneratePageTask,
   [TASK_TYPES.DESIGN_REVERSE_ENGINEER]: queueDesignReverseEngineerTask,
+  [TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE]: queueDesignReverseEngineerPageTask,
 };
 
 const MESSAGE_TOOL_TASK_TYPES = new Set([
@@ -156,6 +159,7 @@ function enableCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.DESIGN_BRAINSTORM,
     TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
     TASK_TYPES.DESIGN_GENERATE_PAGE,
+    TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE,
     TASK_TYPES.DESIGN_ASSISTANT,
     TASK_TYPES.DESIGN_REVERSE_ENGINEER,
     TASK_TYPES.EDIT_DOCUMENTATION,
@@ -172,6 +176,7 @@ function enableCommandsIfUseful(agent, task, taskLogger) {
     TASK_TYPES.DESIGN_BRAINSTORM,
     TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
     TASK_TYPES.DESIGN_GENERATE_PAGE,
+    TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE,
     TASK_TYPES.DESIGN_ASSISTANT,
     TASK_TYPES.DESIGN_REVERSE_ENGINEER,
     // Implementation tasks
@@ -310,6 +315,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
     );
   } else if (task.type === TASK_TYPES.DESIGN_GENERATE_PAGE) {
     overrides = designGeneratePageHandler(task, taskLogger, agent);
+  } else if (task.type === TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE) {
+    overrides = designReverseEngineerPageHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_ASSISTANT) {
     if (agent) {
       agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);

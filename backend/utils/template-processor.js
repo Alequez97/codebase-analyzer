@@ -470,17 +470,6 @@ export async function buildEditTemplateVariables(task) {
 
 function buildDesignReverseEngineerTemplateVariables(task) {
   const designId = task.params?.designId || "";
-  const pages = task.params?.pages || [];
-
-  const pagesJson = JSON.stringify(
-    pages.map((p) => ({
-      name: p.name,
-      route: p.route,
-      sourcePaths: p.sourcePaths || [],
-    })),
-    null,
-    2,
-  );
 
   return {
     CODEBASE_PATH: task.params?.targetDirectory || "",
@@ -494,7 +483,7 @@ function buildDesignReverseEngineerTemplateVariables(task) {
       task.params?.designSystemPath ||
       getDesignSystemManifestRelativePath(designId),
     TOKENS_PATH: task.params?.tokensPath || "",
-    PAGES_JSON: pagesJson,
+    DESCRIPTION: task.params?.description || "",
     PROGRESS_FILE: getProgressFileRelativePath(task.id),
   };
 }
@@ -537,6 +526,7 @@ export async function buildTemplateVariables(task) {
     case TASK_TYPES.DESIGN_BRAINSTORM:
     case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     case TASK_TYPES.DESIGN_GENERATE_PAGE:
+    case TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE:
       return buildDesignTemplateVariables(task);
     case TASK_TYPES.DESIGN_REVERSE_ENGINEER:
       return buildDesignReverseEngineerTemplateVariables(task);

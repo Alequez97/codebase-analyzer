@@ -42,6 +42,7 @@ The orchestrator defined a comprehensive design system. You MUST use it for visu
 **REQUIRED: Use design tokens for all visual styling.**
 
 Available tokens:
+
 - **Colors**: --primary, --background, --surface, --text-primary, --text-secondary, --border, etc.
 - **Typography**: --font-display, --font-body, sizes, weights, line heights
 - **Spacing**: --space-1 through --space-24
@@ -51,6 +52,7 @@ Available tokens:
 **CRITICAL RULES:**
 
 ✅ **ALWAYS use tokens for:**
+
 - Background colors: `background: var(--background)` or `var(--surface)`
 - Text colors: `color: var(--text-primary)`, `var(--text-secondary)`
 - Primary actions: `background: var(--primary)`
@@ -58,16 +60,19 @@ Available tokens:
 - Spacing: `padding: var(--space-4)`
 
 ❌ **NEVER use custom values for:**
+
 - Core background colors (no `#ffffff`, `#000000`, random hexes)
 - Text colors (no hardcoded grays or blacks)
 - Primary brand colors (no custom accent colors)
 
 ✅ **Custom values allowed for:**
+
 - Gradient overlays: `linear-gradient(...)` ON TOP of token backgrounds
 - Decorative elements: shadows, glows
 - Illustration colors
 
 **Example:**
+
 ```css
 /* ✅ CORRECT - Uses tokens */
 .card {
@@ -78,8 +83,8 @@ Available tokens:
 
 /* ❌ WRONG - Custom colors */
 .card {
-  background: #1e293b;  /* Don't hardcode! */
-  color: #333;          /* Use var(--text-primary) */
+  background: #1e293b; /* Don't hardcode! */
+  color: #333; /* Use var(--text-primary) */
 }
 ```
 
@@ -98,6 +103,7 @@ import { Button, Card, Badge, Heading, Text, Container, Stack } from "@/componen
 ```
 
 **Required primitives to use:**
+
 - **Button** - For all clickable actions
 - **Card** - For content containers
 - **Badge** - For labels, tags, status indicators
@@ -111,18 +117,21 @@ import { Button, Card, Badge, Heading, Text, Container, Stack } from "@/componen
 You have **creative freedom in layout and composition**, but **MUST follow the design system for visuals**:
 
 ✅ **Freedom to create:**
+
 - Custom page layouts
 - Unique component compositions
 - Creative UX patterns
 - Custom animations
 
 ❌ **NOT allowed:**
+
 - Custom background colors (use var(--background), var(--surface))
 - Custom text colors (use var(--text-primary), var(--text-secondary))
 - Custom button styles (use the Button component)
 - Custom card styles (use the Card component)
 
 **Example:**
+
 ```jsx
 // ✅ CORRECT - Custom layout, design system visuals
 <div className={styles.heroSection}>
@@ -137,7 +146,7 @@ You have **creative freedom in layout and composition**, but **MUST follow the d
   /* ✅ Uses design tokens */
   background: var(--surface);
   padding: var(--space-16) var(--space-8);
-  
+
   /* ✅ Custom layout is fine */
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -192,7 +201,7 @@ Your page should work across devices. How you achieve that is up to you:
 ### Breakpoints to use (if you use standard breakpoints)
 
 - sm (640px): Mobile landscape
-- md (768px): Tablets  
+- md (768px): Tablets
 - lg (1024px): Small laptops
 - xl (1280px): Desktops
 - 2xl (1536px): Large desktops
@@ -266,11 +275,11 @@ src/
 
 ### Component placement rules
 
-| Component usage | Location | Example import |
-|----------------|----------|----------------|
+| Component usage           | Location                             | Example import                                                              |
+| ------------------------- | ------------------------------------ | --------------------------------------------------------------------------- |
 | Used only in this feature | `src/features/<feature>/components/` | `import { StatsWidget } from "@/features/dashboard/components/StatsWidget"` |
-| Used by 2+ features | `src/components/<Component>/` | `import { Button } from "@/components/Button"` |
-| Feature-specific store | `src/features/<feature>/store/` | `import { useAuthStore } from "@/features/auth/store/useAuthStore"` |
+| Used by 2+ features       | `src/components/<Component>/`        | `import { Button } from "@/components/Button"`                              |
+| Feature-specific store    | `src/features/<feature>/store/`      | `import { useAuthStore } from "@/features/auth/store/useAuthStore"`         |
 
 ### Guidelines
 
@@ -291,7 +300,7 @@ import styles from "./PageName.module.css";
 
 <div className={styles.container}>
   <h1 className={styles.title}>Title</h1>
-</div>
+</div>;
 ```
 
 ```css
@@ -309,7 +318,11 @@ import styles from "./PageName.module.css";
 
 /* ✅ Gradient using token + token or overlay */
 .hero {
-  background: linear-gradient(135deg, var(--surface) 0%, var(--background) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    var(--background) 100%
+  );
 }
 
 /* ✅ Token with opacity overlay */
@@ -323,12 +336,12 @@ import styles from "./PageName.module.css";
 
 ```jsx
 /* ✅ OK for dynamic values like progress bars */
-<div style={{ 
+<div style={{
   width: `${progress}%`
 }}>
 
 /* ❌ NOT OK for colors - use CSS classes with tokens instead */
-<div style={{ 
+<div style={{
   background: '#ff6b6b'  /* Don't do this! */
 }}>
 ```
@@ -338,19 +351,22 @@ import styles from "./PageName.module.css";
 Extract components when it helps, do not when it does not:
 
 ### Extract when:
+
 - JSX block exceeds ~40 lines with clear purpose
 - Visual element repeats 2+ times within the feature
 - Complex conditional logic obscures main layout
 - Component needs local state that parent does not need to know about
 
 ### Placement decision:
-| Scenario | Location |
-|----------|----------|
-| Used only on this page | Keep in page folder |
+
+| Scenario                               | Location                             |
+| -------------------------------------- | ------------------------------------ |
+| Used only on this page                 | Keep in page folder                  |
 | Used by multiple pages in this feature | `src/features/<feature>/components/` |
-| Used by 2+ different features | `src/components/<Component>/` |
+| Used by 2+ different features          | `src/components/<Component>/`        |
 
 ### Keep inline when:
+
 - Simple JSX, under ~30 lines
 - Truly unique to this specific page
 - Extracting would create more indirection than value
@@ -360,6 +376,7 @@ Extract components when it helps, do not when it does not:
 Always use the `@/` path alias pointing to the `src/` directory to avoid deep relative paths.
 
 ### Import from same feature
+
 ```jsx
 // In src/features/dashboard/pages/DashboardPage/DashboardPage.jsx
 import { StatsWidget } from "@/features/dashboard/components/StatsWidget";
@@ -367,18 +384,21 @@ import { useDashboardStore } from "@/features/dashboard/store/useDashboardStore"
 ```
 
 ### Import from other features
+
 ```jsx
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 ```
 
 ### Import truly shared components
+
 ```jsx
 import { Button } from "@/components/Button";
 import { Modal } from "@/components/Modal";
 ```
 
 ### Import UI primitives (if orchestrator created them)
+
 ```jsx
 import { Heading, Stack } from "@/components/ui/index.js";
 ```
@@ -390,13 +410,10 @@ You must CREATE the page files at {{DESIGN_ROOT_PATH}}/{{OUTPUT_PATH}}:
 1. **Page component**: {{DESIGN_ROOT_PATH}}/{{OUTPUT_PATH}}<PageName>.jsx
    - Create the folder if it does not exist
    - Full implementation with named export matching the page name
-   
 2. **Page styles**: {{DESIGN_ROOT_PATH}}/{{OUTPUT_PATH}}<PageName>.module.css (optional but recommended)
    - Page-specific CSS using design tokens or custom values
-   
 3. **Barrel export**: {{DESIGN_ROOT_PATH}}/{{OUTPUT_PATH}}index.js (recommended but optional)
    - Re-export the page component for clean imports
-   
 4. **Feature components**: {{DESIGN_ROOT_PATH}}/src/features/<feature-name>/components/<ComponentName>/ (when needed)
    - Create feature-specific components here (used only by this feature)
    - Structure: Component.jsx, Component.module.css, index.js
@@ -411,7 +428,8 @@ You must CREATE the page files at {{DESIGN_ROOT_PATH}}/{{OUTPUT_PATH}}:
 7. **Feature utils**: {{DESIGN_ROOT_PATH}}/src/features/<feature-name>/utils/ (when needed)
    - Feature-specific helper functions
 
-CRITICAL: 
+CRITICAL:
+
 - CREATE files from scratch - they do not exist yet
 - DO NOT create or modify {{DESIGN_ROOT_PATH}}/src/app/App.jsx
 - DO NOT modify routing - App.jsx already imports your page, just make sure export matches
@@ -423,6 +441,8 @@ CRITICAL:
 ## Implementation rules
 
 - Read the app manifest and design system first
+- **If source reference files are listed in the briefing, read them** — they contain the visual design you must replicate faithfully. Read the actual source files from the codebase (you have read access to the full project).
+- **Improve the structure, not just copy it** — the source may be a messy monolith. Split it into focused sub-components in a logical folder structure. A 500-line class component should become multiple focused hooks + presentational components. Extract repeated UI patterns into the shared `src/components/ui/` primitives.
 - The routing and imports are ALREADY set up in src/app/App.jsx - DO NOT modify App.jsx
 - Your job is to IMPLEMENT the page component at {{OUTPUT_PATH}}<PageName>.jsx
 - The page component is ALREADY imported in App.jsx - just fill in the implementation

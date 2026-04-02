@@ -41,7 +41,9 @@ export function getLogEventForTaskType(taskType) {
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]:
       SOCKET_EVENTS.LOG_DESIGN_TASK,
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: SOCKET_EVENTS.LOG_DESIGN_TASK,
+    [TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE]: SOCKET_EVENTS.LOG_DESIGN_TASK,
     [TASK_TYPES.DESIGN_ASSISTANT]: SOCKET_EVENTS.LOG_DESIGN_TASK,
+    [TASK_TYPES.DESIGN_REVERSE_ENGINEER]: SOCKET_EVENTS.LOG_DESIGN_TASK,
   };
 
   const event = eventMap[taskType];
@@ -78,7 +80,7 @@ export async function setupTaskLogger(task) {
 
   const fsSync = await import("fs");
   const logStream = fsSync.default.createWriteStream(logFile, { flags: "w" });
-  
+
   // Create logger with task ID as prefix for console output
   // Format: [2026-03-23T20:05:57.704Z] [task-abc123] [INFO] Message
   const shortTaskId = task.id.slice(0, 8);
@@ -98,7 +100,9 @@ export async function setupTaskLogger(task) {
     const kind = normalizedOptions.kind ?? "task_progress";
     const level = normalizedOptions.level ?? "info";
     const logMethod =
-      typeof taskLogger[level] === "function" ? taskLogger[level] : taskLogger.info;
+      typeof taskLogger[level] === "function"
+        ? taskLogger[level]
+        : taskLogger.info;
 
     logMethod(message);
     if (publicLogText) {
@@ -185,6 +189,7 @@ export function logTaskError(taskLogger, task, error) {
   });
   taskLogger.raw("=".repeat(80));
 
-  taskLogger.log(`\n${"=".repeat(80)}\n❌ [FAILED] ${error.message}\n${"=".repeat(80)}\n`);
+  taskLogger.log(
+    `\n${"=".repeat(80)}\n❌ [FAILED] ${error.message}\n${"=".repeat(80)}\n`,
+  );
 }
-

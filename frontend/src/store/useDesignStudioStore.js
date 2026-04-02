@@ -462,9 +462,9 @@ export const useDesignStudioStore = create((set, get) => ({
     }
   },
 
-  startReverseEngineer: async ({ pages = [], designId = null } = {}) => {
-    if (!pages.length) {
-      return { success: false, error: "At least one page is required" };
+  startReverseEngineer: async ({ description = "", designId = null } = {}) => {
+    if (!description.trim()) {
+      return { success: false, error: "Description is required" };
     }
 
     const model = get().selectedModel;
@@ -477,7 +477,11 @@ export const useDesignStudioStore = create((set, get) => ({
     });
 
     try {
-      const response = await reverseEngineerDesign({ pages, designId, model });
+      const response = await reverseEngineerDesign({
+        description,
+        designId,
+        model,
+      });
       const taskId = response?.data?.task?.id ?? null;
 
       set({

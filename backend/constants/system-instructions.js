@@ -26,6 +26,8 @@ export const SYSTEM_INSTRUCTION_NAMES = {
   DESIGN_GENERATE_PAGE_REACT_VITE: "design/design-generate-page-react-vite.md",
   DESIGN_ASSISTANT: "design/design-assistant.md",
   DESIGN_REVERSE_ENGINEER: "design/design-reverse-engineer.md",
+  DESIGN_REVERSE_ENGINEER_PAGE_REACT_VITE:
+    "design/design-reverse-engineer-page-react-vite.md",
 };
 
 export const SYSTEM_INSTRUCTION_PATHS = {
@@ -72,4 +74,6 @@ export const SYSTEM_INSTRUCTION_PATHS = {
   DESIGN_ASSISTANT: "backend/system-instructions/design/design-assistant.md",
   DESIGN_REVERSE_ENGINEER:
     "backend/system-instructions/design/design-reverse-engineer.md",
+  DESIGN_REVERSE_ENGINEER_PAGE_REACT_VITE:
+    "backend/system-instructions/design/design-reverse-engineer-page-react-vite.md",
 };

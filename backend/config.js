@@ -229,6 +229,13 @@ const config = {
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
+    [TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE]: {
+      agent: AGENTS.LLM_API,
+      model: MODELS.KIMI_K2_5,
+      maxTokens: 64000,
+      maxIterations: 100,
+      reasoningEffort: REASONING_EFFORT.MEDIUM,
+    },
     [TASK_TYPES.DESIGN_ASSISTANT]: {
       agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
@@ -298,5 +305,27 @@ dirs.forEach((dir) => {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
+
+// Write .gitignore to .code-analysis root to exclude generated build artifacts
+const gitignorePath = path.join(config.paths.targetAnalysis, ".gitignore");
+if (!fs.existsSync(gitignorePath)) {
+  fs.writeFileSync(
+    gitignorePath,
+    [
+      "# Generated build artifacts from design prototypes",
+      "**/node_modules/",
+      "**/dist/",
+      "**/build/",
+      "**/.vite/",
+      "**/coverage/",
+      "**/.cache/",
+      "",
+      "# OS / editor",
+      "**/.DS_Store",
+      "**/Thumbs.db",
+    ].join("\n"),
+    "utf8",
+  );
+}
 
 export default config;

@@ -262,39 +262,26 @@ router.post("/generate", async (req, res) => {
 
 router.post("/reverse-engineer", async (req, res) => {
   try {
-    const { pages, designId = null, agentsOverrides = null } = req.body ?? {};
+    const {
+      description,
+      designId = null,
+      agentsOverrides = null,
+    } = req.body ?? {};
     const model = agentsOverrides?.model || null;
 
-    if (!Array.isArray(pages) || pages.length === 0) {
+    if (
+      !description ||
+      typeof description !== "string" ||
+      !description.trim()
+    ) {
       return res.status(400).json({
         error: "Invalid request",
-        message: "pages array is required and must not be empty",
+        message: "description is required and must be a non-empty string",
       });
     }
 
-    for (const page of pages) {
-      if (!page.name || typeof page.name !== "string") {
-        return res.status(400).json({
-          error: "Invalid request",
-          message: "Each page must have a name string",
-        });
-      }
-      if (!page.route || typeof page.route !== "string") {
-        return res.status(400).json({
-          error: "Invalid request",
-          message: "Each page must have a route string",
-        });
-      }
-      if (!Array.isArray(page.sourcePaths) || page.sourcePaths.length === 0) {
-        return res.status(400).json({
-          error: "Invalid request",
-          message: "Each page must have a non-empty sourcePaths array",
-        });
-      }
-    }
-
     const task = await queueDesignReverseEngineerTask({
-      pages,
+      description: description.trim(),
       designId,
       model,
     });
@@ -310,7 +297,6 @@ router.post("/reverse-engineer", async (req, res) => {
       component: "DesignRoutes",
       taskId: task.id,
       designId: task.params.designId,
-      pageCount: pages.length,
     });
 
     return res.json({

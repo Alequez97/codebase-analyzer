@@ -35,4 +35,5 @@ export const TASK_TYPES = {
   DESIGN_GENERATE_PAGE: "design-generate-page",
   DESIGN_ASSISTANT: "design-assistant",
   DESIGN_REVERSE_ENGINEER: "design-reverse-engineer",
+  DESIGN_REVERSE_ENGINEER_PAGE: "design-reverse-engineer-page",
 };

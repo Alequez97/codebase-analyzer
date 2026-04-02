@@ -15,6 +15,7 @@ export const DELEGATABLE_TASK_TYPES = [
   "edit-refactoring-and-testing",
   "design-plan-and-style-system-generate",
   "design-generate-page",
+  "design-reverse-engineer-page",
 ];
 
 /**
@@ -32,6 +33,7 @@ const SECTION_TYPE_BY_TASK_TYPE = {
 const DIRECT_DELEGATION_TASK_TYPES = new Set([
   "design-plan-and-style-system-generate",
   "design-generate-page",
+  "design-reverse-engineer-page",
 ]);
 
 export const DELEGATION_TOOLS = [
@@ -294,13 +296,17 @@ export class DelegationToolExecutor {
       });
     }
 
-    if (type === "design-generate-page") {
+    if (
+      type === "design-generate-page" ||
+      type === "design-reverse-engineer-page"
+    ) {
       const {
         designId,
         pageId,
         pageName,
         route = "",
-        technology = DESIGN_TECHNOLOGIES.STATIC_HTML,
+        outputPath,
+        technology = DESIGN_TECHNOLOGIES.REACT_VITE,
       } = mergedParams;
       if (!designId || !pageId || !pageName) {
         return {

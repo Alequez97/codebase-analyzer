@@ -17,6 +17,7 @@ import {
   getDesignBriefRelativePath,
   getDesignSystemManifestRelativePath,
   getDesignVariantRelativePath,
+  getNextDesignVersion,
   slugifyDesignId,
 } from "./shared.js";
 import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
@@ -27,13 +28,13 @@ import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
  * language, and produces a standalone React + Vite prototype with mock data.
  *
  * @param {Object} params
- * @param {Array<{name: string, route: string, sourcePaths: string[]}>} params.pages - Pages to reverse-engineer
+ * @param {string} params.description - Natural language description of what to reverse-engineer
  * @param {string} [params.designId] - Target design version ID (auto-generated if null)
  * @param {string|null} [params.model] - LLM model override
  * @param {string|null} [params.delegatedByTaskId] - Parent task ID if delegated
  */
 export async function queueDesignReverseEngineerTask({
-  pages,
+  description,
   designId = null,
   model = null,
   delegatedByTaskId = null,
@@ -46,11 +47,13 @@ export async function queueDesignReverseEngineerTask({
     return agentConfigResult;
   }
 
-  const normalizedDesignId = slugifyDesignId(designId || "reverse-engineer");
+  const normalizedDesignId = designId
+    ? slugifyDesignId(designId)
+    : await getNextDesignVersion();
 
   const taskId = generateTaskId(TASK_TYPES.DESIGN_REVERSE_ENGINEER);
 
-  const userInstruction = `Reverse-engineer the following pages into a standalone React + Vite prototype:\n${pages.map((p) => `- ${p.name} (${p.route})`).join("\n")}`;
+  const userInstruction = description;
 
   const task = {
     id: taskId,
@@ -58,7 +61,7 @@ export async function queueDesignReverseEngineerTask({
     status: TASK_STATUS.PENDING,
     createdAt: new Date().toISOString(),
     params: {
-      pages,
+      description,
       designId: normalizedDesignId,
       technology: DESIGN_TECHNOLOGIES.REACT_VITE,
       designPath: getDesignVariantRelativePath(normalizedDesignId),

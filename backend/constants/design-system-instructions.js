@@ -32,3 +32,17 @@ export function getDesignPageSystemInstructionPath(technology) {
     ]
   );
 }
+
+const DESIGN_REVERSE_ENGINEER_PAGE_SYSTEM_INSTRUCTION_BY_TECHNOLOGY = {
+  [DESIGN_TECHNOLOGIES.REACT_VITE]:
+    SYSTEM_INSTRUCTION_PATHS.DESIGN_REVERSE_ENGINEER_PAGE_REACT_VITE,
+};
+
+export function getDesignReverseEngineerPageSystemInstructionPath(technology) {
+  return (
+    DESIGN_REVERSE_ENGINEER_PAGE_SYSTEM_INSTRUCTION_BY_TECHNOLOGY[technology] ||
+    DESIGN_REVERSE_ENGINEER_PAGE_SYSTEM_INSTRUCTION_BY_TECHNOLOGY[
+      DESIGN_TECHNOLOGIES.REACT_VITE
+    ]
+  );
+}

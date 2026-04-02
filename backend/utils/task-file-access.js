@@ -89,8 +89,10 @@ export function hasUnrestrictedReadAccess(taskType) {
     TASK_TYPES.DESIGN_BRAINSTORM,
     TASK_TYPES.REVIEW_CHANGES,
     TASK_TYPES.DESIGN_REVERSE_ENGINEER, // Needs full project read to scan source pages
-    // Note: DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE and DESIGN_GENERATE_PAGE
-    // are NOT here - they have restricted read paths via getAllowedReadPaths()
+    TASK_TYPES.DESIGN_GENERATE_PAGE, // Needs to read source files provided by orchestrator
+    TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE, // Same as generate-page: reads source files from briefing
+    // Note: DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE
+    // is NOT here - it has restricted read paths via getAllowedReadPaths()
   ];
 
   return unrestrictedTypes.includes(taskType);
@@ -120,6 +122,7 @@ export function hasUnrestrictedWriteAccess(taskType) {
 export function getAllowedWritePaths(task) {
   switch (task?.type) {
     case TASK_TYPES.DESIGN_GENERATE_PAGE:
+    case TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE:
     case TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE:
     case TASK_TYPES.DESIGN_ASSISTANT:
     case TASK_TYPES.DESIGN_REVERSE_ENGINEER:

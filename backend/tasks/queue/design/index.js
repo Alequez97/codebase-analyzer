@@ -7,4 +7,5 @@ export { queueDesignPlanAndStyleSystemGenerateTask } from "./plan-and-style-syst
 export { queueDesignGeneratePageTask } from "./generate-page.js";
 export { queueDesignAssistantTask } from "./design-assistant.js";
 export { queueDesignReverseEngineerTask } from "./reverse-engineer.js";
+export { queueDesignReverseEngineerPageTask } from "./reverse-engineer-page.js";
 export * from "./shared.js";

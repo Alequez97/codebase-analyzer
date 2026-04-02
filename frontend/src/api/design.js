@@ -41,12 +41,12 @@ export const generateDesign = ({
   });
 
 export const reverseEngineerDesign = ({
-  pages,
+  description,
   designId = null,
   model = null,
 }) =>
   client.post("/design/reverse-engineer", {
-    pages,
+    description,
     designId,
     agentsOverrides: model ? { model } : null,
   });

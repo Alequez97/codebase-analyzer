@@ -144,7 +144,7 @@ export default function DesignPage() {
   const hasDesignFiles = manifest.versions.length > 0;
 
   // Existing project: project has source files on disk
-  const isExistingProject = projectFiles.length > 0 && !forceFromScratch;
+  const isExistingProject = projectFiles.length > 0;
 
   const hasActiveDesignGeneration = allTaskEntries.some(
     (entry) =>
@@ -246,9 +246,9 @@ export default function DesignPage() {
     recordTaskEvent,
   ]);
 
-  const handleReverseEngineer = async (pages) => {
+  const handleReverseEngineer = async (description) => {
     setIsSubmitting(true);
-    const result = await startReverseEngineer({ pages });
+    const result = await startReverseEngineer({ description });
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -371,7 +371,7 @@ export default function DesignPage() {
   }
 
   if (!shouldShowWorkspace) {
-    if (isExistingProject) {
+    if (isExistingProject && !forceFromScratch) {
       return (
         <DesignReverseEngineerSetup
           isSubmitting={isSubmitting}
