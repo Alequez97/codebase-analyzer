@@ -58,9 +58,19 @@ Read the discovered page source files. For each page you must determine:
 - **Dark/light mode**: Is a dark or light theme in use?
 - **Tech stack**: What CSS approach is in use? (CSS Modules, Tailwind, styled-components, plain CSS, etc.)
 
+**CRITICAL — External dependencies & browser APIs:**
+
+- **Web fonts**: Does the source use Google Fonts, Adobe Fonts, or custom web fonts? Extract the exact font families and weights. Look for `<link>` tags in HTML or `@import` in CSS.
+- **Icon libraries**: Does the source use Font Awesome, Material Icons, Lucide, react-icons, or similar? Extract the CDN links or npm package names.
+- **Authentication patterns**: What user roles/states exist in the source? (admin, user, guest, etc.) How does the UI change based on authentication? Note all conditional UI elements.
+- **Browser storage**: Does the source use localStorage or sessionStorage for preferences, theme, or state? Note the keys and default values.
+- **Form behavior**: What forms exist and what do they POST to? Note validation logic and success/error states.
+
 Also read adjacent files such as CSS modules, global style files, token files, and shared components — these contain the design system source of truth.
 
 Read the project's `package.json` to understand what dependencies exist (e.g., UI libraries like shadcn, MUI, Ant Design, Chakra).
+
+Read the project's `index.html` or main HTML entry to discover external font/icon CDN links.
 
 ### Step 3 — Understand page structure and navigation
 
@@ -133,14 +143,39 @@ Required token categories:
 
 Create these files:
 
-1. `{{DESIGN_PATH}}/package.json` — include `react`, `react-dom`, `react-router-dom`, `zustand`, and `vite` as dependencies. If the source project uses a specific UI library (shadcn, MUI, etc.) you may include it.
-2. `{{DESIGN_PATH}}/index.html` — Vite HTML entry point
+1. `{{DESIGN_PATH}}/package.json` — include `react`, `react-dom`, `react-router-dom`, `zustand`, and `vite` as dependencies. If the source project uses a specific UI library (shadcn, MUI, etc.) or icon library (lucide-react, react-icons), include those too.
+2. `{{DESIGN_PATH}}/index.html` — Vite HTML entry point. **CRITICAL:** Include any web font `<link>` tags discovered in Step 2 (Google Fonts, Adobe Fonts). Include any icon library CDN links (Font Awesome, Material Icons) discovered in Step 2.
 3. `{{DESIGN_PATH}}/vite.config.js` — configure `base: "./"` and `@/` alias to `src/`
 4. `{{DESIGN_PATH}}/jsconfig.json` — configure `compilerOptions.paths` `@/*` → `["src/*"]`
 5. `{{DESIGN_PATH}}/src/main.jsx` — React entry, mounts App
 6. `{{DESIGN_PATH}}/src/app/App.jsx` — hash router with all page routes wired up (REAL imports, not placeholders)
 7. `{{DESIGN_PATH}}/src/styles/global.css` — reset/base styles
 8. (tokens already written in Step 7 at `src/styles/tokens.css`)
+
+**Example index.html with external dependencies:**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{APP_NAME}}</title>
+    
+    <!-- Web fonts (from Step 2 discovery) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icon libraries (if source uses them) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
 
 **App.jsx routing contract:**
 
@@ -231,8 +266,9 @@ Each delegation must include the following in `designBriefing`:
 2. The existing source file paths to use as visual reference
 3. **Exact UI content extracted from the source** (see format below) — the page agent must not invent these
 4. The mock data structure with **exact field names from the source** (not invented ones)
-5. Any feature-specific design notes extracted in Step 2
-6. Navigation links to other pages in the prototype
+5. **External dependencies & browser APIs** — fonts, icons, auth assumptions, storage handling, form behavior (see format below)
+6. Any feature-specific design notes extracted in Step 2
+7. Navigation links to other pages in the prototype
 
 **Required UI content block in every briefing:**
 
@@ -248,6 +284,14 @@ Exact UI content (copy from source — do not invent alternatives):
 - Any other fixed UI text (placeholders, empty states, pagination labels)
 - Data field names from source: { tableData: ["field1", "field2", "field3"], formFields: [...] }
   ↑ CRITICAL: Extract exact field names used in source (e.g., createdAt, not date; fullName, not name)
+
+External dependencies & browser APIs:
+- Fonts: [font families and weights, e.g., "Inter 400/600/700 via Google Fonts" or "System fonts"]
+- Icons: [icon library used, e.g., "Font Awesome 6.5.0 CDN", "lucide-react npm", "none (inline SVG only)"]
+- Authentication: [user role assumption, e.g., "Assume logged-in admin", "Show both logged-in and guest states"]
+- Browser storage: [storage keys and defaults, e.g., "localStorage theme=dark", "sessionStorage cart", "none"]
+- Forms: [which forms exist and behavior, e.g., "Login form → mock success", "Settings form → preventDefault + toast"]
+  ↑ CRITICAL: Extract from source code and index.html. Page agent needs this to avoid broken fonts/icons/functionality.
 ```
 
 **🚨 CRITICAL — Table Columns and Data Fields:**
@@ -304,6 +348,13 @@ Mock data to use:
 Images:
 - User avatars: use https://picsum.photos/48/48 with different seeds
 - Card thumbnails: use https://picsum.photos/300/200 with seeds
+
+External dependencies & browser APIs (specify what source uses):
+- Fonts: Inter (weights 400, 500, 600, 700) via Google Fonts — already in index.html
+- Icons: Font Awesome 6.5.0 CDN — already in index.html; use <i className="fa fa-icon-name"> syntax
+- Authentication: Assume logged-in admin user; mock user = {name: "Demo User", role: "Admin", avatar: "..."}
+- Browser storage: Dark mode stored in localStorage with key "theme" — replace with useState('dark')
+- Forms: Contact form posts to /api/contact — convert to e.preventDefault() + success toast
 
 Navigation: links to /users, /products, /settings
 ```

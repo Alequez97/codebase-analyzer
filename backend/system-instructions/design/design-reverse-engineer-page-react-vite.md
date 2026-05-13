@@ -285,6 +285,160 @@ API calls, or environment variable references.
 
 ---
 
+## External Dependencies & Browser APIs
+
+The prototype must work standalone without backend dependencies. Handle these common issues:
+
+### Fonts
+
+**Web fonts from CDN (Google Fonts, Adobe Fonts, etc.):**
+
+If the source uses web fonts, you must include them in the prototype:
+
+```html
+<!-- In index.html (orchestrator creates this, but you may need to update it) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+```
+
+**If source uses `@font-face` with local files:**
+
+```css
+/* Copy font files to src/assets/fonts/ and update CSS */
+@font-face {
+  font-family: 'CustomFont';
+  src: url('/assets/fonts/CustomFont-Regular.woff2') format('woff2');
+  font-weight: 400;
+}
+```
+
+**CRITICAL:** Do not assume system fonts will match the source. Extract font information from the briefing and apply it.
+
+### Icon Libraries
+
+**If source uses icon libraries from CDN (Font Awesome, Material Icons, Lucide):**
+
+```html
+<!-- In index.html -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+```
+
+Then use the same icon classes in your JSX:
+
+```jsx
+<i className="fa fa-user"></i>
+<span className="material-icons">settings</span>
+```
+
+**If source uses React icon libraries (react-icons, lucide-react):**
+
+Keep the imports and usage if the orchestrator included the library in package.json:
+
+```jsx
+import { User, Settings, Download } from 'lucide-react';
+
+<User size={20} />
+```
+
+**If icons are custom/local:** Convert to inline SVG or ensure assets are copied to `src/assets/icons/`.
+
+### Authentication & Conditional UI
+
+Many apps show/hide UI based on user state. **For the prototype, assume a logged-in admin user with full permissions:**
+
+```jsx
+// ❌ BAD: Hiding features in prototype
+{user?.role === 'admin' && <AdminPanel />}  // Only admins see this
+{isAuthenticated && <UserMenu />}           // Only logged-in users see this
+
+// ✅ GOOD: Show all features in prototype
+<AdminPanel />  // Always visible
+<UserMenu userName="Demo User" role="Admin" />  // Mock user data
+```
+
+**Rules:**
+
+- Render ALL conditional UI elements (do not filter by user role/permissions)
+- Replace dynamic user data with mock values: `user?.name` → `"Demo User"`
+- Remove authentication checks that hide features
+- Show both authenticated and unauthenticated states if they co-exist (e.g., login form + logged-in view on different routes)
+
+### Browser Storage
+
+Source apps often use localStorage/sessionStorage for preferences, caching, or state persistence.
+
+**Remove or mock all storage operations:**
+
+```jsx
+// ❌ BAD: Real storage dependencies
+const theme = localStorage.getItem('theme') || 'light';
+localStorage.setItem('preferences', JSON.stringify(prefs));
+
+// ✅ GOOD: Use component state or mock values
+const [theme, setTheme] = useState('light');  // Default value instead of storage
+// Or if source specifies: const [theme, setTheme] = useState('dark');
+
+// Make storage writes no-ops (keep for visual completeness)
+const savePreferences = (prefs) => {
+  console.log('Preferences saved (mock):', prefs);
+  // Don't actually write to storage
+};
+```
+
+**If dark mode toggle exists:** Keep the toggle functional using `useState`, but don't persist across page reloads.
+
+### Form Submissions
+
+Forms that POST to backend must be converted to mock submissions:
+
+```jsx
+// ❌ BAD: Real form submission
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  await axios.post('/api/users', formData);  // Breaks in prototype
+};
+
+// ✅ GOOD: Mock submission with user feedback
+const handleSubmit = (e) => {
+  e.preventDefault();
+  
+  // Validate (keep existing validation logic)
+  if (!formData.email) {
+    setError('Email is required');
+    return;
+  }
+  
+  // Mock success
+  console.log('Form submitted (mock):', formData);
+  setSuccess('User created successfully!');
+  
+  // Optional: reset form or navigate
+  setTimeout(() => {
+    setFormData(initialState);
+    setSuccess(null);
+  }, 2000);
+};
+
+return (
+  <form onSubmit={handleSubmit}>
+    {/* form fields */}
+    {error && <Alert type="error">{error}</Alert>}
+    {success && <Alert type="success">{success}</Alert>}
+    <button type="submit">Save Changes</button>
+  </form>
+);
+```
+
+**Rules:**
+
+- All form submissions must call `e.preventDefault()`
+- Keep validation logic active (show validation errors)
+- Show success message or toast on successful mock submission
+- Remove actual API calls but keep the user experience intact
+
+---
+
 ## Output quality checklist
 
 Before finishing, verify:
@@ -292,6 +446,11 @@ Before finishing, verify:
 - [ ] **Table columns:** Same count, same names, same order as source (not renamed, not reordered, not removed)
 - [ ] **Data field names:** Mock data uses exact field names from source code (e.g., `createdAt` not `date`)
 - [ ] **Images:** All images use placeholder services (picsum.photos) or inline SVG — no broken image links
+- [ ] **Fonts:** Web fonts (Google Fonts, etc.) are included in index.html or @font-face declarations are correct
+- [ ] **Icons:** Icon libraries (Font Awesome, Material Icons, lucide-react) are included if source uses them
+- [ ] **Authentication:** All conditional UI is visible; mock user data is provided ("Demo User", "Admin" role)
+- [ ] **Browser storage:** No localStorage/sessionStorage reads that break code; use useState with defaults instead
+- [ ] **Forms:** All form submissions call `e.preventDefault()` and show mock success/error feedback
 - [ ] Every button label from source is present with exact wording (Law 1)
 - [ ] Every navigation item is present with exact label and route (Law 1)
 - [ ] Page layout matches source structure (Law 2)
