@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { tryReadJsonFile } from "./utils.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
 
 /**
  * Get the diagrams directory path for a domain

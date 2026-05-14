@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import { LLMAgent } from "../../agents/agent.js";
+import { LLMAgent } from "@jet-source/agent-core";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

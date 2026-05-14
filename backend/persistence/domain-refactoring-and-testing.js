@@ -6,7 +6,7 @@ import {
 import { REFACTORING_STATUS } from "../constants/refactoring-status.js";
 import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { tryReadJsonFile } from "./utils.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
 import {
   getDomainSectionContentPath,
   getDomainSectionDir,

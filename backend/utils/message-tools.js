@@ -2,7 +2,7 @@ import * as logger from "../../utils/logger.js";
 import {
   TOOL_ERROR_CODES,
   TOOL_ERROR_TYPES,
-} from "../../constants/tool-error-codes.js";
+} from "@jet-source/agent-core";
 
 /**
  * Message tools that LLM can use to communicate with users

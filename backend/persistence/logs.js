@@ -1,8 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
-import { tryReadJsonFile } from "./utils.js";
-import * as tasksPersistence from "./tasks.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
+import * as tasksPersistence from "./task-queue-adapter.js";
 
 function createHttpError(status, error, message) {
   const httpError = new Error(message);

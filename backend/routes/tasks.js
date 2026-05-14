@@ -1,6 +1,6 @@
 import express from "express";
 import * as taskOrchestrator from "../orchestrators/task.js";
-import { TASK_ERROR_CODES } from "../constants/task-error-codes.js";
+import { TASK_ERROR_CODES } from "@jet-source/task-queue";
 import { TASK_TYPES } from "../constants/task-types.js";
 import { SOCKET_EVENTS } from "../constants/socket-events.js";
 import { emitSocketEvent } from "../utils/socket-emitter.js";

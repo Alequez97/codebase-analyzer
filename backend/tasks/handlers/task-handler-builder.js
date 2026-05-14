@@ -6,6 +6,11 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../config.js";
+import {
+  CommandToolExecutor,
+  DelegationToolExecutor,
+  FileToolExecutor,
+} from "@jet-source/agent-core";
 import { SOCKET_EVENTS } from "../../constants/socket-events.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
 import { loadSystemInstructionForTask } from "../../utils/system-instruction-loader.js";
@@ -149,49 +154,11 @@ export function setTaskFileAccess(fileToolExecutor, task, taskLogger) {
 }
 
 function enableCommandsIfUseful(agent, task, taskLogger) {
-  // Task types that need Git commands
   const gitTaskTypes = [
-    TASK_TYPES.IMPLEMENT_FIX,
-    TASK_TYPES.IMPLEMENT_TEST,
-    TASK_TYPES.APPLY_REFACTORING,
-    TASK_TYPES.REVIEW_CHANGES,
-    TASK_TYPES.CUSTOM_CODEBASE_TASK,
-    TASK_TYPES.DESIGN_BRAINSTORM,
-    TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
-    TASK_TYPES.DESIGN_GENERATE_PAGE,
-    TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE,
-    TASK_TYPES.DESIGN_ASSISTANT,
-    TASK_TYPES.DESIGN_REVERSE_ENGINEER,
-    TASK_TYPES.EDIT_DOCUMENTATION,
-    TASK_TYPES.EDIT_DIAGRAMS,
-    TASK_TYPES.EDIT_REQUIREMENTS,
-    TASK_TYPES.EDIT_BUGS_SECURITY,
-    TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
     TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
   ];
 
-  // Task types that need npm build commands (any task that modifies code)
   const npmBuildTaskTypes = [
-    // Design tasks
-    TASK_TYPES.DESIGN_BRAINSTORM,
-    TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE,
-    TASK_TYPES.DESIGN_GENERATE_PAGE,
-    TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE,
-    TASK_TYPES.DESIGN_ASSISTANT,
-    TASK_TYPES.DESIGN_REVERSE_ENGINEER,
-    // Implementation tasks
-    TASK_TYPES.IMPLEMENT_FIX,
-    TASK_TYPES.IMPLEMENT_TEST,
-    TASK_TYPES.APPLY_REFACTORING,
-    // Custom tasks
-    TASK_TYPES.CUSTOM_CODEBASE_TASK,
-    TASK_TYPES.REVIEW_CHANGES,
-    // Edit tasks (might modify code)
-    TASK_TYPES.EDIT_DOCUMENTATION,
-    TASK_TYPES.EDIT_DIAGRAMS,
-    TASK_TYPES.EDIT_REQUIREMENTS,
-    TASK_TYPES.EDIT_BUGS_SECURITY,
-    TASK_TYPES.EDIT_REFACTORING_AND_TESTING,
     TASK_TYPES.EDIT_CODEBASE_ANALYSIS,
   ];
 
@@ -202,17 +169,19 @@ function enableCommandsIfUseful(agent, task, taskLogger) {
     return;
   }
 
-  // Enable specific command categories
-  if (needsGit) {
-    agent.enableGitCommands();
-  }
+  // Git command prefixes (from @jet-source/agent-core)
+  const GIT_COMMANDS = ["git diff", "git log", "git status", "git show", "git branch", "git blame", "git checkout"];
+  const NPM_ALL = ["npm install", "npm ci", "npm pkg set", "npm test", "npm run test", "npx jest", "npx vitest", "npm run build", "npm run dev", "npm run preview"];
 
-  if (needsNpmBuild) {
-    agent.enableAllNpmCommands();
-  }
+  const prefixes = [];
+  if (needsGit) prefixes.push(...GIT_COMMANDS);
+  if (needsNpmBuild) prefixes.push(...NPM_ALL);
 
-  // Set longer timeout for tasks that need builds (installs/compilations take time)
-  agent.setCommandTimeout(needsNpmBuild ? 120_000 : 60_000);
+  const cmdExec = new CommandToolExecutor(config.target.directory, {
+    allowedPrefixes: prefixes,
+    timeoutMs: needsNpmBuild ? 120_000 : 60_000,
+  });
+  agent.enableTools(cmdExec);
 
   taskLogger.info("Command tools enabled", {
     git: needsGit,
@@ -243,8 +212,11 @@ function buildSectionChatContext(task, fallbackMessage) {
 }
 
 export async function createTaskHandler(task, taskLogger, agent) {
-  if (agent?.tools?.fileToolExecutor) {
-    setTaskFileAccess(agent.tools.fileToolExecutor, task, taskLogger);
+  const fileExecutor = agent.toolExecutors.find(
+    (e) => e instanceof FileToolExecutor,
+  );
+  if (fileExecutor) {
+    setTaskFileAccess(fileExecutor, task, taskLogger);
   }
 
   if (agent) {
@@ -252,7 +224,8 @@ export async function createTaskHandler(task, taskLogger, agent) {
   }
 
   if (agent && task.responseHandler && MESSAGE_TOOL_TASK_TYPES.has(task.type)) {
-    agent.enableMessageTools(task.responseHandler);
+    const { MessageToolExecutor } = await import("../../utils/message-tools.js");
+    agent.enableTools(new MessageToolExecutor(task.responseHandler));
     taskLogger.info(`Message tools enabled (${task.type})`);
   }
 
@@ -305,7 +278,7 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = designBrainstormHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE) {
     if (agent) {
-      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      agent.enableTools(new DelegationToolExecutor(config.target.directory, task.id, DESIGN_QUEUE_FUNCTIONS));
       taskLogger.info("Design page delegation tools enabled");
     }
     overrides = designPlanAndStyleSystemGenerateHandler(
@@ -319,13 +292,13 @@ export async function createTaskHandler(task, taskLogger, agent) {
     overrides = designReverseEngineerPageHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_ASSISTANT) {
     if (agent) {
-      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      agent.enableTools(new DelegationToolExecutor(config.target.directory, task.id, DESIGN_QUEUE_FUNCTIONS));
       taskLogger.info("Design assistant delegation tools enabled");
     }
     overrides = designAssistantHandler(task, taskLogger, agent);
   } else if (task.type === TASK_TYPES.DESIGN_REVERSE_ENGINEER) {
     if (agent) {
-      agent.enableDelegationTools(task.id, DESIGN_QUEUE_FUNCTIONS);
+      agent.enableTools(new DelegationToolExecutor(config.target.directory, task.id, DESIGN_QUEUE_FUNCTIONS));
       taskLogger.info("Design reverse-engineer delegation tools enabled");
     }
     overrides = designReverseEngineerHandler(task, taskLogger, agent);

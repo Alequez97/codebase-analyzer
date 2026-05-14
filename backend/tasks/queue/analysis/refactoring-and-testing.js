@@ -1,14 +1,14 @@
 import config from "../../../config.js";
-import * as tasksPersistence from "../../../persistence/tasks.js";
-import { getAgentConfig } from "../../executors/index.js";
+import * as tasksPersistence from "../../../persistence/task-queue-adapter.js";
+
 import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentJsonOutputPath,
-} from "../../../constants/task-output-paths.js";
+} from "../../../persistence/task-output-paths.js";
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
-import { generateTaskId } from "../../utils.js";
+import { generateTaskId, getTaskAgentConfig } from "../../utils.js";
 import {
   getProgressFileRelativePath,
   ensureProgressDirectory,
@@ -28,7 +28,7 @@ export async function queueAnalyzeRefactoringAndTestingTask({
   files,
   includeRequirements = false,
 }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.REFACTORING_AND_TESTING);
+  const agentConfigResult = getTaskAgentConfig(TASK_TYPES.REFACTORING_AND_TESTING);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

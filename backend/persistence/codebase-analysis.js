@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
-import { tryReadJsonFile } from "./utils.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
 
 /**
  * Read full codebase analysis from file

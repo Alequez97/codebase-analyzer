@@ -1,4 +1,4 @@
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
 import * as logger from "../../../utils/logger.js";
 import * as codebaseAnalysisPersistence from "../../../persistence/codebase-analysis.js";
 

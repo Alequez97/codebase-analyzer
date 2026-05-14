@@ -1,4 +1,5 @@
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
+import { DelegationToolExecutor } from "@jet-source/agent-core";
 import {
   queueEditCodebaseAnalysisTask,
   queueEditDocumentationTask,
@@ -33,7 +34,7 @@ export function reviewChangesHandler(task, taskLogger, agent) {
   const { baseBranch = null, domainIds = null } = task.params || {};
 
   if (agent) {
-    agent.enableDelegationTools(taskId, REVIEW_CHANGES_QUEUE_FUNCTIONS);
+    agent.enableTools(new DelegationToolExecutor(config.target.directory, taskId, REVIEW_CHANGES_QUEUE_FUNCTIONS));
     taskLogger.info("Delegation tools enabled");
   }
 

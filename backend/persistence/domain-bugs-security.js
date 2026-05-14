@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import { SECTION_TYPES } from "../constants/section-types.js";
 import { PERSISTENCE_FILES } from "../constants/persistence-files.js";
-import { tryReadJsonFile } from "./utils.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
 import {
   getDomainSectionContentPath,
   getDomainSectionFilePath,

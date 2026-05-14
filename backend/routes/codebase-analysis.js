@@ -1,5 +1,5 @@
 import express from "express";
-import * as codebaseAnalysisOrchestrator from "../orchestrators/codebase-analysis.js";
+import * as codebaseAnalysisService from "../services/codebase-analysis.js";
 import * as codebaseAnalysisPersistence from "../persistence/codebase-analysis.js";
 import {
   queueCodebaseAnalysisTask,
@@ -14,7 +14,7 @@ const router = express.Router();
  */
 router.get("/", async (req, res) => {
   try {
-    const results = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
+    const results = await codebaseAnalysisService.getCodebaseAnalysis();
 
     if (!results) {
       return res.status(404).json({
@@ -62,7 +62,7 @@ router.post("/request", async (req, res) => {
  */
 router.get("/full", async (req, res) => {
   try {
-    const analysis = await codebaseAnalysisOrchestrator.getCodebaseAnalysis();
+    const analysis = await codebaseAnalysisService.getCodebaseAnalysis();
 
     if (!analysis || !analysis.domains || analysis.domains.length === 0) {
       return res.status(404).json({

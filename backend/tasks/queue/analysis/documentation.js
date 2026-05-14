@@ -1,14 +1,14 @@
 import config from "../../../config.js";
-import * as tasksPersistence from "../../../persistence/tasks.js";
-import { getAgentConfig } from "../../executors/index.js";
+import * as tasksPersistence from "../../../persistence/task-queue-adapter.js";
+
 import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions.js";
 import {
   DOMAIN_SECTION_IDS,
   getDomainSectionContentMarkdownOutputPath,
-} from "../../../constants/task-output-paths.js";
+} from "../../../persistence/task-output-paths.js";
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
-import { generateTaskId } from "../../utils.js";
+import { generateTaskId, getTaskAgentConfig } from "../../utils.js";
 import {
   getProgressFileRelativePath,
   ensureProgressDirectory,
@@ -23,7 +23,7 @@ import * as logger from "../../../utils/logger.js";
  * @returns {Promise<Object>} The created task
  */
 export async function queueAnalyzeDocumentationTask({ domainId, files }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.DOCUMENTATION);
+  const agentConfigResult = getTaskAgentConfig(TASK_TYPES.DOCUMENTATION);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

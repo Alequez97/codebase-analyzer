@@ -1,9 +1,9 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { FileToolExecutor } from "../../llm/tools/file-tools.js";
+import { FileToolExecutor } from "@jet-source/agent-core";
 import {
   TOOL_ERROR_CODES,
   TOOL_ERROR_TYPES,
-} from "../../constants/tool-error-codes.js";
+} from "@jet-source/agent-core";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";

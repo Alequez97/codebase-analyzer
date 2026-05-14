@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../../config.js";
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
 
 /**
  * Default handler for generic analysis tasks

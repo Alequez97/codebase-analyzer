@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import { SECTION_TYPES } from "../constants/section-types.js";
-import { tryReadJsonFile, appendRevision } from "./utils.js";
+import { tryReadJsonFile, appendRevision } from "@jet-source/task-queue";
 import {
   getDomainSectionContentPath,
   getDomainSectionDir,

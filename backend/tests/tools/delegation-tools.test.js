@@ -1,8 +1,16 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   DelegationToolExecutor,
-  DELEGATABLE_TASK_TYPES,
-} from "../../llm/tools/delegation-tools.js";
+} from "@jet-source/agent-core";
+
+const DELEGATABLE_TASK_TYPES = [
+  "edit-documentation",
+  "edit-diagrams",
+  "edit-requirements",
+  "edit-bugs-security",
+  "edit-refactoring-and-testing",
+  "design-generate-page",
+];
 import fs from "fs/promises";
 import path from "path";
 import os from "os";

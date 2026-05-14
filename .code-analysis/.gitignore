@@ -1,0 +1,11 @@
+# Generated build artifacts from design prototypes
+**/node_modules/
+**/dist/
+**/build/
+**/.vite/
+**/coverage/
+**/.cache/
+
+# OS / editor
+**/.DS_Store
+**/Thumbs.db

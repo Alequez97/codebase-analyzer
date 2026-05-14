@@ -1,7 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../../../config.js";
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
+import { CommandToolExecutor } from "@jet-source/agent-core";
 import * as domainTestingPersistence from "../../../persistence/domain-refactoring-and-testing.js";
 
 /**
@@ -11,7 +12,7 @@ import * as domainTestingPersistence from "../../../persistence/domain-refactori
  */
 export function implementTestHandler(task, taskLogger, agent) {
   if (agent) {
-    agent.enableCommandTools({ timeoutMs: 60_000 });
+    agent.enableTools(new CommandToolExecutor(config.target.directory, { timeoutMs: 60_000 }));
     taskLogger.info("🔧 Command execution tools enabled (test runner)");
   }
 

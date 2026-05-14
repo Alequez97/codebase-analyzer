@@ -2,7 +2,7 @@ import express from "express";
 import * as domainTestingPersistence from "../../persistence/domain-refactoring-and-testing.js";
 import * as codebaseAnalysisPersistence from "../../persistence/codebase-analysis.js";
 import * as taskQueue from "../../tasks/queue/index.js";
-import { TASK_ERROR_CODES } from "../../constants/task-error-codes.js";
+import { TASK_ERROR_CODES } from "@jet-source/task-queue";
 import { TEST_TYPES } from "../../constants/test-types.js";
 import { SECTION_TYPES } from "../../constants/section-types.js";
 import * as logger from "../../utils/logger.js";

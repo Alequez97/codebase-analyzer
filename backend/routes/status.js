@@ -2,46 +2,9 @@ import fs from "fs/promises";
 import path from "path";
 import express from "express";
 import config from "../config.js";
-import { detectAvailableAgents } from "../tasks/executors/index.js";
-import { PROVIDERS, PROVIDER_NAMES } from "../constants/providers.js";
-import { MODELS, MODEL_NAMES } from "../constants/models.js";
+import { PROVIDER_NAMES, MODELS_BY_PROVIDER, MODEL_NAMES } from "@jet-source/llm-core";
 
 const router = express.Router();
-
-const PROVIDER_MODEL_IDS = {
-  [PROVIDERS.OPENAI]: [
-    MODELS.GPT_5_MINI,
-    MODELS.GPT_5_2,
-    MODELS.GPT_5_3_CODEX,
-    MODELS.GPT_4_TURBO,
-    MODELS.GPT_4,
-  ],
-  [PROVIDERS.ANTHROPIC]: [
-    MODELS.CLAUDE_SONNET_4_6,
-    MODELS.CLAUDE_SONNET_4_5,
-    MODELS.CLAUDE_OPUS_4,
-    MODELS.CLAUDE_OPUS_4_6,
-    MODELS.CLAUDE_HAIKU_3_5,
-  ],
-  [PROVIDERS.DEEPSEEK]: [MODELS.DEEPSEEK_REASONER, MODELS.DEEPSEEK_CHAT],
-  [PROVIDERS.KIMI]: [
-    MODELS.KIMI_K2_5,
-    MODELS.KIMI_K2_THINKING,
-    MODELS.KIMI_K2_THINKING_TURBO,
-  ],
-  [PROVIDERS.GOOGLE]: [
-    MODELS.GEMINI_3_1_PRO_PREVIEW,
-    MODELS.GEMINI_2_5_PRO,
-    MODELS.GEMINI_2_5_FLASH,
-  ],
-  [PROVIDERS.GLM]: [
-    MODELS.GLM_5,
-    MODELS.GLM_5_TURBO,
-    MODELS.GLM_4_7,
-    MODELS.GLM_4_6,
-    MODELS.GLM_4_5,
-  ],
-};
 
 const SOURCE_EXTENSIONS = new Set([
   ".js",
@@ -117,7 +80,7 @@ async function detectHasSourceFiles(dir, maxDepth = 4, depth = 0) {
 }
 
 function buildAvailableModels(apiKeys) {
-  const availableModelsByProvider = Object.entries(PROVIDER_MODEL_IDS)
+  const availableModelsByProvider = Object.entries(MODELS_BY_PROVIDER)
     .filter(([provider]) => Boolean(apiKeys[provider]))
     .map(([provider, modelIds]) => ({
       provider,
@@ -141,10 +104,8 @@ function buildAvailableModels(apiKeys) {
  * Health check with configuration status
  */
 router.get("/", async (req, res) => {
-  const [agents, hasSourceFiles] = await Promise.all([
-    detectAvailableAgents(),
-    detectHasSourceFiles(config.target.directory),
-  ]);
+  const hasSourceFiles = await detectHasSourceFiles(config.target.directory);
+  const agents = { "llm-api": true };
   const { availableModelsByProvider, availableModelLabels } =
     buildAvailableModels(config.apiKeys);
 

@@ -1,23 +1,6 @@
-/**
- * Task status constants
- */
-export const TASK_STATUS = {
-  PENDING: "pending",
-  RUNNING: "running",
-  WAITING_FOR_USER: "waiting_for_user",
-  COMPLETED: "completed",
-  FAILED: "failed",
-  CANCELED: "canceled",
-};
+import { TASK_STATUS as BASE_STATUS } from "@jet-source/task-queue";
 
-/**
- * Task folder names (where tasks are stored based on status)
- */
-export const TASK_FOLDERS = {
-  PENDING: "pending",
-  RUNNING: "running",
+export const TASK_STATUS = {
+  ...BASE_STATUS,
   WAITING_FOR_USER: "waiting_for_user",
-  COMPLETED: "completed",
-  FAILED: "failed",
-  CANCELED: "canceled",
 };

@@ -1,105 +1,111 @@
-import * as llmApi from "./llm-api.js";
 import config from "../../config.js";
-import { AGENT_ERROR_CODES } from "../../constants/agent-error-codes.js";
-import { AGENTS as AGENT_TYPES } from "../../constants/agents.js";
+import {
+  createLLMAgent,
+  FileToolExecutor,
+  PROGRESS_STAGES,
+} from "@jet-source/agent-core";
+import * as logger from "../../utils/logger.js";
+import {
+  setupTaskLogger,
+  logTaskHeader,
+  logTaskSuccess,
+  logTaskError,
+} from "../../utils/task-logger.js";
+import { createTaskHandler } from "../handlers/index.js";
 
-/**
- * Available AI agents
- * - llm-api: Direct LLM API calls via the shared LLMAgent core
- */
-const AGENTS = {
-  [AGENT_TYPES.LLM_API]: {
-    id: AGENT_TYPES.LLM_API,
-    name: "LLM API",
-    purpose: "Runs tasks via the LLMAgent iteration loop",
-    agent: llmApi,
-  },
-};
+export async function execute(task, signal, responseHandler = null) {
+  logger.info(`Executing LLM API task: ${task.type}`, {
+    component: "LLM-API",
+    taskId: task.id,
+    model: task.agentConfig.model,
+  });
 
-/**
- * Get agent configuration for a specific task type
- * @param {string} taskType - The task type from TASK_TYPES
- * @param {string|null} [modelOverride] - Optional model ID to override the configured default
- * @returns {{success: boolean, agentConfig?: Object, error?: string, code?: string}}
- */
-export function getAgentConfig(taskType, modelOverride = null) {
-  const taskConfig = config.tasks[taskType];
+  const { taskLogger, logStream } = await setupTaskLogger(task);
 
-  if (!taskConfig) {
+  try {
+    logTaskHeader(taskLogger, task);
+
+    taskLogger.info("Initializing LLM client...", {
+      component: "LLM-API",
+      model: task.agentConfig.model,
+    });
+
+    const { model, maxTokens, reasoningEffort, maxIterations } = task.agentConfig;
+    const agent = createLLMAgent({
+      model,
+      maxTokens,
+      reasoningEffort,
+      apiKeys: config.apiKeys,
+      maxIterations: maxIterations || 30,
+    });
+
+    const fileExec = new FileToolExecutor(config.target.directory);
+    agent.enableTools(fileExec);
+
+    taskLogger.info("LLM client initialized", { component: "LLM-API" });
+
+    if (responseHandler) {
+      task.responseHandler = responseHandler;
+    }
+
+    const taskHandler = await createTaskHandler(task, taskLogger, agent);
+
+    taskLogger.progress("Starting analysis...", {
+      stage: PROGRESS_STAGES.ANALYZING,
+    });
+    taskLogger.info(
+      `Starting analysis loop (max ${agent.maxIterations} iterations)`,
+      { component: "LLM-API" },
+    );
+
+    const result = await agent.run(taskHandler, signal);
+
+    if (result.success === false) {
+      const error = result.error || "Task failed";
+      logTaskError(taskLogger, task, new Error(error));
+      logStream.end();
+      await new Promise((resolve) => logStream.on("finish", resolve));
+
+      return {
+        success: false,
+        error,
+        taskId: task.id,
+        logFile: task.logFile,
+      };
+    }
+
+    logTaskSuccess(taskLogger, task, agent);
+    logStream.end();
+    await new Promise((resolve) => logStream.on("finish", resolve));
+
+    return {
+      ...result,
+      taskId: task.id,
+      logFile: task.logFile,
+    };
+  } catch (error) {
+    if (signal?.aborted || error.code === "TASK_CANCELLED") {
+      logStream.end();
+      await new Promise((resolve) => logStream.on("finish", resolve));
+      return {
+        success: false,
+        cancelled: true,
+        taskId: task.id,
+        logFile: task.logFile,
+      };
+    }
+
+    logTaskError(taskLogger, task, error);
+    logStream.end();
+    await new Promise((resolve) => logStream.on("finish", resolve));
+
     return {
       success: false,
-      code: AGENT_ERROR_CODES.TASK_CONFIG_MISSING,
-      error: `No configuration found for task type: ${taskType}`,
+      error: error.message,
+      taskId: task.id,
+      logFile: task.logFile,
     };
   }
-
-  return {
-    success: true,
-    agentConfig: {
-      agent: taskConfig.agent,
-      model: modelOverride || taskConfig.model,
-      maxTokens: taskConfig.maxTokens,
-      maxIterations: taskConfig.maxIterations || 30,
-      reasoningEffort: taskConfig.reasoningEffort,
-    },
-  };
 }
 
-/**
- * Get available agent based on config and detection
- * @param {string} agentId - The agent ID to retrieve
- * @returns {Promise<{success: boolean, agent?: Object, error?: string, code?: string}>}
- */
-export async function getAgent(agentId) {
-  const selectedId = agentId || AGENT_TYPES.LLM_API;
-  const agentEntry = AGENTS[selectedId];
 
-  if (!agentEntry) {
-    return {
-      success: false,
-      code: AGENT_ERROR_CODES.UNSUPPORTED_AGENT,
-      error: `Unsupported AI agent: ${selectedId}`,
-    };
-  }
-
-  const selectedAgent = agentEntry.agent;
-
-  const available = await selectedAgent.detect();
-  if (!available) {
-    return {
-      success: false,
-      code: AGENT_ERROR_CODES.AGENT_UNAVAILABLE,
-      error: `${agentEntry.name} is not available on this machine`,
-    };
-  }
-
-  return {
-    success: true,
-    agent: selectedAgent,
-  };
-}
-
-/**
- * Detect which agents are available
- * @returns {Promise<Object>} Available agents
- */
-export async function detectAvailableAgents() {
-  const entries = await Promise.all(
-    Object.values(AGENTS).map(async (agentEntry) => [
-      agentEntry.id,
-      await agentEntry.agent.detect(),
-    ]),
-  );
-
-  return Object.fromEntries(entries);
-}
-
-/**
- * Get tools currently supported by backend execution flow
- * @returns {string[]} Supported tool IDs
- */
-export function getSupportedAgents() {
-  return Object.values(AGENTS).map(
-    ({ agent: _agent, ...agentEntry }) => agentEntry,
-  );
-}

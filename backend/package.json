@@ -12,15 +12,16 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
-    "@google/generative-ai": "^0.21.0",
+    "@jet-source/llm-core": "^1.2.1",
+    "@jet-source/agent-core": "^1.2.1",
+    "@jet-source/file-system-agent-runner": "^1.2.1",
+    "@jet-source/task-queue": "^1.2.1",
     "@ngrok/ngrok": "^1.7.0",
     "chokidar": "^3.5.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "openai": "^4.52.0",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {

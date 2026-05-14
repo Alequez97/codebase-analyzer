@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest";
 import { setTaskFileAccess } from "../../tasks/handlers/task-handler-builder.js";
 import { TASK_TYPES } from "../../constants/task-types.js";
-import { FileToolExecutor } from "../../llm/tools/file-tools.js";
+import { FileToolExecutor } from "@jet-source/agent-core";
 
 describe("setTaskFileAccess", () => {
   test("sets file access permissions for design-assistant task", () => {

@@ -10,7 +10,7 @@ import config from "../../../config.js";
 export function applyRefactoringHandler(task, taskLogger, agent) {
   // Enable command execution for running tests
   if (agent) {
-    agent.enableCommandTools({ timeoutMs: 120_000 }); // Longer timeout for potentially running full test suite
+    agent.enableTools(new CommandToolExecutor(config.target.directory, { timeoutMs: 120_000 })); // Longer timeout for potentially running full test suite
     taskLogger.info("🔧 Command execution tools enabled (test validation)");
   }
 

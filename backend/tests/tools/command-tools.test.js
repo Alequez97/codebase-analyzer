@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import { EventEmitter } from "events";
-import { CommandToolExecutor } from "../../llm/tools/command-tools.js";
+import { CommandToolExecutor } from "@jet-source/agent-core";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -566,7 +566,7 @@ describe("CommandToolExecutor - Constructor options", () => {
   test("merges additionalAllowedPrefixes with the default list", () => {
     // Arrange
     const executor = new CommandToolExecutor("/fake/project", {
-      additionalAllowedPrefixes: ["my-custom-runner"],
+      allowedPrefixes: ["my-custom-runner"],
     });
 
     // Act + Assert — custom prefix is allowed
@@ -575,10 +575,10 @@ describe("CommandToolExecutor - Constructor options", () => {
     expect(executor._isSafeCommand("npm test")).toBe(true);
   });
 
-  test("additionalAllowedPrefixes does not affect the global SAFE_COMMAND_PREFIXES list", () => {
+  test("additionalAllowedPrefixes does not affect other executor instances", () => {
     // Arrange — create one executor with a custom prefix
     new CommandToolExecutor("/fake/project", {
-      additionalAllowedPrefixes: ["secret-runner"],
+      allowedPrefixes: ["secret-runner"],
     });
 
     // Act — create another without

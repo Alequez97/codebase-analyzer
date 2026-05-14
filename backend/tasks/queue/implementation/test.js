@@ -1,13 +1,13 @@
 import config from "../../../config.js";
-import * as tasksPersistence from "../../../persistence/tasks.js";
+import * as tasksPersistence from "../../../persistence/task-queue-adapter.js";
 import { readE2EConfig } from "../../../persistence/e2e-config.js";
-import { getAgentConfig } from "../../executors/index.js";
+
 import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions.js";
-import { TASK_ERROR_CODES } from "../../../constants/task-error-codes.js";
+import { TASK_ERROR_CODES } from "@jet-source/task-queue";
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
 import { SUPPORTED_TEST_TYPES } from "../../../constants/test-types.js";
-import { generateTaskId } from "../../utils.js";
+import { generateTaskId, getTaskAgentConfig } from "../../utils.js";
 import {
   getProgressFileRelativePath,
   ensureProgressDirectory,
@@ -27,7 +27,7 @@ export async function queueImplementTestTask({
   testRecommendation,
   domainFiles = [],
 }) {
-  const agentConfigResult = getAgentConfig(TASK_TYPES.IMPLEMENT_TEST);
+  const agentConfigResult = getTaskAgentConfig(TASK_TYPES.IMPLEMENT_TEST);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

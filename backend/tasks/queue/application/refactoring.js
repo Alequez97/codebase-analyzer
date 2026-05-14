@@ -1,11 +1,11 @@
 import config from "../../../config.js";
-import * as tasksPersistence from "../../../persistence/tasks.js";
-import { getAgentConfig } from "../../executors/index.js";
+import * as tasksPersistence from "../../../persistence/task-queue-adapter.js";
+
 import { SYSTEM_INSTRUCTION_PATHS } from "../../../constants/system-instructions.js";
-import { TASK_ERROR_CODES } from "../../../constants/task-error-codes.js";
+import { TASK_ERROR_CODES } from "@jet-source/task-queue";
 import { TASK_TYPES } from "../../../constants/task-types.js";
 import { TASK_STATUS } from "../../../constants/task-status.js";
-import { generateTaskId } from "../../utils.js";
+import { generateTaskId, getTaskAgentConfig } from "../../utils.js";
 import {
   getProgressFileRelativePath,
   ensureProgressDirectory,
@@ -46,7 +46,7 @@ export async function queueApplyRefactoringTask({ domainId, refactoring }) {
     };
   }
 
-  const agentConfigResult = getAgentConfig(TASK_TYPES.APPLY_REFACTORING);
+  const agentConfigResult = getTaskAgentConfig(TASK_TYPES.APPLY_REFACTORING);
   if (!agentConfigResult.success) {
     return agentConfigResult;
   }

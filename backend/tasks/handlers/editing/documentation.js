@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../../../config.js";
 import { SOCKET_EVENTS } from "../../../constants/socket-events.js";
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
 import { emitSocketEvent } from "../../../utils/socket-emitter.js";
 import {
   appendDomainSectionChatMessage,

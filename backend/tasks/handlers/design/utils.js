@@ -1,7 +1,7 @@
 /**
  * Shared utilities for design task handlers
  */
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
 
 export function describeDesignToolCall(toolName) {
   if (

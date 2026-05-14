@@ -23,8 +23,8 @@ import {
   getDomainSectionContentPath,
   getDomainSectionMetadataPath,
 } from "./domain-section-paths.js";
-import { tryReadJsonFile } from "./utils.js";
-import { readTask } from "./tasks.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
+import { readTask } from "./task-queue-adapter.js";
 
 /**
  * Read a specific domain analysis (merged from four separate sections)

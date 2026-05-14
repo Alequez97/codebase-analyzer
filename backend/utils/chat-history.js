@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import config from "../config.js";
-import { tryReadJsonFile } from "../persistence/utils.js";
+import { tryReadJsonFile } from "@jet-source/task-queue";
 import * as logger from "./logger.js";
 
 /**

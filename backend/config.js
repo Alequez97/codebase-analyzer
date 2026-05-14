@@ -4,11 +4,9 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import * as logger from "./utils/logger.js";
 import { TASK_TYPES } from "./constants/task-types.js";
-import { TASK_FOLDERS } from "./constants/task-status.js";
-import { MODELS } from "./constants/models.js";
-import { PROVIDERS } from "./constants/providers.js";
-import { AGENTS } from "./constants/agents.js";
-import { REASONING_EFFORT } from "./constants/reasoning-effort.js";
+import { TASK_FOLDERS } from "./constants/persistence-files.js";
+import { MODELS, PROVIDERS, REASONING_EFFORT } from "@jet-source/llm-core";
+
 import { PERSISTENCE_FILES } from "./constants/persistence-files.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -75,7 +73,7 @@ const config = {
     [PROVIDERS.DEEPSEEK]: process.env.DEEPSEEK_API_KEY,
     [PROVIDERS.KIMI]: process.env.MOONSHOT_API_KEY,
     [PROVIDERS.OPENROUTER]: process.env.OPENROUTER_API_KEY,
-    [PROVIDERS.GOOGLE]: process.env.GOOGLE_API_KEY,
+    [PROVIDERS.GEMINI]: process.env.GOOGLE_API_KEY,
     [PROVIDERS.GLM]: process.env.GLM_API_KEY,
     braveSearch: process.env.BRAVE_SEARCH_API_KEY,
   },
@@ -83,63 +81,54 @@ const config = {
   // Task-specific agent and model configuration
   tasks: {
     [TASK_TYPES.CODEBASE_ANALYSIS]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DOCUMENTATION]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DIAGRAMS]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.REQUIREMENTS]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.BUGS_SECURITY]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET_4_6,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.REFACTORING_AND_TESTING]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.CLAUDE_SONNET_4_6,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.HIGH,
     },
     [TASK_TYPES.IMPLEMENT_FIX]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.IMPLEMENT_TEST]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.APPLY_REFACTORING]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
@@ -148,42 +137,36 @@ const config = {
 
     // Edit tasks (AI chat for editing domain sections)
     [TASK_TYPES.EDIT_DOCUMENTATION]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
     [TASK_TYPES.EDIT_DIAGRAMS]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
     [TASK_TYPES.EDIT_REQUIREMENTS]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
     [TASK_TYPES.EDIT_BUGS_SECURITY]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
     [TASK_TYPES.EDIT_REFACTORING_AND_TESTING]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
       reasoningEffort: REASONING_EFFORT.LOW,
     },
     [TASK_TYPES.EDIT_CODEBASE_ANALYSIS]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_MINI,
       maxTokens: 64000,
       maxIterations: 50,
@@ -192,7 +175,6 @@ const config = {
 
     // Custom codebase task (floating agent chat)
     [TASK_TYPES.CUSTOM_CODEBASE_TASK]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 200,
@@ -201,7 +183,6 @@ const config = {
 
     // Review changes task
     [TASK_TYPES.REVIEW_CHANGES]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.GPT_5_2,
       maxTokens: 64000,
       maxIterations: 50,
@@ -209,42 +190,36 @@ const config = {
     },
 
     [TASK_TYPES.DESIGN_BRAINSTORM]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_PLAN_AND_STYLE_SYSTEM_GENERATE]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_GENERATE_PAGE]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_REVERSE_ENGINEER_PAGE]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 100,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_ASSISTANT]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
       reasoningEffort: REASONING_EFFORT.MEDIUM,
     },
     [TASK_TYPES.DESIGN_REVERSE_ENGINEER]: {
-      agent: AGENTS.LLM_API,
       model: MODELS.KIMI_K2_5,
       maxTokens: 64000,
       maxIterations: 200,
@@ -252,13 +227,6 @@ const config = {
     },
   },
 
-  // Default agent config
-  defaultAgentConfig: {
-    agent: AGENTS.LLM_API,
-    model: MODELS.DEEPSEEK_REASONER,
-    maxTokens: 16000,
-    reasoningEffort: REASONING_EFFORT.MEDIUM,
-  },
 
   // Paths
   paths: {

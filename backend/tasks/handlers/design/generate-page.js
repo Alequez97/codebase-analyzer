@@ -14,7 +14,7 @@ import {
   markProgressComplete,
 } from "../../../utils/task-progress.js";
 import { SOCKET_EVENTS } from "../../../constants/socket-events.js";
-import { PROGRESS_STAGES } from "../../../constants/progress-stages.js";
+import { PROGRESS_STAGES } from "@jet-source/agent-core";
 import { emitSocketEvent } from "../../../utils/socket-emitter.js";
 import { loadDesignManifest } from "../../../utils/design-manifest.js";
 import { DESIGN_TECHNOLOGIES } from "../../../constants/design-technologies.js";
